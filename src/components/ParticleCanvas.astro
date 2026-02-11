@@ -1,0 +1,129 @@
+<div class="particle-container absolute inset-0 -z-10" id="particle-container">
+  <canvas id="particle-canvas" class="w-full h-full"></canvas>
+</div>
+
+<style>
+  /* Static gradient fallback -- always visible, canvas overlays it */
+  .particle-container {
+    background: radial-gradient(ellipse at 50% 0%, var(--color-surface-alt) 0%, var(--color-surface) 70%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #particle-canvas {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+(function() {
+  // Bail out entirely if user prefers reduced motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const container = document.getElementById('particle-container');
+  const dpr = window.devicePixelRatio || 1;
+  let particles = [];
+  let animationId = null;
+  let isRunning = false;
+
+  // Mobile: fewer particles for performance
+  function getParticleCount() {
+    const width = container.offsetWidth;
+    if (width < 640) return 30;   // Mobile
+    if (width < 1024) return 50;  // Tablet
+    return 80;                     // Desktop
+  }
+
+  function resize() {
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+  }
+
+  function createParticle(w, h) {
+    return {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 2 + 0.5,
+      alpha: Math.random() * 0.6 + 0.1,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+    };
+  }
+
+  function init() {
+    resize();
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    const count = getParticleCount();
+    particles = Array.from({ length: count }, function() { return createParticle(w, h); });
+  }
+
+  function draw() {
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
+    for (var j = 0; j < particles.length; j++) {
+      var p = particles[j];
+      p.x += p.dx;
+      p.y += p.dy;
+      // Wrap around edges
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(124, 115, 255, ' + p.alpha + ')';
+      ctx.fill();
+    }
+    animationId = requestAnimationFrame(draw);
+  }
+
+  function start() {
+    if (!isRunning) {
+      isRunning = true;
+      draw();
+    }
+  }
+
+  function stop() {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    isRunning = false;
+  }
+
+  // Pause when tab is hidden
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) { stop(); }
+    else { start(); }
+  });
+
+  window.addEventListener('resize', function() {
+    resize();
+    // Recalculate particle count on resize
+    var count = getParticleCount();
+    var w = container.offsetWidth;
+    var h = container.offsetHeight;
+    if (count < particles.length) {
+      particles = particles.slice(0, count);
+    } else {
+      while (particles.length < count) {
+        particles.push(createParticle(w, h));
+      }
+    }
+  });
+
+  init();
+  start();
+})();
+</script>
