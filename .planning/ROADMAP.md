@@ -48,12 +48,11 @@ Plans:
   3. Site loads in the user's OS-preferred color scheme with no flash of wrong theme on any page load or navigation
   4. Site uses Space Grotesk for headings, Inter for body text, and JetBrains Mono for code — visible across all pages
   5. Site passes WCAG 2.1 AA checks: all interactive elements are keyboard-navigable, color contrast ratios meet minimums, and HTML is semantic
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Install Tailwind CSS, configure dark/light theme system with CSS custom properties, set up futuristic typography, add FOUC-prevention script
+- [ ] 02-02-PLAN.md — Create Header, Footer, ThemeToggle components, wire into Layout.astro, add accessibility foundations
 
 ### Phase 3: Blog Infrastructure
 **Goal**: Users can browse and read blog posts with proper typography, syntax-highlighted code, and reading time — while draft posts stay hidden in production
@@ -150,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
-| 2. Layout Shell + Theme System | 0/TBD | Not started | - |
+| 2. Layout Shell + Theme System | 0/2 | In Progress | - |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
