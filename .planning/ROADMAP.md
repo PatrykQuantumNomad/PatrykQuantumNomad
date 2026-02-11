@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Project Scaffold + Deployment Pipeline** - Astro project with CI/CD deploying to GitHub Pages with custom domain
 - [x] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
 - [x] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
-- [ ] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
+- [x] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
 - [ ] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
 - [ ] **Phase 6: Visual Effects + Quantum Explorer** - Particle canvas, view transitions, scroll reveals, and reduced-motion fallbacks
 - [ ] **Phase 7: Enhanced Blog + Advanced SEO** - Tag pages, table of contents, dynamic OG images, LLMs.txt, GEO optimization, Lighthouse validation
@@ -85,7 +85,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Home page with animated hero (typing effect for role titles), CTA buttons, skills grid, latest blog posts, and contact CTA
-- [ ] 04-02-PLAN.md — Projects page (19 repos grouped by category), About page (bio, tech stack, career highlights), and Contact page (email + LinkedIn)
+- [x] 04-02-PLAN.md — Projects page (19 repos grouped by category), About page (bio, tech stack, career highlights), and Contact page (email + LinkedIn)
 
 ### Phase 5: SEO Foundation
 **Goal**: Every page is discoverable by search engines and social platforms with proper metadata, structured data, sitemap, and RSS feed
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
-| 4. Core Static Pages | 1/2 | In Progress | - |
+| 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
 | 5. SEO Foundation | 0/TBD | Not started | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
