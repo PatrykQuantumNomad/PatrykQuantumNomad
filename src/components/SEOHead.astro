@@ -1,0 +1,50 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  canonicalURL?: URL | string;
+  ogType?: 'website' | 'article';
+  publishedDate?: Date;
+  updatedDate?: Date;
+  tags?: string[];
+}
+
+const {
+  title,
+  description,
+  canonicalURL = new URL(Astro.url.pathname, Astro.site),
+  ogType = 'website',
+  publishedDate,
+  updatedDate,
+  tags,
+} = Astro.props;
+---
+
+<!-- Primary Meta -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL.toString()} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL.toString()} />
+<meta property="og:site_name" content="Patryk Golabek" />
+<meta property="og:locale" content="en_CA" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+
+<!-- Article-specific (only when ogType === 'article') -->
+{ogType === 'article' && publishedDate && (
+  <meta property="article:published_time" content={publishedDate.toISOString()} />
+)}
+{ogType === 'article' && updatedDate && (
+  <meta property="article:modified_time" content={updatedDate.toISOString()} />
+)}
+{ogType === 'article' && tags?.map((tag) => (
+  <meta property="article:tag" content={tag} />
+))}
