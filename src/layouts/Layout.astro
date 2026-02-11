@@ -13,6 +13,7 @@ interface Props {
   publishedDate?: Date;
   updatedDate?: Date;
   tags?: string[];
+  ogImage?: string;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   publishedDate,
   updatedDate,
   tags,
+  ogImage,
 } = Astro.props;
 ---
 
@@ -41,6 +43,7 @@ const {
       publishedDate={publishedDate}
       updatedDate={updatedDate}
       tags={tags}
+      ogImage={ogImage}
     />
 
     <!-- RSS Autodiscovery -->
