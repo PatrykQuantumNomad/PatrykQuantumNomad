@@ -112,11 +112,11 @@ Plans:
   3. Clicking an external blog entry opens the external site in a new tab (not an internal page)
   4. No `/blog/ext-*` detail pages exist in the built output -- external posts do not generate slug pages or OG images
   5. RSS feed at `/rss.xml` includes external blog entries with their canonical external URL as the link
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Create external blog content files and add getStaticPaths guards
+- [ ] 09-02-PLAN.md — Update BlogCard for external links with source badges and update RSS feed
 
 ### Phase 10: Social Links & Contact Update
 **Goal**: All visible social links and contact info reflect current accounts (X, YouTube, updated email) with LinkedIn removed from the UI
@@ -184,4 +184,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11 (Phase 8 complete)*
+*Last updated: 2026-02-11 (Phase 9 planned)*
