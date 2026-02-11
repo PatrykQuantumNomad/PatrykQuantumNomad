@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+
+  const uniqueTags = [...new Set(posts.flatMap((post) => post.data.tags))];
+
+  return uniqueTags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((post) => post.data.tags.includes(tag))
+        .sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<Layout
+  title={`Posts tagged '${tag}' — Patryk Golabek`}
+  description={`Blog posts about ${tag} by Patryk Golabek`}
+>
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
+      Posts tagged &ldquo;{tag}&rdquo;
+    </h1>
+    <a
+      href="/blog/"
+      class="inline-block mb-8 text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
+    >
+      &larr; All posts
+    </a>
+    {posts.length > 0 ? (
+      <div class="space-y-8">
+        {posts.map((post) => (
+          <div class="reveal">
+            <BlogCard post={post} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p class="text-[var(--color-text-secondary)]">No posts with this tag yet.</p>
+    )}
+  </section>
+</Layout>
