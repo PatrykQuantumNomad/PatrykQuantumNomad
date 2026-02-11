@@ -100,11 +100,11 @@ Plans:
   5. robots.txt exists at site root and points to sitemap-index.xml
   6. Homepage includes Person JSON-LD schema and blog posts include BlogPosting JSON-LD schema (validatable via Google Rich Results Test)
   7. SEO keywords (Kubernetes, cloud-native, AI/ML, platform engineering, etc.) appear naturally throughout site content
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — SEO head component (OG, Twitter, canonical), @astrojs/sitemap, RSS feed, wire into all pages with unique metadata
+- [ ] 05-02-PLAN.md — JSON-LD structured data (Person on homepage, BlogPosting on posts) and SEO keyword verification
 
 ### Phase 6: Visual Effects + Quantum Explorer
 **Goal**: The site delivers the signature "Quantum Explorer" experience — particle canvas on the hero, smooth page transitions, scroll-triggered reveals — without compromising performance or accessibility
@@ -152,6 +152,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
-| 5. SEO Foundation | 0/TBD | Not started | - |
+| 5. SEO Foundation | 0/2 | Planned | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
