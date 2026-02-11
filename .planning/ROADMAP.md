@@ -120,7 +120,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — ClientRouter view transitions, ParticleCanvas component, hero integration with transition:persist, typing animation fix
+- [x] 06-01-PLAN.md — ClientRouter view transitions, ParticleCanvas component, hero integration with transition:persist, typing animation fix
 - [ ] 06-02-PLAN.md — Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections
 
 ### Phase 7: Enhanced Blog + Advanced SEO
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
 | 5. SEO Foundation | 2/2 | Complete | 2026-02-11 |
-| 6. Visual Effects + Quantum Explorer | 0/2 | In progress | - |
+| 6. Visual Effects + Quantum Explorer | 1/2 | In progress | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |

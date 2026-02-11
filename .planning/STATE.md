@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 5 complete - SEO Foundation (2/2 plans done). Ready for Phase 6.
+**Current focus:** Phase 6 in progress - Visual Effects + Quantum Explorer (1/2 plans done).
 
 ## Current Position
 
-Phase: 5 of 7 (SEO Foundation) COMPLETE
-Plan: 2 of 2 in current phase (done)
-Status: Phase 5 complete, ready for Phase 6
-Last activity: 2026-02-11 -- Completed 05-02 (JSON-LD structured data, SEO keywords)
+Phase: 6 of 7 (Visual Effects + Quantum Explorer)
+Plan: 1 of 2 in current phase (done)
+Status: Plan 06-01 complete, ready for 06-02
+Last activity: 2026-02-11 -- Completed 06-01 (ClientRouter, ParticleCanvas, typing fix)
 
-Progress: [███████░░░] ~71%
+Progress: [████████░░] ~79%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: ~12 min
-- Total execution time: 2.1 hours
+- Total plans completed: 11
+- Average duration: ~11 min
+- Total execution time: 2.15 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [███████░░░] ~71%
 | 3 - Blog Infrastructure | 2/2 | 7 min | 4 min |
 | 4 - Core Static Pages | 2/2 | 6 min | 3 min |
 | 5 - SEO Foundation | 2/2 | 6 min | 3 min |
+| 6 - Visual Effects | 1/2 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (2 min), 04-02 (4 min), 05-01 (3 min), 05-02 (3 min)
+- Last 5 plans: 04-02 (4 min), 05-01 (3 min), 05-02 (3 min), 06-01 (3 min)
 - Trend: Fast execution on component/page creation tasks
 
 *Updated after each plan completion*
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [05-02]: BlogPostingJsonLd accepts typed props for dynamic post data with optional keywords/updatedDate
 - [05-02]: JSON-LD rendered via Astro set:html directive on script tag for proper JSON injection
 - [05-02]: No keyword changes needed -- Phase 4 content already covers all 20+ target SEO keywords naturally
+- [06-01]: Used is:inline script for particle canvas (IIFE prevents global leakage, re-executes on navigation if not persisted)
+- [06-01]: Fixed particle color to rgba(124, 115, 255, alpha) -- hero gradient is dark in both themes so no theme-aware canvas color needed
+- [06-01]: Used window.__typingInterval global guard to prevent typing animation double-fire after ClientRouter navigation
 
 ### Pending Todos
 
@@ -91,12 +95,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Research]: Phase 6 (Visual Effects) and Phase 7 (OG images) flagged for `/gsd:research-phase` before implementation
+- [Research]: Phase 7 (OG images) flagged for `/gsd:research-phase` before implementation
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 05-02-PLAN.md (JSON-LD structured data, SEO keywords)
+Stopped at: Completed 06-01-PLAN.md (ClientRouter, ParticleCanvas, typing animation fix)
 Resume file: None
-Next: Phase 5 complete. Ready for Phase 6 (Visual Effects + Quantum Explorer) -- needs research first
+Next: Execute 06-02-PLAN.md (Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections)
