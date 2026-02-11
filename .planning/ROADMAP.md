@@ -103,7 +103,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — SEO head component (OG, Twitter, canonical), @astrojs/sitemap, RSS feed, wire into all pages with unique metadata
+- [x] 05-01-PLAN.md — SEO head component (OG, Twitter, canonical), @astrojs/sitemap, RSS feed, wire into all pages with unique metadata
 - [ ] 05-02-PLAN.md — JSON-LD structured data (Person on homepage, BlogPosting on posts) and SEO keyword verification
 
 ### Phase 6: Visual Effects + Quantum Explorer
@@ -152,6 +152,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
-| 5. SEO Foundation | 0/2 | Planned | - |
+| 5. SEO Foundation | 1/2 | In progress | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
