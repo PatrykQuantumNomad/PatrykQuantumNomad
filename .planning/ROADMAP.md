@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Scaffold + Deployment Pipeline** - Astro project with CI/CD deploying to GitHub Pages with custom domain
 - [x] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
-- [ ] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
+- [x] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
 - [ ] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
 - [ ] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
 - [ ] **Phase 6: Visual Effects + Quantum Explorer** - Particle canvas, view transitions, scroll reveals, and reduced-motion fallbacks
@@ -69,7 +69,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Install dependencies, configure integrations (expressive-code, MDX, typography), create content collection schema, remark reading-time plugin, and sample blog posts
-- [ ] 03-02-PLAN.md — Create BlogCard component, blog listing page (/blog/), and individual post page (/blog/[slug]/) with prose styling and reading time
+- [x] 03-02-PLAN.md — Create BlogCard component, blog listing page (/blog/), and individual post page (/blog/[slug]/) with prose styling and reading time
 
 ### Phase 4: Core Static Pages
 **Goal**: Users can explore a complete 5-page site — home page with animated hero, projects page with all 19 repos, about page, and contact information — responsive across devices
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
-| 3. Blog Infrastructure | 1/2 | In progress | - |
+| 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |

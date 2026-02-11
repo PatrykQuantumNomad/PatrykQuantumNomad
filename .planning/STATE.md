@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 3 in progress - Blog Infrastructure (plan 01 of 02 complete)
+**Current focus:** Phase 3 complete - Blog Infrastructure (2/2 plans). Ready for Phase 4.
 
 ## Current Position
 
-Phase: 3 of 7 (Blog Infrastructure) — IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Plan 03-01 complete, ready for Plan 03-02
-Last activity: 2026-02-11 — Completed 03-01 (Blog dependencies and content collection)
+Phase: 3 of 7 (Blog Infrastructure) — COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 3 complete, ready for Phase 4
+Last activity: 2026-02-11 — Completed 03-02 (Blog pages and components)
 
-Progress: [████░░░░░░] ~35%
+Progress: [████░░░░░░] ~42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: ~20 min
-- Total execution time: 1.7 hours
+- Total plans completed: 6
+- Average duration: ~18 min
+- Total execution time: 1.8 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [████░░░░░░] ~35%
 |-------|-------|-------|----------|
 | 1 - Scaffold + Deploy | 2/2 | 83 min | 42 min |
 | 2 - Layout + Theme | 2/2 | 12 min | 6 min |
-| 3 - Blog Infrastructure | 1/2 | 4 min | 4 min |
+| 3 - Blog Infrastructure | 2/2 | 7 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (80 min), 02-01 (3 min), 02-02 (9 min), 03-01 (4 min)
-- Trend: Fast execution on configuration/schema tasks
+- Last 5 plans: 02-01 (3 min), 02-02 (9 min), 03-01 (4 min), 03-02 (3 min)
+- Trend: Fast execution on component/page creation tasks
 
 *Updated after each plan completion*
 
@@ -63,6 +63,10 @@ Recent decisions affecting current work:
 - [03-01]: useDarkModeMediaQuery: false since site uses class-based toggle, not prefers-color-scheme
 - [03-01]: Prose uses CSS custom properties (not dark:prose-invert) since custom properties already switch between themes
 - [03-01]: Content collection uses Astro 5 glob loader with src/content.config.ts (not root content/config.ts)
+- [03-02]: Used post.id (not post.slug) for URLs per Astro 5 API where slug was removed
+- [03-02]: Draft filter applied in both listing query AND getStaticPaths to prevent draft page generation
+- [03-02]: render() imported as standalone function from astro:content (Astro 5 API change)
+- [03-02]: Prose class without dark:prose-invert since CSS custom properties handle theme switching automatically
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 03-01-PLAN.md (Blog dependencies and content collection)
+Stopped at: Completed 03-02-PLAN.md (Blog pages and components)
 Resume file: None
-Next: Execute 03-02-PLAN.md (Blog listing page, post page, BlogCard component)
+Next: Plan Phase 4 (Core Static Pages) — Home, Projects, About, Contact pages
