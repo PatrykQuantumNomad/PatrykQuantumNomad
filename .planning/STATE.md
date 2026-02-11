@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 6 in progress - Visual Effects + Quantum Explorer (1/2 plans done).
+**Current focus:** Phase 6 complete - Visual Effects + Quantum Explorer. Ready for Phase 7.
 
 ## Current Position
 
 Phase: 6 of 7 (Visual Effects + Quantum Explorer)
-Plan: 1 of 2 in current phase (done)
-Status: Plan 06-01 complete, ready for 06-02
-Last activity: 2026-02-11 -- Completed 06-01 (ClientRouter, ParticleCanvas, typing fix)
+Plan: 2 of 2 in current phase (done)
+Status: Phase 6 complete, ready for Phase 7
+Last activity: 2026-02-11 -- Completed 06-02 (Scroll reveal animations on all pages)
 
-Progress: [████████░░] ~79%
+Progress: [█████████░] ~86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: ~11 min
-- Total execution time: 2.15 hours
+- Total plans completed: 12
+- Average duration: ~10 min
+- Total execution time: 2.18 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [████████░░] ~79%
 | 3 - Blog Infrastructure | 2/2 | 7 min | 4 min |
 | 4 - Core Static Pages | 2/2 | 6 min | 3 min |
 | 5 - SEO Foundation | 2/2 | 6 min | 3 min |
-| 6 - Visual Effects | 1/2 | 3 min | 3 min |
+| 6 - Visual Effects | 2/2 | 5 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (4 min), 05-01 (3 min), 05-02 (3 min), 06-01 (3 min)
+- Last 5 plans: 05-01 (3 min), 05-02 (3 min), 06-01 (3 min), 06-02 (2 min)
 - Trend: Fast execution on component/page creation tasks
 
 *Updated after each plan completion*
@@ -88,6 +88,11 @@ Recent decisions affecting current work:
 - [06-01]: Used is:inline script for particle canvas (IIFE prevents global leakage, re-executes on navigation if not persisted)
 - [06-01]: Fixed particle color to rgba(124, 115, 255, alpha) -- hero gradient is dark in both themes so no theme-aware canvas color needed
 - [06-01]: Used window.__typingInterval global guard to prevent typing animation double-fire after ClientRouter navigation
+- [06-02]: CSS opacity+transform transition for scroll reveals (no animation library)
+- [06-02]: Intersection Observer threshold 0.1 with -50px bottom rootMargin for natural reveal timing
+- [06-02]: Module script (not is:inline) for observer to persist across ClientRouter navigations
+- [06-02]: Hero section excluded from reveals to ensure immediate above-the-fold visibility
+- [06-02]: Blog cards wrapped in reveal divs rather than modifying BlogCard component
 
 ### Pending Todos
 
@@ -101,6 +106,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 06-01-PLAN.md (ClientRouter, ParticleCanvas, typing animation fix)
+Stopped at: Completed 06-02-PLAN.md (Scroll reveal animations on all pages -- Phase 6 complete)
 Resume file: None
-Next: Execute 06-02-PLAN.md (Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections)
+Next: Research Phase 7 (Enhanced Blog + Advanced SEO) then execute 07-01-PLAN.md

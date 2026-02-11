@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
 - [x] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
 - [x] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
-- [ ] **Phase 6: Visual Effects + Quantum Explorer** - Particle canvas, view transitions, scroll reveals, and reduced-motion fallbacks
+- [x] **Phase 6: Visual Effects + Quantum Explorer** - Particle canvas, view transitions, scroll reveals, and reduced-motion fallbacks
 - [ ] **Phase 7: Enhanced Blog + Advanced SEO** - Tag pages, table of contents, dynamic OG images, LLMs.txt, GEO optimization, Lighthouse validation
 
 ## Phase Details
@@ -121,7 +121,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — ClientRouter view transitions, ParticleCanvas component, hero integration with transition:persist, typing animation fix
-- [ ] 06-02-PLAN.md — Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections
+- [x] 06-02-PLAN.md — Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections
 
 ### Phase 7: Enhanced Blog + Advanced SEO
 **Goal**: Blog gains discoverability features (tags, ToC, dynamic social images) and the site achieves advanced SEO capabilities (LLMs.txt, GEO optimization) with verified Lighthouse 90+ performance
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
 | 5. SEO Foundation | 2/2 | Complete | 2026-02-11 |
-| 6. Visual Effects + Quantum Explorer | 1/2 | In progress | - |
+| 6. Visual Effects + Quantum Explorer | 2/2 | Complete | 2026-02-11 |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
