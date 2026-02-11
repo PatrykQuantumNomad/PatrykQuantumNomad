@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 3 complete - Blog Infrastructure (2/2 plans). Ready for Phase 4.
+**Current focus:** Phase 4 in progress - Core Static Pages (1/2 plans complete).
 
 ## Current Position
 
-Phase: 3 of 7 (Blog Infrastructure) — COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Phase 3 complete, ready for Phase 4
-Last activity: 2026-02-11 — Completed 03-02 (Blog pages and components)
+Phase: 4 of 7 (Core Static Pages) — IN PROGRESS
+Plan: 1 of 2 in current phase (04-01 complete)
+Status: 04-01 (Home page) complete, ready for 04-02
+Last activity: 2026-02-11 — Completed 04-01 (Home page with hero and content sections)
 
-Progress: [████░░░░░░] ~42%
+Progress: [█████░░░░░] ~50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: ~18 min
+- Total plans completed: 7
+- Average duration: ~16 min
 - Total execution time: 1.8 hours
 
 **By Phase:**
@@ -30,9 +30,10 @@ Progress: [████░░░░░░] ~42%
 | 1 - Scaffold + Deploy | 2/2 | 83 min | 42 min |
 | 2 - Layout + Theme | 2/2 | 12 min | 6 min |
 | 3 - Blog Infrastructure | 2/2 | 7 min | 4 min |
+| 4 - Core Static Pages | 1/2 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3 min), 02-02 (9 min), 03-01 (4 min), 03-02 (3 min)
+- Last 5 plans: 02-02 (9 min), 03-01 (4 min), 03-02 (3 min), 04-01 (2 min)
 - Trend: Fast execution on component/page creation tasks
 
 *Updated after each plan completion*
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [03-02]: Draft filter applied in both listing query AND getStaticPaths to prevent draft page generation
 - [03-02]: render() imported as standalone function from astro:content (Astro 5 API change)
 - [03-02]: Prose class without dark:prose-invert since CSS custom properties handle theme switching automatically
+- [04-01]: Typing animation uses inline JS text rotation + CSS blinking cursor (no external library)
+- [04-01]: Skills card icons are inline SVG from Heroicons for zero HTTP overhead
+- [04-01]: Contact CTA placed directly on home page for immediate recruiter accessibility
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 03-02-PLAN.md (Blog pages and components)
+Stopped at: Completed 04-01-PLAN.md (Home page with hero and content sections)
 Resume file: None
-Next: Plan Phase 4 (Core Static Pages) — Home, Projects, About, Contact pages
+Next: Execute 04-02 (Projects page, About page, Contact page)

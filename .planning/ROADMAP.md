@@ -84,7 +84,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Home page with animated hero (typing effect for role titles), CTA buttons, skills grid, latest blog posts, and contact CTA
+- [x] 04-01-PLAN.md — Home page with animated hero (typing effect for role titles), CTA buttons, skills grid, latest blog posts, and contact CTA
 - [ ] 04-02-PLAN.md — Projects page (19 repos grouped by category), About page (bio, tech stack, career highlights), and Contact page (email + LinkedIn)
 
 ### Phase 5: SEO Foundation
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
-| 4. Core Static Pages | 0/2 | Planned | - |
+| 4. Core Static Pages | 1/2 | In Progress | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
