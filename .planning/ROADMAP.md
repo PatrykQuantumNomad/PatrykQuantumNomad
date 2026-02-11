@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Astro project from scratch with astro.config.mjs, minimal index page, CNAME, robots.txt
+- [x] 01-01-PLAN.md — Scaffold Astro project from scratch with astro.config.mjs, minimal index page, CNAME, robots.txt
 - [ ] 01-02-PLAN.md — GitHub Actions deployment workflow + DNS/Pages configuration checkpoint
 
 ### Phase 2: Layout Shell + Theme System
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Project Scaffold + Deployment Pipeline | 0/2 | Planned | - |
+| 1. Project Scaffold + Deployment Pipeline | 1/2 | In progress | - |
 | 2. Layout Shell + Theme System | 0/TBD | Not started | - |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
