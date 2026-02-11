@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Light Theme (default) ─────────────────────────────────────────────── */
+:root {
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8f9fc;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a68;
+  --color-accent: #6c63ff;
+  --color-accent-hover: #5a52e0;
+  --color-border: #e2e4e9;
+}
+
+/* ─── Dark Theme ────────────────────────────────────────────────────────── */
+:root.dark {
+  --color-surface: #0a0a1a;
+  --color-surface-alt: #12122a;
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary: #9898b8;
+  --color-accent: #7c73ff;
+  --color-accent-hover: #9a93ff;
+  --color-border: #2a2a4a;
+}
+
+/* ─── Base Typography ───────────────────────────────────────────────────── */
+@layer base {
+  body {
+    @apply font-sans text-[var(--color-text-primary)] bg-[var(--color-surface)] antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+  code, pre {
+    @apply font-mono;
+  }
+}
