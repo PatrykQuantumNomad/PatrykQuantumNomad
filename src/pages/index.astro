@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import ParticleCanvas from '../components/ParticleCanvas.astro';
 import PersonJsonLd from '../components/PersonJsonLd.astro';
 
 const posts = await getCollection('blog', ({ data }) => {
@@ -17,32 +18,35 @@ const latestPosts = posts
   description="Portfolio of Patryk Golabek, Cloud-Native Software Architect with 17+ years in Kubernetes, AI/ML systems, platform engineering, and DevSecOps."
 >
   <!-- Hero Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4">
-      Patryk Golabek
-    </h1>
-    <p class="text-xl sm:text-2xl text-[var(--color-accent)] font-heading font-medium mb-6">
-      <span id="typing-role" class="typing-cursor">Cloud-Native Architect</span>
-    </p>
-    <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mb-8">
-      Building resilient cloud-native systems and AI-powered solutions for 17+ years.
-      Pre-1.0 Kubernetes adopter. Ontario, Canada.
-    </p>
-    <div class="flex flex-wrap gap-4">
-      <a
-        href="/projects/"
-        class="inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
-      >
-        View Projects
-      </a>
-      <a
-        href="/blog/"
-        class="inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10 transition-colors"
-      >
-        Read Blog
-      </a>
-    </div>
-  </section>
+  <div class="relative" transition:persist="particle-hero">
+    <ParticleCanvas />
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4">
+        Patryk Golabek
+      </h1>
+      <p class="text-xl sm:text-2xl text-[var(--color-accent)] font-heading font-medium mb-6">
+        <span id="typing-role" class="typing-cursor">Cloud-Native Architect</span>
+      </p>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mb-8">
+        Building resilient cloud-native systems and AI-powered solutions for 17+ years.
+        Pre-1.0 Kubernetes adopter. Ontario, Canada.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="/projects/"
+          class="inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+        >
+          View Projects
+        </a>
+        <a
+          href="/blog/"
+          class="inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10 transition-colors"
+        >
+          Read Blog
+        </a>
+      </div>
+    </section>
+  </div>
 
   <!-- Skills / What I Build Section -->
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -181,11 +185,15 @@ const latestPosts = posts
 
 <script is:inline>
   (function() {
+    // Guard against double-initialization from ClientRouter re-execution
+    if (window.__typingInterval) {
+      clearInterval(window.__typingInterval);
+    }
     const roles = ['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder'];
     let i = 0;
     const el = document.getElementById('typing-role');
     if (el) {
-      setInterval(function() {
+      window.__typingInterval = setInterval(function() {
         i = (i + 1) % roles.length;
         el.textContent = roles[i];
       }, 3000);
