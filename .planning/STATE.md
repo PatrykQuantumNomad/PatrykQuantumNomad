@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 5 in progress - SEO Foundation (1/2 plans complete). Ready for 05-02.
+**Current focus:** Phase 5 complete - SEO Foundation (2/2 plans done). Ready for Phase 6.
 
 ## Current Position
 
-Phase: 5 of 7 (SEO Foundation)
-Plan: 1 of 2 in current phase
-Status: Plan 05-01 complete, ready for 05-02
-Last activity: 2026-02-11 -- Completed 05-01 (SEO Head, Sitemap, RSS)
+Phase: 5 of 7 (SEO Foundation) COMPLETE
+Plan: 2 of 2 in current phase (done)
+Status: Phase 5 complete, ready for Phase 6
+Last activity: 2026-02-11 -- Completed 05-02 (JSON-LD structured data, SEO keywords)
 
-Progress: [██████░░░░] ~64%
+Progress: [███████░░░] ~71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: ~13 min
-- Total execution time: 2.0 hours
+- Total plans completed: 10
+- Average duration: ~12 min
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [██████░░░░] ~64%
 | 2 - Layout + Theme | 2/2 | 12 min | 6 min |
 | 3 - Blog Infrastructure | 2/2 | 7 min | 4 min |
 | 4 - Core Static Pages | 2/2 | 6 min | 3 min |
-| 5 - SEO Foundation | 1/2 | 3 min | 3 min |
+| 5 - SEO Foundation | 2/2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3 min), 04-01 (2 min), 04-02 (4 min), 05-01 (3 min)
+- Last 5 plans: 04-01 (2 min), 04-02 (4 min), 05-01 (3 min), 05-02 (3 min)
 - Trend: Fast execution on component/page creation tasks
 
 *Updated after each plan completion*
@@ -80,6 +80,10 @@ Recent decisions affecting current work:
 - [05-01]: canonicalURL derived from Astro.url.pathname + Astro.site when not explicitly provided
 - [05-01]: og:image deferred to Phase 7 for dynamic OG image generation
 - [05-01]: RSS autodiscovery link added to Layout head for all pages
+- [05-02]: PersonJsonLd uses static data (no props) since only one person on the site
+- [05-02]: BlogPostingJsonLd accepts typed props for dynamic post data with optional keywords/updatedDate
+- [05-02]: JSON-LD rendered via Astro set:html directive on script tag for proper JSON injection
+- [05-02]: No keyword changes needed -- Phase 4 content already covers all 20+ target SEO keywords naturally
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 05-01-PLAN.md (SEO Head, Sitemap, RSS)
+Stopped at: Completed 05-02-PLAN.md (JSON-LD structured data, SEO keywords)
 Resume file: None
-Next: Execute 05-02 -- JSON-LD structured data and SEO keyword verification
+Next: Phase 5 complete. Ready for Phase 6 (Visual Effects + Quantum Explorer) -- needs research first

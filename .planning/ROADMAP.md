@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
 - [x] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
 - [x] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
-- [ ] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
+- [x] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
 - [ ] **Phase 6: Visual Effects + Quantum Explorer** - Particle canvas, view transitions, scroll reveals, and reduced-motion fallbacks
 - [ ] **Phase 7: Enhanced Blog + Advanced SEO** - Tag pages, table of contents, dynamic OG images, LLMs.txt, GEO optimization, Lighthouse validation
 
@@ -104,7 +104,7 @@ Plans:
 
 Plans:
 - [x] 05-01-PLAN.md — SEO head component (OG, Twitter, canonical), @astrojs/sitemap, RSS feed, wire into all pages with unique metadata
-- [ ] 05-02-PLAN.md — JSON-LD structured data (Person on homepage, BlogPosting on posts) and SEO keyword verification
+- [x] 05-02-PLAN.md — JSON-LD structured data (Person on homepage, BlogPosting on posts) and SEO keyword verification
 
 ### Phase 6: Visual Effects + Quantum Explorer
 **Goal**: The site delivers the signature "Quantum Explorer" experience — particle canvas on the hero, smooth page transitions, scroll-triggered reveals — without compromising performance or accessibility
@@ -152,6 +152,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
-| 5. SEO Foundation | 1/2 | In progress | - |
+| 5. SEO Foundation | 2/2 | Complete | 2026-02-11 |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
