@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 8 of 12 (Schema & Hero Config Foundation)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-11 — Roadmap created for v1.1 Content Refresh
+Plan: 1 of 2 in current phase
+Status: Plan 08-01 complete, ready for 08-02
+Last activity: 2026-02-11 — Completed 08-01 Schema & Hero Config data contracts
 
-Progress: [████████████████░░░░░░░░] 68% (v1.0 complete: 16/16 plans | v1.1: 0/7 plans)
+Progress: [█████████████████░░░░░░░] 74% (v1.0 complete: 16/16 plans | v1.1: 1/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (all v1.0)
+- Total plans completed: 17 (16 v1.0 + 1 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -27,7 +27,7 @@ Progress: [████████████████░░░░░░░
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 8. Schema & Config | 0/2 | - | - |
+| 8. Schema & Config | 1/2 | 3min | 3min |
 | 9. External Blog | 0/2 | - | - |
 | 10. Social Links | 0/1 | - | - |
 | 11. Hero & Projects | 0/1 | - | - |
@@ -48,6 +48,9 @@ v1.1 decisions so far:
 - Keep existing blog post (building-kubernetes-observability-stack), only delete draft-placeholder.md
 - Single-collection approach for external blog posts (schema extension, not separate data source)
 - LinkedIn removed from UI but consider keeping in JSON-LD sameAs (deferred to v1.2 per CONFIG-02)
+- Used `as const` for siteConfig to preserve literal types for downstream consumers
+- Used `z.enum` for blog source field to enforce type safety on blog post sources
+- Added `@astrojs/check` and `typescript` as dev dependencies for type verification
 
 ### Pending Todos
 
@@ -62,6 +65,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Roadmap created for v1.1 milestone
+Stopped at: Completed 08-01-PLAN.md (Schema & Hero Config data contracts)
 Resume file: None
-Next: Plan Phase 8 via `/gsd:plan-phase 8`
+Next: Execute Phase 8 Plan 02 (wire siteConfig into components)
