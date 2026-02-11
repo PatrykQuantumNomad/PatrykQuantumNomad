@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Pushing to main triggers a GitHub Actions build that deploys to GitHub Pages without manual intervention
   2. Visiting patrykgolabek.dev in a browser loads the site over HTTPS
   3. The site rebuilds and redeploys successfully on subsequent pushes (CNAME persists across deploys)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Scaffold Astro project from scratch with astro.config.mjs, minimal index page, CNAME, robots.txt
+- [ ] 01-02-PLAN.md — GitHub Actions deployment workflow + DNS/Pages configuration checkpoint
 
 ### Phase 2: Layout Shell + Theme System
 **Goal**: Every page shares a consistent layout with header navigation, footer, dark/light mode toggle, futuristic typography, and accessibility fundamentals
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Project Scaffold + Deployment Pipeline | 0/TBD | Not started | - |
+| 1. Project Scaffold + Deployment Pipeline | 0/2 | Planned | - |
 | 2. Layout Shell + Theme System | 0/TBD | Not started | - |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
