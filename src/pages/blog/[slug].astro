@@ -18,7 +18,14 @@ const { Content, remarkPluginFrontmatter } = await render(post);
 const { title, description, publishedDate, tags } = post.data;
 ---
 
-<Layout title={title} description={description}>
+<Layout
+  title={`${title} — Patryk Golabek`}
+  description={description}
+  ogType="article"
+  publishedDate={publishedDate}
+  updatedDate={post.data.updatedDate}
+  tags={tags}
+>
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <header class="mb-8">
       <h1 class="text-3xl sm:text-4xl font-heading font-bold">{title}</h1>
