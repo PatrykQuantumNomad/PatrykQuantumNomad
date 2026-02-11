@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 8 - Schema & Hero Config Foundation (v1.1 Content Refresh)
+**Current focus:** Phase 9 - External Blog Integration (v1.1 Content Refresh)
 
 ## Current Position
 
-Phase: 8 of 12 (Schema & Hero Config Foundation)
-Plan: 1 of 2 in current phase
-Status: Plan 08-01 complete, ready for 08-02
-Last activity: 2026-02-11 — Completed 08-01 Schema & Hero Config data contracts
+Phase: 8 of 12 (Schema & Hero Config Foundation) -- COMPLETE
+Plan: 2 of 2 in current phase (complete)
+Status: Phase 8 complete, ready for Phase 9
+Last activity: 2026-02-11 — Completed 08-02 Wire home page and PersonJsonLd to siteConfig
 
-Progress: [█████████████████░░░░░░░] 74% (v1.0 complete: 16/16 plans | v1.1: 1/7 plans)
+Progress: [██████████████████░░░░░░] 78% (v1.0 complete: 16/16 plans | v1.1: 2/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17 (16 v1.0 + 1 v1.1)
+- Total plans completed: 18 (16 v1.0 + 2 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -27,7 +27,7 @@ Progress: [█████████████████░░░░░░
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 8. Schema & Config | 1/2 | 3min | 3min |
+| 8. Schema & Config | 2/2 | 6min | 3min |
 | 9. External Blog | 0/2 | - | - |
 | 10. Social Links | 0/1 | - | - |
 | 11. Hero & Projects | 0/1 | - | - |
@@ -51,6 +51,8 @@ v1.1 decisions so far:
 - Used `as const` for siteConfig to preserve literal types for downstream consumers
 - Used `z.enum` for blog source field to enforce type safety on blog post sources
 - Added `@astrojs/check` and `typescript` as dev dependencies for type verification
+- Used spread `[...siteConfig.roles]` in define:vars to convert readonly tuple for JSON serialization
+- Computed pageTitle/pageDescription in frontmatter for clean config-to-template data flow
 
 ### Pending Todos
 
@@ -65,6 +67,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 08-01-PLAN.md (Schema & Hero Config data contracts)
+Stopped at: Completed 08-02-PLAN.md (Wire home page and PersonJsonLd to siteConfig)
 Resume file: None
-Next: Execute Phase 8 Plan 02 (wire siteConfig into components)
+Next: Execute Phase 9 (External Blog Integration)

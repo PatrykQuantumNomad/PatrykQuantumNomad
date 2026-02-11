@@ -80,7 +80,7 @@ Plans:
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 8: Schema & Hero Config Foundation** - Establish data contracts that all content phases depend on
+- [x] **Phase 8: Schema & Hero Config Foundation** - Establish data contracts that all content phases depend on
 - [ ] **Phase 9: External Blog Integration** - Surface curated external blog posts alongside local content
 - [ ] **Phase 10: Social Links & Contact Update** - Update email, add X and YouTube, remove LinkedIn from UI
 - [ ] **Phase 11: Hero & Project Curation** - Refresh hero messaging and remove deprecated projects
@@ -100,7 +100,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 08-01-PLAN.md — Create site.ts hero config and extend blog schema with externalUrl/source
-- [ ] 08-02-PLAN.md — Wire home page and PersonJsonLd to consume from site.ts
+- [x] 08-02-PLAN.md — Wire home page and PersonJsonLd to consume from site.ts
 
 ### Phase 9: External Blog Integration
 **Goal**: Visitors see a credible content hub with 8-12 curated external posts from Kubert AI and Translucent Computing alongside local blog content
@@ -176,7 +176,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 5. SEO Foundation | v1.0 | 2/2 | Complete | 2026-02-11 |
 | 6. Visual Effects | v1.0 | 2/2 | Complete | 2026-02-11 |
 | 7. Enhanced Blog & SEO | v1.0 | 3/3 | Complete | 2026-02-11 |
-| 8. Schema & Hero Config | v1.1 | 1/2 | In progress | - |
+| 8. Schema & Hero Config | v1.1 | 2/2 | Complete | 2026-02-11 |
 | 9. External Blog | v1.1 | 0/2 | Not started | - |
 | 10. Social Links | v1.1 | 0/1 | Not started | - |
 | 11. Hero & Projects | v1.1 | 0/1 | Not started | - |
@@ -184,4 +184,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11 (08-01 complete)*
+*Last updated: 2026-02-11 (Phase 8 complete)*
