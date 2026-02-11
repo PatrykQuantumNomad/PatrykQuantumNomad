@@ -76,32 +76,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SOCIAL-01 | — | Pending |
-| SOCIAL-02 | — | Pending |
-| SOCIAL-03 | — | Pending |
-| SOCIAL-04 | — | Pending |
-| BLOG-01 | — | Pending |
-| BLOG-02 | — | Pending |
-| BLOG-03 | — | Pending |
-| BLOG-04 | — | Pending |
-| BLOG-05 | — | Pending |
-| BLOG-06 | — | Pending |
-| BLOG-07 | — | Pending |
-| HERO-01 | — | Pending |
-| HERO-02 | — | Pending |
-| HERO-03 | — | Pending |
-| PROJ-01 | — | Pending |
-| PROJ-02 | — | Pending |
-| PROJ-03 | — | Pending |
-| CLEAN-01 | — | Pending |
-| CLEAN-02 | — | Pending |
-| CLEAN-03 | — | Pending |
+| SOCIAL-01 | Phase 10 | Pending |
+| SOCIAL-02 | Phase 10 | Pending |
+| SOCIAL-03 | Phase 10 | Pending |
+| SOCIAL-04 | Phase 10 | Pending |
+| BLOG-01 | Phase 9 | Pending |
+| BLOG-02 | Phase 9 | Pending |
+| BLOG-03 | Phase 9 | Pending |
+| BLOG-04 | Phase 9 | Pending |
+| BLOG-05 | Phase 9 | Pending |
+| BLOG-06 | Phase 9 | Pending |
+| BLOG-07 | Phase 8 | Pending |
+| HERO-01 | Phase 11 | Pending |
+| HERO-02 | Phase 11 | Pending |
+| HERO-03 | Phase 8 | Pending |
+| PROJ-01 | Phase 11 | Pending |
+| PROJ-02 | Phase 11 | Pending |
+| PROJ-03 | Phase 11 | Pending |
+| CLEAN-01 | Phase 12 | Pending |
+| CLEAN-02 | Phase 12 | Pending |
+| CLEAN-03 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️ (pending roadmap creation)
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-11 after roadmap creation (traceability populated)*
