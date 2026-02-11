@@ -1,0 +1,42 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  publishedDate: Date;
+  updatedDate?: Date;
+  url: string;
+  tags?: string[];
+}
+
+const { title, description, publishedDate, updatedDate, url, tags } = Astro.props;
+
+const schema: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "datePublished": publishedDate.toISOString(),
+  "dateModified": (updatedDate || publishedDate).toISOString(),
+  "url": url,
+  "author": {
+    "@type": "Person",
+    "name": "Patryk Golabek",
+    "url": "https://patrykgolabek.dev"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Patryk Golabek",
+    "url": "https://patrykgolabek.dev"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": url
+  }
+};
+
+if (tags && tags.length > 0) {
+  schema["keywords"] = tags.join(', ');
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

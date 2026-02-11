@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import BlogPostingJsonLd from '../../components/BlogPostingJsonLd.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
@@ -16,6 +17,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, remarkPluginFrontmatter } = await render(post);
 const { title, description, publishedDate, tags } = post.data;
+const postURL = new URL('/blog/' + post.id + '/', Astro.site).toString();
 ---
 
 <Layout
@@ -48,6 +50,14 @@ const { title, description, publishedDate, tags } = post.data;
     <div class="prose max-w-none mt-8">
       <Content />
     </div>
+    <BlogPostingJsonLd
+      title={title}
+      description={description}
+      publishedDate={publishedDate}
+      updatedDate={post.data.updatedDate}
+      url={postURL}
+      tags={tags}
+    />
   </article>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
     <a href="/blog/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors">

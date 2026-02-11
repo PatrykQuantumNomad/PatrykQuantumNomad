@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import PersonJsonLd from '../components/PersonJsonLd.astro';
 
 const posts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
@@ -163,6 +164,8 @@ const latestPosts = posts
       </a>
     </div>
   </section>
+
+  <PersonJsonLd />
 </Layout>
 
 <style>

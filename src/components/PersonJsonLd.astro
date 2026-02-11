@@ -1,0 +1,41 @@
+---
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Patryk Golabek",
+  "url": "https://patrykgolabek.dev",
+  "jobTitle": "Cloud-Native Software Architect",
+  "description": "Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps",
+  "knowsAbout": [
+    "Kubernetes",
+    "Cloud-Native Architecture",
+    "AI/ML",
+    "Platform Engineering",
+    "DevSecOps",
+    "Infrastructure as Code",
+    "LLM Agents",
+    "RAG Pipelines",
+    "Terraform",
+    "Python",
+    "TypeScript",
+    "Java"
+  ],
+  "sameAs": [
+    "https://github.com/PatrykQuantumNomad",
+    "https://www.linkedin.com/in/patrykgolabek/",
+    "https://translucentcomputing.com/blog/",
+    "https://mykubert.com/blog/"
+  ],
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Translucent Computing"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressRegion": "Ontario",
+    "addressCountry": "CA"
+  }
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
