@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 7 of 7 (Enhanced Blog + Advanced SEO)
-Plan: 1 of 3 in current phase (done)
-Status: Plan 07-01 complete, ready for 07-02
-Last activity: 2026-02-11 -- Completed 07-01 (Tag pages, ToC, LLMs.txt)
+Plan: 2 of 3 in current phase (done)
+Status: Plan 07-02 complete, ready for 07-03
+Last activity: 2026-02-11 -- Completed 07-02 (OG image generation, GEO optimization)
 
-Progress: [██████████] ~90%
+Progress: [███████████] ~93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: ~10 min
-- Total execution time: 2.25 hours
+- Total execution time: 2.37 hours
 
 **By Phase:**
 
@@ -33,11 +33,11 @@ Progress: [██████████] ~90%
 | 4 - Core Static Pages | 2/2 | 6 min | 3 min |
 | 5 - SEO Foundation | 2/2 | 6 min | 3 min |
 | 6 - Visual Effects | 2/2 | 5 min | 3 min |
-| 7 - Enhanced Blog + SEO | 1/3 | 4 min | 4 min |
+| 7 - Enhanced Blog + SEO | 2/3 | 11 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (3 min), 06-01 (3 min), 06-02 (2 min), 07-01 (4 min)
-- Trend: Consistent fast execution on component/page creation tasks
+- Last 5 plans: 06-01 (3 min), 06-02 (2 min), 07-01 (4 min), 07-02 (7 min)
+- Trend: Consistent fast execution; 07-02 slightly longer due to font downloads and binary image generation
 
 *Updated after each plan completion*
 
@@ -98,6 +98,10 @@ Recent decisions affecting current work:
 - [07-01]: ToC only renders when 2+ qualifying h2/h3 headings exist to avoid visual clutter on short posts
 - [07-01]: LLMs.txt dynamically generated from blog collection at build time per llmstxt.org spec
 - [07-01]: Tag pages use same draft filter pattern as blog index for consistency
+- [07-02]: Used woff font files from fontsource instead of TTF -- Satori supports woff natively, Google Fonts GitHub TTF paths returned 404
+- [07-02]: OG images use Satori JSX object syntax (not satori-html) for maintainability and type safety
+- [07-02]: Module-scope font caching in og-image.ts prevents redundant file reads during multi-post generation
+- [07-02]: BlogPostingJsonLd image rendered as ImageObject with explicit width/height for rich snippet eligibility
 
 ### Pending Todos
 
@@ -105,12 +109,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Research]: Phase 7 (OG images) flagged for `/gsd:research-phase` before implementation
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 07-01-PLAN.md (Tag pages, ToC, LLMs.txt)
+Stopped at: Completed 07-02-PLAN.md (OG image generation, GEO optimization)
 Resume file: None
-Next: Execute 07-02-PLAN.md (OG image generation with Satori + Sharp)
+Next: Execute 07-03-PLAN.md (Lighthouse audit and final SEO polish)
