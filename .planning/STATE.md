@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 6 complete - Visual Effects + Quantum Explorer. Ready for Phase 7.
+**Current focus:** Phase 7 in progress - Enhanced Blog + Advanced SEO.
 
 ## Current Position
 
-Phase: 6 of 7 (Visual Effects + Quantum Explorer)
-Plan: 2 of 2 in current phase (done)
-Status: Phase 6 complete, ready for Phase 7
-Last activity: 2026-02-11 -- Completed 06-02 (Scroll reveal animations on all pages)
+Phase: 7 of 7 (Enhanced Blog + Advanced SEO)
+Plan: 1 of 3 in current phase (done)
+Status: Plan 07-01 complete, ready for 07-02
+Last activity: 2026-02-11 -- Completed 07-01 (Tag pages, ToC, LLMs.txt)
 
-Progress: [█████████░] ~86%
+Progress: [██████████] ~90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: ~10 min
-- Total execution time: 2.18 hours
+- Total execution time: 2.25 hours
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: [█████████░] ~86%
 | 4 - Core Static Pages | 2/2 | 6 min | 3 min |
 | 5 - SEO Foundation | 2/2 | 6 min | 3 min |
 | 6 - Visual Effects | 2/2 | 5 min | 3 min |
+| 7 - Enhanced Blog + SEO | 1/3 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (3 min), 05-02 (3 min), 06-01 (3 min), 06-02 (2 min)
-- Trend: Fast execution on component/page creation tasks
+- Last 5 plans: 05-02 (3 min), 06-01 (3 min), 06-02 (2 min), 07-01 (4 min)
+- Trend: Consistent fast execution on component/page creation tasks
 
 *Updated after each plan completion*
 
@@ -93,6 +94,10 @@ Recent decisions affecting current work:
 - [06-02]: Module script (not is:inline) for observer to persist across ClientRouter navigations
 - [06-02]: Hero section excluded from reveals to ensure immediate above-the-fold visibility
 - [06-02]: Blog cards wrapped in reveal divs rather than modifying BlogCard component
+- [07-01]: BlogCard restructured with CSS absolute overlay to avoid invalid nested <a> tags; tag links use relative z-10
+- [07-01]: ToC only renders when 2+ qualifying h2/h3 headings exist to avoid visual clutter on short posts
+- [07-01]: LLMs.txt dynamically generated from blog collection at build time per llmstxt.org spec
+- [07-01]: Tag pages use same draft filter pattern as blog index for consistency
 
 ### Pending Todos
 
@@ -106,6 +111,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 06-02-PLAN.md (Scroll reveal animations on all pages -- Phase 6 complete)
+Stopped at: Completed 07-01-PLAN.md (Tag pages, ToC, LLMs.txt)
 Resume file: None
-Next: Research Phase 7 (Enhanced Blog + Advanced SEO) then execute 07-01-PLAN.md
+Next: Execute 07-02-PLAN.md (OG image generation with Satori + Sharp)
