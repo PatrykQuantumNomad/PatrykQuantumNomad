@@ -51,7 +51,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Install Tailwind CSS, configure dark/light theme system with CSS custom properties, set up futuristic typography, add FOUC-prevention script
+- [x] 02-01-PLAN.md — Install Tailwind CSS, configure dark/light theme system with CSS custom properties, set up futuristic typography, add FOUC-prevention script
 - [ ] 02-02-PLAN.md — Create Header, Footer, ThemeToggle components, wire into Layout.astro, add accessibility foundations
 
 ### Phase 3: Blog Infrastructure
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
-| 2. Layout Shell + Theme System | 0/2 | In Progress | - |
+| 2. Layout Shell + Theme System | 1/2 | In Progress | - |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
