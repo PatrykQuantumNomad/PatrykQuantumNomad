@@ -135,11 +135,12 @@ Plans:
   4. /llms.txt serves an LLM-friendly content summary for AI-powered discovery tools
   5. Site achieves Lighthouse scores of 90+ in Performance, Accessibility, Best Practices, and SEO on mobile
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Tag pages, table of contents component, and LLMs.txt endpoint
+- [ ] 07-02-PLAN.md — Dynamic OG image generation (Satori + Sharp) and GEO optimization
+- [ ] 07-03-PLAN.md — Lighthouse audit, performance optimization, and final verification
 
 ## Progress
 
@@ -154,4 +155,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
 | 5. SEO Foundation | 2/2 | Complete | 2026-02-11 |
 | 6. Visual Effects + Quantum Explorer | 2/2 | Complete | 2026-02-11 |
-| 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
+| 7. Enhanced Blog + Advanced SEO | 0/3 | Not started | - |
