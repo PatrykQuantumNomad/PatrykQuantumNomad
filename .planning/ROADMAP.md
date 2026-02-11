@@ -12,7 +12,7 @@ This roadmap delivers a complete personal portfolio and blog site for Patryk Gol
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Project Scaffold + Deployment Pipeline** - Astro project with CI/CD deploying to GitHub Pages with custom domain
+- [x] **Phase 1: Project Scaffold + Deployment Pipeline** - Astro project with CI/CD deploying to GitHub Pages with custom domain
 - [ ] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
 - [ ] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
 - [ ] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Scaffold Astro project from scratch with astro.config.mjs, minimal index page, CNAME, robots.txt
-- [ ] 01-02-PLAN.md — GitHub Actions deployment workflow + DNS/Pages configuration checkpoint
+- [x] 01-02-PLAN.md — GitHub Actions deployment workflow + DNS/Pages configuration checkpoint
 
 ### Phase 2: Layout Shell + Theme System
 **Goal**: Every page shares a consistent layout with header navigation, footer, dark/light mode toggle, futuristic typography, and accessibility fundamentals
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Project Scaffold + Deployment Pipeline | 1/2 | In progress | - |
+| 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 0/TBD | Not started | - |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |

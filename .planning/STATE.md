@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 1 of 7 (Project Scaffold + Deployment Pipeline)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-11 — Completed 01-01 (Scaffold Astro project)
+Phase: 1 of 7 (Project Scaffold + Deployment Pipeline) — COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase 1 complete, ready for Phase 2
+Last activity: 2026-02-11 — Completed 01-02 (GitHub Actions deployment)
 
-Progress: [█░░░░░░░░░] ~7%
+Progress: [██░░░░░░░░] ~14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3 min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: ~42 min
+- Total execution time: 1.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 - Scaffold + Deploy | 1/2 | 3 min | 3 min |
+| 1 - Scaffold + Deploy | 2/2 | 83 min | 42 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min)
-- Trend: Starting
+- Last 5 plans: 01-01 (3 min), 01-02 (80 min)
+- Trend: Phase 1 complete
 
 *Updated after each plan completion*
 
@@ -46,6 +46,9 @@ Recent decisions affecting current work:
 - [01-01]: Astro ^5.3.0 chosen as latest stable; manual scaffold for full control
 - [01-01]: tsconfig extends astro/tsconfigs/strict for maximum type safety
 - [01-01]: robots.txt pre-references sitemap-index.xml before @astrojs/sitemap is installed
+- [01-02]: Used withastro/action@v3 (official Astro build action) instead of custom Node.js build steps
+- [01-02]: Concurrency set to cancel-in-progress: false to prevent partial deploys
+- [01-02]: Manual DNS and GitHub Pages configuration via web UI required (outside automation scope)
 
 ### Pending Todos
 
@@ -59,5 +62,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 01-01-PLAN.md (Scaffold Astro project)
+Stopped at: Completed 01-02-PLAN.md (GitHub Actions deployment) — Phase 1 complete
 Resume file: None
+Next: Begin Phase 2 (Layout Shell + Theme System)
