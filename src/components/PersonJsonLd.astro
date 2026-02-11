@@ -1,11 +1,13 @@
 ---
+import { siteConfig } from '../data/site';
+
 const schema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "Patryk Golabek",
-  "url": "https://patrykgolabek.dev",
-  "jobTitle": "Cloud-Native Software Architect",
-  "description": "Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps",
+  "name": siteConfig.name,
+  "url": siteConfig.url,
+  "jobTitle": siteConfig.jobTitle,
+  "description": siteConfig.description,
   "knowsAbout": [
     "Kubernetes",
     "Cloud-Native Architecture",
