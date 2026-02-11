@@ -76,5 +76,27 @@ const {
       <slot />
     </main>
     <Footer />
+    <script>
+      function initScrollReveal() {
+        const elements = document.querySelectorAll('.reveal:not(.revealed)');
+        if (!elements.length) return;
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+        );
+
+        elements.forEach((el) => observer.observe(el));
+      }
+
+      document.addEventListener('astro:page-load', initScrollReveal);
+    </script>
   </body>
 </html>
