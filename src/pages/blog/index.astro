@@ -21,7 +21,9 @@ const sortedPosts = posts.sort(
     {sortedPosts.length > 0 ? (
       <div class="space-y-8">
         {sortedPosts.map((post) => (
-          <BlogCard post={post} />
+          <div class="reveal">
+            <BlogCard post={post} />
+          </div>
         ))}
       </div>
     ) : (

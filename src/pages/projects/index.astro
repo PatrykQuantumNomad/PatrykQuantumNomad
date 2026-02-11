@@ -20,7 +20,7 @@ const grouped = categories.map((category) => ({
     </p>
 
     {grouped.map(({ category, items }, idx) => (
-      <div class={idx > 0 ? 'mt-12' : ''}>
+      <div class={`${idx > 0 ? 'mt-12' : ''} reveal`}>
         <h2 class="text-xl sm:text-2xl font-heading font-bold mb-6">
           {category}
         </h2>

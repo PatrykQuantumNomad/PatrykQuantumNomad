@@ -58,7 +58,7 @@ const highlights = [
 >
   <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <!-- Introduction -->
-    <div class="flex flex-col sm:flex-row items-start gap-8 mb-16">
+    <div class="flex flex-col sm:flex-row items-start gap-8 mb-16 reveal">
       <div class="shrink-0">
         <div class="w-24 h-24 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white text-3xl font-heading font-bold">
           PG
@@ -99,7 +99,7 @@ const highlights = [
     </div>
 
     <!-- Tech Stack -->
-    <div class="mb-16">
+    <div class="mb-16 reveal">
       <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Tech Stack</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {techStack.map(({ label, items }) => (
@@ -120,7 +120,7 @@ const highlights = [
     </div>
 
     <!-- Career Highlights -->
-    <div class="mb-16">
+    <div class="mb-16 reveal">
       <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Career Highlights</h2>
       <div class="space-y-6">
         {highlights.map(({ title, text }) => (
@@ -133,7 +133,7 @@ const highlights = [
     </div>
 
     <!-- Connect -->
-    <div>
+    <div class="reveal">
       <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-6">Let's Connect</h2>
       <div class="flex flex-wrap gap-4">
         <!-- GitHub -->
