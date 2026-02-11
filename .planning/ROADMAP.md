@@ -96,11 +96,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Blog content schema accepts optional `externalUrl` and `source` fields without breaking existing posts
   2. A centralized hero config in `src/data/site.ts` exports name, tagline, and roles array
   3. Home page title tag, meta description, and JSON-LD Person entity consume hero data from site.ts (not hardcoded strings)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Create site.ts hero config and extend blog schema with externalUrl/source
+- [ ] 08-02-PLAN.md — Wire home page and PersonJsonLd to consume from site.ts
 
 ### Phase 9: External Blog Integration
 **Goal**: Visitors see a credible content hub with 8-12 curated external posts from Kubert AI and Translucent Computing alongside local blog content
