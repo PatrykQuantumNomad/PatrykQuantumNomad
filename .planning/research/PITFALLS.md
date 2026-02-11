@@ -1,367 +1,363 @@
-# Pitfalls Research
+# Pitfalls Research: v1.1 Content Refresh
 
-**Domain:** Astro 5+ portfolio/blog site with GitHub Pages deployment, custom domain, rich animations
+**Domain:** Content updates, project curation, external blog integration, hero copy refresh on existing Astro 5 portfolio site (patrykgolabek.dev)
 **Researched:** 2026-02-11
-**Confidence:** HIGH (verified via official docs, GitHub issues, and multiple community sources)
+**Confidence:** HIGH (verified against codebase, Astro docs, SEO best practices, and multiple community sources)
+
+**Context:** This is a SUBSEQUENT milestone pitfalls document. The v1.0 site is live with sitemap, RSS, OG images, JSON-LD, Lighthouse 90+ scores. These pitfalls are specific to the risk of breaking existing functionality while adding/modifying content.
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: CNAME File Deleted on Every Deploy
+### Pitfall 1: Removing Blog Posts or Projects Breaks Existing External Links and Indexed URLs
 
 **What goes wrong:**
-Custom domain (patrykgolabek.dev) stops working after every GitHub Actions deployment. GitHub Pages forgets the custom domain configuration, reverting to `username.github.io`. The site goes down or redirects to the wrong URL.
+Search engines have already indexed URLs like `/blog/building-kubernetes-observability-stack/`. If the test blog post is removed or its slug changes, anyone who bookmarked it, linked to it from another site, or found it via Google gets a 404. Google Search Console starts reporting "Page not found" errors. Any link equity the URL accumulated is permanently lost.
+
+The same applies if projects are removed from `src/data/projects.ts` -- while the projects page itself uses external GitHub links (not internal routes), removing or re-categorizing projects changes the page content that Google has already indexed. If any project categories are removed entirely, the page hash-links that may have been shared break.
 
 **Why it happens:**
-The `withastro/action@v3` GitHub Action rebuilds and deploys from scratch each time. If the `CNAME` file is not in the `public/` directory of your source repository, it gets wiped from the deployed branch on every push. GitHub Pages reads the CNAME file from the deployed artifact to know which custom domain to serve.
+Static sites on GitHub Pages cannot return HTTP 301 redirects. When a file is removed from `dist/`, that URL simply returns 404. There is no server-side redirect layer. Astro's built-in `redirects` config generates `<meta http-equiv="refresh">` HTML pages, which Google treats as a soft redirect -- better than a 404 but not as strong as a true 301 for preserving SEO value.
 
 **How to avoid:**
-1. Create `public/CNAME` containing exactly one line: `patrykgolabek.dev`
-2. Commit this file to the repository -- it will be copied to `dist/` during build
-3. Set `site: 'https://patrykgolabek.dev'` in `astro.config.mjs`
-4. Do NOT set `base` -- with a custom domain, base must be omitted (it is only for subdirectory deployments like `username.github.io/repo-name`)
-5. Verify after first deploy: check Settings > Pages shows patrykgolabek.dev as custom domain
+1. **Never delete a published blog post without a redirect.** Add meta-refresh redirects in `astro.config.mjs`:
+   ```js
+   redirects: {
+     '/blog/old-slug/': '/blog/new-slug/',
+   }
+   ```
+2. **For the test post specifically:** If removing `building-kubernetes-observability-stack.md`, either leave it as a real post (rewrite it into genuine content) or add a redirect to `/blog/`. Do NOT simply delete the file.
+3. **For project removals:** Since project cards link to external GitHub URLs (not internal pages), removing a project card does not create a broken internal link. However, verify no internal pages link to removed projects.
+4. **Audit internal links before removal:** Search the entire `src/` directory for any hardcoded references to content being removed.
+5. **Update the sitemap filter** to exclude any redirected URLs if needed.
 
 **Warning signs:**
-- Site accessible at `username.github.io` but not at custom domain after deploy
-- GitHub Pages settings show custom domain field is blank after a push
-- SSL certificate errors on the custom domain
+- Google Search Console reports "Page with redirect" or "Not found (404)" errors after deploy
+- Referral traffic from external sites drops to zero
+- The RSS feed still references a removed post's URL (see Pitfall 3)
 
 **Phase to address:**
-Phase 1 (Project scaffold / deployment pipeline). This must be correct from the very first deploy.
+Any phase that removes or renames content. Must be the FIRST step before content deletion.
 
 ---
 
-### Pitfall 2: Dark Mode Flash of Unstyled Content (FOUC)
+### Pitfall 2: External Blog Links Mixed Into Blog Page Break Content Collection Assumptions
 
 **What goes wrong:**
-Users who prefer dark mode see a blinding white flash on every page load and on every page navigation (with View Transitions). The page renders in light mode first, then snaps to dark mode once JavaScript executes. This is jarring, unprofessional, and especially noticeable on the "Quantum Explorer" dark theme.
+The v1.1 milestone includes integrating external blog links (Translucent Computing, Kubert AI). If external blog posts are added to the Astro content collection, the `[slug].astro` dynamic route tries to generate static pages for them, which either fails at build time or creates empty pages. If external posts are added to the blog index without proper handling, clicking them navigates to a nonexistent internal URL instead of the external site.
+
+Additionally, the RSS feed (`rss.xml.ts`), OG image generator (`open-graph/[...slug].png.ts`), and `llms.txt.ts` all iterate over the blog content collection. Adding entries that are meant to be external links causes these integrations to generate broken output -- RSS items linking to internal URLs that do not exist, OG images generated for pages that will never be visited, and LLM.txt listing content that is not on this site.
 
 **Why it happens:**
-Two separate failure modes:
-1. **Initial load FOUC:** Theme JavaScript runs after the browser's first paint, so the `dark` class is not on `<html>` when CSS first renders
-2. **View Transitions FOUC:** Astro's View Transitions swap DOM elements, which resets the `<html>` class list, stripping the `dark` class during navigation
+The current content collection schema (`src/content.config.ts`) has no concept of "external" posts. Every entry in the `blog` collection is expected to have a rendered page at `/blog/{id}/`. The `getStaticPaths()` function in `[slug].astro` generates a route for every non-draft entry. The RSS feed maps every entry to an internal `/blog/{id}/` URL. There is no `externalUrl` field in the Zod schema.
 
 **How to avoid:**
-Place an inline script in the `<head>` using the `is:inline` directive (prevents Astro from bundling/deferring it). This script must:
-- Read `localStorage.theme` preference
-- Fall back to `window.matchMedia('(prefers-color-scheme: dark)')` for OS preference
-- Apply the `dark` class to `document.documentElement` immediately
-- Register event listeners for both `astro:page-load` and `astro:after-swap` to reapply after View Transitions
+There are two valid approaches -- choose ONE:
 
-```astro
-<script is:inline>
-  function applyTheme() {
-    const theme = localStorage.getItem('theme')
-      || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }
-  applyTheme();
-  document.addEventListener('astro:page-load', applyTheme);
-  document.addEventListener('astro:after-swap', applyTheme);
-</script>
+**Approach A: Separate data source for external posts (RECOMMENDED)**
+Keep external blog posts OUT of the content collection entirely. Create a separate data file (e.g., `src/data/external-posts.ts`) with title, URL, date, source, and description. Render these in the blog index alongside local posts, sorted by date, but with distinct visual treatment (external link icon, "on Translucent Computing" badge). This avoids touching the content collection pipeline, RSS, OG images, or LLMs.txt.
+
+**Approach B: Schema extension with conditional routing**
+Add an `externalUrl` field to the blog schema. Then update EVERY consumer:
+- `[slug].astro`: Filter out external entries in `getStaticPaths()`
+- `rss.xml.ts`: Use external URL for `link` field when present
+- `open-graph/[...slug].png.ts`: Skip external entries
+- `llms.txt.ts`: Link to external URL instead of internal path
+- `blog/index.astro` and `index.astro`: Link to external URL
+- `blog/tags/[tag].astro`: Handle external entries in tag pages
+- Sitemap: External entries must not generate internal URLs
+
+Approach B touches 7+ files and creates ongoing maintenance burden. Approach A is cleaner.
+
+**Warning signs:**
+- Build errors: "getStaticPaths() returned a path for a page that does not have a corresponding content entry"
+- Blog index links to `/blog/some-external-post/` which returns 404
+- RSS feed contains items with internal URLs that have no matching page
+- OG images are generated for nonexistent pages
+
+**Phase to address:**
+The external blog integration phase. Design the data model BEFORE implementing any UI.
+
+---
+
+### Pitfall 3: RSS Feed, Sitemap, and LLMs.txt Drift When Content Changes
+
+**What goes wrong:**
+After content changes (adding external posts, removing the test post, adding new real posts), the RSS feed, sitemap, and LLMs.txt contain stale or broken data. Specifically:
+- RSS feed items link to removed blog posts
+- Sitemap includes URLs for pages that no longer exist
+- LLMs.txt references deleted posts
+- New external blog links are not reflected in RSS (they should NOT be in RSS -- they are someone else's content hosted elsewhere)
+
+**Why it happens:**
+The RSS feed (`rss.xml.ts`), sitemap (`@astrojs/sitemap`), and LLMs.txt all independently query the content collection. They are not coordinated. The sitemap is especially tricky because `@astrojs/sitemap` operates at the route level, not the content level -- it includes every page that Astro generates, including redirect pages. If a redirect HTML page is generated for a removed post, the sitemap includes the redirect URL, which confuses search engines.
+
+The current RSS implementation hardcodes the link pattern:
+```typescript
+link: `/blog/${post.id}/`,
 ```
+This means every blog collection entry gets an internal link. If content is removed without updating the RSS, the next build will simply exclude it -- but anyone who already fetched the RSS will have stale links in their reader.
+
+**How to avoid:**
+1. **After any content change, verify all three outputs:**
+   - Build the site and check `dist/sitemap-index.xml` (or `dist/sitemap-0.xml`) for removed URLs
+   - Check `dist/rss.xml` for correct entries and valid links
+   - Check `/llms.txt` output for correct post listings
+2. **Add a sitemap filter** if redirects are generating unwanted entries:
+   ```js
+   sitemap({
+     filter: (page) => !page.includes('/old-removed-slug/'),
+   }),
+   ```
+3. **Do NOT add external blog posts to RSS.** The RSS feed should only contain content hosted on patrykgolabek.dev. External posts belong to their respective sites' RSS feeds. Including them violates RSS best practices and confuses feed readers about content ownership.
+4. **Consider adding `<lastmod>` to sitemap entries** via the `serialize` option to signal to search engines when content was last updated.
 
 **Warning signs:**
-- Any visible color flash when navigating between pages
-- Testing only in light mode and never toggling to dark mode during dev
-- Not testing View Transitions with dark mode active
+- Feed readers show broken entries
+- Google Search Console reports sitemap URLs that return 404
+- LLMs.txt lists posts that no longer exist on the site
 
 **Phase to address:**
-Phase 2 (Layout / theme system). Must be implemented when the base layout and theme toggle are first created, not bolted on later.
+Every phase that modifies content must include a verification step for these three outputs.
 
 ---
 
-### Pitfall 3: Particle Animations Destroying Lighthouse Performance and Battery Life
+### Pitfall 4: Hero Tagline Changes Harm SEO Keyword Alignment
 
 **What goes wrong:**
-Canvas-based particle effects (the "Quantum Explorer" theme) tank Lighthouse Performance score below 90. On mobile devices, continuous `requestAnimationFrame` loops drain battery even when the tab is backgrounded or the user has scrolled past the animated section. Total Blocking Time (TBT) spikes because particle initialization blocks the main thread.
+The hero section's H1 ("Patryk Golabek"), subtitle, and meta description contain carefully chosen keywords: "Cloud-Native Architect", "Kubernetes", "AI/ML Engineer", "Platform Builder". Changing the hero copy without considering SEO keyword alignment can degrade search rankings for target queries. The typing animation rotates through four role strings -- changing these changes what Google indexes (Google does index JavaScript-rendered content, but the initial HTML content carries more weight).
+
+Additionally, the `<title>` tag ("Patryk Golabek -- Cloud-Native Architect & AI/ML Engineer"), the `<meta name="description">`, the OG tags, and the Person JSON-LD `jobTitle` field all need to stay synchronized with the hero copy. If the hero says "Platform Engineering Lead" but the title tag still says "Cloud-Native Architect", Google sees inconsistent signals.
 
 **Why it happens:**
-- Particle libraries like tsParticles ship large bundles (full bundle is 200KB+) that increase Time to Interactive
-- Continuous animation loops consume CPU even when not visible on screen
-- Canvas redraws on every frame regardless of whether the animation is in the viewport
-- No built-in mechanism to pause when the user scrolls away or switches tabs
-- Mobile devices with limited GPU/CPU budget struggle with high particle counts
+The title, meta description, hero H1, typing roles, JSON-LD `jobTitle`, and OG metadata are all defined in different places:
+- Title/description: `src/pages/index.astro` lines 17-18 (Layout props)
+- Hero H1: `src/pages/index.astro` line 25
+- Typing roles: `src/pages/index.astro` line 192 (JavaScript array)
+- Hero subtitle: `src/pages/index.astro` lines 31-33
+- Person JSON-LD `jobTitle`: `src/components/PersonJsonLd.astro` line 7
+- Person JSON-LD `description`: `src/components/PersonJsonLd.astro` line 8
+- About page title/description: `src/pages/about.astro` lines 56-57
+
+There is no single source of truth for these values. Updating one without the others creates inconsistency.
 
 **How to avoid:**
-1. **Lazy-load the particle system:** Use `client:visible` or Intersection Observer to only initialize particles when the hero section enters the viewport
-2. **Use a slim bundle:** tsParticles offers `loadSlim` (much smaller than `loadFull`). Better yet, write a minimal custom Canvas particle system (~50-100 lines) for simple effects
-3. **Pause when not visible:** Use `document.visibilitychange` event to cancel `requestAnimationFrame` when the tab is hidden. Use Intersection Observer to pause when scrolled out of view
-4. **Respect `prefers-reduced-motion`:** Check `window.matchMedia('(prefers-reduced-motion: reduce)')` and either disable particles entirely or show a static background. This is a WCAG 2.1 requirement (SC 2.3.3)
-5. **Cap particle count on mobile:** Detect viewport width and reduce particle count by 50-75% on screens under 768px
-6. **Avoid layout shift:** Give the canvas container explicit dimensions so it does not cause CLS when it loads
+1. **Create a centralized site config** (e.g., `src/data/site-config.ts`) that defines the canonical title, job title, description, and role keywords. Import this in all pages and components that use these values.
+2. **When changing hero copy, update ALL of these locations:**
+   - `index.astro` title and description props
+   - `index.astro` H1 text
+   - `index.astro` typing roles array
+   - `index.astro` hero subtitle paragraph
+   - `PersonJsonLd.astro` jobTitle and description
+   - `about.astro` title and description props
+   - `about.astro` intro paragraph
+   - `contact.astro` title and description props
+3. **Keep target keywords present.** Research confirms that H1 and title tag keyword alignment strengthens ranking signals. The keywords "Cloud-Native Architect", "Kubernetes", and "AI/ML" should remain present somewhere in the H1 or subtitle even if the specific phrasing changes.
+4. **Do not remove the static H1 text.** The typing animation is progressive enhancement. The initial `<span>` text ("Cloud-Native Architect") is what search engines primarily index. If you change the initial text to something generic, you lose keyword value.
 
 **Warning signs:**
-- Lighthouse Performance below 90 on mobile
-- TBT exceeding 200ms
-- Fans spinning on laptops when viewing the page
-- Mobile devices getting warm
-- Users with vestibular disorders experiencing discomfort
+- Google Search Console shows impressions dropping for target keywords after deploy
+- Structured Data Testing Tool shows `jobTitle` mismatch with page content
+- Social sharing preview shows old/mismatched title and description
 
 **Phase to address:**
-Phase 3 (Hero section / animations). Must be designed with performance constraints from the start. Do not implement the full particle system first and optimize later -- build with the constraints baked in.
+The hero refresh phase. Create the centralized config FIRST, then update the hero copy.
 
 ---
 
-### Pitfall 4: Content Collections Silent Failures with Glob Loader
+### Pitfall 5: Social Link Updates Break Accessibility and JSON-LD Structured Data
 
 **What goes wrong:**
-Blog posts exist in the filesystem but do not appear on the site. The content collection returns an empty array. No build error is thrown. The developer wastes hours debugging what appears to be a rendering issue when it is actually a content loading issue.
+When adding or updating social links (new platforms like dev.to, X/Twitter, Bluesky, or updating existing URLs), multiple things can silently break:
+1. **Missing aria-labels:** New social icon links without `aria-label` attributes are invisible to screen readers. WebAIM estimates 50% of top websites have empty link accessibility errors.
+2. **JSON-LD `sameAs` array not updated:** The `PersonJsonLd.astro` component has a `sameAs` array listing social profiles. If new links are added to the Footer or Contact page but not to JSON-LD, Google sees inconsistent identity signals.
+3. **Broken SVG icons:** Adding a new social platform requires a new SVG icon. If the SVG has no `aria-hidden="true"` attribute, screen readers try to announce the raw SVG markup. If the SVG has incorrect `viewBox`, it renders at wrong dimensions.
+4. **Links scattered across 4 files:** Social links currently appear in Footer.astro, contact.astro, about.astro, and PersonJsonLd.astro -- all with hardcoded URLs. Updating one and missing another creates inconsistency.
 
 **Why it happens:**
-Astro 5's `glob()` loader has historically weak validation:
-- The `base` path resolves relative to the **project root**, not the config file. Writing `base: './content/blog'` does not mean "relative to `src/content.config.ts`" -- it means relative to the project root
-- An invalid `base` directory produces an empty collection **without any error**
-- Glob patterns that match zero files produce only a vague warning: "The collection does not exist or is empty"
-- The config file location changed from `src/content/config.ts` (Astro 4) to `src/content.config.ts` (Astro 5) -- using the old location silently fails
+Social links are currently hardcoded in each component independently. There is no centralized social links data source. The Footer has 3 social links (GitHub, LinkedIn, Translucent Computing blog), the Contact page has 5 (adds Kubert AI and Email), the About page has 5, and JSON-LD has 4 URLs in `sameAs`. They are already not perfectly aligned.
 
 **How to avoid:**
-1. Place the config at `src/content.config.ts` (not `src/content/config.ts`)
-2. Use absolute-looking paths from project root: `base: 'src/content/blog'` not `base: './content/blog'`
-3. After any schema change, run `npx astro sync` to regenerate types
-4. Add a smoke test: after build, verify that the blog index page contains at least one post title
-5. Use `z.coerce.date()` instead of `z.date()` for date fields -- raw strings from frontmatter will fail strict date validation
-6. Test the content collection query in isolation before building page templates around it
+1. **Create a centralized social links data file** (e.g., `src/data/social-links.ts`) with label, URL, SVG icon component or path, and aria-label for each platform.
+2. **Every social link MUST have:**
+   - `aria-label="[Platform name] profile"` or visible text
+   - `target="_blank"` with `rel="noopener noreferrer"`
+   - `aria-hidden="true"` on the SVG icon element
+   - The SVG should have proper `viewBox`, `fill="currentColor"` or `stroke="currentColor"`
+3. **Update JSON-LD `sameAs` from the same data source.** The `sameAs` array should be generated from the centralized config, not maintained separately.
+4. **Validate after changes:**
+   - Run Lighthouse accessibility audit
+   - Test with a screen reader (VoiceOver on macOS: Cmd+F5)
+   - Validate JSON-LD with Google Rich Results Test
+   - Check all links actually resolve (no typos in URLs)
 
 **Warning signs:**
-- Blog index page renders but shows "No posts found" with no error
-- TypeScript errors about missing `astro:content` module (run `npx astro sync`)
-- Collection name uses singular form ("blog" is fine, but some edge cases with singular/plural can cause issues with image integration)
+- Lighthouse accessibility score drops below 90
+- Screen reader announces "link" with no label when navigating social icons
+- Google Rich Results Test shows warnings about `sameAs` URLs
+- Social links in footer differ from those on contact page
 
 **Phase to address:**
-Phase 4 (Blog / content collections). Define the schema and verify content loading works before building any blog UI.
+The contact/social updates phase. Centralize the data source BEFORE updating individual links.
 
 ---
 
-### Pitfall 5: Sitemap and SEO Metadata Silently Generating Wrong URLs
+### Pitfall 6: OG Image Generation Breaks When Blog Content Collection Changes
 
 **What goes wrong:**
-The sitemap-index.xml generates URLs pointing to the wrong domain or missing the base path. Open Graph tags use relative URLs that social media crawlers cannot resolve. Google Search Console reports the sitemap as having errors. Pages are not indexed despite being live.
+The dynamic OG image generator (`src/pages/open-graph/[...slug].png.ts`) uses `getStaticPaths()` to generate images for all blog posts. If a blog post is removed but something still references its OG image URL (cached social media shares, Google's cache), the OG image returns 404. More critically, if the content collection schema changes (adding new fields, changing the structure), the OG image generator may fail to build because it depends on `post.data.title`, `post.data.description`, and `post.data.tags`.
+
+If external blog posts are incorrectly added to the content collection (see Pitfall 2), the OG image generator will try to create images for external content that has no corresponding page.
 
 **Why it happens:**
-- `@astrojs/sitemap` requires the `site` field in `astro.config.mjs` to be set and must begin with `http://` or `https://`. If missing, the build silently succeeds but generates no sitemap
-- If `site` includes a trailing path (like `https://example.com/blog/`), the sitemap URLs get mangled -- subdirectory is either doubled or dropped
-- Open Graph `og:url` and `og:image` tags must be absolute URLs. Using relative paths like `/images/og.png` causes social sharing previews to break
-- RSS feed URLs follow the same pattern -- relative links in feed items break feed readers
-- JSON-LD structured data must also use absolute URLs for `url`, `image`, and `logo` fields
+The OG image route creates paths from the content collection:
+```typescript
+return posts.map((post) => ({
+  params: { slug: 'blog/' + post.id },
+  props: { title: post.data.title, description: post.data.description, tags: post.data.tags },
+}));
+```
+Any change to the content collection's entries or schema directly affects OG image generation. The Satori-based generator also has known issues with font weights and long titles -- changing post titles to longer strings can cause layout overflow in the OG image.
 
 **How to avoid:**
-1. Set `site: 'https://patrykgolabek.dev'` (no trailing slash, no path) in `astro.config.mjs`
-2. Use `Astro.site` to construct absolute URLs in templates: `new URL('/og-image.png', Astro.site).href`
-3. After build, validate `dist/sitemap-index.xml` contains correct absolute URLs
-4. Test Open Graph tags with Facebook Sharing Debugger or opengraph.xyz
-5. Validate JSON-LD with Google's Rich Results Test and schema.org validator
-6. Verify RSS feed in a feed reader after deploy
-7. Submit sitemap to Google Search Console after first deploy
+1. **Test OG image generation after any content change:** Run `npm run build` and verify `/open-graph/blog/{slug}.png` files exist for all expected posts.
+2. **Keep title length under 80 characters** (the `truncate` function already handles this, but verify new content respects it).
+3. **If removing a post, the OG image is automatically removed** since it is generated from getStaticPaths. This is expected behavior, but be aware that cached social shares will show broken images.
+4. **If adding external posts to a separate data file** (Approach A from Pitfall 2), no OG images need to be generated for them -- the external sites handle their own OG images.
 
 **Warning signs:**
-- Social media shares show no preview image or wrong title
-- Google Search Console reports sitemap errors
-- `dist/sitemap-index.xml` is missing or contains `undefined` in URLs
-- RSS feed items have broken links
+- Build fails with Satori rendering errors after content changes
+- Social media shares show broken/missing preview images
+- The `dist/open-graph/` directory contains unexpected or missing files
 
 **Phase to address:**
-Phase 5 (SEO). But the `site` configuration must be correct from Phase 1, since other integrations depend on it.
+Any phase that modifies blog content. Include OG image verification in the build check.
 
 ---
 
-### Pitfall 6: Sharp Image Service Failing in CI but Working Locally
+## Moderate Pitfalls
+
+### Pitfall 7: Tag Pages Generate/Disappear Based on Content Changes
 
 **What goes wrong:**
-The Astro build succeeds locally but fails in GitHub Actions with `Could not find Sharp` errors. Image optimization breaks, causing the entire build to fail and blocking deployments.
-
-**Why it happens:**
-- Sharp is a native Node.js module with platform-specific binary dependencies
-- Astro includes Sharp by default but relies on it being resolvable at build time
-- Different Node.js versions between local and CI environments cause binary incompatibility
-- pnpm's strict dependency resolution can fail to hoist Sharp correctly
-- The lockfile may not include platform-specific binaries for the CI environment (Linux) when developed on macOS
+The `[tag].astro` route generates pages for every unique tag across all blog posts. If the only post with tag "observability" is removed, the `/blog/tags/observability/` page disappears. If someone had linked to or bookmarked that tag page, they get a 404.
 
 **How to avoid:**
-1. Pin Node.js version in the GitHub Actions workflow and locally (use `.nvmrc` with the same version)
-2. If using pnpm, add `shamefully-hoist=true` to `.npmrc` or explicitly install sharp: `pnpm add sharp`
-3. Always commit the lockfile (`package-lock.json`, `pnpm-lock.yaml`)
-4. For a static site with pre-optimized images, consider using `image.service: { entrypoint: 'astro/assets/services/noop' }` to skip runtime optimization entirely and handle images manually
-5. Add `"engines": { "node": ">=20.3.0" }` to `package.json`
+- Accept that tag pages are ephemeral by nature -- they exist only while tagged content exists
+- Do NOT create redirects for removed tag pages (they are low-value pages)
+- When removing the last post with a given tag, verify no internal links reference that tag page
+- The sitemap will automatically exclude the removed tag page on next build
 
-**Warning signs:**
-- Build works locally but fails in CI
-- Error messages mentioning Sharp, libvips, or native module compilation
-- Images display as broken links after deployment
-
-**Phase to address:**
-Phase 1 (Project scaffold / CI pipeline). Verify image handling works in CI on the very first deploy.
-
----
-
-### Pitfall 7: Tailwind CSS v4 Integration Breaking Styles
+### Pitfall 8: Typing Animation Roles Array Not Aligned With SEO Content
 
 **What goes wrong:**
-After installing Tailwind CSS, styles are missing, utility classes do not apply, or `@apply` directives fail. Component-scoped `<style>` blocks in `.astro` files cannot access Tailwind theme variables.
-
-**Why it happens:**
-- The `@astrojs/tailwind` integration is **deprecated** for Tailwind v4. Using it with v4 causes silent failures
-- Tailwind v4 uses `@import "tailwindcss"` instead of the v3 `@tailwind base; @tailwind utilities; @tailwind components;` directives
-- Stylesheet bundling in Astro means that CSS modules and `<style>` blocks in Astro/Vue/Svelte components are bundled separately and do **not** have access to Tailwind theme variables
-- `@apply` behavior changed in v4 and may not work as expected without explicit configuration
-- Arbitrary values syntax changed -- some square bracket patterns from v3 break in v4
+The hero typing animation cycles through `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']`. These are rendered via JavaScript, meaning the initial HTML only shows "Cloud-Native Architect". If the roles array is updated but the initial `<span>` text is not, or if roles are changed to less SEO-valuable terms, the page loses keyword density for target search terms.
 
 **How to avoid:**
-1. Use the Vite plugin approach, **not** `@astrojs/tailwind`: install `@tailwindcss/vite` and add it to Vite plugins in `astro.config.mjs`
-2. Ensure Astro >= 5.2 (first version with official Tailwind v4 support)
-3. Use `@import "tailwindcss"` in your main CSS file, not `@tailwind` directives
-4. For component `<style>` blocks that need Tailwind, use `@reference "../../styles/global.css"` or apply classes directly in HTML instead of `@apply`
-5. Test the upgrade with `npx @tailwindcss/upgrade` tool before manual migration
+- The FIRST role in the array should always match the initial `<span>` text
+- All roles should contain target keywords (these ARE the primary professional identity keywords)
+- Test that the animation still works after changes -- the `setInterval` cycles through the array by index
 
-**Warning signs:**
-- Styles appear in dev but are missing in production build
-- Console warnings about unknown utility classes
-- `@apply` throwing errors or being silently ignored
-- Theme colors not resolving in component-scoped styles
+### Pitfall 9: Content Removal Changes the Projects Page SEO Profile
 
-**Phase to address:**
-Phase 1 (Project scaffold). Tailwind must be correctly configured from the start, not retrofitted.
+**What goes wrong:**
+The projects page meta description says "Explore 19 open-source projects." If projects are added or removed, this number becomes inaccurate. Google's cached snippet shows the old count, creating a mismatch. Additionally, removing a project category entirely changes the page structure that Google has already indexed.
+
+**How to avoid:**
+- Update the meta description project count when adding/removing projects
+- Consider making the count dynamic: `{projects.length} open-source projects`
+- Do not remove entire categories unless they are truly empty -- restructure rather than delete
+
+### Pitfall 10: GitHub Pages Cache Serves Stale Content After Deploy
+
+**What goes wrong:**
+After deploying content updates, visitors still see old content because GitHub Pages has aggressive CDN caching. The old version of blog posts, project lists, or hero text persists for minutes to hours after deploy.
+
+**How to avoid:**
+- GitHub Pages cache TTL is typically 10 minutes but can be longer
+- HTML files get `Cache-Control: max-age=600` by default
+- After critical content updates, verify the live site reflects changes (hard refresh with Ctrl+Shift+R)
+- The OG images already have `Cache-Control: public, max-age=31536000, immutable` -- this is fine for static assets but means old OG images are cached aggressively by social platforms. After updating OG content, use Facebook Sharing Debugger to force a re-scrape.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable but create long-term problems.
+Shortcuts that seem reasonable during a content refresh but create problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `loadFull` for tsParticles | All effects available immediately | 200KB+ bundle, poor mobile performance | Never for a portfolio targeting Lighthouse 90+ |
-| Hardcoding `site` URL in templates | Quick Open Graph tags | Breaks when domain changes, duplicated strings everywhere | Never -- always use `Astro.site` |
-| Skipping `astro sync` after schema changes | Saves 2 seconds | TypeScript errors pile up, IDE autocomplete breaks, silent runtime failures | Never |
-| Inline styles instead of Tailwind classes | Fast prototyping | Inconsistent theming, dark mode doesn't apply, unmaintainable | Only in throwaway prototypes |
-| Skipping `prefers-reduced-motion` support | Faster initial development | Accessibility violation (WCAG 2.1 SC 2.3.3), excludes users with vestibular disorders | Never |
-| Using `@astrojs/tailwind` with Tailwind v4 | Familiar setup from v3 projects | Silent style failures, deprecated integration | Never with Tailwind v4 |
-| Committing without testing the build | Ship faster | Broken deploys, custom domain resets, missing content | Never for production deployments |
-
-## Integration Gotchas
-
-Common mistakes when connecting to external services and integrations.
-
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| GitHub Pages + Custom Domain | Setting `base: '/repo-name'` alongside a custom domain | With a custom domain, remove `base` entirely. Base is only for subdirectory deployments |
-| `@astrojs/sitemap` | Forgetting to set `site` in astro.config.mjs | Always set `site: 'https://patrykgolabek.dev'` -- sitemap silently generates nothing without it |
-| `@astrojs/rss` | Using relative URLs in feed item links | Use `new URL(post.slug, Astro.site).href` for absolute URLs in all feed items |
-| Google Search Console | Submitting sitemap before DNS/SSL is fully propagated | Wait 24-72 hours after custom domain setup for DNS and SSL propagation before submitting sitemap |
-| View Transitions + 404 page | Using View Transitions on the 404 page | View Transitions on a 404 page can break client-side navigation when users try to navigate away. Keep 404.astro simple with no View Transitions |
-| GitHub Actions + withastro/action | Not committing the lockfile | The action detects your package manager by reading the lockfile. No lockfile = build failure |
-| Tailwind v4 + Astro components | Using `@apply` in component `<style>` blocks | Component-scoped styles are bundled separately and lack access to Tailwind context. Use utility classes in HTML or `@reference` |
-
-## Performance Traps
-
-Patterns that work during development but fail at production quality.
-
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Unoptimized web fonts | FOUT (flash of unstyled text), CLS spike of 0.1+ | Self-host fonts, use `font-display: swap`, preload critical fonts, use `size-adjust` on fallback | First real Lighthouse audit |
-| Canvas animation never pausing | Battery drain on mobile, CPU usage stays high when tab is in background | Use `document.visibilitychange` to pause, Intersection Observer to stop when off-screen | Mobile users, background tabs |
-| Full tsParticles bundle | 200KB+ JS download, TBT exceeds 200ms | Use `loadSlim` or write custom minimal particle system (< 5KB) | Lighthouse mobile audit |
-| Uncompressed images in content | LCP exceeds 2.5s, bandwidth waste | Use Astro's `<Image>` component or pre-optimize all images. Set explicit width/height to prevent CLS | Any page with hero images or blog post images |
-| Synchronous font loading | Render-blocking resource, LCP delay | Use `<link rel="preload">` for critical fonts, `font-display: optional` for non-critical | Lighthouse Performance audit, slow 3G test |
-| No image dimensions specified | CLS from images loading and pushing content | Always set `width` and `height` on `<img>` or use Astro's `<Image>` which handles this | CLS audit, any page with images above the fold |
-
-## Security Mistakes
-
-Domain-specific security issues for a static portfolio/blog site.
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Exposing draft posts in static output | Unpublished content visible in dist/ and indexed by search engines | Filter drafts in content collection queries: `filter: (entry) => !entry.data.draft` AND verify dist/ does not contain draft HTML files |
-| Missing Content Security Policy headers | XSS vectors if embedding third-party scripts or analytics | Add CSP headers via `_headers` file or meta tags. For GitHub Pages, use `<meta http-equiv="Content-Security-Policy">` since you cannot set HTTP headers |
-| API keys in client-side code | Exposed secrets in browser DevTools | Never use `PUBLIC_` prefixed env vars for sensitive keys. For a static site, handle API calls at build time only |
-| Missing `rel="noopener noreferrer"` on external links | Tab nabbing vulnerability on external links | Add `rel="noopener noreferrer"` to all `target="_blank"` links, or use Astro's built-in link handling |
-
-## UX Pitfalls
-
-Common user experience mistakes in portfolio/blog sites with rich animations.
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Particle animations with no reduced-motion support | Users with vestibular disorders experience dizziness/nausea | Check `prefers-reduced-motion: reduce` and show a static gradient or still image instead |
-| Dark mode toggle without system preference detection | User's OS says "dark mode" but site loads in light mode | Default to OS preference via `matchMedia`, only override when user explicitly toggles |
-| Animation-heavy hero blocking content visibility | Users wait 3+ seconds to see actual content (bio, projects) | Content must be visible immediately; animations are progressive enhancement, not gates |
-| No loading state for dynamic blog list | Blank space while content loads (though this is minimal with static output) | For static output, ensure all content is pre-rendered. Use skeleton states only if using client-side data fetching |
-| Dark mode that forgets preference on navigation | Annoying re-flash on every page if localStorage check is missing after View Transitions | Use the `astro:after-swap` event handler pattern described in Pitfall 2 |
-| Animations that run continuously in the background | Battery drain, fan noise, laptop overheating | Pause all Canvas/requestAnimationFrame animations when the page is not visible or the section is off-screen |
+| Hardcoding social URLs in each component | Quick to add a new link | URLs diverge across Footer, Contact, About, JSON-LD; one gets stale | Never -- centralize from day one of v1.1 |
+| Adding external blog posts to the content collection | Reuses existing blog card rendering | Breaks RSS, OG images, LLMs.txt, requires conditional logic in 7+ files | Never -- use a separate data source |
+| Deleting the test blog post without a redirect | Clean slate for real content | 404 for anyone who bookmarked it; Google reports crawl error | Only if the post has zero external backlinks and is not indexed |
+| Updating hero text in index.astro only | Quick copy change | Title tag, JSON-LD, About page, meta description all become inconsistent | Never -- update all locations or centralize first |
+| Hardcoding project count in meta description | Accurate at time of writing | Becomes inaccurate whenever projects change | Avoid -- compute dynamically from data |
+| Skipping build verification after content changes | Faster iteration | Broken RSS, missing OG images, sitemap errors deployed to production | Never for production deploys |
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
+Things that appear complete after a content refresh but have hidden issues.
 
-- [ ] **Custom domain:** Site loads at patrykgolabek.dev -- but verify HTTPS is enforced (Settings > Pages > "Enforce HTTPS" checkbox), and both `www.patrykgolabek.dev` and `patrykgolabek.dev` resolve correctly
-- [ ] **Sitemap:** `sitemap-index.xml` exists -- but verify all URLs are absolute, use the custom domain (not github.io), and include all blog posts
-- [ ] **Open Graph:** Meta tags are present -- but verify `og:image` uses an absolute URL and the image actually renders when shared on LinkedIn/Twitter (test with sharing debugger tools)
-- [ ] **RSS feed:** Feed endpoint exists -- but verify feed items contain full absolute URLs and the feed validates in a feed reader
-- [ ] **Dark mode:** Toggle works -- but verify no FOUC on first load, no FOUC during View Transitions, system preference is respected as default, and preference persists across sessions
-- [ ] **404 page:** Custom 404.astro exists -- but verify `dist/404.html` is generated and GitHub Pages actually serves it on invalid routes (test a nonsense URL on the live site)
-- [ ] **Blog posts:** Posts render -- but verify draft posts are excluded from production build, dates parse correctly, and the collection schema validates all required frontmatter fields
-- [ ] **Particle animations:** Particles render on desktop -- but verify they pause when tab is hidden, reduce on mobile, respect `prefers-reduced-motion`, and do not cause CLS
-- [ ] **Lighthouse scores:** Desktop scores are 90+ -- but verify **mobile** scores are also 90+, which is harder to achieve with canvas animations and web fonts
-- [ ] **JSON-LD structured data:** `<script type="application/ld+json">` exists -- but verify it passes Google's Rich Results Test and the schema.org validator without errors
-- [ ] **Content Security Policy:** CSP meta tag is in the head -- but verify `unsafe-inline` is scoped correctly for the inline dark-mode script and `unsafe-eval` is not present
-
-## Recovery Strategies
-
-When pitfalls occur despite prevention, how to recover.
-
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| CNAME deleted on deploy | LOW | Add `public/CNAME`, push, wait for GitHub to re-provision SSL (up to 1 hour). Re-trigger by removing and re-adding domain in Settings > Pages |
-| Dark mode FOUC | LOW | Add the `is:inline` script to the base layout `<head>`. No structural changes needed |
-| Particle animations tanking Lighthouse | MEDIUM | Replace tsParticles with a custom minimal canvas system. Requires rewriting the animation but not the page structure |
-| Content collections returning empty | LOW | Fix `base` path in `src/content.config.ts`, run `npx astro sync`, rebuild |
-| Wrong sitemap URLs | LOW | Fix `site` in `astro.config.mjs`, rebuild, resubmit to Search Console |
-| Sharp CI failure | LOW | Pin Node.js version in workflow and add explicit `sharp` dependency. Or switch to `noop` image service for fully static approach |
-| Tailwind v4 styles broken | MEDIUM | Migrate from `@astrojs/tailwind` to `@tailwindcss/vite` plugin. Requires updating imports and possibly rewriting `@apply` usage |
-| SSL not provisioning for custom domain | LOW | Remove domain from Settings > Pages, save, re-add, save. Check for conflicting DNS records (extra A/AAAA records, missing CAA for letsencrypt.org). Wait 24-72 hours |
+- [ ] **External blog links added to blog page:** Visually correct -- but verify clicking them opens the external site (not an internal 404), they have `target="_blank"` and `rel="noopener noreferrer"`, and they are NOT in the RSS feed
+- [ ] **Test blog post removed:** No 404 at the old URL -- verify a redirect exists, the sitemap no longer includes the old URL, RSS feed no longer references it, LLMs.txt no longer lists it, and OG image route no longer generates for it
+- [ ] **Hero copy updated:** Reads well -- but verify the `<title>` tag matches, the `<meta name="description">` is updated, the PersonJsonLd `jobTitle` and `description` match, the typing roles array is aligned, and the About page bio reflects the same narrative
+- [ ] **New social link added:** Icon renders and links work -- but verify `aria-label` is present, SVG has `aria-hidden="true"`, the URL is in JSON-LD `sameAs` array, the link appears consistently in Footer AND Contact AND About pages
+- [ ] **Project added or removed:** Card appears/disappears -- but verify the projects page meta description count is accurate, no internal links reference removed projects, the page still renders correctly with changed category groupings
+- [ ] **Content changes deployed:** Site looks right -- but verify `dist/sitemap-0.xml` has correct URLs, `dist/rss.xml` has correct entries, Lighthouse scores are still 90+ (content changes can affect CLS if layout shifts), and JSON-LD still validates
+- [ ] **Social link URL changed:** New URL loads -- but verify the old URL is updated in ALL four locations (Footer, Contact, About, PersonJsonLd), not just the one you were looking at
+- [ ] **RSS feed after changes:** Feed endpoint responds -- but verify it validates with W3C Feed Validation Service, contains only local posts (no external blog links), and all `<link>` elements use absolute `https://patrykgolabek.dev/` URLs
 
 ## Pitfall-to-Phase Mapping
 
-How roadmap phases should address these pitfalls.
+How v1.1 roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| CNAME deleted on deploy | Phase 1: Scaffold + CI | Custom domain resolves after a push to main. Automated: check `dist/CNAME` exists in build output |
-| Tailwind v4 misconfiguration | Phase 1: Scaffold | Utility classes render in both dev and production build. No console warnings |
-| Sharp CI failure | Phase 1: Scaffold + CI | First GitHub Actions build succeeds with image processing |
-| Dark mode FOUC | Phase 2: Layout + Theme | No visible flash when loading any page in dark mode. Test with View Transitions active |
-| Particle performance | Phase 3: Hero + Animations | Lighthouse mobile Performance >= 90. TBT < 200ms. Animation pauses when tab is hidden |
-| Reduced motion accessibility | Phase 3: Hero + Animations | With `prefers-reduced-motion: reduce` enabled, no animations play. Static fallback visible |
-| Content collections empty | Phase 4: Blog + Content | Blog index shows all non-draft posts. `astro sync` completes without errors |
-| Sitemap wrong URLs | Phase 5: SEO | All URLs in sitemap-index.xml use `https://patrykgolabek.dev`. No `undefined` values |
-| Open Graph / social sharing | Phase 5: SEO | Facebook Sharing Debugger shows correct title, description, and image for all page types |
-| JSON-LD validation | Phase 5: SEO | Google Rich Results Test passes for homepage, blog posts, and about page |
-| RSS feed broken links | Phase 5: SEO | Feed validates in W3C Feed Validation Service. All links are absolute |
-| Draft posts in production | Phase 4: Blog + Content | Build output (`dist/`) contains no HTML files for draft posts |
+| Content removal breaks indexed URLs (P1) | First phase of any content change | No new 404s in build output; redirect pages generated for removed content |
+| External blog links break content pipeline (P2) | External blog integration phase | Build succeeds; RSS/OG/LLMs.txt contain only local content; external links open correctly |
+| RSS/Sitemap/LLMs.txt drift (P3) | Every phase that modifies content | Post-build check of `dist/rss.xml`, `dist/sitemap-0.xml`, and `/llms.txt` |
+| Hero copy breaks keyword alignment (P4) | Hero refresh phase | Title tag, meta description, JSON-LD, and hero text all contain target keywords and are consistent |
+| Social links break accessibility/JSON-LD (P5) | Contact/social updates phase | Lighthouse accessibility 90+; JSON-LD `sameAs` matches visible social links; all links have aria-labels |
+| OG image generation breaks (P6) | Any blog content change phase | `dist/open-graph/` contains PNG for every non-draft post; no Satori build errors |
+| Tag pages appear/disappear (P7) | Blog content change phase | Expected tag pages exist; no orphaned tag references |
+| Typing animation misalignment (P8) | Hero refresh phase | First role in array matches initial `<span>` text; all roles are SEO-valuable |
+| Project count meta description stale (P9) | Project curation phase | Meta description project count matches actual data |
+| Stale CDN cache after deploy (P10) | All phases (deployment step) | Live site reflects changes within 15 minutes; force social media re-scrape for OG |
+
+## Recommended Phase Ordering Based on Pitfalls
+
+Based on the dependency analysis above, the v1.1 phases should be ordered to establish centralized data sources BEFORE making content changes:
+
+1. **Data centralization phase** -- Create `site-config.ts` and `social-links.ts`, refactor existing components to use them. This prevents Pitfalls 4 and 5 from occurring in subsequent phases.
+2. **External blog integration** -- Design and implement the separate data source for external posts. This prevents Pitfall 2.
+3. **Content changes** (hero refresh, project curation, post updates) -- With centralized data in place, changes propagate correctly. Addresses Pitfalls 1, 4, 8, 9.
+4. **Social/contact updates** -- Using centralized social links, update all platforms. Addresses Pitfall 5.
+5. **Verification phase** -- Full build audit of sitemap, RSS, OG images, LLMs.txt, Lighthouse, and JSON-LD. Catches Pitfalls 3, 6, 7, 10.
 
 ## Sources
 
-- [Astro Deploy to GitHub Pages -- Official Docs](https://docs.astro.build/en/guides/deploy/github/) (HIGH confidence)
-- [GitHub Community Discussion: Custom Domain Deleted After Deploy](https://github.com/orgs/community/discussions/22366) (HIGH confidence)
-- [GitHub Community Discussion: Custom Domain Deleted by Workflow](https://github.com/orgs/community/discussions/159544) (HIGH confidence)
 - [Astro Content Collections -- Official Docs](https://docs.astro.build/en/guides/content-collections/) (HIGH confidence)
-- [Glob Loader Weak Validation -- GitHub Issue #12795](https://github.com/withastro/astro/issues/12795) (HIGH confidence)
-- [Content Config Loading Error -- GitHub Issue #14317](https://github.com/withastro/astro/issues/14317) (HIGH confidence)
-- [FOUC Dark Mode with Astro Transitions and Tailwind -- simonporter.co.uk](https://www.simonporter.co.uk/posts/what-the-fouc-astro-transitions-and-tailwind/) (MEDIUM confidence)
-- [Dark Mode in Astro with Tailwind: Preventing FOUC -- danielnewton.dev](https://www.danielnewton.dev/blog/dark-mode-astro-tailwind-fouc/) (MEDIUM confidence)
-- [View Transitions Dark Mode Flash -- GitHub Issue #8711](https://github.com/withastro/astro/issues/8711) (HIGH confidence)
+- [Content Layer Deep Dive -- Astro Blog](https://astro.build/blog/content-layer-deep-dive/) (HIGH confidence)
+- [Astro RSS Recipes -- Official Docs](https://docs.astro.build/en/recipes/rss/) (HIGH confidence)
 - [Astro Sitemap Integration -- Official Docs](https://docs.astro.build/en/guides/integrations-guide/sitemap/) (HIGH confidence)
-- [Sitemap URLs Wrong with Base Directory -- GitHub Issue #13315](https://github.com/withastro/astro/issues/13315) (HIGH confidence)
-- [Sharp Missing in Docker/CI -- GitHub Issue #14531](https://github.com/withastro/astro/issues/14531) (HIGH confidence)
-- [Astro 5.2 Tailwind v4 Support -- astro.build](https://astro.build/blog/astro-520/) (HIGH confidence)
-- [Tailwind v4 Astro Integration Issue -- GitHub Issue #18055](https://github.com/tailwindlabs/tailwindcss/issues/18055) (HIGH confidence)
-- [Canvas Optimization -- MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas) (HIGH confidence)
-- [requestAnimationFrame Battery Drain -- cytoscape/cytoscape.js Issue #2657](https://github.com/cytoscape/cytoscape.js/issues/2657) (MEDIUM confidence)
-- [WCAG 2.1 SC 2.3.3 Animation from Interactions -- W3C](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html) (HIGH confidence)
-- [GitHub Pages HTTPS Troubleshooting -- GitHub Docs](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https) (HIGH confidence)
-- [Astro Build Failures Guide -- eastondev.com](https://eastondev.com/blog/en/posts/dev/20251203-astro-build-failures-guide/) (MEDIUM confidence)
-- [Fixing Font Layout Shifts -- DebugBear](https://www.debugbear.com/blog/web-font-layout-shift) (MEDIUM confidence)
+- [Sitemap Includes Drafts -- GitHub Issue #7087](https://github.com/withastro/astro/issues/7087) (HIGH confidence)
+- [Excluding Drafts in Astro Sitemap](https://www.jakubtomek.com/blog/excluding-drafts-in-astro-sitemap-integration) (MEDIUM confidence)
+- [Astro SSG Redirects on GitHub Pages](https://puf.io/posts/astro-ssg-redirects/) (MEDIUM confidence)
+- [Astro Routing -- Redirects](https://docs.astro.build/en/guides/routing/) (HIGH confidence)
+- [GitHub Pages 301 Redirect Limitation](https://github.com/orgs/community/discussions/22407) (HIGH confidence)
+- [301 Redirect SEO Best Practices](https://www.browserstack.com/guide/301-permanent-redirect) (MEDIUM confidence)
+- [Deleting Website Content SEO Best Practices](https://wpslimseo.com/deleting-website-content-seo-best-practices/) (MEDIUM confidence)
+- [H1 Tags Ranking Factor 2026 Case Study](https://www.rankability.com/ranking-factors/google/h1-tags/) (MEDIUM confidence)
+- [SearchPilot: Adding Keywords to H1](https://www.searchpilot.com/resources/case-studies/seo-split-test-lessons-adding-custom-to-the-h1) (MEDIUM confidence)
+- [JSON-LD sameAs Property -- Schema.org](https://schema.org/sameAs) (HIGH confidence)
+- [Social Media Icons Accessibility Error -- BOIA](https://www.boia.org/blog/check-your-websites-social-media-icons-for-this-common-accessibility-error) (MEDIUM confidence)
+- [Icon Accessibility Best Practices -- A11Y Collective](https://www.a11y-collective.com/blog/icon-usability-and-accessibility/) (MEDIUM confidence)
+- [ARIA Labels Implementation Guide](https://www.allaccessible.org/blog/implementing-aria-labels-for-web-accessibility) (MEDIUM confidence)
+- [Dynamic OG Images with Satori and Astro](https://knaap.dev/posts/dynamic-og-images-with-any-static-site-generator/) (MEDIUM confidence)
+- [Community Loaders for Astro Content Layer](https://astro.build/blog/community-loaders/) (HIGH confidence)
+- [Astro SEO Complete Guide](https://eastondev.com/blog/en/posts/dev/20251202-astro-seo-complete-guide/) (MEDIUM confidence)
 
 ---
-*Pitfalls research for: Astro 5+ portfolio/blog on GitHub Pages with custom domain, rich animations, and full SEO*
+*Pitfalls research for: v1.1 content refresh on existing Astro 5 portfolio at patrykgolabek.dev*
 *Researched: 2026-02-11*

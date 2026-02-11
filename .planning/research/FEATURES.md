@@ -1,234 +1,423 @@
-# Feature Research
+# Feature Research: v1.1 Content Refresh
 
-**Domain:** Developer portfolio + blog site (senior architect)
+**Domain:** Developer portfolio content refresh (existing Astro 5 site at patrykgolabek.dev)
 **Researched:** 2026-02-11
 **Confidence:** HIGH
+**Scope:** External blog integration, social links update, hero tagline refresh, project curation, test post cleanup
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Table Stakes (Must Ship in v1.1)
 
-Features visitors assume exist. Missing any of these and recruiters/collaborators bounce.
+These are the core deliverables. Without all of them, v1.1 is incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Responsive / mobile-first layout** | 53% of users abandon sites that take >3s on mobile; recruiters browse on phones. Mobile-responsive is non-negotiable. | MEDIUM | Tailwind CSS handles breakpoints; test on real devices. Must hit 44x44px tap targets. |
-| **Fast page loads (Core Web Vitals)** | LCP <2.5s, INP <200ms, CLS <0.1. Google ranks on these; slow = unprofessional. Astro static HTML is fast by default. | LOW | Astro pre-renders static HTML. Main risk is heavy JS from particle effects or large images. Lazy-load all images. |
-| **Clear navigation (max 5-7 items)** | Visitors decide in seconds whether to stay. Confused navigation = immediate bounce. | LOW | Home, Projects, Blog, About, Contact. Keep it flat. |
-| **Projects showcase with descriptions** | 87% of hiring managers value portfolios over resumes. Each project needs: what it is, tech used, your role, link to repo/demo. | MEDIUM | Astro content collection for projects. 4-10 curated projects (not all 19 repos -- pick the strongest). Include screenshots/diagrams. |
-| **About page with professional bio** | Recruiters want to know who you are, your experience level, location, and what you're looking for. | LOW | First-person, concise. Include title, years experience, specialties, location, availability. Link to LinkedIn. |
-| **Contact method** | The whole point of a portfolio is reachability. No contact = dead end. | LOW | For a static site on GitHub Pages, use a mailto: link + LinkedIn link. Contact forms require a backend service. Start simple. |
-| **Blog with readable posts** | Technical writing demonstrates expertise. A blog without good typography, code highlighting, and reading experience fails its purpose. | MEDIUM | Astro content collections + MDX. Shiki syntax highlighting (built-in). Readable line lengths (65-75 chars). |
-| **Code syntax highlighting** | Developer audience expects properly highlighted code blocks. Monospace font, theme-appropriate colors, copy button. | LOW | Astro ships Shiki built-in with github-dark theme. Supports 200+ languages. Add copy-to-clipboard button via rehype plugin. |
-| **Dark mode support** | 82% of mobile users prefer dark mode. For a "Quantum Explorer" dark-first theme, this is baked in -- but provide a light toggle for accessibility. | MEDIUM | Default dark (matches theme). Use CSS custom properties for theming. Persist preference to localStorage. Respect prefers-color-scheme. |
-| **SEO fundamentals** | The site exists to be found. Title tags (50-60 chars), meta descriptions (160 chars), semantic HTML, heading hierarchy, clean URLs. | MEDIUM | Astro generates clean HTML. Add astro-seo component. Unique title/description per page. Canonical URLs. |
-| **Sitemap** | Search engines need to discover all pages. Standard for any site that wants to rank. | LOW | `@astrojs/sitemap` integration -- one line in config. Auto-generates from all routes. |
-| **RSS feed** | Developer audience subscribes via RSS. Expected for any blog. Enriched metadata increases subscriptions by ~18%. | LOW | `@astrojs/rss` integration. Auto-generate from blog content collection. Include full content, categories, author. |
-| **Open Graph / social meta tags** | Links shared on Twitter/X, LinkedIn, Discord must show proper cards with title, description, image. | MEDIUM | OG tags + Twitter card meta on every page. Requires OG images (can be static initially, dynamic later). |
-| **Accessible design (WCAG 2.1 AA)** | Legal requirement in many jurisdictions. Screen reader support, keyboard navigation, sufficient color contrast, alt text on all images. | MEDIUM | Astro view transitions include route announcer for screen readers. Test contrast ratios on dark theme (common pitfall). Use semantic HTML. |
-| **Custom domain (patrykgolabek.dev)** | yourname.com signals professionalism. GitHub Pages supports custom domains via CNAME record. | LOW | Add CNAME file to public/. Configure DNS. Set `site` in astro.config. |
-| **Reading time estimate** | Blog readers expect to know time commitment before reading. Standard on dev blogs. | LOW | Calculate from word count at build time (~200-250 wpm). Display in blog post header. |
+| **External blog entries in blog listing** | The portfolio currently shows 1 real blog post. Patryk has 62 posts on Translucent Computing and 17 on Kubert AI. Without surfacing this writing, the site misrepresents his output. Visitors and recruiters need to see the full body of work. | MEDIUM | Two implementation approaches exist (see Detailed Analysis below). Recommend a second Astro content collection with an inline loader that hardcodes curated external entries -- no build-time API fetching needed for a small, manually curated set. |
+| **Social links update (add X, YouTube, email; remove LinkedIn)** | Social links appear in 3 places: Footer, Contact page, PersonJsonLd. All 3 must be updated atomically. Inconsistent social presence across pages is a credibility problem. | LOW | Replace LinkedIn SVG with X (@QuantumMentat), YouTube (@QuantumMentat), and update email to pgolabek@gmail.com. GitHub stays. Keep aria-labels and SVG accessibility. Update `sameAs` array in PersonJsonLd. |
+| **Hero tagline refresh** | Current tagline reads: "Building resilient cloud-native systems and AI-powered solutions for 17+ years. Pre-1.0 Kubernetes adopter. Ontario, Canada." The request is to remove location, remove "Pre-1.0 Kubernetes adopter", and shift to a "craft & precision" tone. The typing roles array also needs review. | LOW | Text-only change in `src/pages/index.astro`. The typing effect roles array and the static subtitle paragraph both need updating. No structural changes. |
+| **Remove Full-Stack Applications category and gemini-beauty-math project** | The Full-Stack Applications category contains only the portfolio repo itself and a fork (arjancode_examples) -- neither demonstrates meaningful engineering work. The gemini-beauty-math project is in AI/ML but is a lightweight demo that dilutes the portfolio's senior architect signal. | LOW | Remove the category from `categories` array and remove 3 projects from `projects` array in `src/data/projects.ts`. Update the projects page meta description to reflect the new count. |
+| **Remove initial test blog post** | The `draft-placeholder.md` file is a draft test post with a future publish date (2026-03-01). While it is filtered out in production builds via the `draft: true` flag, it should be removed entirely to keep the content directory clean. | LOW | Delete `src/data/blog/draft-placeholder.md`. No impact on production output since it was already `draft: true`. |
 
-### Differentiators (Competitive Advantage)
+### Differentiators (Opportunities Within Scope)
 
-Features that set patrykgolabek.dev apart from generic developer portfolios. These are what make visitors remember the site.
+Features that go beyond the minimum ask and add meaningful value to the v1.1 refresh.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **"Quantum Explorer" visual theme** | Dark space canvas with particle effects, rich animations, futuristic typography. Makes the site memorable and signals creative technical ability. Most senior architect portfolios are plain. | HIGH | This is the signature differentiator. Use canvas-based particles (three.js or tsparticles) as Astro islands -- hydrate only on the home page hero. Must not tank performance. Provide reduced-motion fallback (static gradient). |
-| **View transitions (page animations)** | Smooth animated transitions between pages make the site feel like an app, not a static document. Astro has built-in support via `<ClientRouter />`. | MEDIUM | Astro provides fade, slide, and custom animations. Automatically respects prefers-reduced-motion. Persist elements (like nav) across navigations. |
-| **Dynamic OG image generation** | Auto-generated social sharing cards for each blog post with title, date, and branding. Looks polished when shared. Most portfolios use a single generic OG image. | MEDIUM | Use Satori + Sharp at build time. Generate 1200x630 images per blog post. Template matches site branding. No runtime dependency. |
-| **Project case studies (not just links)** | Instead of just linking to GitHub repos, provide context: problem, approach, architecture decisions, tech stack, outcomes. Demonstrates senior-level thinking. | MEDIUM | MDX content collection for projects. Include architecture diagrams, tech badges, and key decisions. 3-5 deep case studies for flagship projects; brief cards for the rest. |
-| **Blog post series / tags / categories** | Organize content by topic (Kubernetes, AI/ML, Platform Engineering, DevSecOps). Helps visitors find relevant content and signals depth in each domain. | LOW | Tags via frontmatter. Generate tag index pages. Content collection schema validates tags. |
-| **Search functionality** | Lets visitors quickly find blog posts and projects. Expected on content-heavy sites. | MEDIUM | Use Pagefind (indexes at build time, zero runtime cost, <10KB JS). Integrates well with Astro static output. Better than Fuse.js for content-heavy blogs. |
-| **JSON-LD structured data** | Schema.org Person markup with jobTitle, knowsAbout (skills), sameAs (social links). Helps Google understand the site is about a real professional. Increasingly important for AI-powered search. | MEDIUM | Add JSON-LD to layout. Person type on home/about. BlogPosting type on blog posts. Use `<script type="application/ld+json">` in head. |
-| **GitHub activity integration** | Show recent contributions, pinned repos, or commit activity. Signals active developer (not just a static resume). | LOW | Fetch GitHub API at build time. Display pinned repos or contribution count. Rebuilds via scheduled GitHub Action (weekly). |
-| **Animated hero section** | Eye-catching entry point with typing effect or animated text revealing title/tagline. First 3 seconds determine if a visitor stays. | MEDIUM | Keep it tasteful -- one animation, not a circus. Typing effect for role title. Particle background. CTA buttons below. |
-| **Performance score badge** | Display Lighthouse 100/100 score. For a site built by an architect, perfect performance IS the portfolio piece. | LOW | Astro static sites regularly score 95-100. Achieving and displaying this demonstrates technical competence. |
-| **Blog post table of contents** | Auto-generated ToC from headings. Essential for long-form technical articles. Helps readers navigate and signals comprehensive content. | LOW | Parse headings from rendered markdown. Sticky sidebar on desktop, collapsible on mobile. Highlight current section on scroll. |
-| **Cross-posting links to existing blogs** | Link to articles on Translucent Computing blog and Kubert AI blog. Strengthens SEO backlink profile. Shows depth of writing without duplicating content. | LOW | Add "Also published on" links. Or aggregate external blog posts into the content collection with external URLs. |
-| **Email newsletter subscription** | Capture interested readers for ongoing engagement. Simple Buttondown, Convertkit, or Substack integration. | LOW | Single email input + CTA. No complex forms. Link to external newsletter service. Progressive enhancement. |
+| **Visual distinction for external vs local posts** | Blog listing shows external posts with a subtle "external link" indicator (icon + source label like "on Kubert AI" or "on Translucent Computing"). Visitors instantly understand which posts open on the portfolio vs which navigate to an external blog. This is honest UX -- no bait-and-switch. | LOW | Add a small external-link icon and source badge to `BlogCard.astro` when the entry has an `externalUrl`. Conditionally render `target="_blank" rel="noopener noreferrer"` for external entries. |
+| **Source filtering on blog listing** | Allow visitors to filter by "All", "On this site", "Kubert AI", "Translucent Computing" via simple tab-style buttons at the top of the blog page. With potentially 80+ posts across 3 sources, filtering prevents overwhelm. | MEDIUM | Client-side filtering with vanilla JS on data attributes. No framework needed. Progressive enhancement -- without JS, all posts show. |
+| **Curated external post selection (not full feed dump)** | Instead of importing all 79 external posts, hand-pick 8-12 that best represent Patryk's expertise (Kubernetes, AI/ML, platform engineering, DevOps). Quality over quantity. A curated selection signals editorial judgment. | LOW | Manually define entries in the content collection. Each entry has title, description, publishedDate, tags, externalUrl, and source. No API fetching needed. |
+| **Hero typing roles refresh** | Current roles: `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']`. Refresh to match the craft/precision tone. Removing "Pioneer" (which implies early-adopter bragging) and aligning with the new subtitle. | LOW | Update the `roles` array in the inline script on `index.astro`. |
+| **Update PersonJsonLd structured data** | Remove `address` (location is being removed from hero), update `sameAs` to include X and YouTube URLs, remove LinkedIn. Keeps structured data consistent with visible content. | LOW | Edit `src/components/PersonJsonLd.astro`. |
+| **Update contact page CTA on home page** | Home page hero CTA currently links to LinkedIn ("Connect on LinkedIn"). This needs to change since LinkedIn is being removed. Replace with an email CTA or X profile link. | LOW | Edit `src/pages/index.astro` contact CTA section. |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### Anti-Features (Explicitly NOT Building for v1.1)
 
-Features that seem appealing but create problems. Deliberately NOT building these.
+| Anti-Feature | Why Tempting | Why Avoid | What to Do Instead |
+|--------------|-------------|-----------|-------------------|
+| **Build-time RSS feed fetching from external blogs** | "Automate it! Fetch from WordPress RSS feeds at build time and always stay current." | Both WordPress feeds return only 3-4 recent items (WordPress default is 10, but Translucent Computing shows 4 and Kubert AI shows 3). The feeds are unreliable for historical content. RSS parsing adds a build dependency (rss-parser or similar). Build failures from external API downtime are unacceptable for a static portfolio on GitHub Pages. The external blogs update infrequently (last Kubert post was June 2025, last TC post was April 2025). | Manually curate external entries as static data in a content collection. Update when new posts are published -- which is quarterly at most. Zero build dependencies. |
+| **Full external post content rendered locally** | "Import the full HTML from WordPress and render it on patrykgolabek.dev for better SEO." | Duplicate content harms SEO (Google penalizes it). WordPress content includes shortcodes, custom CSS, and plugin-specific markup that would render incorrectly. Maintaining parity between two rendering engines is a maintenance nightmare. The external blogs have their own design systems. | Link to external posts with `target="_blank"`. The portfolio gets the "content hub" benefit (showing breadth of writing) while the original blogs retain their SEO authority. Use canonical URLs if ever rendering local copies in the future. |
+| **Automated external blog sync via GitHub Actions** | "Schedule a weekly GitHub Action to fetch new posts and commit them." | Over-engineering for quarterly publishing cadence. Adds CI complexity. The curated selection requires editorial judgment (which posts to include) that cannot be automated. | Manual curation. When Patryk publishes a new external post worth showcasing, add a 5-line entry to the external posts data file. 2-minute task. |
+| **LinkedIn removal from PersonJsonLd sameAs** | "User said remove LinkedIn, so remove it everywhere." | LinkedIn may still be a valid `sameAs` for structured data even if not shown in the UI. Google uses `sameAs` for entity recognition, and LinkedIn profiles are strong identity signals. Removing it from visible links is different from removing it from machine-readable metadata. | Consider keeping LinkedIn in the `sameAs` array of PersonJsonLd even though it is removed from visible footer/contact links. Flag this as a decision for Patryk to make. LOW confidence on the SEO impact either way. |
+| **Contact form to replace LinkedIn** | "With LinkedIn gone, add a contact form as the secondary contact method." | Contact forms on static GitHub Pages sites require a third-party service (Formspree, etc.). Adds a dependency for marginal benefit -- recruiters know how to send email. | Email link + X profile link + YouTube link. Three contact methods is sufficient. |
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| **CMS backend (WordPress, Strapi, etc.)** | "Easier to update content" | Adds hosting complexity, security surface, ongoing maintenance, and cost. For a single-author site updated monthly, it is overkill. Astro content collections with Git-based editing is simpler and more reliable. | Write Markdown/MDX in VS Code. Commit and push. GitHub Actions deploys automatically. Zero maintenance. |
-| **Comments system** | "Engagement and community" | Requires moderation, attracts spam, needs a backend or third-party service (Disqus injects ads and tracking). For a portfolio site, comments add noise without proportional value. | Add a "Discuss on Twitter/X" or "Reply via email" link. Engage on social platforms where the audience already is. |
-| **Complex contact form with validation** | "Professional contact method" | On a static GitHub Pages site, forms need a third-party service (Formspree, Netlify Forms, etc.) adding a dependency and potential failure point. For a portfolio targeting recruiters, they already know how to email. | Prominent mailto: link with pre-filled subject line + LinkedIn profile link. Simple, reliable, zero dependencies. |
-| **Multi-language / i18n** | "Reach broader audience" | Doubles content maintenance burden. Patryk's target audience (English-speaking tech recruiters, collaborators) does not require translation. | Write in English. If needed later, Astro has built-in i18n routing -- but defer until there is actual demand. |
-| **User accounts / authentication** | "Personalized experience" | A portfolio is a public read-only site. Authentication adds massive complexity (sessions, security, passwords) for zero user value. | None needed. The site is fully public. |
-| **Real-time features (WebSockets, live data)** | "Show GitHub stats live" or "Live visitor count" | Requires a server or serverless functions, adds complexity, and the data is not meaningfully different from build-time fetched data for a portfolio. | Fetch GitHub data at build time. Rebuild weekly via scheduled GitHub Action. Data is fresh enough. |
-| **Heavy animation throughout (every page)** | "Showcase frontend skills" | Particle effects and animations on EVERY page tank performance, distract from content, and cause accessibility issues. Research shows this is the #1 portfolio mistake. | Reserve heavy animations for the home page hero ONLY. Use subtle view transitions between pages. Blog posts should be clean reading experiences with zero animation distractions. |
-| **Analytics with Google Analytics** | "Track visitors" | GA4 is heavyweight (45KB+), requires cookie consent banner (GDPR), and is overkill for a portfolio. Sends visitor data to Google. | Use Plausible or Fathom (~1KB script, no cookies, GDPR compliant, privacy-friendly). Or skip analytics entirely for v1 -- know your content is good and focus on writing. |
-| **Infinite scroll for blog** | "Modern feel" | Breaks back button, harms SEO (search engines prefer paginated URLs), and frustrates users who want to reach the footer. | Standard pagination (10 posts per page) or "Load more" button. Clean URL per page. |
-| **Client-side rendering (SPA mode)** | "App-like experience" | Defeats Astro's core advantage (zero JS by default). SPAs hurt SEO, increase bundle size, and break without JS. Astro view transitions give the same UX benefit without the downsides. | Use Astro's default static output with view transitions for smooth navigation. Islands for interactive components only. |
+---
+
+## Detailed Analysis: External Blog Integration
+
+### The Core Problem
+
+The blog listing at `/blog/` currently queries a single content collection (`blog`) backed by the glob loader reading from `src/data/blog/`. External posts from mykubert.com and translucentcomputing.com need to appear in this listing, sorted chronologically alongside local posts, but linking out to their original URLs instead of rendering locally.
+
+### Approach A: Single Collection with Mixed Entries (RECOMMENDED)
+
+Extend the existing `blog` content collection schema to support an optional `externalUrl` field. Add external posts as minimal Markdown files with frontmatter only (no body content needed).
+
+**Schema change in `src/content.config.ts`:**
+```typescript
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    publishedDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+    externalUrl: z.string().url().optional(),
+    source: z.enum(['local', 'kubert-ai', 'translucent-computing']).default('local'),
+  }),
+});
+```
+
+**External post file example** (`src/data/blog/ext-kubert-ai-agent-sql-server.md`):
+```markdown
+---
+title: "Building a Custom AI Agent for SQL Server: Deep Dive into DevOps"
+description: "A hands-on guide to building an AI agent that automates SQL Server operations using LLM orchestration and DevOps patterns."
+publishedDate: 2024-08-29
+tags: ["ai", "devops", "sql-server", "llm-agents"]
+externalUrl: "https://mykubert.com/blog/building-a-custom-ai-agent-for-sql-server-deep-dive-into-devops/"
+source: "kubert-ai"
+---
+```
+
+**Advantages:**
+- Uses the existing content collection -- no new collection to define or query
+- All posts (local + external) sort naturally by `publishedDate` in the existing blog listing query
+- BlogCard component gets a simple conditional: if `externalUrl` exists, link externally; otherwise link to `/blog/{slug}/`
+- RSS feed, tag pages, and home page "Latest Writing" section all automatically include external posts with zero additional queries
+- The blog post detail page (`/blog/[slug].astro`) can guard against rendering external-only entries (they have no body)
+
+**Disadvantages:**
+- External post files clutter `src/data/blog/` directory (mitigated by `ext-` prefix convention)
+- Must remember to not generate detail pages for external entries
+
+### Approach B: Separate Collection + Merge at Query Time
+
+Create a second content collection (`externalPosts`) and merge results in every page that lists blog posts.
+
+**Disadvantages that make this inferior:**
+- Every page querying blog content (blog listing, home page, tag pages, RSS) must now query two collections and merge
+- Two separate Zod schemas to maintain
+- Tag pages need dual-collection awareness
+- More code changes, more surface area for bugs
+
+### Recommendation: Approach A
+
+Use the single-collection approach. It requires the smallest code surface change (schema update + BlogCard conditional + slug page guard) and leverages the existing query infrastructure everywhere.
+
+### External Posts to Curate (Recommended Initial Selection)
+
+From the 79 total external posts, select 8-12 that best represent Patryk's core domains. Prioritize posts where Patryk is the author (some Translucent Computing posts are by other authors like Robert Golabek or Mike Lagowski).
+
+**From Kubert AI (mykubert.com) -- Patryk-authored:**
+
+| Post | Date | Why Include |
+|------|------|-------------|
+| "Building a Custom AI Agent for SQL Server: Deep Dive into DevOps" | 2024-08-29 | Hands-on technical depth, AI + DevOps intersection |
+| "Introducing Open Source Kubernetes AI Assistant" | 2024-08-23 | Flagship Kubert product, demonstrates K8s + AI expertise |
+| "Ollama Kubernetes Deployment: Cost-Effective and Secure" | 2024-09-06 | Practical K8s deployment, LLM infrastructure |
+| "Red Teaming LLMs: AI Agent Threats" | 2024-10-01 | Security depth, demonstrates breadth beyond just building |
+| "From Golden Paths to Agentic AI: A New Era of Kubernetes Management" | 2025-01-16 | Platform engineering + AI convergence thesis |
+| "AgentOps and Agentic AI: The Future of DevOps and Cloud Automation" | 2025-06-01 | Most recent Kubert post, forward-looking |
+
+**From Translucent Computing (translucentcomputing.com) -- Patryk-authored:**
+
+| Post | Date | Why Include |
+|------|------|-------------|
+| "Apache Airflow -- Data Pipeline" | 2025-03-22 | Data engineering depth, practical infrastructure |
+| "Strategies for Managing Kubernetes Cloud Cost Part 1" | 2025-03-22 | K8s production expertise, cost optimization |
+| "Workflow Engine Data Pipeline" | 2025-03-22 | Complements Airflow post, data platform breadth |
+| "Why is Zero Trust Security Important for Your Business?" | 2025-03-22 | Security perspective, breadth of architecture thinking |
+
+**Selection criteria applied:**
+1. Patryk must be the author (excluded Robert Golabek and Mike Lagowski posts)
+2. Technical depth over marketing/news content
+3. Covers diverse domains (AI/ML, K8s, security, data engineering, platform engineering)
+4. Recency weighted but not exclusively
+
+---
+
+## Detailed Analysis: Hero Tagline Refresh
+
+### Current State
+
+```
+Name:     Patryk Golabek
+Typing:   Cloud-Native Architect | Kubernetes Pioneer | AI/ML Engineer | Platform Builder
+Subtitle: Building resilient cloud-native systems and AI-powered solutions for 17+ years.
+          Pre-1.0 Kubernetes adopter. Ontario, Canada.
+```
+
+### Requirements
+
+- Remove "Pre-1.0 Kubernetes adopter" (bragging tone, not craft/precision)
+- Remove "Ontario, Canada" (location not needed)
+- Shift to "craft & precision" vibe
+- Keep it concise and professional
+
+### Hero Tagline Best Practices (Research Findings)
+
+Based on analysis of effective developer portfolio hero sections:
+
+1. **6-10 words maximum** for the primary tagline (HIGH confidence -- multiple sources agree)
+2. **Lead with what you do, not how long you have done it** -- years of experience can be on the About page
+3. **"Craft" language signals intentionality** -- "I architect" / "I design" / "I craft" vs "I build" (which is generic)
+4. **Precision language signals rigor** -- "engineered for scale" / "measured outcomes" / "deliberate systems"
+5. **Avoid buzzword soup** -- "cloud-native AI-powered DevSecOps platform engineering" says nothing. Pick one clear identity.
+6. **The subtitle supports the headline** -- headline is the identity, subtitle is the value proposition
+
+### Recommended Options
+
+**Option A (Recommended): Architect's Identity**
+```
+Typing:   Software Architect | Systems Engineer | AI/ML Builder
+Subtitle: Designing cloud-native systems with craft and precision.
+          Kubernetes, AI agents, platform engineering.
+```
+Why: "Designing" implies thoughtfulness over speed. "Craft and precision" is explicit. Second line maps competencies without being a buzzword list. Clean, confident, no fluff.
+
+**Option B: Craft-Forward**
+```
+Typing:   Cloud-Native Architect | Systems Designer | AI Engineer
+Subtitle: Engineering resilient systems with deliberate precision.
+          From Kubernetes platforms to AI-powered automation.
+```
+Why: "Deliberate precision" is stronger than "craft and precision" for a technical audience. "Resilient systems" signals production-grade thinking.
+
+**Option C: Minimalist**
+```
+Typing:   Architect | Engineer | Builder
+Subtitle: Cloud-native systems and AI agents, crafted with precision.
+```
+Why: Extremely concise. The typing roles are abstract enough to intrigue. The subtitle does the specificity work.
+
+**Recommendation:** Option A. It balances specificity (recruiters need to understand what you do quickly) with the craft/precision tone. The typing roles cover the three main domains without being overly cute.
+
+### Typing Roles Analysis
+
+Current: `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']`
+
+Issues with current roles:
+- "Kubernetes Pioneer" -- bragging, being removed per requirements
+- "Platform Builder" -- "Builder" is too generic for a 17-year senior architect
+- "Cloud-Native Architect" -- good, keep or refine
+- "AI/ML Engineer" -- good, keep or refine
+
+Recommended roles for Option A: `['Software Architect', 'Systems Engineer', 'AI/ML Builder']`
+
+Alternative set: `['Cloud-Native Architect', 'Systems Designer', 'AI Engineer']`
+
+---
+
+## Detailed Analysis: Social Links Update
+
+### Current State
+
+| Location | Links Present |
+|----------|--------------|
+| Footer (`Footer.astro`) | GitHub, LinkedIn, Translucent Computing Blog |
+| Contact page (`contact.astro`) | Email (patryk@translucentcomputing.com), LinkedIn, GitHub, Translucent Computing Blog, Kubert AI Blog |
+| Home page CTA (`index.astro`) | Email (patryk@translucentcomputing.com), LinkedIn |
+| PersonJsonLd (`PersonJsonLd.astro`) | GitHub, LinkedIn, TC Blog, Kubert Blog in `sameAs` |
+
+### Required Changes
+
+| Action | Details |
+|--------|---------|
+| **Add X (Twitter)** | @QuantumMentat -- https://x.com/QuantumMentat |
+| **Add YouTube** | @QuantumMentat -- https://youtube.com/@QuantumMentat |
+| **Update email** | Change from patryk@translucentcomputing.com to pgolabek@gmail.com |
+| **Remove LinkedIn** | Remove from footer, contact page cards, home page CTA |
+| **Keep GitHub** | No change |
+| **Keep external blog links** | Translucent Computing and Kubert AI blog links stay in contact page "Other places" section |
+
+### Files Requiring Changes
+
+1. `src/components/Footer.astro` -- Remove LinkedIn SVG/link, add X and YouTube SVGs/links
+2. `src/pages/contact.astro` -- Replace LinkedIn card with X card, add YouTube card, update email address
+3. `src/pages/index.astro` -- Replace "Connect on LinkedIn" CTA with X or email alternative
+4. `src/components/PersonJsonLd.astro` -- Update `sameAs` array, update email, consider keeping LinkedIn in sameAs (see Anti-Features note)
+
+### SVG Icons Needed
+
+- **X (Twitter):** Standard X logo SVG (24x24 viewBox, single path)
+- **YouTube:** Standard YouTube play button SVG (24x24 viewBox)
+- Both are widely available and license-free for social link usage
+
+---
+
+## Detailed Analysis: Project Curation
+
+### Current Categories and Counts
+
+| Category | Count | Projects |
+|----------|-------|----------|
+| AI/ML & LLM Agents | 8 | kps-graph-agent, kps-assistant, kps-assistant-support, kubert-langflow, kps-langflow, tekstack-assistant-library, financial-data-extractor, **gemini-beauty-math** |
+| Kubernetes & Infrastructure | 6 | kps-cluster-deployment, kps-infra-management, kps-basic-package, kps-observability-package, kps-charts, kps-images |
+| Platform & DevOps Tooling | 2 | kps-lobe-chat, jobs |
+| **Full-Stack Applications** | **2** | **PatrykQuantumNomad, arjancode_examples (fork)** |
+| Security & Networking | 1 | networking-tools |
+
+### Required Removals
+
+| Item | Action | Rationale |
+|------|--------|-----------|
+| "Full-Stack Applications" category | Remove from `categories` array | Category only contains the portfolio repo itself and a fork -- neither demonstrates meaningful engineering |
+| `PatrykQuantumNomad` project | Remove from `projects` array | Self-referential (the portfolio site listing itself as a project is circular) |
+| `arjancode_examples` project | Remove from `projects` array | Fork of someone else's code examples -- does not represent original work |
+| `gemini-beauty-math` project | Remove from `projects` array | Lightweight demo from AI/ML category -- dilutes the senior architect signal among the stronger AI agent projects |
+
+### Post-Removal State
+
+| Category | Count | Projects |
+|----------|-------|----------|
+| AI/ML & LLM Agents | 7 | kps-graph-agent, kps-assistant, kps-assistant-support, kubert-langflow, kps-langflow, tekstack-assistant-library, financial-data-extractor |
+| Kubernetes & Infrastructure | 6 | (unchanged) |
+| Platform & DevOps Tooling | 2 | (unchanged) |
+| Security & Networking | 1 | (unchanged) |
+| **Total** | **16** | Down from 19 |
+
+### Implementation Notes
+
+- Update `categories` array: remove `'Full-Stack Applications'`
+- Remove 3 entries from `projects` array
+- Update projects page meta description: "Explore 16 open-source projects..." (was 19)
+- No structural changes to the projects page template
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Content Collections (blog + projects)]
-    |-- requires --> [MDX Integration]
-    |-- requires --> [Zod Schema Validation]
-    |-- enables --> [Blog Post Pages]
-    |       |-- enables --> [Reading Time]
-    |       |-- enables --> [Table of Contents]
-    |       |-- enables --> [Tags/Categories]
-    |       |-- enables --> [RSS Feed]
-    |       |-- enables --> [OG Image Generation]
-    |       |-- enables --> [Search (Pagefind)]
-    |-- enables --> [Project Case Studies]
-    |       |-- enables --> [GitHub Activity Integration]
-
-[Base Layout + Theming]
-    |-- requires --> [Tailwind CSS]
-    |-- requires --> [Dark Mode System]
-    |-- enables --> [Responsive Design]
-    |-- enables --> [View Transitions]
-    |-- enables --> [Quantum Explorer Theme]
-    |       |-- requires --> [Particle Effects (Canvas/Islands)]
-    |       |-- requires --> [Reduced Motion Fallback]
-
-[SEO Foundation]
-    |-- requires --> [Sitemap (@astrojs/sitemap)]
-    |-- requires --> [Meta Tags (astro-seo)]
-    |-- requires --> [Canonical URLs]
-    |-- enables --> [JSON-LD Structured Data]
-    |-- enables --> [OG Image Generation]
-
-[Custom Domain]
-    |-- requires --> [CNAME in public/]
-    |-- requires --> [DNS Configuration]
-    |-- requires --> [site config in astro.config]
+[v1.1 Content Refresh]
+    |
+    |-- [External Blog Integration]
+    |       |-- requires --> Schema update in content.config.ts (add externalUrl, source fields)
+    |       |-- requires --> External post markdown files in src/data/blog/
+    |       |-- requires --> BlogCard.astro conditional rendering
+    |       |-- requires --> Blog slug page guard (skip rendering for external entries)
+    |       |-- impacts --> RSS feed (external posts should appear with external links)
+    |       |-- impacts --> Home page "Latest Writing" (external posts may appear)
+    |       |-- impacts --> Tag pages (external posts have tags)
+    |       |-- impacts --> OG image generation (skip for external entries -- they have no local page)
+    |
+    |-- [Social Links Update]
+    |       |-- requires --> X and YouTube SVG icons
+    |       |-- requires --> Footer.astro update
+    |       |-- requires --> Contact page update
+    |       |-- requires --> Home page CTA update
+    |       |-- requires --> PersonJsonLd.astro update
+    |       |-- independent of --> External Blog Integration (no dependency)
+    |
+    |-- [Hero Tagline Refresh]
+    |       |-- requires --> index.astro subtitle text update
+    |       |-- requires --> index.astro typing roles array update
+    |       |-- independent of --> Social Links Update (no dependency)
+    |       |-- independent of --> External Blog Integration (no dependency)
+    |
+    |-- [Project Curation]
+    |       |-- requires --> projects.ts data update
+    |       |-- requires --> Projects page meta description update
+    |       |-- independent of --> all other v1.1 features
+    |
+    |-- [Test Post Cleanup]
+    |       |-- requires --> Delete draft-placeholder.md
+    |       |-- independent of --> all other v1.1 features
 ```
 
 ### Dependency Notes
 
-- **Content Collections require MDX Integration:** MDX enables component-in-markdown for interactive code examples and custom layouts in blog posts and project case studies.
-- **OG Image Generation requires Content Collections:** Needs access to post titles, descriptions, and dates from frontmatter to generate images at build time.
-- **Pagefind Search requires built static output:** Pagefind indexes the generated HTML post-build, so it runs as a post-build step.
-- **View Transitions require Base Layout:** The `<ClientRouter />` component lives in the base layout and wraps all pages.
-- **Quantum Explorer Theme requires Reduced Motion Fallback:** Particle effects and heavy animations MUST have a static fallback for accessibility compliance (prefers-reduced-motion).
-- **JSON-LD Structured Data enhances SEO Foundation:** Built on top of basic meta tags, adds machine-readable context that improves search engine and AI understanding.
+- **External Blog Integration is the only complex feature.** It touches 4-5 files and has downstream impacts on RSS, tags, home page, and OG generation. Everything else is a straightforward text/data edit.
+- **Social Links, Hero Tagline, Project Curation, and Test Post Cleanup are all independent** of each other and can be done in any order or in parallel.
+- **External Blog Integration should be done first** because it is the highest-risk change (schema modification, conditional rendering logic, multiple downstream impacts).
+- **Schema change in content.config.ts is backward-compatible** -- adding optional fields does not break existing entries.
 
 ---
 
-## MVP Definition
+## MVP Definition for v1.1
 
-### Launch With (v1)
+### Must Ship
 
-Minimum viable site -- enough to replace the GitHub profile as the primary professional web presence.
+1. External blog entries appearing in blog listing (8-12 curated posts)
+2. Social links updated across all 4 files (Footer, Contact, Home CTA, PersonJsonLd)
+3. Hero tagline refreshed (subtitle + typing roles)
+4. Full-Stack Applications category and gemini-beauty-math removed
+5. Draft placeholder post deleted
 
-- [ ] **Responsive 5-page site** (Home, Blog, Blog Post, Projects, About) -- the core structure
-- [ ] **Base dark theme with light mode toggle** -- core visual identity without particle effects yet
-- [ ] **Content collections for blog + projects** -- Markdown/MDX with Zod schemas
-- [ ] **3-5 initial blog posts** (can be cross-posted from existing Translucent Computing or Kubert AI blogs)
-- [ ] **Project showcase (top 6-8 repos)** with descriptions, tech stacks, repo links
-- [ ] **SEO fundamentals** -- meta tags, sitemap, RSS, canonical URLs, OG tags
-- [ ] **Code syntax highlighting** -- Shiki built-in with copy button
-- [ ] **Contact section** -- mailto link + LinkedIn + GitHub profile links
-- [ ] **Custom domain** -- patrykgolabek.dev configured with GitHub Pages
-- [ ] **GitHub Actions CI/CD** -- auto-deploy on push to main
-- [ ] **Accessible design** -- semantic HTML, keyboard nav, contrast ratios, alt text
+### Should Ship (Differentiators)
 
-### Add After Validation (v1.x)
+6. Visual distinction badge on external posts ("on Kubert AI", "on Translucent Computing")
+7. Blog slug page guard preventing 404s for external-only entries
+8. RSS feed updated to include external posts with correct external links
 
-Features to add once the core site is live and content is flowing.
+### Defer to v1.2+
 
-- [ ] **Quantum Explorer particle effects** -- add to home hero only, with reduced-motion fallback
-- [ ] **View transitions** -- smooth page animations via `<ClientRouter />`
-- [ ] **Dynamic OG image generation** -- Satori + Sharp for per-post social cards
-- [ ] **JSON-LD structured data** -- Person + BlogPosting schemas
-- [ ] **Blog post table of contents** -- auto-generated from headings
-- [ ] **Reading time estimates** -- calculated at build time
-- [ ] **Tags/categories with index pages** -- organize blog content by topic
-- [ ] **Animated hero section** -- typing effect for role title
-
-### Future Consideration (v2+)
-
-Features to defer until the site has content and traffic.
-
-- [ ] **Pagefind search** -- worthwhile after 15-20+ blog posts
-- [ ] **GitHub activity integration** -- fetch pinned repos / contribution data at build time
-- [ ] **Newsletter subscription** -- add when there are regular readers to retain
-- [ ] **Deep project case studies** -- 3-5 detailed write-ups with architecture diagrams
-- [ ] **Privacy-friendly analytics** -- Plausible or Fathom when you want traffic data
-- [ ] **Performance score badge** -- display after achieving consistent Lighthouse 100
+9. Source filtering on blog listing (only valuable after blog has 20+ total entries)
+10. External blog link cards on About page (cross-promotion)
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Responsive 5-page structure | HIGH | MEDIUM | P1 |
-| Content collections (blog + projects) | HIGH | MEDIUM | P1 |
-| Dark/light theme | HIGH | MEDIUM | P1 |
-| SEO fundamentals (meta, sitemap, RSS) | HIGH | LOW | P1 |
-| Code syntax highlighting | HIGH | LOW | P1 |
-| Custom domain | HIGH | LOW | P1 |
-| GitHub Actions CI/CD | HIGH | LOW | P1 |
-| Contact section | HIGH | LOW | P1 |
-| Accessibility (WCAG 2.1 AA) | HIGH | MEDIUM | P1 |
-| Quantum Explorer particle effects | MEDIUM | HIGH | P2 |
-| View transitions | MEDIUM | LOW | P2 |
-| OG image generation | MEDIUM | MEDIUM | P2 |
-| JSON-LD structured data | MEDIUM | MEDIUM | P2 |
-| Table of contents | MEDIUM | LOW | P2 |
-| Reading time | MEDIUM | LOW | P2 |
-| Tags/categories | MEDIUM | LOW | P2 |
-| Animated hero | MEDIUM | MEDIUM | P2 |
-| Search (Pagefind) | LOW | MEDIUM | P3 |
-| GitHub activity integration | LOW | LOW | P3 |
-| Newsletter subscription | LOW | LOW | P3 |
-| Deep case studies | MEDIUM | HIGH | P3 |
-| Analytics (Plausible) | LOW | LOW | P3 |
+| Feature | User Value | Implementation Cost | Risk | Priority |
+|---------|------------|---------------------|------|----------|
+| External blog entries in listing | HIGH | MEDIUM | MEDIUM | P1 |
+| Social links update (all 4 files) | HIGH | LOW | LOW | P1 |
+| Hero tagline refresh | HIGH | LOW | LOW | P1 |
+| Project curation (remove category + projects) | MEDIUM | LOW | LOW | P1 |
+| Test post cleanup | LOW | LOW | LOW | P1 |
+| External post visual distinction badge | MEDIUM | LOW | LOW | P1 |
+| Blog slug page guard for external entries | HIGH | LOW | MEDIUM | P1 |
+| RSS feed external post inclusion | MEDIUM | LOW | LOW | P1 |
+| PersonJsonLd structured data update | MEDIUM | LOW | LOW | P1 |
+| Home page CTA update (LinkedIn removal) | HIGH | LOW | LOW | P1 |
+| Source filtering on blog listing | LOW | MEDIUM | LOW | P2 |
+| About page cross-promotion links | LOW | LOW | LOW | P2 |
 
 **Priority key:**
-- P1: Must have for launch -- site is incomplete without these
-- P2: Should have, add in v1.x -- enhance the experience
-- P3: Nice to have, future consideration -- defer until content/traffic justify
+- P1: Must complete for v1.1 -- the milestone is incomplete without these
+- P2: Nice to have, defer if needed without blocking the milestone
 
 ---
 
-## Competitor Feature Analysis
+## Implementation Complexity Summary
 
-| Feature | Generic Dev Portfolios | Top Astro Blog Templates (AstroPaper, etc.) | patrykgolabek.dev Approach |
-|---------|------------------------|----------------------------------------------|---------------------------|
-| Visual identity | Generic templates, similar look | Clean and minimal, interchangeable | Unique "Quantum Explorer" dark theme with particle effects -- memorable and distinctive |
-| Project showcase | List of repo links | Basic cards with descriptions | Curated case studies demonstrating architectural thinking, not just code links |
-| Blog experience | Basic markdown rendering | Full-featured (tags, search, RSS) | Full-featured blog with emphasis on code quality (Shiki, copy button, ToC) |
-| SEO | Often afterthought | Good defaults (sitemap, meta) | Aggressive from day one: structured data, OG images, schema.org, clean URLs |
-| Performance | Variable (often heavy frameworks) | Excellent (Astro default) | Target Lighthouse 100 -- the performance IS the portfolio for an architect |
-| Content depth | Surface-level project lists | Blog posts | Deep technical writing + architecture decision records + cross-links to external blogs |
-| Personal brand | Name + photo + links | Minimal branding | Strong narrative: 17+ years, pre-1.0 K8s, cloud-native + AI/ML intersection |
-| Animations | Either none or overdone | Minimal (view transitions) | Tasteful: particles on home hero only, view transitions between pages, clean blog reading |
+| Feature | Files Changed | Lines of Code (est.) | Risk Level |
+|---------|--------------|---------------------|------------|
+| External blog integration | 5 files (content.config.ts, 8-12 new .md files, BlogCard.astro, blog/[slug].astro, rss.xml.ts) | ~120 LOC changes + ~80 LOC new frontmatter files | MEDIUM -- schema change is the key risk |
+| Social links update | 4 files (Footer.astro, contact.astro, index.astro, PersonJsonLd.astro) | ~80 LOC changes | LOW -- straightforward replacements |
+| Hero tagline refresh | 1 file (index.astro) | ~10 LOC changes | LOW -- text only |
+| Project curation | 1 file (projects.ts) + 1 file (projects/index.astro meta) | ~30 LOC removed | LOW -- data deletion |
+| Test post cleanup | 1 file deletion | 0 LOC (file removal) | LOW |
+| **Total** | **~12 files touched** | **~320 LOC** | **Overall: LOW-MEDIUM** |
 
 ---
 
 ## Sources
 
-- [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/) -- HIGH confidence, official documentation
-- [Astro View Transitions docs](https://docs.astro.build/en/guides/view-transitions/) -- HIGH confidence, official documentation
-- [Astro Syntax Highlighting docs](https://docs.astro.build/en/guides/syntax-highlighting/) -- HIGH confidence, official documentation
-- [Astro GitHub Pages Deployment docs](https://docs.astro.build/en/guides/deploy/github/) -- HIGH confidence, official documentation
-- [SEO Checklist for Developer Portfolios (Shipixen)](https://shipixen.com/blog/seo-checklist-for-developer-portfolios-and-landing-pages) -- MEDIUM confidence, verified against multiple sources
-- [5 Mistakes Developers Make in Portfolio Websites](https://www.devportfoliotemplates.com/blog/5-mistakes-developers-make-in-their-portfolio-websites) -- MEDIUM confidence, aligns with multiple sources
-- [How Recruiters Actually Look at Your Portfolio](https://blog.opendoorscareers.com/p/how-recruiters-and-hiring-managers-actually-look-at-your-portfolio) -- MEDIUM confidence
-- [Beyond the ATS: Build a Tech Portfolio That Gets Hired (TieTalent)](https://tietalent.com/en/blog/220/beyond-the-ats-how-to-build-a-tech-portfolio) -- MEDIUM confidence
-- [Astro OG Image Generation (Cassidy Williams)](https://cassidoo.co/post/og-image-gen-astro/) -- MEDIUM confidence, practical implementation guide
-- [Dynamic OG Images in AstroPaper](https://astro-paper.pages.dev/posts/dynamic-og-image-generation-in-astropaper-blog-posts/) -- MEDIUM confidence
-- [Pagefind for Static Site Search](https://www.webdong.dev/en/post/how-to-add-search-to-any-kind-of-static-site-using-pagefind/) -- MEDIUM confidence
-- [Plausible Analytics](https://plausible.io/) -- HIGH confidence, official site
-- [Dark Mode Design Trends 2025 (AlterSquare)](https://www.altersquare.io/dark-mode-design-trends-for-2025-should-your-startup-adopt-it/) -- MEDIUM confidence
-- [Structured Data for SEO (DK Development)](https://dkdevelopment.net/seo-structured-data-2025/) -- MEDIUM confidence
+### HIGH Confidence (Official Documentation)
+- [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/) -- Collection definition, loaders, querying, merging multiple collections
+- [Astro Content Loader API Reference](https://docs.astro.build/en/reference/content-loader-reference/) -- Custom loader interface, inline loaders, object loaders, LoaderContext
+- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- getCollection(), getEntry(), schema validation
+
+### MEDIUM Confidence (Verified Patterns)
+- [Syncing dev.to Posts with Astro Blog](https://logarithmicspirals.com/blog/updating-astro-blog-to-pull-devto-posts/) -- Real-world pattern for mixing local + external posts, canonical URL handling
+- [Adding Local Markdown Posts to Hashnode-Powered Astro Blog](https://akoskm.com/hashnode-local-astro-hybrid-setup/) -- Hybrid local/external content approach
+- [Building an RSS Aggregator with Astro (Raymond Camden)](https://www.raymondcamden.com/2026/02/02/building-an-rss-aggregator-with-astro) -- RSS parsing patterns, rss-parser library
+- [Hero Section Copywriting Tips](https://zoconnected.com/blog/how-to-write-hero-section-website-copy/) -- 6-10 word headline, clarity over cleverness
+- [Hero Section Examples Analysis (Thrive Themes)](https://thrivethemes.com/hero-section-examples/) -- Headline + subtitle structure, CTA placement
+- [Developer Portfolio Best Practices 2025 (CodeTap)](https://codetap.org/blog/developer-portfolio-2025) -- Social link placement, contact info visibility
+
+### Verified External Blog Data
+- Translucent Computing blog (`translucentcomputing.com/blog/`) -- WordPress site, RSS at `/feed/`, 62 posts in sitemap, 4 in RSS feed, Patryk + other authors
+- Kubert AI blog (`mykubert.com/blog/`) -- WordPress site, RSS at `/feed/`, 17 posts in sitemap, 3 in RSS feed, Patryk primary author
+- Both blogs confirmed accessible via standard WordPress RSS feeds and XML sitemaps (Yoast SEO + W3 Total Cache)
 
 ---
-*Feature research for: patrykgolabek.dev -- Developer Portfolio + Blog*
+*Feature research for: patrykgolabek.dev v1.1 Content Refresh*
 *Researched: 2026-02-11*

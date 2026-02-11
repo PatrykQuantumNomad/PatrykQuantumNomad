@@ -1,712 +1,525 @@
-# Architecture Research
+# Architecture Research: v1.1 Content Refresh
 
-**Domain:** Astro 5+ portfolio + blog static site (patrykgolabek.dev)
+**Domain:** Integration of external blog entries, social links configuration, hero updates, and project curation into existing Astro 5 portfolio site
 **Researched:** 2026-02-11
 **Confidence:** HIGH
+**Scope:** Modifications to existing architecture -- NOT a from-scratch build
 
-## System Overview
+## Integration with Existing System
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Build Layer (Astro SSG)                     │
-│                                                                     │
-│  astro.config.mjs          src/content.config.ts                    │
-│  (site, base, vite         (defineCollection, glob loader,          │
-│   plugins, integrations)    Zod schemas, type generation)           │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                         Page Layer (src/pages/)                     │
-│                                                                     │
-│  ┌──────────┐ ┌──────────┐ ┌────────────────┐ ┌──────────────────┐ │
-│  │ index    │ │ about    │ │ projects/      │ │ blog/            │ │
-│  │ .astro   │ │ .astro   │ │ index.astro    │ │ index.astro      │ │
-│  │          │ │          │ │                │ │ [slug].astro     │ │
-│  └────┬─────┘ └────┬─────┘ └──────┬─────────┘ └──────┬───────────┘ │
-│       │            │              │                   │             │
-│       └────────────┴──────────────┴───────────────────┘             │
-│                            │                                        │
-├────────────────────────────┼────────────────────────────────────────┤
-│                      Layout Layer                                   │
-│                            │                                        │
-│                   ┌────────┴────────┐                               │
-│                   │  BaseLayout     │                               │
-│                   │  (html, head,   │                               │
-│                   │   body shell)   │                               │
-│                   └────────┬────────┘                               │
-│                            │                                        │
-│              ┌─────────────┼──────────────┐                         │
-│              │             │              │                          │
-│       ┌──────┴──────┐ ┌───┴────┐  ┌──────┴──────┐                  │
-│       │  SEO        │ │ Header │  │  Footer     │                  │
-│       │  (meta,og,  │ │ (nav,  │  │  (links,    │                  │
-│       │   schema)   │ │  theme)│  │   social)   │                  │
-│       └─────────────┘ └────────┘  └─────────────┘                  │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                      Component Layer                                │
-│                                                                     │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐          │
-│  │ Hero      │ │ BlogCard  │ │ Project   │ │ Particle  │          │
-│  │ Section   │ │           │ │ Card      │ │ Background│          │
-│  └───────────┘ └───────────┘ └───────────┘ └───────────┘          │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐          │
-│  │ ScrollRe- │ │ ThemeTog- │ │ Tag/Badge │ │ Section   │          │
-│  │ veal      │ │ gle       │ │           │ │ Heading   │          │
-│  └───────────┘ └───────────┘ └───────────┘ └───────────┘          │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                      Content Layer                                  │
-│                                                                     │
-│  src/data/blog/              src/data/projects/                     │
-│  ├── post-1.md               ├── projects.json                     │
-│  ├── post-2.md               (or individual .md files)             │
-│  └── post-3.mdx                                                    │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                      Static Assets (public/)                        │
-│                                                                     │
-│  ├── favicon.svg   ├── robots.txt   ├── CNAME                      │
-│  └── og-default.png                                                 │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                      Output (dist/)                                 │
-│                                                                     │
-│  Static HTML + CSS + minimal JS  -->  GitHub Pages                  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+### Current Architecture Snapshot
+
+The v1.0 site at patrykgolabek.dev is a fully operational Astro 5 static site with:
+
+- **Content config:** `src/content.config.ts` defines a single `blog` collection using `glob()` loader pointed at `./src/data/blog`
+- **Blog schema:** Zod object with `title`, `description`, `publishedDate`, `updatedDate?`, `tags[]`, `draft`
+- **Blog listing:** `src/pages/blog/index.astro` queries `getCollection('blog')`, sorts by date, renders `BlogCard` components
+- **Blog detail:** `src/pages/blog/[slug].astro` uses `getStaticPaths()` + `render()` to generate individual post pages
+- **Home page:** `src/pages/index.astro` shows 3 latest posts with hardcoded hero text and typing animation roles array
+- **Projects:** `src/data/projects.ts` TypeScript module (NOT a content collection) with typed `Project[]` array and `categories` const
+- **Social links:** Hardcoded as inline HTML in `Footer.astro` (GitHub, LinkedIn, Translucent Computing Blog) and `contact.astro` (same + Kubert AI Blog)
+- **Contact info:** Hardcoded email (`patryk@translucentcomputing.com`) in `index.astro` CTA and `contact.astro`
+- **SEO data:** `PersonJsonLd.astro` has hardcoded `sameAs` array; `SEOHead.astro` has no centralized site data import
+
+### What Changes, What Stays
+
+| Component | Status | Change Summary |
+|-----------|--------|----------------|
+| `src/content.config.ts` | **MODIFY** | Add `externalUrl` optional field to blog schema |
+| `src/data/blog/*.md` | **ADD/REMOVE** | Add external blog entry stubs; remove unwanted posts |
+| `src/data/projects.ts` | **MODIFY** | Remove specific project entries from the array |
+| `src/data/site.ts` (NEW) | **CREATE** | Centralized site config: social links, contact info, hero text |
+| `src/components/BlogCard.astro` | **MODIFY** | Conditional link: external URL vs internal `/blog/{id}/` |
+| `src/pages/blog/index.astro` | **MINOR MODIFY** | No structural change; BlogCard handles link logic |
+| `src/pages/blog/[slug].astro` | **MODIFY** | Filter out external posts from `getStaticPaths()` |
+| `src/pages/index.astro` | **MODIFY** | Import hero text from `site.ts`; import social links; update typing roles |
+| `src/components/Footer.astro` | **MODIFY** | Import social links from `site.ts` instead of hardcoding |
+| `src/pages/contact.astro` | **MODIFY** | Import contact info and social links from `site.ts` |
+| `src/components/PersonJsonLd.astro` | **MODIFY** | Import `sameAs` URLs from `site.ts` |
+| `src/pages/rss.xml.ts` | **MODIFY** | Handle external posts: use `externalUrl` as link for external entries |
+| `src/pages/llms.txt.ts` | **MODIFY** | Same external URL handling |
+| `src/pages/open-graph/[...slug].png.ts` | **MODIFY** | Skip OG image generation for external posts |
+| `astro.config.mjs` | **NO CHANGE** | No configuration changes needed |
+| `src/layouts/Layout.astro` | **NO CHANGE** | Layout is unchanged |
+| `src/components/Header.astro` | **NO CHANGE** | Navigation unchanged |
+| `src/pages/blog/tags/[tag].astro` | **MODIFY** | BlogCard handles link logic; tags page needs no structural change |
+
+---
+
+## Component Modifications
+
+### 1. Blog Schema Extension (`src/content.config.ts`)
+
+**Current state:**
+```typescript
+schema: z.object({
+  title: z.string(),
+  description: z.string(),
+  publishedDate: z.coerce.date(),
+  updatedDate: z.coerce.date().optional(),
+  tags: z.array(z.string()).default([]),
+  draft: z.boolean().default(false),
+}),
 ```
 
-### Component Responsibilities
-
-| Component | Responsibility | Communicates With |
-|-----------|----------------|-------------------|
-| `astro.config.mjs` | Site URL, Vite plugins (Tailwind), build output, integrations | Build system, all components |
-| `src/content.config.ts` | Collection definitions (blog, projects), Zod schemas, glob loaders | Content layer, page layer |
-| `BaseLayout.astro` | HTML shell (`<html>`, `<head>`, `<body>`), global CSS import, `<slot />` for page content | SEO, Header, Footer, ClientRouter, all pages |
-| `SEO.astro` | `<title>`, `<meta>`, Open Graph, Twitter Cards, JSON-LD schema | BaseLayout (receives props), `<head>` |
-| `Header.astro` | Navigation links, site logo, ThemeToggle mount point | BaseLayout, ThemeToggle |
-| `Footer.astro` | Social links, copyright, secondary navigation | BaseLayout |
-| `ThemeToggle.astro` | Light/dark mode switch, localStorage persistence, system preference detection | Header, inline `<script>`, `<html>` class attribute |
-| `ParticleBackground` | Canvas-based or CSS particle animation for hero sections | Hero section (client:idle or client:visible island) |
-| `ScrollReveal.astro` | IntersectionObserver-based reveal animations for sections | Any section wrapper, inline `<script>` |
-| `BlogCard.astro` | Preview card for blog posts (title, date, excerpt, tags) | Blog index page, content collection data |
-| `ProjectCard.astro` | Preview card for projects (name, tech stack, links) | Projects page, content collection data |
-| Page files (`src/pages/`) | Route definitions, data fetching via `getCollection()`/`getEntry()`, template composition | Layouts, components, content collections |
-| `[slug].astro` | Dynamic blog post routes via `getStaticPaths()`, renders `<Content />` from `render()` | Content collections, BaseLayout |
-
-## Recommended Project Structure
-
-```
-patrykgolabek.dev/
-├── public/                        # Static assets (no processing)
-│   ├── favicon.svg                # Site favicon
-│   ├── og-default.png             # Default Open Graph image
-│   ├── robots.txt                 # Search engine directives
-│   └── CNAME                      # Custom domain for GitHub Pages
-│
-├── src/
-│   ├── components/                # Reusable UI components
-│   │   ├── layout/                # Layout-specific components
-│   │   │   ├── Header.astro       # Site navigation + theme toggle
-│   │   │   ├── Footer.astro       # Footer content + social links
-│   │   │   └── SEO.astro          # Meta tags, OG, JSON-LD
-│   │   │
-│   │   ├── ui/                    # Generic UI primitives
-│   │   │   ├── BlogCard.astro     # Blog post preview card
-│   │   │   ├── ProjectCard.astro  # Project showcase card
-│   │   │   ├── TagBadge.astro     # Tag/category badge
-│   │   │   ├── SectionHeading.astro # Consistent section headers
-│   │   │   └── Button.astro       # Reusable button/link component
-│   │   │
-│   │   ├── sections/              # Page-specific section blocks
-│   │   │   ├── Hero.astro         # Landing page hero
-│   │   │   ├── FeaturedPosts.astro  # Recent blog posts section
-│   │   │   ├── FeaturedProjects.astro # Highlighted projects
-│   │   │   └── SkillsGrid.astro   # Technology/skills showcase
-│   │   │
-│   │   └── effects/               # Animation & visual effects
-│   │       ├── ScrollReveal.astro # IntersectionObserver reveals
-│   │       ├── ParticleCanvas.astro # Particle background effect
-│   │       └── ThemeToggle.astro  # Dark/light mode switcher
-│   │
-│   ├── layouts/                   # Page layout templates
-│   │   └── BaseLayout.astro       # Root layout (html/head/body)
-│   │
-│   ├── pages/                     # File-based routes (REQUIRED)
-│   │   ├── index.astro            # Home page (/)
-│   │   ├── about.astro            # About page (/about/)
-│   │   ├── projects/
-│   │   │   └── index.astro        # Projects listing (/projects/)
-│   │   └── blog/
-│   │       ├── index.astro        # Blog listing (/blog/)
-│   │       └── [slug].astro       # Individual post (/blog/[slug]/)
-│   │
-│   ├── data/                      # Content collection source files
-│   │   ├── blog/                  # Blog post markdown/MDX files
-│   │   │   ├── my-first-post.md
-│   │   │   └── another-post.mdx
-│   │   └── projects/              # Project data
-│   │       └── projects.json      # Or individual .md files
-│   │
-│   ├── styles/                    # Global styles
-│   │   └── global.css             # Tailwind import + custom CSS vars
-│   │
-│   ├── lib/                       # Utility functions
-│   │   ├── constants.ts           # Site metadata, nav links, social links
-│   │   ├── utils.ts               # Date formatting, slug helpers
-│   │   └── types.ts               # Shared TypeScript types
-│   │
-│   └── content.config.ts          # Content collection definitions
-│
-├── astro.config.mjs               # Astro configuration
-├── tsconfig.json                  # TypeScript configuration
-├── package.json                   # Dependencies and scripts
-└── .github/
-    └── workflows/
-        └── deploy.yml             # GitHub Pages deployment action
+**Target state -- add two optional fields:**
+```typescript
+schema: z.object({
+  title: z.string(),
+  description: z.string(),
+  publishedDate: z.coerce.date(),
+  updatedDate: z.coerce.date().optional(),
+  tags: z.array(z.string()).default([]),
+  draft: z.boolean().default(false),
+  externalUrl: z.string().url().optional(),  // NEW: link to external blog
+  source: z.string().optional(),              // NEW: "Translucent Computing", "Kubert AI", etc.
+}),
 ```
 
-### Structure Rationale
+**Rationale:** This is the simplest approach that keeps ALL blog entries in one collection. External posts are just markdown stubs with minimal body content and an `externalUrl` in frontmatter. This avoids creating a second collection, a custom loader, or any merge logic. The `glob()` loader still works -- external entries are just `.md` files with a special frontmatter field. The `source` field provides a display label for where the post lives (shown on the card as a badge).
 
-- **`src/components/` with subdirectories:** Prevents a flat dump of 15+ components. `layout/` holds structural pieces that appear on every page. `ui/` holds generic reusable primitives. `sections/` holds composed blocks used on specific pages. `effects/` isolates animation concerns that may need client-side JS.
-- **`src/data/` instead of `src/content/`:** Astro 5's Content Layer API decoupled content from the `src/content/` directory. The `glob()` loader points to any directory. Using `src/data/` makes the separation between "content files" and "content config" clearer and avoids confusion with the old convention. The config file lives at `src/content.config.ts` regardless of where data files are stored.
-- **`src/lib/`:** Centralizes non-component logic (constants, utilities, types). Keeps components focused on rendering, not data manipulation.
-- **`src/styles/global.css`:** Single entry point for Tailwind (`@import "tailwindcss"`) plus CSS custom properties for theme colors, fonts, and animation variables. Imported once in `BaseLayout.astro`.
-- **`public/CNAME`:** Required for custom domain on GitHub Pages. Must contain `patrykgolabek.dev`.
+**Why NOT a separate collection or custom inline loader:**
+- A second collection (e.g., `externalBlogs`) would require merging two arrays in every page that lists posts, manually sorting the combined result, and maintaining two schemas. This adds complexity for minimal benefit.
+- A custom inline loader that programmatically defines entries would work but loses the ergonomics of writing markdown files. Adding an external post should be "create a .md file with frontmatter" -- the same workflow as internal posts.
+- The single-collection approach means `getCollection('blog')` returns everything, already sorted by date, with no merge step. Pages just need to check `post.data.externalUrl` to decide behavior.
 
-## Architectural Patterns
+**Confidence:** HIGH -- this is a standard Zod `.optional()` field on an existing schema. Astro's content layer treats it as any other frontmatter field. Verified via [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/).
 
-### Pattern 1: Single Base Layout with Prop-Driven SEO
+### 2. External Blog Entry Files (`src/data/blog/`)
 
-**What:** One `BaseLayout.astro` wraps every page. It receives SEO data as props and passes them to the `SEO.astro` component. No separate layout per page type -- use composition within pages instead.
+**Structure of an external blog stub file:**
+```markdown
+---
+title: "Building RAG Pipelines with LangChain and Kubernetes"
+description: "A deep dive into production RAG architecture using LangChain, vector databases, and Kubernetes orchestration."
+publishedDate: 2025-11-15
+tags: ["ai", "rag", "kubernetes", "langchain"]
+externalUrl: "https://translucentcomputing.com/blog/rag-pipelines-langchain-kubernetes/"
+source: "Translucent Computing"
+---
 
-**When to use:** Always. Every page needs the HTML shell, global CSS, header, footer, and SEO meta.
+Originally published on Translucent Computing Blog.
+```
 
-**Trade-offs:** Simpler than multiple layouts. If a page needs radically different chrome (no header), use a boolean prop like `hideNav` rather than creating a second layout.
+The body content is minimal -- it exists only because the `glob()` loader requires a markdown file. The body is never rendered for external posts. The filename (e.g., `rag-pipelines-langchain-kubernetes.md`) determines the `post.id` but no static page is generated for it.
 
-**Example:**
+### 3. BlogCard Component (`src/components/BlogCard.astro`)
+
+**Current behavior:** Always links to `/blog/${post.id}/`
+
+**Modified behavior:** Check `post.data.externalUrl`. If present, link there with `target="_blank"` and an external link indicator. If absent, link internally as before.
 
 ```astro
 ---
-// src/layouts/BaseLayout.astro
-import SEO from '../components/layout/SEO.astro';
-import Header from '../components/layout/Header.astro';
-import Footer from '../components/layout/Footer.astro';
-import { ClientRouter } from 'astro:transitions';
-import '../styles/global.css';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  title: string;
-  description: string;
-  ogImage?: string;
-  ogType?: 'website' | 'article';
-  publishedDate?: string;
-  canonicalUrl?: string;
+  post: CollectionEntry<'blog'>;
 }
 
-const { title, description, ogImage, ogType = 'website', publishedDate, canonicalUrl } = Astro.props;
+const { post } = Astro.props;
+const { title, description, publishedDate, tags, externalUrl, source } = post.data;
+const isExternal = !!externalUrl;
+const href = isExternal ? externalUrl : `/blog/${post.id}/`;
 ---
 
-<!doctype html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <SEO
-      title={title}
-      description={description}
-      ogImage={ogImage}
-      ogType={ogType}
-      publishedDate={publishedDate}
-      canonicalUrl={canonicalUrl ?? Astro.url.href}
-    />
-    <ClientRouter />
-  </head>
-  <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
-    <Header />
-    <main>
-      <slot />
-    </main>
-    <Footer />
-  </body>
-</html>
+<article class="group relative p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] hover:border-[var(--color-accent)] transition-colors">
+  <a
+    href={href}
+    class="absolute inset-0 z-0"
+    aria-label={title}
+    {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+  ></a>
+  <div class="flex items-center gap-2">
+    <time datetime={publishedDate.toISOString()} class="text-sm text-[var(--color-text-secondary)]">
+      {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+    </time>
+    {isExternal && source && (
+      <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-text-secondary)]/10 text-[var(--color-text-secondary)]">
+        {source}
+      </span>
+    )}
+  </div>
+  <h2 class="text-xl font-heading font-bold mt-2 group-hover:text-[var(--color-accent)] transition-colors">
+    {title}
+    {isExternal && (
+      <svg class="inline-block w-4 h-4 ml-1 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 17L17 7" />
+        <path d="M7 7h10v10" />
+      </svg>
+    )}
+  </h2>
+  <p class="mt-2 text-[var(--color-text-secondary)]">{description}</p>
+  {tags.length > 0 && (
+    <div class="flex flex-wrap gap-2 mt-4">
+      {tags.map((tag) => (
+        <a
+          href={`/blog/tags/${tag}/`}
+          class="relative z-10 text-xs px-2 py-1 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors"
+        >
+          {tag}
+        </a>
+      ))}
+    </div>
+  )}
+</article>
 ```
 
-### Pattern 2: Content Collection with Type-Safe Schema
+**Key design decisions:**
+- External posts get a small arrow icon next to the title (same icon used on projects page -- visual consistency)
+- External posts show a `source` badge next to the date
+- External links open in a new tab (`target="_blank"`)
+- Tag links still work and point to internal tag pages -- this is intentional so external posts contribute to the site's tag ecosystem
+- The card structure and styling remain identical -- external posts look like first-class content, not second-class citizens
 
-**What:** Define blog collection in `src/content.config.ts` using the Astro 5 Content Layer API with `glob()` loader and Zod schema validation. The schema enforces frontmatter structure at build time -- invalid posts fail the build with helpful error messages.
+### 4. Dynamic Blog Route (`src/pages/blog/[slug].astro`)
 
-**When to use:** For all structured content (blog posts, projects).
-
-**Trade-offs:** Slightly more setup than raw markdown imports, but provides type safety, validation, and the `getCollection()`/`render()` API. Worth it for any site with more than a handful of content files.
-
-**Example:**
-
-```typescript
-// src/content.config.ts
-import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
-
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    publishedDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-    ogImage: z.string().optional(),
-  }),
-});
-
-const projects = defineCollection({
-  loader: file('./src/data/projects/projects.json'),
-  schema: z.object({
-    name: z.string(),
-    description: z.string(),
-    url: z.string().url().optional(),
-    repo: z.string().url().optional(),
-    tags: z.array(z.string()),
-    featured: z.boolean().default(false),
-  }),
-});
-
-export const collections = { blog, projects };
-```
-
-### Pattern 3: Dynamic Routes via getStaticPaths + Content Collections
-
-**What:** The `[slug].astro` page exports `getStaticPaths()` which queries the blog collection and generates one static HTML page per post at build time. Data is passed via `props` -- no re-querying inside the component.
-
-**When to use:** For the `/blog/[slug]/` route. This is the canonical Astro 5 pattern for content-driven static pages.
-
-**Trade-offs:** All routes must be known at build time (this is correct for a static blog). Adding a new post means rebuilding the site.
-
-**Example:**
+**Critical change:** Filter out external posts from `getStaticPaths()`. External posts must NOT generate local pages -- they have no renderable body content.
 
 ```astro
----
-// src/pages/blog/[slug].astro
-import { getCollection, render } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blog', ({ data }) => {
+    return (import.meta.env.PROD ? data.draft !== true : true) && !data.externalUrl;
+  });
+
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
   }));
 }
-
-const { post } = Astro.props;
-const { Content, headings } = await render(post);
----
-
-<BaseLayout
-  title={post.data.title}
-  description={post.data.description}
-  ogType="article"
-  publishedDate={post.data.publishedDate.toISOString()}
->
-  <article class="prose dark:prose-invert max-w-3xl mx-auto px-4 py-12">
-    <h1>{post.data.title}</h1>
-    <time datetime={post.data.publishedDate.toISOString()}>
-      {post.data.publishedDate.toLocaleDateString('en-CA')}
-    </time>
-    <Content />
-  </article>
-</BaseLayout>
 ```
 
-### Pattern 4: Theme Toggle with Anti-Flicker Inline Script
+The only change is adding `&& !data.externalUrl` to the filter. Everything else in the file stays the same.
 
-**What:** Dark mode uses Tailwind's `class` strategy (`dark:` variants). A tiny inline script in `<head>` reads `localStorage` and applies the `dark` class to `<html>` before the page paints. The toggle component updates localStorage and the class. When using View Transitions (`<ClientRouter />`), the `astro:after-swap` event re-applies the theme to prevent flash-of-wrong-theme between navigations.
+### 5. Centralized Site Configuration (`src/data/site.ts` -- NEW FILE)
 
-**When to use:** Any Astro site with dark mode and View Transitions.
+**Current problem:** Social links, contact email, and hero text are scattered as hardcoded strings across `Footer.astro`, `contact.astro`, `index.astro`, and `PersonJsonLd.astro`. Updating the email requires changes in 3 files. Adding a social link requires editing 2-3 components.
 
-**Trade-offs:** The inline script in `<head>` adds ~200 bytes to every page but eliminates the flash-of-incorrect-theme (FOIT) that would occur if theme detection ran after paint.
+**Solution:** A single TypeScript data file that exports typed configuration objects.
 
-**Example:**
+```typescript
+// src/data/site.ts
 
+export interface SocialLink {
+  platform: string;
+  url: string;
+  label: string;
+  icon: string; // SVG path data or icon identifier
+}
+
+export const socialLinks: SocialLink[] = [
+  {
+    platform: 'github',
+    url: 'https://github.com/PatrykQuantumNomad',
+    label: 'GitHub profile',
+    icon: 'github',
+  },
+  {
+    platform: 'linkedin',
+    url: 'https://www.linkedin.com/in/patrykgolabek/',
+    label: 'LinkedIn profile',
+    icon: 'linkedin',
+  },
+  {
+    platform: 'blog-tc',
+    url: 'https://translucentcomputing.com/blog/',
+    label: 'Translucent Computing Blog',
+    icon: 'book',
+  },
+  {
+    platform: 'blog-kubert',
+    url: 'https://mykubert.com/blog/',
+    label: 'Kubert AI Blog',
+    icon: 'sparkle',
+  },
+];
+
+export const contact = {
+  email: 'patryk@translucentcomputing.com',
+};
+
+export const hero = {
+  name: 'Patryk Golabek',
+  tagline: 'Building resilient cloud-native systems and AI-powered solutions for 17+ years. Pre-1.0 Kubernetes adopter. Ontario, Canada.',
+  roles: ['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder'],
+};
+
+export const sameAs = socialLinks.map((link) => link.url);
+```
+
+**Why `src/data/site.ts` and not `src/lib/constants.ts`:**
+The existing project uses `src/data/` for content data files (blog posts, projects). Site configuration is data, not library code. Keeping it in `src/data/` follows the established convention. The v1.0 architecture research recommended `src/lib/constants.ts`, but the actual implementation never created that file -- the data ended up hardcoded in components. This is the opportunity to centralize it.
+
+**Why a TypeScript file and not JSON/YAML:**
+- Type safety: interfaces are defined alongside the data
+- Computed properties: `sameAs` derives from `socialLinks` automatically
+- Import ergonomics: `import { socialLinks } from '../data/site'` works cleanly in `.astro` files
+
+### 6. Footer Social Links (`src/components/Footer.astro`)
+
+**Current state:** Three hardcoded `<a>` tags with inline SVG icons for GitHub, LinkedIn, and Translucent Computing Blog.
+
+**Modified state:** Import `socialLinks` from `src/data/site.ts` and render dynamically. SVG icons are mapped via a helper or kept as a simple conditional block since there are only 3-4 links.
+
+The SVG icons are currently inline in the template. For maintainability, the simplest approach is a map of platform-to-SVG-markup within the component, or keep using inline SVGs but drive the `href` and `aria-label` from the imported data. Full icon-component abstraction is over-engineering for 4 social links.
+
+**Recommended approach -- minimal change:**
 ```astro
 ---
-// In BaseLayout.astro <head>, BEFORE any stylesheet:
+import { socialLinks } from '../data/site';
+const currentYear = new Date().getFullYear();
 ---
+```
+Then iterate `socialLinks` to render each `<a>` tag. The SVG icon rendering can use a simple `{link.icon === 'github' && (...)}` conditional or a small `SocialIcon` helper component.
+
+### 7. Home Page Hero (`src/pages/index.astro`)
+
+**Current state:** Hero text is hardcoded directly in the template. The typing roles array is in an inline `<script is:inline>` block.
+
+**What changes:**
+1. Import `hero` from `src/data/site.ts` for the name, tagline, and static role text
+2. Import `contact` for the CTA email link
+3. The typing `roles` array in the inline script should also reference the config -- but since `<script is:inline>` does not have access to Astro variables at runtime, the roles array needs to be injected via a `data-*` attribute or a `<script>` block that reads from a rendered element
+
+**Recommended pattern for typing roles:**
+```astro
+<span id="typing-role" class="typing-cursor" data-roles={JSON.stringify(hero.roles)}>
+  {hero.roles[0]}
+</span>
+
 <script is:inline>
-  const theme = (() => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme');
+  (function() {
+    if (window.__typingInterval) clearInterval(window.__typingInterval);
+    const el = document.getElementById('typing-role');
+    if (!el) return;
+    const roles = JSON.parse(el.dataset.roles || '[]');
+    let i = 0;
+    if (roles.length > 1) {
+      window.__typingInterval = setInterval(function() {
+        i = (i + 1) % roles.length;
+        el.textContent = roles[i];
+      }, 3000);
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   })();
-  document.documentElement.classList.toggle('dark', theme === 'dark');
-
-  // Re-apply on View Transition page swap
-  document.addEventListener('astro:after-swap', () => {
-    const t = localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', t === 'dark');
-  });
 </script>
 ```
 
-### Pattern 5: Scroll Reveal via IntersectionObserver (No Framework)
+This keeps the roles defined in one place (`site.ts`) and injects them into the DOM via `data-roles`. The inline script reads them at runtime.
 
-**What:** A `ScrollReveal.astro` wrapper component that uses a small inline script with `IntersectionObserver` to add a CSS class when elements enter the viewport. Pure CSS handles the animation. No React/Vue/Svelte needed -- this stays within Astro's zero-JS-by-default philosophy.
+### 8. Contact Page (`src/pages/contact.astro`)
 
-**When to use:** For scroll-triggered fade-in, slide-up, or other reveal animations on sections.
+**Current state:** Hardcoded email, LinkedIn URL, GitHub URL, blog URLs as inline HTML.
 
-**Trade-offs:** Lighter than a framework island. Inline script re-runs per page if `data-astro-rerun` is set or if using `is:inline`. For View Transitions, listen to `astro:page-load` to re-initialize observers.
+**Modified state:** Import `socialLinks` and `contact` from `src/data/site.ts`. Map social links to contact cards. The page layout stays the same, but URLs come from the centralized config.
 
-**Example:**
+### 9. PersonJsonLd (`src/components/PersonJsonLd.astro`)
 
-```astro
----
-// src/components/effects/ScrollReveal.astro
-interface Props {
-  animation?: 'fade-up' | 'fade-in' | 'slide-left';
-  delay?: number;
-  threshold?: number;
-}
+**Current state:** Hardcoded `sameAs` array with 4 URLs.
 
-const { animation = 'fade-up', delay = 0, threshold = 0.1 } = Astro.props;
----
+**Modified state:** Import `sameAs` from `src/data/site.ts`. The structured data stays accurate as social links are added or removed.
 
-<div
-  class="scroll-reveal opacity-0"
-  data-animation={animation}
-  data-delay={delay}
-  data-threshold={threshold}
->
-  <slot />
-</div>
+### 10. RSS Feed (`src/pages/rss.xml.ts`)
 
-<script>
-  function initScrollReveal() {
-    const elements = document.querySelectorAll('.scroll-reveal:not(.revealed)');
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            const delay = parseInt(el.dataset.delay || '0', 10);
-            setTimeout(() => el.classList.add('revealed'), delay);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    );
-    elements.forEach((el) => observer.observe(el));
-  }
+**Current state:** All blog posts get `/blog/${post.id}/` as the link.
 
-  // Run on initial load and after View Transition navigations
-  initScrollReveal();
-  document.addEventListener('astro:page-load', initScrollReveal);
-</script>
+**Modified state:** External posts should use their `externalUrl` as the RSS link. This way RSS readers link directly to the external article.
+
+```typescript
+items: posts.map((post) => ({
+  title: post.data.title,
+  pubDate: post.data.publishedDate,
+  description: post.data.description,
+  link: post.data.externalUrl ?? `/blog/${post.id}/`,
+})),
 ```
 
-### Pattern 6: SEO Component with Structured Data
+### 11. LLMs.txt (`src/pages/llms.txt.ts`)
 
-**What:** A single `SEO.astro` component owns all `<head>` meta tags: basic meta, Open Graph, Twitter Cards, and JSON-LD structured data. Pages pass data as props. Defaults come from a site constants file.
+**Same pattern as RSS:** External posts should link to their `externalUrl`.
 
-**When to use:** Every page, via BaseLayout.
+### 12. OG Image Generation (`src/pages/open-graph/[...slug].png.ts`)
 
-**Trade-offs:** Centralizes all SEO logic in one place. If structured data becomes complex (e.g., different schemas per page type), consider splitting into sub-components, but start unified.
+**Filter out external posts:** External posts do not have local pages, so they should not have OG images generated. Add `&& !data.externalUrl` to the filter in `getStaticPaths`.
 
-**Example:**
+### 13. Project Data Curation (`src/data/projects.ts`)
 
-```astro
----
-// src/components/layout/SEO.astro
-import { SITE } from '../../lib/constants';
+**Change type:** Data removal only. Remove specific entries from the `projects` array. No structural changes to the `Project` interface, `categories` array, or the projects page component.
 
-interface Props {
-  title: string;
-  description: string;
-  ogImage?: string;
-  ogType?: 'website' | 'article';
-  publishedDate?: string;
-  canonicalUrl: string;
-}
-
-const {
-  title,
-  description,
-  ogImage = SITE.defaultOgImage,
-  ogType = 'website',
-  publishedDate,
-  canonicalUrl,
-} = Astro.props;
-
-const fullTitle = `${title} | ${SITE.name}`;
-const ogImageUrl = new URL(ogImage, Astro.site).href;
-
-const jsonLd = ogType === 'article'
-  ? {
-      '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
-      headline: title,
-      description,
-      datePublished: publishedDate,
-      author: { '@type': 'Person', name: SITE.author },
-      image: ogImageUrl,
-    }
-  : {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: SITE.name,
-      url: SITE.url,
-      description,
-    };
 ---
 
-<title>{fullTitle}</title>
-<meta name="description" content={description} />
-<link rel="canonical" href={canonicalUrl} />
+## Data Flow for External Blog Entries
 
-<!-- Open Graph -->
-<meta property="og:title" content={fullTitle} />
-<meta property="og:description" content={description} />
-<meta property="og:image" content={ogImageUrl} />
-<meta property="og:type" content={ogType} />
-<meta property="og:url" content={canonicalUrl} />
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={fullTitle} />
-<meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={ogImageUrl} />
-
-<!-- Structured Data -->
-<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-```
-
-## Data Flow
-
-### Build-Time Data Flow (Primary)
+### Build-Time Flow
 
 ```
-┌─────────────────┐     glob()       ┌──────────────────────┐
-│  Markdown/MDX   │────────────────>│  Content Collections  │
-│  files in       │                  │  (validated by Zod    │
-│  src/data/blog/ │                  │   schema at build)    │
-└─────────────────┘                  └──────────┬───────────┘
-                                                │
-                         getCollection('blog')  │  getEntry('blog', id)
-                                                │
-                    ┌───────────────────────────┬┴──────────────────────┐
-                    │                           │                       │
-              ┌─────┴─────┐             ┌───────┴──────┐        ┌──────┴──────┐
-              │ blog/     │             │ blog/        │        │ index.astro │
-              │ index     │             │ [slug].astro │        │ (featured   │
-              │ .astro    │             │              │        │  posts)     │
-              │           │             │ render(post) │        │             │
-              │ Lists all │             │ -> <Content/>│        │             │
-              │ posts     │             │ -> headings  │        │             │
-              └─────┬─────┘             └──────┬───────┘        └──────┬──────┘
-                    │                          │                       │
-                    │        props             │   props               │  props
-                    ▼                          ▼                       ▼
-              ┌───────────┐             ┌────────────┐         ┌────────────┐
-              │ BaseLayout│             │ BaseLayout │         │ BaseLayout │
-              │  + SEO    │             │  + SEO     │         │  + SEO     │
-              │  + Header │             │  + Header  │         │  + Header  │
-              │  + Footer │             │  + Footer  │         │  + Footer  │
-              └─────┬─────┘             └─────┬──────┘         └─────┬──────┘
-                    │                         │                      │
-                    ▼                         ▼                      ▼
-              ┌───────────┐             ┌────────────┐         ┌────────────┐
-              │ Static    │             │ Static     │         │ Static     │
-              │ HTML      │             │ HTML       │         │ HTML       │
-              │ /blog/    │             │ /blog/slug │         │ /          │
-              └───────────┘             └────────────┘         └────────────┘
+src/data/blog/
+ |
+ +-- building-kubernetes-observability-stack.md  (internal, externalUrl: undefined)
+ +-- draft-placeholder.md                        (internal, draft: true)
+ +-- rag-pipelines-langchain-kubernetes.md        (EXTERNAL, externalUrl: "https://...")
+ +-- kubert-ai-multi-agent-systems.md             (EXTERNAL, externalUrl: "https://...")
+ |
+ v  glob() loader
+ |
+ v  Zod schema validation (externalUrl is optional -- both pass)
+ |
+Content Collection Store
+ |
+ +---> getCollection('blog')
+        |
+        +---> blog/index.astro      --> ALL posts (internal + external)
+        |     renders BlogCard      --> BlogCard checks externalUrl
+        |                               - internal: href="/blog/{id}/"
+        |                               - external: href=externalUrl, target="_blank"
+        |
+        +---> blog/[slug].astro     --> ONLY internal posts (filter: !externalUrl)
+        |     getStaticPaths()          No static page generated for external posts
+        |     render(post)              render() only called on internal posts
+        |
+        +---> index.astro           --> 3 latest posts (internal + external mixed)
+        |     "Latest Writing"          Same BlogCard conditional logic
+        |
+        +---> blog/tags/[tag].astro --> Tag pages include external posts
+        |     getStaticPaths()          External posts tagged "kubernetes" appear on /blog/tags/kubernetes/
+        |                               BlogCard handles link logic
+        |
+        +---> rss.xml.ts            --> ALL non-draft posts
+        |     link = externalUrl ?? `/blog/${post.id}/`
+        |
+        +---> llms.txt.ts           --> ALL non-draft posts
+        |     link = externalUrl ?? local path
+        |
+        +---> open-graph/[...slug]  --> ONLY internal posts (filter: !externalUrl)
+              No OG images for external posts
 ```
 
-### Client-Side Data Flow (Minimal)
+### What Does NOT Change in the Data Flow
+
+- The `glob()` loader, Zod validation pipeline, and `getCollection()` API all work unchanged
+- The sort-by-date logic is unchanged -- external posts sort alongside internal posts by `publishedDate`
+- The draft filtering logic is unchanged -- external posts can also be drafts
+- Tag pages automatically include external posts because tags come from the same collection
+- View Transitions, theme toggle, scroll reveals -- all client-side behavior is unaffected
+
+---
+
+## New: Centralized Configuration Data Flow
 
 ```
-                    Browser loads static HTML
-                            │
-            ┌───────────────┼───────────────┐
-            │               │               │
-            ▼               ▼               ▼
-    ┌──────────────┐ ┌────────────┐ ┌──────────────────┐
-    │ Theme inline │ │ ScrollRev. │ │ ParticleCanvas   │
-    │ script (head)│ │ observer   │ │ (client:idle or  │
-    │              │ │ (inline)   │ │  client:visible)  │
-    │ Reads:       │ │            │ │                   │
-    │ localStorage │ │ Watches:   │ │ Reads: nothing    │
-    │ media query  │ │ viewport   │ │ Writes: canvas    │
-    │              │ │ position   │ │                   │
-    │ Writes:      │ │            │ │                   │
-    │ html.class   │ │ Writes:    │ │                   │
-    │ localStorage │ │ CSS classes│ │                   │
-    └──────────────┘ └────────────┘ └──────────────────┘
-            │
-            │  View Transition navigation
-            ▼
-    ┌──────────────────┐
-    │ astro:after-swap │ --> Re-apply theme class
-    │ astro:page-load  │ --> Re-init scroll observers
-    └──────────────────┘
+src/data/site.ts
+ |
+ +-- socialLinks[]   --> Footer.astro (social icon links)
+ |                   --> contact.astro (contact cards + "Other places" section)
+ |                   --> PersonJsonLd.astro (sameAs array)
+ |
+ +-- contact.email   --> index.astro (CTA "Get in Touch" mailto:)
+ |                   --> contact.astro (email card mailto:)
+ |
+ +-- hero.name       --> index.astro (h1)
+ +-- hero.tagline    --> index.astro (subtitle paragraph)
+ +-- hero.roles      --> index.astro (typing animation via data-roles attribute)
 ```
 
-### Key Data Flows
+---
 
-1. **Content to Page:** Markdown files -> `glob()` loader -> Zod validation -> `getCollection()` in page frontmatter -> props to components -> static HTML. All happens at build time. Zero runtime data fetching.
+## Modification Dependency Graph and Build Order
 
-2. **SEO Prop Cascade:** Page defines `title`/`description` -> passes as props to `BaseLayout` -> BaseLayout passes to `SEO` component -> SEO renders `<meta>`, `<title>`, JSON-LD into `<head>`. Constants file provides defaults.
+The v1.1 changes have clear dependencies that dictate build order:
 
-3. **Theme State:** `localStorage` + system `prefers-color-scheme` -> inline script sets `html.dark` class -> Tailwind `dark:` variants activate. Toggle button updates both localStorage and class. View Transition `astro:after-swap` event re-applies.
+```
+[1] src/data/site.ts (NEW)          <-- No dependencies. Create first.
+     |
+     +-----> [2] src/content.config.ts (MODIFY schema)    <-- No dependency on site.ts
+     |                                                         but logical to do alongside
+     |
+     +-----> [3] src/data/blog/*.md (ADD external stubs)   <-- Requires [2] for schema
+     |                                                         validation to pass
+     |
+     +-----> [4] src/components/BlogCard.astro (MODIFY)    <-- Requires [2] for types
+     |
+     +-----> [5a] src/components/Footer.astro (MODIFY)     <-- Requires [1] for imports
+     +-----> [5b] src/components/PersonJsonLd.astro (MODIFY) <-- Requires [1]
+     +-----> [5c] src/pages/contact.astro (MODIFY)         <-- Requires [1]
+     |
+     +-----> [6] src/pages/index.astro (MODIFY hero)       <-- Requires [1], [4]
+     |
+     +-----> [7a] src/pages/blog/[slug].astro (MODIFY)     <-- Requires [2]
+     +-----> [7b] src/pages/rss.xml.ts (MODIFY)            <-- Requires [2]
+     +-----> [7c] src/pages/llms.txt.ts (MODIFY)           <-- Requires [2]
+     +-----> [7d] src/pages/open-graph/[...slug].png.ts    <-- Requires [2]
+     |
+     +-----> [8] src/data/projects.ts (MODIFY -- remove entries) <-- Independent, any time
+```
 
-4. **Blog Post Rendering:** `getStaticPaths()` calls `getCollection('blog')` -> returns `params.slug` + `props.post` per entry -> page calls `render(post)` to get `<Content />` component + headings -> `<Content />` renders markdown as HTML inside the article layout.
+### Recommended Phase Structure for v1.1
 
-## Scaling Considerations
+**Phase 1: Configuration Foundation**
+1. Create `src/data/site.ts` with social links, contact, hero data
+2. Modify `src/content.config.ts` to add `externalUrl` and `source` fields
 
-| Concern | Current Scale (Portfolio) | If Content Grows (100+ posts) | Notes |
-|---------|--------------------------|-------------------------------|-------|
-| Build time | Sub-second for ~10 pages | Astro 5 Content Layer handles tens of thousands of entries with caching between builds | Not a concern until hundreds of posts |
-| Page weight | ~20-50KB per page (static HTML + Tailwind) | Same per page; listing pages may need pagination | Use `paginate()` helper at ~20 posts per page |
-| SEO | JSON-LD + OG tags per page | Consider generating sitemap.xml via `@astrojs/sitemap` integration | Add sitemap from Phase 1 |
-| Client JS | Near-zero (inline scripts only) | Same unless adding search | Pagefind for client-side search if needed later |
-| Images | `<Image />` component for optimization | Same; Sharp handles well | Use `src/` images for optimization, `public/` only for favicon/CNAME |
+**Phase 2: External Blog Integration**
+3. Add external blog entry stub files in `src/data/blog/`
+4. Modify `BlogCard.astro` for conditional internal/external linking
+5. Modify `blog/[slug].astro` to filter out external posts
+6. Modify `rss.xml.ts`, `llms.txt.ts`, `open-graph/[...slug].png.ts` for external post handling
 
-### Scaling Priorities
+**Phase 3: Centralized Config Consumption**
+7. Modify `Footer.astro` to import social links from `site.ts`
+8. Modify `contact.astro` to import social links and email from `site.ts`
+9. Modify `PersonJsonLd.astro` to import `sameAs` from `site.ts`
+10. Modify `index.astro` to import hero data and contact from `site.ts`
 
-1. **First optimization needed:** Pagination on the blog listing page. Once you have more than ~15-20 posts, a single listing page becomes unwieldy. Use Astro's built-in `paginate()` function in `getStaticPaths()`.
-
-2. **Second optimization needed:** Client-side search. At 50+ posts, visitors will want to search by keyword/tag. Pagefind is the standard choice for Astro static sites (runs at build time, generates a search index, ~5KB client bundle).
-
-3. **Third optimization needed:** Image optimization pipeline. If blog posts include many images, ensure all content images are in `src/` (not `public/`) so Astro's Sharp-based `<Image />` component can optimize format, dimensions, and quality at build time.
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Multiple Layout Files for Minor Variations
-
-**What people do:** Create `BlogLayout.astro`, `PageLayout.astro`, `HomeLayout.astro` that all duplicate the HTML shell, head tags, header, and footer.
-
-**Why it's wrong:** Leads to divergent `<head>` content across layouts, missed SEO tags on some pages, and duplicated maintenance burden. When you update the header, you must update it in every layout.
-
-**Do this instead:** One `BaseLayout.astro` with props for customization. Use conditional rendering for minor differences (e.g., `{showHero && <Hero />}`). Compose unique page sections inside the `<slot />`.
-
-### Anti-Pattern 2: Using `src/content/` Directory with Astro 5 Content Layer
-
-**What people do:** Place content files in `src/content/blog/` following the Astro 4 convention, then configure the `glob()` loader to point there.
-
-**Why it's wrong:** While it works, `src/content/` has legacy significance in Astro. The Content Layer API in Astro 5 decoupled the content directory from the config. Using `src/content/` can cause confusion about whether you are using the old or new API, and the legacy system may still try to process files there.
-
-**Do this instead:** Use `src/data/` (or any other directory name) for content files. The `glob()` loader in `src/content.config.ts` explicitly points to wherever your files are. This makes the new API boundary clear.
-
-### Anti-Pattern 3: Framework Islands for Static-Only Interactions
-
-**What people do:** Import React or Svelte components with `client:load` for simple interactions like a theme toggle, mobile menu, or scroll animation.
-
-**Why it's wrong:** Adds 30-80KB+ of framework JavaScript for interactions that need only a few lines of vanilla JS. Breaks Astro's zero-JS-by-default benefit. Increases time-to-interactive.
-
-**Do this instead:** Use Astro components with inline `<script>` tags for simple interactions. The theme toggle, mobile nav, and scroll reveals all work perfectly with vanilla JS. Reserve framework islands for genuinely complex interactive widgets (e.g., a filterable/sortable data table, a rich text editor).
-
-### Anti-Pattern 4: Fetching Data Inside Components Instead of Pages
-
-**What people do:** Import `getCollection()` inside a `BlogCard.astro` component to fetch its own data.
-
-**Why it's wrong:** Breaks the data-down pattern. Components become tightly coupled to the data source. Makes the component unusable in other contexts. Multiple components on a page might independently query the same collection.
-
-**Do this instead:** Fetch data in pages (or `getStaticPaths()`), pass data as props to components. Components are pure renderers -- they receive data and emit HTML.
-
-### Anti-Pattern 5: Skipping `astro:page-load` Re-initialization with View Transitions
-
-**What people do:** Initialize client-side behavior (scroll observers, event listeners) only on initial page load. After a View Transition navigation, those scripts do not re-run, leaving the page broken.
-
-**Why it's wrong:** The `<ClientRouter />` performs a soft DOM swap on navigation. Module scripts only execute once. Without re-initialization, interactive features silently break on the second page.
-
-**Do this instead:** Always wrap initialization logic in an `astro:page-load` event listener. This fires on initial load AND after every View Transition navigation.
-
-## Integration Points
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| GitHub Pages | `withastro/action@v5` GitHub Action, `public/CNAME` for custom domain | Set source to "GitHub Actions" in repo settings, not "Deploy from a branch" |
-| Google Analytics | Inline script in BaseLayout `<head>` or Partytown integration | Use Partytown to move analytics off main thread if needed |
-| RSS Feed | `@astrojs/rss` integration, generate in `src/pages/rss.xml.ts` | Queries content collections at build time |
-| Sitemap | `@astrojs/sitemap` integration in `astro.config.mjs` | Auto-generates from all pages; respects `site` config |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Pages <-> Content Collections | `getCollection()`, `getEntry()`, `render()` from `astro:content` | Build-time only. Pages own data fetching, not components |
-| Pages <-> BaseLayout | Props (`title`, `description`, `ogImage`, etc.) + `<slot />` for content | Layout never fetches its own data |
-| BaseLayout <-> SEO Component | Props cascade from page -> layout -> SEO | SEO component is a pure renderer |
-| Theme Script <-> ThemeToggle | Shared `localStorage` key ('theme') + `html.classList` | Both read/write the same storage key; the inline script runs first |
-| ScrollReveal <-> View Transitions | `astro:page-load` event | Observer re-initialization after every navigation |
-| Content Config <-> Markdown Files | `glob()` loader pattern + Zod schema | Config specifies base directory and file pattern; schema validates frontmatter |
-
-## Suggested Build Order
-
-Based on component dependencies, build in this order:
-
-### Phase 1: Foundation (no visible output depends on later phases)
-1. **Project scaffold** -- `astro.config.mjs`, `tsconfig.json`, Tailwind v4 setup
-2. **`src/lib/constants.ts`** -- Site metadata, nav links, social URLs (everything else references this)
-3. **`src/styles/global.css`** -- Tailwind import, CSS custom properties for theme colors
-4. **`src/content.config.ts`** -- Collection definitions and schemas (enables type generation via `astro sync`)
-
-### Phase 2: Layout Shell (all pages depend on this)
-5. **`SEO.astro`** -- Meta tags, OG, JSON-LD (needed by BaseLayout)
-6. **`Header.astro`** -- Navigation (needed by BaseLayout)
-7. **`Footer.astro`** -- Footer content (needed by BaseLayout)
-8. **`BaseLayout.astro`** -- Composes SEO + Header + Footer + global CSS + ClientRouter
-9. **Theme toggle inline script** -- Add to BaseLayout head (prevents FOIT)
-
-### Phase 3: Content Infrastructure (blog depends on this)
-10. **Sample blog post(s)** in `src/data/blog/` -- Needed to test collection queries
-11. **`BlogCard.astro`** -- Used by blog listing and home page
-12. **`/blog/index.astro`** -- Blog listing page with `getCollection('blog')`
-13. **`/blog/[slug].astro`** -- Dynamic post pages with `getStaticPaths()` + `render()`
-
-### Phase 4: Static Pages (independent of content infra)
-14. **`/index.astro`** -- Home page (can use placeholder content initially)
-15. **`/about.astro`** -- About page
-16. **`/projects/index.astro`** -- Projects page with project collection or static data
-
-### Phase 5: Visual Effects (enhances existing pages)
-17. **`ThemeToggle.astro`** -- Interactive toggle button (depends on theme script from Phase 2)
-18. **`ScrollReveal.astro`** -- Scroll-triggered reveals
-19. **`ParticleCanvas.astro`** -- Hero particle effect
-
-### Phase 6: Polish & Deployment
-20. **Sitemap** (`@astrojs/sitemap` integration)
-21. **RSS feed** (`src/pages/rss.xml.ts`)
-22. **GitHub Actions workflow** (`.github/workflows/deploy.yml`)
-23. **`public/CNAME`**, `robots.txt`, favicon
+**Phase 4: Content Curation**
+11. Remove unwanted blog posts from `src/data/blog/`
+12. Remove unwanted project entries from `src/data/projects.ts`
 
 **Why this order:**
-- Constants and config must exist before anything references them
-- BaseLayout must exist before any page can render
-- Content collections must be defined before blog pages can query them
-- Pages can be built with placeholder content, then enriched with effects
-- Deployment is last because it requires a buildable site
+- Phase 1 establishes the data contracts (schema, config) that all other changes depend on
+- Phase 2 is the most architecturally complex change (external blog integration) and should be done while the codebase is closest to its known-good state
+- Phase 3 is a series of safe refactors (replacing hardcoded strings with imports) that can be done independently
+- Phase 4 is pure content deletion -- the lowest risk and can be done last or in parallel with Phase 3
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern: Separate Collection for External Posts
+
+**What it looks like:** Creating a second collection `externalBlogs` with a custom inline loader or JSON file, then merging with the `blog` collection in every page.
+
+**Why it's wrong for this use case:** Doubles the query complexity. Every page that lists posts must query two collections, merge the arrays, and re-sort by date. Type unions get messy. Tag pages need to aggregate tags from both collections. The RSS feed needs both. All for what amounts to adding an optional field to existing entries.
+
+**When it WOULD be right:** If external posts had a fundamentally different schema (e.g., fetched live from an API at build time with different fields). Not the case here -- external posts have the same title/description/date/tags structure as internal posts.
+
+### Anti-Pattern: Generating Static Pages for External Posts Then Redirecting
+
+**What it looks like:** Letting `[slug].astro` generate pages for external posts, then using Astro's `redirect` or a meta refresh tag to send visitors to the external URL.
+
+**Why it's wrong:** Wastes build time generating pages that nobody should visit. Creates URLs that exist but immediately bounce visitors. Confuses search engines. Adds pages to the sitemap that are not real content. On GitHub Pages (static hosting), you cannot do proper 301 redirects -- only meta refresh, which is an SEO anti-pattern.
+
+**Do this instead:** Never generate a page for external posts. Filter them out in `getStaticPaths()`. The blog listing links directly to the external URL.
+
+### Anti-Pattern: Storing Social Links in astro.config.mjs
+
+**What it looks like:** Adding custom fields to `astro.config.mjs` and accessing them via `Astro.config`.
+
+**Why it's wrong:** `astro.config.mjs` is for Astro framework configuration (build settings, integrations, site URL). Custom application data does not belong there. Astro does not expose arbitrary config fields to components.
+
+**Do this instead:** Use a TypeScript data file (`src/data/site.ts`) imported directly by components that need it.
+
+---
 
 ## Sources
 
-- [Astro Project Structure](https://docs.astro.build/en/basics/project-structure/) -- Official docs on directory conventions (HIGH confidence)
-- [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/) -- Content Layer API, loaders, schemas (HIGH confidence)
-- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- `render()`, `getCollection()`, `getEntry()` (HIGH confidence)
-- [Astro Upgrade to v5](https://docs.astro.build/en/guides/upgrade-to/v5/) -- Breaking changes: content.config.ts location, slug->id, render() import, ClientRouter rename (HIGH confidence)
-- [Astro Layouts](https://docs.astro.build/en/basics/layouts/) -- Layout composition, props, Markdown layout props (HIGH confidence)
-- [Astro Islands](https://docs.astro.build/en/concepts/islands/) -- Partial hydration, client directives (HIGH confidence)
-- [Astro Routing](https://docs.astro.build/en/guides/routing/) -- File-based routing, getStaticPaths, dynamic routes (HIGH confidence)
-- [Astro View Transitions](https://docs.astro.build/en/guides/view-transitions/) -- ClientRouter, lifecycle events, transition directives (HIGH confidence)
-- [Astro Images](https://docs.astro.build/en/guides/images/) -- Image/Picture components, src/ vs public/ (HIGH confidence)
-- [Astro Deploy to GitHub Pages](https://docs.astro.build/en/guides/deploy/github/) -- Action, CNAME, site/base config (HIGH confidence)
-- [Tailwind CSS v4 Astro Installation](https://tailwindcss.com/docs/installation/framework-guides/astro) -- @tailwindcss/vite plugin setup (HIGH confidence)
-- [Astro Dark Mode with Tailwind + View Transitions](https://namoku.dev/blog/darkmode-tailwind-astro/) -- Anti-flicker pattern, astro:after-swap (MEDIUM confidence)
-- [Astro SEO Complete Guide](https://eastondev.com/blog/en/posts/dev/20251202-astro-seo-complete-guide/) -- Meta tags, JSON-LD patterns (MEDIUM confidence)
+- [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/) -- Content Layer API, `glob()` loader, Zod schemas, optional fields (HIGH confidence)
+- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- `getCollection()`, `render()`, `CollectionEntry` type, filter functions (HIGH confidence)
+- [Astro Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/) -- Inline loaders, entry structure, `rendered` field (HIGH confidence)
+- [Content Layer: A Deep Dive](https://astro.build/blog/content-layer-deep-dive/) -- Architecture of Content Layer, loader invocation, store management (HIGH confidence)
+- [Syncing dev.to Posts with Astro Blog](https://logarithmicspirals.com/blog/updating-astro-blog-to-pull-devto-posts/) -- Pattern for mixing external API posts with local markdown in content collections (MEDIUM confidence)
+- [External Redirects in Astro on Vercel](https://www.jamiekuppens.com/posts/how-to-add-external-redirects-in-astro-on-vercel) -- externalLink frontmatter pattern, postbuild redirect scripts (MEDIUM confidence)
+- [Astro Content Collections Complete 2026 Guide](https://inhaq.com/blog/getting-started-with-astro-content-collections.html) -- Schema patterns, optional fields, Zod URL validation (MEDIUM confidence)
+- [Astro Build a Blog Tutorial: Social Media Footer](https://docs.astro.build/en/tutorial/3-components/2/) -- Centralized social links pattern (HIGH confidence)
 
 ---
-*Architecture research for: Astro 5+ portfolio + blog static site*
+*Architecture research for: v1.1 content refresh integration*
 *Researched: 2026-02-11*
