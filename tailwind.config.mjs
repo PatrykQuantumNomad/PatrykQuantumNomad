@@ -1,4 +1,5 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
+import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -20,7 +21,22 @@ export default {
         'accent-hover': 'var(--color-accent-hover)',
         border: 'var(--color-border)',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': 'var(--color-text-primary)',
+            '--tw-prose-headings': 'var(--color-text-primary)',
+            '--tw-prose-links': 'var(--color-accent)',
+            '--tw-prose-bold': 'var(--color-text-primary)',
+            '--tw-prose-code': 'var(--color-text-primary)',
+            '--tw-prose-quotes': 'var(--color-text-secondary)',
+            '--tw-prose-hr': 'var(--color-border)',
+            '--tw-prose-th-borders': 'var(--color-border)',
+            '--tw-prose-td-borders': 'var(--color-border)',
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [typography],
 };
