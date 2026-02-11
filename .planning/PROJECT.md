@@ -51,7 +51,15 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — next milestone requirements to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.1 Content Refresh
+
+**Goal:** Update personal info, refine hero messaging, curate projects, and integrate external blog content
+
+**Target features:**
+- Update contact info (email, X, YouTube) and remove LinkedIn
+- Recraft hero tagline with craft & precision tone
+- Remove Full-Stack Application project category and gemini-beauty-math
+- Remove test blog post and add external blog entries from Kubert AI and Translucent Computing
 
 ### Out of Scope
 
@@ -107,4 +115,4 @@ Custom "Quantum Explorer" theme is distinctive and fully accessible.
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-11 after v1.0 milestone*
+*Last updated: 2026-02-11 after v1.1 milestone started*

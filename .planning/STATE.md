@@ -5,16 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.1 Content Refresh
 
 ## Current Position
 
-Phase: v1.0 complete (7 phases, 15 plans delivered)
-Plan: Not started
-Status: Ready to plan next milestone
-Last activity: 2026-02-11 — v1.0 milestone complete
-
-Progress: [##########] v1.0 100% SHIPPED
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-11 — Milestone v1.1 started
 
 ## Accumulated Context
 
@@ -25,7 +23,7 @@ All v1.0 decisions marked with outcomes (all ✓ Good).
 
 ### Pending Todos
 
-None — milestone complete.
+None — milestone just started.
 
 ### Blockers/Concerns
 
@@ -34,6 +32,6 @@ None — milestone complete.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: v1.0 milestone archived and tagged
+Stopped at: Defining v1.1 requirements
 Resume file: None
-Next: `/gsd:new-milestone` to define v1.1+ scope
+Next: Complete requirements → roadmap
