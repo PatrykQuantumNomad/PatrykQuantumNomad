@@ -117,11 +117,11 @@ Plans:
   3. Users with prefers-reduced-motion enabled see a static gradient fallback instead of any animations (particles, scroll reveals, transitions)
   4. Navigating between pages produces smooth view transitions (no full-page reload flash)
   5. Page sections animate into view as the user scrolls down (scroll-triggered reveal animations)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — ClientRouter view transitions, ParticleCanvas component, hero integration with transition:persist, typing animation fix
+- [ ] 06-02-PLAN.md — Scroll reveal CSS/JS infrastructure and apply reveal animations to all page sections
 
 ### Phase 7: Enhanced Blog + Advanced SEO
 **Goal**: Blog gains discoverability features (tags, ToC, dynamic social images) and the site achieves advanced SEO capabilities (LLMs.txt, GEO optimization) with verified Lighthouse 90+ performance
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Blog Infrastructure | 2/2 | Complete | 2026-02-11 |
 | 4. Core Static Pages | 2/2 | Complete | 2026-02-11 |
 | 5. SEO Foundation | 2/2 | Complete | 2026-02-11 |
-| 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
+| 6. Visual Effects + Quantum Explorer | 0/2 | In progress | - |
 | 7. Enhanced Blog + Advanced SEO | 0/TBD | Not started | - |
