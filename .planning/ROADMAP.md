@@ -65,11 +65,11 @@ Plans:
   3. Code blocks in blog posts display syntax highlighting with a visible copy button that copies code to clipboard
   4. Each blog post displays an estimated reading time (e.g., "5 min read")
   5. Posts with `draft: true` in frontmatter do not appear on /blog/ or generate pages in production builds
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Install dependencies, configure integrations (expressive-code, MDX, typography), create content collection schema, remark reading-time plugin, and sample blog posts
+- [ ] 03-02-PLAN.md — Create BlogCard component, blog listing page (/blog/), and individual post page (/blog/[slug]/) with prose styling and reading time
 
 ### Phase 4: Core Static Pages
 **Goal**: Users can explore a complete 5-page site — home page with animated hero, projects page with all 19 repos, about page, and contact information — responsive across devices
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
-| 3. Blog Infrastructure | 0/TBD | Not started | - |
+| 3. Blog Infrastructure | 0/2 | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
