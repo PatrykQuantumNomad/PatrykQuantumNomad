@@ -66,6 +66,7 @@ const ogImageURL = new URL('/open-graph/blog/' + post.id + '.png', Astro.site).t
       updatedDate={post.data.updatedDate}
       url={postURL}
       tags={tags}
+      image={ogImageURL}
     />
   </article>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">

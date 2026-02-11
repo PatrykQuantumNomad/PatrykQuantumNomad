@@ -6,9 +6,10 @@ interface Props {
   updatedDate?: Date;
   url: string;
   tags?: string[];
+  image?: string;
 }
 
-const { title, description, publishedDate, updatedDate, url, tags } = Astro.props;
+const { title, description, publishedDate, updatedDate, url, tags, image } = Astro.props;
 
 const schema: Record<string, unknown> = {
   "@context": "https://schema.org",
@@ -36,6 +37,15 @@ const schema: Record<string, unknown> = {
 
 if (tags && tags.length > 0) {
   schema["keywords"] = tags.join(', ');
+}
+
+if (image) {
+  schema["image"] = {
+    "@type": "ImageObject",
+    "url": image,
+    "width": 1200,
+    "height": 630
+  };
 }
 ---
 
