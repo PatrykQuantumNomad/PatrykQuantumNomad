@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 2 - Layout Shell + Theme System
+**Current focus:** Phase 2 complete, ready for Phase 3 - Blog Infrastructure
 
 ## Current Position
 
-Phase: 2 of 7 (Layout Shell + Theme System) — IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Completed 02-01 (Tailwind CSS, theme system, typography)
-Last activity: 2026-02-11 — Completed 02-01 (Tailwind, theme, typography)
+Phase: 2 of 7 (Layout Shell + Theme System) — COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 2 complete, ready for Phase 3
+Last activity: 2026-02-11 — Completed 02-02 (Header, Footer, ThemeToggle, layout shell)
 
-Progress: [███░░░░░░░] ~21%
+Progress: [███░░░░░░░] ~28%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~29 min
-- Total execution time: 1.45 hours
+- Total plans completed: 4
+- Average duration: ~25 min
+- Total execution time: 1.6 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Scaffold + Deploy | 2/2 | 83 min | 42 min |
-| 2 - Layout + Theme | 1/2 | 3 min | 3 min |
+| 2 - Layout + Theme | 2/2 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (80 min), 02-01 (3 min)
-- Trend: Phase 2 in progress
+- Last 5 plans: 01-01 (3 min), 01-02 (80 min), 02-01 (3 min), 02-02 (9 min)
+- Trend: Phase 2 complete
 
 *Updated after each plan completion*
 
@@ -53,6 +53,10 @@ Recent decisions affecting current work:
 - [02-01]: darkMode: 'class' chosen over 'media' to support manual theme toggle in 02-02
 - [02-01]: CSS custom properties for theme-aware colors enable runtime switching without recompilation
 - [02-01]: Inline theme-detection script in head prevents FOUC by setting .dark class before first paint
+- [02-02]: PG initials as logo placeholder -- will be replaced with proper branding later
+- [02-02]: ThemeToggle script deferred (not is:inline) since Layout.astro inline script handles initial state
+- [02-02]: Mobile menu uses classList.toggle('hidden') -- no animation library needed
+- [02-02]: Skip-to-content link uses sr-only with focus:not-sr-only pattern
 
 ### Pending Todos
 
@@ -66,6 +70,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 02-01-PLAN.md (Tailwind CSS, theme system, typography)
+Stopped at: Completed 02-02-PLAN.md (Header, Footer, ThemeToggle, layout shell) -- Phase 2 complete
 Resume file: None
-Next: Execute 02-02-PLAN.md (Header, Footer, ThemeToggle components)
+Next: Phase 3 (Blog Infrastructure) -- plan-phase needed to create 03-01-PLAN.md and 03-02-PLAN.md

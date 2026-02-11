@@ -13,7 +13,7 @@ This roadmap delivers a complete personal portfolio and blog site for Patryk Gol
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Scaffold + Deployment Pipeline** - Astro project with CI/CD deploying to GitHub Pages with custom domain
-- [ ] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
+- [x] **Phase 2: Layout Shell + Theme System** - Base layout, navigation, dark/light mode, typography, and accessibility foundation
 - [ ] **Phase 3: Blog Infrastructure** - Content collections, blog listing, post pages, syntax highlighting, reading time, draft filtering
 - [ ] **Phase 4: Core Static Pages** - Home (with hero), Projects (19 repos), About, and Contact — responsive across devices
 - [ ] **Phase 5: SEO Foundation** - Meta tags, Open Graph, sitemap, RSS, JSON-LD, robots.txt, and keyword integration
@@ -52,7 +52,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Install Tailwind CSS, configure dark/light theme system with CSS custom properties, set up futuristic typography, add FOUC-prevention script
-- [ ] 02-02-PLAN.md — Create Header, Footer, ThemeToggle components, wire into Layout.astro, add accessibility foundations
+- [x] 02-02-PLAN.md — Create Header, Footer, ThemeToggle components, wire into Layout.astro, add accessibility foundations
 
 ### Phase 3: Blog Infrastructure
 **Goal**: Users can browse and read blog posts with proper typography, syntax-highlighted code, and reading time — while draft posts stay hidden in production
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
-| 2. Layout Shell + Theme System | 1/2 | In Progress | - |
+| 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
 | 3. Blog Infrastructure | 0/TBD | Not started | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
