@@ -68,7 +68,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Install dependencies, configure integrations (expressive-code, MDX, typography), create content collection schema, remark reading-time plugin, and sample blog posts
+- [x] 03-01-PLAN.md — Install dependencies, configure integrations (expressive-code, MDX, typography), create content collection schema, remark reading-time plugin, and sample blog posts
 - [ ] 03-02-PLAN.md — Create BlogCard component, blog listing page (/blog/), and individual post page (/blog/[slug]/) with prose styling and reading time
 
 ### Phase 4: Core Static Pages
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|---------------|--------|-----------|
 | 1. Project Scaffold + Deployment Pipeline | 2/2 | Complete | 2026-02-11 |
 | 2. Layout Shell + Theme System | 2/2 | Complete | 2026-02-11 |
-| 3. Blog Infrastructure | 0/2 | Not started | - |
+| 3. Blog Infrastructure | 1/2 | In progress | - |
 | 4. Core Static Pages | 0/TBD | Not started | - |
 | 5. SEO Foundation | 0/TBD | Not started | - |
 | 6. Visual Effects + Quantum Explorer | 0/TBD | Not started | - |
