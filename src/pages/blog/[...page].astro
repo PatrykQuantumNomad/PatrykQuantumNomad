@@ -1,38 +1,53 @@
 ---
+import type { GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import BlogCard from '../../components/BlogCard.astro';
+import Pagination from '../../components/Pagination.astro';
 
-const posts = await getCollection('blog', ({ data }) => {
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getCollection('blog', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+  const sortedPosts = posts.sort(
+    (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
+  );
+  return paginate(sortedPosts, { pageSize: 10 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+// For tag cloud and stats, use the full collection
+const allPosts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
 });
-
-const sortedPosts = posts.sort(
+const allSorted = allPosts.sort(
   (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
 );
 
-// Tag cloud data
+// Tag cloud from ALL posts
 const tagCounts = new Map<string, number>();
-sortedPosts.forEach((post) => {
+allSorted.forEach((post) => {
   post.data.tags.forEach((tag) => {
     tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
   });
 });
 const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
 
-// Year groups
-const postsByYear = new Map<number, typeof sortedPosts>();
-sortedPosts.forEach((post) => {
+// Year groups from CURRENT PAGE posts only
+const postsByYear = new Map<number, typeof page.data>();
+page.data.forEach((post) => {
   const year = post.data.publishedDate.getFullYear();
   if (!postsByYear.has(year)) postsByYear.set(year, []);
   postsByYear.get(year)!.push(post);
 });
 const years = [...postsByYear.keys()].sort((a, b) => b - a);
 
-// Stats
-const totalPosts = sortedPosts.length;
-const oldestYear = Math.min(...years);
-const newestYear = Math.max(...years);
+// Global stats
+const totalPosts = allSorted.length;
+const allYears = [...new Set(allSorted.map((p) => p.data.publishedDate.getFullYear()))];
+const oldestYear = Math.min(...allYears);
+const newestYear = Math.max(...allYears);
 ---
 
 <Layout
@@ -52,10 +67,10 @@ const newestYear = Math.max(...years);
       class="text-lg text-[var(--color-text-secondary)] mt-4"
       data-reveal
     >
-      Technical writing on cloud-native architecture, AI/ML engineering, and platform building.
+      Articles on building things — cloud platforms, AI agents, data pipelines, mobile apps, and the occasional robotic arm.
     </p>
     <p class="meta-mono mt-3" data-reveal>
-      {totalPosts} ARTICLES &middot; {oldestYear} &mdash; {newestYear}
+      {totalPosts} ARTICLES &middot; {oldestYear} &mdash; {newestYear}{page.lastPage > 1 && <> &middot; PAGE {page.currentPage} OF {page.lastPage}</>}
     </p>
 
     <div class="gradient-divider mt-10" data-divider-reveal aria-hidden="true"></div>
@@ -83,7 +98,7 @@ const newestYear = Math.max(...years);
     <div class="gradient-divider mt-10" data-divider-reveal aria-hidden="true"></div>
 
     {/* Year-Grouped Post Listing */}
-    {sortedPosts.length > 0 ? (
+    {page.data.length > 0 ? (
       <div>
         {years.map((year) => (
           <div>
@@ -107,5 +122,13 @@ const newestYear = Math.max(...years);
     ) : (
       <p class="text-[var(--color-text-secondary)] mt-12">No posts yet. Check back soon!</p>
     )}
+
+    {/* Pagination */}
+    <Pagination
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={page.url.prev}
+      nextUrl={page.url.next}
+    />
   </section>
 </Layout>
