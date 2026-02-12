@@ -50,9 +50,15 @@ None.
 - [Tech Debt]: Social links hardcoded across 5 component files instead of centralized config
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02, v1.2)
 
+## Quick Tasks
+
+| Task | Name | Duration | Completed |
+|------|------|----------|-----------|
+| 001 | Create favicon for the website | 2min | 2026-02-12 |
+
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: v1.1 milestone complete
+Stopped at: Completed quick-001 (favicon)
 Resume file: None
 Next: `/gsd:new-milestone` to plan v1.2
