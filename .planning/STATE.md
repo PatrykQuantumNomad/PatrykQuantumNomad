@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 11 - Hero & Project Curation (v1.1 Content Refresh) -- COMPLETE
+**Current focus:** Phase 12 - Cleanup & Verification (v1.1 Content Refresh) -- COMPLETE
 
 ## Current Position
 
-Phase: 11 of 12 (Hero & Project Curation) -- COMPLETE
+Phase: 12 of 12 (Cleanup & Verification) -- COMPLETE
 Plan: 1 of 1 in current phase (done)
-Status: Phase 11 complete, ready for Phase 12
-Last activity: 2026-02-12 — Completed 11-01 Hero & Project Curation
+Status: v1.1 Content Refresh COMPLETE. All phases (8-12) executed successfully.
+Last activity: 2026-02-12 — Completed 12-01 Cleanup & Verification
 
-Progress: [███████████████████████░] 95% (v1.0 complete: 16/16 plans | v1.1: 6/7 plans)
+Progress: [████████████████████████] 100% (v1.0 complete: 16/16 plans | v1.1: 7/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22 (16 v1.0 + 6 v1.1)
+- Total plans completed: 23 (16 v1.0 + 7 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -31,7 +31,7 @@ Progress: [███████████████████████
 | 9. External Blog | 2/2 | 4min | 2min |
 | 10. Social Links | 1/1 | 3min | 3min |
 | 11. Hero & Projects | 1/1 | 3min | 3min |
-| 12. Cleanup & Verify | 0/1 | - | - |
+| 12. Cleanup & Verify | 1/1 | 2min | 2min |
 
 *Updated after each plan completion*
 
@@ -57,6 +57,9 @@ v1.1 decisions so far:
 - getStaticPaths guards exclude external posts in both dev and prod modes (not just PROD)
 - Inline SVG for external link icon (no icon library dependency)
 - Nullish coalescing for RSS link fallback (externalUrl ?? internal path)
+- Nullish coalescing for LLMs.txt URL resolution (matches rss.xml.ts pattern)
+- Inline external link detection in homepage (no shared helper, matches plan scope)
+- Source badge and external link icon on homepage Latest Writing (matches BlogCard.astro pattern)
 
 ### Pending Todos
 
@@ -70,6 +73,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 11-01-PLAN.md (Hero & Project Curation)
+Stopped at: Completed 12-01-PLAN.md (Cleanup & Verification) -- v1.1 COMPLETE
 Resume file: None
-Next: Plan and execute Phase 12 (Cleanup & Verification)
+Next: v1.1 Content Refresh complete. Ready for deployment or v1.2 planning.
