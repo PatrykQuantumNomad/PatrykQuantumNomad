@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 Phase: All complete (12 phases across v1.0 + v1.1)
 Plan: Not started
 Status: Ready for next milestone
-Last activity: 2026-02-12 — v1.1 Content Refresh milestone complete
+Last activity: 2026-02-12 - Completed quick task 001: Create favicon for the website
 
 Progress: [████████████████████████] 100% (v1.0: 16/16 plans | v1.1: 7/7 plans)
 
@@ -50,11 +50,11 @@ None.
 - [Tech Debt]: Social links hardcoded across 5 component files instead of centralized config
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02, v1.2)
 
-## Quick Tasks
+### Quick Tasks Completed
 
-| Task | Name | Duration | Completed |
-|------|------|----------|-----------|
-| 001 | Create favicon for the website | 2min | 2026-02-12 |
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Create favicon for the website | 2026-02-12 | a21a260 | [001-create-favicon-for-the-website](./quick/001-create-favicon-for-the-website/) |
 
 ## Session Continuity
 
