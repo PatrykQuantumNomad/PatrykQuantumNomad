@@ -10,6 +10,29 @@ const posts = await getCollection('blog', ({ data }) => {
 const sortedPosts = posts.sort(
   (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
 );
+
+// Tag cloud data
+const tagCounts = new Map<string, number>();
+sortedPosts.forEach((post) => {
+  post.data.tags.forEach((tag) => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+
+// Year groups
+const postsByYear = new Map<number, typeof sortedPosts>();
+sortedPosts.forEach((post) => {
+  const year = post.data.publishedDate.getFullYear();
+  if (!postsByYear.has(year)) postsByYear.set(year, []);
+  postsByYear.get(year)!.push(post);
+});
+const years = [...postsByYear.keys()].sort((a, b) => b - a);
+
+// Stats
+const totalPosts = sortedPosts.length;
+const oldestYear = Math.min(...years);
+const newestYear = Math.max(...years);
 ---
 
 <Layout
@@ -17,17 +40,72 @@ const sortedPosts = posts.sort(
   description="Technical articles on Kubernetes, cloud-native architecture, AI/ML engineering, LLM agents, RAG pipelines, and platform engineering by Patryk Golabek."
 >
   <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-8">Blog</h1>
+
+    {/* Hero Section */}
+    <h1
+      class="text-4xl sm:text-5xl font-heading font-extrabold"
+      data-word-reveal
+    >
+      Blog
+    </h1>
+    <p
+      class="text-lg text-[var(--color-text-secondary)] mt-4"
+      data-reveal
+    >
+      Technical writing on cloud-native architecture, AI/ML engineering, and platform building.
+    </p>
+    <p class="meta-mono mt-3" data-reveal>
+      {totalPosts} ARTICLES &middot; {oldestYear} &mdash; {newestYear}
+    </p>
+
+    <div class="gradient-divider mt-10" data-divider-reveal aria-hidden="true"></div>
+
+    {/* Tag Cloud Section */}
+    <div class="mt-10">
+      <h2
+        class="text-lg font-heading font-bold mb-4"
+        data-reveal
+      >
+        Browse by Topic
+      </h2>
+      <div class="flex flex-wrap gap-2" data-reveal>
+        {sortedTags.map(([tag, count]) => (
+          <a
+            href={`/blog/tags/${tag}/`}
+            class="text-xs px-3 py-1.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors font-medium"
+          >
+            {tag} <span class="opacity-60">({count})</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="gradient-divider mt-10" data-divider-reveal aria-hidden="true"></div>
+
+    {/* Year-Grouped Post Listing */}
     {sortedPosts.length > 0 ? (
-      <div class="space-y-8">
-        {sortedPosts.map((post) => (
-          <div class="reveal">
-            <BlogCard post={post} />
+      <div>
+        {years.map((year) => (
+          <div>
+            <h2
+              class="flex items-center justify-between text-2xl font-heading font-bold text-[var(--color-accent)] mb-6 mt-12 first:mt-0"
+              data-reveal
+            >
+              <span>{year}</span>
+              <span class="meta-mono text-sm">{postsByYear.get(year)!.length} posts</span>
+            </h2>
+            <div class="space-y-6">
+              {postsByYear.get(year)!.map((post) => (
+                <div data-reveal>
+                  <BlogCard post={post} />
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
     ) : (
-      <p class="text-[var(--color-text-secondary)]">No posts yet. Check back soon!</p>
+      <p class="text-[var(--color-text-secondary)] mt-12">No posts yet. Check back soon!</p>
     )}
   </section>
 </Layout>
