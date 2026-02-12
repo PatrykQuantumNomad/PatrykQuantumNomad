@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 10 - Social Links & Contact Update (v1.1 Content Refresh)
+**Current focus:** Phase 11 - Hero & Project Curation (v1.1 Content Refresh) -- COMPLETE
 
 ## Current Position
 
-Phase: 10 of 12 (Social Links & Contact Update) -- COMPLETE
+Phase: 11 of 12 (Hero & Project Curation) -- COMPLETE
 Plan: 1 of 1 in current phase (done)
-Status: Phase 10 complete, ready for Phase 11
-Last activity: 2026-02-12 — Completed 10-01 Social Links & Contact Update
+Status: Phase 11 complete, ready for Phase 12
+Last activity: 2026-02-12 — Completed 11-01 Hero & Project Curation
 
-Progress: [██████████████████████░░] 90% (v1.0 complete: 16/16 plans | v1.1: 5/7 plans)
+Progress: [███████████████████████░] 95% (v1.0 complete: 16/16 plans | v1.1: 6/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21 (16 v1.0 + 5 v1.1)
+- Total plans completed: 22 (16 v1.0 + 6 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -30,7 +30,7 @@ Progress: [██████████████████████░
 | 8. Schema & Config | 2/2 | 6min | 3min |
 | 9. External Blog | 2/2 | 4min | 2min |
 | 10. Social Links | 1/1 | 3min | 3min |
-| 11. Hero & Projects | 0/1 | - | - |
+| 11. Hero & Projects | 1/1 | 3min | 3min |
 | 12. Cleanup & Verify | 0/1 | - | - |
 
 *Updated after each plan completion*
@@ -65,11 +65,11 @@ None yet.
 ### Blockers/Concerns
 
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
-- [Content]: Hero tagline final copy needs user approval during Phase 11
+- [Content]: Hero tagline approved by user during Phase 11 execution (resolved)
 
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 10-01-PLAN.md (Social Links & Contact Update)
+Stopped at: Completed 11-01-PLAN.md (Hero & Project Curation)
 Resume file: None
-Next: Execute Phase 11 Plan 1 (Hero & Projects Update)
+Next: Plan and execute Phase 12 (Cleanup & Verification)
