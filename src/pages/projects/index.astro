@@ -13,24 +13,29 @@ const grouped = categories.map((category) => ({
   description="Explore 16 open-source projects by Patryk Golabek spanning Kubernetes platforms, AI/ML agents, infrastructure as code, and security tooling."
 >
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Projects</h1>
-    <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl mb-12">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4" data-word-reveal>Projects</h1>
+    <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl mb-12" data-reveal>
       Open-source work spanning Kubernetes, AI/ML, infrastructure as code, and
       platform engineering. All repositories live on GitHub.
     </p>
 
     {grouped.map(({ category, items }, idx) => (
-      <div class={`${idx > 0 ? 'mt-12' : ''} reveal`}>
-        <h2 class="text-xl sm:text-2xl font-heading font-bold mb-6">
+      <div class={`${idx > 0 ? 'mt-12' : ''}`}>
+        <h2 class="text-xl sm:text-2xl font-heading font-bold mb-6" data-word-reveal>
           {category}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((project) => (
+          {items.map((project, projIdx) => (
             <a
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
-              class="group p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] hover:border-[var(--color-accent)] transition-colors"
+              class:list={[
+                'group card-hover p-5 rounded-lg border border-[var(--color-border)]',
+                projIdx === 0 ? 'md:col-span-2 lg:col-span-2' : '',
+              ]}
+              data-reveal
+              data-tilt
             >
               <div class="flex items-start justify-between gap-2">
                 <span class="font-heading font-bold text-lg group-hover:text-[var(--color-accent)] transition-colors">
@@ -51,7 +56,7 @@ const grouped = categories.map((category) => ({
                 </svg>
               </div>
               <div class="flex flex-wrap gap-2 mt-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                <span class="meta-mono px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
                   {project.language}
                 </span>
                 {project.fork && (
@@ -70,7 +75,7 @@ const grouped = categories.map((category) => ({
     ))}
 
     <!-- View all on GitHub -->
-    <div class="mt-16 text-center">
+    <div class="mt-16 text-center" data-reveal>
       <a
         href="https://github.com/PatrykQuantumNomad"
         target="_blank"

@@ -1,5 +1,12 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
+import avatarImg from '../assets/images/meandbatman.jpg';
+import familyImg from '../assets/images/meandfamily.jpg';
+import dogImg from '../assets/images/meanddog.jpg';
+import cyclingImg from '../assets/images/cycling.jpg';
+import snowImg from '../assets/images/snowman.jpg';
+import kidsImg from '../assets/images/meandkids.jpg';
 
 const techStack = [
   {
@@ -58,14 +65,20 @@ const highlights = [
 >
   <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <!-- Introduction -->
-    <div class="flex flex-col sm:flex-row items-start gap-8 mb-16 reveal">
+    <div class="flex flex-col sm:flex-row items-start gap-8 mb-16" data-reveal>
       <div class="shrink-0">
-        <div class="w-24 h-24 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white text-3xl font-heading font-bold">
-          PG
+        <div class="avatar-glow">
+          <Image
+            src={avatarImg}
+            alt="Patryk Golabek"
+            width={96}
+            height={96}
+            class="w-24 h-24 rounded-full object-cover"
+          />
         </div>
       </div>
       <div>
-        <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-6">About Me</h1>
+        <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-6" data-word-reveal>About Me</h1>
         <div class="space-y-4 text-[var(--color-text-secondary)] leading-relaxed">
           <p>
             I'm Patryk Golabek, a Cloud-Native Software Architect based in Ontario, Canada,
@@ -98,18 +111,96 @@ const highlights = [
       </div>
     </div>
 
+    <!-- Life Outside Code -->
+    <div class="mb-16">
+      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Life Outside Code</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" data-reveal>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={familyImg}
+            alt="Family hike in autumn"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">Fall adventures</span>
+          </div>
+        </div>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={dogImg}
+            alt="Relaxing with my dog"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">Best coworker</span>
+          </div>
+        </div>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={snowImg}
+            alt="Covered in snow"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">Canadian winters</span>
+          </div>
+        </div>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={cyclingImg}
+            alt="Cycling outdoors"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">On two wheels</span>
+          </div>
+        </div>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={kidsImg}
+            alt="Road trip with the kids"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">Road crew</span>
+          </div>
+        </div>
+        <div class="relative overflow-hidden rounded-lg aspect-square group flex items-center justify-center bg-[var(--color-surface-alt)] border border-[var(--color-border)]" data-tilt>
+          <div class="text-center p-4">
+            <p class="text-4xl mb-2">17+</p>
+            <p class="meta-mono">Years building software</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Tech Stack -->
-    <div class="mb-16 reveal">
-      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Tech Stack</h2>
+    <div class="mb-16" data-reveal>
+      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Tech Stack</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {techStack.map(({ label, items }) => (
           <div>
-            <h3 class="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
+            <h3 class="font-mono text-sm font-medium text-[var(--color-accent)] uppercase tracking-[0.2em] mb-3">
               {label}
             </h3>
             <div class="flex flex-wrap gap-2">
               {items.map((item) => (
-                <span class="text-sm px-3 py-1 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-[var(--color-text-primary)]">
+                <span class="tech-pill text-sm px-3 py-1 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-[var(--color-text-primary)] cursor-default">
                   {item}
                 </span>
               ))}
@@ -120,11 +211,15 @@ const highlights = [
     </div>
 
     <!-- Career Highlights -->
-    <div class="mb-16 reveal">
-      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Career Highlights</h2>
-      <div class="space-y-6">
-        {highlights.map(({ title, text }) => (
-          <div class="pl-6 border-l-2 border-[var(--color-accent)]">
+    <div class="mb-16" data-reveal>
+      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Career Highlights</h2>
+      <div class="space-y-6" id="highlights-list">
+        {highlights.map(({ title, text }, idx) => (
+          <div
+            class="highlight-item pl-6"
+            data-reveal
+            style={`transition-delay: ${idx * 0.15}s;`}
+          >
             <h3 class="font-heading font-bold text-lg mb-1">{title}</h3>
             <p class="text-[var(--color-text-secondary)]">{text}</p>
           </div>
@@ -133,8 +228,8 @@ const highlights = [
     </div>
 
     <!-- Connect -->
-    <div class="reveal">
-      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-6">Let's Connect</h2>
+    <div data-reveal>
+      <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-6" data-word-reveal>Let's Connect</h2>
       <div class="flex flex-wrap gap-4">
         <!-- GitHub -->
         <a
@@ -217,3 +312,27 @@ const highlights = [
     </div>
   </section>
 </Layout>
+
+<script>
+  // Animate highlight items timeline when they scroll into view
+  function initHighlightTimeline() {
+    const items = document.querySelectorAll('.highlight-item');
+    if (!items.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    items.forEach((el) => observer.observe(el));
+  }
+
+  document.addEventListener('astro:page-load', initHighlightTimeline);
+</script>

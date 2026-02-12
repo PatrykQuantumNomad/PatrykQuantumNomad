@@ -1,0 +1,96 @@
+<!-- TextScramble.astro — Terminal decryption-style text reveal for [data-animate="headline"] -->
+<script>
+  const CHARS = '!<>-_\\/[]{}=+*^?#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  interface QueueItem {
+    from: string;
+    to: string;
+    start: number;
+    end: number;
+    char?: string;
+  }
+
+  class TextScramble {
+    private el: HTMLElement;
+    private frameRequest: number = 0;
+    private frame: number = 0;
+    private queue: QueueItem[] = [];
+    private resolve!: () => void;
+
+    constructor(el: HTMLElement) {
+      this.el = el;
+    }
+
+    setText(newText: string): Promise<void> {
+      const oldText = this.el.textContent || '';
+      const length = Math.max(oldText.length, newText.length);
+      const promise = new Promise<void>((resolve) => (this.resolve = resolve));
+      this.queue = [];
+
+      for (let i = 0; i < length; i++) {
+        const from = oldText[i] || '';
+        const to = newText[i] || '';
+        const start = Math.floor(Math.random() * 30);
+        const end = start + Math.floor(Math.random() * 30);
+        this.queue.push({ from, to, start, end });
+      }
+
+      cancelAnimationFrame(this.frameRequest);
+      this.frame = 0;
+      this.update();
+      return promise;
+    }
+
+    private update() {
+      let output = '';
+      let complete = 0;
+
+      for (let i = 0; i < this.queue.length; i++) {
+        let { from, to, start, end, char } = this.queue[i];
+
+        if (this.frame >= end) {
+          complete++;
+          output += to;
+        } else if (this.frame >= start) {
+          if (!char || Math.random() < 0.28) {
+            char = CHARS[Math.floor(Math.random() * CHARS.length)];
+            this.queue[i].char = char;
+          }
+          output += `<span class="text-[var(--color-accent-secondary)] opacity-70">${char}</span>`;
+        } else {
+          output += from;
+        }
+      }
+
+      this.el.innerHTML = output;
+      if (complete === this.queue.length) {
+        this.resolve();
+      } else {
+        this.frameRequest = requestAnimationFrame(() => {
+          this.frame++;
+          this.update();
+        });
+      }
+    }
+  }
+
+  function initTextScramble() {
+    const el = document.querySelector<HTMLElement>('[data-animate="headline"]');
+    if (!el) return;
+
+    if (REDUCED_MOTION) {
+      el.style.opacity = '1';
+      return;
+    }
+
+    const targetText = el.textContent || '';
+    el.textContent = '';
+    el.style.opacity = '1';
+
+    const scrambler = new TextScramble(el);
+    setTimeout(() => scrambler.setText(targetText), 300);
+  }
+
+  document.addEventListener('astro:page-load', initTextScramble);
+</script>

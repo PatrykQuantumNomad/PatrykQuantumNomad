@@ -1,0 +1,48 @@
+<!-- WordReveal.astro — Word-by-word scroll-triggered reveal for headings -->
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initWordReveal() {
+    if (REDUCED_MOTION) return;
+
+    const headings = document.querySelectorAll<HTMLElement>('[data-word-reveal]');
+    headings.forEach((heading) => {
+      // Skip if already processed
+      if (heading.dataset.wordRevealInit) return;
+      heading.dataset.wordRevealInit = '1';
+
+      const text = heading.textContent || '';
+      const words = text.trim().split(/\s+/);
+
+      heading.innerHTML = words
+        .map(
+          (word) =>
+            `<span class="inline-block overflow-hidden"><span class="inline-block" style="transform:translateY(100%)">${word}</span></span>`
+        )
+        .join(' ');
+
+      const innerSpans = heading.querySelectorAll('span > span');
+
+      ScrollTrigger.create({
+        trigger: heading,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.to(innerSpans, {
+            y: 0,
+            duration: 0.8,
+            stagger: 0.05,
+            ease: 'power3.out',
+          });
+        },
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initWordReveal);
+</script>

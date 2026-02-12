@@ -1,0 +1,33 @@
+<!-- TiltCard.astro — vanilla-tilt initialization for [data-tilt] elements -->
+<script>
+  async function initTilt() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const elements = document.querySelectorAll('[data-tilt]');
+    if (!elements.length) return;
+
+    const VanillaTilt = (await import('vanilla-tilt')).default;
+
+    elements.forEach((el) => {
+      VanillaTilt.init(el as HTMLElement, {
+        max: 15,
+        speed: 300,
+        glare: true,
+        'max-glare': 0.3,
+        perspective: 800,
+      });
+    });
+  }
+
+  function cleanupTilt() {
+    document.querySelectorAll('[data-tilt]').forEach((el) => {
+      if ((el as any).vanillaTilt) {
+        (el as any).vanillaTilt.destroy();
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initTilt);
+  document.addEventListener('astro:before-swap', cleanupTilt);
+</script>

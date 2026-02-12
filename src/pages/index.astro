@@ -1,9 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import ParticleCanvas from '../components/ParticleCanvas.astro';
 import PersonJsonLd from '../components/PersonJsonLd.astro';
 import { siteConfig } from '../data/site';
+import heroImg from '../assets/images/meandbatman.jpg';
 
 const posts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
@@ -24,40 +26,71 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   <!-- Hero Section -->
   <div class="relative" transition:persist="particle-hero">
     <ParticleCanvas />
-    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4">
-        {siteConfig.name}
-      </h1>
-      <p class="text-xl sm:text-2xl text-[var(--color-accent)] font-heading font-medium mb-6 min-h-[1.75rem] sm:min-h-[2rem]">
-        <span id="typing-role" class="typing-cursor">{siteConfig.roles[0]}</span>
-      </p>
-      <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mb-8">
-        {siteConfig.tagline}
-      </p>
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="/projects/"
-          class="inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
-        >
-          View Projects
-        </a>
-        <a
-          href="/blog/"
-          class="inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10 transition-colors"
-        >
-          Read Blog
-        </a>
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Text side -->
+        <div data-parallax="hero">
+          <p class="meta-mono mb-4 text-[var(--color-accent-secondary)]" data-reveal>Cloud-Native Architect &middot; Ontario, Canada</p>
+          <h1
+            class="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold mb-4 leading-[0.95] tracking-[-0.03em]"
+            style="opacity: 0;"
+            data-animate="headline"
+          >
+            {siteConfig.name}
+          </h1>
+          <p class="text-2xl sm:text-3xl text-[var(--color-accent)] font-heading font-medium mb-6 min-h-[2rem] sm:min-h-[2.5rem] typing-glow">
+            <span id="typing-role" class="typing-cursor" data-roles={JSON.stringify(siteConfig.roles)}>{siteConfig.roles[0]}</span>
+          </p>
+          <p class="text-lg text-[var(--color-text-secondary)] max-w-xl mb-8" data-reveal>
+            {siteConfig.tagline}
+          </p>
+          <div class="flex flex-wrap gap-4" data-reveal>
+            <a
+              href="/projects/"
+              class="btn-primary inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)]"
+              data-magnetic
+            >
+              View Projects
+            </a>
+            <a
+              href="/blog/"
+              class="btn-outline inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10"
+              data-magnetic
+            >
+              Read Blog
+            </a>
+          </div>
+        </div>
+        <!-- Photo side -->
+        <div class="relative flex justify-center lg:justify-end" data-reveal>
+          <div class="relative">
+            <div class="hero-img-frame overflow-hidden rounded-2xl shadow-2xl max-w-md" style="aspect-ratio: 480/600;" data-tilt>
+              <Image
+                src={heroImg}
+                alt="Patryk Golabek posing with Batman"
+                width={480}
+                height={600}
+                class="w-full h-full object-cover"
+                loading="eager"
+                fetchpriority="high"
+              />
+            </div>
+            <!-- Decorative accent -->
+            <div class="absolute -bottom-4 -right-4 w-24 h-24 rounded-xl bg-[var(--color-accent)]/20 -z-10"></div>
+            <div class="absolute -top-4 -left-4 w-16 h-16 rounded-lg bg-[var(--color-accent-secondary)]/20 -z-10"></div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
 
   <!-- Skills / What I Build Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 reveal">
-    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">What I Build</h2>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>What I Build</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
       <!-- Cloud-Native & Kubernetes -->
-      <div class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+      <div class="card-hover p-6 rounded-lg border border-[var(--color-border)]" data-reveal data-tilt>
         <div class="mb-4 text-[var(--color-accent)]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
@@ -70,7 +103,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
       </div>
 
       <!-- AI/ML Systems -->
-      <div class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+      <div class="card-hover p-6 rounded-lg border border-[var(--color-border)]" data-reveal data-tilt>
         <div class="mb-4 text-[var(--color-accent)]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -83,7 +116,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
       </div>
 
       <!-- Platform Engineering -->
-      <div class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+      <div class="card-hover p-6 rounded-lg border border-[var(--color-border)]" data-reveal data-tilt>
         <div class="mb-4 text-[var(--color-accent)]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.03a1.5 1.5 0 01-.55-2.05l3.03-5.1a1.5 1.5 0 012.05-.55l5.1 3.03a1.5 1.5 0 01.55 2.05l-3.03 5.1a1.5 1.5 0 01-2.05.55zM20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3" />
@@ -96,7 +129,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
       </div>
 
       <!-- Full-Stack Development -->
-      <div class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+      <div class="card-hover p-6 rounded-lg border border-[var(--color-border)]" data-reveal data-tilt>
         <div class="mb-4 text-[var(--color-accent)]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
@@ -112,15 +145,15 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   </section>
 
   <!-- Latest Blog Posts Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 reveal">
-    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Latest Writing</h2>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Latest Writing</h2>
     {latestPosts.length > 0 ? (
       <div class="space-y-6">
         {latestPosts.map((post) => {
           const isExternal = !!post.data.externalUrl;
           const href = isExternal ? post.data.externalUrl : `/blog/${post.id}/`;
           return (
-            <article class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+            <article class="card-hover p-6 rounded-lg border border-[var(--color-border)]" data-reveal data-tilt>
               <a
                 href={href}
                 class="text-lg font-heading font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors"
@@ -128,7 +161,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
               >
                 {post.data.title}
               </a>
-              <p class="text-sm text-[var(--color-text-secondary)] mt-1">
+              <p class="meta-mono mt-2">
                 <time datetime={post.data.publishedDate.toISOString()}>
                   {post.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </time>
@@ -153,7 +186,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
     ) : (
       <p class="text-[var(--color-text-secondary)]">No posts yet. Check back soon!</p>
     )}
-    <div class="mt-8">
+    <div class="mt-8" data-reveal>
       <a
         href="/blog/"
         class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium transition-colors"
@@ -164,15 +197,16 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   </section>
 
   <!-- Contact CTA Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 reveal">
-    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-4">Interested in working together?</h2>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16" data-reveal>
+    <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-4" data-word-reveal>Interested in working together?</h2>
     <p class="text-[var(--color-text-secondary)] mb-8 max-w-2xl">
       Whether you need a cloud-native architect, want to collaborate on an open-source project, or just want to chat about Kubernetes and AI — I'd love to hear from you.
     </p>
     <div class="flex flex-wrap gap-4">
       <a
         href="mailto:pgolabek@gmail.com"
-        class="inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+        class="btn-primary inline-flex items-center px-6 py-3 rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)]"
+        data-magnetic
       >
         Get in Touch
       </a>
@@ -180,7 +214,8 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
         href="https://x.com/QuantumMentat"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10 transition-colors"
+        class="btn-outline inline-flex items-center px-6 py-3 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] font-medium hover:bg-[var(--color-accent)]/10"
+        data-magnetic
       >
         <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -203,20 +238,3 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
     50% { opacity: 0; }
   }
 </style>
-
-<script is:inline define:vars={{ roles: [...siteConfig.roles] }}>
-  (function() {
-    // Guard against double-initialization from ClientRouter re-execution
-    if (window.__typingInterval) {
-      clearInterval(window.__typingInterval);
-    }
-    let i = 0;
-    const el = document.getElementById('typing-role');
-    if (el) {
-      window.__typingInterval = setInterval(function() {
-        i = (i + 1) % roles.length;
-        el.textContent = roles[i];
-      }, 3000);
-    }
-  })();
-</script>

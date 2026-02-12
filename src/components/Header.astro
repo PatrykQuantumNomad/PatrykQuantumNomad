@@ -1,8 +1,8 @@
 ---
 // Header.astro
-// Responsive header with site logo, desktop/mobile navigation, and theme toggle.
-// Semantic landmark with ARIA labels for accessibility.
-import ThemeToggle from './ThemeToggle.astro';
+// Scroll-aware sticky header with backdrop blur, animated underlines, and smooth mobile menu.
+import { Image } from 'astro:assets';
+import hulkImg from '../assets/images/hulk.png';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -15,15 +15,26 @@ const navLinks = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header role="banner" class="bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+<header
+  id="site-header"
+  role="banner"
+  class="sticky top-0 z-50 bg-[var(--color-surface)]/60 backdrop-blur-xl border-b border-transparent transition-all duration-300"
+>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
-      <!-- Logo / Site name -->
+      <!-- Logo -->
       <a
         href="/"
-        class="font-heading text-xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors"
+        class="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        PG
+        <Image
+          src={hulkImg}
+          alt="PG"
+          width={36}
+          height={36}
+          class="rounded-full"
+        />
+        <span class="font-mono text-lg font-bold text-[var(--color-accent)] tracking-widest">PG<span class="text-[var(--color-accent-secondary)]">_</span></span>
       </a>
 
       <!-- Desktop navigation (hidden on mobile, shown md+) -->
@@ -34,7 +45,7 @@ const currentPath = Astro.url.pathname;
             <a
               href={link.href}
               class:list={[
-                'font-medium transition-colors',
+                'nav-link font-medium transition-colors',
                 isActive
                   ? 'text-[var(--color-accent)]'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]',
@@ -49,8 +60,6 @@ const currentPath = Astro.url.pathname;
 
       <!-- Right side: theme toggle + mobile menu button -->
       <div class="flex items-center gap-2">
-        <ThemeToggle />
-
         <!-- Mobile menu button (visible below md) -->
         <button
           id="mobile-menu-btn"
@@ -97,10 +106,11 @@ const currentPath = Astro.url.pathname;
     </div>
   </div>
 
-  <!-- Mobile navigation panel (hidden by default) -->
+  <!-- Mobile navigation panel (slide transition) -->
   <nav
     id="mobile-menu"
-    class="hidden md:hidden border-t border-[var(--color-border)]"
+    class="md:hidden border-t border-[var(--color-border)] overflow-hidden transition-all duration-300 ease-in-out"
+    style="max-height: 0; opacity: 0;"
     aria-label="Mobile navigation"
   >
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
@@ -126,38 +136,82 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <script>
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const iconOpen = document.getElementById('menu-icon-open');
-  const iconClose = document.getElementById('menu-icon-close');
+  function initHeader() {
+    const header = document.getElementById('site-header');
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu') as HTMLElement;
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
 
-  menuBtn?.addEventListener('click', () => {
-    const isOpen = mobileMenu?.classList.contains('hidden') === false;
+    if (!header) return;
 
-    if (isOpen) {
-      mobileMenu?.classList.add('hidden');
-      iconOpen?.classList.remove('hidden');
-      iconClose?.classList.add('hidden');
-      menuBtn.setAttribute('aria-expanded', 'false');
-      menuBtn.setAttribute('aria-label', 'Open menu');
-    } else {
-      mobileMenu?.classList.remove('hidden');
-      iconOpen?.classList.add('hidden');
-      iconClose?.classList.remove('hidden');
-      menuBtn.setAttribute('aria-expanded', 'true');
-      menuBtn.setAttribute('aria-label', 'Close menu');
+    // Scroll-aware header: hide on scroll down, show on scroll up
+    let lastScroll = 0;
+    let ticking = false;
+
+    function updateHeader() {
+      const scrollY = window.scrollY;
+      const isScrolled = scrollY > 20;
+
+      // Show/hide border based on scroll position
+      if (isScrolled) {
+        header.style.borderColor = 'var(--color-border)';
+      } else {
+        header.style.borderColor = 'transparent';
+      }
+
+      // Hide on scroll down, show on scroll up
+      if (scrollY > lastScroll && scrollY > 80) {
+        header.style.transform = 'translateY(-100%)';
+      } else {
+        header.style.transform = 'translateY(0)';
+      }
+
+      lastScroll = scrollY;
+      ticking = false;
     }
-  });
 
-  // Close mobile menu when a link is clicked
-  const mobileLinks = mobileMenu?.querySelectorAll('a');
-  mobileLinks?.forEach((link) => {
-    link.addEventListener('click', () => {
-      mobileMenu?.classList.add('hidden');
-      iconOpen?.classList.remove('hidden');
-      iconClose?.classList.add('hidden');
-      menuBtn?.setAttribute('aria-expanded', 'false');
-      menuBtn?.setAttribute('aria-label', 'Open menu');
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Mobile menu toggle with slide animation
+    menuBtn?.addEventListener('click', () => {
+      const isOpen = mobileMenu.style.maxHeight !== '0px' && mobileMenu.style.maxHeight !== '';
+
+      if (isOpen) {
+        mobileMenu.style.maxHeight = '0';
+        mobileMenu.style.opacity = '0';
+        iconOpen?.classList.remove('hidden');
+        iconClose?.classList.add('hidden');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open menu');
+      } else {
+        mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+        mobileMenu.style.opacity = '1';
+        iconOpen?.classList.add('hidden');
+        iconClose?.classList.remove('hidden');
+        menuBtn.setAttribute('aria-expanded', 'true');
+        menuBtn.setAttribute('aria-label', 'Close menu');
+      }
     });
-  });
+
+    // Close mobile menu when a link is clicked
+    const mobileLinks = mobileMenu?.querySelectorAll('a');
+    mobileLinks?.forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileMenu.style.maxHeight = '0';
+        mobileMenu.style.opacity = '0';
+        iconOpen?.classList.remove('hidden');
+        iconClose?.classList.add('hidden');
+        menuBtn?.setAttribute('aria-expanded', 'false');
+        menuBtn?.setAttribute('aria-label', 'Open menu');
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
 </script>

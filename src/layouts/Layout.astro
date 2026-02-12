@@ -4,6 +4,12 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SEOHead from '../components/SEOHead.astro';
+import CustomCursor from '../components/animations/CustomCursor.astro';
+import TiltCard from '../components/animations/TiltCard.astro';
+import MagneticButton from '../components/animations/MagneticButton.astro';
+import SplitText from '../components/animations/SplitText.astro';
+import TextScramble from '../components/animations/TextScramble.astro';
+import WordReveal from '../components/animations/WordReveal.astro';
 
 interface Props {
   title: string;
@@ -49,36 +55,23 @@ const {
     <!-- RSS Autodiscovery -->
     <link rel="alternate" type="application/rss+xml" title="Patryk Golabek | Blog" href="/rss.xml" />
 
-    <!-- Theme detection: runs before any paint to prevent FOUC -->
-    <script is:inline>
-      (function() {
-        function applyTheme() {
-          const stored = localStorage.getItem('theme');
-          if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
-        }
-        applyTheme();
-        document.addEventListener('astro:after-swap', applyTheme);
-      })();
-    </script>
-
-    <!-- Google Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code) -->
+    <!-- Google Fonts: Bricolage Grotesque (headings), DM Sans (body), Fira Code (mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap"
       rel="stylesheet"
-      media="print"
-      onload="this.media='all'"
     />
-    <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    </noscript>
   </head>
-  <body class="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-text-primary)] transition-colors">
+  <body class="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-text-primary)]">
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" aria-hidden="true">
+      <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
+    </div>
+
+    <!-- Navigation Loading Indicator -->
+    <div id="nav-loading" class="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-accent)] z-[60] scale-x-0 origin-left transition-transform duration-300" aria-hidden="true"></div>
+
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--color-accent)] focus:text-white focus:rounded-lg focus:outline-none">
       Skip to main content
     </a>
@@ -87,27 +80,63 @@ const {
       <slot />
     </main>
     <Footer />
+    <CustomCursor />
+    <TiltCard />
+    <MagneticButton />
+    <SplitText />
+    <TextScramble />
+    <WordReveal />
+
+    <!-- Animation lifecycle: GSAP ScrollTrigger + Lenis smooth scroll -->
     <script>
-      function initScrollReveal() {
-        const elements = document.querySelectorAll('.reveal:not(.revealed)');
-        if (!elements.length) return;
+      import { initSmoothScroll } from '../lib/smooth-scroll';
+      import { initScrollAnimations } from '../lib/scroll-animations';
+      import { cleanupAnimations } from '../lib/animation-lifecycle';
 
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-        );
-
-        elements.forEach((el) => observer.observe(el));
+      function initAll() {
+        initSmoothScroll();
+        initScrollAnimations();
+        initScrollProgress();
       }
 
-      document.addEventListener('astro:page-load', initScrollReveal);
+      function initScrollProgress() {
+        const bar = document.getElementById('scroll-progress-bar');
+        if (!bar) return;
+
+        function updateProgress() {
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+          bar!.style.width = `${progress}%`;
+        }
+
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress();
+      }
+
+      document.addEventListener('astro:page-load', initAll);
+      document.addEventListener('astro:before-swap', cleanupAnimations);
+    </script>
+
+    <!-- Navigation loading indicator -->
+    <script>
+      document.addEventListener('astro:before-preparation', () => {
+        const bar = document.getElementById('nav-loading');
+        if (bar) bar.style.transform = 'scaleX(0.7)';
+      });
+      document.addEventListener('astro:page-load', () => {
+        const bar = document.getElementById('nav-loading');
+        if (bar) {
+          bar.style.transform = 'scaleX(1)';
+          setTimeout(() => {
+            bar.style.opacity = '0';
+            setTimeout(() => {
+              bar.style.transform = 'scaleX(0)';
+              bar.style.opacity = '1';
+            }, 200);
+          }, 150);
+        }
+      });
     </script>
   </body>
 </html>

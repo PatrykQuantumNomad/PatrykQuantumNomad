@@ -1,0 +1,48 @@
+<!-- SplitText.astro — Typing role rotation effect (headline handled by TextScramble) -->
+<script>
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateTypingRole(roles: string[]) {
+    const el = document.getElementById('typing-role');
+    if (!el || REDUCED_MOTION) return;
+
+    let currentIndex = 0;
+
+    async function typeRole(text: string) {
+      // Delete current text character by character
+      const currentText = el!.textContent || '';
+      for (let i = currentText.length; i >= 0; i--) {
+        el!.textContent = currentText.slice(0, i);
+        await new Promise((r) => setTimeout(r, 30));
+      }
+
+      // Type new text character by character
+      for (let i = 0; i <= text.length; i++) {
+        el!.textContent = text.slice(0, i);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    }
+
+    async function cycle() {
+      await new Promise((r) => setTimeout(r, 3000));
+      currentIndex = (currentIndex + 1) % roles.length;
+      await typeRole(roles[currentIndex]);
+      cycle();
+    }
+
+    cycle();
+  }
+
+  function initHeroAnimations() {
+    // Get roles from the data attribute
+    const rolesEl = document.querySelector('[data-roles]');
+    if (rolesEl) {
+      try {
+        const roles = JSON.parse(rolesEl.getAttribute('data-roles') || '[]');
+        if (roles.length > 1) animateTypingRole(roles);
+      } catch { /* noop */ }
+    }
+  }
+
+  document.addEventListener('astro:page-load', initHeroAnimations);
+</script>

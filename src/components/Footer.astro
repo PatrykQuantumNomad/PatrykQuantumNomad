@@ -1,16 +1,36 @@
 ---
 // Footer.astro
-// Site footer with copyright and social links.
-// Semantic landmark with ARIA labels for accessibility.
+// Site footer with gradient divider, elastic social icons, and tech marquee.
 const currentYear = new Date().getFullYear();
+
+const techKeywords = [
+  'Kubernetes', 'Cloud-Native', 'AI/ML', 'LangGraph', 'Terraform', 'Docker',
+  'TypeScript', 'React', 'Platform Engineering', 'DevSecOps', 'GitOps', 'ArgoCD',
+  'Kubernetes', 'Cloud-Native', 'AI/ML', 'LangGraph', 'Terraform', 'Docker',
+  'TypeScript', 'React', 'Platform Engineering', 'DevSecOps', 'GitOps', 'ArgoCD',
+];
 ---
 
-<footer role="contentinfo" class="border-t border-[var(--color-border)]">
+<!-- Tech keyword marquee -->
+<div class="overflow-hidden py-3 opacity-30" aria-hidden="true">
+  <div class="marquee-track">
+    {techKeywords.map((keyword) => (
+      <span class="text-xs font-mono text-[var(--color-text-secondary)] mx-4 whitespace-nowrap">
+        {keyword}
+      </span>
+    ))}
+  </div>
+</div>
+
+<!-- Gradient divider -->
+<div class="gradient-divider"></div>
+
+<footer role="contentinfo">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
       <!-- Copyright -->
-      <p class="text-sm text-[var(--color-text-secondary)]">
-        &copy; {currentYear} Patryk Golabek. All rights reserved.
+      <p class="meta-mono">
+        <span class="opacity-50">//</span> &copy; {currentYear} Patryk Golabek
       </p>
 
       <!-- Social links -->
@@ -21,10 +41,10 @@ const currentYear = new Date().getFullYear();
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub profile"
-          class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          class="social-icon text-[var(--color-text-secondary)]"
         >
           <svg
-            class="w-5 h-5"
+            class="w-5 h-5 icon-github"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
@@ -39,10 +59,10 @@ const currentYear = new Date().getFullYear();
           target="_blank"
           rel="noopener noreferrer"
           aria-label="X profile"
-          class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          class="social-icon text-[var(--color-text-secondary)]"
         >
           <svg
-            class="w-5 h-5"
+            class="w-5 h-5 icon-x"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
@@ -57,10 +77,10 @@ const currentYear = new Date().getFullYear();
           target="_blank"
           rel="noopener noreferrer"
           aria-label="YouTube channel"
-          class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          class="social-icon text-[var(--color-text-secondary)]"
         >
           <svg
-            class="w-5 h-5"
+            class="w-5 h-5 icon-youtube"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
@@ -75,10 +95,10 @@ const currentYear = new Date().getFullYear();
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Blog at Translucent Computing"
-          class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          class="social-icon text-[var(--color-text-secondary)]"
         >
           <svg
-            class="w-5 h-5"
+            class="w-5 h-5 icon-blog"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

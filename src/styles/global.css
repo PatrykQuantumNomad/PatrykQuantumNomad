@@ -2,26 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Light Theme (default) ─────────────────────────────────────────────── */
+/* ─── Tropical Sunset Palette ──────────────────────────────────────────── */
 :root {
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8f9fc;
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #4a4a68;
-  --color-accent: #6c63ff;
-  --color-accent-hover: #5a52e0;
-  --color-border: #e2e4e9;
+  --color-surface: #fffaf7;
+  --color-surface-alt: #f5ede6;
+  --color-text-primary: #2c2c2c;
+  --color-text-secondary: #5a5a5a;
+  --color-accent: #c44b20;
+  --color-accent-hover: #a33f1a;
+  --color-accent-secondary: #006d6d;
+  --color-accent-glow: rgba(196, 75, 32, 0.3);
+  --color-gradient-start: #c44b20;
+  --color-gradient-end: #006d6d;
+  --color-border: #e5ddd5;
+  --color-glow-intense: rgba(196, 75, 32, 0.5);
+  --color-glow-neon: rgba(0, 109, 109, 0.3);
 }
 
-/* ─── Dark Theme ────────────────────────────────────────────────────────── */
-:root.dark {
-  --color-surface: #0a0a1a;
-  --color-surface-alt: #12122a;
-  --color-text-primary: #e8e8f0;
-  --color-text-secondary: #9898b8;
-  --color-accent: #7c73ff;
-  --color-accent-hover: #9a93ff;
-  --color-border: #2a2a4a;
+
+/* ─── Font Fallback Metrics (reduce CLS from font swap) ────────────────── */
+@font-face {
+  font-family: 'Bricolage Grotesque Fallback';
+  src: local('Arial');
+  size-adjust: 95%;
+  ascent-override: 105%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'DM Sans Fallback';
+  src: local('Arial');
+  size-adjust: 97%;
+  ascent-override: 100%;
+  descent-override: 25%;
+  line-gap-override: 0%;
 }
 
 /* ─── Base Typography ───────────────────────────────────────────────────── */
@@ -31,6 +45,7 @@
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading font-bold;
+    letter-spacing: -0.02em;
   }
   code, pre {
     @apply font-mono;
@@ -46,20 +61,350 @@ button:focus-visible,
   border-radius: 4px;
 }
 
-/* Scroll Reveal Animations */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+/* ─── Monospace Metadata (Film Credits Style) ──────────────────────────── */
+.meta-mono {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-text-secondary);
 }
-.reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
+
+/* ─── Scroll Reveal (GSAP clip-path) ───────────────────────────────────── */
+[data-reveal] {
+  will-change: clip-path;
 }
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
+  [data-reveal] {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ─── Scroll Progress Bar ──────────────────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 100;
+  pointer-events: none;
+}
+.scroll-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+  transition: width 0.1s linear;
+}
+
+/* ─── Page Transitions ─────────────────────────────────────────────────── */
+::view-transition-old(root) {
+  animation: page-exit 0.4s ease-in both;
+}
+::view-transition-new(root) {
+  animation: page-enter 0.4s ease-out both;
+}
+@keyframes page-exit {
+  from { opacity: 1; clip-path: inset(0 0 0 0); }
+  to { opacity: 0; clip-path: inset(0 0 100% 0); }
+}
+@keyframes page-enter {
+  from { opacity: 0; clip-path: inset(100% 0 0 0); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+/* Hero persisted element — no transition animation */
+::view-transition-old(particle-hero),
+::view-transition-new(particle-hero) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.15s;
+    animation-name: fade-transition;
+  }
+  @keyframes fade-transition {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* ─── Nav Link Animated Underline ──────────────────────────────────────── */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ─── Button Hover Effects ─────────────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--color-accent-glow);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px var(--color-accent-glow);
+}
+/* Shine sweep on hover */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+.btn-primary:hover::after {
+  left: 120%;
+}
+
+.btn-outline {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-outline:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px var(--color-accent-glow);
+}
+.btn-outline:active {
+  transform: translateY(0);
+}
+
+/* ─── Card Hover Depth + Glassmorphism ─────────────────────────────────── */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(248, 248, 252, 0.7);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px var(--color-accent-glow), 0 0 60px var(--color-glow-neon);
+  border-color: var(--color-accent);
+}
+
+/* ─── Icon Hover Bounce ────────────────────────────────────────────────── */
+.icon-hover {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.icon-hover:hover {
+  animation: icon-bounce 0.4s ease;
+}
+@keyframes icon-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.15); }
+}
+
+/* ─── Footer Social Elastic Hover ──────────────────────────────────────── */
+.social-icon {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+}
+.social-icon:hover {
+  transform: scale(1.25);
+}
+.social-icon:hover .icon-github { color: #333; }
+.social-icon:hover .icon-x { color: #1a1a2e; }
+.social-icon:hover .icon-youtube { color: #ff0000; }
+.social-icon:hover .icon-blog { color: var(--color-accent-secondary); }
+
+/* ─── Tech Stack Pill Hover ────────────────────────────────────────────── */
+.tech-pill {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.tech-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-accent-glow);
+  background-color: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+/* ─── Typing Role Glow ─────────────────────────────────────────────────── */
+.typing-glow {
+  text-shadow: 0 0 30px var(--color-accent-glow);
+}
+
+/* ─── Avatar Rotating Gradient Border ──────────────────────────────────── */
+.avatar-glow {
+  position: relative;
+  background: conic-gradient(from 0deg, var(--color-gradient-start), var(--color-gradient-end), var(--color-gradient-start));
+  padding: 3px;
+  border-radius: 9999px;
+  animation: avatar-spin 4s linear infinite;
+}
+@keyframes avatar-spin {
+  to { background: conic-gradient(from 360deg, var(--color-gradient-start), var(--color-gradient-end), var(--color-gradient-start)); }
+}
+
+/* ─── Timeline Connector Animation ─────────────────────────────────────── */
+.highlight-item {
+  border-left: 2px solid transparent;
+  background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  background-size: 2px 0%;
+  background-position: left;
+  background-repeat: no-repeat;
+  transition: background-size 0.8s ease-out;
+}
+.highlight-item.revealed {
+  background-size: 2px 100%;
+}
+
+/* ─── Contact Brand Glow ───────────────────────────────────────────────── */
+.contact-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(248, 248, 252, 0.7);
+}
+.contact-card:hover {
+  transform: translateY(-4px);
+}
+.contact-card[data-brand="email"]:hover {
+  box-shadow: 0 12px 32px var(--color-glow-intense);
+  border-color: var(--color-accent);
+}
+.contact-card[data-brand="x"]:hover {
+  box-shadow: 0 12px 32px rgba(29, 155, 240, 0.2);
+  border-color: #1d9bf0;
+}
+.contact-card[data-brand="youtube"]:hover {
+  box-shadow: 0 12px 32px rgba(255, 0, 0, 0.2);
+  border-color: #ff0000;
+}
+
+/* ─── Dot Grid Background (Contact) ────────────────────────────────────── */
+.dot-grid-bg {
+  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ─── Footer Gradient Divider ──────────────────────────────────────────── */
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), var(--color-accent-secondary), transparent);
+}
+
+/* ─── Marquee ──────────────────────────────────────────────────────────── */
+.marquee-track {
+  display: flex;
+  animation: marquee 20s linear infinite;
+  width: max-content;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Custom Cursor ────────────────────────────────────────────────────── */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  mix-blend-mode: difference;
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease;
+}
+.cursor-dot.expanded {
+  width: 14px;
+  height: 14px;
+  margin: -3px 0 0 -3px;
+}
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  will-change: transform;
+  mix-blend-mode: difference;
+  opacity: 0.5;
+  transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+}
+.cursor-ring.expanded {
+  width: 56px;
+  height: 56px;
+  margin: -10px 0 0 -10px;
+  opacity: 0.3;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-dot, .cursor-ring {
+    display: none !important;
+  }
+}
+
+/* ─── Grain Texture Overlay ────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ─── Reduced Motion Global Fallback ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary:hover,
+  .btn-outline:hover,
+  .card-hover:hover,
+  .contact-card:hover,
+  .tech-pill:hover {
     transform: none;
-    transition: none;
+  }
+  .btn-primary::after {
+    display: none;
+  }
+  .avatar-glow {
+    animation: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  .icon-hover:hover {
+    animation: none;
+  }
+  body::before {
+    display: none;
   }
 }

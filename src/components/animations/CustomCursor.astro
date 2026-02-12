@@ -1,0 +1,97 @@
+<!-- CustomCursor.astro — Custom dot + ring cursor, desktop only -->
+<div class="cursor-dot" id="cursor-dot" aria-hidden="true" transition:persist="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true" transition:persist="cursor-ring"></div>
+
+<script>
+  // Use a global object so the animation loop and mouse position
+  // survive Astro view transitions without duplicating listeners.
+  if (!(window as any).__cursorState) {
+    (window as any).__cursorState = {
+      mouseX: -100,
+      mouseY: -100,
+      ringX: -100,
+      ringY: -100,
+      initialized: false,
+      animating: false,
+    };
+  }
+
+  const state = (window as any).__cursorState;
+
+  function initCursor() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    if (!dot || !ring) return;
+
+    // Only attach the global mousemove listener once
+    if (!state.initialized) {
+      state.initialized = true;
+
+      document.addEventListener('mousemove', (e) => {
+        state.mouseX = e.clientX;
+        state.mouseY = e.clientY;
+      }, { passive: true });
+
+      // Hide when cursor leaves window
+      document.addEventListener('mouseleave', () => {
+        const d = document.getElementById('cursor-dot');
+        const r = document.getElementById('cursor-ring');
+        if (d) d.style.opacity = '0';
+        if (r) r.style.opacity = '0';
+      });
+      document.addEventListener('mouseenter', () => {
+        const d = document.getElementById('cursor-dot');
+        const r = document.getElementById('cursor-ring');
+        if (d) d.style.opacity = '1';
+        if (r) r.style.opacity = '0.5';
+      });
+    }
+
+    // Start animation loop (only one loop ever runs)
+    if (!state.animating) {
+      state.animating = true;
+      const lerp = 0.2;
+
+      function animate() {
+        // Always query fresh DOM refs in case elements were replaced
+        const d = document.getElementById('cursor-dot');
+        const r = document.getElementById('cursor-ring');
+        if (d && r) {
+          d.style.transform = `translate(${state.mouseX - 3}px, ${state.mouseY - 3}px)`;
+
+          state.ringX += (state.mouseX - 22 - state.ringX) * lerp;
+          state.ringY += (state.mouseY - 22 - state.ringY) * lerp;
+          r.style.transform = `translate(${state.ringX}px, ${state.ringY}px)`;
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    // Re-add hover listeners for the current page's interactive elements
+    addHoverListeners();
+  }
+
+  function addHoverListeners() {
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    if (!dot || !ring) return;
+
+    const targets = document.querySelectorAll('a, button, [data-cursor="expand"], [role="button"]');
+    targets.forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        dot.classList.add('expanded');
+        ring.classList.add('expanded');
+      });
+      el.addEventListener('mouseleave', () => {
+        dot.classList.remove('expanded');
+        ring.classList.remove('expanded');
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCursor);
+</script>

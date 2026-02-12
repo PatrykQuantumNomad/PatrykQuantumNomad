@@ -5,7 +5,10 @@
 <style>
   /* Static gradient fallback -- always visible, canvas overlays it */
   .particle-container {
-    background: radial-gradient(ellipse at 50% 0%, var(--color-surface-alt) 0%, var(--color-surface) 70%);
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(196, 75, 32, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(0, 109, 109, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 0%, var(--color-surface-alt) 0%, var(--color-surface) 60%);
   }
   @media (prefers-reduced-motion: reduce) {
     #particle-canvas {
@@ -16,114 +19,223 @@
 
 <script is:inline>
 (function() {
-  // Bail out entirely if user prefers reduced motion
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const canvas = document.getElementById('particle-canvas');
-  if (!canvas) return;
+  // Only register listeners once across view transitions
+  if (window.__particleListenersReady) return;
+  window.__particleListenersReady = true;
 
-  const ctx = canvas.getContext('2d', { alpha: true });
-  const container = document.getElementById('particle-container');
-  const dpr = window.devicePixelRatio || 1;
-  let particles = [];
-  let animationId = null;
-  let isRunning = false;
-
-  // Mobile: fewer particles for performance
-  function getParticleCount() {
-    const width = container.offsetWidth;
-    if (width < 640) return 30;   // Mobile
-    if (width < 1024) return 50;  // Tablet
-    return 80;                     // Desktop
-  }
-
-  function resize() {
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.scale(dpr, dpr);
-  }
-
-  function createParticle(w, h) {
-    return {
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: Math.random() * 2 + 0.5,
-      alpha: Math.random() * 0.6 + 0.1,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.3,
-    };
-  }
-
-  function init() {
-    resize();
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
-    const count = getParticleCount();
-    particles = Array.from({ length: count }, function() { return createParticle(w, h); });
-  }
-
-  function draw() {
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
-    ctx.clearRect(0, 0, w, h);
-    for (var j = 0; j < particles.length; j++) {
-      var p = particles[j];
-      p.x += p.dx;
-      p.y += p.dy;
-      // Wrap around edges
-      if (p.x < 0) p.x = w;
-      if (p.x > w) p.x = 0;
-      if (p.y < 0) p.y = h;
-      if (p.y > h) p.y = 0;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(124, 115, 255, ' + p.alpha + ')';
-      ctx.fill();
-    }
-    animationId = requestAnimationFrame(draw);
-  }
-
-  function start() {
-    if (!isRunning) {
-      isRunning = true;
-      draw();
+  function cleanup() {
+    if (window.__heroAnimationId) {
+      cancelAnimationFrame(window.__heroAnimationId);
+      window.__heroAnimationId = null;
     }
   }
 
-  function stop() {
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-      animationId = null;
+  function bootParticles() {
+    var canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+
+    var ctx = canvas.getContext('2d', { alpha: true });
+    var container = document.getElementById('particle-container');
+    if (!container || container.offsetHeight === 0) {
+      requestAnimationFrame(bootParticles);
+      return;
     }
-    isRunning = false;
-  }
 
-  // Pause when tab is hidden
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) { stop(); }
-    else { start(); }
-  });
+    // Clean up any previous animation before re-init
+    cleanup();
 
-  window.addEventListener('resize', function() {
-    resize();
-    // Recalculate particle count on resize
-    var count = getParticleCount();
-    var w = container.offsetWidth;
-    var h = container.offsetHeight;
-    if (count < particles.length) {
-      particles = particles.slice(0, count);
-    } else {
-      while (particles.length < count) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var particles = [];
+    var animationId = null;
+    var isRunning = false;
+    var CONNECTION_DIST = 170;
+
+    var mouse = { x: -999, y: -999 };
+    var isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+    if (!isTouch) {
+      container.addEventListener('mousemove', function(e) {
+        var rect = container.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      }, { passive: true });
+
+      container.addEventListener('mouseleave', function() {
+        mouse.x = -999;
+        mouse.y = -999;
+      });
+    }
+
+    function getAccentColor() {
+      var style = getComputedStyle(document.documentElement);
+      return style.getPropertyValue('--color-accent').trim() || '#c44b20';
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      var r = parseInt(hex.substring(0, 2), 16);
+      var g = parseInt(hex.substring(2, 4), 16);
+      var b = parseInt(hex.substring(4, 6), 16);
+      return { r: r, g: g, b: b };
+    }
+
+    function getParticleCount() {
+      var width = container.offsetWidth;
+      if (width < 640) return 70;
+      if (width < 1024) return 100;
+      return 160;
+    }
+
+    function resize() {
+      var w = container.offsetWidth;
+      var h = container.offsetHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function createParticle(w, h) {
+      return {
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: Math.random() * 2.5 + 0.8,
+        alpha: Math.random() * 0.4 + 0.2,
+        dx: (Math.random() - 0.5) * 0.7,
+        dy: (Math.random() - 0.5) * 0.7,
+      };
+    }
+
+    function init() {
+      resize();
+      var w = container.offsetWidth;
+      var h = container.offsetHeight;
+      var count = getParticleCount();
+      particles = [];
+      for (var i = 0; i < count; i++) {
         particles.push(createParticle(w, h));
       }
     }
-  });
 
-  init();
-  start();
+    function draw() {
+      var w = container.offsetWidth;
+      var h = container.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      var accent = getAccentColor();
+      var rgb = hexToRgb(accent);
+
+      for (var j = 0; j < particles.length; j++) {
+        var p = particles[j];
+
+        if (!isTouch && mouse.x > -900) {
+          var mdx = p.x - mouse.x;
+          var mdy = p.y - mouse.y;
+          var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (mDist < 180 && mDist > 0) {
+            var force = (180 - mDist) / 180 * 1.0;
+            p.dx += (mdx / mDist) * force;
+            p.dy += (mdy / mDist) * force;
+          }
+        }
+
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dx *= 0.98;
+        p.dy *= 0.98;
+
+        var speed = Math.sqrt(p.dx * p.dx + p.dy * p.dy);
+        if (speed < 0.3) {
+          p.dx += (Math.random() - 0.5) * 0.25;
+          p.dy += (Math.random() - 0.5) * 0.25;
+        }
+
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + p.alpha + ')';
+        ctx.fill();
+      }
+
+      for (var i = 0; i < particles.length; i++) {
+        for (var k = i + 1; k < particles.length; k++) {
+          var dx = particles[i].x - particles[k].x;
+          var dy = particles[i].y - particles[k].y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < CONNECTION_DIST) {
+            var opacity = (1 - dist / CONNECTION_DIST) * 0.25;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[k].x, particles[k].y);
+            ctx.strokeStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + opacity + ')';
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+      window.__heroAnimationId = animationId;
+    }
+
+    function start() {
+      if (!isRunning) {
+        isRunning = true;
+        draw();
+      }
+    }
+
+    function stop() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+        window.__heroAnimationId = null;
+      }
+      isRunning = false;
+    }
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) { stop(); }
+      else { start(); }
+    });
+
+    window.addEventListener('resize', function() {
+      resize();
+      var count = getParticleCount();
+      var w = container.offsetWidth;
+      var h = container.offsetHeight;
+      if (count < particles.length) {
+        particles = particles.slice(0, count);
+      } else {
+        while (particles.length < count) {
+          particles.push(createParticle(w, h));
+        }
+      }
+    });
+
+    init();
+    start();
+  }
+
+  // Clean up on page swap (navigating away)
+  document.addEventListener('astro:before-swap', cleanup);
+
+  // Boot on every page load (handles view transition navigations back to home)
+  document.addEventListener('astro:page-load', bootParticles);
+
+  // Also boot immediately for first load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootParticles);
+  } else {
+    bootParticles();
+  }
 })();
 </script>
