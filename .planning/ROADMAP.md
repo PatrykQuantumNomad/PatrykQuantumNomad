@@ -115,7 +115,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Create external blog content files and add getStaticPaths guards
+- [x] 09-01-PLAN.md — Create external blog content files and add getStaticPaths guards
 - [ ] 09-02-PLAN.md — Update BlogCard for external links with source badges and update RSS feed
 
 ### Phase 10: Social Links & Contact Update
@@ -177,11 +177,11 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 6. Visual Effects | v1.0 | 2/2 | Complete | 2026-02-11 |
 | 7. Enhanced Blog & SEO | v1.0 | 3/3 | Complete | 2026-02-11 |
 | 8. Schema & Hero Config | v1.1 | 2/2 | Complete | 2026-02-11 |
-| 9. External Blog | v1.1 | 0/2 | Not started | - |
+| 9. External Blog | v1.1 | 1/2 | In progress | - |
 | 10. Social Links | v1.1 | 0/1 | Not started | - |
 | 11. Hero & Projects | v1.1 | 0/1 | Not started | - |
 | 12. Cleanup & Verify | v1.1 | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11 (Phase 9 planned)*
+*Last updated: 2026-02-12 (Phase 9 plan 1 complete)*

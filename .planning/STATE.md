@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 8 of 12 (Schema & Hero Config Foundation) -- COMPLETE
-Plan: 2 of 2 in current phase (complete)
-Status: Phase 8 complete, ready for Phase 9
-Last activity: 2026-02-11 — Completed 08-02 Wire home page and PersonJsonLd to siteConfig
+Phase: 9 of 12 (External Blog Integration) -- IN PROGRESS
+Plan: 1 of 2 in current phase (complete)
+Status: Phase 9 plan 1 complete, ready for plan 2
+Last activity: 2026-02-12 — Completed 09-01 External blog content and getStaticPaths guards
 
-Progress: [██████████████████░░░░░░] 78% (v1.0 complete: 16/16 plans | v1.1: 2/7 plans)
+Progress: [███████████████████░░░░░] 83% (v1.0 complete: 16/16 plans | v1.1: 3/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18 (16 v1.0 + 2 v1.1)
+- Total plans completed: 19 (16 v1.0 + 3 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -28,7 +28,7 @@ Progress: [██████████████████░░░░░
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 8. Schema & Config | 2/2 | 6min | 3min |
-| 9. External Blog | 0/2 | - | - |
+| 9. External Blog | 1/2 | 2min | 2min |
 | 10. Social Links | 0/1 | - | - |
 | 11. Hero & Projects | 0/1 | - | - |
 | 12. Cleanup & Verify | 0/1 | - | - |
@@ -53,6 +53,8 @@ v1.1 decisions so far:
 - Added `@astrojs/check` and `typescript` as dev dependencies for type verification
 - Used spread `[...siteConfig.roles]` in define:vars to convert readonly tuple for JSON serialization
 - Computed pageTitle/pageDescription in frontmatter for clean config-to-template data flow
+- Frontmatter-only stubs with no body content for external blog posts
+- getStaticPaths guards exclude external posts in both dev and prod modes (not just PROD)
 
 ### Pending Todos
 
@@ -66,7 +68,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-11
-Stopped at: Completed 08-02-PLAN.md (Wire home page and PersonJsonLd to siteConfig)
+Last session: 2026-02-12
+Stopped at: Completed 09-01-PLAN.md (External blog content and getStaticPaths guards)
 Resume file: None
-Next: Execute Phase 9 (External Blog Integration)
+Next: Execute Phase 9 Plan 2 (Blog listing, RSS, and tag integration for external posts)
