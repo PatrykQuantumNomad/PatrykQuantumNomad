@@ -81,7 +81,7 @@ Plans:
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 8: Schema & Hero Config Foundation** - Establish data contracts that all content phases depend on
-- [ ] **Phase 9: External Blog Integration** - Surface curated external blog posts alongside local content
+- [x] **Phase 9: External Blog Integration** - Surface curated external blog posts alongside local content
 - [ ] **Phase 10: Social Links & Contact Update** - Update email, add X and YouTube, remove LinkedIn from UI
 - [ ] **Phase 11: Hero & Project Curation** - Refresh hero messaging and remove deprecated projects
 - [ ] **Phase 12: Cleanup & Verification** - Delete draft post and verify all outputs are consistent
@@ -116,7 +116,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — Create external blog content files and add getStaticPaths guards
-- [ ] 09-02-PLAN.md — Update BlogCard for external links with source badges and update RSS feed
+- [x] 09-02-PLAN.md — Update BlogCard for external links with source badges and update RSS feed
 
 ### Phase 10: Social Links & Contact Update
 **Goal**: All visible social links and contact info reflect current accounts (X, YouTube, updated email) with LinkedIn removed from the UI
@@ -177,11 +177,11 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 6. Visual Effects | v1.0 | 2/2 | Complete | 2026-02-11 |
 | 7. Enhanced Blog & SEO | v1.0 | 3/3 | Complete | 2026-02-11 |
 | 8. Schema & Hero Config | v1.1 | 2/2 | Complete | 2026-02-11 |
-| 9. External Blog | v1.1 | 1/2 | In progress | - |
+| 9. External Blog | v1.1 | 2/2 | Complete | 2026-02-12 |
 | 10. Social Links | v1.1 | 0/1 | Not started | - |
 | 11. Hero & Projects | v1.1 | 0/1 | Not started | - |
 | 12. Cleanup & Verify | v1.1 | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-12 (Phase 9 plan 1 complete)*
+*Last updated: 2026-02-12 (Phase 9 complete)*

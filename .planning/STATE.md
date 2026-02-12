@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 9 - External Blog Integration (v1.1 Content Refresh)
+**Current focus:** Phase 10 - Social Links & Contact Update (v1.1 Content Refresh)
 
 ## Current Position
 
-Phase: 9 of 12 (External Blog Integration) -- IN PROGRESS
-Plan: 1 of 2 in current phase (complete)
-Status: Phase 9 plan 1 complete, ready for plan 2
-Last activity: 2026-02-12 — Completed 09-01 External blog content and getStaticPaths guards
+Phase: 10 of 12 (Social Links & Contact Update) -- NOT STARTED
+Plan: 0 of 1 in current phase
+Status: Phase 9 complete, ready for Phase 10
+Last activity: 2026-02-12 — Completed 09-02 BlogCard external links and RSS feed
 
-Progress: [███████████████████░░░░░] 83% (v1.0 complete: 16/16 plans | v1.1: 3/7 plans)
+Progress: [████████████████████░░░░] 86% (v1.0 complete: 16/16 plans | v1.1: 4/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (16 v1.0 + 3 v1.1)
+- Total plans completed: 20 (16 v1.0 + 4 v1.1)
 - Average duration: ~10 min (v1.0 baseline)
 - Total execution time: ~2.5 hours (v1.0)
 
@@ -28,7 +28,7 @@ Progress: [███████████████████░░░░
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 8. Schema & Config | 2/2 | 6min | 3min |
-| 9. External Blog | 1/2 | 2min | 2min |
+| 9. External Blog | 2/2 | 4min | 2min |
 | 10. Social Links | 0/1 | - | - |
 | 11. Hero & Projects | 0/1 | - | - |
 | 12. Cleanup & Verify | 0/1 | - | - |
@@ -55,6 +55,8 @@ v1.1 decisions so far:
 - Computed pageTitle/pageDescription in frontmatter for clean config-to-template data flow
 - Frontmatter-only stubs with no body content for external blog posts
 - getStaticPaths guards exclude external posts in both dev and prod modes (not just PROD)
+- Inline SVG for external link icon (no icon library dependency)
+- Nullish coalescing for RSS link fallback (externalUrl ?? internal path)
 
 ### Pending Todos
 
@@ -64,11 +66,10 @@ None yet.
 
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
 - [Content]: Hero tagline final copy needs user approval during Phase 11
-- [Content]: External post titles/descriptions need verification against actual external blog posts during Phase 9
 
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 09-01-PLAN.md (External blog content and getStaticPaths guards)
+Stopped at: Completed 09-02-PLAN.md (BlogCard external links and RSS feed)
 Resume file: None
-Next: Execute Phase 9 Plan 2 (Blog listing, RSS, and tag integration for external posts)
+Next: Execute Phase 10 Plan 1 (Social Links & Contact Update)
