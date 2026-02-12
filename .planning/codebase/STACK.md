@@ -5,102 +5,88 @@
 ## Languages
 
 **Primary:**
-- TypeScript (strict) — All page logic, components, data schemas, and library code
-- Astro Component Language — `.astro` files for pages, layouts, and components (HTML + frontmatter TS)
+- TypeScript 5.9.3 - Component logic, content schemas, utility libraries
+- JavaScript (ES Module) - Build config, remark plugins, inline scripts
 
 **Secondary:**
-- CSS — Global styles with Tailwind directives and custom CSS (`src/styles/global.css`)
-- Vanilla JavaScript — Inline `<script is:inline>` blocks for particle canvas (`src/components/ParticleCanvas.astro`)
+- CSS - Global styles, component-scoped styles in Astro components
+- MDX - Blog post content with embedded components
 
 ## Runtime
 
 **Environment:**
-- Node.js (version not pinned — no `.nvmrc` or `.node-version` file present)
-- ES Modules (`"type": "module"` in `package.json`)
+- Node.js (version unspecified in package.json)
 
 **Package Manager:**
 - npm
-- Lockfile: `package-lock.json` (present, ~298KB)
+- Lockfile: present (`package-lock.json`)
 
 ## Frameworks
 
 **Core:**
-- Astro `^5.3.0` — Static site generator, SSG output mode (`output: 'static'`)
-- Tailwind CSS `^3.4.19` — Utility-first CSS framework
-- TypeScript `^5.9.3` — Strict mode via `astro/tsconfigs/strict` preset
+- Astro 5.3.0 - Static site generator, primary framework
+- Tailwind CSS 3.4.19 - Utility-first CSS framework
 
-**Animation:**
-- GSAP `^3.14.2` — ScrollTrigger, batch animations, parallax, clip-path reveals
-- Lenis `^1.3.17` — Smooth scroll (desktop only, disabled on touch/reduced-motion)
-- vanilla-tilt `^1.8.1` — 3D tilt effect on cards (desktop only)
-
-**Content:**
-- Astro MDX `^4.3.13` — MDX content processing
-- astro-expressive-code `^0.41.6` — Syntax highlighting with `github-dark` / `github-light` themes
+**Testing:**
+- Not detected
 
 **Build/Dev:**
-- Astro CLI — `astro dev`, `astro build`, `astro preview`
-- Vite (bundled with Astro) — Underlying build tool and dev server
+- Vite (bundled with Astro) - Build tool and dev server
+- TypeScript 5.9.3 - Type checking
+- `@astrojs/check` 0.9.6 - Astro-specific type checking
 
 ## Key Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `astro` | `^5.3.0` | Core SSG framework, static output |
-| `tailwindcss` | `^3.4.19` | Utility CSS framework |
-| `@astrojs/tailwind` | `^6.0.2` | Astro + Tailwind integration |
-| `@tailwindcss/typography` | `^0.5.19` | Prose styling for blog content |
-| `gsap` | `^3.14.2` | Animation library (ScrollTrigger, batch reveals, parallax) |
-| `lenis` | `^1.3.17` | Smooth scroll on desktop (integrated with GSAP ticker) |
-| `vanilla-tilt` | `^1.8.1` | 3D tilt hover effect on cards |
-| `@astrojs/mdx` | `^4.3.13` | MDX content support |
-| `astro-expressive-code` | `^0.41.6` | Code block syntax highlighting |
-| `@astrojs/sitemap` | `^3.7.0` | Auto-generated `sitemap-index.xml` |
-| `@astrojs/rss` | `^4.0.15` | RSS feed generation (`/rss.xml`) |
-| `@astrojs/check` | `^0.9.6` | Astro type-checking CLI |
-| `satori` | `^0.19.2` | SVG generation for dynamic OG images |
-| `sharp` | `^0.34.5` | Image processing (OG image PNG conversion, Astro image optimization) |
-| `reading-time` | `^1.5.0` | Estimated reading time for blog posts |
-| `mdast-util-to-string` | `^4.0.0` | MDX AST to plain text (used by reading-time remark plugin) |
-| `typescript` | `^5.9.3` | TypeScript compiler (strict config) |
+**Critical:**
+- `@astrojs/mdx` 4.3.13 - MDX support for blog content
+- `@astrojs/tailwind` 6.0.2 - Tailwind CSS integration
+- `@astrojs/sitemap` 3.7.0 - Automatic sitemap generation
+- `@astrojs/rss` 4.0.15 - RSS feed generation
 
-## Dev Dependencies
+**Animation & Interaction:**
+- `gsap` 3.14.2 - Animation library with ScrollTrigger for scroll-based animations
+- `lenis` 1.3.17 - Smooth scroll library
+- `vanilla-tilt` 1.8.1 - 3D tilt hover effects
 
-No dev dependencies declared. All packages are in `dependencies`. There are no linters, formatters, or test frameworks configured.
+**Content Processing:**
+- `reading-time` 1.5.0 - Reading time estimation for blog posts
+- `mdast-util-to-string` 4.0.0 - Markdown AST to string conversion
+- `astro-expressive-code` 0.41.6 - Enhanced code syntax highlighting
 
-## Configuration Files
+**Image Generation:**
+- `satori` 0.19.2 - React to SVG/PNG converter for Open Graph images
+- `sharp` 0.34.5 - High-performance image processing
 
-| File | Purpose |
-|------|---------|
-| `astro.config.mjs` | Astro configuration: static output, site URL, integrations (expressive-code, MDX, Tailwind, sitemap), remark plugins |
-| `tailwind.config.mjs` | Tailwind config: custom fonts (DM Sans, Bricolage Grotesque, Fira Code), CSS variable-based color tokens, typography plugin |
-| `tsconfig.json` | TypeScript config: extends `astro/tsconfigs/strict` |
-| `package.json` | Project manifest, scripts (`dev`, `build`, `preview`), all dependencies |
-| `src/content.config.ts` | Astro content collections: `blog` collection with Zod schema (title, description, publishedDate, tags, draft, externalUrl, source) |
-| `remark-reading-time.mjs` | Custom remark plugin: injects `minutesRead` into frontmatter |
-| `public/robots.txt` | Search engine directives, sitemap reference |
-| `public/CNAME` | Custom domain: `patrykgolabek.dev` |
-| `.github/workflows/deploy.yml` | GitHub Actions CI/CD for GitHub Pages deployment |
+**UI Enhancement:**
+- `@tailwindcss/typography` 0.5.19 - Prose styling for blog content
 
-## Scripts
+## Configuration
 
-```bash
-npm run dev          # Start Astro dev server (Vite-powered)
-npm run build        # Production static build
-npm run preview      # Preview production build locally
-```
+**Environment:**
+- No `.env` files detected - all configuration is static
+- Site URL configured in `astro.config.mjs`: `https://patrykgolabek.dev`
+- Output mode: static site generation
+
+**Build:**
+- `astro.config.mjs` - Astro framework config (MDX, Tailwind, sitemap, expressive-code)
+- `tailwind.config.mjs` - Custom colors, fonts, typography plugin
+- `tsconfig.json` - Extends `astro/tsconfigs/strict`
+- `remark-reading-time.mjs` - Custom remark plugin for reading time
+
+**TypeScript:**
+- Strict mode enabled via Astro's strict preset
+- ES modules (`"type": "module"` in package.json)
 
 ## Platform Requirements
 
 **Development:**
-- Node.js (ES modules support required)
-- npm for dependency management
-- No Docker or containerization for local dev
+- Node.js (modern version supporting ES modules)
+- npm for dependency installation
 
 **Production:**
-- GitHub Pages (static hosting)
-- Custom domain: `patrykgolabek.dev` (via `public/CNAME`)
-- Built with `withastro/action@v3` in CI
+- Static hosting (outputs pre-rendered HTML/CSS/JS)
+- No server-side runtime required
+- Deployment target: `https://patrykgolabek.dev` (configured in `astro.config.mjs`)
 
 ---
 

@@ -4,185 +4,182 @@
 
 ## Pattern Overview
 
-**Overall:** Static Site Generation (SSG) with Astro
+**Overall:** Static Site Generation (SSG) with Island Architecture
 
 **Key Characteristics:**
-- 100% static output (`output: 'static'` in `astro.config.mjs`) -- all pages pre-rendered at build time
-- Client-side View Transitions via Astro `ClientRouter` for SPA-like navigation without a JS framework
-- Data-attribute-driven animation system layered on top of static HTML
-- CSS custom properties (design tokens) for theming with no dark mode (light-only "Tropical Sunset" palette)
-- Content collection for blog posts with both local Markdown and external URL references
+- Server-rendered static pages with selective client-side hydration
+- File-based routing where each `.astro` file in `src/pages/` becomes a route
+- Content collections for structured data (blog posts)
+- Component-based UI with progressive enhancement
+- Animation lifecycle management via GSAP + Lenis
 
 ## Layers
 
-**Layouts Layer:**
-- Purpose: Wraps all pages with shared HTML shell, head metadata, navigation, and animation bootstrapping
-- Location: `src/layouts/Layout.astro`
-- Contains: Single layout file with `<head>`, `<Header>`, `<main><slot/></main>`, `<Footer>`, and all global animation component scripts
-- Depends on: `src/components/Header.astro`, `src/components/Footer.astro`, `src/components/SEOHead.astro`, all animation components in `src/components/animations/`
-- Used by: Every page in `src/pages/`
-
-**Pages Layer:**
-- Purpose: Route definitions and page-level content/logic
-- Location: `src/pages/`
-- Contains: `.astro` page files, API routes (`.ts` files for RSS, OG images, llms.txt)
-- Depends on: Layout, components, data files, content collections
-- Used by: Astro router (file-based routing)
-
-**Components Layer:**
-- Purpose: Reusable UI elements and animation controllers
-- Location: `src/components/` and `src/components/animations/`
-- Contains: Astro components (`.astro`) -- no React/Vue/Svelte; all server-rendered with inline `<script>` for interactivity
-- Depends on: CSS custom properties from `src/styles/global.css`, GSAP, vanilla-tilt
-- Used by: Pages and Layout
+**Presentation Layer:**
+- Purpose: UI components and page templates
+- Location: `src/components/`, `src/pages/`, `src/layouts/`
+- Contains: Astro components, page routes, layout wrappers
+- Depends on: Data layer, styling layer, animation utilities
+- Used by: Build process (Astro compiler)
 
 **Data Layer:**
-- Purpose: Static data sources and content configuration
-- Location: `src/data/` and `src/content.config.ts`
-- Contains: Site config (`src/data/site.ts`), project catalog (`src/data/projects.ts`), blog content collection (`src/data/blog/`)
-- Depends on: Nothing
-- Used by: Pages, components, API routes
+- Purpose: Static data, content collections, and configuration
+- Location: `src/data/`, `src/content.config.ts`, `src/data/blog/`
+- Contains: TypeScript data files, Markdown/MDX content, site config
+- Depends on: Nothing (pure data)
+- Used by: Presentation layer
 
-**Lib Layer:**
-- Purpose: Shared TypeScript modules for animation lifecycle and OG image generation
-- Location: `src/lib/`
-- Contains: `animation-lifecycle.ts` (GSAP/Lenis cleanup), `scroll-animations.ts` (scroll-triggered reveals), `smooth-scroll.ts` (Lenis init), `og-image.ts` (Satori-based OG image generation)
-- Depends on: GSAP, Lenis, Satori, Sharp
-- Used by: Layout (animation modules), OG image API route (`og-image.ts`)
+**Animation & Interaction Layer:**
+- Purpose: Client-side interactivity and scroll-based animations
+- Location: `src/lib/`, `src/components/animations/`
+- Contains: GSAP animations, scroll triggers, smooth scroll, custom cursor, tilt effects
+- Depends on: GSAP library, Lenis smooth scroll
+- Used by: Layout wrapper, individual pages
 
-**Styles Layer:**
-- Purpose: Global CSS, design tokens, animation styles, and utility classes
-- Location: `src/styles/global.css`
-- Contains: CSS custom properties (color palette), Tailwind directives, component-level CSS (cards, cursors, orbs, etc.)
+**Styling Layer:**
+- Purpose: CSS design system with theme support
+- Location: `src/styles/global.css`, `tailwind.config.mjs`
+- Contains: CSS custom properties, Tailwind utilities, dark/light theme
 - Depends on: Tailwind CSS framework
-- Used by: Everything via Tailwind + CSS custom properties
+- Used by: All components
+
+**Build Layer:**
+- Purpose: Static site generation and optimization
+- Location: `astro.config.mjs`, `remark-reading-time.mjs`
+- Contains: Astro config, integrations, remark plugins
+- Depends on: Astro core, MDX, Tailwind, Expressive Code, Sitemap
+- Used by: Build process
 
 ## Data Flow
 
-**Page Render Flow (Build Time):**
+**Static Page Rendering:**
 
-1. Astro resolves file-based routes from `src/pages/`
-2. Pages import Layout and pass props (title, description, SEO metadata)
-3. Layout renders `<SEOHead>` with meta tags, canonical URLs, Open Graph tags
-4. Page fetches blog posts via `getCollection('blog')` from content collection
-5. Content collection uses glob loader to read Markdown from `src/data/blog/`
-6. Static HTML output written to `dist/`
+1. Astro build process reads page files from `src/pages/`
+2. Pages import data from `src/data/` (projects, site config) or query content collections
+3. Components are server-rendered to HTML with minimal client JS
+4. Static assets processed and optimized
+5. Output written to `dist/` for static hosting
 
-**Blog Post Flow:**
+**Content Collection Flow:**
 
-1. Content defined in `src/data/blog/` as `.md` files with Zod-validated frontmatter (via `src/content.config.ts`)
-2. Posts can be local (full Markdown rendered) or external (redirect URL + metadata only)
-3. `remark-reading-time.mjs` plugin injects reading time into frontmatter at build
-4. Dynamic route `src/pages/blog/[slug].astro` uses `getStaticPaths()` to generate pages for non-external posts
-5. Tag pages generated dynamically via `src/pages/blog/tags/[tag].astro`
-6. OG images generated at build time via `src/pages/open-graph/[...slug].png.ts` using Satori + Sharp
+1. Markdown/MDX files in `src/data/blog/` define content
+2. `src/content.config.ts` defines schema validation with Zod
+3. Pages use `getCollection('blog')` to query posts
+4. Content is filtered (draft status, external URLs)
+5. Posts are rendered via `[slug].astro` dynamic route
 
-**Client-Side Navigation Flow:**
+**Client-Side Animation Flow:**
 
-1. `ClientRouter` from `astro:transitions` enables view transitions
-2. On navigation: `astro:before-swap` fires -- `cleanupAnimations()` kills all GSAP ScrollTriggers, Lenis instance, and GSAP tweens
-3. On page load: `astro:page-load` fires -- re-initializes smooth scroll, scroll animations, and all animation components
-4. Particle canvas hero uses `transition:persist="particle-hero"` to survive page transitions without re-rendering
-
-**Animation Initialization Flow:**
-
-1. Layout `<script>` listens for `astro:page-load` and calls `initAll()`
-2. `initSmoothScroll()` creates Lenis instance (desktop only, respects reduced motion)
-3. `initScrollAnimations()` sets up GSAP ScrollTrigger batches for `[data-reveal]`, parallax, dividers, tech pills, card groups
-4. Each animation component (`TiltCard`, `CustomCursor`, `MagneticButton`, etc.) independently listens for `astro:page-load`
-5. On `astro:before-swap`, cleanup functions destroy ScrollTriggers, Lenis, and vanilla-tilt instances
+1. `Layout.astro` includes animation component scripts
+2. On `astro:page-load` event, `initSmoothScroll()` and `initScrollAnimations()` execute
+3. GSAP ScrollTrigger registers elements with `data-*` attributes
+4. Scroll events trigger animations (reveal, parallax, stagger)
+5. On `astro:before-swap`, `cleanupAnimations()` removes ScrollTrigger instances
 
 **State Management:**
-- No client-side state management framework
-- Animation state managed via module-level variables in `src/lib/animation-lifecycle.ts` (Lenis instance reference)
-- Custom cursor state persisted on `window.__cursorState` to survive view transitions
-- Particle canvas state persisted on `window.__heroAnimationId` and `window.__particleListenersReady`
-- Theme toggle uses `localStorage` for persistence (via `ThemeToggle.astro`, not currently wired into Layout)
+- No global state management (pure static generation)
+- Theme state stored in `localStorage` via ThemeToggle component
+- Scroll position and animation states managed by GSAP ScrollTrigger
+- Mobile menu state managed via vanilla JS in Header component
 
 ## Key Abstractions
 
-**Data Attributes for Animation Binding:**
-- Purpose: Declarative animation triggers -- components scan the DOM for data attributes rather than receiving props
-- Examples: `data-reveal`, `data-tilt`, `data-magnetic`, `data-word-reveal`, `data-animate="headline"`, `data-section-bg`, `data-parallax`, `data-timeline`, `data-card-group`, `data-card-item`, `data-divider-reveal`
-- Pattern: Add the data attribute to any HTML element; the corresponding animation component (loaded once in Layout) handles initialization on `astro:page-load`
+**Layout Wrapper:**
+- Purpose: Common page structure (header, footer, SEO, animations)
+- Examples: `src/layouts/Layout.astro`
+- Pattern: Slot-based composition with props for SEO metadata
 
-**Content Collection (Blog):**
-- Purpose: Type-safe blog content with Zod schema validation
+**Content Collections:**
+- Purpose: Type-safe content management for blog posts
 - Examples: `src/content.config.ts`, `src/data/blog/*.md`
-- Pattern: Frontmatter schema enforces required fields (title, description, publishedDate) and optional fields (externalUrl, source, draft, tags). External posts have `externalUrl` and `source` fields; local posts have full Markdown body.
+- Pattern: Astro Content Collections API with Zod schema validation
 
-**Site Config:**
-- Purpose: Single source of truth for site-wide metadata
-- Examples: `src/data/site.ts`
-- Pattern: Export a const object with `name`, `jobTitle`, `description`, `tagline`, `roles`, `url`. Used by pages, JSON-LD components, and meta tags.
+**Animation Components:**
+- Purpose: Declarative animation effects via data attributes
+- Examples: `src/components/animations/CustomCursor.astro`, `src/components/animations/TiltCard.astro`, `src/components/animations/MagneticButton.astro`
+- Pattern: Self-initializing scripts that observe `data-*` attributes and register GSAP animations
 
-**SEO Components:**
-- Purpose: Structured data and social sharing metadata
-- Examples: `src/components/SEOHead.astro`, `src/components/PersonJsonLd.astro`, `src/components/BlogPostingJsonLd.astro`
-- Pattern: Each component accepts typed props and renders meta tags or JSON-LD `<script>` blocks. SEOHead handles Open Graph, Twitter Cards, and canonical URLs.
+**Data Modules:**
+- Purpose: Centralized configuration and structured data
+- Examples: `src/data/site.ts`, `src/data/projects.ts`
+- Pattern: Exported TypeScript constants with type definitions
+
+**JSON-LD Structured Data:**
+- Purpose: SEO-rich snippets for search engines
+- Examples: `src/components/PersonJsonLd.astro`, `src/components/BlogPostingJsonLd.astro`
+- Pattern: Schema.org markup rendered in component scripts
 
 ## Entry Points
 
-**Astro Build Entry:**
-- Location: `astro.config.mjs`
-- Triggers: `astro build` / `astro dev`
-- Responsibilities: Configures integrations (MDX, Tailwind, Sitemap, Expressive Code), sets site URL, registers remark plugins
-
-**Home Page:**
+**Main Page:**
 - Location: `src/pages/index.astro`
-- Triggers: Route `/`
-- Responsibilities: Hero section with particle canvas, typing animation, skills grid, latest blog posts, contact CTA, Person JSON-LD
+- Triggers: Astro build process, user visiting `/`
+- Responsibilities: Hero section, skills showcase, latest blog posts, CTA
 
-**Blog Dynamic Routes:**
+**Blog Index:**
+- Location: `src/pages/blog/index.astro`
+- Triggers: User visiting `/blog/`
+- Responsibilities: List all published blog posts with filtering
+
+**Blog Post:**
 - Location: `src/pages/blog/[slug].astro`
-- Triggers: Route `/blog/{slug}/`
-- Responsibilities: Renders individual blog post with TOC, reading time, tags, BlogPosting JSON-LD, OG image
+- Triggers: Dynamic route for each blog post
+- Responsibilities: Render markdown content, table of contents, structured data
 
-**API Endpoints:**
-- Location: `src/pages/rss.xml.ts`, `src/pages/llms.txt.ts`, `src/pages/open-graph/[...slug].png.ts`
-- Triggers: Routes `/rss.xml`, `/llms.txt`, `/open-graph/blog/{slug}.png`
-- Responsibilities: RSS feed generation, LLM-friendly text index, dynamic OG image generation (Satori + Sharp)
+**Projects Page:**
+- Location: `src/pages/projects/index.astro`
+- Triggers: User visiting `/projects/`
+- Responsibilities: Display categorized project portfolio
+
+**Build Entry:**
+- Location: `astro.config.mjs`
+- Triggers: `npm run build`
+- Responsibilities: Configure integrations, plugins, site metadata
 
 ## Error Handling
 
-**Strategy:** Minimal -- static site with no runtime errors in production. Build-time errors caught by Astro/TypeScript.
+**Strategy:** Build-time validation with runtime graceful degradation
 
 **Patterns:**
-- Content validation via Zod schema in `src/content.config.ts` -- malformed frontmatter fails the build
-- Draft filtering: `import.meta.env.PROD ? data.draft !== true : true` -- drafts visible in dev, hidden in production
-- External URL filtering: `getStaticPaths` excludes posts with `externalUrl` from page generation (no empty pages)
-- Animation graceful degradation: Every animation checks `prefers-reduced-motion` and `pointer: coarse` before initializing
-- Particle canvas has `requestAnimationFrame` retry if container has zero height (layout not ready)
+- Zod schema validation in content collections prevents invalid blog posts from building
+- GSAP animations check for `prefers-reduced-motion` and skip animations if enabled
+- Animation lifecycle cleanup on page navigation prevents memory leaks
+- Fallback checks for DOM elements before attaching event listeners (`if (!element) return`)
+- External blog posts filtered from static generation via `!data.externalUrl` check
 
 ## Cross-Cutting Concerns
 
-**Accessibility:**
-- Skip-to-content link in Layout
-- `aria-label`, `aria-hidden`, `aria-current`, `aria-expanded`, `aria-controls` used throughout
-- Custom cursor, animations, and smooth scroll all disable for `prefers-reduced-motion: reduce`
-- Focus-visible outlines defined in `src/styles/global.css`
+**Logging:** Browser console only (no server-side logging in static build)
 
-**SEO:**
-- Canonical URLs on every page via `src/components/SEOHead.astro`
-- Open Graph + Twitter Card meta on all pages
-- JSON-LD structured data: Person (homepage), BlogPosting (blog posts)
-- Auto-generated sitemap via `@astrojs/sitemap`
-- RSS feed at `/rss.xml`
-- LLM-friendly index at `/llms.txt`
-- Dynamic OG images per blog post
+**Validation:** Zod schemas for content collections (`src/content.config.ts`)
+
+**Authentication:** Not applicable (static public site)
+
+**SEO Optimization:**
+- `SEOHead.astro` component handles meta tags, Open Graph, Twitter Cards
+- Structured data via PersonJsonLd and BlogPostingJsonLd
+- Sitemap generated via `@astrojs/sitemap` integration
+- RSS feed at `/rss.xml.ts`
+- Reading time calculation via remark plugin
+
+**Accessibility:**
+- Skip to main content link in Layout
+- ARIA labels on interactive elements
+- Semantic HTML structure
+- Focus management in mobile menu
+- Reduced motion support in animations
 
 **Performance:**
-- Static output (CDN-friendly)
-- Image optimization via Astro `<Image>` component (automatic WebP conversion)
-- Font fallback metrics in CSS to reduce CLS
-- Particle canvas pauses on `visibilitychange` (tab hidden)
-- Lenis smooth scroll disabled on touch devices
-- `is:inline` script on ParticleCanvas avoids Astro bundling (runs immediately)
+- Static generation eliminates server response time
+- Image optimization via Astro's Image component
+- Font preconnect to Google Fonts
+- CSS scoped to components
+- Minimal JavaScript (only for animations and interactivity)
 
-**View Transitions:**
-- Clip-path page exit/enter animations defined in `src/styles/global.css`
-- Reduced-motion fallback to simple fade
-- `transition:persist` on particle hero and custom cursor elements
+**Theme System:**
+- CSS custom properties in `src/styles/global.css`
+- Dark/light mode toggle via ThemeToggle component
+- Persistent theme preference in localStorage
 
 ---
 

@@ -4,193 +4,150 @@
 
 ## Tech Debt
 
-**Dark Mode Incomplete — ThemeToggle component exists but has no effect:**
-- Issue: `src/components/ThemeToggle.astro` toggles a `.dark` class on `<html>`, but the component is never imported or rendered anywhere. No dark mode CSS variables are defined — `src/styles/global.css` only defines light-mode `:root` variables with no `.dark` or `[data-theme="dark"]` overrides. The `tailwind.config.mjs` has no `darkMode` setting. The Expressive Code integration in `astro.config.mjs` references a `.dark` CSS selector for code themes, but this class is never applied.
-- Files: `src/components/ThemeToggle.astro`, `src/styles/global.css`, `tailwind.config.mjs`, `astro.config.mjs`
-- Impact: Dead code. If a user somehow triggers it, text and backgrounds become unreadable since no dark palette exists.
-- Fix approach: Either implement full dark mode (add `:root.dark` CSS variables, `darkMode: 'class'` in Tailwind config, render `<ThemeToggle />` in `<Header>`) or delete `ThemeToggle.astro` entirely.
+**No Shared URL Resolver for Blog Posts:**
+- Issue: External blog post URL construction is duplicated across 6 different files. Two files (`src/pages/llms.txt.ts` and `src/pages/index.astro`) had bugs where external posts linked to non-existent internal paths. This was recently fixed in Phase 12, but the lack of a shared helper means future changes risk regressions.
+- Files: `src/components/BlogCard.astro`, `src/pages/rss.xml.ts`, `src/pages/blog/[slug].astro`, `src/pages/open-graph/[...slug].png.ts`, `src/pages/llms.txt.ts`, `src/pages/index.astro`
+- Impact: Future schema changes to blog posts (like adding new URL patterns) require updating 6+ files. Missing one file creates user-facing broken links.
+- Fix approach: Extract a shared utility `getBlogPostUrl(post)` in `src/lib/blog-utils.ts` that returns `post.data.externalUrl ?? \`/blog/${post.id}/\`` and refactor all 6 files to use it. This consolidates the logic and prevents future bugs.
 
-**Inline SVG Icons Duplicated Across Multiple Files:**
-- Issue: The same SVG icon paths are copy-pasted across 4+ files. The X/Twitter icon path `M18.244 2.25h3.308...` appears in `src/pages/index.astro`, `src/pages/contact.astro`, `src/pages/about.astro`, and `src/components/Footer.astro`. The GitHub icon, YouTube icon, and blog/book icon are similarly duplicated.
-- Files: `src/pages/index.astro`, `src/pages/contact.astro`, `src/pages/about.astro`, `src/components/Footer.astro`
-- Impact: Any icon change requires editing 4+ files. Risk of inconsistency.
-- Fix approach: Create an `src/components/icons/` directory with individual icon components (e.g., `XIcon.astro`, `GitHubIcon.astro`, `YouTubeIcon.astro`) and import them everywhere.
+**Global State Management for Animations:**
+- Issue: Multiple animation components (`src/components/ParticleCanvas.astro`, `src/components/animations/CustomCursor.astro`, `src/components/animations/TimelineDrawLine.astro`, `src/components/animations/TiltCard.astro`) use `window.__*` properties to persist state across Astro view transitions. This is a workaround for Astro's view transition model where scripts re-run on each navigation.
+- Files: `src/components/ParticleCanvas.astro` (lines 25-26, 29-32, 186), `src/components/animations/CustomCursor.astro` (lines 8-19)
+- Impact: Global window pollution, harder to debug state issues, potential memory leaks if cleanup is missed. The pattern works but is fragile — adding new animation components requires deep knowledge of this convention.
+- Fix approach: Consider migrating to a centralized animation lifecycle manager that exports a module-scoped singleton instead of relying on `window` globals. Alternatively, document this pattern clearly in developer docs so future contributors know to use it consistently.
 
-**Social Links Hardcoded in Multiple Places:**
-- Issue: Social URLs (GitHub, X, YouTube, Translucent Computing, Kubert AI, email) and the email address `pgolabek@gmail.com` are hardcoded directly in page templates across `src/pages/index.astro`, `src/pages/about.astro`, `src/pages/contact.astro`, `src/components/Footer.astro`, and `src/components/PersonJsonLd.astro`. The site config at `src/data/site.ts` only stores name, title, description, tagline, roles, and URL — no social links.
-- Files: `src/data/site.ts`, `src/pages/index.astro`, `src/pages/about.astro`, `src/pages/contact.astro`, `src/components/Footer.astro`, `src/components/PersonJsonLd.astro`
-- Impact: Changing a social URL or email requires editing 5+ files. Error-prone.
-- Fix approach: Add a `socials` object to `src/data/site.ts` with all social URLs and the email address. Import and reference it everywhere.
+**Type Safety Bypass with `any` Casts:**
+- Issue: Four animation components use `(window as any).__*` or `(el as any)` casts to bypass TypeScript's type checking. This silences legitimate type errors and makes refactoring risky.
+- Files: `src/components/ParticleCanvas.astro`, `src/components/animations/CustomCursor.astro`, `src/components/animations/TimelineDrawLine.astro`, `src/components/animations/TiltCard.astro`
+- Impact: Loss of type safety in critical animation code. If the global state shape changes or an animation API breaks, TypeScript won't catch it at compile time.
+- Fix approach: Define proper TypeScript interfaces for window globals (e.g., `interface Window { __cursorState?: CursorState; }`) and add them to a `src/types/window.d.ts` ambient module declaration. This preserves type safety while still allowing the global state pattern.
 
-**Tech Stack Data Hardcoded in About Page:**
-- Issue: The `techStack` and `highlights` arrays are defined inline in `src/pages/about.astro` (lines 12-60) rather than in a data file.
-- Files: `src/pages/about.astro`
-- Impact: Minor — the data is only used on one page. But if tech stack data is needed elsewhere (e.g., structured data, resume generation), it would need to be extracted.
-- Fix approach: Move `techStack` and `highlights` to `src/data/about.ts` or `src/data/site.ts`.
+## Known Bugs
 
-**Hardcoded Author Name in Non-Config Files:**
-- Issue: "Patryk Golabek" is hardcoded as a raw string in `src/components/BlogPostingJsonLd.astro` (lines 24, 29), `src/components/SEOHead.astro` (line 35), `src/components/Footer.astro` (line 33), `src/pages/rss.xml.ts` (line 15), and multiple page title strings. These should reference `siteConfig.name` from `src/data/site.ts`.
-- Files: `src/components/BlogPostingJsonLd.astro`, `src/components/SEOHead.astro`, `src/components/Footer.astro`, `src/pages/rss.xml.ts`, `src/pages/llms.txt.ts`
-- Impact: If the site owner's name display changes, many files need manual editing.
-- Fix approach: Import `siteConfig` in all components that reference the author name.
+**TypeScript Error in OG Image Generation (Pre-existing, Non-blocking):**
+- Symptoms: `astro check` reports `TS2345` error at `src/pages/open-graph/[...slug].png.ts:30` — `Type 'Buffer' is not assignable to type 'BodyInit'`. The error is a TypeScript strictness issue with Sharp's Buffer output and the Response constructor.
+- Files: `src/pages/open-graph/[...slug].png.ts` (line 30)
+- Trigger: Running `astro check` or using strict TypeScript IDE checking.
+- Workaround: The code works correctly at runtime. The build succeeds and OG images generate properly. This is a type definition mismatch, not a runtime bug.
+- Resolution path: Add type cast `as unknown as BodyInit` or convert to Uint8Array: `return new Response(Uint8Array.from(png), { ... })`. This is documented as pre-existing from v1.0, not introduced by v1.1 work. Low priority.
 
-## Performance Concerns
+**External Blog Posts Linked to 404 Pages (FIXED in Phase 12, but context matters):**
+- Symptoms: Homepage "Latest Writing" section and `llms.txt` output were linking external blog posts to internal `/blog/ext-*/` paths that don't exist. Users clicking these links got 404 errors.
+- Files: `src/pages/index.astro` (line 156), `src/pages/llms.txt.ts` (line 19) — FIXED as of 2026-02-12
+- Trigger: Homepage displays 3 most recent posts. If any of those 3 are external posts (from `ext-*.md` files with `externalUrl` frontmatter), the links were broken.
+- Workaround: None — users simply got 404 errors.
+- Fix applied: Both files now use `post.data.externalUrl ?? /blog/${post.id}/` pattern to correctly route external posts. This bug is resolved but serves as an example of the "no shared URL resolver" tech debt above.
 
-**Particle Canvas O(n^2) Connection Algorithm:**
-- Issue: The particle connection drawing in `src/components/ParticleCanvas.astro` uses a nested loop comparing every particle pair (lines 167-183). With 160 particles on desktop, this performs ~12,800 distance calculations per frame at 60fps.
-- Files: `src/components/ParticleCanvas.astro`
-- Impact: On lower-end devices, this can cause frame drops. The `getAccentColor()` function also calls `getComputedStyle()` on every frame (line 128), which triggers a style recalculation.
-- Fix approach: Cache the accent color RGB value (only recalculate on theme change). For the connection algorithm, use spatial partitioning (grid-based bucketing) to reduce pair checks, or reduce `CONNECTION_DIST` / particle count.
+## Security Considerations
 
-**Google Fonts Loaded as Render-Blocking CSS:**
-- Issue: Three Google Font families are loaded via a standard `<link rel="stylesheet">` in `src/layouts/Layout.astro` (lines 61-66). This is render-blocking.
-- Files: `src/layouts/Layout.astro`
-- Impact: Delays First Contentful Paint. Font fallback metrics are defined in `src/styles/global.css` (lines 24-39) which helps reduce CLS, but the download still blocks rendering.
-- Fix approach: Add `media="print" onload="this.media='all'"` pattern, or use `<link rel="preload">` with `as="style"`, or self-host the fonts (some are already available locally in `src/assets/fonts/` for OG image generation).
+**No Content Security Policy:**
+- Risk: The site has no CSP headers. Inline scripts in Astro components (ParticleCanvas, CustomCursor, etc.) run without restrictions. If a malicious script were injected via user input (unlikely for a static site with no user-generated content, but still a risk if external blog posts are compromised), there's no second line of defense.
+- Files: All pages lack CSP meta tags or headers. `src/layouts/Layout.astro` does not include CSP configuration.
+- Current mitigation: Static site generation with no user input fields. All content is hardcoded or pulled from trusted external sources (own blog feeds).
+- Recommendations: Add a CSP meta tag to `Layout.astro` that allows inline scripts but restricts external script sources. Example: `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">`. This would provide defense-in-depth without breaking existing inline scripts.
 
-**Multiple `will-change` Declarations Active Simultaneously:**
-- Issue: `src/styles/global.css` applies `will-change` to `[data-reveal]` elements (line 75), custom cursor elements (lines 336, 355), and floating orbs (line 380). On pages with many reveal elements, cards, and cursor active, this creates many compositor layers.
-- Files: `src/styles/global.css`
-- Impact: Increased GPU memory usage, potential jank on memory-constrained devices.
-- Fix approach: Only apply `will-change` just before animation starts and remove it after. For `[data-reveal]`, the GSAP scroll-triggered animation already handles GPU promotion.
+**External Blog Content Trust:**
+- Risk: The site fetches and displays external blog posts from `mykubert.com` and `translucentcomputing.com` via RSS feeds. If those sites are compromised and malicious content is injected into the RSS feeds, the next build would pull and display that content.
+- Files: Blog collection in `src/data/blog/ext-*.md` files manually reference external URLs. The RSS feed generator (`src/pages/rss.xml.ts`) includes these posts.
+- Current mitigation: Manual curation — each external post has a local `.md` file with frontmatter that's committed to git. The actual content isn't fetched at build time, only metadata is stored locally.
+- Recommendations: This is acceptable for a personal portfolio. If automated RSS ingestion is added in the future, implement content validation (strip dangerous HTML, validate URLs) before publishing.
 
-**Large Image: kaiju.png at 884KB:**
-- Issue: `src/assets/images/kaiju.png` is 884KB. While Astro's `<Image>` component optimizes at build time, the source PNG is larger than necessary.
-- Files: `src/assets/images/kaiju.png`
-- Impact: Slower build times. The optimized output is still larger than comparable JPEGs.
-- Fix approach: Convert to WebP or JPEG source if transparency is not needed (it is used as a photo, not as an overlay).
+## Performance Bottlenecks
 
-## Accessibility Concerns
+**Particle Animation O(n²) Collision Detection:**
+- Problem: `src/components/ParticleCanvas.astro` draws connection lines between nearby particles using a nested loop (lines 167-182). With 160 particles on desktop, this is 12,800 distance calculations per frame at 60fps = ~768,000 ops/sec.
+- Files: `src/components/ParticleCanvas.astro` (lines 167-182)
+- Cause: Naive all-pairs distance check. No spatial partitioning (quadtree, grid) to limit checks to nearby particles only.
+- Current mitigation: Particle count is capped at 160 on desktop, 100 on tablets, 70 on mobile. Animation pauses when tab is hidden (lines 205-208). Reduced motion preference disables it entirely (lines 22-23).
+- Improvement path: Implement spatial hashing — divide canvas into grid cells and only check particles in the same or adjacent cells. Would reduce complexity from O(n²) to roughly O(n) for typical particle distributions. This is overkill for current performance (animation runs smoothly on modern hardware), but would be needed if particle count increases or mobile performance degrades.
 
-**Missing Favicon and Apple Touch Icon:**
-- Issue: No `<link rel="icon">` or `<link rel="apple-touch-icon">` is defined anywhere. The `public/` directory contains only `CNAME` and `robots.txt` — no `favicon.ico`, `favicon.svg`, or other icon files.
-- Files: `src/layouts/Layout.astro`, `public/`
-- Impact: Browsers show a generic icon. Safari tabs and iOS home screen bookmarks have no branding. Some crawlers report this as an error.
-- Fix approach: Create a favicon (SVG preferred for scalability) and add it to `public/`. Add `<link rel="icon">` to `src/layouts/Layout.astro`.
+**No Image Optimization Pipeline:**
+- Problem: Hero image (`src/assets/images/meandbatman.jpg`) and any future images are served as-is. No responsive image formats (WebP, AVIF), no lazy loading beyond native browser support, no CDN caching headers.
+- Files: `src/pages/index.astro` uses Astro's `Image` component (lines 68-76) which does provide some optimization, but no global optimization strategy is configured.
+- Cause: Astro's default image handling is used without custom sharp configs or responsive srcsets.
+- Current mitigation: Using Astro's built-in `Image` component provides basic optimization (resizing, format conversion). The hero image is marked `loading="eager"` and `fetchpriority="high"` (lines 74-75) which is correct for LCP optimization.
+- Improvement path: Add responsive srcsets for different screen sizes. Consider adding `<link rel="preload">` for hero image in `<head>`. Configure long-term cache headers for static assets. This is a polish item, not a critical issue — Lighthouse scores are likely already good.
 
-**LinkedIn Link Missing from UI (Present Only in Structured Data):**
-- Issue: LinkedIn (`https://www.linkedin.com/in/patrykgolabek/`) appears in the `sameAs` array of `src/components/PersonJsonLd.astro` but is not linked anywhere visible in the About, Contact, or Footer pages.
-- Files: `src/components/PersonJsonLd.astro`, `src/pages/about.astro`, `src/pages/contact.astro`, `src/components/Footer.astro`
-- Impact: Key professional networking platform is not discoverable by human visitors. Recruiters cannot easily find the LinkedIn profile from the site.
-- Fix approach: Add a LinkedIn link with icon to the About page social links section, Contact page, and Footer.
+## Fragile Areas
 
-**Hero Headline Starts With `opacity: 0` — No JS Fallback:**
-- Issue: In `src/pages/index.astro` (line 37), the `<h1>` has `style="opacity: 0;"` and relies on `TextScramble.astro` JavaScript to reveal it. If JS fails to load or execute, the page title is invisible.
-- Files: `src/pages/index.astro`, `src/components/animations/TextScramble.astro`
-- Impact: Without JS, the most important content on the homepage is hidden.
-- Fix approach: Use a `<noscript>` style block or CSS-only fallback that sets opacity to 1 when JS has not initialized, e.g., add `[data-animate="headline"] { opacity: 1; }` as a default and let JS override.
+**Animation Lifecycle Management:**
+- Files: `src/lib/animation-lifecycle.ts`, `src/lib/scroll-animations.ts`, `src/lib/smooth-scroll.ts`, all animation components in `src/components/animations/`
+- Why fragile: Animations rely on careful cleanup during Astro view transitions. Missing a cleanup call (`cleanupAnimations()` in `animation-lifecycle.ts`) causes memory leaks, duplicate scroll triggers, and animation glitches. Adding new animations requires understanding the lifecycle hooks (`astro:page-load`, `astro:before-swap`) and global state pattern.
+- Safe modification: Always test navigation between all pages when adding/modifying animations. Check browser DevTools Performance tab for memory leaks (ScrollTrigger instances piling up, `requestAnimationFrame` handlers not canceled). Use the existing `cleanupAnimations()` pattern and document new global state in code comments.
+- Test coverage: No automated tests for animation lifecycle. Manual testing only. This is acceptable for a portfolio site, but means regressions are caught late.
 
-**Custom Cursor Runs an Infinite `requestAnimationFrame` Loop:**
-- Issue: In `src/components/animations/CustomCursor.astro` (lines 58-72), the cursor animation loop runs continuously via `requestAnimationFrame` and never stops — even when the browser tab is visible but the user is not moving the mouse.
-- Files: `src/components/animations/CustomCursor.astro`
-- Impact: Continuous CPU/GPU usage on desktop, wasting battery. Unlike the particle canvas which pauses on `visibilitychange`, the cursor loop has no pause mechanism.
-- Fix approach: Add a `visibilitychange` listener to pause the loop, or switch to a passive event-driven approach (only update on `mousemove`).
+**About Page Complexity:**
+- Files: `src/pages/about.astro` (332 lines, largest page file)
+- Why fragile: Contains timeline rendering, skill pills, career highlights, and multiple animation triggers. Modifying the timeline structure or adding new sections risks breaking existing animations (TimelineDrawLine, tech pill scatter, card group stagger). The page has the most complex scroll animation setup.
+- Safe modification: Make incremental changes and test scroll animations thoroughly. The timeline data is hardcoded in the page — consider extracting it to a separate data file (`src/data/timeline.ts`) if it needs frequent updates.
+- Test coverage: None. Changes are verified manually by scrolling through the page and checking animations fire correctly.
 
-**Typing Role Animation Uses Recursive `cycle()` Without Cleanup:**
-- Issue: In `src/components/animations/SplitText.astro` (lines 26-33), the `cycle()` function recursively calls itself via `setTimeout` without any cancellation mechanism. When navigating away via view transitions and returning, a new cycle starts without stopping the previous one.
-- Files: `src/components/animations/SplitText.astro`
-- Impact: Multiple overlapping typing animations can run simultaneously after several page navigations, causing visual glitches.
-- Fix approach: Store the timeout ID and clear it on `astro:before-swap`. Use a flag or AbortController pattern to stop the previous cycle.
+**Blog Collection Schema Changes:**
+- Files: `src/content.config.ts`, all blog post consumers (6 files as documented in tech debt section)
+- Why fragile: Adding or changing blog post frontmatter fields requires updating the Zod schema in `content.config.ts` AND ensuring all consumers handle the new field correctly. The recent `externalUrl` field addition caused two bugs (llms.txt and homepage) that weren't caught until Phase 12 verification.
+- Safe modification: When adding new fields, grep for all existing field usages to find all consumers. Test all blog-related pages (homepage, blog index, blog detail, RSS, sitemap, llms.txt, OG images) after schema changes. Consider the shared URL resolver tech debt fix to reduce surface area.
+- Test coverage: No build-time validation that all blog post consumers handle all schema fields. Runtime errors would only appear if a specific code path is triggered.
 
-## SEO Concerns
+## Scaling Limits
 
-**Missing `twitter:site` and `twitter:creator` Meta Tags:**
-- Issue: `src/components/SEOHead.astro` includes `twitter:card`, `twitter:title`, `twitter:description`, and `twitter:image`, but omits `twitter:site` and `twitter:creator` which attribute the content to the author's X account.
-- Files: `src/components/SEOHead.astro`
-- Impact: Shared links on X do not link back to the @QuantumMentat account.
-- Fix approach: Add `<meta name="twitter:site" content="@QuantumMentat" />` and `<meta name="twitter:creator" content="@QuantumMentat" />` to `src/components/SEOHead.astro`.
+**Static Site Generation Build Time:**
+- Current capacity: 19 pages generated in 1.33 seconds (measured 2026-02-12). 1 local blog post, 10 external blog posts, 13 tag pages.
+- Limit: If blog post count grows significantly (100+ posts), build time will increase linearly. OG image generation (`generateOgImage()` in `src/lib/og-image.ts`) is CPU-intensive — 100 posts = ~100 additional PNG renders. Tag pages scale with unique tag count (currently 13).
+- Scaling path: Astro's static output mode doesn't support incremental builds. At 100+ posts, consider switching to on-demand rendering for OG images (generate once, cache in CDN) or pre-generating images offline. Alternatively, move to Astro's SSR mode with edge caching for blog routes.
 
-**No OG Image for Non-Blog Pages:**
-- Issue: OG images are generated dynamically for blog posts via `src/pages/open-graph/[...slug].png.ts`, but the homepage, about, contact, projects, and blog index pages have no `ogImage` prop passed to `<Layout>`. The `<SEOHead>` component conditionally renders `og:image` only when `ogImage` is provided.
-- Files: `src/pages/index.astro`, `src/pages/about.astro`, `src/pages/contact.astro`, `src/pages/projects/index.astro`, `src/pages/blog/index.astro`, `src/components/SEOHead.astro`
-- Impact: When these pages are shared on social media, they show no preview image — significantly reducing click-through rates.
-- Fix approach: Create a static default OG image (e.g., `public/og-default.png`) and set it as the fallback in `<SEOHead>` when no `ogImage` prop is provided.
+**Third-Party Animation Libraries Bundle Size:**
+- Current capacity: GSAP and Lenis are bundled for animation features. Current bundle size not measured, but both are relatively heavy libraries (GSAP core ~50kb gzipped, Lenis ~4kb).
+- Limit: Every animation feature added increases JS bundle size. At some point, mobile performance degrades (especially on slow networks or low-end devices).
+- Scaling path: Implement code splitting — only load animation libraries on pages that use them. Consider replacing GSAP with lighter alternatives (vanilla Web Animations API) for simple effects. Audit bundle with `astro build --analyze` and set a budget (e.g., max 100kb gzipped JS on homepage).
 
-**OG Image Color Scheme Mismatch:**
-- Issue: The OG image generator in `src/lib/og-image.ts` uses a dark blue/purple color scheme (`#0a0a1a` background, `#7c73ff` accent) that does not match the site's tropical sunset palette (`#fffaf7` background, `#c44b20` accent).
-- Files: `src/lib/og-image.ts`, `src/styles/global.css`
-- Impact: Brand inconsistency between the live site and social media previews.
-- Fix approach: Update `src/lib/og-image.ts` to use the site's actual color palette from CSS variables.
+## Dependencies at Risk
 
-**Blog Post Count Hardcoded in Projects Page Description:**
-- Issue: `src/pages/projects/index.astro` (line 13) hardcodes "16 open-source projects" in the meta description. The actual count may change as projects are added or removed from `src/data/projects.ts`.
-- Files: `src/pages/projects/index.astro`, `src/data/projects.ts`
-- Impact: Stale meta description when project count changes.
-- Fix approach: Use `projects.length` dynamically in the description string.
+**GSAP Licensing:**
+- Risk: GSAP is free for open-source projects but requires a commercial license for business use. If this portfolio is used to promote paid services (consulting, courses), it might technically violate GSAP's license terms.
+- Impact: Legal risk if monetization triggers commercial license requirement. GSAP's licensing is somewhat ambiguous for personal portfolio sites.
+- Migration plan: GreenSock is lenient about personal portfolios, so this is low risk. If it becomes a concern, replace GSAP with open-source alternatives like Framer Motion or vanilla Web Animations API. Most effects (scroll-triggered reveals, parallax) can be implemented without GSAP.
 
-## Security Concerns
+**Astro Framework Evolution:**
+- Risk: Astro is evolving rapidly (currently on v5.3.0). Major version upgrades sometimes break view transitions, content collections API, or image handling. The codebase relies heavily on Astro-specific features (content collections, view transitions, built-in Image component).
+- Impact: Future Astro upgrades may require refactoring content collections, animation lifecycle hooks, or image optimization.
+- Migration plan: Pin Astro version in `package.json` (currently unpinned: `"astro": "^5.3.0"`). Before upgrading major versions, check Astro's migration guide and test thoroughly on a branch. The view transition persistence pattern (`transition:persist`) is particularly fragile across Astro versions.
 
-**Email Address Exposed in Plaintext:**
-- Issue: `pgolabek@gmail.com` appears as plaintext in `src/pages/index.astro`, `src/pages/about.astro`, and `src/pages/contact.astro` (both as `mailto:` links and visible text). This is easily harvestable by spam bots.
-- Files: `src/pages/index.astro` (line 212), `src/pages/about.astro` (line 296), `src/pages/contact.astro` (lines 20, 36)
-- Impact: Increased spam to personal email.
-- Fix approach: Use JavaScript-based email obfuscation, a contact form service, or encode the email address. At minimum, consider using a professional domain email instead.
+## Missing Critical Features
 
-**No Content Security Policy (CSP) Headers:**
-- Issue: No CSP headers are configured anywhere — no meta tag CSP in `src/layouts/Layout.astro`, no header configuration in `astro.config.mjs`, and no `_headers` file in `public/`. The site loads external resources from `fonts.googleapis.com` and `fonts.gstatic.com`.
-- Files: `src/layouts/Layout.astro`, `astro.config.mjs`, `public/`
-- Impact: No protection against XSS via injected scripts. GitHub Pages does serve basic security headers, but CSP is not one of them.
-- Fix approach: Add a `<meta http-equiv="Content-Security-Policy">` tag to `src/layouts/Layout.astro` or create `public/_headers` if the hosting supports it.
+**No Analytics:**
+- Problem: No visitor tracking, pageview metrics, or user behavior data. Can't measure which blog posts get traffic, which projects get clicks, or where visitors come from.
+- Blocks: Data-driven content decisions, SEO optimization, conversion tracking for contact form (if added).
+- Priority: Medium. For a personal portfolio, qualitative feedback (LinkedIn messages, email) may be sufficient. But analytics would help optimize for recruiter visibility.
 
-## Maintenance Risks
+**No Automated Testing:**
+- Problem: Zero test coverage. No unit tests for utility functions (`src/lib/og-image.ts`, `src/lib/scroll-animations.ts`), no integration tests for page rendering, no E2E tests for navigation or animations.
+- Blocks: Confident refactoring. Every change requires full manual regression testing (click through all pages, scroll all animations, test light/dark mode, test mobile, etc.). The animation lifecycle fragility is directly caused by lack of automated tests.
+- Priority: Low for a portfolio site. The verification process in `.planning/phases/*/VERIFICATION.md` serves as manual test documentation. But adding Playwright E2E tests for navigation + animation lifecycle would catch regressions early.
 
-**No Test Suite:**
-- Issue: The project has zero test files — no unit tests, integration tests, or end-to-end tests. No test framework is configured in `package.json`. No testing dependencies.
-- Files: `package.json`
-- Impact: Changes to data schemas, RSS generation, OG image generation, or blog collection logic cannot be verified automatically. Regressions are only caught manually.
-- Fix approach: Add Vitest for unit testing key modules (`src/lib/og-image.ts`, `src/data/projects.ts`, `remark-reading-time.mjs`). Consider Playwright for basic E2E smoke tests.
+**No Sitemap Priority/Changefreq Hints:**
+- Problem: Sitemap (`dist/sitemap-0.xml`) includes all pages with default priority (0.5) and no `<changefreq>` hints. Search engines treat all pages equally.
+- Blocks: SEO optimization — homepage and featured blog posts should have higher priority than tag archive pages.
+- Priority: Low. Modern search engines mostly ignore `<priority>` and `<changefreq>`. But adding it is trivial with `@astrojs/sitemap` config and provides a small SEO signal.
 
-**No Linting or Formatting Configuration:**
-- Issue: No `.eslintrc`, `.prettierrc`, `eslint.config.js`, `biome.json`, or any other linting/formatting configuration exists. No linting dependencies in `package.json`.
-- Files: Project root
-- Impact: No enforced code style. Inconsistencies can creep in over time, especially with multiple contributors or AI-assisted coding.
-- Fix approach: Add Biome (fast, zero-config alternative to ESLint+Prettier) or at minimum Prettier for consistent formatting.
+## Test Coverage Gaps
 
-**No `package.json` Type-Check Script:**
-- Issue: `package.json` has `@astrojs/check` as a dependency but no `check` or `typecheck` script defined. Only `dev`, `build`, and `preview` scripts exist.
-- Files: `package.json`
-- Impact: TypeScript type checking is not easily runnable and is not part of CI. Type errors may not be caught before deployment.
-- Fix approach: Add `"check": "astro check"` to `package.json` scripts and add it to the CI workflow.
+**Animation Lifecycle:**
+- What's not tested: GSAP ScrollTrigger cleanup, Lenis smooth scroll initialization/destruction, view transition persistence for cursor and particle animations.
+- Files: All files in `src/components/animations/`, `src/lib/animation-lifecycle.ts`, `src/lib/smooth-scroll.ts`, `src/lib/scroll-animations.ts`
+- Risk: Memory leaks from uncleaned ScrollTriggers, duplicate animation listeners after navigation, broken animations on view transitions. These issues only appear during manual testing (navigate between pages, check DevTools memory profiler).
+- Priority: High. This is the most fragile part of the codebase. Adding Playwright tests that navigate between pages and check for console errors + memory growth would catch lifecycle bugs.
 
-**CI Pipeline Has No Build Verification Beyond Default:**
-- Issue: `.github/workflows/deploy.yml` uses `withastro/action@v3` which runs `astro build`, but there is no type checking, no linting, and no test step.
-- Files: `.github/workflows/deploy.yml`
-- Impact: Broken TypeScript types, malformed data, or runtime errors deploy to production unchecked.
-- Fix approach: Add steps for `astro check`, linting, and tests before the build step.
+**Blog Collection Integration:**
+- What's not tested: RSS feed accuracy (external vs internal URLs), sitemap inclusion (drafts excluded, external posts excluded from detail pages), OG image generation (only for internal posts), blog post URL consistency across all consumers.
+- Files: `src/pages/rss.xml.ts`, `src/pages/blog/[slug].astro`, `src/pages/open-graph/[...slug].png.ts`, `src/pages/llms.txt.ts`, `src/pages/index.astro`, `src/components/BlogCard.astro`
+- Risk: Broken links (as happened in Phase 12), missing posts in RSS, incorrect OG images, 404 errors for users clicking blog cards.
+- Priority: Medium. The recent Phase 12 bugs demonstrate this gap. Adding build-time assertions (check all links in generated HTML resolve, verify RSS item count matches expected) would catch these issues before deployment.
 
-**OG Image Fonts Differ from Site Fonts:**
-- Issue: `src/lib/og-image.ts` uses Inter and Space Grotesk fonts (loaded from `src/assets/fonts/`), but the actual site uses Bricolage Grotesque (headings), DM Sans (body), and Fira Code (mono) loaded from Google Fonts. The bundled `.woff` files are only for OG image generation.
-- Files: `src/lib/og-image.ts`, `src/assets/fonts/`, `src/layouts/Layout.astro`, `tailwind.config.mjs`
-- Impact: Visual inconsistency between OG images and the live site.
-- Fix approach: Download Bricolage Grotesque and DM Sans as `.woff` files for OG image generation, or accept the current divergence as intentional.
-
-## Improvement Opportunities
-
-**Quick Wins:**
-- Add favicon and apple-touch-icon to `public/` and reference in `src/layouts/Layout.astro`
-- Add `twitter:site` and `twitter:creator` meta tags to `src/components/SEOHead.astro`
-- Add LinkedIn link to About, Contact, and Footer
-- Add `"check": "astro check"` script to `package.json`
-- Fix hero `opacity: 0` with a CSS `<noscript>` fallback
-- Add a default OG image fallback in `src/components/SEOHead.astro`
-- Fix hardcoded project count "16" in `src/pages/projects/index.astro`
-
-**Medium-Effort Improvements:**
-- Extract inline SVG icons to `src/components/icons/` directory
-- Centralize social links in `src/data/site.ts`
-- Replace hardcoded "Patryk Golabek" strings with `siteConfig.name` references
-- Cache accent color in particle canvas to avoid per-frame `getComputedStyle()`
-- Add `visibilitychange` pause to custom cursor animation loop
-- Fix typing role animation cleanup for view transitions
-- Self-host Google Fonts to eliminate render-blocking external requests
-
-**Larger Refactoring Opportunities:**
-- Implement dark mode fully or remove `ThemeToggle.astro`
-- Add Vitest + basic test coverage for data modules and utilities
-- Add Biome or Prettier for code formatting
-- Enhance CI pipeline with type checking, linting, and tests
-- Update OG image colors to match site palette
-- Consider spatial partitioning for particle canvas connections on mobile
+**Responsive Design:**
+- What's not tested: Mobile layout, tablet breakpoints, touch interactions, reduced-motion preference handling.
+- Files: All pages and components (layout is defined via Tailwind responsive classes).
+- Risk: Broken mobile layouts, inaccessible animations on touch devices, poor UX for users with reduced-motion preference.
+- Priority: Medium. Manual testing on real devices is best, but Playwright can simulate mobile viewports and verify critical elements are visible/clickable.
 
 ---
 
