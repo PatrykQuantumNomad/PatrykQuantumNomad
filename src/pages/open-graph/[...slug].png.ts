@@ -4,7 +4,8 @@ import { generateOgImage } from '../../lib/og-image';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getCollection('blog', ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true;
+    const isPublished = import.meta.env.PROD ? data.draft !== true : true;
+    return isPublished && !data.externalUrl;
   });
 
   return posts.map((post) => ({

@@ -6,7 +6,8 @@ import TableOfContents from '../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
-    return import.meta.env.PROD ? data.draft !== true : true;
+    const isPublished = import.meta.env.PROD ? data.draft !== true : true;
+    return isPublished && !data.externalUrl;
   });
 
   return posts.map((post) => ({
