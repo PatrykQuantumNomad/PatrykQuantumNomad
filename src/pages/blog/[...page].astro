@@ -57,21 +57,23 @@ const newestYear = Math.max(...allYears);
   <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
     {/* Hero Section */}
-    <h1
-      class="text-4xl sm:text-5xl font-heading font-extrabold"
-      data-word-reveal
-    >
-      Blog
-    </h1>
-    <p
-      class="text-lg text-[var(--color-text-secondary)] mt-4"
-      data-reveal
-    >
-      Articles on building things — cloud platforms, AI agents, data pipelines, mobile apps, and the occasional robotic arm.
-    </p>
-    <p class="meta-mono mt-3" data-reveal>
-      {totalPosts} ARTICLES &middot; {oldestYear} &mdash; {newestYear}{page.lastPage > 1 && <> &middot; PAGE {page.currentPage} OF {page.lastPage}</>}
-    </p>
+    <div data-blog-hero>
+      <h1
+        class="text-4xl sm:text-5xl font-heading font-extrabold"
+        data-blog-hero-title
+      >
+        Blog
+      </h1>
+      <p
+        class="text-lg text-[var(--color-text-secondary)] mt-4"
+        data-blog-hero-subtitle
+      >
+        Articles on building things — cloud platforms, AI agents, data pipelines, mobile apps, and the occasional robotic arm.
+      </p>
+      <p class="meta-mono mt-3" data-blog-hero-stats>
+        {totalPosts} ARTICLES &middot; {oldestYear} &mdash; {newestYear}{page.lastPage > 1 && <> &middot; PAGE {page.currentPage} OF {page.lastPage}</>}
+      </p>
+    </div>
 
     <div class="gradient-divider mt-10" data-divider-reveal aria-hidden="true"></div>
 
@@ -101,7 +103,7 @@ const newestYear = Math.max(...allYears);
     {page.data.length > 0 ? (
       <div>
         {years.map((year) => (
-          <div>
+          <div data-card-group>
             <h2
               class="flex items-center justify-between text-2xl font-heading font-bold text-[var(--color-accent)] mb-6 mt-12 first:mt-0"
               data-reveal
@@ -111,7 +113,7 @@ const newestYear = Math.max(...allYears);
             </h2>
             <div class="space-y-6">
               {postsByYear.get(year)!.map((post) => (
-                <div data-reveal>
+                <div data-card-item>
                   <BlogCard post={post} />
                 </div>
               ))}
@@ -132,3 +134,34 @@ const newestYear = Math.max(...allYears);
     />
   </section>
 </Layout>
+
+<script>
+  import { gsap } from 'gsap';
+
+  function initBlogHero() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const hero = document.querySelector('[data-blog-hero]');
+    if (!hero) return;
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.from('[data-blog-hero-title]', {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+    })
+    .from('[data-blog-hero-subtitle]', {
+      y: 30,
+      opacity: 0,
+      duration: 0.7,
+    }, '-=0.5')
+    .from('[data-blog-hero-stats]', {
+      y: 20,
+      opacity: 0,
+      duration: 0.6,
+    }, '-=0.4');
+  }
+
+  document.addEventListener('astro:page-load', initBlogHero);
+</script>

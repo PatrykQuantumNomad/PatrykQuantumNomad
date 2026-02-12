@@ -541,4 +541,10 @@ body::before {
   .prose a {
     transition: none;
   }
+  [data-blog-hero-title],
+  [data-blog-hero-subtitle],
+  [data-blog-hero-stats] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
