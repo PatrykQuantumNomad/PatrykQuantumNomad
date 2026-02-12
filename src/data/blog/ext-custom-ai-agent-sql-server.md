@@ -4,6 +4,6 @@ description: "Build a custom AI agent for SQL Server management using DevOps pra
 publishedDate: 2024-08-28
 tags: ["ai", "devops", "kubernetes", "cloud-native"]
 draft: false
-externalUrl: "https://mykubert.com/blog/building-a-custom-ai-agent-for-sql-server-devops-practices/"
+externalUrl: "https://mykubert.com/blog/building-a-custom-ai-agent-for-sql-server-deep-dive-into-devops/"
 source: "Kubert AI"
 ---
