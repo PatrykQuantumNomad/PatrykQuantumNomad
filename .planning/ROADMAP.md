@@ -127,10 +127,10 @@ Plans:
   2. X (@QuantumMentat) link appears in Footer and Contact with proper SVG icon and aria-label
   3. YouTube (@QuantumMentat) link appears in Footer and Contact with proper SVG icon and aria-label
   4. LinkedIn link is no longer visible anywhere in the site UI (Footer, Contact, Home CTA)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md — Update social links (X, YouTube), email, and PersonJsonLd across all 5 files
 
 ### Phase 11: Hero & Project Curation
 **Goal**: Hero section conveys a craft-and-precision architect identity, and the Projects page shows only active, relevant work
