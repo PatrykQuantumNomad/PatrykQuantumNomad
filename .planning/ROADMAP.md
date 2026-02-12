@@ -141,10 +141,10 @@ Plans:
   2. Hero typing animation cycles through updated roles reflecting architect/engineer/builder identity
   3. Projects page no longer shows the "Full-Stack Applications" category or gemini-beauty-math
   4. Project count in meta descriptions matches the actual number of displayed projects
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md — Update hero tagline/roles in site.ts, curate projects, update meta description counts
 
 ### Phase 12: Cleanup & Verification
 **Goal**: All stale content is removed and every generated output (sitemap, RSS, LLMs.txt, OG images) accurately reflects the v1.1 content changes
@@ -184,4 +184,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11 (Phase 10 complete)*
+*Last updated: 2026-02-11 (Phase 11 planned)*
