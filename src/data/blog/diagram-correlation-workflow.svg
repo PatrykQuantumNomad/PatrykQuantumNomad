@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="380" viewBox="0 0 900 380">
+  <!-- Background -->
+  <rect width="900" height="380" fill="#f8f9fa"/>
+
+  <!-- Arrowhead markers -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#888"/>
+    </marker>
+    <marker id="arr-accent" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#FF6600"/>
+    </marker>
+    <marker id="arr-sentry" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#362D59"/>
+    </marker>
+  </defs>
+
+  <!-- ===== GRAFANA HUB (center-left) ===== -->
+  <rect x="270" y="135" width="180" height="110" rx="10" fill="#FF6600"/>
+  <text x="360" y="185" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="white">Grafana</text>
+  <text x="360" y="210" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="white" opacity="0.85">metrics · logs · traces</text>
+
+  <!-- ===== SENTRY HUB (center-right) ===== -->
+  <rect x="610" y="135" width="180" height="110" rx="10" fill="#362D59"/>
+  <text x="700" y="185" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="white">Sentry</text>
+  <text x="700" y="210" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="white" opacity="0.85">exceptions · alerts</text>
+
+  <!-- ===== CONNECTION: Grafana ↔ Sentry ===== -->
+  <!-- Forward arrow -->
+  <line x1="450" y1="180" x2="608" y2="180" stroke="#888" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Reverse arrow -->
+  <line x1="610" y1="200" x2="452" y2="200" stroke="#888" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="530" y="172" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#666">check errors</text>
+  <text x="530" y="218" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#666">view metrics</text>
+
+  <!-- ===== SIGNAL NODES ===== -->
+
+  <!-- METRICS (Prometheus) — top center-left -->
+  <rect x="20" y="30" width="150" height="65" rx="8" fill="#E6522C"/>
+  <text x="95" y="58" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Metrics</text>
+  <text x="95" y="78" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white" opacity="0.9">Prometheus</text>
+
+  <!-- LOGS (Loki / OpenSearch) — bottom center-left -->
+  <rect x="20" y="285" width="150" height="65" rx="8" fill="#F2A626"/>
+  <text x="95" y="313" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Logs</text>
+  <text x="95" y="333" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white" opacity="0.9">Loki / OpenSearch</text>
+
+  <!-- TRACES (Jaeger) — top far-left -->
+  <rect x="20" y="155" width="150" height="65" rx="8" fill="#66CFE0"/>
+  <text x="95" y="183" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Traces</text>
+  <text x="95" y="203" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white" opacity="0.9">Jaeger</text>
+
+  <!-- EXCEPTIONS — right side -->
+  <rect x="820" y="155" width="60" height="65" rx="8" fill="#362D59" opacity="0.3"/>
+  <text x="850" y="193" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#362D59">errors</text>
+
+  <!-- ===== BIDIRECTIONAL ARROWS: Grafana ↔ Signal Nodes ===== -->
+
+  <!-- Grafana ↔ Metrics -->
+  <line x1="170" y1="70" x2="290" y2="135" stroke="#FF6600" stroke-width="2" marker-end="url(#arr-accent)"/>
+  <line x1="310" y1="135" x2="155" y2="80" stroke="#E6522C" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="210" y="88" font-family="Arial, sans-serif" font-size="10" fill="#666">dashboards</text>
+
+  <!-- Grafana ↔ Traces -->
+  <line x1="170" y1="188" x2="268" y2="188" stroke="#FF6600" stroke-width="2" marker-end="url(#arr-accent)"/>
+  <line x1="270" y1="198" x2="172" y2="198" stroke="#66CFE0" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="220" y="182" font-family="Arial, sans-serif" font-size="10" fill="#666">drill down</text>
+
+  <!-- Grafana ↔ Logs -->
+  <line x1="170" y1="310" x2="290" y2="245" stroke="#FF6600" stroke-width="2" marker-end="url(#arr-accent)"/>
+  <line x1="310" y1="245" x2="155" y2="300" stroke="#F2A626" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="210" y="290" font-family="Arial, sans-serif" font-size="10" fill="#666">correlate</text>
+
+  <!-- Sentry ↔ Exceptions indicator -->
+  <line x1="790" y1="188" x2="820" y2="188" stroke="#362D59" stroke-width="2" marker-end="url(#arr-sentry)"/>
+
+  <!-- ===== CROSS-CONNECTIONS (dashed) ===== -->
+
+  <!-- Logs ↔ Sentry (errors in logs correlate with exceptions) -->
+  <line x1="170" y1="330" x2="610" y2="245" stroke="#888" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="380" y="310" font-family="Arial, sans-serif" font-size="10" fill="#999" font-style="italic">errors in logs</text>
+
+  <!-- Metrics ↔ Traces (RED metrics from trace data) -->
+  <line x1="170" y1="50" x2="170" y2="155" stroke="#888" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="180" y="120" font-family="Arial, sans-serif" font-size="10" fill="#999" font-style="italic">RED metrics</text>
+
+  <!-- ===== LEGEND ===== -->
+  <line x1="620" y1="35" x2="660" y2="35" stroke="#888" stroke-width="2"/>
+  <text x="668" y="39" font-family="Arial, sans-serif" font-size="10" fill="#666">direct integration</text>
+
+  <line x1="620" y1="55" x2="660" y2="55" stroke="#888" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="668" y="59" font-family="Arial, sans-serif" font-size="10" fill="#666">cross-signal correlation</text>
+
+  <text x="620" y="80" font-family="Arial, sans-serif" font-size="10" fill="#999" font-style="italic">Start investigation from any signal</text>
+</svg>

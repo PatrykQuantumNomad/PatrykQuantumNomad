@@ -1,0 +1,47 @@
+---
+interface Props {
+  name: string;
+  url: string;
+  description: string;
+  pillar?: string;
+}
+const { name, url, description, pillar } = Astro.props;
+
+const pillarColors: Record<string, string> = {
+  metrics: '#E6522C',
+  logs: '#F2A626',
+  traces: '#66CFE0',
+  exceptions: '#362D59',
+  visualization: '#FF6600',
+  alerting: '#4A154B',
+};
+const borderColor = pillar ? pillarColors[pillar] || 'var(--color-accent)' : 'var(--color-accent)';
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="not-prose no-prose-link group block p-4 my-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] hover:shadow-md transition-all duration-300"
+  style={`--tool-accent: ${borderColor}`}
+>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="font-heading font-bold text-[var(--color-text-primary)] group-hover:text-[var(--tool-accent)] transition-colors">
+        {name}
+      </span>
+      {pillar && (
+        <span
+          class="text-xs px-2 py-0.5 rounded-full"
+          style={`background: color-mix(in srgb, ${borderColor} 15%, transparent); color: ${borderColor}`}
+        >
+          {pillar}
+        </span>
+      )}
+    </div>
+    <svg class="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[var(--tool-accent)] group-hover:translate-x-0.5 transition-all" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+    </svg>
+  </div>
+  <p class="mt-1 text-sm text-[var(--color-text-secondary)]">{description}</p>
+</a>

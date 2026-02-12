@@ -1,0 +1,168 @@
+---
+title: "Building a Complete Observability Stack for Kubernetes"
+description: "A practical guide to wiring together Prometheus, Grafana Loki, Jaeger, Sentry, and OpenSearch into a unified observability platform for Kubernetes workloads."
+publishedDate: 2026-02-12
+tags: ["kubernetes", "observability", "cloud-native", "devops", "prometheus", "grafana"]
+draft: false
+---
+
+import Lede from '../../components/blog/Lede.astro';
+import TldrSummary from '../../components/blog/TldrSummary.astro';
+import Callout from '../../components/blog/Callout.astro';
+import Figure from '../../components/blog/Figure.astro';
+import ToolCard from '../../components/blog/ToolCard.astro';
+import ToolGrid from '../../components/blog/ToolGrid.astro';
+import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
+
+<Lede>Reviving an older blog post.</Lede>
+
+
+Kubernetes provides container orchestration, self-healing, and automatic scaling by default. However, it does not offer comprehensive visibility into application behavior at runtime. While a metrics API and container logs are available, integrating these into a unified observability framework—one that links latency spikes to specific traces and explanatory log lines—requires a carefully assembled stack of interoperable tools.
+
+This gap is one that every team operating production Kubernetes environments must address. Although Kubernetes offers a robust platform for deploying and managing containers, it is not a traditional Platform-as-a-Service and does not include a pre-configured environment for monitoring, debugging, or application insight. Teams must assemble this environment independently, and these decisions directly impact the speed and effectiveness of diagnosing operational issues.
+
+This post walks through one proven approach to building that observability layer: the tools involved, how they map to the four pillars of observability, and why the architecture looks the way it does.
+
+## Four Pillars, Not Three
+
+While most observability frameworks emphasize three pillars—metrics, logs, and traces—a more comprehensive strategy introduces a fourth pillar: exceptions. This approach treats exceptions as a primary signal type, complete with dedicated tooling and correlation mechanisms.
+
+Here is how the architecture breaks down:
+
+<Figure
+  src="/images/tekstack-observability.png"
+  alt="Kubernetes Observability Architecture showing four interconnected pillars: metrics, logs, traces, and exceptions"
+  caption="The observability architecture uses a Venn-style layout to show how the four signal types interconnect."
+/>
+
+<Figure
+  src="/images/diagram-data-flow.svg"
+  alt="Data flow diagram showing how signals flow from Kubernetes pods through the observability stack"
+  caption="Signal flow: from Kubernetes pods through each observability tool to the unified Grafana dashboard."
+/>
+
+## Metrics: Prometheus
+
+<ToolCard
+  name="Prometheus"
+  url="https://prometheus.io/"
+  description="Time-series metrics collection with Kubernetes-native service discovery, alerting rules, and the largest ecosystem of exporters."
+  pillar="metrics"
+/>
+
+[Prometheus](https://prometheus.io/) sits at the center of the metrics pillar. It scrapes endpoints exposed by your applications and Kubernetes infrastructure on a configurable interval, stores time-series data, and evaluates alerting rules. In a well-configured cluster, Prometheus uses [Kubernetes service discovery](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config), so any pod annotated for scraping is automatically picked up.
+
+Prometheus addresses real-time operational questions such as request rate, error rate, latency percentiles, CPU and memory utilization, and queue depths. In most cases, when anomalies appear on a [Grafana](https://grafana.com/) dashboard, Prometheus serves as the primary data source.
+
+## Logs: Grafana Loki and OpenSearch
+
+<ToolGrid>
+  <ToolCard
+    name="Grafana Loki"
+    url="https://grafana.com/oss/loki/"
+    description="Kubernetes-native log aggregation — indexes labels, not full text, for fast label-driven queries during incident response."
+    pillar="logs"
+  />
+  <ToolCard
+    name="OpenSearch"
+    url="https://opensearch.org/"
+    description="Full-text search, regex matching, and long-term log analytics with its own dashboard interface."
+    pillar="logs"
+  />
+</ToolGrid>
+
+An effective observability stack incorporates two log backends to address distinct use cases. [Grafana Loki](https://grafana.com/oss/loki/) is optimized for Kubernetes-native log aggregation, indexing labels instead of full text to minimize storage costs while enabling filtering by namespace, pod, container, or custom labels. For requirements such as full-text search, regular expression matching, or long-term log analytics, [OpenSearch](https://opensearch.org/) offers these functionalities along with its own [dashboard interface](https://opensearch.org/docs/latest/dashboards/).
+
+These two systems are complementary rather than redundant. Loki supports rapid, label-driven queries commonly used during incident response, while OpenSearch is suited for more intensive analytical workloads, such as searching across extensive log datasets for unanticipated patterns.
+
+## Tracing: OpenTracing and Jaeger
+
+<ToolGrid>
+  <ToolCard
+    name="OpenTracing"
+    url="https://opentracing.io/"
+    description="Vendor-neutral instrumentation API that decouples application code from specific tracing backends."
+    pillar="traces"
+  />
+  <ToolCard
+    name="Jaeger"
+    url="https://www.jaegertracing.io/"
+    description="Trace backend that collects, stores, and visualizes distributed traces with searchable UI."
+    pillar="traces"
+  />
+</ToolGrid>
+
+Distributed tracing addresses the question of where time is being spent within a system, a perspective that metrics and logs alone cannot provide. When a user request traverses multiple microservices and experiences latency, tracing identifies the specific service contributing to the delay and pinpoints the downstream bottleneck.
+
+[OpenTracing](https://opentracing.io/) provides a vendor-neutral instrumentation API that decouples application code from a specific tracing vendor. [Jaeger](https://www.jaegertracing.io/) serves as the trace backend — it collects, stores, and visualizes traces with a UI that lets you search by service, operation, tags, or duration.
+
+The intersection of tracing and metrics, labeled "Tracing-Metric" in the architecture diagram, enables the derivation of RED metrics (Rate, Errors, Duration) directly from trace data. This integration allows users to investigate a spike on a Prometheus dashboard by accessing the corresponding Jaeger traces responsible for the anomaly.
+
+## Exceptions: Sentry
+
+<ToolCard
+  name="Sentry"
+  url="https://sentry.io/"
+  description="Application exception management — captures stack traces, groups incidents, monitors regressions, and notifies teams."
+  pillar="exceptions"
+/>
+
+[Sentry](https://sentry.io/) manages application exceptions as a distinct signal type, ensuring they are not obscured within general log data. Upon the occurrence of an unhandled exception, Sentry captures the complete stack trace, groups related incidents, monitors regression status, and notifies the appropriate team.
+
+Treating exceptions as a separate signal accelerates the triage process. Rather than manually searching logs for stack traces, developers receive a prioritized list of errors, including frequency, affected users, and release associations. Sentry integrates with the other observability pillars through the overlapping regions in the architecture.
+
+- **Exception-Metric**: exception counts and rates feed into Prometheus for alerting thresholds.
+- **Exception-Log**: stack traces and contextual data are logged for correlation.
+- **Exception-Metric-Log**: the full intersection where an exception event is visible as a metric anomaly, traceable in the logs, and captured with full context in Sentry simultaneously.
+
+## Grafana and Sentry: Nearly a Single Pane of Glass
+
+<ToolCard
+  name="Grafana"
+  url="https://grafana.com/"
+  description="Unified visualization platform natively integrating Prometheus, Loki, Jaeger, and OpenSearch via plugins."
+  pillar="visualization"
+/>
+
+Three of the four pillars converge within [Grafana](https://grafana.com/), which serves as the primary platform for visualization and exploration. Grafana natively integrates with Prometheus, Loki, and Jaeger, while the [OpenSearch plugin](https://grafana.com/grafana/plugins/grafana-opensearch-datasource/) enables access to the full-text log index. From a single Grafana dashboard, operators can identify metric anomalies, investigate contributing traces, and examine related log entries. [Sentry](https://sentry.io/) operates as a separate dashboard for exception management. When an investigation requires checking exceptions, teams switch to Sentry's own UI to review stack traces, incident grouping, and regression status.
+
+<Callout type="tip" title="Cross-pillar correlation">
+The ability to correlate data across signal types transforms a set of monitoring tools into a comprehensive observability platform. Grafana covers metrics, logs, and traces in one place, while Sentry adds the exception pillar with its own dedicated interface. It is not quite a single pane of glass, but it is close — at 3 AM when checkout latency doubles, the investigation starts in Grafana and reaches Sentry in one step.
+</Callout>
+
+<Figure
+  src="/images/diagram-correlation-workflow.svg"
+  alt="Correlation workflow showing how a metric spike leads to trace analysis, log investigation, and exception verification"
+  caption="Cross-pillar correlation: from a metric spike to the exact trace, log line, and exception that explains it."
+/>
+
+## Slack Integration and Alerting
+
+<ToolCard
+  name="Slack"
+  url="https://slack.com/"
+  description="Routes alerts from Prometheus Alertmanager and Sentry directly into team channels for workflow-native notifications."
+  pillar="alerting"
+/>
+
+The architecture positions [Slack](https://slack.com/) at the top of the stack, interfacing with the cluster boundary. Alerts reach Slack through two independent paths. [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) handles metric alerts (PromQL rules), log-based alerts (Loki Ruler evaluating LogQL rules), and trace-derived alerts — RED metrics (Rate, Errors, Duration) extracted from Jaeger spans via [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) are fed into Prometheus and alerted on like any other metric. [Sentry](https://sentry.io/) uses its own built-in Slack integration to deliver exception notifications directly, bypassing Alertmanager entirely. Jaeger and OpenTracing have no native alerting capabilities; trace-based alerting is achieved exclusively through this span-to-metrics pipeline.
+
+The objective is to eliminate the need for proactive dashboard monitoring; critical alerts are delivered directly to the appropriate channels.
+
+<Figure
+  src="/images/diagram-alert-routing.svg"
+  alt="Alert routing diagram showing how Prometheus and Sentry alerts flow to Slack channels"
+  caption="Alert routing: Prometheus Alertmanager and Sentry notifications converge in Slack for team-native incident response."
+/>
+
+## Why This Architecture Works
+
+This observability layer adopts a deliberately opinionated design. Instead of offering a broad selection of tools and leaving integration to individual teams, it prescribes specific solutions and ensures their seamless integration.
+
+Prometheus for metrics because it is the Kubernetes-native standard with the largest ecosystem of exporters and recording rules. Grafana Loki for log aggregation because it shares Grafana's label model and keeps storage efficient. OpenSearch for full-text log analytics when label-based querying is not enough. Jaeger for distributed tracing with OpenTracing instrumentation for vendor neutrality. Sentry for exception tracking because application errors deserve their own workflow, not just a log line. Grafana is the unified frontend because it natively supports all of the above as data sources.
+
+The outcome is a cluster in which observability is integrated from the outset, rather than retrofitted after initial production incidents. This approach ensures cohesive configuration and establishes correlation paths among all signal types.
+
+<KeyTakeaway>
+Observability should be integrated from day one, not bolted on after the first production incident. This stack prescribes specific, interoperable tools and wires them together with correlation paths across every signal type, giving teams genuine visibility into application behaviour, failure causes, and performance bottlenecks.
+</KeyTakeaway>

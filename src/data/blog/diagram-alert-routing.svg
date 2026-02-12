@@ -1,0 +1,87 @@
+<svg viewBox="0 0 720 520" xmlns="http://www.w3.org/2000/svg" width="720" height="520">
+  <!-- Background -->
+  <rect width="720" height="520" fill="#f8f9fa"/>
+
+  <!-- Define arrowheads -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#666"/>
+    </marker>
+    <marker id="arrowhead-light" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#999"/>
+    </marker>
+  </defs>
+
+  <!-- ===== LEFT PATH: Prometheus + Loki + Trace RED Metrics → Alertmanager → Slack ===== -->
+
+  <!-- Path label -->
+  <text x="210" y="22" font-family="sans-serif" font-size="11" fill="#999" text-anchor="middle" font-weight="bold">PROMETHEUS + ALERTMANAGER PATH</text>
+
+  <!-- Prometheus Box -->
+  <rect x="15" y="40" width="145" height="80" rx="8" fill="#E6522C"/>
+  <text x="87" y="72" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Prometheus</text>
+  <text x="87" y="93" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">PromQL rules</text>
+
+  <!-- Loki Ruler Box -->
+  <rect x="175" y="40" width="145" height="80" rx="8" fill="#F2A626"/>
+  <text x="247" y="72" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Loki Ruler</text>
+  <text x="247" y="93" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">LogQL rules</text>
+
+  <!-- Jaeger / OTel Collector trace metrics box -->
+  <rect x="15" y="145" width="305" height="55" rx="6" fill="none" stroke="#66CFE0" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="167" y="168" font-family="sans-serif" font-size="11" font-weight="bold" fill="#66CFE0" text-anchor="middle">Jaeger traces → OTel Collector → RED metrics</text>
+  <text x="167" y="186" font-family="sans-serif" font-size="10" fill="#999" text-anchor="middle">span-derived rate, errors, duration fed into Prometheus</text>
+
+  <!-- Alertmanager Box -->
+  <rect x="80" y="260" width="210" height="80" rx="8" fill="#F07C5C"/>
+  <text x="185" y="295" font-family="sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">Alertmanager</text>
+  <text x="185" y="316" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">routing · grouping · dedup</text>
+
+  <!-- Arrow: Prometheus → Alertmanager -->
+  <line x1="87" y1="120" x2="145" y2="258" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="88" y="218" font-family="sans-serif" font-size="10" fill="#666">fires</text>
+
+  <!-- Arrow: Loki Ruler → Alertmanager -->
+  <line x1="247" y1="120" x2="220" y2="258" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="248" y="218" font-family="sans-serif" font-size="10" fill="#666">fires</text>
+
+  <!-- Arrow: OTel RED metrics note → Prometheus (indicating they feed into Prometheus) -->
+  <line x1="87" y1="145" x2="87" y2="122" stroke="#999" stroke-width="1.5" marker-end="url(#arrowhead-light)" stroke-dasharray="4,3"/>
+
+  <!-- ===== RIGHT PATH: Sentry → Slack (direct) ===== -->
+
+  <!-- Path label -->
+  <text x="570" y="22" font-family="sans-serif" font-size="11" fill="#999" text-anchor="middle" font-weight="bold">EXCEPTIONS PATH</text>
+
+  <!-- Sentry Box -->
+  <rect x="495" y="40" width="170" height="80" rx="8" fill="#362D59"/>
+  <text x="580" y="72" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Sentry</text>
+  <text x="580" y="93" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" opacity="0.9">Error thresholds</text>
+
+  <!-- Sentry Slack Integration -->
+  <rect x="495" y="260" width="170" height="80" rx="8" fill="#362D59" opacity="0.15" stroke="#362D59" stroke-width="1.5"/>
+  <text x="580" y="295" font-family="sans-serif" font-size="13" font-weight="bold" fill="#362D59" text-anchor="middle">Slack Integration</text>
+  <text x="580" y="316" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">built-in · direct</text>
+
+  <!-- Arrow: Sentry → Sentry Slack Integration -->
+  <line x1="580" y1="120" x2="580" y2="258" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="605" y="195" font-family="sans-serif" font-size="10" fill="#666">notifications</text>
+
+  <!-- ===== BOTTOM: Slack (shared destination) ===== -->
+
+  <!-- Slack Box -->
+  <rect x="260" y="430" width="200" height="70" rx="8" fill="#4A154B"/>
+  <text x="360" y="462" font-family="sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">Slack</text>
+  <text x="360" y="483" font-family="sans-serif" font-size="12" fill="white" text-anchor="middle" opacity="0.9">Team Channels</text>
+
+  <!-- Arrow: Alertmanager → Slack -->
+  <line x1="185" y1="340" x2="295" y2="428" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="210" y="395" font-family="sans-serif" font-size="10" fill="#666">routed alerts</text>
+
+  <!-- Arrow: Sentry Slack Integration → Slack -->
+  <line x1="580" y1="340" x2="430" y2="428" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="525" y="395" font-family="sans-serif" font-size="10" fill="#666">error alerts</text>
+
+  <!-- ===== Divider line ===== -->
+  <line x1="430" y1="15" x2="430" y2="410" stroke="#ddd" stroke-width="1" stroke-dasharray="8,6"/>
+</svg>

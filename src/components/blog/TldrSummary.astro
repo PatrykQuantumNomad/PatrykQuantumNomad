@@ -1,0 +1,13 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = 'TL;DR' } = Astro.props;
+---
+
+<aside class="not-prose my-8 p-5 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
+  <h2 class="font-heading font-bold text-sm uppercase tracking-wider text-[var(--color-accent)] mb-3">{title}</h2>
+  <div class="text-[var(--color-text-primary)] text-sm leading-relaxed [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:pl-5 [&>ul>li]:mb-1">
+    <slot />
+  </div>
+</aside>

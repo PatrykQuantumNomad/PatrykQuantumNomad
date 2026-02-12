@@ -1,0 +1,27 @@
+---
+interface Props {
+  type?: 'info' | 'warning' | 'tip' | 'important';
+  title?: string;
+}
+const { type = 'info', title } = Astro.props;
+
+const config: Record<string, { icon: string; bg: string; border: string; iconColor: string }> = {
+  info:      { icon: 'ℹ', bg: 'bg-blue-50',    border: 'border-blue-300',    iconColor: 'text-blue-600' },
+  warning:   { icon: '⚠', bg: 'bg-amber-50',   border: 'border-amber-300',   iconColor: 'text-amber-600' },
+  tip:       { icon: '💡', bg: 'bg-emerald-50', border: 'border-emerald-300', iconColor: 'text-emerald-600' },
+  important: { icon: '🔥', bg: 'bg-red-50',     border: 'border-red-300',     iconColor: 'text-red-600' },
+};
+const c = config[type];
+---
+
+<aside class={`not-prose my-6 p-4 rounded-lg border-l-4 ${c.border} ${c.bg}`} role="note">
+  <div class="flex items-start gap-3">
+    <span class={`text-xl ${c.iconColor}`} aria-hidden="true">{c.icon}</span>
+    <div>
+      {title && <p class="font-heading font-bold text-sm mb-1">{title}</p>}
+      <div class="text-sm text-[var(--color-text-primary)] [&>p]:mb-2 [&>p:last-child]:mb-0">
+        <slot />
+      </div>
+    </div>
+  </div>
+</aside>
