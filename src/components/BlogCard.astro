@@ -6,14 +6,33 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, description, publishedDate, tags } = post.data;
+const { title, description, publishedDate, tags, externalUrl, source } = post.data;
+const isExternal = !!externalUrl;
+const href = isExternal ? externalUrl : `/blog/${post.id}/`;
 ---
 
 <article class="group relative p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] hover:border-[var(--color-accent)] transition-colors">
-  <a href={`/blog/${post.id}/`} class="absolute inset-0 z-0" aria-label={title}></a>
-  <time datetime={publishedDate.toISOString()} class="text-sm text-[var(--color-text-secondary)]">
-    {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
-  </time>
+  <a
+    href={href}
+    class="absolute inset-0 z-0"
+    aria-label={title}
+    {...isExternal && { target: "_blank", rel: "noopener noreferrer" }}
+  ></a>
+  <div class="flex items-center gap-2">
+    <time datetime={publishedDate.toISOString()} class="text-sm text-[var(--color-text-secondary)]">
+      {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+    </time>
+    {source && (
+      <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+        on {source}
+      </span>
+    )}
+    {isExternal && (
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[var(--color-text-secondary)]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+      </svg>
+    )}
+  </div>
   <h2 class="text-xl font-heading font-bold mt-2 group-hover:text-[var(--color-accent)] transition-colors">
     {title}
   </h2>
