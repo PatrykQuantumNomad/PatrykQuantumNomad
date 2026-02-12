@@ -11,7 +11,6 @@ export const categories = [
   'AI/ML & LLM Agents',
   'Kubernetes & Infrastructure',
   'Platform & DevOps Tooling',
-  'Full-Stack Applications',
   'Security & Networking',
 ] as const;
 
@@ -73,14 +72,6 @@ export const projects: Project[] = [
       'Production-grade financial data extraction system with structured output parsing',
     url: 'https://github.com/PatrykQuantumNomad/financial-data-extractor',
     language: 'Python',
-    category: 'AI/ML & LLM Agents',
-  },
-  {
-    name: 'gemini-beauty-math',
-    description:
-      'Interactive mathematical visualization app built with Google Gemini AI Studio',
-    url: 'https://github.com/PatrykQuantumNomad/gemini-beauty-math',
-    language: 'TypeScript',
     category: 'AI/ML & LLM Agents',
   },
 
@@ -150,25 +141,6 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/jobs',
     language: 'Python',
     category: 'Platform & DevOps Tooling',
-  },
-
-  // Full-Stack Applications
-  {
-    name: 'PatrykQuantumNomad',
-    description:
-      'This portfolio site — Astro, Tailwind, GitHub Pages, Quantum Explorer theme',
-    url: 'https://github.com/PatrykQuantumNomad/PatrykQuantumNomad',
-    language: 'JavaScript',
-    category: 'Full-Stack Applications',
-  },
-  {
-    name: 'arjancode_examples',
-    description:
-      'Code examples and patterns from software architecture video series',
-    url: 'https://github.com/PatrykQuantumNomad/arjancode_examples',
-    language: 'Python',
-    category: 'Full-Stack Applications',
-    fork: true,
   },
 
   // Security & Networking

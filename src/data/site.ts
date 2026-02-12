@@ -8,11 +8,11 @@ export const siteConfig = {
     'Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps',
   /** Hero tagline shown below the name */
   tagline:
-    'Building resilient cloud-native systems and AI-powered solutions for 17+ years. Pre-1.0 Kubernetes adopter. Ontario, Canada.',
+    'Architecting resilient cloud-native systems and AI-powered platforms with 17+ years of hands-on engineering.',
   /** Roles for the typing animation */
   roles: [
     'Cloud-Native Architect',
-    'Kubernetes Pioneer',
+    'Systems Engineer',
     'AI/ML Engineer',
     'Platform Builder',
   ] as const,
