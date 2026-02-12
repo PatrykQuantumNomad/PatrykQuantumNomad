@@ -2,28 +2,27 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-11)
+See: .planning/PROJECT.md (updated 2026-02-12)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 12 - Cleanup & Verification (v1.1 Content Refresh) -- COMPLETE
+**Current focus:** Planning next milestone (v1.2)
 
 ## Current Position
 
-Phase: 12 of 12 (Cleanup & Verification) -- COMPLETE
-Plan: 1 of 1 in current phase (done)
-Status: v1.1 Content Refresh COMPLETE. All phases (8-12) executed successfully.
-Last activity: 2026-02-12 — Completed 12-01 Cleanup & Verification
+Phase: All complete (12 phases across v1.0 + v1.1)
+Plan: Not started
+Status: Ready for next milestone
+Last activity: 2026-02-12 — v1.1 Content Refresh milestone complete
 
-Progress: [████████████████████████] 100% (v1.0 complete: 16/16 plans | v1.1: 7/7 plans)
+Progress: [████████████████████████] 100% (v1.0: 16/16 plans | v1.1: 7/7 plans)
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 23 (16 v1.0 + 7 v1.1)
-- Average duration: ~10 min (v1.0 baseline)
-- Total execution time: ~2.5 hours (v1.0)
+- Average duration: ~10 min (v1.0), ~3 min (v1.1)
 
-**By Phase (v1.1):**
+**v1.1 Summary:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -33,46 +32,27 @@ Progress: [███████████████████████
 | 11. Hero & Projects | 1/1 | 3min | 3min |
 | 12. Cleanup & Verify | 1/1 | 2min | 2min |
 
-*Updated after each plan completion*
-
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-All v1.0 decisions marked with outcomes (all good).
-
-v1.1 decisions so far:
-- "Core only" for social links: update directly in component files, no centralized site.ts for social
-- "All listed" for hero: includes site.ts for hero keyword propagation
-- Keep existing blog post (building-kubernetes-observability-stack), only delete draft-placeholder.md
-- Single-collection approach for external blog posts (schema extension, not separate data source)
-- LinkedIn removed from UI but consider keeping in JSON-LD sameAs (deferred to v1.2 per CONFIG-02)
-- Used `as const` for siteConfig to preserve literal types for downstream consumers
-- Used `z.enum` for blog source field to enforce type safety on blog post sources
-- Added `@astrojs/check` and `typescript` as dev dependencies for type verification
-- Used spread `[...siteConfig.roles]` in define:vars to convert readonly tuple for JSON serialization
-- Computed pageTitle/pageDescription in frontmatter for clean config-to-template data flow
-- Frontmatter-only stubs with no body content for external blog posts
-- getStaticPaths guards exclude external posts in both dev and prod modes (not just PROD)
-- Inline SVG for external link icon (no icon library dependency)
-- Nullish coalescing for RSS link fallback (externalUrl ?? internal path)
-- Nullish coalescing for LLMs.txt URL resolution (matches rss.xml.ts pattern)
-- Inline external link detection in homepage (no shared helper, matches plan scope)
-- Source badge and external link icon on homepage Latest Writing (matches BlogCard.astro pattern)
+Full decision log in PROJECT.md Key Decisions table.
+v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
-- [Content]: Hero tagline approved by user during Phase 11 execution (resolved)
+- [Tech Debt]: No shared getBlogPostUrl helper — URL resolution duplicated in 3 files
+- [Tech Debt]: Social links hardcoded across 5 component files instead of centralized config
+- [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02, v1.2)
 
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 12-01-PLAN.md (Cleanup & Verification) -- v1.1 COMPLETE
+Stopped at: v1.1 milestone complete
 Resume file: None
-Next: v1.1 Content Refresh complete. Ready for deployment or v1.2 planning.
+Next: `/gsd:new-milestone` to plan v1.2

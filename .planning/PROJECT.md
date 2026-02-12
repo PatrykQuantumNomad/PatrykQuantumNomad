@@ -48,18 +48,23 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ WCAG 2.1 AA accessibility (semantic HTML, keyboard nav, contrast) — v1.0
 - ✓ Reduced-motion fallbacks for all animations — v1.0
 - ✓ Responsive design across mobile, tablet, and desktop — v1.0
+- ✓ Centralized hero config (site.ts) propagating to title, meta, JSON-LD — v1.1
+- ✓ Blog schema extended with optional externalUrl and source fields — v1.1
+- ✓ 10 curated external blog posts from Kubert AI and Translucent Computing — v1.1
+- ✓ External posts show source badges, external link icons, open in new tab — v1.1
+- ✓ External posts excluded from detail pages, OG images, and internal routing — v1.1
+- ✓ RSS feed includes external blog entries with canonical external URLs — v1.1
+- ✓ Updated email (pgolabek@gmail.com) across Footer, Contact, Home CTA — v1.1
+- ✓ X and YouTube social links with proper SVG icons and aria-labels — v1.1
+- ✓ LinkedIn removed from visible UI (retained in JSON-LD sameAs) — v1.1
+- ✓ Hero tagline updated to craft-and-precision architect messaging — v1.1
+- ✓ Projects curated from 19 to 16 (removed Full-Stack Applications category) — v1.1
+- ✓ Draft placeholder deleted, all build outputs verified consistent — v1.1
+- ✓ LLMs.txt and homepage external URLs resolved correctly — v1.1
 
 ### Active
 
-## Current Milestone: v1.1 Content Refresh
-
-**Goal:** Update personal info, refine hero messaging, curate projects, and integrate external blog content
-
-**Target features:**
-- Update contact info (email, X, YouTube) and remove LinkedIn
-- Recraft hero tagline with craft & precision tone
-- Remove Full-Stack Application project category and gemini-beauty-math
-- Remove test blog post and add external blog entries from Kubert AI and Translucent Computing
+(No active milestone — ready for v1.2 planning)
 
 ### Out of Scope
 
@@ -78,11 +83,14 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.0 with ~30,070 lines of code across 203 files.
+Shipped v1.1 Content Refresh on top of v1.0 MVP.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1 requirements delivered. Lighthouse 90+ on mobile.
+2,274 lines in src/ across Astro, TypeScript, and Markdown files.
+All 36 v1.0 + 18 v1.1 requirements delivered (54 total). Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
+Blog now shows 11 posts (1 local + 10 external from Kubert AI and Translucent Computing).
+Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
 
@@ -101,6 +109,12 @@ Custom "Quantum Explorer" theme is distinctive and fully accessible.
 | Satori + Sharp for OG images | Build-time generation, no server needed | ✓ Good — unique images per post, zero runtime cost |
 | media="print" onload for async fonts | Non-blocking font loading for performance | ✓ Good — improved Lighthouse performance score |
 | focus-visible over focus for outlines | Mouse users see no outline, keyboard users get indicators | ✓ Good — better UX for both input methods |
+| Centralized siteConfig with `as const` | Type-safe hero data propagation across pages | ✓ Good — single source of truth for identity |
+| Schema extension for external posts | Single collection, not separate data source | ✓ Good — simple, no breaking changes |
+| Frontmatter-only stubs for externals | No body content needed for link-only posts | ✓ Good — minimal overhead |
+| getStaticPaths guards for externals | Exclude external posts from detail/OG routes | ✓ Good — clean build output |
+| Direct component updates for social links | No centralized social config (deferred to v1.2) | ✓ Good — fast, minimal scope |
+| Nullish coalescing for URL resolution | `externalUrl ?? internal path` pattern | ✓ Good — consistent across RSS, LLMs.txt, homepage |
 
 ## Constraints
 
@@ -115,4 +129,4 @@ Custom "Quantum Explorer" theme is distinctive and fully accessible.
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-11 after v1.1 milestone started*
+*Last updated: 2026-02-12 after v1.1 milestone*

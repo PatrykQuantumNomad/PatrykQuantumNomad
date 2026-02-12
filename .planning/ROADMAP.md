@@ -70,102 +70,20 @@ Plans:
 
 </details>
 
-### ✅ v1.1 Content Refresh (Shipped 2026-02-12)
+<details>
+<summary>✅ v1.1 Content Refresh (Phases 8-12) - SHIPPED 2026-02-12</summary>
 
-**Milestone Goal:** Update personal info, refine hero messaging, curate projects, and integrate external blog content from Kubert AI and Translucent Computing
+- [x] Phase 8: Schema & Hero Config Foundation (2/2 plans) — completed 2026-02-11
+- [x] Phase 9: External Blog Integration (2/2 plans) — completed 2026-02-12
+- [x] Phase 10: Social Links & Contact Update (1/1 plan) — completed 2026-02-11
+- [x] Phase 11: Hero & Project Curation (1/1 plan) — completed 2026-02-12
+- [x] Phase 12: Cleanup & Verification (1/1 plan) — completed 2026-02-12
 
-**Phase Numbering:**
-- Integer phases (8, 9, 10, 11, 12): Planned milestone work
-- Decimal phases (e.g., 8.1): Urgent insertions (marked with INSERTED)
+See `.planning/milestones/v1.1-ROADMAP.md` for full details.
 
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [x] **Phase 8: Schema & Hero Config Foundation** - Establish data contracts that all content phases depend on
-- [x] **Phase 9: External Blog Integration** - Surface curated external blog posts alongside local content
-- [x] **Phase 10: Social Links & Contact Update** - Update email, add X and YouTube, remove LinkedIn from UI
-- [x] **Phase 11: Hero & Project Curation** - Refresh hero messaging and remove deprecated projects
-- [x] **Phase 12: Cleanup & Verification** - Delete draft post and verify all outputs are consistent
-
-## Phase Details
-
-### Phase 8: Schema & Hero Config Foundation
-**Goal**: Data contracts exist so that all subsequent content changes propagate consistently
-**Depends on**: Nothing (first phase of v1.1 -- builds on shipped v1.0)
-**Requirements**: BLOG-07, HERO-03
-**Success Criteria** (what must be TRUE):
-  1. Blog content schema accepts optional `externalUrl` and `source` fields without breaking existing posts
-  2. A centralized hero config in `src/data/site.ts` exports name, tagline, and roles array
-  3. Home page title tag, meta description, and JSON-LD Person entity consume hero data from site.ts (not hardcoded strings)
-**Plans**: 2 plans
-
-Plans:
-- [x] 08-01-PLAN.md — Create site.ts hero config and extend blog schema with externalUrl/source
-- [x] 08-02-PLAN.md — Wire home page and PersonJsonLd to consume from site.ts
-
-### Phase 9: External Blog Integration
-**Goal**: Visitors see a credible content hub with 8-12 curated external posts from Kubert AI and Translucent Computing alongside local blog content
-**Depends on**: Phase 8 (schema must support externalUrl and source fields)
-**Requirements**: BLOG-01, BLOG-02, BLOG-03, BLOG-04, BLOG-05, BLOG-06
-**Success Criteria** (what must be TRUE):
-  1. Blog listing page displays external posts mixed with local posts, sorted chronologically by date
-  2. External blog entries show a visible source badge (e.g., "on Kubert AI") and an external link icon distinguishing them from local posts
-  3. Clicking an external blog entry opens the external site in a new tab (not an internal page)
-  4. No `/blog/ext-*` detail pages exist in the built output -- external posts do not generate slug pages or OG images
-  5. RSS feed at `/rss.xml` includes external blog entries with their canonical external URL as the link
-**Plans**: 2 plans
-
-Plans:
-- [x] 09-01-PLAN.md — Create external blog content files and add getStaticPaths guards
-- [x] 09-02-PLAN.md — Update BlogCard for external links with source badges and update RSS feed
-
-### Phase 10: Social Links & Contact Update
-**Goal**: All visible social links and contact info reflect current accounts (X, YouTube, updated email) with LinkedIn removed from the UI
-**Depends on**: Nothing (independent of Phases 8-9 -- updates component files directly)
-**Requirements**: SOCIAL-01, SOCIAL-02, SOCIAL-03, SOCIAL-04
-**Success Criteria** (what must be TRUE):
-  1. Footer, Contact page, and Home CTA all display pgolabek@gmail.com as the email address
-  2. X (@QuantumMentat) link appears in Footer and Contact with proper SVG icon and aria-label
-  3. YouTube (@QuantumMentat) link appears in Footer and Contact with proper SVG icon and aria-label
-  4. LinkedIn link is no longer visible anywhere in the site UI (Footer, Contact, Home CTA)
-**Plans**: 1 plan
-
-Plans:
-- [x] 10-01-PLAN.md — Update social links (X, YouTube), email, and PersonJsonLd across all 5 files
-
-### Phase 11: Hero & Project Curation
-**Goal**: Hero section conveys a craft-and-precision architect identity, and the Projects page shows only active, relevant work
-**Depends on**: Phase 8 (hero config in site.ts must exist for keyword propagation)
-**Requirements**: HERO-01, HERO-02, PROJ-01, PROJ-02, PROJ-03
-**Success Criteria** (what must be TRUE):
-  1. Hero section displays a new tagline with craft and precision tone -- no location reference, no "Pre-1.0 Kubernetes adopter"
-  2. Hero typing animation cycles through updated roles reflecting architect/engineer/builder identity
-  3. Projects page no longer shows the "Full-Stack Applications" category or gemini-beauty-math
-  4. Project count in meta descriptions matches the actual number of displayed projects
-**Plans**: 1 plan
-
-Plans:
-- [x] 11-01-PLAN.md — Update hero tagline/roles in site.ts, curate projects, update meta description counts
-
-### Phase 12: Cleanup & Verification
-**Goal**: All stale content is removed and every generated output (sitemap, RSS, LLMs.txt, OG images) accurately reflects the v1.1 content changes
-**Depends on**: Phases 8, 9, 10, 11 (verification must happen after all content changes)
-**Requirements**: CLEAN-01, CLEAN-02, CLEAN-03
-**Success Criteria** (what must be TRUE):
-  1. The draft placeholder blog post file is deleted and does not appear in any build output
-  2. `astro build` completes with zero errors and no broken internal links
-  3. Sitemap lists all valid pages (no removed pages, includes new tag pages if any)
-  4. RSS feed entries have correct links -- external posts link externally, local posts link to `/blog/[slug]/`
-  5. LLMs.txt reflects updated content accurately
-**Plans**: 1 plan
-
-Plans:
-- [x] 12-01-PLAN.md — Delete draft placeholder, fix external URL bugs in LLMs.txt and homepage, verify all build outputs
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
-(Phases 10 and 11 could execute in parallel since they are independent, but 10 depends on nothing while 11 depends on Phase 8)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -184,4 +102,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-12 (Phase 12 complete — v1.1 milestone done)*
+*Last updated: 2026-02-12 (v1.1 milestone archived)*
