@@ -16,7 +16,7 @@ export async function GET(context: APIContext) {
     '',
     ...sortedPosts.map(
       (p) =>
-        `- [${p.data.title}](https://patrykgolabek.dev/blog/${p.id}/): ${p.data.description}`
+        `- [${p.data.title}](${p.data.externalUrl ?? `https://patrykgolabek.dev/blog/${p.id}/`}): ${p.data.description}`
     ),
     '',
     '## Optional',

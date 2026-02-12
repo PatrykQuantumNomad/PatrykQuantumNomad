@@ -116,24 +116,39 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8">Latest Writing</h2>
     {latestPosts.length > 0 ? (
       <div class="space-y-6">
-        {latestPosts.map((post) => (
-          <article class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
-            <a
-              href={`/blog/${post.id}/`}
-              class="text-lg font-heading font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors"
-            >
-              {post.data.title}
-            </a>
-            <p class="text-sm text-[var(--color-text-secondary)] mt-1">
-              <time datetime={post.data.publishedDate.toISOString()}>
-                {post.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
-            </p>
-            <p class="text-sm text-[var(--color-text-secondary)] mt-2">
-              {post.data.description}
-            </p>
-          </article>
-        ))}
+        {latestPosts.map((post) => {
+          const isExternal = !!post.data.externalUrl;
+          const href = isExternal ? post.data.externalUrl : `/blog/${post.id}/`;
+          return (
+            <article class="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]">
+              <a
+                href={href}
+                class="text-lg font-heading font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors"
+                {...isExternal && { target: "_blank", rel: "noopener noreferrer" }}
+              >
+                {post.data.title}
+              </a>
+              <p class="text-sm text-[var(--color-text-secondary)] mt-1">
+                <time datetime={post.data.publishedDate.toISOString()}>
+                  {post.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+                {post.data.source && (
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                    on {post.data.source}
+                  </span>
+                )}
+                {isExternal && (
+                  <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 text-[var(--color-text-secondary)] ml-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                  </svg>
+                )}
+              </p>
+              <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+                {post.data.description}
+              </p>
+            </article>
+          );
+        })}
       </div>
     ) : (
       <p class="text-[var(--color-text-secondary)]">No posts yet. Check back soon!</p>
