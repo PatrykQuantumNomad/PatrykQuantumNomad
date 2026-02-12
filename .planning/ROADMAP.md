@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-11)
-- 🚧 **v1.1 Content Refresh** - Phases 8-12 (in progress)
+- ✅ **v1.1 Content Refresh** - Phases 8-12 (shipped 2026-02-12)
 
 ## Phases
 
@@ -70,7 +70,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.1 Content Refresh (In Progress)
+### ✅ v1.1 Content Refresh (Shipped 2026-02-12)
 
 **Milestone Goal:** Update personal info, refine hero messaging, curate projects, and integrate external blog content from Kubert AI and Translucent Computing
 
@@ -84,7 +84,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: External Blog Integration** - Surface curated external blog posts alongside local content
 - [x] **Phase 10: Social Links & Contact Update** - Update email, add X and YouTube, remove LinkedIn from UI
 - [x] **Phase 11: Hero & Project Curation** - Refresh hero messaging and remove deprecated projects
-- [ ] **Phase 12: Cleanup & Verification** - Delete draft post and verify all outputs are consistent
+- [x] **Phase 12: Cleanup & Verification** - Delete draft post and verify all outputs are consistent
 
 ## Phase Details
 
@@ -159,7 +159,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Delete draft placeholder, fix external URL bugs in LLMs.txt and homepage, verify all build outputs
+- [x] 12-01-PLAN.md — Delete draft placeholder, fix external URL bugs in LLMs.txt and homepage, verify all build outputs
 
 ## Progress
 
@@ -180,8 +180,8 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 9. External Blog | v1.1 | 2/2 | Complete | 2026-02-12 |
 | 10. Social Links | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Hero & Projects | v1.1 | 1/1 | Complete | 2026-02-12 |
-| 12. Cleanup & Verify | v1.1 | 0/1 | Not started | - |
+| 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-12 (Phase 12 planned)*
+*Last updated: 2026-02-12 (Phase 12 complete — v1.1 milestone done)*
