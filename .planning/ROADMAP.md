@@ -156,10 +156,10 @@ Plans:
   3. Sitemap lists all valid pages (no removed pages, includes new tag pages if any)
   4. RSS feed entries have correct links -- external posts link externally, local posts link to `/blog/[slug]/`
   5. LLMs.txt reflects updated content accurately
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — Delete draft placeholder, fix external URL bugs in LLMs.txt and homepage, verify all build outputs
 
 ## Progress
 
@@ -184,4 +184,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-12 (Phase 11 complete)*
+*Last updated: 2026-02-12 (Phase 12 planned)*
