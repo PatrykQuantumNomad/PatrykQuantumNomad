@@ -85,7 +85,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   </div>
 
   <!-- Skills / What I Build Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <section class="relative overflow-hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16" data-section-bg="skills">
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>What I Build</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
@@ -144,8 +144,10 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
     </div>
   </section>
 
+  <div class="gradient-divider max-w-6xl mx-auto" data-divider-reveal aria-hidden="true"></div>
+
   <!-- Latest Blog Posts Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <section class="relative overflow-hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16" data-section-bg="writing">
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Latest Writing</h2>
     {latestPosts.length > 0 ? (
       <div class="space-y-6">
@@ -196,8 +198,10 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
     </div>
   </section>
 
+  <div class="gradient-divider max-w-6xl mx-auto" data-divider-reveal aria-hidden="true"></div>
+
   <!-- Contact CTA Section -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16" data-reveal>
+  <section class="relative overflow-hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16" data-section-bg="cta" data-reveal>
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-4" data-word-reveal>Interested in working together?</h2>
     <p class="text-[var(--color-text-secondary)] mb-8 max-w-2xl">
       Whether you need a cloud-native architect, want to collaborate on an open-source project, or just want to chat about Kubernetes and AI — I'd love to hear from you.

@@ -14,12 +14,13 @@ import Layout from '../layouts/Layout.astro';
     </p>
 
     <!-- Contact Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16" data-reveal>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16" data-card-group>
       <!-- Email Card -->
       <a
         href="mailto:pgolabek@gmail.com"
         class="contact-card group p-6 rounded-lg border border-[var(--color-border)]"
         data-brand="email"
+        data-card-item
         data-tilt
       >
         <div class="mb-4 text-[var(--color-accent)]">
@@ -43,6 +44,7 @@ import Layout from '../layouts/Layout.astro';
         rel="noopener noreferrer"
         class="contact-card group p-6 rounded-lg border border-[var(--color-border)]"
         data-brand="x"
+        data-card-item
         data-tilt
       >
         <div class="mb-4 text-[var(--color-accent)]">
@@ -65,6 +67,7 @@ import Layout from '../layouts/Layout.astro';
         rel="noopener noreferrer"
         class="contact-card group p-6 rounded-lg border border-[var(--color-border)]"
         data-brand="youtube"
+        data-card-item
         data-tilt
       >
         <div class="mb-4 text-[var(--color-accent)]">

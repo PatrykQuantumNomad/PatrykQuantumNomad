@@ -1,12 +1,13 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import avatarImg from '../assets/images/meandbatman.jpg';
+import avatarImg from '../assets/images/anime.jpeg';
 import familyImg from '../assets/images/meandfamily.jpg';
 import dogImg from '../assets/images/meanddog.jpg';
 import cyclingImg from '../assets/images/cycling.jpg';
 import snowImg from '../assets/images/snowman.jpg';
 import kidsImg from '../assets/images/meandkids.jpg';
+import kaijuImg from '../assets/images/kaiju.png';
 
 const techStack = [
   {
@@ -70,10 +71,10 @@ const highlights = [
         <div class="avatar-glow">
           <Image
             src={avatarImg}
-            alt="Patryk Golabek"
-            width={96}
-            height={96}
-            class="w-24 h-24 rounded-full object-cover"
+            alt="Anime-style portrait of Patryk Golabek at his desk"
+            width={240}
+            height={180}
+            class="w-60 h-[180px] rounded-2xl object-cover"
           />
         </div>
       </div>
@@ -166,10 +167,17 @@ const highlights = [
             <span class="meta-mono text-white">Road crew</span>
           </div>
         </div>
-        <div class="relative overflow-hidden rounded-lg aspect-square group flex items-center justify-center bg-[var(--color-surface-alt)] border border-[var(--color-border)]" data-tilt>
-          <div class="text-center p-4">
-            <p class="text-4xl mb-2">17+</p>
-            <p class="meta-mono">Years building software</p>
+        <div class="relative overflow-hidden rounded-lg aspect-square group" data-tilt>
+          <Image
+            src={kaijuImg}
+            alt="Patryk as a Kaiju No.8 character"
+            width={400}
+            height={400}
+            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <span class="meta-mono text-white">Kaiju No. 8 mode</span>
           </div>
         </div>
       </div>
@@ -199,7 +207,7 @@ const highlights = [
     <!-- Career Highlights -->
     <div class="mb-16" data-reveal>
       <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Career Highlights</h2>
-      <div class="space-y-6" id="highlights-list">
+      <div class="relative space-y-6" id="highlights-list" data-timeline>
         {highlights.map(({ title, text }, idx) => (
           <div
             class="highlight-item pl-6"

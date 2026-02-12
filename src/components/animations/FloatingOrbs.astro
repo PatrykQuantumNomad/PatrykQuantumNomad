@@ -1,0 +1,73 @@
+<!-- FloatingOrbs.astro — Parallax gradient orbs behind homepage sections -->
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  interface OrbConfig {
+    x: string;
+    y: string;
+    size: number;
+    color: string;
+    opacity: number;
+    parallaxY: number;
+  }
+
+  const ORB_CONFIG: Record<string, OrbConfig[]> = {
+    skills: [
+      { x: '10%', y: '20%', size: 400, color: 'var(--color-accent)', opacity: 0.06, parallaxY: -60 },
+      { x: '75%', y: '60%', size: 300, color: 'var(--color-accent-secondary)', opacity: 0.05, parallaxY: -40 },
+    ],
+    writing: [
+      { x: '80%', y: '15%', size: 350, color: 'var(--color-accent)', opacity: 0.05, parallaxY: -50 },
+      { x: '15%', y: '70%', size: 280, color: 'var(--color-accent-secondary)', opacity: 0.04, parallaxY: -35 },
+    ],
+    cta: [
+      { x: '20%', y: '30%', size: 450, color: 'var(--color-accent-secondary)', opacity: 0.07, parallaxY: -70 },
+      { x: '70%', y: '60%', size: 250, color: 'var(--color-accent)', opacity: 0.04, parallaxY: -30 },
+    ],
+  };
+
+  function initFloatingOrbs() {
+    if (REDUCED_MOTION) return;
+
+    const sections = document.querySelectorAll<HTMLElement>('[data-section-bg]');
+    sections.forEach((section) => {
+      const key = section.dataset.sectionBg;
+      if (!key || !ORB_CONFIG[key]) return;
+
+      // Skip if already initialized
+      if (section.querySelector('.section-orb')) return;
+
+      ORB_CONFIG[key].forEach((config) => {
+        const orb = document.createElement('div');
+        orb.classList.add('section-orb');
+        orb.setAttribute('aria-hidden', 'true');
+        orb.style.left = config.x;
+        orb.style.top = config.y;
+        orb.style.width = config.size + 'px';
+        orb.style.height = config.size + 'px';
+        orb.style.background = `radial-gradient(circle, ${config.color} 0%, transparent 70%)`;
+        orb.style.opacity = '0';
+        section.appendChild(orb);
+
+        gsap.to(orb, {
+          opacity: config.opacity,
+          y: config.parallaxY,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 90%',
+            end: 'bottom 10%',
+            scrub: 1,
+          },
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initFloatingOrbs);
+</script>

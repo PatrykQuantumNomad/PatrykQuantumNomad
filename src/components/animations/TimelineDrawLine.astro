@@ -1,0 +1,97 @@
+<!-- TimelineDrawLine.astro — SVG draw-line for career highlights timeline -->
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initTimelineDrawLine() {
+    const container = document.querySelector<HTMLElement>('[data-timeline]');
+    if (!container) return;
+
+    const items = container.querySelectorAll<HTMLElement>('.highlight-item');
+    if (items.length < 2) return;
+
+    // Remove any existing SVG from previous page load
+    container.querySelectorAll('.timeline-svg').forEach((el) => el.remove());
+
+    // Measure item positions relative to container
+    const containerRect = container.getBoundingClientRect();
+    const positions: number[] = [];
+    items.forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      positions.push(rect.top - containerRect.top + 12); // 12px = align with first line of text
+    });
+
+    const startY = positions[0];
+    const endY = positions[positions.length - 1];
+
+    // Create SVG
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.classList.add('timeline-svg');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('viewBox', `0 0 2 ${endY - startY}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.style.top = startY + 'px';
+    svg.style.height = (endY - startY) + 'px';
+
+    // Create the vertical path
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', `M1 0 L1 ${endY - startY}`);
+    svg.appendChild(path);
+
+    // Create dot markers at each item position
+    positions.forEach((pos) => {
+      const circle = document.createElementNS(svgNS, 'circle');
+      circle.setAttribute('cx', '1');
+      circle.setAttribute('cy', String(pos - startY));
+      circle.setAttribute('r', '4');
+      svg.appendChild(circle);
+    });
+
+    container.appendChild(svg);
+
+    if (REDUCED_MOTION) return;
+
+    // Animate the path drawing
+    const totalLength = path.getTotalLength();
+    gsap.set(path, {
+      strokeDasharray: totalLength,
+      strokeDashoffset: totalLength,
+    });
+
+    gsap.to(path, {
+      strokeDashoffset: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: container,
+        start: 'top 80%',
+        end: 'bottom 80%',
+        scrub: 0.5,
+      },
+    });
+
+    // Animate dot markers — scale up as they enter viewport
+    const circles = svg.querySelectorAll('circle');
+    circles.forEach((circle) => {
+      gsap.set(circle, { scale: 0, transformOrigin: 'center' });
+      ScrollTrigger.create({
+        trigger: circle,
+        start: 'top 75%',
+        once: true,
+        onEnter: () => {
+          gsap.to(circle, {
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(2)',
+          });
+        },
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initTimelineDrawLine);
+</script>

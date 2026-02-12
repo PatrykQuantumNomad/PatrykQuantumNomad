@@ -12,7 +12,7 @@ const grouped = categories.map((category) => ({
   title="Projects — Patryk Golabek | Open-Source Portfolio"
   description="Explore 16 open-source projects by Patryk Golabek spanning Kubernetes platforms, AI/ML agents, infrastructure as code, and security tooling."
 >
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 dot-grid-bg">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4" data-word-reveal>Projects</h1>
     <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl mb-12" data-reveal>
       Open-source work spanning Kubernetes, AI/ML, infrastructure as code, and
@@ -24,7 +24,7 @@ const grouped = categories.map((category) => ({
         <h2 class="text-xl sm:text-2xl font-heading font-bold mb-6" data-word-reveal>
           {category}
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-card-group>
           {items.map((project, projIdx) => (
             <a
               href={project.url}
@@ -34,7 +34,7 @@ const grouped = categories.map((category) => ({
                 'group card-hover p-5 rounded-lg border border-[var(--color-border)]',
                 projIdx === 0 ? 'md:col-span-2 lg:col-span-2' : '',
               ]}
-              data-reveal
+              data-card-item
               data-tilt
             >
               <div class="flex items-start justify-between gap-2">

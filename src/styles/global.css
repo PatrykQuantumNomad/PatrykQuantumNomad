@@ -256,7 +256,7 @@ button:focus-visible,
   position: relative;
   background: conic-gradient(from 0deg, var(--color-gradient-start), var(--color-gradient-end), var(--color-gradient-start));
   padding: 3px;
-  border-radius: 9999px;
+  border-radius: 1rem;
   animation: avatar-spin 4s linear infinite;
 }
 @keyframes avatar-spin {
@@ -370,6 +370,38 @@ button:focus-visible,
   }
 }
 
+/* ─── Floating Section Orbs ───────────────────────────────────────────── */
+.section-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, opacity;
+}
+
+/* ─── Timeline Draw-Line ──────────────────────────────────────────────── */
+.timeline-svg {
+  position: absolute;
+  top: 0;
+  left: 11px;
+  width: 2px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+.timeline-svg path {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  fill: none;
+}
+.timeline-svg circle {
+  fill: var(--color-surface);
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
 /* ─── Grain Texture Overlay ────────────────────────────────────────────── */
 body::before {
   content: '';
@@ -406,5 +438,11 @@ body::before {
   }
   body::before {
     display: none;
+  }
+  .section-orb {
+    display: none;
+  }
+  .timeline-svg path {
+    stroke-dashoffset: 0 !important;
   }
 }
