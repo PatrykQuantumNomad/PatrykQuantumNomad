@@ -7,16 +7,20 @@ export async function GET(context: APIContext) {
     return import.meta.env.PROD ? data.draft !== true : true;
   });
 
+  const sortedPosts = posts.sort(
+    (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
+  );
+
   return rss({
     title: 'Patryk Golabek | Blog',
     description:
       'Articles on cloud-native architecture, Kubernetes, AI/ML, and platform engineering',
     site: context.site!,
-    items: posts.map((post) => ({
+    items: sortedPosts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.publishedDate,
       description: post.data.description,
-      link: `/blog/${post.id}/`,
+      link: post.data.externalUrl ?? `/blog/${post.id}/`,
     })),
   });
 }
