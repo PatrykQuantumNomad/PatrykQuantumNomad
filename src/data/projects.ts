@@ -2,6 +2,7 @@ export interface Project {
   name: string;
   description: string;
   url: string;
+  liveUrl?: string;
   language: string;
   category: Category;
   fork?: boolean;
@@ -147,8 +148,9 @@ export const projects: Project[] = [
   {
     name: 'networking-tools',
     description:
-      'Network scanning, penetration testing, and security audit toolkit',
+      'Pentesting learning lab with 17 security tools (Nmap, Metasploit, SQLMap, etc.), 28 use-case scripts, and Docker-based vulnerable targets',
     url: 'https://github.com/PatrykQuantumNomad/networking-tools',
+    liveUrl: 'https://patrykquantumnomad.github.io/networking-tools/',
     language: 'Shell',
     category: 'Security & Networking',
   },
