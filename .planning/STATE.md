@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 15 of 15 (Filtering, Animations & Polish)
-Plan: 1 of 2 in current phase (completed)
-Status: Plan 15-01 complete, ready for Plan 15-02
-Last activity: 2026-02-13 -- Plan 15-01 complete (category filter system)
+Plan: 2 of 2 in current phase (completed)
+Status: Phase 15 COMPLETE -- v1.2 Projects Page Redesign milestone COMPLETE
+Last activity: 2026-02-13 -- Plan 15-02 complete (interactive animations)
 
-Progress: [████████████████████████░] 96% (v1.2 phase 15: 1/2 plans complete)
+Progress: [█████████████████████████] 100% (v1.2 complete: all 15 phases done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28 (16 v1.0 + 7 v1.1 + 5 v1.2)
+- Total plans completed: 29 (16 v1.0 + 7 v1.1 + 6 v1.2)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
 
 **v1.2 Summary:**
@@ -31,6 +31,7 @@ Progress: [███████████████████████
 | 14. Visual Design & Cards | 01 | 3min | 2 | 3 |
 | 14. Visual Design & Cards | 02 | 2min | 1 | 1 |
 | 15. Filtering & Polish | 01 | 5min | 2 | 3 |
+| 15. Filtering & Polish | 02 | 3min | 2 | 4 |
 
 **v1.1 Summary:**
 
@@ -68,6 +69,9 @@ v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 - [15-01] replaceState for hash updates (not pushState) to avoid polluting browser history
 - [15-01] vanilla-tilt destroy before Flip.getState, reinit via dynamic import in onComplete
 - [15-01] Instant toggle fallback when prefers-reduced-motion is active
+- [15-02] Added position: relative to .card-hover (required for ::after glow overlay)
+- [15-02] Glow uses var(--category-glow) with accent-glow fallback, matching card hover system
+- [15-02] Raw rgba() values for orb colors (independent opacity tuning per orb)
 
 ### Pending Todos
 
@@ -96,6 +100,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 15-01-PLAN.md (category filter system)
+Stopped at: Completed 15-02-PLAN.md (interactive animations) -- Phase 15 COMPLETE, v1.2 milestone COMPLETE
 Resume file: None
-Next: Execute 15-02-PLAN.md (scroll animations and polish)
+Next: All v1.2 plans complete. Ready for v1.3 planning or deployment.

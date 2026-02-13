@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-11)
 - ✅ **v1.1 Content Refresh** - Phases 8-12 (shipped 2026-02-12)
-- 🚧 **v1.2 Projects Page Redesign** - Phases 13-15 (in progress)
+- **v1.2 Projects Page Redesign** - Phases 13-15 (shipped 2026-02-13)
 
 ## Phases
 
@@ -84,7 +84,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full details.
 
 </details>
 
-### 🚧 v1.2 Projects Page Redesign (In Progress)
+### v1.2 Projects Page Redesign (Complete)
 
 **Milestone Goal:** Transform the projects page from a basic 3-column grid into a visually striking, interactive bento-grid showcase with category filtering, rich animations, and enhanced project data -- a portfolio page that demonstrates frontend craft.
 
@@ -133,7 +133,7 @@ Plans:
 
 Plans:
 - [x] 15-01-PLAN.md -- Category filter system with GSAP Flip transitions and URL hash sync
-- [ ] 15-02-PLAN.md -- Mouse-tracking glow, floating orbs, and magnetic CTA buttons
+- [x] 15-02-PLAN.md -- Mouse-tracking glow, floating orbs, and magnetic CTA buttons
 
 ## Progress
 
@@ -153,8 +153,8 @@ Plans:
 | 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
-| 15. Filtering & Animations | v1.2 | 0/2 | Not started | - |
+| 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (Phase 15 revised: ANIM-01 marked pre-existing)*
+*Last updated: 2026-02-13 (v1.2 milestone complete: all 15 phases shipped)*
