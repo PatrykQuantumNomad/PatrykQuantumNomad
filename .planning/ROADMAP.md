@@ -74,11 +74,11 @@ Plans:
 <details>
 <summary>✅ v1.1 Content Refresh (Phases 8-12) - SHIPPED 2026-02-12</summary>
 
-- [x] Phase 8: Schema & Hero Config Foundation (2/2 plans) — completed 2026-02-11
-- [x] Phase 9: External Blog Integration (2/2 plans) — completed 2026-02-12
-- [x] Phase 10: Social Links & Contact Update (1/1 plan) — completed 2026-02-11
-- [x] Phase 11: Hero & Project Curation (1/1 plan) — completed 2026-02-12
-- [x] Phase 12: Cleanup & Verification (1/1 plan) — completed 2026-02-12
+- [x] Phase 8: Schema & Hero Config Foundation (2/2 plans) -- completed 2026-02-11
+- [x] Phase 9: External Blog Integration (2/2 plans) -- completed 2026-02-12
+- [x] Phase 10: Social Links & Contact Update (1/1 plan) -- completed 2026-02-11
+- [x] Phase 11: Hero & Project Curation (1/1 plan) -- completed 2026-02-12
+- [x] Phase 12: Cleanup & Verification (1/1 plan) -- completed 2026-02-12
 
 See `.planning/milestones/v1.1-ROADMAP.md` for full details.
 
@@ -122,12 +122,12 @@ Plans:
 #### Phase 15: Filtering, Animations & Polish
 **Goal**: Users can filter projects by category with smooth transitions, and all page elements use rich scroll-triggered and interactive animations with accessibility fallbacks
 **Depends on**: Phase 14 (complete visual card design)
-**Requirements**: FILTER-01, FILTER-02, FILTER-03, FILTER-04, VIS-03, ANIM-01, ANIM-02, ANIM-03, ANIM-04, ANIM-05, ANIM-06
+**Requirements**: FILTER-01, FILTER-02, FILTER-03, FILTER-04, VIS-03, ANIM-01 (pre-existing), ANIM-02, ANIM-03, ANIM-04, ANIM-05, ANIM-06
 **Success Criteria** (what must be TRUE):
   1. Category filter tabs appear at the top of the page with "All" selected by default; clicking a tab shows only that category's projects
   2. Filter transitions are smooth -- cards fade out and in with position shifts, not instant show/hide
   3. The active filter tab is visually distinct (accent-styled pill button), and the selected filter is reflected in the URL hash (e.g., #kubernetes)
-  4. Cards stagger-reveal on scroll, mouse-tracking gradient glow follows cursor across card surfaces, floating orbs appear behind category sections, and CTA buttons have magnetic pull effect
+  4. Cards stagger-reveal on scroll (ANIM-01 -- already implemented via existing `data-card-group` + `initCardGroupStagger()`), mouse-tracking gradient glow follows cursor across card surfaces, floating orbs appear behind category sections, and CTA buttons have magnetic pull effect
   5. All animations degrade gracefully when prefers-reduced-motion is enabled (no motion, instant transitions)
 **Plans**: 2 plans
 
@@ -157,4 +157,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (Phase 15 planned: 2 plans)*
+*Last updated: 2026-02-13 (Phase 15 revised: ANIM-01 marked pre-existing)*
