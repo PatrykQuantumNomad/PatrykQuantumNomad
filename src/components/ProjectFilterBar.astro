@@ -1,0 +1,28 @@
+---
+import { categories } from '../data/projects';
+import type { Category } from '../data/projects';
+
+const categoryMeta: Record<Category, { slug: string; label: string }> = {
+  'AI/ML & LLM Agents':         { slug: 'ai-ml',      label: 'AI / ML' },
+  'Kubernetes & Infrastructure': { slug: 'kubernetes',  label: 'Kubernetes' },
+  'Platform & DevOps Tooling':   { slug: 'platform',   label: 'Platform' },
+  'Security & Networking':       { slug: 'security',   label: 'Security' },
+};
+
+const tabs = [
+  { slug: 'all', label: 'All' },
+  ...categories.map((c) => categoryMeta[c]),
+];
+---
+
+<nav class="flex flex-wrap gap-2 mb-10" aria-label="Filter projects by category">
+  {tabs.map((tab) => (
+    <button
+      class="filter-tab meta-mono px-4 py-1.5 rounded-full border border-[var(--color-border)] transition-all duration-200"
+      data-filter={tab.slug}
+      aria-pressed={tab.slug === 'all' ? 'true' : 'false'}
+    >
+      {tab.label}
+    </button>
+  ))}
+</nav>

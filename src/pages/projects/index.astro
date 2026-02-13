@@ -1,14 +1,25 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import ProjectFilterBar from '../../components/ProjectFilterBar.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { projects, categories } from '../../data/projects';
+import type { Category } from '../../data/projects';
+
+// Category slug mapping (matches ProjectCard and ProjectFilterBar)
+const categoryMeta: Record<Category, { slug: string }> = {
+  'AI/ML & LLM Agents':         { slug: 'ai-ml' },
+  'Kubernetes & Infrastructure': { slug: 'kubernetes' },
+  'Platform & DevOps Tooling':   { slug: 'platform' },
+  'Security & Networking':       { slug: 'security' },
+};
 
 // Separate featured from category groups (avoid duplication - LAYOUT-02)
 const featured = projects.filter(p => p.featured);
 const grouped = categories.map((category) => ({
   category,
+  slug: categoryMeta[category].slug,
   items: projects.filter((p) => p.category === category && !p.featured),
   totalCount: projects.filter((p) => p.category === category).length,
 }));
@@ -25,14 +36,18 @@ const grouped = categories.map((category) => ({
       platform engineering. All repositories live on GitHub.
     </p>
 
+    <ProjectFilterBar />
+
     {/* Hero section for featured projects (LAYOUT-02) */}
     {featured.length > 0 && (
-      <ProjectHero projects={featured} />
+      <div data-hero-section>
+        <ProjectHero projects={featured} />
+      </div>
     )}
 
     {/* Category sections with bento grid (LAYOUT-01, LAYOUT-03) */}
-    {grouped.map(({ category, items, totalCount }, idx) => (
-      <div>
+    {grouped.map(({ category, slug, items, totalCount }, idx) => (
+      <div data-category-section={slug} data-section-bg={slug} style="position: relative;">
         {idx > 0 && (
           <div class="gradient-divider max-w-6xl mx-auto my-10" data-divider-reveal aria-hidden="true"></div>
         )}

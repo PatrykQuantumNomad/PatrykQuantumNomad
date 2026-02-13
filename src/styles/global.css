@@ -212,6 +212,24 @@ button:focus-visible,
   border-color: var(--color-accent);
 }
 
+/* ─── Filter Tab Pill Buttons ─────────────────────────────────────────── */
+.filter-tab {
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+.filter-tab:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.filter-tab[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px var(--color-accent-glow);
+}
+
 /* ─── Icon Hover Bounce ────────────────────────────────────────────────── */
 .icon-hover {
   transition: transform 0.3s ease, color 0.3s ease;
