@@ -113,7 +113,11 @@ Plans:
   2. Project cards display status badges (Featured/Active/Live) with visually distinct styling per status
   3. Cards use glassmorphism with category-tinted glow on hover (visible color shift per category)
   4. Each category header shows the project count in monospace metadata style (e.g., "AI/ML & LLM Agents // 7 projects")
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 14-01-PLAN.md -- CSS category glow system and enhanced card components (tech pills, status badges, category glow)
+- [ ] 14-02-PLAN.md -- Category headers with monospace project count metadata
 
 #### Phase 15: Filtering, Animations & Polish
 **Goal**: Users can filter projects by category with smooth transitions, and all page elements use rich scroll-triggered and interactive animations with accessibility fallbacks
@@ -144,9 +148,9 @@ Plans:
 | 11. Hero & Projects | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
-| 14. Visual Design & Cards | v1.2 | 0/TBD | Not started | - |
+| 14. Visual Design & Cards | v1.2 | 0/2 | Not started | - |
 | 15. Filtering & Animations | v1.2 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (Phase 13 planned: 2 plans in 2 waves)*
+*Last updated: 2026-02-13 (Phase 14 planned: 2 plans in 1 wave)*
