@@ -6,9 +6,10 @@ const schema = {
   "@type": "Person",
   "@id": "https://patrykgolabek.dev/#person",
   "name": siteConfig.name,
+  "alternateName": ["QuantumMentat", "QuantumNomad"],
   "url": siteConfig.url,
   "image": "https://patrykgolabek.dev/open-graph/default.png",
-  "jobTitle": siteConfig.jobTitle,
+  "email": "pgolabek@gmail.com",
   "description": siteConfig.description,
   "knowsAbout": [
     "Kubernetes",
@@ -35,14 +36,22 @@ const schema = {
     "https://mykubert.com/blog/",
     "https://patrykquantumnomad.github.io/networking-tools/"
   ],
-  "worksFor": {
-    "@type": "Organization",
-    "name": "Translucent Computing"
-  },
+  "jobTitle": "Cloud-Native Software Architect (Open to Work)",
   "address": {
     "@type": "PostalAddress",
     "addressRegion": "Ontario",
     "addressCountry": "CA"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "professional",
+    "email": "pgolabek@gmail.com",
+    "url": "https://patrykgolabek.dev/contact/"
+  },
+  "seeks": {
+    "@type": "Demand",
+    "name": "Software Architect, Staff Engineer, or Engineering Leadership role",
+    "description": "Actively seeking opportunities in cloud-native architecture, AI/ML systems, and platform engineering"
   }
 };
 ---

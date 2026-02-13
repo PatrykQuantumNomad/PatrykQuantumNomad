@@ -8,7 +8,7 @@ tags: [projects, featured, data]
 requires: []
 provides:
   - Updated featured project flags for hero section
-  - JobFlo display name for jobs project
+  - JobFlow display name for jobs project
 affects: [projects-page, project-hero]
 
 # Tech tracking
@@ -22,7 +22,7 @@ key-files:
     - src/data/projects.ts
 
 key-decisions:
-  - "networking-tools and JobFlo replace kps-graph-agent and kps-cluster-deployment as featured projects"
+  - "networking-tools and JobFlow replace kps-graph-agent and kps-cluster-deployment as featured projects"
 
 patterns-established: []
 
@@ -33,7 +33,7 @@ completed: 2026-02-13
 
 # Quick Task 009: Change Which Project Is Featured Summary
 
-**Swapped featured projects to networking-tools and JobFlo, un-featuring kps-graph-agent and kps-cluster-deployment**
+**Swapped featured projects to networking-tools and JobFlow, un-featuring kps-graph-agent and kps-cluster-deployment**
 
 ## Performance
 
@@ -46,7 +46,7 @@ completed: 2026-02-13
 ## Accomplishments
 - Un-featured kps-graph-agent and kps-cluster-deployment, setting their gridSize to medium
 - Featured networking-tools (already had large gridSize) and jobs project
-- Renamed jobs display name to "JobFlo" with large gridSize
+- Renamed jobs display name to "JobFlow" with large gridSize
 - Verified exactly 2 projects have `featured: true`
 - Build passes with no errors
 
@@ -75,7 +75,7 @@ None.
 None - no external service configuration required.
 
 ## Next Phase Readiness
-- Featured projects hero section now shows networking-tools and JobFlo
+- Featured projects hero section now shows networking-tools and JobFlow
 - kps-graph-agent and kps-cluster-deployment return to their category grids with medium cards
 - No follow-up work required
 

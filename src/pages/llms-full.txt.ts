@@ -35,8 +35,12 @@ export async function GET(context: APIContext) {
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
 
+  const generatedDate = new Date().toISOString().split('T')[0];
+
   const lines: string[] = [
     '# Patryk Golabek -- Full Site Content',
+    '',
+    `> Generated: ${generatedDate}`,
     '',
     '> Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps. Ontario, Canada.',
     '',
@@ -50,7 +54,7 @@ export async function GET(context: APIContext) {
     '',
     'Career Highlights:',
     '- Early Kubernetes adopter: Building production clusters before the 1.0 release.',
-    '- From code to leadership: Went from writing code to leading teams and shaping technical strategy as a CTO and co-founder, but never stopped building.',
+    '- From code to leadership: Went from writing code to leading teams and shaping technical strategy — including CTO and co-founder roles. Currently open to new opportunities.',
     '- AI/ML Systems: Deep into LLM agents, RAG pipelines, and AI-powered automation.',
     '- Open-Source: 16+ public repositories spanning Kubernetes, AI agents, infrastructure as code, and more.',
     '- Writing & sharing: Actively publishing technical content on cloud-native architecture, AI/ML, and platform engineering.',
@@ -70,11 +74,11 @@ export async function GET(context: APIContext) {
   // Expertise Areas
   lines.push('## Expertise Areas');
   lines.push('');
-  lines.push('- Kubernetes & Cloud-Native Architecture (pre-1.0 adopter, production platforms)');
-  lines.push('- AI/ML Systems & LLM Agents (RAG pipelines, LangGraph, Langflow)');
-  lines.push('- Platform Engineering & DevSecOps (Terraform, CI/CD, GitOps)');
-  lines.push('- Full-Stack Development (Python, Java, TypeScript, React, Angular)');
-  lines.push('- Infrastructure as Code (Terraform, Terragrunt, Helm)');
+  lines.push('- Kubernetes & Cloud-Native Architecture — Expert, 10+ years (pre-1.0 adopter, production platforms)');
+  lines.push('- AI/ML Systems & LLM Agents — Expert, 3+ years (RAG pipelines, LangGraph, Langflow)');
+  lines.push('- Platform Engineering & DevSecOps — Expert, 10+ years (Terraform, CI/CD, GitOps)');
+  lines.push('- Full-Stack Development — Expert, 17+ years (Python, Java, TypeScript, React, Angular)');
+  lines.push('- Infrastructure as Code — Expert, 8+ years (Terraform, Terragrunt, Helm)');
   lines.push('');
 
   // Projects section
@@ -87,10 +91,10 @@ export async function GET(context: APIContext) {
     lines.push(`### ${category}`);
     lines.push('');
     for (const project of categoryProjects) {
-      lines.push(`- ${project.name} (${project.technologies.join(', ')}): ${project.description}`);
+      lines.push(`- ${project.name} [${project.status}] (${project.technologies.join(', ')}): ${project.description}`);
       lines.push(`  URL: ${project.url}`);
       if (project.liveUrl) {
-        lines.push(`  Live URL: ${project.liveUrl}`);
+        lines.push(`  Live: ${project.liveUrl}`);
       }
     }
     lines.push('');
@@ -105,11 +109,14 @@ export async function GET(context: APIContext) {
     const date = post.data.publishedDate.toISOString().split('T')[0];
     const tags = post.data.tags.join(', ');
     lines.push(`### ${post.data.title}`);
+    lines.push(`Author: Patryk Golabek`);
     lines.push(`Date: ${date}`);
     lines.push(`Tags: ${tags}`);
     lines.push(`URL: ${url}`);
     lines.push(`Description: ${post.data.description}`);
-    if (!post.data.externalUrl) {
+    if (post.data.externalUrl && post.data.source) {
+      lines.push(`Originally published on: ${post.data.source}`);
+    } else if (!post.data.externalUrl) {
       lines.push('(Full article hosted on this site)');
     }
     lines.push('');

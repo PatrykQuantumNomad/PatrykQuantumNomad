@@ -1,0 +1,20 @@
+---
+import { projects } from '../data/projects';
+
+const schemas = projects.map((project) => ({
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": project.name,
+  "description": project.description,
+  "codeRepository": project.url,
+  "url": project.liveUrl ?? project.url,
+  "programmingLanguage": project.language,
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person"
+  },
+  ...(project.liveUrl && { "installUrl": project.liveUrl }),
+}));
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schemas)} />

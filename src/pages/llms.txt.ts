@@ -7,8 +7,12 @@ export async function GET(context: APIContext) {
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
 
+  const generatedDate = new Date().toISOString().split('T')[0];
+
   const lines = [
     '# Patryk Golabek',
+    '',
+    `> Generated: ${generatedDate}`,
     '',
     '> Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps. Ontario, Canada.',
     '',
@@ -32,8 +36,10 @@ export async function GET(context: APIContext) {
     '  Live: https://patrykquantumnomad.github.io/networking-tools/',
     '  Source: https://github.com/PatrykQuantumNomad/networking-tools',
     '- financial-data-extractor: Full-stack financial statement extraction with FastAPI, Next.js 15, and LLM-powered PDF parsing',
+    '  Live: https://patrykquantumnomad.github.io/financial-data-extractor/',
     '  Source: https://github.com/PatrykQuantumNomad/financial-data-extractor',
-    '- JobFlo: Multi-platform job scraper with scoring, human-in-the-loop applications, and 544 tests',
+    '- JobFlow: Multi-platform job scraper with scoring, human-in-the-loop applications, and 544 tests',
+    '  Live: https://patrykquantumnomad.github.io/jobs/',
     '  Source: https://github.com/PatrykQuantumNomad/jobs',
     '',
     '## Blog Posts',

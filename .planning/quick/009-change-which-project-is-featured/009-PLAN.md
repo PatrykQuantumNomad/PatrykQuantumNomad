@@ -9,14 +9,14 @@ files_modified:
 autonomous: true
 must_haves:
   truths:
-    - "networking-tools and JobFlo appear in the Featured Projects hero section on /projects/"
+    - "networking-tools and JobFlow appear in the Featured Projects hero section on /projects/"
     - "kps-graph-agent and kps-cluster-deployment appear in their normal category sections, not in the hero"
-    - "The 'jobs' project displays as 'JobFlo' everywhere its name renders"
+    - "The 'jobs' project displays as 'JobFlow' everywhere its name renders"
     - "Both newly featured projects render as large hero cards in the 2-column hero grid"
   artifacts:
     - path: "src/data/projects.ts"
       provides: "Updated featured flags and display name"
-      contains: "JobFlo"
+      contains: "JobFlow"
   key_links:
     - from: "src/data/projects.ts"
       to: "src/pages/projects/index.astro"
@@ -25,9 +25,9 @@ must_haves:
 ---
 
 <objective>
-Change which projects are featured on the projects page: un-feature kps-graph-agent and kps-cluster-deployment, make networking-tools and jobs featured. Rename the "jobs" project display name to "JobFlo".
+Change which projects are featured on the projects page: un-feature kps-graph-agent and kps-cluster-deployment, make networking-tools and jobs featured. Rename the "jobs" project display name to "JobFlow".
 
-Purpose: Update the project showcase to highlight networking-tools and JobFlo in the hero section, replacing the previous featured projects which move back to their category grids.
+Purpose: Update the project showcase to highlight networking-tools and JobFlow in the hero section, replacing the previous featured projects which move back to their category grids.
 Output: Updated src/data/projects.ts with corrected featured flags, gridSize values, and display name.
 </objective>
 
@@ -56,25 +56,25 @@ Output: Updated src/data/projects.ts with corrected featured flags, gridSize val
 
     3. **networking-tools** (line ~200): Add `featured: true`, confirm `gridSize` is already `'large'` (it is — no change needed)
 
-    4. **jobs** (line ~187): Change `name: 'jobs'` to `name: 'JobFlo'`, add `featured: true`, change `gridSize: 'small'` to `gridSize: 'large'`
+    4. **jobs** (line ~187): Change `name: 'jobs'` to `name: 'JobFlow'`, add `featured: true`, change `gridSize: 'small'` to `gridSize: 'large'`
 
     Important: The `name` field is the display name shown in ProjectHero.astro (line 54: `{project.name}`) and ProjectCard.astro. The `url` field remains unchanged as `https://github.com/PatrykQuantumNomad/jobs`.
 
     Note: The projects page filters featured projects out of category groups (line 23 of projects/index.astro: `!p.featured`), so un-featuring kps-graph-agent and kps-cluster-deployment will automatically return them to their category sections, and featuring networking-tools and jobs will move them to the hero.
   </action>
   <verify>
-    Run: `grep -n 'featured\|JobFlo\|gridSize' src/data/projects.ts` and confirm:
-    - Only networking-tools and JobFlo have `featured: true`
+    Run: `grep -n 'featured\|JobFlow\|gridSize' src/data/projects.ts` and confirm:
+    - Only networking-tools and JobFlow have `featured: true`
     - kps-graph-agent and kps-cluster-deployment have no `featured` property and `gridSize: 'medium'`
-    - jobs entry shows `name: 'JobFlo'` and `gridSize: 'large'`
+    - jobs entry shows `name: 'JobFlow'` and `gridSize: 'large'`
     - networking-tools shows `gridSize: 'large'`
 
     Run: `npm run build` to confirm no build errors.
   </verify>
   <done>
-    - Exactly 2 projects have `featured: true`: networking-tools and JobFlo
+    - Exactly 2 projects have `featured: true`: networking-tools and JobFlow
     - kps-graph-agent and kps-cluster-deployment have no featured flag and gridSize medium
-    - The jobs project displays as "JobFlo" with gridSize large
+    - The jobs project displays as "JobFlow" with gridSize large
     - Build succeeds with no errors
   </done>
 </task>
@@ -83,15 +83,15 @@ Output: Updated src/data/projects.ts with corrected featured flags, gridSize val
 
 <verification>
 - `grep -c 'featured: true' src/data/projects.ts` returns exactly 2
-- `grep 'JobFlo' src/data/projects.ts` shows the renamed project
+- `grep 'JobFlow' src/data/projects.ts` shows the renamed project
 - `npm run build` completes successfully
-- Featured hero section on /projects/ will show networking-tools and JobFlo
+- Featured hero section on /projects/ will show networking-tools and JobFlow
 </verification>
 
 <success_criteria>
-- networking-tools and JobFlo are the only featured projects
+- networking-tools and JobFlow are the only featured projects
 - kps-graph-agent and kps-cluster-deployment return to their category grids with medium gridSize
-- The "jobs" project displays as "JobFlo" across the site
+- The "jobs" project displays as "JobFlow" across the site
 - Site builds without errors
 </success_criteria>
 

@@ -175,6 +175,7 @@ export const projects: Project[] = [
     description:
       'Full-stack financial statement extraction — FastAPI backend, Next.js 15 frontend, and LLM-powered PDF parsing targeting European companies',
     url: 'https://github.com/PatrykQuantumNomad/financial-data-extractor',
+    liveUrl: 'https://patrykquantumnomad.github.io/financial-data-extractor/',
     language: 'Python',
     category: 'Open Source Tools',
     technologies: ['Python', 'FastAPI', 'Next.js', 'LLM', 'PostgreSQL'],
@@ -182,10 +183,11 @@ export const projects: Project[] = [
     gridSize: 'large',
   },
   {
-    name: 'JobFlo',
+    name: 'JobFlow',
     description:
       'Multi-platform job scraper with intelligent scoring, human-in-the-loop applications, and FastAPI dashboard (544 tests)',
     url: 'https://github.com/PatrykQuantumNomad/jobs',
+    liveUrl: 'https://patrykquantumnomad.github.io/jobs/',
     language: 'Python',
     category: 'Open Source Tools',
     technologies: ['Python', 'FastAPI', 'Playwright', 'SQLite'],

@@ -7,18 +7,9 @@ interface Props {
 
 const { project } = Astro.props;
 
-// gridSize-driven span classes (LAYOUT-01)
-// CRITICAL: Always use responsive prefix to prevent mobile overflow (Pitfall 1)
-const spanClass = project.gridSize === 'large'
-  ? 'sm:col-span-2 lg:col-span-2'
-  : 'col-span-1';
-
-// Padding varies by gridSize for visual hierarchy
-const paddingClass = project.gridSize === 'large'
-  ? 'p-6'
-  : project.gridSize === 'medium'
-    ? 'p-5'
-    : 'p-4';
+// Uniform card sizing — all cards span 1 column
+const spanClass = 'col-span-1';
+const paddingClass = 'p-5';
 
 // Status badge styling
 const statusStyles: Record<Project['status'], string> = {
@@ -76,7 +67,7 @@ const hasLiveUrl = !!project.liveUrl;
     <p class="text-sm text-[var(--color-text-secondary)] mt-2 flex-1">
       {project.description}
     </p>
-    <div class="flex items-center gap-3 mt-4 pt-3 border-t border-[var(--color-border)]">
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-[var(--color-border)]">
       <div class="flex items-center gap-2 flex-wrap">
         <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
           <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
@@ -89,7 +80,7 @@ const hasLiveUrl = !!project.liveUrl;
           </span>
         )}
       </div>
-      <div class="flex items-center gap-2 ml-auto">
+      <div class="flex items-center gap-2">
         <a
           href={project.url}
           target="_blank"

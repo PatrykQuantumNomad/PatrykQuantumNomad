@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import ProjectsJsonLd from '../../components/ProjectsJsonLd.astro';
 import ProjectFilterBar from '../../components/ProjectFilterBar.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { projects, categories } from '../../data/projects';
@@ -48,7 +49,7 @@ const grouped = categories.map((category) => ({
             // {totalCount} {totalCount === 1 ? 'project' : 'projects'}
           </span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 grid-flow-dense" data-card-group>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-card-group>
           {items.map((item) => (
             <ProjectCard project={item} />
           ))}
@@ -61,7 +62,7 @@ const grouped = categories.map((category) => ({
       <a
         href="https://github.com/PatrykQuantumNomad"
         target="_blank"
-        rel="noopener noreferrer"
+        rel="me noopener noreferrer"
         class="inline-flex items-center gap-2 text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium transition-colors"
       >
         View all repositories on GitHub
@@ -85,6 +86,7 @@ const grouped = categories.map((category) => ({
     { name: "Home", url: `${Astro.site}` },
     { name: "Projects", url: `${new URL('/projects/', Astro.site)}` },
   ]} />
+  <ProjectsJsonLd />
 
   <script>
     import { gsap } from 'gsap';
