@@ -29,10 +29,9 @@ const statusStyles: Record<Project['status'], string> = {
 
 // Category glow colors for hover effect (VIS-04)
 const categoryMeta: Record<Category, { slug: string; glowColor: string }> = {
-  'AI/ML & LLM Agents':         { slug: 'ai-ml',     glowColor: 'rgba(139, 92, 246, 0.3)' },
-  'Kubernetes & Infrastructure': { slug: 'kubernetes', glowColor: 'rgba(59, 130, 246, 0.3)' },
-  'Platform & DevOps Tooling':   { slug: 'platform',  glowColor: 'rgba(16, 185, 129, 0.3)' },
-  'Security & Networking':       { slug: 'security',  glowColor: 'rgba(245, 158, 11, 0.3)' },
+  'Kubert Kubernetes Platform': { slug: 'kubert',      glowColor: 'rgba(59, 130, 246, 0.3)' },
+  'AI & Intelligent Agents':    { slug: 'ai-agents',   glowColor: 'rgba(139, 92, 246, 0.3)' },
+  'Open Source Tools':           { slug: 'open-source', glowColor: 'rgba(16, 185, 129, 0.3)' },
 };
 
 // Status dot color indicators (VIS-02)
@@ -79,12 +78,6 @@ const hasLiveUrl = !!project.liveUrl;
     </p>
     <div class="flex items-center gap-3 mt-4 pt-3 border-t border-[var(--color-border)]">
       <div class="flex items-center gap-2 flex-wrap">
-        {project.featured && (
-          <span class="meta-mono px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] inline-flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
-            Featured
-          </span>
-        )}
         <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
           <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
           {project.status}
@@ -171,12 +164,6 @@ const hasLiveUrl = !!project.liveUrl;
     </p>
     <div class="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-border)]">
       <div class="flex items-center gap-2 flex-wrap">
-        {project.featured && (
-          <span class="meta-mono px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] inline-flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
-            Featured
-          </span>
-        )}
         <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
           <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
           {project.status}
