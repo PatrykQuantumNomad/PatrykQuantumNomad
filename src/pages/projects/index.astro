@@ -96,4 +96,160 @@ const grouped = categories.map((category) => ({
     { name: "Home", url: `${Astro.site}` },
     { name: "Projects", url: `${new URL('/projects/', Astro.site)}` },
   ]} />
+
+  <script>
+    import { gsap } from 'gsap';
+    import { Flip } from 'gsap/Flip';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    gsap.registerPlugin(Flip, ScrollTrigger);
+
+    const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let isAnimating = false;
+    const VALID_SLUGS = ['ai-ml', 'kubernetes', 'platform', 'security'];
+
+    function initProjectFilter() {
+      const tabs = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+      const cards = document.querySelectorAll<HTMLElement>('[data-card-item]');
+      const sections = document.querySelectorAll<HTMLElement>('[data-category-section]');
+      const heroSection = document.querySelector<HTMLElement>('[data-hero-section]');
+
+      if (!tabs.length) return;
+
+      // Restore filter from URL hash on load
+      const initialSlug = getFilterFromHash();
+      if (initialSlug !== 'all') {
+        applyFilter(initialSlug, false, cards, sections, heroSection);
+        setActiveTab(initialSlug);
+      }
+
+      // Tab click handlers
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          if (isAnimating) return;
+          const slug = tab.dataset.filter!;
+          applyFilter(slug, !REDUCED_MOTION, cards, sections, heroSection);
+          setActiveTab(slug);
+          setFilterHash(slug);
+        });
+      });
+
+      // Browser back/forward hash navigation
+      window.addEventListener('hashchange', () => {
+        if (isAnimating) return;
+        const slug = getFilterFromHash();
+        applyFilter(slug, !REDUCED_MOTION, cards, sections, heroSection);
+        setActiveTab(slug);
+      });
+    }
+
+    function applyFilter(
+      slug: string,
+      animate: boolean,
+      cards: NodeListOf<HTMLElement>,
+      sections: NodeListOf<HTMLElement>,
+      heroSection: HTMLElement | null
+    ) {
+      if (animate) {
+        isAnimating = true;
+
+        // Destroy vanilla-tilt before capturing Flip state (clean geometry)
+        document.querySelectorAll('[data-tilt]').forEach((el) => {
+          if ((el as any).vanillaTilt) (el as any).vanillaTilt.destroy();
+        });
+
+        const state = Flip.getState('[data-card-item]');
+        toggleVisibility(slug, cards, sections, heroSection);
+
+        Flip.from(state, {
+          duration: 0.5,
+          ease: 'power2.inOut',
+          stagger: 0.03,
+          absolute: true,
+          absoluteOnLeave: true,
+          onEnter: (els: Element[]) =>
+            gsap.fromTo(
+              els,
+              { opacity: 0, scale: 0.9 },
+              { opacity: 1, scale: 1, duration: 0.4, stagger: 0.03 }
+            ),
+          onLeave: (els: Element[]) =>
+            gsap.to(els, { opacity: 0, scale: 0.9, duration: 0.3 }),
+          onComplete: () => {
+            isAnimating = false;
+            ScrollTrigger.refresh();
+            reinitTilt();
+          },
+        });
+      } else {
+        toggleVisibility(slug, cards, sections, heroSection);
+        reinitTilt();
+      }
+    }
+
+    function toggleVisibility(
+      slug: string,
+      cards: NodeListOf<HTMLElement>,
+      sections: NodeListOf<HTMLElement>,
+      heroSection: HTMLElement | null
+    ) {
+      const showAll = slug === 'all';
+
+      cards.forEach((card) => {
+        card.style.display = showAll || card.dataset.category === slug ? '' : 'none';
+      });
+
+      sections.forEach((section) => {
+        section.style.display = showAll || section.dataset.categorySection === slug ? '' : 'none';
+      });
+
+      if (heroSection) {
+        heroSection.style.display = showAll ? '' : 'none';
+      }
+    }
+
+    async function reinitTilt() {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+      if (REDUCED_MOTION) return;
+
+      const VanillaTilt = (await import('vanilla-tilt')).default;
+      document
+        .querySelectorAll<HTMLElement>('[data-tilt]:not([style*="display: none"])')
+        .forEach((el) => {
+          // Only init if not already initialized (destroyed elements won't have vanillaTilt)
+          if (!(el as any).vanillaTilt) {
+            VanillaTilt.init(el, {
+              max: 15,
+              speed: 300,
+              glare: true,
+              'max-glare': 0.3,
+              perspective: 800,
+            });
+          }
+        });
+    }
+
+    function setActiveTab(slug: string) {
+      document.querySelectorAll('[data-filter]').forEach((tab) => {
+        tab.setAttribute(
+          'aria-pressed',
+          (tab as HTMLElement).dataset.filter === slug ? 'true' : 'false'
+        );
+      });
+    }
+
+    function getFilterFromHash(): string {
+      const hash = window.location.hash.slice(1).toLowerCase();
+      return VALID_SLUGS.includes(hash) ? hash : 'all';
+    }
+
+    function setFilterHash(slug: string) {
+      if (slug === 'all') {
+        history.replaceState(null, '', window.location.pathname);
+      } else {
+        history.replaceState(null, '', '#' + slug);
+      }
+    }
+
+    document.addEventListener('astro:page-load', initProjectFilter);
+  </script>
 </Layout>
