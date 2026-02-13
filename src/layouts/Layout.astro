@@ -63,6 +63,18 @@ const websiteSchema = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Security Headers -->
+    <!--
+      Note: frame-ancestors directive is NOT supported in meta CSP tags (only in HTTP headers).
+      Using frame-src 'none' to block outbound framing. For inbound clickjacking protection
+      (X-Frame-Options equivalent), a server-level header is needed — not possible on GitHub Pages.
+      Note: X-Content-Type-Options: nosniff cannot be set via meta tags (GitHub Pages limitation).
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; frame-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" />
+
     <meta name="generator" content={Astro.generator} />
 
     <!-- Favicon -->
