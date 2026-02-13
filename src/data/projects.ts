@@ -31,9 +31,8 @@ export const projects: Project[] = [
     language: 'Python',
     category: 'AI/ML & LLM Agents',
     technologies: ['Python', 'LangGraph', 'Neo4j'],
-    featured: true,
     status: 'active',
-    gridSize: 'large',
+    gridSize: 'medium',
   },
   {
     name: 'kps-assistant',
@@ -111,9 +110,8 @@ export const projects: Project[] = [
     language: 'HCL',
     category: 'Kubernetes & Infrastructure',
     technologies: ['HCL', 'Terraform', 'Kubernetes', 'GCP'],
-    featured: true,
     status: 'active',
-    gridSize: 'large',
+    gridSize: 'medium',
   },
   {
     name: 'kps-infra-management',
@@ -184,15 +182,16 @@ export const projects: Project[] = [
     gridSize: 'medium',
   },
   {
-    name: 'jobs',
+    name: 'JobFlo',
     description:
       'Automated job scraper and tracking dashboard for the job search process',
     url: 'https://github.com/PatrykQuantumNomad/jobs',
     language: 'Python',
     category: 'Platform & DevOps Tooling',
     technologies: ['Python', 'Scraping', 'Automation'],
+    featured: true,
     status: 'experimental',
-    gridSize: 'small',
+    gridSize: 'large',
   },
 
   // Security & Networking
@@ -205,6 +204,7 @@ export const projects: Project[] = [
     language: 'Shell',
     category: 'Security & Networking',
     technologies: ['Shell', 'Docker', 'Nmap', 'Metasploit'],
+    featured: true,
     status: 'active',
     gridSize: 'large',
   },
