@@ -101,8 +101,8 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full details.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md -- Extend Project data model with technologies, featured, status, gridSize
-- [ ] 13-02-PLAN.md -- Rebuild projects page with hero section and bento grid layout
+- [x] 13-01-PLAN.md -- Extend Project data model with technologies, featured, status, gridSize
+- [x] 13-02-PLAN.md -- Rebuild projects page with hero section and bento grid layout
 
 #### Phase 14: Visual Design & Card Components
 **Goal**: Project cards are visually rich with tech badges, status indicators, glassmorphism effects, and polished category headers
@@ -143,7 +143,7 @@ Plans:
 | 10. Social Links | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Hero & Projects | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
-| 13. Data Model & Bento Grid | v1.2 | 0/2 | Not started | - |
+| 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 14. Visual Design & Cards | v1.2 | 0/TBD | Not started | - |
 | 15. Filtering & Animations | v1.2 | 0/TBD | Not started | - |
 

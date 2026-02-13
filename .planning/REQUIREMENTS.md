@@ -9,17 +9,17 @@ Requirements for the Projects Page Redesign milestone. Each maps to roadmap phas
 
 ### Data Model
 
-- [ ] **DATA-01**: Project data includes `technologies` array for multi-tech badge display
-- [ ] **DATA-02**: Project data includes `featured` flag to spotlight hero projects
-- [ ] **DATA-03**: Project data includes `status` field (active/archived/experimental)
-- [ ] **DATA-04**: Project data includes `gridSize` hint for bento layout placement (large/medium/small)
+- [x] **DATA-01**: Project data includes `technologies` array for multi-tech badge display
+- [x] **DATA-02**: Project data includes `featured` flag to spotlight hero projects
+- [x] **DATA-03**: Project data includes `status` field (active/archived/experimental)
+- [x] **DATA-04**: Project data includes `gridSize` hint for bento layout placement (large/medium/small)
 
 ### Layout
 
-- [ ] **LAYOUT-01**: Projects page uses bento grid with asymmetric card sizes based on gridSize
-- [ ] **LAYOUT-02**: Featured project(s) display in a hero section above the category grid
-- [ ] **LAYOUT-03**: Categories separated by animated gradient dividers
-- [ ] **LAYOUT-04**: Responsive layout — bento on desktop, 2-col on tablet, 1-col stacked on mobile
+- [x] **LAYOUT-01**: Projects page uses bento grid with asymmetric card sizes based on gridSize
+- [x] **LAYOUT-02**: Featured project(s) display in a hero section above the category grid
+- [x] **LAYOUT-03**: Categories separated by animated gradient dividers
+- [x] **LAYOUT-04**: Responsive layout — bento on desktop, 2-col on tablet, 1-col stacked on mobile
 
 ### Filtering
 
@@ -80,14 +80,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 13 | Pending |
-| DATA-02 | Phase 13 | Pending |
-| DATA-03 | Phase 13 | Pending |
-| DATA-04 | Phase 13 | Pending |
-| LAYOUT-01 | Phase 13 | Pending |
-| LAYOUT-02 | Phase 13 | Pending |
-| LAYOUT-03 | Phase 13 | Pending |
-| LAYOUT-04 | Phase 13 | Pending |
+| DATA-01 | Phase 13 | Done |
+| DATA-02 | Phase 13 | Done |
+| DATA-03 | Phase 13 | Done |
+| DATA-04 | Phase 13 | Done |
+| LAYOUT-01 | Phase 13 | Done |
+| LAYOUT-02 | Phase 13 | Done |
+| LAYOUT-03 | Phase 13 | Done |
+| LAYOUT-04 | Phase 13 | Done |
 | VIS-01 | Phase 14 | Pending |
 | VIS-02 | Phase 14 | Pending |
 | VIS-04 | Phase 14 | Pending |

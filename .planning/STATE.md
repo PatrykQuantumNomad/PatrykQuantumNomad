@@ -85,4 +85,4 @@ None.
 Last session: 2026-02-13
 Stopped at: Completed 13-02-PLAN.md (bento grid layout) -- Phase 13 complete
 Resume file: None
-Next: Phase 14 (Interactive Effects) or Phase 15 (Visual Polish)
+Next: `/gsd:plan-phase 14` — Visual Design & Card Components
