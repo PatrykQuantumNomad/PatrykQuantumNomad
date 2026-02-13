@@ -98,7 +98,11 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full details.
   3. Featured project(s) appear in a visually distinct hero section above the category grid
   4. Category groups are separated by gradient dividers
   5. Layout adapts correctly: bento grid on desktop, 2-column on tablet, single-column stack on mobile
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md -- Extend Project data model with technologies, featured, status, gridSize
+- [ ] 13-02-PLAN.md -- Rebuild projects page with hero section and bento grid layout
 
 #### Phase 14: Visual Design & Card Components
 **Goal**: Project cards are visually rich with tech badges, status indicators, glassmorphism effects, and polished category headers
@@ -139,10 +143,10 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full details.
 | 10. Social Links | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Hero & Projects | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
-| 13. Data Model & Bento Grid | v1.2 | 0/TBD | Not started | - |
+| 13. Data Model & Bento Grid | v1.2 | 0/2 | Not started | - |
 | 14. Visual Design & Cards | v1.2 | 0/TBD | Not started | - |
 | 15. Filtering & Animations | v1.2 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (v1.2 milestone roadmap added)*
+*Last updated: 2026-02-13 (Phase 13 planned: 2 plans in 2 waves)*
