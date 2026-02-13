@@ -129,7 +129,11 @@ Plans:
   3. The active filter tab is visually distinct (accent-styled pill button), and the selected filter is reflected in the URL hash (e.g., #kubernetes)
   4. Cards stagger-reveal on scroll, mouse-tracking gradient glow follows cursor across card surfaces, floating orbs appear behind category sections, and CTA buttons have magnetic pull effect
   5. All animations degrade gracefully when prefers-reduced-motion is enabled (no motion, instant transitions)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md -- Category filter system with GSAP Flip transitions and URL hash sync
+- [ ] 15-02-PLAN.md -- Mouse-tracking glow, floating orbs, and magnetic CTA buttons
 
 ## Progress
 
@@ -149,8 +153,8 @@ Plans:
 | 12. Cleanup & Verify | v1.1 | 1/1 | Complete | 2026-02-12 |
 | 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
-| 15. Filtering & Animations | v1.2 | 0/TBD | Not started | - |
+| 15. Filtering & Animations | v1.2 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-13 (Phase 14 complete: 2/2 plans)*
+*Last updated: 2026-02-13 (Phase 15 planned: 2 plans)*
