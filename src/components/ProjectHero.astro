@@ -1,11 +1,33 @@
 ---
-import type { Project } from '../data/projects';
+import type { Project, Category } from '../data/projects';
 
 interface Props {
   projects: Project[];
 }
 
 const { projects } = Astro.props;
+
+// Status badge styling
+const statusStyles: Record<Project['status'], string> = {
+  active: 'bg-emerald-500/10 text-emerald-700',
+  experimental: 'bg-amber-500/10 text-amber-700',
+  archived: 'bg-gray-500/10 text-gray-500',
+};
+
+// Category glow colors for hover effect (VIS-04)
+const categoryMeta: Record<Category, { slug: string; glowColor: string }> = {
+  'AI/ML & LLM Agents':         { slug: 'ai-ml',     glowColor: 'rgba(139, 92, 246, 0.3)' },
+  'Kubernetes & Infrastructure': { slug: 'kubernetes', glowColor: 'rgba(59, 130, 246, 0.3)' },
+  'Platform & DevOps Tooling':   { slug: 'platform',  glowColor: 'rgba(16, 185, 129, 0.3)' },
+  'Security & Networking':       { slug: 'security',  glowColor: 'rgba(245, 158, 11, 0.3)' },
+};
+
+// Status dot color indicators (VIS-02)
+const statusDotStyles: Record<Project['status'], string> = {
+  active: 'bg-emerald-500',
+  experimental: 'bg-amber-500',
+  archived: 'bg-gray-400',
+};
 ---
 
 <section class="mb-12">
@@ -14,12 +36,19 @@ const { projects } = Astro.props;
     {projects.map((project) => (
       <div
         class="card-hover p-8 rounded-xl border-2 border-[var(--color-accent)]/30 bg-[var(--color-surface-alt)] flex flex-col"
+        style={`--category-glow: ${categoryMeta[project.category].glowColor}`}
+        data-category={categoryMeta[project.category].slug}
         data-card-item
         data-tilt
       >
         <div class="flex items-center gap-2 mb-3">
-          <span class="meta-mono px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+          <span class="meta-mono px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] inline-flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
             Featured
+          </span>
+          <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
+            <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
+            {project.status}
           </span>
         </div>
         <h3 class="text-2xl font-heading font-bold mb-2">{project.name}</h3>
@@ -28,7 +57,7 @@ const { projects } = Astro.props;
         </p>
         <div class="flex flex-wrap gap-2 mb-4">
           {project.technologies.map((tech) => (
-            <span class="tech-pill text-xs px-2 py-0.5 rounded-full border border-[var(--color-border)]">
+            <span class="tech-pill text-xs px-2.5 py-0.5 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] tracking-wide">
               {tech}
             </span>
           ))}
