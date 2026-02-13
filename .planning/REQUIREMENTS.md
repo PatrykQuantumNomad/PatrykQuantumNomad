@@ -80,35 +80,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| LAYOUT-01 | — | Pending |
-| LAYOUT-02 | — | Pending |
-| LAYOUT-03 | — | Pending |
-| LAYOUT-04 | — | Pending |
-| FILTER-01 | — | Pending |
-| FILTER-02 | — | Pending |
-| FILTER-03 | — | Pending |
-| FILTER-04 | — | Pending |
-| ANIM-01 | — | Pending |
-| ANIM-02 | — | Pending |
-| ANIM-03 | — | Pending |
-| ANIM-04 | — | Pending |
-| ANIM-05 | — | Pending |
-| ANIM-06 | — | Pending |
-| VIS-01 | — | Pending |
-| VIS-02 | — | Pending |
-| VIS-03 | — | Pending |
-| VIS-04 | — | Pending |
-| VIS-05 | — | Pending |
+| DATA-01 | Phase 13 | Pending |
+| DATA-02 | Phase 13 | Pending |
+| DATA-03 | Phase 13 | Pending |
+| DATA-04 | Phase 13 | Pending |
+| LAYOUT-01 | Phase 13 | Pending |
+| LAYOUT-02 | Phase 13 | Pending |
+| LAYOUT-03 | Phase 13 | Pending |
+| LAYOUT-04 | Phase 13 | Pending |
+| VIS-01 | Phase 14 | Pending |
+| VIS-02 | Phase 14 | Pending |
+| VIS-04 | Phase 14 | Pending |
+| VIS-05 | Phase 14 | Pending |
+| FILTER-01 | Phase 15 | Pending |
+| FILTER-02 | Phase 15 | Pending |
+| FILTER-03 | Phase 15 | Pending |
+| FILTER-04 | Phase 15 | Pending |
+| VIS-03 | Phase 15 | Pending |
+| ANIM-01 | Phase 15 | Pending |
+| ANIM-02 | Phase 15 | Pending |
+| ANIM-03 | Phase 15 | Pending |
+| ANIM-04 | Phase 15 | Pending |
+| ANIM-05 | Phase 15 | Pending |
+| ANIM-06 | Phase 15 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation (all 23 requirements mapped)*
