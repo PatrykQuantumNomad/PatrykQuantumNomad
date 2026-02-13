@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.2 Projects Page Redesign -- Phase 14 complete, ready for Phase 15
+**Current focus:** v1.2 Projects Page Redesign -- Phase 15 in progress (Filtering, Animations & Polish)
 
 ## Current Position
 
-Phase: 14 of 15 (Visual Design & Card Components) -- COMPLETE
-Plan: 2 of 2 in current phase (completed)
-Status: Phase 14 complete
-Last activity: 2026-02-13 -- Plan 14-01 complete (card visual enhancements)
+Phase: 15 of 15 (Filtering, Animations & Polish)
+Plan: 1 of 2 in current phase (completed)
+Status: Plan 15-01 complete, ready for Plan 15-02
+Last activity: 2026-02-13 -- Plan 15-01 complete (category filter system)
 
-Progress: [█████████████████████████] 100% (v1.2 phase 14: 2/2 plans complete)
+Progress: [████████████████████████░] 96% (v1.2 phase 15: 1/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27 (16 v1.0 + 7 v1.1 + 4 v1.2)
+- Total plans completed: 28 (16 v1.0 + 7 v1.1 + 5 v1.2)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
 
 **v1.2 Summary:**
@@ -30,6 +30,7 @@ Progress: [███████████████████████
 | 13. Data Model & Bento Grid | 02 | 4min | 2 | 3 |
 | 14. Visual Design & Cards | 01 | 3min | 2 | 3 |
 | 14. Visual Design & Cards | 02 | 2min | 1 | 1 |
+| 15. Filtering & Polish | 01 | 5min | 2 | 3 |
 
 **v1.1 Summary:**
 
@@ -63,6 +64,10 @@ v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 - [14-02] totalCount includes featured projects for accurate category totals
 - [14-02] // separator convention for monospace metadata annotations
 - [14-02] Singular/plural grammar via ternary (1 project vs N projects)
+- [15-01] Button elements for filter tabs (not anchors) to prevent Astro ClientRouter interception
+- [15-01] replaceState for hash updates (not pushState) to avoid polluting browser history
+- [15-01] vanilla-tilt destroy before Flip.getState, reinit via dynamic import in onComplete
+- [15-01] Instant toggle fallback when prefers-reduced-motion is active
 
 ### Pending Todos
 
@@ -91,6 +96,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 14-01-PLAN.md (card visual enhancements) -- Phase 14 complete
+Stopped at: Completed 15-01-PLAN.md (category filter system)
 Resume file: None
-Next: `/gsd:plan-phase 15` -- Animation & Scroll Effects (or next milestone)
+Next: Execute 15-02-PLAN.md (scroll animations and polish)

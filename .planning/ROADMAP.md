@@ -132,7 +132,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md -- Category filter system with GSAP Flip transitions and URL hash sync
+- [x] 15-01-PLAN.md -- Category filter system with GSAP Flip transitions and URL hash sync
 - [ ] 15-02-PLAN.md -- Mouse-tracking glow, floating orbs, and magnetic CTA buttons
 
 ## Progress
