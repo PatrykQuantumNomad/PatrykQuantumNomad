@@ -6,6 +6,10 @@ export interface Project {
   language: string;
   category: Category;
   fork?: boolean;
+  technologies: string[];
+  featured?: boolean;
+  status: 'active' | 'archived' | 'experimental';
+  gridSize: 'large' | 'medium' | 'small';
 }
 
 export const categories = [
@@ -26,6 +30,10 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-graph-agent',
     language: 'Python',
     category: 'AI/ML & LLM Agents',
+    technologies: ['Python', 'LangGraph', 'Neo4j'],
+    featured: true,
+    status: 'active',
+    gridSize: 'large',
   },
   {
     name: 'kps-assistant',
@@ -34,6 +42,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-assistant',
     language: 'Python',
     category: 'AI/ML & LLM Agents',
+    technologies: ['Python', 'LLM', 'FastAPI'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'kps-assistant-support',
@@ -42,6 +53,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-assistant-support',
     language: 'HCL',
     category: 'AI/ML & LLM Agents',
+    technologies: ['HCL', 'Terraform', 'Kubernetes'],
+    status: 'active',
+    gridSize: 'small',
   },
   {
     name: 'kubert-langflow',
@@ -50,6 +64,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kubert-langflow',
     language: 'Python',
     category: 'AI/ML & LLM Agents',
+    technologies: ['Python', 'Langflow', 'LLM'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'kps-langflow',
@@ -58,6 +75,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-langflow',
     language: 'HCL',
     category: 'AI/ML & LLM Agents',
+    technologies: ['HCL', 'Terraform', 'Kubernetes'],
+    status: 'active',
+    gridSize: 'small',
   },
   {
     name: 'tekstack-assistant-library',
@@ -66,6 +86,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/tekstack-assistant-library',
     language: 'Python',
     category: 'AI/ML & LLM Agents',
+    technologies: ['Python', 'LLM', 'SDK'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'financial-data-extractor',
@@ -74,6 +97,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/financial-data-extractor',
     language: 'Python',
     category: 'AI/ML & LLM Agents',
+    technologies: ['Python', 'NLP', 'Data Extraction'],
+    status: 'active',
+    gridSize: 'medium',
   },
 
   // Kubernetes & Infrastructure
@@ -84,6 +110,10 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-cluster-deployment',
     language: 'HCL',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['HCL', 'Terraform', 'Kubernetes', 'GCP'],
+    featured: true,
+    status: 'active',
+    gridSize: 'large',
   },
   {
     name: 'kps-infra-management',
@@ -92,6 +122,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-infra-management',
     language: 'HCL',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['HCL', 'Terraform', 'Terragrunt'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'kps-basic-package',
@@ -100,6 +133,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-basic-package',
     language: 'HCL',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['HCL', 'Terraform'],
+    status: 'active',
+    gridSize: 'small',
   },
   {
     name: 'kps-observability-package',
@@ -108,6 +144,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-observability-package',
     language: 'HCL',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['HCL', 'Terraform', 'Prometheus', 'Grafana'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'kps-charts',
@@ -116,6 +155,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-charts',
     language: 'Go Template',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['Go Template', 'Helm', 'Kubernetes'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'kps-images',
@@ -124,6 +166,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-images',
     language: 'TSQL',
     category: 'Kubernetes & Infrastructure',
+    technologies: ['Docker', 'CI/CD', 'Shell'],
+    status: 'active',
+    gridSize: 'small',
   },
 
   // Platform & DevOps Tooling
@@ -134,6 +179,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/kps-lobe-chat',
     language: 'TypeScript',
     category: 'Platform & DevOps Tooling',
+    technologies: ['TypeScript', 'Kubernetes', 'Docker'],
+    status: 'active',
+    gridSize: 'medium',
   },
   {
     name: 'jobs',
@@ -142,6 +190,9 @@ export const projects: Project[] = [
     url: 'https://github.com/PatrykQuantumNomad/jobs',
     language: 'Python',
     category: 'Platform & DevOps Tooling',
+    technologies: ['Python', 'Scraping', 'Automation'],
+    status: 'experimental',
+    gridSize: 'small',
   },
 
   // Security & Networking
@@ -153,5 +204,8 @@ export const projects: Project[] = [
     liveUrl: 'https://patrykquantumnomad.github.io/networking-tools/',
     language: 'Shell',
     category: 'Security & Networking',
+    technologies: ['Shell', 'Docker', 'Nmap', 'Metasploit'],
+    status: 'active',
+    gridSize: 'large',
   },
 ];
