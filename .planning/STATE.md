@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 14 of 15 (Visual Design & Card Components) -- IN PROGRESS
-Plan: 2 of 2 in current phase (plan 02 complete, plan 01 parallel)
-Status: Plan 14-02 complete
-Last activity: 2026-02-13 -- Plan 14-02 complete (category headers with project count)
+Phase: 14 of 15 (Visual Design & Card Components) -- COMPLETE
+Plan: 2 of 2 in current phase (completed)
+Status: Phase 14 complete
+Last activity: 2026-02-13 -- Plan 14-01 complete (card visual enhancements)
 
-Progress: [█████████████████████████] 50% (v1.2 phase 14: 1/2 plans complete)
+Progress: [█████████████████████████] 100% (v1.2 phase 14: 2/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26 (16 v1.0 + 7 v1.1 + 3 v1.2)
+- Total plans completed: 27 (16 v1.0 + 7 v1.1 + 4 v1.2)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
 
 **v1.2 Summary:**
@@ -28,6 +28,7 @@ Progress: [███████████████████████
 |-------|------|----------|-------|-------|
 | 13. Data Model & Bento Grid | 01 | 3min | 2 | 2 |
 | 13. Data Model & Bento Grid | 02 | 4min | 2 | 3 |
+| 14. Visual Design & Cards | 01 | 3min | 2 | 3 |
 | 14. Visual Design & Cards | 02 | 2min | 1 | 1 |
 
 **v1.1 Summary:**
@@ -56,6 +57,9 @@ v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 - [13-02] Hero section as separate data-card-group for independent GSAP stagger
 - [13-02] Status badges: active=emerald, experimental=amber, archived=gray
 - [13-02] grid-flow-dense on category grids to fill gaps from 2-col spanning cards
+- [14-01] Inline --category-glow style over data-attribute CSS selectors (simpler, fewer rules)
+- [14-01] CSS var() fallback pattern keeps non-project card glow unchanged
+- [14-01] Live badge sky-blue with pulsing dot, distinct from status badges
 - [14-02] totalCount includes featured projects for accurate category totals
 - [14-02] // separator convention for monospace metadata annotations
 - [14-02] Singular/plural grammar via ternary (1 project vs N projects)
@@ -87,6 +91,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 14-02-PLAN.md (category headers with project count)
+Stopped at: Completed 14-01-PLAN.md (card visual enhancements) -- Phase 14 complete
 Resume file: None
-Next: Awaiting 14-01 completion, then Phase 15
+Next: `/gsd:plan-phase 15` -- Animation & Scroll Effects (or next milestone)
