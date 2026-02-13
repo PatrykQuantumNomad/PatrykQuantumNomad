@@ -10,6 +10,7 @@ const featured = projects.filter(p => p.featured);
 const grouped = categories.map((category) => ({
   category,
   items: projects.filter((p) => p.category === category && !p.featured),
+  totalCount: projects.filter((p) => p.category === category).length,
 }));
 ---
 
@@ -30,14 +31,19 @@ const grouped = categories.map((category) => ({
     )}
 
     {/* Category sections with bento grid (LAYOUT-01, LAYOUT-03) */}
-    {grouped.map(({ category, items }, idx) => (
+    {grouped.map(({ category, items, totalCount }, idx) => (
       <div>
         {idx > 0 && (
           <div class="gradient-divider max-w-6xl mx-auto my-10" data-divider-reveal aria-hidden="true"></div>
         )}
-        <h2 class="text-xl sm:text-2xl font-heading font-bold mb-6" data-word-reveal>
-          {category}
-        </h2>
+        <div class="flex items-baseline gap-3 mb-6">
+          <h2 class="text-xl sm:text-2xl font-heading font-bold" data-word-reveal>
+            {category}
+          </h2>
+          <span class="meta-mono text-[var(--color-text-secondary)]">
+            // {totalCount} {totalCount === 1 ? 'project' : 'projects'}
+          </span>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 grid-flow-dense" data-card-group>
           {items.map((item) => (
             <ProjectCard project={item} />
