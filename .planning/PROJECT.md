@@ -64,7 +64,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(No active milestone — ready for v1.2 planning)
+## Current Milestone: v1.2 Projects Page Redesign
+
+**Goal:** Transform the projects page from a basic grid into a visually striking, interactive bento-grid showcase with category filtering, enhanced animations, and richer project data.
+
+**Target features:**
+- Bento grid layout with asymmetric card sizes and featured hero section
+- Interactive category filter tabs with animated transitions
+- Enhanced data model (tech stacks, status badges, featured flags)
+- Mouse-tracking glow, floating orbs, magnetic buttons, staggered reveals
+- Responsive design with reduced-motion fallbacks
 
 ### Out of Scope
 
@@ -129,4 +138,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-12 after v1.1 milestone*
+*Last updated: 2026-02-13 after v1.2 milestone start*
