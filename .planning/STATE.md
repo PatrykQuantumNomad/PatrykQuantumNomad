@@ -65,10 +65,11 @@ None.
 | 006 | SEO cross-linking for networking-tools | 2026-02-13 | 2b33c18 | [006-seo-cross-linking-for-networking-tools-p](./quick/006-seo-cross-linking-for-networking-tools-p/) |
 | 007 | Add security headers via CSP meta tag | 2026-02-13 | 94633d0 | [007-add-security-headers-via-csp-meta-tag](./quick/007-add-security-headers-via-csp-meta-tag/) |
 | 008 | Implement external SEO audit findings | 2026-02-13 | 2d6253d | [008-implement-external-seo-audit-findings](./quick/008-implement-external-seo-audit-findings/) |
+| 009 | Change featured projects to networking-tools and JobFlo | 2026-02-13 | e153249 | [009-change-which-project-is-featured](./quick/009-change-which-project-is-featured/) |
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: v1.2 milestone archived
+Stopped at: Completed quick task 009
 Resume file: None
 Next: Run `/gsd:new-milestone` to define next milestone
