@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import BlogCard from '../../../components/BlogCard.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
@@ -50,4 +51,9 @@ const { tag, posts } = Astro.props;
       <p class="text-[var(--color-text-secondary)]">No posts with this tag yet.</p>
     )}
   </section>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
+    { name: `Tag: ${tag}`, url: `${new URL(`/blog/tags/${tag}/`, Astro.site)}` },
+  ]} />
 </Layout>

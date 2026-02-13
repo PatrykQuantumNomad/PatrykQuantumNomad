@@ -34,6 +34,28 @@ const {
   tags,
   ogImage = `${new URL('/open-graph/default.png', Astro.site)}`,
 } = Astro.props;
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://patrykgolabek.dev/#website",
+  "name": "Patryk Golabek",
+  "url": "https://patrykgolabek.dev",
+  "description": "Portfolio of Patryk Golabek, Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps.",
+  "inLanguage": "en",
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://www.google.com/search?q=site:patrykgolabek.dev+{search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+};
 ---
 
 <!doctype html>
@@ -62,6 +84,8 @@ const {
       tags={tags}
       ogImage={ogImage}
     />
+
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
     <!-- RSS Autodiscovery -->
     <link rel="alternate" type="application/rss+xml" title="Patryk Golabek | Blog" href="/rss.xml" />

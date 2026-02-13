@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import BlogCard from '../../components/BlogCard.astro';
 import Pagination from '../../components/Pagination.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getCollection('blog', ({ data }) => {
@@ -133,6 +134,10 @@ const newestYear = Math.max(...allYears);
       nextUrl={page.url.next}
     />
   </section>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
+  ]} />
 </Layout>
 
 <script>

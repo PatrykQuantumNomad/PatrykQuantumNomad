@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import { projects, categories } from '../../data/projects';
 
 const grouped = categories.map((category) => ({
@@ -99,4 +100,8 @@ const grouped = categories.map((category) => ({
       </a>
     </div>
   </section>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "Projects", url: `${new URL('/projects/', Astro.site)}` },
+  ]} />
 </Layout>

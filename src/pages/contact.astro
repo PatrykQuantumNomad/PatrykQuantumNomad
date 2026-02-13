@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 ---
 
 <Layout
@@ -127,4 +128,8 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </section>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "Contact", url: `${new URL('/contact/', Astro.site)}` },
+  ]} />
 </Layout>

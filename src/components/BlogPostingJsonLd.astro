@@ -19,13 +19,16 @@ const schema: Record<string, unknown> = {
   "datePublished": publishedDate.toISOString(),
   "dateModified": (updatedDate || publishedDate).toISOString(),
   "url": url,
+  "inLanguage": "en",
   "author": {
     "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
     "name": "Patryk Golabek",
     "url": "https://patrykgolabek.dev"
   },
   "publisher": {
     "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
     "name": "Patryk Golabek",
     "url": "https://patrykgolabek.dev"
   },

@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 import avatarImg from '../assets/images/anime.jpeg';
 import familyImg from '../assets/images/meandfamily.jpg';
 import dogImg from '../assets/images/meanddog.jpg';
@@ -305,6 +306,10 @@ const highlights = [
       </div>
     </div>
   </section>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "About", url: `${new URL('/about/', Astro.site)}` },
+  ]} />
 </Layout>
 
 <script>
