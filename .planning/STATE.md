@@ -5,28 +5,29 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.2 Projects Page Redesign -- Phase 13: Data Model & Bento Grid Layout
+**Current focus:** v1.2 Projects Page Redesign -- Phase 13 complete, ready for Phase 14
 
 ## Current Position
 
-Phase: 13 of 15 (Data Model & Bento Grid Layout)
-Plan: 1 of 2 in current phase (completed)
-Status: Executing phase 13
-Last activity: 2026-02-13 -- Plan 13-01 complete (data model extension)
+Phase: 13 of 15 (Data Model & Bento Grid Layout) -- COMPLETE
+Plan: 2 of 2 in current phase (completed)
+Status: Phase 13 complete
+Last activity: 2026-02-13 -- Plan 13-02 complete (bento grid layout)
 
-Progress: [████████████░░░░░░░░░░░░░] 50% (v1.2: 1/2 plans in phase 13)
+Progress: [█████████████████████████] 100% (v1.2 phase 13: 2/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24 (16 v1.0 + 7 v1.1 + 1 v1.2)
-- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
+- Total plans completed: 25 (16 v1.0 + 7 v1.1 + 2 v1.2)
+- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3.5 min (v1.2)
 
 **v1.2 Summary:**
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 13. Data Model & Bento Grid | 01 | 3min | 2 | 2 |
+| 13. Data Model & Bento Grid | 02 | 4min | 2 | 3 |
 
 **v1.1 Summary:**
 
@@ -50,6 +51,10 @@ v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 - [13-01] 2 featured projects: kps-graph-agent (AI) + kps-cluster-deployment (K8s)
 - [13-01] networking-tools gridSize 'large' (sole Security category project)
 - [13-01] Grid distribution: 3 large, 8 medium, 5 small across 16 projects
+- [13-02] ProjectCard uses conditional rendering (div vs anchor) based on liveUrl presence
+- [13-02] Hero section as separate data-card-group for independent GSAP stagger
+- [13-02] Status badges: active=emerald, experimental=amber, archived=gray
+- [13-02] grid-flow-dense on category grids to fill gaps from 2-col spanning cards
 
 ### Pending Todos
 
@@ -78,6 +83,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 13-01-PLAN.md (data model extension)
+Stopped at: Completed 13-02-PLAN.md (bento grid layout) -- Phase 13 complete
 Resume file: None
-Next: Execute 13-02-PLAN.md (bento grid layout)
+Next: Phase 14 (Interactive Effects) or Phase 15 (Visual Polish)
