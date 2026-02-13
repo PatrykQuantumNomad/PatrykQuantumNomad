@@ -89,6 +89,9 @@ export async function GET(context: APIContext) {
     for (const project of categoryProjects) {
       lines.push(`- ${project.name} (${project.language}): ${project.description}`);
       lines.push(`  URL: ${project.url}`);
+      if (project.liveUrl) {
+        lines.push(`  Live URL: ${project.liveUrl}`);
+      }
     }
     lines.push('');
   }

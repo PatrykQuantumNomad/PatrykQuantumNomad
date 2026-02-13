@@ -26,6 +26,12 @@ export async function GET(context: APIContext) {
     '- [About](https://patrykgolabek.dev/about/): Background and experience',
     '- [Contact](https://patrykgolabek.dev/contact/): Get in touch',
     '',
+    '## Featured Projects',
+    '',
+    '- networking-tools: Pentesting learning lab with 17 security tools (Nmap, Metasploit, SQLMap, etc.), 28 use-case scripts, and Docker-based vulnerable targets',
+    '  Live: https://patrykquantumnomad.github.io/networking-tools/',
+    '  Source: https://github.com/PatrykQuantumNomad/networking-tools',
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
