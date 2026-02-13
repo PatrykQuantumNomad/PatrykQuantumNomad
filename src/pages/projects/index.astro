@@ -250,6 +250,22 @@ const grouped = categories.map((category) => ({
       }
     }
 
-    document.addEventListener('astro:page-load', initProjectFilter);
+    function initCardGlow() {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+      if (REDUCED_MOTION) return;
+
+      document.querySelectorAll<HTMLElement>('[data-card-item]').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mouse-x', String(e.clientX - rect.left));
+          card.style.setProperty('--mouse-y', String(e.clientY - rect.top));
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', () => {
+      initProjectFilter();
+      initCardGlow();
+    });
   </script>
 </Layout>

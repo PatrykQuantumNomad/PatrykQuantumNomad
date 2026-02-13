@@ -199,6 +199,7 @@ button:focus-visible,
 
 /* ─── Card Hover Depth + Glassmorphism ─────────────────────────────────── */
 .card-hover {
+  position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -210,6 +211,39 @@ button:focus-visible,
     0 12px 40px var(--category-glow, var(--color-accent-glow)),
     0 0 60px var(--category-glow, var(--color-glow-neon));
   border-color: var(--color-accent);
+}
+
+/* ─── Mouse-Tracking Card Glow ─────────────────────────────────────────── */
+[data-card-item]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    300px circle at calc(var(--mouse-x, -300) * 1px) calc(var(--mouse-y, -300) * 1px),
+    var(--category-glow, var(--color-accent-glow)),
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+[data-card-item]:hover::after {
+  opacity: 0.5;
+}
+
+/* Ensure card content sits above glow overlay */
+[data-card-item] > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media (pointer: coarse) {
+  [data-card-item]::after {
+    display: none;
+  }
 }
 
 /* ─── Filter Tab Pill Buttons ─────────────────────────────────────────── */
@@ -569,5 +603,8 @@ body::before {
   }
   .animate-pulse {
     animation: none;
+  }
+  [data-card-item]::after {
+    transition: none;
   }
 }
