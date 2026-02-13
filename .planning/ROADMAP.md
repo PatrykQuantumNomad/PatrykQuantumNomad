@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-11)
 - ✅ **v1.1 Content Refresh** - Phases 8-12 (shipped 2026-02-12)
-- **v1.2 Projects Page Redesign** - Phases 13-15 (shipped 2026-02-13)
+- ✅ **v1.2 Projects Page Redesign** - Phases 13-15 (shipped 2026-02-13)
 
 ## Phases
 
