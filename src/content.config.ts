@@ -10,6 +10,7 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    coverImage: z.string().optional(),
     externalUrl: z.string().url().optional(),
     source: z.enum(['Kubert AI', 'Translucent Computing']).optional(),
   }),
