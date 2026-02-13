@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.2 Projects Page Redesign -- Phase 15 in progress (Filtering, Animations & Polish)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 15 of 15 (Filtering, Animations & Polish)
-Plan: 2 of 2 in current phase (completed)
-Status: Phase 15 COMPLETE -- v1.2 Projects Page Redesign milestone COMPLETE
-Last activity: 2026-02-13 -- Plan 15-02 complete (interactive animations)
+Phase: 15 of 15 (all phases complete)
+Plan: N/A
+Status: v1.2 milestone COMPLETE — ready for next milestone
+Last activity: 2026-02-13 — v1.2 Projects Page Redesign milestone archived
 
-Progress: [█████████████████████████] 100% (v1.2 complete: all 15 phases done)
+Progress: [█████████████████████████] 100% (3 milestones shipped: v1.0 + v1.1 + v1.2)
 
 ## Performance Metrics
 
@@ -22,56 +22,23 @@ Progress: [███████████████████████
 - Total plans completed: 29 (16 v1.0 + 7 v1.1 + 6 v1.2)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
 
-**v1.2 Summary:**
+**Cumulative Stats:**
 
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 13. Data Model & Bento Grid | 01 | 3min | 2 | 2 |
-| 13. Data Model & Bento Grid | 02 | 4min | 2 | 3 |
-| 14. Visual Design & Cards | 01 | 3min | 2 | 3 |
-| 14. Visual Design & Cards | 02 | 2min | 1 | 1 |
-| 15. Filtering & Polish | 01 | 5min | 2 | 3 |
-| 15. Filtering & Polish | 02 | 3min | 2 | 4 |
-
-**v1.1 Summary:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 8. Schema & Config | 2/2 | 6min | 3min |
-| 9. External Blog | 2/2 | 4min | 2min |
-| 10. Social Links | 1/1 | 3min | 3min |
-| 11. Hero & Projects | 1/1 | 3min | 3min |
-| 12. Cleanup & Verify | 1/1 | 2min | 2min |
+| Milestone | Phases | Plans | Requirements | Date |
+|-----------|--------|-------|--------------|------|
+| v1.0 MVP | 1-7 | 15 | 36 | 2026-02-11 |
+| v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
+| v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
+| **Total** | **15** | **29** | **77** | |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
+v1.0 decisions archived in milestones/v1.0-ROADMAP.md.
 v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
-
-**v1.2 decisions:**
-- [13-01] Kept language field for backward compat; technologies array is the richer display field
-- [13-01] 2 featured projects: kps-graph-agent (AI) + kps-cluster-deployment (K8s)
-- [13-01] networking-tools gridSize 'large' (sole Security category project)
-- [13-01] Grid distribution: 3 large, 8 medium, 5 small across 16 projects
-- [13-02] ProjectCard uses conditional rendering (div vs anchor) based on liveUrl presence
-- [13-02] Hero section as separate data-card-group for independent GSAP stagger
-- [13-02] Status badges: active=emerald, experimental=amber, archived=gray
-- [13-02] grid-flow-dense on category grids to fill gaps from 2-col spanning cards
-- [14-01] Inline --category-glow style over data-attribute CSS selectors (simpler, fewer rules)
-- [14-01] CSS var() fallback pattern keeps non-project card glow unchanged
-- [14-01] Live badge sky-blue with pulsing dot, distinct from status badges
-- [14-02] totalCount includes featured projects for accurate category totals
-- [14-02] // separator convention for monospace metadata annotations
-- [14-02] Singular/plural grammar via ternary (1 project vs N projects)
-- [15-01] Button elements for filter tabs (not anchors) to prevent Astro ClientRouter interception
-- [15-01] replaceState for hash updates (not pushState) to avoid polluting browser history
-- [15-01] vanilla-tilt destroy before Flip.getState, reinit via dynamic import in onComplete
-- [15-01] Instant toggle fallback when prefers-reduced-motion is active
-- [15-02] Added position: relative to .card-hover (required for ::after glow overlay)
-- [15-02] Glow uses var(--category-glow) with accent-glow fallback, matching card hover system
-- [15-02] Raw rgba() values for orb colors (independent opacity tuning per orb)
+v1.2 decisions archived in milestones/v1.2-ROADMAP.md.
 
 ### Pending Todos
 
@@ -80,9 +47,11 @@ None.
 ### Blockers/Concerns
 
 - [Infra]: DNS configuration for patrykgolabek.dev is a manual step outside automation scope
-- [Tech Debt]: No shared getBlogPostUrl helper -- URL resolution duplicated in 3 files
+- [Tech Debt]: No shared getBlogPostUrl helper — URL resolution duplicated in 3 files
 - [Tech Debt]: Social links hardcoded across 5 component files instead of centralized config
-- [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02, v1.2)
+- [Tech Debt]: Category colors defined in 3 places (ProjectCard, ProjectHero, FloatingOrbs)
+- [Tech Debt]: Filter system inline script (~80 lines) in projects/index.astro
+- [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
 
 ### Quick Tasks Completed
 
@@ -100,6 +69,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 15-02-PLAN.md (interactive animations) -- Phase 15 COMPLETE, v1.2 milestone COMPLETE
+Stopped at: v1.2 milestone archived
 Resume file: None
-Next: All v1.2 plans complete. Ready for v1.3 planning or deployment.
+Next: Run `/gsd:new-milestone` to define next milestone

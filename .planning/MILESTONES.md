@@ -1,5 +1,31 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.2 Projects Page Redesign (Shipped: 2026-02-13)
+
+**Delivered:** Transformed the projects page into a visually striking, interactive bento-grid showcase with GSAP Flip category filtering, mouse-tracking glow, floating orbs, magnetic buttons, and full accessibility fallbacks
+
+**Phases completed:** 13-15 (6 plans total)
+
+**Key accomplishments:**
+- Extended project data model with technologies, featured, status, and gridSize fields across all 16 projects
+- Built asymmetric bento grid layout with featured hero section and responsive 4/2/1 column breakpoints
+- Added category-tinted glassmorphism with styled tech pills, status badges, and Featured/Live indicators
+- Implemented GSAP Flip-animated category filter tabs with URL hash persistence
+- Created mouse-tracking gradient glow, floating parallax orbs, and magnetic CTA buttons
+- Full reduced-motion and touch device accessibility fallbacks on all animations
+
+**Stats:**
+- 8 source files created/modified (+659 / -110 lines)
+- 5,874 lines in src/ (Astro, TypeScript, CSS, MDX, Markdown)
+- 3 phases, 6 plans, 11 tasks
+- 4 days from start to ship (2026-02-10 → 2026-02-13)
+
+**Git range:** `feat(13-01)` → `feat(15-02)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.1 Content Refresh (Shipped: 2026-02-12)
 
 **Delivered:** Updated personal info, integrated 10 external blog posts from Kubert AI and Translucent Computing, refined hero messaging to craft-and-precision tone, curated projects, and verified all build outputs
