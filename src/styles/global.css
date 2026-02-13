@@ -206,7 +206,9 @@ button:focus-visible,
 }
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px var(--color-accent-glow), 0 0 60px var(--color-glow-neon);
+  box-shadow:
+    0 12px 40px var(--category-glow, var(--color-accent-glow)),
+    0 0 60px var(--category-glow, var(--color-glow-neon));
   border-color: var(--color-accent);
 }
 
@@ -546,5 +548,8 @@ body::before {
   [data-blog-hero-stats] {
     opacity: 1 !important;
     transform: none !important;
+  }
+  .animate-pulse {
+    animation: none;
   }
 }
