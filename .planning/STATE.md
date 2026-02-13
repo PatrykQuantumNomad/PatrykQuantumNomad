@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.2 Projects Page Redesign -- Phase 13 complete, ready for Phase 14
+**Current focus:** v1.2 Projects Page Redesign -- Phase 14 complete, ready for Phase 15
 
 ## Current Position
 
-Phase: 13 of 15 (Data Model & Bento Grid Layout) -- COMPLETE
-Plan: 2 of 2 in current phase (completed)
-Status: Phase 13 complete
-Last activity: 2026-02-13 -- Plan 13-02 complete (bento grid layout)
+Phase: 14 of 15 (Visual Design & Card Components) -- IN PROGRESS
+Plan: 2 of 2 in current phase (plan 02 complete, plan 01 parallel)
+Status: Plan 14-02 complete
+Last activity: 2026-02-13 -- Plan 14-02 complete (category headers with project count)
 
-Progress: [█████████████████████████] 100% (v1.2 phase 13: 2/2 plans complete)
+Progress: [█████████████████████████] 50% (v1.2 phase 14: 1/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25 (16 v1.0 + 7 v1.1 + 2 v1.2)
-- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3.5 min (v1.2)
+- Total plans completed: 26 (16 v1.0 + 7 v1.1 + 3 v1.2)
+- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2)
 
 **v1.2 Summary:**
 
@@ -28,6 +28,7 @@ Progress: [███████████████████████
 |-------|------|----------|-------|-------|
 | 13. Data Model & Bento Grid | 01 | 3min | 2 | 2 |
 | 13. Data Model & Bento Grid | 02 | 4min | 2 | 3 |
+| 14. Visual Design & Cards | 02 | 2min | 1 | 1 |
 
 **v1.1 Summary:**
 
@@ -55,6 +56,9 @@ v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
 - [13-02] Hero section as separate data-card-group for independent GSAP stagger
 - [13-02] Status badges: active=emerald, experimental=amber, archived=gray
 - [13-02] grid-flow-dense on category grids to fill gaps from 2-col spanning cards
+- [14-02] totalCount includes featured projects for accurate category totals
+- [14-02] // separator convention for monospace metadata annotations
+- [14-02] Singular/plural grammar via ternary (1 project vs N projects)
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 13-02-PLAN.md (bento grid layout) -- Phase 13 complete
+Stopped at: Completed 14-02-PLAN.md (category headers with project count)
 Resume file: None
-Next: `/gsd:plan-phase 14` — Visual Design & Card Components
+Next: Awaiting 14-01 completion, then Phase 15
