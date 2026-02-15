@@ -175,7 +175,7 @@ export const projects: Project[] = [
     description:
       'Full-stack financial statement extraction — FastAPI backend, Next.js 15 frontend, and LLM-powered PDF parsing targeting European companies',
     url: 'https://github.com/PatrykQuantumNomad/financial-data-extractor',
-    liveUrl: 'https://patrykquantumnomad.github.io/financial-data-extractor/',
+    liveUrl: 'https://financial-data-extractor.patrykgolabek.dev',
     language: 'Python',
     category: 'Open Source Tools',
     technologies: ['Python', 'FastAPI', 'Next.js', 'LLM', 'PostgreSQL'],

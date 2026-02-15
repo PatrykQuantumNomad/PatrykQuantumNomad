@@ -36,7 +36,7 @@ export async function GET(context: APIContext) {
     '  Live: https://networking-tools.patrykgolabek.dev/',
     '  Source: https://github.com/PatrykQuantumNomad/networking-tools',
     '- financial-data-extractor: Full-stack financial statement extraction with FastAPI, Next.js 15, and LLM-powered PDF parsing',
-    '  Live: https://patrykquantumnomad.github.io/financial-data-extractor/',
+    '  Live: https://financial-data-extractor.patrykgolabek.dev',
     '  Source: https://github.com/PatrykQuantumNomad/financial-data-extractor',
     '- JobFlow: Multi-platform job scraper with scoring, human-in-the-loop applications, and 544 tests',
     '  Live: https://jobflow.patrykgolabek.dev',
