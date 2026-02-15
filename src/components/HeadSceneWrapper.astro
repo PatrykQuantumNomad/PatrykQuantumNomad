@@ -1,14 +1,14 @@
 ---
 import HeadScene from './HeadScene.tsx';
 import { Image } from 'astro:assets';
-import heroImg from '../assets/images/meandbatman.jpg';
+import heroImg from '../assets/images/anime.jpeg';
 ---
 
 <div class="head-scene-wrapper" id="head-scene-wrapper">
   <!-- Fallback image in normal flow — establishes container size -->
   <Image
     src={heroImg}
-    alt="Patryk Golabek posing with Batman"
+    alt="Patryk Golabek anime portrait"
     width={480}
     height={600}
     class="head-fallback-img"
@@ -24,13 +24,21 @@ import heroImg from '../assets/images/meandbatman.jpg';
 <style>
   .head-scene-wrapper {
     position: relative;
+    min-height: 320px;
+  }
+
+  @media (max-width: 639px) {
+    .head-scene-wrapper {
+      min-height: 360px;
+    }
   }
 
   .head-fallback-img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
+    object-position: center top;
     opacity: 0;
   }
 

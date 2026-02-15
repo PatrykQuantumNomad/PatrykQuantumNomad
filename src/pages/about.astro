@@ -66,13 +66,16 @@ const highlights = [
   title="About — Patryk Golabek | Cloud-Native Software Architect"
   description="About Patryk Golabek — Cloud-Native Software Architect with 17+ years building Kubernetes platforms, AI/ML systems, and developer tools. Based in Ontario, Canada."
 >
-  <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-16">
     <!-- Introduction -->
-    <div class="flex flex-col sm:flex-row items-start gap-8 mb-16" data-reveal>
-      <div class="shrink-0 w-60">
+    <div class="about-intro flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 mb-16" data-reveal>
+      <div class="about-intro-model shrink-0 w-full max-w-[16rem] sm:w-72 sm:max-w-none mx-auto sm:mx-0">
         <HeadSceneWrapper />
+        <p class="model-click-hint" id="model-click-hint">
+          <span class="hint-pointer">&#9756;</span> click or tap the 3D head
+        </p>
       </div>
-      <div>
+      <div class="about-intro-copy">
         <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-6" data-word-reveal>About Me</h1>
         <div class="space-y-4 text-[var(--color-text-secondary)] leading-relaxed">
           <p>
@@ -328,7 +331,64 @@ const highlights = [
   ]} />
 </Layout>
 
+<style>
+  /* ── Intro section layering ─────────────────────────────── */
+  .about-intro {
+    position: relative;
+  }
+
+  .about-intro-model,
+  .about-intro-copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Mobile: center the text block ─────────────────────── */
+  @media (max-width: 639px) {
+    .about-intro-copy {
+      text-align: center;
+    }
+  }
+
+  /* ── Model click hint ───────────────────────────────────── */
+  .model-click-hint {
+    text-align: center;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: rgba(140, 150, 170, 0.75);
+    margin-top: 0.25rem;
+    transition: opacity 0.5s ease;
+  }
+
+  .hint-pointer {
+    display: inline-block;
+    animation: hintPulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(-3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hint-pointer { animation: none; }
+    .model-click-hint { display: none; }
+  }
+</style>
+
 <script>
+  // Hide model click hint after first interaction
+  function initModelHint() {
+    document.getElementById('head-scene-wrapper')
+      ?.addEventListener('click', () => {
+        const hint = document.getElementById('model-click-hint');
+        if (hint) hint.style.opacity = '0';
+      }, { once: true });
+  }
+
+  document.addEventListener('astro:page-load', initModelHint);
+
   // Animate highlight items timeline when they scroll into view
   function initHighlightTimeline() {
     const items = document.querySelectorAll('.highlight-item');
