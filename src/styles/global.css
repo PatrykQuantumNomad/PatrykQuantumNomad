@@ -630,3 +630,8 @@ body::before {
     transition: none;
   }
 }
+
+/* ─── 3D Head Scene ────────────────────────────────────────────────────── */
+.head-fallback {
+  transition: opacity 0.6s ease-out;
+}

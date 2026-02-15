@@ -1,0 +1,69 @@
+---
+import HeadScene from './HeadScene.tsx';
+import { Image } from 'astro:assets';
+import heroImg from '../assets/images/meandbatman.jpg';
+---
+
+<div class="head-scene-wrapper" id="head-scene-wrapper">
+  <!-- Fallback image in normal flow — establishes container size -->
+  <Image
+    src={heroImg}
+    alt="Patryk Golabek posing with Batman"
+    width={480}
+    height={600}
+    class="head-fallback-img"
+    id="head-fallback"
+    loading="eager"
+  />
+  <!-- R3F canvas overlays on top — lazy hydration when visible -->
+  <div class="head-canvas" id="head-canvas-mount">
+    <HeadScene client:visible />
+  </div>
+</div>
+
+<style>
+  .head-scene-wrapper {
+    position: relative;
+  }
+
+  .head-fallback-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    opacity: 0;
+  }
+
+  .head-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* Reduced motion: hide canvas, show fallback */
+  @media (prefers-reduced-motion: reduce) {
+    .head-canvas {
+      display: none;
+    }
+    .head-fallback-img {
+      opacity: 1;
+      border-radius: 1rem;
+    }
+  }
+</style>
+
+<script is:inline>
+(function() {
+  // Skip 3D on reduced motion or low-end devices
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var cores = navigator.hardwareConcurrency || 2;
+  var memory = navigator.deviceMemory || 4;
+  if (cores <= 2 && memory <= 2) {
+    var mount = document.getElementById('head-canvas-mount');
+    if (mount) mount.style.display = 'none';
+    var fallback = document.getElementById('head-fallback');
+    if (fallback) { fallback.style.opacity = '1'; fallback.style.borderRadius = '1rem'; }
+  }
+})();
+</script>

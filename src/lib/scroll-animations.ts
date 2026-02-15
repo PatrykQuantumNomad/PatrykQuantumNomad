@@ -66,6 +66,20 @@ export function initScrollAnimations() {
     });
   });
 
+  // Hero scroll progress for 3D head scene
+  const heroWrapper = document.querySelector('[transition\\:persist="particle-hero"]');
+  if (heroWrapper) {
+    ScrollTrigger.create({
+      trigger: heroWrapper,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      onUpdate: (self) => {
+        (window as any).__heroScrollProgress = self.progress;
+      },
+    });
+  }
+
   // Animated section dividers — draw from left to right
   const dividers = gsap.utils.toArray<HTMLElement>('[data-divider-reveal]');
   dividers.forEach((el) => {
