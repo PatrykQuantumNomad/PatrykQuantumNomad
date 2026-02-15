@@ -1,4 +1,5 @@
 ---
+import ProjectIllustration from './ProjectIllustration.astro';
 import type { Project, Category } from '../data/projects';
 
 interface Props {
@@ -7,10 +8,6 @@ interface Props {
 
 const { project } = Astro.props;
 
-// Uniform card sizing — all cards span 1 column
-const spanClass = 'col-span-1';
-const paddingClass = 'p-5';
-
 // Status badge styling
 const statusStyles: Record<Project['status'], string> = {
   active: 'bg-emerald-500/10 text-emerald-700',
@@ -18,14 +15,28 @@ const statusStyles: Record<Project['status'], string> = {
   archived: 'bg-gray-500/10 text-gray-500',
 };
 
-// Category glow colors for hover effect (VIS-04)
-const categoryMeta: Record<Category, { slug: string; glowColor: string }> = {
-  'Kubert Kubernetes Platform': { slug: 'kubert',      glowColor: 'rgba(59, 130, 246, 0.3)' },
-  'AI & Intelligent Agents':    { slug: 'ai-agents',   glowColor: 'rgba(139, 92, 246, 0.3)' },
-  'Open Source Tools':           { slug: 'open-source', glowColor: 'rgba(16, 185, 129, 0.3)' },
+// Category visual config
+const categoryMeta: Record<Category, { slug: string; glowColor: string; patternColor: string; iconColor: string }> = {
+  'Kubert Kubernetes Platform': {
+    slug: 'kubert',
+    glowColor: 'rgba(59, 130, 246, 0.3)',
+    patternColor: '#3b82f6',
+    iconColor: '#2563eb',
+  },
+  'AI & Intelligent Agents': {
+    slug: 'ai-agents',
+    glowColor: 'rgba(139, 92, 246, 0.3)',
+    patternColor: '#8b5cf6',
+    iconColor: '#7c3aed',
+  },
+  'Open Source Tools': {
+    slug: 'open-source',
+    glowColor: 'rgba(16, 185, 129, 0.3)',
+    patternColor: '#10b981',
+    iconColor: '#059669',
+  },
 };
 
-// Status dot color indicators (VIS-02)
 const statusDotStyles: Record<Project['status'], string> = {
   active: 'bg-emerald-500',
   experimental: 'bg-amber-500',
@@ -33,80 +44,96 @@ const statusDotStyles: Record<Project['status'], string> = {
 };
 
 const hasLiveUrl = !!project.liveUrl;
+const meta = categoryMeta[project.category];
 ---
 
 {hasLiveUrl ? (
   <div
-    class:list={[
-      'card-hover rounded-lg border border-[var(--color-border)] flex flex-col',
-      paddingClass,
-      spanClass,
-    ]}
-    style={`--category-glow: ${categoryMeta[project.category].glowColor}`}
-    data-category={categoryMeta[project.category].slug}
+    class="card-hover rounded-xl border border-[var(--color-border)] flex flex-col overflow-hidden col-span-1"
+    style={`--category-glow: ${meta.glowColor}`}
+    data-category={meta.slug}
     data-card-item
     data-tilt
   >
-    <h3 class="font-heading font-bold text-lg">
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="hover:text-[var(--color-accent)] transition-colors"
-      >
-        {project.name}
-      </a>
-    </h3>
-    <div class="flex flex-wrap gap-2 mt-2">
-      {project.technologies.map((tech) => (
-        <span class="tech-pill text-xs px-2.5 py-0.5 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] tracking-wide">
-          {tech}
+    {/* Visual header with project-specific SVG illustration */}
+    <div class="relative overflow-hidden shrink-0 h-28" data-card-pattern={meta.slug}>
+      <ProjectIllustration name={project.name} category={project.category} />
+
+      {/* Language badge */}
+      <div class="absolute top-3 left-3 z-10">
+        <span class="meta-mono px-2 py-0.5 rounded text-[0.65rem]" style={`background: ${meta.patternColor}18; color: ${meta.iconColor}; backdrop-filter: blur(8px);`}>
+          {project.language}
         </span>
-      ))}
-    </div>
-    <p class="text-sm text-[var(--color-text-secondary)] mt-2 flex-1">
-      {project.description}
-    </p>
-    <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-[var(--color-border)]">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
-          <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
-          {project.status}
-        </span>
-        {project.liveUrl && (
-          <span class="meta-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 inline-flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
-            Live
-          </span>
-        )}
       </div>
-      <div class="flex items-center gap-2">
+
+      {/* Fork badge */}
+      {project.fork && (
+        <div class="absolute top-3 right-3 z-10">
+          <span class="meta-mono px-2 py-0.5 rounded text-[0.65rem] bg-amber-500/10 text-amber-700" style="backdrop-filter: blur(8px);">
+            fork
+          </span>
+        </div>
+      )}
+    </div>
+
+    {/* Card body */}
+    <div class="flex flex-col flex-1 p-4">
+      <h3 class="font-heading font-bold text-lg">
         <a
           href={project.url}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
-          data-magnetic
+          class="hover:text-[var(--color-accent)] transition-colors"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-          </svg>
-          Source
+          {project.name}
         </a>
-        <a
-          href={project.liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
-          data-magnetic
-        >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
-          Live Site
-        </a>
+      </h3>
+      <div class="flex flex-wrap gap-1.5 mt-2">
+        {project.technologies.map((tech) => (
+          <span class="tech-pill text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] tracking-wide">
+            {tech}
+          </span>
+        ))}
+      </div>
+      <p class="text-sm text-[var(--color-text-secondary)] mt-2 flex-1 line-clamp-3">
+        {project.description}
+      </p>
+      <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-[var(--color-border)]">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
+            <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
+            {project.status}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+            data-magnetic
+          >
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            Source
+          </a>
+          <a
+            href={project.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="live-site-btn inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition-all shadow-sm hover:shadow-md"
+            data-magnetic
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse"></span>
+            Live Site
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -115,46 +142,64 @@ const hasLiveUrl = !!project.liveUrl;
     href={project.url}
     target="_blank"
     rel="noopener noreferrer"
-    class:list={[
-      'group card-hover rounded-lg border border-[var(--color-border)] flex flex-col',
-      paddingClass,
-      spanClass,
-    ]}
-    style={`--category-glow: ${categoryMeta[project.category].glowColor}`}
-    data-category={categoryMeta[project.category].slug}
+    class="group card-hover rounded-xl border border-[var(--color-border)] flex flex-col overflow-hidden col-span-1"
+    style={`--category-glow: ${meta.glowColor}`}
+    data-category={meta.slug}
     data-card-item
     data-tilt
   >
-    <div class="flex items-start justify-between gap-2">
-      <h3 class="font-heading font-bold text-lg group-hover:text-[var(--color-accent)] transition-colors">
-        {project.name}
-      </h3>
-      <svg
-        class="w-4 h-4 mt-1 shrink-0 text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M7 17L17 7" />
-        <path d="M7 7h10v10" />
-      </svg>
-    </div>
-    <div class="flex flex-wrap gap-2 mt-2">
-      {project.technologies.map((tech) => (
-        <span class="tech-pill text-xs px-2.5 py-0.5 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] tracking-wide">
-          {tech}
+    {/* Visual header with project-specific SVG illustration */}
+    <div class="relative overflow-hidden shrink-0 h-28" data-card-pattern={meta.slug}>
+      <ProjectIllustration name={project.name} category={project.category} />
+
+      {/* Language badge */}
+      <div class="absolute top-3 left-3 z-10">
+        <span class="meta-mono px-2 py-0.5 rounded text-[0.65rem]" style={`background: ${meta.patternColor}18; color: ${meta.iconColor}; backdrop-filter: blur(8px);`}>
+          {project.language}
         </span>
-      ))}
+      </div>
+
+      {/* Fork badge */}
+      {project.fork && (
+        <div class="absolute top-3 right-3 z-10">
+          <span class="meta-mono px-2 py-0.5 rounded text-[0.65rem] bg-amber-500/10 text-amber-700" style="backdrop-filter: blur(8px);">
+            fork
+          </span>
+        </div>
+      )}
     </div>
-    <p class="text-sm text-[var(--color-text-secondary)] mt-2 flex-1">
-      {project.description}
-    </p>
-    <div class="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-border)]">
-      <div class="flex items-center gap-2 flex-wrap">
+
+    {/* Card body */}
+    <div class="flex flex-col flex-1 p-4">
+      <div class="flex items-start justify-between gap-2">
+        <h3 class="font-heading font-bold text-lg group-hover:text-[var(--color-accent)] transition-colors">
+          {project.name}
+        </h3>
+        <svg
+          class="w-4 h-4 mt-1 shrink-0 text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7 17L17 7" />
+          <path d="M7 7h10v10" />
+        </svg>
+      </div>
+      <div class="flex flex-wrap gap-1.5 mt-2">
+        {project.technologies.map((tech) => (
+          <span class="tech-pill text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] tracking-wide">
+            {tech}
+          </span>
+        ))}
+      </div>
+      <p class="text-sm text-[var(--color-text-secondary)] mt-2 flex-1 line-clamp-3">
+        {project.description}
+      </p>
+      <div class="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-border)]">
         <span class:list={['meta-mono px-2 py-0.5 rounded-full inline-flex items-center gap-1', statusStyles[project.status]]}>
           <span class:list={['w-1.5 h-1.5 rounded-full', statusDotStyles[project.status]]}></span>
           {project.status}

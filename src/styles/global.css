@@ -246,6 +246,28 @@ button:focus-visible,
   }
 }
 
+/* ─── Live Site Button Glow ──────────────────────────────────────────── */
+.live-site-btn {
+  position: relative;
+  overflow: hidden;
+}
+.live-site-btn:hover {
+  box-shadow: 0 4px 16px var(--color-accent-glow);
+}
+.live-site-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+.live-site-btn:hover::after {
+  left: 120%;
+}
+
 /* ─── Filter Tab Pill Buttons ─────────────────────────────────────────── */
 .filter-tab {
   cursor: pointer;
