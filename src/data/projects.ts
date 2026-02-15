@@ -187,7 +187,7 @@ export const projects: Project[] = [
     description:
       'Multi-platform job scraper with intelligent scoring, human-in-the-loop applications, and FastAPI dashboard (544 tests)',
     url: 'https://github.com/PatrykQuantumNomad/jobs',
-    liveUrl: 'https://patrykquantumnomad.github.io/jobs/',
+    liveUrl: 'https://jobflow.patrykgolabek.dev',
     language: 'Python',
     category: 'Open Source Tools',
     technologies: ['Python', 'FastAPI', 'Playwright', 'SQLite'],
@@ -199,7 +199,7 @@ export const projects: Project[] = [
     description:
       'Pentesting learning lab — 17 security tools (Nmap, Metasploit, SQLMap), 28 scripts, and Docker-based targets (DVWA, Juice Shop, WebGoat)',
     url: 'https://github.com/PatrykQuantumNomad/networking-tools',
-    liveUrl: 'https://patrykquantumnomad.github.io/networking-tools/',
+    liveUrl: 'https://networking-tools.patrykgolabek.dev/',
     language: 'Shell',
     category: 'Open Source Tools',
     technologies: ['Shell', 'Docker', 'Nmap', 'Metasploit', 'Security'],
