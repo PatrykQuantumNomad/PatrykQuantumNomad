@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import { remarkReadingTime } from './remark-reading-time.mjs';
+import indexNow from './src/integrations/indexnow';
 
 export default defineConfig({
   site: 'https://patrykgolabek.dev',
@@ -29,6 +30,7 @@ export default defineConfig({
         'https://webinar-slack-bot.patrykgolabek.dev/',
       ],
     }),
+    indexNow(),
   ],
   markdown: {
     remarkPlugins: [remarkReadingTime],
