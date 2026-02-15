@@ -168,6 +168,18 @@ export const projects: Project[] = [
     status: 'active',
     gridSize: 'medium',
   },
+  {
+    name: 'kubert-assistant-lite',
+    description:
+      'Open-source DevOps tool combining local Kubernetes cluster deployment via kind with an AI-powered Kubectl Agent for natural-language cluster management',
+    url: 'https://github.com/TranslucentComputing/kubert-assistant-lite',
+    liveUrl: 'https://kubert-assistant-lite.patrykgolabek.dev/',
+    language: 'Shell',
+    category: 'AI & Intelligent Agents',
+    technologies: ['Shell', 'Kubernetes', 'Docker', 'Helm', 'BATS'],
+    status: 'active',
+    gridSize: 'medium',
+  },
 
   // Open Source Tools
   {
@@ -205,5 +217,17 @@ export const projects: Project[] = [
     technologies: ['Shell', 'Docker', 'Nmap', 'Metasploit', 'Security'],
     status: 'active',
     gridSize: 'large',
+  },
+  {
+    name: 'webinar-slack-bot',
+    description:
+      'Production-ready Slack bot on Kubernetes — Slack Bolt + FastAPI with DevSpace orchestration, ExternalDNS, Cert-Manager, Prometheus observability, and Redis ETL',
+    url: 'https://github.com/TranslucentComputing/webinar-slack-bot',
+    liveUrl: 'https://webinar-slack-bot.patrykgolabek.dev/',
+    language: 'Python',
+    category: 'Open Source Tools',
+    technologies: ['Python', 'FastAPI', 'Slack Bolt', 'Kubernetes', 'DevSpace'],
+    status: 'active',
+    gridSize: 'medium',
   },
 ];

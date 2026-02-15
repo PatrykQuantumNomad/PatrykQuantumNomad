@@ -20,7 +20,15 @@ export default defineConfig({
     }),
     mdx(),
     tailwind(),
-    sitemap(),
+    sitemap({
+      customPages: [
+        'https://networking-tools.patrykgolabek.dev/',
+        'https://financial-data-extractor.patrykgolabek.dev/',
+        'https://jobflow.patrykgolabek.dev/',
+        'https://kubert-assistant-lite.patrykgolabek.dev/',
+        'https://webinar-slack-bot.patrykgolabek.dev/',
+      ],
+    }),
   ],
   markdown: {
     remarkPlugins: [remarkReadingTime],
