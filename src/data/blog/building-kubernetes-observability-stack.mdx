@@ -18,7 +18,7 @@ import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
 <Lede>Reviving an older blog post.</Lede>
 
 
-Kubernetes provides container orchestration, self-healing, and automatic scaling by default. However, it does not offer comprehensive visibility into application behavior at runtime. While a metrics API and container logs are available, integrating these into a unified observability framework—one that links latency spikes to specific traces and explanatory log lines—requires a carefully assembled stack of interoperable tools.
+Kubernetes provides container orchestration, self-healing, and automatic scaling by default. However, it does not offer comprehensive visibility into application behavior at runtime. While a metrics API and container logs are available, integrating these into a unified observability framework, one that links latency spikes to specific traces and explanatory log lines, requires a carefully assembled stack of interoperable tools.
 
 This gap is one that every team operating production Kubernetes environments must address. Although Kubernetes offers a robust platform for deploying and managing containers, it is not a traditional Platform-as-a-Service and does not include a pre-configured environment for monitoring, debugging, or application insight. Teams must assemble this environment independently, and these decisions directly impact the speed and effectiveness of diagnosing operational issues.
 
@@ -26,7 +26,7 @@ This post walks through one proven approach to building that observability layer
 
 ## Four Pillars, Not Three
 
-While most observability frameworks emphasize three pillars—metrics, logs, and traces—a more comprehensive strategy introduces a fourth pillar: exceptions. This approach treats exceptions as a primary signal type, complete with dedicated tooling and correlation mechanisms.
+While most observability frameworks emphasize three pillars (metrics, logs, and traces). A more comprehensive strategy introduces a fourth pillar: exceptions. This approach treats exceptions as a primary signal type, complete with dedicated tooling and correlation mechanisms.
 
 Here is how the architecture breaks down:
 
@@ -61,7 +61,7 @@ Prometheus addresses real-time operational questions such as request rate, error
   <ToolCard
     name="Grafana Loki"
     url="https://grafana.com/oss/loki/"
-    description="Kubernetes-native log aggregation — indexes labels, not full text, for fast label-driven queries during incident response."
+    description="Kubernetes-native log aggregation: indexes labels, not full text, for fast label-driven queries during incident response."
     pillar="logs"
   />
   <ToolCard
@@ -95,7 +95,7 @@ These two systems are complementary rather than redundant. Loki supports rapid, 
 
 Distributed tracing addresses the question of where time is being spent within a system, a perspective that metrics and logs alone cannot provide. When a user request traverses multiple microservices and experiences latency, tracing identifies the specific service contributing to the delay and pinpoints the downstream bottleneck.
 
-[OpenTracing](https://opentracing.io/) provides a vendor-neutral instrumentation API that decouples application code from a specific tracing vendor. [Jaeger](https://www.jaegertracing.io/) serves as the trace backend — it collects, stores, and visualizes traces with a UI that lets you search by service, operation, tags, or duration.
+[OpenTracing](https://opentracing.io/) provides a vendor-neutral instrumentation API that decouples application code from a specific tracing vendor. [Jaeger](https://www.jaegertracing.io/) serves as the trace backend, it collects, stores, and visualizes traces with a UI that lets you search by service, operation, tags, or duration.
 
 The intersection of tracing and metrics, labeled "Tracing-Metric" in the architecture diagram, enables the derivation of RED metrics (Rate, Errors, Duration) directly from trace data. This integration allows users to investigate a spike on a Prometheus dashboard by accessing the corresponding Jaeger traces responsible for the anomaly.
 
@@ -104,7 +104,7 @@ The intersection of tracing and metrics, labeled "Tracing-Metric" in the archite
 <ToolCard
   name="Sentry"
   url="https://sentry.io/"
-  description="Application exception management — captures stack traces, groups incidents, monitors regressions, and notifies teams."
+  description="Application exception management: captures stack traces, groups incidents, monitors regressions, and notifies teams."
   pillar="exceptions"
 />
 
@@ -128,7 +128,7 @@ Treating exceptions as a separate signal accelerates the triage process. Rather 
 Three of the four pillars converge within [Grafana](https://grafana.com/), which serves as the primary platform for visualization and exploration. Grafana natively integrates with Prometheus, Loki, and Jaeger, while the [OpenSearch plugin](https://grafana.com/grafana/plugins/grafana-opensearch-datasource/) enables access to the full-text log index. From a single Grafana dashboard, operators can identify metric anomalies, investigate contributing traces, and examine related log entries. [Sentry](https://sentry.io/) operates as a separate dashboard for exception management. When an investigation requires checking exceptions, teams switch to Sentry's own UI to review stack traces, incident grouping, and regression status.
 
 <Callout type="tip" title="Cross-pillar correlation">
-The ability to correlate data across signal types transforms a set of monitoring tools into a comprehensive observability platform. Grafana covers metrics, logs, and traces in one place, while Sentry adds the exception pillar with its own dedicated interface. It is not quite a single pane of glass, but it is close — at 3 AM when checkout latency doubles, the investigation starts in Grafana and reaches Sentry in one step.
+The ability to correlate data across signal types transforms a set of monitoring tools into a comprehensive observability platform. Grafana covers metrics, logs, and traces in one place, while Sentry adds the exception pillar with its own dedicated interface. It is not quite a single pane of glass, but it is close, at 3 AM when checkout latency doubles, the investigation starts in Grafana and reaches Sentry in one step.
 </Callout>
 
 <Figure
@@ -146,7 +146,7 @@ The ability to correlate data across signal types transforms a set of monitoring
   pillar="alerting"
 />
 
-The architecture positions [Slack](https://slack.com/) at the top of the stack, interfacing with the cluster boundary. Alerts reach Slack through two independent paths. [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) handles metric alerts (PromQL rules), log-based alerts (Loki Ruler evaluating LogQL rules), and trace-derived alerts — RED metrics (Rate, Errors, Duration) extracted from Jaeger spans via [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) are fed into Prometheus and alerted on like any other metric. [Sentry](https://sentry.io/) uses its own built-in Slack integration to deliver exception notifications directly, bypassing Alertmanager entirely. Jaeger and OpenTracing have no native alerting capabilities; trace-based alerting is achieved exclusively through this span-to-metrics pipeline.
+The architecture positions [Slack](https://slack.com/) at the top of the stack, interfacing with the cluster boundary. Alerts reach Slack through two independent paths. [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) handles metric alerts (PromQL rules), log-based alerts (Loki Ruler evaluating LogQL rules), and trace-derived alerts, RED metrics (Rate, Errors, Duration) extracted from Jaeger spans via [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) are fed into Prometheus and alerted on like any other metric. [Sentry](https://sentry.io/) uses its own built-in Slack integration to deliver exception notifications directly, bypassing Alertmanager entirely. Jaeger and OpenTracing have no native alerting capabilities; trace-based alerting is achieved exclusively through this span-to-metrics pipeline.
 
 The objective is to eliminate the need for proactive dashboard monitoring; critical alerts are delivered directly to the appropriate channels.
 
