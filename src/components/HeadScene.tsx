@@ -145,23 +145,23 @@ function makeBadgeTexture(text: string, short: string, accent: string) {
   // Faux "logo mark"
   ctx.fillStyle = accent;
   ctx.beginPath();
-  ctx.arc(100, 195, 56, 0, Math.PI * 2);
+  ctx.arc(100, 200, 64, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#0f1117';
-  ctx.font = '700 42px system-ui, sans-serif';
+  ctx.font = '700 52px system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(short, 100, 196);
+  ctx.fillText(short, 100, 201);
 
   // Main technology name
   ctx.fillStyle = '#f6f8ff';
-  ctx.font = '700 54px system-ui, sans-serif';
+  ctx.font = '700 68px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText(text, 180, 175);
+  ctx.fillText(text, 185, 180);
 
   ctx.fillStyle = 'rgba(220, 226, 255, 0.82)';
-  ctx.font = '500 30px system-ui, sans-serif';
-  ctx.fillText('tech bonk', 180, 230);
+  ctx.font = '500 38px system-ui, sans-serif';
+  ctx.fillText('tech bonk', 185, 240);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -207,32 +207,34 @@ function TechBadgeMesh({ type }: { type: FallingObjectType }) {
 // ─── SINGLE FALLING OBJECT (animated) ─────────────────────────────────────────
 function FallingObject({
   type,
-  active,
+  trigger,
   onImpact,
 }: {
   type: FallingObjectType;
-  active: boolean;
+  trigger: number;
   onImpact: () => void;
 }) {
   const ref = useRef<THREE.Group>(null);
   const progress = useRef(0);
   const impacted = useRef(false);
   const offsetX = useRef(0);
+  const animating = useRef(false);
 
   useEffect(() => {
-    if (!active) return;
+    if (trigger === 0) return;
     progress.current = 0;
     impacted.current = false;
+    animating.current = true;
     offsetX.current = (Math.random() - 0.5) * 0.25;
     if (ref.current) {
       ref.current.visible = true;
       ref.current.scale.set(1, 1, 1);
       ref.current.rotation.set(0, 0, 0);
     }
-  }, [active]);
+  }, [trigger]);
 
   useFrame((_, delta) => {
-    if (!ref.current || !active) return;
+    if (!ref.current || !animating.current) return;
     progress.current += delta;
     const t = progress.current;
 
@@ -288,6 +290,7 @@ function FallingObject({
     // Phase 4: gone
     else {
       ref.current.visible = false;
+      animating.current = false;
     }
   });
 
@@ -314,26 +317,29 @@ function BonkText({ text, active }: { text: string; active: boolean }) {
   useFrame((_, delta) => {
     if (!visible) return;
     timer.current += delta;
-    if (timer.current > 1.5) setVisible(false);
+    if (timer.current > 2.2) setVisible(false);
   });
 
   if (!visible) return null;
 
   return (
-    <Html position={[0, -0.5, 0]} center>
+    <Html position={[0, -0.6, 0.5]} center>
       <div
         ref={ref}
         style={{
-          fontSize: text.length > 16 ? '18px' : '24px',
-          fontWeight: 900,
+          fontSize: text.length > 16 ? '16px' : '20px',
+          fontWeight: 800,
           fontFamily: 'var(--font-mono, monospace)',
-          color: '#ff3d3d',
-          textShadow: '2px 2px 0 #000, -1px -1px 0 #000',
-          WebkitTextStroke: '1px #000',
+          color: '#fff',
+          background: 'rgba(220, 38, 38, 0.92)',
+          padding: '6px 14px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.5)',
           pointerEvents: 'none',
           userSelect: 'none',
           animation: 'bonkPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           whiteSpace: 'nowrap',
+          lineHeight: 1.2,
         }}
       >
         {text}
@@ -402,32 +408,27 @@ function ImpactStars({ active }: { active: boolean }) {
 
 // ─── FALLING OBJECTS CONTROLLER ───────────────────────────────────────────────
 function FallingObjects({
-  active,
+  trigger,
   onImpact,
 }: {
-  active: boolean;
+  trigger: number;
   onImpact: (word: string) => void;
 }) {
   type LandedBadge = { id: number; type: FallingObjectType; x: number; rot: number; scale: number; z: number };
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [objectActive, setObjectActive] = useState(false);
+  const [objectTrigger, setObjectTrigger] = useState(0);
   const [starsActive, setStarsActive] = useState(false);
   const [bonkText, setBonkText] = useState('');
   const [bonkTextActive, setBonkTextActive] = useState(false);
   const [landedBadges, setLandedBadges] = useState<LandedBadge[]>([]);
-  const sequenceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const landedId = useRef(0);
 
   useEffect(() => {
-    if (!active) {
-      setObjectActive(false);
-      return;
-    }
-    // Pick a random object from the sequence
+    if (trigger === 0) return;
     const idx = Math.floor(Math.random() * FALLING_OBJECT_SEQUENCE.length);
     setCurrentIndex(idx);
-    setObjectActive(true);
-  }, [active]);
+    setObjectTrigger((n) => n + 1);
+  }, [trigger]);
 
   const handleImpact = useCallback(() => {
     const type = FALLING_OBJECT_SEQUENCE[currentIndex];
@@ -450,17 +451,7 @@ function FallingObjects({
       };
       return [...prev, next].slice(-12);
     });
-
-    // Reset after animation completes
-    clearTimeout(sequenceTimer.current);
-    sequenceTimer.current = setTimeout(() => {
-      setObjectActive(false);
-    }, 3600);
   }, [currentIndex, onImpact]);
-
-  useEffect(() => {
-    return () => clearTimeout(sequenceTimer.current);
-  }, []);
 
   const objectType = FALLING_OBJECT_SEQUENCE[currentIndex];
 
@@ -468,7 +459,7 @@ function FallingObjects({
     <>
       <FallingObject
         type={objectType}
-        active={objectActive}
+        trigger={objectTrigger}
         onImpact={handleImpact}
       />
       <group position={[0, -1.35, 0.35]}>
@@ -503,7 +494,7 @@ function HeadModel() {
   const groupRef = useRef<THREE.Group>(null);
   const targetRotation = useRef({ x: 0, y: 0 });
 
-  const [bonkActive, setBonkActive] = useState(false);
+  const [bonkTrigger, setBonkTrigger] = useState(0);
 
   // Wobble from clicks / bonk
   const wobble = useRef({ x: 0, y: 0 });
@@ -512,18 +503,13 @@ function HeadModel() {
   // Head dip for bonk impacts
   const headDip = useRef(0);
 
-  const bonkTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
   const handleClick = useCallback(() => {
     // Add spin + wobble impulse
     spinImpulse.current += 6;
     wobble.current = { x: 0.12, y: 0.08 };
 
-    // Trigger falling object
-    setBonkActive(false);
-    setTimeout(() => setBonkActive(true), 10);
-    clearTimeout(bonkTimer.current);
-    bonkTimer.current = setTimeout(() => setBonkActive(false), 3500);
+    // Trigger falling object with a new unique value each click
+    setBonkTrigger((n) => n + 1);
   }, []);
 
   const handleBonkImpact = useCallback((_word: string) => {
@@ -533,10 +519,6 @@ function HeadModel() {
     spinImpulse.current += 3;
   }, []);
 
-  useEffect(() => {
-    return () => clearTimeout(bonkTimer.current);
-  }, []);
-
   useFrame((state) => {
     if (!groupRef.current) return;
 
@@ -544,7 +526,7 @@ function HeadModel() {
     const t = state.clock.elapsedTime;
 
     // ── Original: slow auto-rotation + amplified mouse offset ──
-    const autoY = t * 0.15;
+    const autoY = t * 0.45;
     targetRotation.current.y = autoY + globalMouse.x * 1.2;
     targetRotation.current.x = globalMouse.y * -0.6 + scrollProgress * 0.4;
 
@@ -585,7 +567,7 @@ function HeadModel() {
         <primitive object={scene} />
       </group>
 
-      <FallingObjects active={bonkActive} onImpact={handleBonkImpact} />
+      <FallingObjects trigger={bonkTrigger} onImpact={handleBonkImpact} />
     </>
   );
 }

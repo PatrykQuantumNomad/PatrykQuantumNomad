@@ -25,7 +25,7 @@ async function loadCoverImage(coverImage: string): Promise<string | null> {
     const filePath = join('./public', coverImage);
     const buffer = await readFile(filePath);
     const resized = await sharp(buffer)
-      .resize(460, 360, { fit: 'cover' })
+      .resize(380, 320, { fit: 'cover' })
       .png()
       .toBuffer();
     return `data:image/png;base64,${resized.toString('base64')}`;
@@ -49,229 +49,420 @@ export async function generateOgImage(
   const coverDataUri = coverImage ? await loadCoverImage(coverImage) : null;
   const hasCover = !!coverDataUri;
 
-  const svg = await satori(
-    {
-      type: 'div',
-      props: {
-        style: {
-          width: '1200px',
-          height: '630px',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#faf8f5',
-          position: 'relative',
-          fontFamily: 'Inter',
-        },
-        children: [
-          // Accent bar at top
-          {
-            type: 'div',
-            props: {
-              style: {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '1200px',
-                height: '6px',
-                backgroundImage: 'linear-gradient(to right, #c44b20, #e8734a)',
-              },
-            },
-          },
-          // Main content
-          {
-            type: 'div',
-            props: {
-              style: {
-                display: 'flex',
-                flexDirection: 'row',
-                flexGrow: 1,
-                padding: '50px 56px 40px',
-                gap: '40px',
-              },
-              children: [
-                // Left side: text content
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      flex: hasCover ? '1 1 55%' : '1 1 100%',
-                    },
-                    children: [
-                      // Top: title + description
-                      {
-                        type: 'div',
-                        props: {
-                          style: {
-                            display: 'flex',
-                            flexDirection: 'column',
-                          },
-                          children: [
-                            {
-                              type: 'div',
-                              props: {
-                                style: {
-                                  fontFamily: 'Space Grotesk',
-                                  fontWeight: 700,
-                                  fontSize: hasCover ? '40px' : '48px',
-                                  color: '#1a1a2e',
-                                  lineHeight: 1.2,
-                                },
-                                children: displayTitle,
-                              },
-                            },
-                            {
-                              type: 'div',
-                              props: {
-                                style: {
-                                  fontSize: '20px',
-                                  color: '#555566',
-                                  lineHeight: 1.6,
-                                  marginTop: '16px',
-                                },
-                                children: displayDescription,
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      // Bottom: tags + branding
-                      {
-                        type: 'div',
-                        props: {
-                          style: {
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '16px',
-                          },
-                          children: [
-                            // Tags
-                            {
-                              type: 'div',
-                              props: {
-                                style: {
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  gap: '8px',
-                                },
-                                children: displayTags.map((tag) => ({
-                                  type: 'div',
-                                  props: {
-                                    style: {
-                                      fontSize: '14px',
-                                      color: '#c44b20',
-                                      backgroundColor: 'rgba(196,75,32,0.1)',
-                                      borderRadius: '20px',
-                                      padding: '4px 14px',
-                                    },
-                                    children: tag,
-                                  },
-                                })),
-                              },
-                            },
-                            // Branding line
-                            {
-                              type: 'div',
-                              props: {
-                                style: {
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                },
-                                children: [
-                                  // PG mark
-                                  {
-                                    type: 'div',
-                                    props: {
-                                      style: {
-                                        fontFamily: 'Space Grotesk',
-                                        fontWeight: 700,
-                                        fontSize: '16px',
-                                        color: '#ffffff',
-                                        backgroundColor: '#c44b20',
-                                        borderRadius: '6px',
-                                        padding: '2px 8px',
-                                      },
-                                      children: 'PG',
-                                    },
-                                  },
-                                  {
-                                    type: 'div',
-                                    props: {
-                                      style: {
-                                        fontSize: '16px',
-                                        color: '#888899',
-                                      },
-                                      children: 'patrykgolabek.dev',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-                // Right side: cover image (if available)
-                ...(hasCover
-                  ? [
-                      {
-                        type: 'div',
-                        props: {
-                          style: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flex: '0 0 420px',
-                          },
-                          children: [
-                            {
-                              type: 'img',
-                              props: {
-                                src: coverDataUri,
-                                width: 420,
-                                height: 340,
-                                style: {
-                                  borderRadius: '12px',
-                                  border: '1px solid #e0ddd8',
-                                  objectFit: 'cover',
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ]
-                  : []),
-              ],
-            },
-          },
-        ],
+  const brandingRow = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
       },
-    },
-    {
-      width: 1200,
-      height: 630,
-      fonts: [
+      children: [
         {
-          name: 'Inter',
-          data: interFont!,
-          weight: 400,
-          style: 'normal',
+          type: 'div',
+          props: {
+            style: {
+              fontFamily: 'Space Grotesk',
+              fontWeight: 700,
+              fontSize: '16px',
+              color: '#ffffff',
+              backgroundColor: '#c44b20',
+              borderRadius: '6px',
+              padding: '2px 8px',
+            },
+            children: 'PG',
+          },
         },
         {
-          name: 'Space Grotesk',
-          data: spaceGroteskFont!,
-          weight: 700,
-          style: 'normal',
+          type: 'div',
+          props: {
+            style: { fontSize: '16px', color: '#888899' },
+            children: 'patrykgolabek.dev',
+          },
         },
       ],
     },
-  );
+  };
+
+  const tagsRow = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap' as const,
+        gap: hasCover ? '8px' : '10px',
+      },
+      children: displayTags.map((tag) => ({
+        type: 'div',
+        props: {
+          style: {
+            fontSize: hasCover ? '14px' : '15px',
+            color: '#c44b20',
+            backgroundColor: 'rgba(196,75,32,0.1)',
+            borderRadius: '20px',
+            padding: hasCover ? '4px 14px' : '6px 18px',
+          },
+          children: tag,
+        },
+      })),
+    },
+  };
+
+  const coverLayout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        // Accent bar
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              top: 0,
+              left: 0,
+              width: '1200px',
+              height: '6px',
+              backgroundImage: 'linear-gradient(to right, #c44b20, #e8734a)',
+            },
+          },
+        },
+        // Main row
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'row' as const,
+              flexGrow: 1,
+              padding: '50px 48px 40px',
+              gap: '36px',
+            },
+            children: [
+              // Left text
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'column' as const,
+                    justifyContent: 'space-between',
+                    flex: '1 1 0%',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: { display: 'flex', flexDirection: 'column' as const },
+                        children: [
+                          {
+                            type: 'div',
+                            props: {
+                              style: {
+                                fontFamily: 'Space Grotesk',
+                                fontWeight: 700,
+                                fontSize: '40px',
+                                color: '#1a1a2e',
+                                lineHeight: 1.2,
+                              },
+                              children: displayTitle,
+                            },
+                          },
+                          {
+                            type: 'div',
+                            props: {
+                              style: {
+                                fontSize: '20px',
+                                color: '#555566',
+                                lineHeight: 1.6,
+                                marginTop: '16px',
+                              },
+                              children: displayDescription,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          flexDirection: 'column' as const,
+                          gap: '16px',
+                        },
+                        children: [tagsRow, brandingRow],
+                      },
+                    },
+                  ],
+                },
+              },
+              // Right cover image
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: '0 0 380px',
+                  },
+                  children: [
+                    {
+                      type: 'img',
+                      props: {
+                        src: coverDataUri!,
+                        width: 380,
+                        height: 320,
+                        style: {
+                          borderRadius: '12px',
+                          border: '1px solid #e0ddd8',
+                          objectFit: 'cover' as const,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+
+  const noCoverLayout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        // Accent bar
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              top: 0,
+              left: 0,
+              width: '1200px',
+              height: '6px',
+              backgroundImage: 'linear-gradient(to right, #c44b20, #e8734a)',
+            },
+          },
+        },
+        // Main two-column row
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'row' as const,
+              width: '1200px',
+              height: '630px',
+            },
+            children: [
+              // Left column: text content
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'column' as const,
+                    justifyContent: 'center',
+                    width: '620px',
+                    padding: '40px 0px 60px 56px',
+                    gap: '24px',
+                  },
+                  children: [
+                    // Title
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '56px',
+                          color: '#1a1a2e',
+                          lineHeight: 1.15,
+                        },
+                        children: displayTitle,
+                      },
+                    },
+                    // Description
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '22px',
+                          color: '#555566',
+                          lineHeight: 1.5,
+                        },
+                        children: displayDescription,
+                      },
+                    },
+                    // Tags
+                    tagsRow,
+                  ],
+                },
+              },
+              // Right column: decorative monogram
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '350px',
+                    height: '630px',
+                  },
+                  children: [
+                    // Outer ring
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '240px',
+                          height: '240px',
+                          borderRadius: '50%',
+                          border: '3px solid rgba(196,75,32,0.15)',
+                        },
+                        children: [
+                          // Inner filled circle
+                          {
+                            type: 'div',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '190px',
+                                height: '190px',
+                                borderRadius: '50%',
+                                backgroundImage:
+                                  'linear-gradient(145deg, rgba(196,75,32,0.12), rgba(196,75,32,0.04))',
+                              },
+                              children: [
+                                {
+                                  type: 'div',
+                                  props: {
+                                    style: {
+                                      display: 'flex',
+                                      alignItems: 'baseline',
+                                      fontFamily: 'Space Grotesk',
+                                      fontWeight: 700,
+                                      fontSize: '80px',
+                                      letterSpacing: '-2px',
+                                    },
+                                    children: [
+                                      {
+                                        type: 'span',
+                                        props: {
+                                          style: { color: 'rgba(196,75,32,0.3)' },
+                                          children: 'PG',
+                                        },
+                                      },
+                                      {
+                                        type: 'span',
+                                        props: {
+                                          style: { color: 'rgba(0,109,109,0.3)' },
+                                          children: '_',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Branding pinned to bottom-left
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    color: '#ffffff',
+                    backgroundColor: '#c44b20',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                  },
+                  children: 'PG',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: { fontSize: '16px', color: '#888899' },
+                  children: 'patrykgolabek.dev',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+
+  const svg = await satori(hasCover ? coverLayout : noCoverLayout, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: 'Inter',
+        data: interFont!,
+        weight: 400,
+        style: 'normal',
+      },
+      {
+        name: 'Space Grotesk',
+        data: spaceGroteskFont!,
+        weight: 700,
+        style: 'normal',
+      },
+    ],
+  });
 
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
   return png;
