@@ -7,12 +7,8 @@ let interFont: Buffer | undefined;
 let spaceGroteskFont: Buffer | undefined;
 
 async function loadFonts() {
-  if (!interFont) {
-    interFont = await readFile('./src/assets/fonts/Inter-Regular.woff');
-  }
-  if (!spaceGroteskFont) {
-    spaceGroteskFont = await readFile('./src/assets/fonts/SpaceGrotesk-Bold.woff');
-  }
+  interFont ??= await readFile('./src/assets/fonts/Inter-Regular.woff');
+  spaceGroteskFont ??= await readFile('./src/assets/fonts/SpaceGrotesk-Bold.woff');
 }
 
 function truncate(text: string, maxLength: number): string {
@@ -25,7 +21,7 @@ async function loadCoverImage(coverImage: string): Promise<string | null> {
     const filePath = join('./public', coverImage);
     const buffer = await readFile(filePath);
     const resized = await sharp(buffer)
-      .resize(380, 320, { fit: 'cover' })
+      .resize(1088, 400, { fit: 'contain', background: { r: 250, g: 248, b: 245, alpha: 1 } })
       .png()
       .toBuffer();
     return `data:image/png;base64,${resized.toString('base64')}`;
@@ -135,100 +131,84 @@ export async function generateOgImage(
             },
           },
         },
-        // Main row
+        // Cover image across the top
         {
           type: 'div',
           props: {
             style: {
               display: 'flex',
-              flexDirection: 'row' as const,
-              flexGrow: 1,
-              padding: '50px 48px 40px',
-              gap: '36px',
+              justifyContent: 'center',
+              padding: '60px 56px 0px',
             },
             children: [
-              // Left text
               {
-                type: 'div',
+                type: 'img',
                 props: {
+                  src: coverDataUri!,
+                  width: 1088,
+                  height: 400,
                   style: {
-                    display: 'flex',
-                    flexDirection: 'column' as const,
-                    justifyContent: 'space-between',
-                    flex: '1 1 0%',
+                    borderRadius: '12px',
+                    border: '1px solid #e0ddd8',
                   },
-                  children: [
-                    {
-                      type: 'div',
-                      props: {
-                        style: { display: 'flex', flexDirection: 'column' as const },
-                        children: [
-                          {
-                            type: 'div',
-                            props: {
-                              style: {
-                                fontFamily: 'Space Grotesk',
-                                fontWeight: 700,
-                                fontSize: '40px',
-                                color: '#1a1a2e',
-                                lineHeight: 1.2,
-                              },
-                              children: displayTitle,
-                            },
-                          },
-                          {
-                            type: 'div',
-                            props: {
-                              style: {
-                                fontSize: '20px',
-                                color: '#555566',
-                                lineHeight: 1.6,
-                                marginTop: '16px',
-                              },
-                              children: displayDescription,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          flexDirection: 'column' as const,
-                          gap: '16px',
-                        },
-                        children: [tagsRow, brandingRow],
-                      },
-                    },
-                  ],
                 },
               },
-              // Right cover image
+            ],
+          },
+        },
+        // Bottom section: title, tags, branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'flex-end',
+              flexGrow: 1,
+              padding: '16px 56px 28px',
+              gap: '10px',
+            },
+            children: [
+              // Title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '32px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.25,
+                  },
+                  children: displayTitle,
+                },
+              },
+              // Tags + branding row
               {
                 type: 'div',
                 props: {
                   style: {
                     display: 'flex',
+                    flexDirection: 'row' as const,
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    flex: '0 0 380px',
+                    gap: '16px',
                   },
                   children: [
+                    tagsRow,
+                    // Separator dot
                     {
-                      type: 'img',
+                      type: 'div',
                       props: {
-                        src: coverDataUri!,
-                        width: 380,
-                        height: 320,
                         style: {
-                          borderRadius: '12px',
-                          border: '1px solid #e0ddd8',
-                          objectFit: 'cover' as const,
+                          width: '4px',
+                          height: '4px',
+                          borderRadius: '50%',
+                          backgroundColor: '#bbb',
+                          flexShrink: 0,
                         },
                       },
                     },
+                    brandingRow,
                   ],
                 },
               },
@@ -445,7 +425,8 @@ export async function generateOgImage(
     },
   };
 
-  const svg = await satori(hasCover ? coverLayout : noCoverLayout, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Satori accepts plain object VNodes at runtime
+  const svg = await satori((hasCover ? coverLayout : noCoverLayout) as any, {
     width: 1200,
     height: 630,
     fonts: [
