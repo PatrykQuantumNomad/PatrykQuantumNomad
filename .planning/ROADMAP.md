@@ -116,14 +116,14 @@ Plans:
 **Research flag**: NEEDS RESEARCH-PHASE (complex interaction between Expressive Code build-time rendering, tab state management, and DOM performance with 250 code blocks)
 **Success Criteria** (what must be TRUE):
   1. Visiting /beauty-index/code/ displays a tabbed interface with 10 feature tabs (Variable Declaration, If/Else, Loops, Functions, Structs, Pattern Matching, Error Handling, String Interpolation, List Operations, Signature Idiom)
-  2. Clicking a tab shows syntax-highlighted code blocks for all 25 languages implementing that feature — only the active tab's code blocks are in the DOM at any time
+  2. Clicking a tab shows syntax-highlighted code blocks for all 25 languages implementing that feature — only the active tab's code blocks are visible at any time (CSS-based hiding, all blocks in DOM)
   3. A feature support matrix table shows which languages support each feature, serving as a quick-reference grid
   4. The page loads and tab-switches without perceptible lag on mobile devices (Lighthouse performance remains 90+)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 19-01: TBD
-- [ ] 19-02: TBD
+- [ ] 19-01-PLAN.md — Code features data, Nanostores setup, tab UI React island, and feature matrix table
+- [ ] 19-02-PLAN.md — Code comparison page assembly with 10 feature tabs and 250 build-time code blocks
 
 ### Phase 20: Blog Content & Cross-Linking
 **Goal**: A full-length blog post explains the Beauty Index methodology, and all Beauty Index pages and the blog post link to each other
@@ -179,10 +179,10 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 16. Data Foundation & Charts | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 17. Overview & Detail Pages | v1.3 | 3/3 | Complete | 2026-02-17 |
 | 18. OG Images & Shareability | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 19. Code Comparison | v1.3 | 0/? | Not started | - |
+| 19. Code Comparison | v1.3 | 0/2 | Not started | - |
 | 20. Blog Content | v1.3 | 0/? | Not started | - |
 | 21. SEO & Launch | v1.3 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 18 complete (2/2 plans)*
+*Last updated: 2026-02-17 — Phase 19 planned (2 plans)*
