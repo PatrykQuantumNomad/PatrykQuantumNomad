@@ -10,6 +10,8 @@ import { getCollection } from 'astro:content';
 import { Code } from 'astro:components';
 import type { BuiltinLanguage } from 'shiki';
 import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
 import RadarChart from '../../components/beauty-index/RadarChart.astro';
 import ScoreBreakdown from '../../components/beauty-index/ScoreBreakdown.astro';
 import ShareControls from '../../components/beauty-index/ShareControls.astro';
@@ -46,7 +48,23 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
   description={language.characterSketch}
   ogImage={ogImageURL}
 >
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: "https://patrykgolabek.dev/" },
+    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+    { name: language.name, url: `https://patrykgolabek.dev/beauty-index/${language.id}/` },
+  ]} />
+
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
+      <ol class="flex items-center gap-1">
+        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><a href="/beauty-index/" class="hover:text-[var(--color-accent)] transition-colors">Beauty Index</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li aria-current="page">{language.name}</li>
+      </ol>
+    </nav>
+
     {/* Header area */}
     <header class="flex flex-col sm:flex-row sm:items-center gap-4">
       <div>
@@ -71,6 +89,20 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
       <div class="flex items-center">
         <ScoreBreakdown language={language} />
       </div>
+    </div>
+
+    {/* Screen reader accessible radar chart data */}
+    <div class="sr-only">
+      <dl>
+        {DIMENSIONS.map((dim) => (
+          <>
+            <dt>{dim.name}</dt>
+            <dd>{language[dim.key]} out of 10</dd>
+          </>
+        ))}
+        <dt>Total</dt>
+        <dd>{total} out of 60</dd>
+      </dl>
     </div>
 
     {/* Character Sketch section */}

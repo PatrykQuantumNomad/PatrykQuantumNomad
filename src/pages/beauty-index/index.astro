@@ -7,6 +7,8 @@
  */
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import BeautyIndexJsonLd from '../../components/BeautyIndexJsonLd.astro';
 import RankingBarChart from '../../components/beauty-index/RankingBarChart.astro';
 import ScoringTable from '../../components/beauty-index/ScoringTable.astro';
 import LanguageGrid from '../../components/beauty-index/LanguageGrid.astro';
@@ -24,8 +26,21 @@ const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString(
   description="Ranking 25 programming languages across 6 aesthetic dimensions. From Haskell's mathematical purity to COBOL's industrial grit — every language has a beauty score."
   ogImage={ogImageURL}
 >
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: "https://patrykgolabek.dev/" },
+    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+  ]} />
+  <BeautyIndexJsonLd languages={sorted} />
+
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
+      <ol class="flex items-center gap-1 justify-center">
+        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li aria-current="page">Beauty Index</li>
+      </ol>
+    </nav>
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">
       The Beauty Index
     </h1>
@@ -43,7 +58,7 @@ const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString(
   {/* Ranking Bar Chart Section */}
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <h2 class="text-2xl font-heading font-bold mb-6">Rankings</h2>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto" role="img" aria-label={`Bar chart ranking ${sorted.length} programming languages by total beauty score, from ${sorted[0].name} at ${totalScore(sorted[0])} to ${sorted[sorted.length - 1].name} at ${totalScore(sorted[sorted.length - 1])}`}>
       <RankingBarChart languages={sorted} />
     </div>
   </section>

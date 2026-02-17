@@ -10,6 +10,7 @@ import { Code } from 'astro:components';
 import type { BuiltinLanguage } from 'shiki';
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import { CODE_FEATURES } from '../../../data/beauty-index/code-features';
 import CodeComparisonTabs from '../../../components/beauty-index/CodeComparisonTabs.tsx';
 import FeatureMatrix from '../../../components/beauty-index/FeatureMatrix.astro';
@@ -26,8 +27,23 @@ const featureNames = features.map((f) => f.name);
   title="Code Comparison | Beauty Index | Patryk Golabek"
   description="Compare how 25 programming languages express the same concepts side-by-side. From variable declarations to pattern matching."
 >
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: "https://patrykgolabek.dev/" },
+    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+    { name: "Code Comparison", url: "https://patrykgolabek.dev/beauty-index/code/" },
+  ]} />
+
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
+      <ol class="flex items-center gap-1 justify-center">
+        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><a href="/beauty-index/" class="hover:text-[var(--color-accent)] transition-colors">Beauty Index</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li aria-current="page">Code Comparison</li>
+      </ol>
+    </nav>
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">
       Code Comparison
     </h1>
