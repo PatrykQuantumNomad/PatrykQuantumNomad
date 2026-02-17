@@ -56,7 +56,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 - [x] **Phase 17: Overview & Language Detail Pages** - Core user-facing pages with rankings, radar charts, and language profiles (completed 2026-02-17)
 - [x] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features (completed 2026-02-17)
 - [x] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering (completed 2026-02-17)
-- [ ] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index
+- [ ] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index (1 plan)
 - [ ] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits
 
 ## Phase Details
@@ -132,10 +132,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A blog post titled "The Beauty Index" (or similar) appears in the blog listing at /blog/, renders as a full local MDX post with methodology explanation, scoring rubric, and editorial commentary
   2. The blog post links to the overview page, at least 3 individual language pages, and the code comparison page — and those pages link back to the blog post
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 20-01: TBD
+- [ ] 20-01-PLAN.md — Blog post + bidirectional cross-links
 
 ### Phase 21: SEO & Launch Readiness
 **Goal**: The Beauty Index section is fully integrated into site navigation, discoverable by search engines, and meets all quality standards
@@ -180,7 +180,7 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 17. Overview & Detail Pages | v1.3 | 3/3 | Complete | 2026-02-17 |
 | 18. OG Images & Shareability | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 19. Code Comparison | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 20. Blog Content | v1.3 | 0/? | Not started | - |
+| 20. Blog Content | v1.3 | 0/1 | Planned | - |
 | 21. SEO & Launch | v1.3 | 0/? | Not started | - |
 
 ---
