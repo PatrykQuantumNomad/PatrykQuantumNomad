@@ -147,11 +147,12 @@ Plans:
   3. The homepage and at least 2 existing blog posts contain internal links to Beauty Index pages
   4. Lighthouse audit scores 90+ on Performance, Accessibility, Best Practices, and SEO for the overview page, a language detail page, and the code comparison page
   5. Keyboard navigation works across all Beauty Index pages — scoring table sort, tab switching, language navigation — and screen readers can access chart data via accessible alternatives
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 21-01: TBD
-- [ ] 21-02: TBD
+- [ ] 21-01-PLAN.md — Navigation, structured data (JSON-LD), breadcrumbs, accessible chart alternatives, and sitemap verification
+- [ ] 21-02-PLAN.md — Homepage and blog cross-linking, ScoringTable accessibility fixes
+- [ ] 21-03-PLAN.md — Lighthouse audit, accessibility verification, and user sign-off
 
 ## Progress
 
@@ -181,8 +182,8 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 18. OG Images & Shareability | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 19. Code Comparison | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 20. Blog Content | v1.3 | 1/1 | Complete | 2026-02-17 |
-| 21. SEO & Launch | v1.3 | 0/? | Not started | - |
+| 21. SEO & Launch | v1.3 | 0/3 | Planned | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 20 complete (1 plan executed)*
+*Last updated: 2026-02-17 — Phase 21 planned (3 plans)*
