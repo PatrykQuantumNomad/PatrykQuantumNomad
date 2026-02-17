@@ -52,7 +52,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 **Milestone Goal:** Add a new content pillar ranking 25 programming languages across 6 aesthetic dimensions, with interactive overview, per-language detail pages, a code comparison explorer, OG images for social sharing, a methodology blog post, and full SEO integration.
 
-- [ ] **Phase 16: Data Foundation & Chart Components** - Language data schema, shared SVG math, and all build-time chart components
+- [x] **Phase 16: Data Foundation & Chart Components** - Language data schema, shared SVG math, and all build-time chart components — completed 2026-02-17
 - [ ] **Phase 17: Overview & Language Detail Pages** - Core user-facing pages with rankings, radar charts, and language profiles
 - [ ] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features
 - [ ] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering
