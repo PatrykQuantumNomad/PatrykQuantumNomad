@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 21 in progress (SEO & Launch Readiness)
+**Current focus:** v1.3 The Beauty Index — Complete
 
 ## Current Position
 
-Phase: 21 of 21 (Final Verification)
-Plan: 2 of 3 in current phase
-Status: Phase 21 in progress — 21-01 and 21-02 complete
-Last activity: 2026-02-17 — Completed 21-01 (SEO Navigation & Structured Data)
+Phase: 21 of 21 (Complete)
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase 21 complete — all plans (01, 02, 03) finished
+Last activity: 2026-02-17 — Completed 21-03 (Lighthouse & Accessibility Audit)
 
-Progress: [======================>........] 20/21 phases (v1.0-v1.2 complete, v1.3 phases 16-20 complete, 21 remaining)
+Progress: [================================] 21/21 phases (v1.0-v1.3 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 41 (16 v1.0 + 7 v1.1 + 6 v1.2 + 12 v1.3)
+- Total plans completed: 44 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -29,8 +29,8 @@ Progress: [======================>........] 20/21 phases (v1.0-v1.2 complete, v1
 | v1.0 MVP | 1-7 | 15 | 36 | 2026-02-11 |
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
-| v1.3 The Beauty Index | 16-21 | TBD | 37 | in progress |
-| **Total** | **21** | **29+** | **114** | |
+| v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
+| **Total** | **21** | **44** | **114** | |
 
 ## Accumulated Context
 
@@ -73,6 +73,8 @@ v1.3 decisions to date:
 - No separate sr-only table for bar chart -- ScoringTable already provides accessible tabular data
 - BeautyIndexJsonLd uses creator @id reference to match PersonJsonLd
 - Visual breadcrumbs centered on overview/code pages, left-aligned on detail pages
+- Dual color pattern: TierConfig.color for decorative elements, TierConfig.textColor for WCAG AA text contrast
+- sr-only span suffix for SEO link-text audit (Lighthouse checks visible text, not aria-label)
 
 ### Pending Todos
 
@@ -106,6 +108,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 21-01-PLAN.md (SEO Navigation & Structured Data)
+Stopped at: Completed 21-03-PLAN.md (Lighthouse & Accessibility Audit)
 Resume file: None
-Next: Phase 21 Plan 03 remaining
+Next: v1.3 The Beauty Index milestone complete. All 21 phases finished.
