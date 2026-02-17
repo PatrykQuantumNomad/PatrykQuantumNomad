@@ -103,11 +103,11 @@ Plans:
   2. Sharing any /beauty-index/[slug]/ page shows a custom OG image featuring that language's radar chart and score summary
   3. Clicking a "Download as Image" button on a radar chart saves a PNG file to the user's device
   4. On mobile devices, a share button triggers the native OS share sheet via Web Share API; on desktop, a copy-to-clipboard button copies the chart image
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 18-01: TBD
-- [ ] 18-02: TBD
+- [ ] 18-01-PLAN.md — OG image generators, API routes, and meta tag wiring
+- [ ] 18-02-PLAN.md — ShareControls component (download, share, copy) on detail pages
 
 ### Phase 19: Code Comparison Page
 **Goal**: Users can compare how 25 programming languages express the same programming concepts side-by-side
