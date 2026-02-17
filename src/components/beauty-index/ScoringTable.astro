@@ -1,0 +1,152 @@
+---
+/**
+ * ScoringTable.astro — Sortable HTML table of all Beauty Index languages.
+ * Displays rank, name, 6 dimension scores, and total score with tier color indication.
+ * Includes inline client-side JavaScript for column sorting.
+ */
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+import { getTierColor } from '../../lib/beauty-index/tiers';
+import { type Language, totalScore } from '../../lib/beauty-index/schema';
+
+interface Props {
+  languages: Language[];
+}
+
+const { languages } = Astro.props;
+
+// Sort by total score descending (default)
+const sorted = [...languages].sort((a, b) => totalScore(b) - totalScore(a));
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full text-sm" data-sortable>
+    <thead>
+      <tr class="border-b-2 border-[var(--color-border)]">
+        <th
+          class="px-2 py-2 text-left cursor-pointer select-none sort-desc"
+          data-sort="rank"
+          data-type="number"
+        >
+          Rank<span class="sort-indicator"></span>
+        </th>
+        <th
+          class="px-2 py-2 text-left cursor-pointer select-none"
+          data-sort="name"
+        >
+          Language<span class="sort-indicator"></span>
+        </th>
+        {DIMENSIONS.map((dim) => (
+          <th
+            class="px-2 py-2 text-center cursor-pointer select-none"
+            data-sort={dim.key}
+            data-type="number"
+            title={dim.name}
+          >
+            {dim.symbol}<span class="sort-indicator"></span>
+          </th>
+        ))}
+        <th
+          class="px-2 py-2 text-center cursor-pointer select-none"
+          data-sort="total"
+          data-type="number"
+        >
+          Total<span class="sort-indicator"></span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {sorted.map((lang, i) => {
+        const total = totalScore(lang);
+        const tierColor = getTierColor(lang.tier);
+        return (
+          <tr
+            class="border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-alt)] transition-colors"
+            style={`border-left: 3px solid ${tierColor};`}
+            data-rank={i + 1}
+            data-name={lang.name.toLowerCase()}
+            data-phi={lang.phi}
+            data-omega={lang.omega}
+            data-lambda={lang.lambda}
+            data-psi={lang.psi}
+            data-gamma={lang.gamma}
+            data-sigma={lang.sigma}
+            data-total={total}
+          >
+            <td class="px-2 py-1.5 text-[var(--color-text-secondary)]">{i + 1}</td>
+            <td class="px-2 py-1.5">
+              <a
+                href={`/beauty-index/${lang.id}/`}
+                class="text-[var(--color-accent)] hover:underline font-medium"
+              >
+                {lang.name}
+              </a>
+            </td>
+            {DIMENSIONS.map((dim) => (
+              <td class="px-2 py-1.5 text-center" data-col={dim.key}>
+                {lang[dim.key]}
+              </td>
+            ))}
+            <td class="px-2 py-1.5 text-center font-bold">{total}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  th .sort-indicator::after {
+    content: '';
+    display: inline-block;
+    margin-left: 4px;
+    opacity: 0.3;
+  }
+  th.sort-asc .sort-indicator::after {
+    content: '\25B2';
+    opacity: 1;
+  }
+  th.sort-desc .sort-indicator::after {
+    content: '\25BC';
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const table = document.querySelector<HTMLTableElement>('[data-sortable]');
+    if (!table) return;
+    const headers = table.querySelectorAll<HTMLTableCellElement>('th[data-sort]');
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    headers.forEach((th) => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort!;
+        const isNumeric = th.dataset.type === 'number';
+        const isAsc = th.classList.contains('sort-asc');
+        const newDir = isAsc ? 'desc' : 'asc';
+
+        headers.forEach((h) => { h.classList.remove('sort-asc', 'sort-desc'); });
+        th.classList.add(newDir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+          const aVal = a.dataset[key] ?? '';
+          const bVal = b.dataset[key] ?? '';
+          let cmp: number;
+          if (isNumeric) {
+            cmp = parseFloat(aVal) - parseFloat(bVal);
+          } else {
+            cmp = aVal.localeCompare(bVal);
+          }
+          return newDir === 'asc' ? cmp : -cmp;
+        });
+
+        rows.forEach((row, idx) => {
+          row.querySelector('td')!.textContent = String(idx + 1);
+          tbody.appendChild(row);
+        });
+      });
+    });
+  });
+</script>

@@ -1,0 +1,51 @@
+---
+/**
+ * LanguageNav.astro — Previous/next language navigation.
+ * Renders prev/next links between language detail pages
+ * with a central "Overview" link back to the index.
+ * Ships ZERO client-side JavaScript.
+ */
+
+interface Props {
+  prev: { id: string; name: string } | null;
+  next: { id: string; name: string } | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav
+  aria-label="Language navigation"
+  class="flex items-center justify-between mt-12 pt-6 border-t border-[var(--color-border)]"
+>
+  {prev ? (
+    <a
+      href={`/beauty-index/${prev.id}/`}
+      class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
+    >
+      <span aria-hidden="true">&larr;</span>
+      <span>{prev.name}</span>
+    </a>
+  ) : (
+    <span />
+  )}
+
+  <a
+    href="/beauty-index/"
+    class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+  >
+    Overview
+  </a>
+
+  {next ? (
+    <a
+      href={`/beauty-index/${next.id}/`}
+      class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
+    >
+      <span>{next.name}</span>
+      <span aria-hidden="true">&rarr;</span>
+    </a>
+  ) : (
+    <span />
+  )}
+</nav>

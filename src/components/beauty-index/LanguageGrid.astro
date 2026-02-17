@@ -1,0 +1,61 @@
+---
+/**
+ * LanguageGrid.astro — Tier-grouped grid of radar chart thumbnails.
+ * Groups languages by tier (Beautiful first) with responsive grid layout.
+ * Each card links to the language's detail page with a thumbnail radar chart.
+ * Ships ZERO client-side JavaScript.
+ */
+import RadarChart from './RadarChart.astro';
+import { TIERS } from '../../lib/beauty-index/tiers';
+import { type Language, totalScore } from '../../lib/beauty-index/schema';
+
+interface Props {
+  languages: Language[];
+}
+
+const { languages } = Astro.props;
+
+// Sort all languages by total score descending
+const sorted = [...languages].sort((a, b) => totalScore(b) - totalScore(a));
+
+// Group into tiers, beautiful first (reverse the default lowest-first order)
+const tierGroups = TIERS.slice().reverse().map((tier) => {
+  const members = sorted.filter((lang) => lang.tier === tier.name);
+  return { tier, members };
+}).filter((group) => group.members.length > 0);
+---
+
+<div class="space-y-10">
+  {tierGroups.map(({ tier, members }) => (
+    <section>
+      <div class="flex items-baseline gap-3 mb-4">
+        <h3
+          class="text-lg font-bold"
+          style={`color: ${tier.color};`}
+        >
+          {tier.label}
+        </h3>
+        <span class="text-sm text-[var(--color-text-secondary)]">
+          {tier.minScore}&ndash;{tier.maxScore} points
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {members.map((lang) => (
+          <a
+            href={`/beauty-index/${lang.id}/`}
+            class="rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors bg-[var(--color-surface)] p-3 flex flex-col items-center"
+          >
+            <RadarChart language={lang} size={160} />
+            <span class="text-sm font-medium mt-1 text-[var(--color-text-primary)]">
+              {lang.name}
+            </span>
+            <span class="text-xs text-[var(--color-text-secondary)]">
+              {totalScore(lang)} points
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+</div>
