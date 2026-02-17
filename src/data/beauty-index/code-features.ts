@@ -2371,7 +2371,7 @@ Released: #{version}
 val version = 2.0
 
 val msg = "Hello, $name! Version: $version"
-val expr = "Length: ${name.length}, Upper: ${name.uppercase()}"
+val expr = "Length: \${name.length}, Upper: \${name.uppercase()}"
 val multi = """
     |Welcome to $name
     |Version: $version
@@ -2434,7 +2434,7 @@ Version: \${version}
 val version = 3.4
 
 val msg = s"Hello, $name! Version: $version"
-val expr = s"Length: ${name.length}, Upper: ${name.toUpperCase}"
+val expr = s"Length: \${name.length}, Upper: \${name.toUpperCase}"
 val formatted = f"$name%-10s | $version%5.1f"
 
 val raw = raw"No \\n escape: $name"`,

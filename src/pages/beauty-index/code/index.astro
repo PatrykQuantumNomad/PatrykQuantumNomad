@@ -1,0 +1,94 @@
+---
+/**
+ * Code Comparison Page — /beauty-index/code/
+ * Renders 10 tabbed feature panels with syntax-highlighted code blocks
+ * for all 25 languages. All 250 code blocks are rendered at build time
+ * using Astro's Code component, with client-side tab switching via
+ * the CodeComparisonTabs React island.
+ */
+import { Code } from 'astro:components';
+import type { BuiltinLanguage } from 'shiki';
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import { CODE_FEATURES } from '../../../data/beauty-index/code-features';
+import CodeComparisonTabs from '../../../components/beauty-index/CodeComparisonTabs.tsx';
+import FeatureMatrix from '../../../components/beauty-index/FeatureMatrix.astro';
+import { totalScore } from '../../../lib/beauty-index/schema';
+
+const languages = await getCollection('languages');
+const allData = languages.map((entry) => entry.data);
+const sortedLanguages = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
+const features = CODE_FEATURES;
+const featureNames = features.map((f) => f.name);
+---
+
+<Layout
+  title="Code Comparison | Beauty Index | Patryk Golabek"
+  description="Compare how 25 programming languages express the same concepts side-by-side. From variable declarations to pattern matching."
+>
+  {/* Hero Section */}
+  <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      Code Comparison
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
+      See how 25 languages express the same programming concepts.
+      Click tabs to switch features.
+    </p>
+  </section>
+
+  {/* Tabbed Code Comparison Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <CodeComparisonTabs client:load features={featureNames}>
+      {features.map((feature, featureIndex) => (
+        <div
+          data-tab-panel={featureIndex}
+          hidden={featureIndex !== 0}
+          role="tabpanel"
+          aria-labelledby={`tab-${featureIndex}`}
+          id={`panel-${featureIndex}`}
+          style="content-visibility: auto; contain-intrinsic-size: 0 500px;"
+        >
+          <h2 class="text-2xl font-heading font-bold mb-2">{feature.name}</h2>
+          <p class="text-[var(--color-text-secondary)] mb-6">{feature.description}</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sortedLanguages.map((language) => (
+              <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
+                <div class="px-4 py-2 bg-[var(--color-surface-alt)] border-b border-[var(--color-border)]">
+                  <span class="text-sm font-medium">{language.name}</span>
+                </div>
+                {feature.snippets[language.id] !== undefined ? (
+                  <div class="code-block-wrapper">
+                    <Code code={feature.snippets[language.id]!.code} lang={feature.snippets[language.id]!.lang as BuiltinLanguage} />
+                  </div>
+                ) : (
+                  <div class="px-4 py-6 text-center text-sm text-[var(--color-text-secondary)] italic">
+                    Feature not natively supported
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </CodeComparisonTabs>
+  </section>
+
+  {/* Feature Support Matrix Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-16">
+    <h2 class="text-2xl font-heading font-bold mb-2">Feature Support Matrix</h2>
+    <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+      Quick reference showing which languages support each feature.
+    </p>
+    <FeatureMatrix />
+  </section>
+</Layout>
+
+<style>
+  /* Ensure code blocks don't overflow their containers */
+  .code-block-wrapper :global(pre) {
+    margin: 0;
+    border-radius: 0;
+  }
+</style>
