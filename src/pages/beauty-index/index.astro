@@ -15,11 +15,14 @@ import { totalScore } from '../../lib/beauty-index/schema';
 const languages = await getCollection('languages');
 const allData = languages.map((entry) => entry.data);
 const sorted = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
+
+const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString();
 ---
 
 <Layout
   title="The Beauty Index | Patryk Golabek"
   description="Ranking 25 programming languages across 6 aesthetic dimensions. From Haskell's mathematical purity to COBOL's industrial grit — every language has a beauty score."
+  ogImage={ogImageURL}
 >
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">

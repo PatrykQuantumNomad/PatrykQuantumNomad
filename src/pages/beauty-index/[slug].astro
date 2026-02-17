@@ -37,11 +37,13 @@ export async function getStaticPaths() {
 const { language, prev, next, rank } = Astro.props;
 const snippet = getSnippet(language.id);
 const total = totalScore(language);
+const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.site).toString();
 ---
 
 <Layout
   title={language.name + " — The Beauty Index | Patryk Golabek"}
   description={language.characterSketch}
+  ogImage={ogImageURL}
 >
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     {/* Header area */}
