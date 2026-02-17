@@ -74,7 +74,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Data model, utilities, content collection, and Greek font fallback
+- [x] 16-01-PLAN.md — Data model, utilities, content collection, and Greek font fallback
 - [ ] 16-02-PLAN.md — Chart components (radar, bar, tier badge, score breakdown) and test pages
 
 ### Phase 17: Overview & Language Detail Pages
@@ -176,7 +176,7 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
-| 16. Data Foundation & Charts | v1.3 | 0/2 | Not started | - |
+| 16. Data Foundation & Charts | v1.3 | 1/2 | In progress | - |
 | 17. Overview & Detail Pages | v1.3 | 0/? | Not started | - |
 | 18. OG Images & Shareability | v1.3 | 0/? | Not started | - |
 | 19. Code Comparison | v1.3 | 0/? | Not started | - |
