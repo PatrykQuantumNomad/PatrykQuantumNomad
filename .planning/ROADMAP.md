@@ -5,7 +5,7 @@
 - SHIPPED **v1.0 MVP** — Phases 1-7 (shipped 2026-02-11)
 - SHIPPED **v1.1 Content Refresh** — Phases 8-12 (shipped 2026-02-12)
 - SHIPPED **v1.2 Projects Page Redesign** — Phases 13-15 (shipped 2026-02-13)
-- IN PROGRESS **v1.3 The Beauty Index** — Phases 16-21
+- SHIPPED **v1.3 The Beauty Index** — Phases 16-21 (shipped 2026-02-17)
 
 ## Phases
 
@@ -48,7 +48,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 </details>
 
-### v1.3 The Beauty Index (In Progress)
+### v1.3 The Beauty Index (SHIPPED 2026-02-17)
 
 **Milestone Goal:** Add a new content pillar ranking 25 programming languages across 6 aesthetic dimensions, with interactive overview, per-language detail pages, a code comparison explorer, OG images for social sharing, a methodology blog post, and full SEO integration.
 
@@ -57,7 +57,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 - [x] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features (completed 2026-02-17)
 - [x] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering (completed 2026-02-17)
 - [x] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index (completed 2026-02-17)
-- [ ] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits
+- [x] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits (completed 2026-02-17)
 
 ## Phase Details
 
@@ -150,9 +150,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Navigation, structured data (JSON-LD), breadcrumbs, accessible chart alternatives, and sitemap verification
-- [ ] 21-02-PLAN.md — Homepage and blog cross-linking, ScoringTable accessibility fixes
-- [ ] 21-03-PLAN.md — Lighthouse audit, accessibility verification, and user sign-off
+- [x] 21-01-PLAN.md — Navigation, structured data (JSON-LD), breadcrumbs, accessible chart alternatives, and sitemap verification
+- [x] 21-02-PLAN.md — Homepage and blog cross-linking, ScoringTable accessibility fixes
+- [x] 21-03-PLAN.md — Lighthouse audit, accessibility verification, and user sign-off
 
 ## Progress
 
@@ -182,8 +182,8 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 18. OG Images & Shareability | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 19. Code Comparison | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 20. Blog Content | v1.3 | 1/1 | Complete | 2026-02-17 |
-| 21. SEO & Launch | v1.3 | 0/3 | Planned | - |
+| 21. SEO & Launch | v1.3 | 3/3 | Complete | 2026-02-17 |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 21 planned (3 plans)*
+*Last updated: 2026-02-17 — Phase 21 complete, v1.3 shipped*
