@@ -11,15 +11,15 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 Phase: 21 of 21 (Final Verification)
 Plan: 2 of 3 in current phase
-Status: Phase 21 in progress — 21-02 complete
-Last activity: 2026-02-17 — Completed 21-02 (Cross-Links & Accessibility)
+Status: Phase 21 in progress — 21-01 and 21-02 complete
+Last activity: 2026-02-17 — Completed 21-01 (SEO Navigation & Structured Data)
 
 Progress: [======================>........] 20/21 phases (v1.0-v1.2 complete, v1.3 phases 16-20 complete, 21 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 40 (16 v1.0 + 7 v1.1 + 6 v1.2 + 11 v1.3)
+- Total plans completed: 41 (16 v1.0 + 7 v1.1 + 6 v1.2 + 12 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -70,6 +70,9 @@ v1.3 decisions to date:
 - Button-inside-th pattern per Adrian Roselli sortable table guidance (not role=button on th)
 - aria-sort omitted from non-active columns (not aria-sort=none) per WAI-ARIA best practice
 - Beauty Index callout placed between What I Build and Latest Writing for natural content flow
+- No separate sr-only table for bar chart -- ScoringTable already provides accessible tabular data
+- BeautyIndexJsonLd uses creator @id reference to match PersonJsonLd
+- Visual breadcrumbs centered on overview/code pages, left-aligned on detail pages
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 21-02-PLAN.md (Cross-Links & Accessibility)
+Stopped at: Completed 21-01-PLAN.md (SEO Navigation & Structured Data)
 Resume file: None
-Next: Phase 21 plans 01 and 03 remaining
+Next: Phase 21 Plan 03 remaining
