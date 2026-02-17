@@ -78,7 +78,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(No active requirements — next milestone not yet defined)
+## Current Milestone: v1.3 The Beauty Index
+
+**Goal:** Add a new content pillar — The Beauty Index — a subjective multi-dimensional ranking of 25 programming languages by aesthetic beauty, with an interactive overview page, per-language detail pages, a code comparison explorer, and a companion blog post.
+
+**Target features:**
+- Beauty Index blog post (full essay as local blog content)
+- Interactive overview page with ranking chart, scoring table, and 25 radar charts
+- Individual language pages with radar chart, scores, and signature code
+- Code comparison page with feature-tabbed syntax-highlighted examples
+- Social media shareability (clean visuals, screenshot-friendly charts)
 
 ### Out of Scope
 
@@ -109,6 +118,7 @@ Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 11 posts (1 local + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
+v1.3 adds The Beauty Index — a new content pillar ranking 25 programming languages across 6 aesthetic dimensions (Φ, Ω, Λ, Ψ, Γ, Σ). Includes interactive charts (radar/spider per language, overall ranking bar chart), per-language detail pages, a feature-tabbed code comparison explorer, and a full-length blog essay. Design priority is social media shareability.
 
 ## Key Decisions
 
@@ -153,4 +163,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-13 after v1.2 milestone*
+*Last updated: 2026-02-17 after v1.3 milestone start*
