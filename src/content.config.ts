@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, file } from 'astro/loaders';
+import { languageSchema } from './lib/beauty-index/schema';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
@@ -16,4 +17,9 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+const languages = defineCollection({
+  loader: file('src/data/beauty-index/languages.json'),
+  schema: languageSchema,
+});
+
+export const collections = { blog, languages };
