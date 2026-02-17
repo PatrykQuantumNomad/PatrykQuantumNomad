@@ -55,7 +55,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 - [x] **Phase 16: Data Foundation & Chart Components** - Language data schema, shared SVG math, and all build-time chart components — completed 2026-02-17
 - [x] **Phase 17: Overview & Language Detail Pages** - Core user-facing pages with rankings, radar charts, and language profiles (completed 2026-02-17)
 - [x] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features (completed 2026-02-17)
-- [ ] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering
+- [x] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering (completed 2026-02-17)
 - [ ] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index
 - [ ] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits
 
@@ -122,8 +122,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Code features data, Nanostores setup, tab UI React island, and feature matrix table
-- [ ] 19-02-PLAN.md — Code comparison page assembly with 10 feature tabs and 250 build-time code blocks
+- [x] 19-01-PLAN.md — Code features data, Nanostores setup, tab UI React island, and feature matrix table
+- [x] 19-02-PLAN.md — Code comparison page assembly with 10 feature tabs and 240 build-time code blocks
 
 ### Phase 20: Blog Content & Cross-Linking
 **Goal**: A full-length blog post explains the Beauty Index methodology, and all Beauty Index pages and the blog post link to each other
@@ -185,4 +185,4 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 19 planned (2 plans)*
+*Last updated: 2026-02-17 — Phase 19 complete (2 plans executed)*

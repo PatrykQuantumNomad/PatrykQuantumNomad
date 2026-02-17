@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 19 in progress (Code Comparison Page)
+**Current focus:** v1.3 The Beauty Index — Phase 19 complete, Phase 20 next (Blog Content & Cross-Linking)
 
 ## Current Position
 
-Phase: 19 of 21 (Code Comparison Page)
-Plan: 1 of 2 in current phase (plan 01 complete)
-Status: 19-01 complete (code features data + tab infrastructure), 19-02 pending
-Last activity: 2026-02-17 — Completed 19-01 (Code Features & Tab Infrastructure)
+Phase: 20 of 21 (Blog Content & Cross-Linking)
+Plan: 0 of TBD in current phase (not yet planned)
+Status: Phase 19 complete, Phase 20 pending planning
+Last activity: 2026-02-17 — Completed 19-02 (Code Comparison Page Assembly)
 
-Progress: [===================>...........] 18.5/21 phases (v1.0-v1.2 complete, v1.3 phases 16-18 complete, 19 in progress)
+Progress: [====================>..........] 19/21 phases (v1.0-v1.2 complete, v1.3 phases 16-19 complete, 20-21 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 37 (16 v1.0 + 7 v1.1 + 6 v1.2 + 8 v1.3)
+- Total plans completed: 38 (16 v1.0 + 7 v1.1 + 6 v1.2 + 9 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -63,6 +63,8 @@ v1.3 decisions to date:
 - Pattern Matching undefined for 10 languages without native support
 - Signature Idiom feature reuses existing SNIPPETS data directly
 - data-tab-panel attribute convention for server-rendered panel visibility sync
+- All 240 code blocks rendered at build time via Astro Code component (zero runtime Shiki)
+- content-visibility: auto on tab panels for deferred paint performance
 
 ### Pending Todos
 
@@ -77,7 +79,7 @@ None.
 - [Tech Debt]: Filter system inline script (~80 lines) in projects/index.astro
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
 - [v1.3 Gap]: Dark mode strategy deferred — charts use light mode CSS custom properties only
-- [v1.3 Research]: Code comparison lazy-rendering pattern needs validation in Phase 19
+- [v1.3 Resolved]: Code comparison uses content-visibility: auto + hidden attribute for lazy rendering (validated Phase 19)
 
 ### Quick Tasks Completed
 
@@ -96,6 +98,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 19-01-PLAN.md (Code Features & Tab Infrastructure)
+Stopped at: Completed 19-02-PLAN.md (Code Comparison Page Assembly)
 Resume file: None
-Next: Phase 19 Plan 02 (Page Assembly & Integration)
+Next: Phase 20 (Blog Content & Cross-Linking) — needs planning
