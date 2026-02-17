@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 19 complete, Phase 20 next (Blog Content & Cross-Linking)
+**Current focus:** v1.3 The Beauty Index — Phase 20 complete, Phase 21 next (Final Verification)
 
 ## Current Position
 
-Phase: 20 of 21 (Blog Content & Cross-Linking)
+Phase: 21 of 21 (Final Verification)
 Plan: 0 of TBD in current phase (not yet planned)
-Status: Phase 19 complete, Phase 20 pending planning
-Last activity: 2026-02-17 — Completed 19-02 (Code Comparison Page Assembly)
+Status: Phase 20 complete, Phase 21 pending planning
+Last activity: 2026-02-17 — Completed 20-01 (Blog Content & Cross-Linking)
 
-Progress: [====================>..........] 19/21 phases (v1.0-v1.2 complete, v1.3 phases 16-19 complete, 20-21 remaining)
+Progress: [======================>........] 20/21 phases (v1.0-v1.2 complete, v1.3 phases 16-20 complete, 21 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 38 (16 v1.0 + 7 v1.1 + 6 v1.2 + 9 v1.3)
+- Total plans completed: 39 (16 v1.0 + 7 v1.1 + 6 v1.2 + 10 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -65,6 +65,8 @@ v1.3 decisions to date:
 - data-tab-panel attribute convention for server-rendered panel visibility sync
 - All 240 code blocks rendered at build time via Astro Code component (zero runtime Shiki)
 - content-visibility: auto on tab panels for deferred paint performance
+- Blog post uses prose dimension descriptions rather than importing data files
+- Back-links in hero sections (overview, code) and after Character section (detail pages)
 
 ### Pending Todos
 
@@ -98,6 +100,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 19-02-PLAN.md (Code Comparison Page Assembly)
+Stopped at: Completed 20-01-PLAN.md (Blog Content & Cross-Linking)
 Resume file: None
-Next: Phase 20 (Blog Content & Cross-Linking) — needs planning
+Next: Phase 21 (Final Verification) — needs planning
