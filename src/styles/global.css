@@ -38,6 +38,26 @@
   line-gap-override: 0%;
 }
 
+/* ─── Greek Character Fallback ────────────────────────────────────────── */
+/* DM Sans and Bricolage Grotesque lack Greek glyphs.                     */
+/* Noto Sans loaded via Google Fonts, scoped to Greek block via unicode-range */
+@font-face {
+  font-family: 'Greek Fallback';
+  src: local('Noto Sans');
+  unicode-range: U+0370-03FF;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Greek Fallback';
+  src: local('Noto Sans');
+  unicode-range: U+0370-03FF;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ─── Base Typography ───────────────────────────────────────────────────── */
 @layer base {
   body {

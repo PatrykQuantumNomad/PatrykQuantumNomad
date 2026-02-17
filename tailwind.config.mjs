@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'DM Sans Fallback', ...defaultTheme.fontFamily.sans],
-        heading: ['Bricolage Grotesque', 'Bricolage Grotesque Fallback', ...defaultTheme.fontFamily.sans],
+        sans: ['DM Sans', 'DM Sans Fallback', 'Greek Fallback', ...defaultTheme.fontFamily.sans],
+        heading: ['Bricolage Grotesque', 'Bricolage Grotesque Fallback', 'Greek Fallback', ...defaultTheme.fontFamily.sans],
         mono: ['Fira Code', ...defaultTheme.fontFamily.mono],
       },
       colors: {
