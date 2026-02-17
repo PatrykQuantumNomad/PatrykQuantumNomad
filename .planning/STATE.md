@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 17 (Overview & Language Detail Pages)
+**Current focus:** v1.3 The Beauty Index — Phase 18 (OG Images & Shareability)
 
 ## Current Position
 
-Phase: 17 of 21 (Overview & Language Detail Pages) -- COMPLETE
-Plan: 3 of 3 in current phase (all plans complete)
-Status: Phase 17 complete (all 3 plans: snippets+components, overview page, detail pages)
-Last activity: 2026-02-17 — Completed 17-03 (Language Detail Pages)
+Phase: 18 of 21 (OG Images & Shareability)
+Plan: 1 of 2 in current phase
+Status: 18-01 complete (Beauty Index OG images), 18-02 remaining
+Last activity: 2026-02-17 — Completed 18-01 (Beauty Index OG Images)
 
-Progress: [===================>...........] 17/21 phases (v1.0-v1.2 complete, v1.3 phases 16-17 complete)
+Progress: [===================>...........] 18/21 phases (v1.0-v1.2 complete, v1.3 phases 16-18 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34 (16 v1.0 + 7 v1.1 + 6 v1.2 + 5 v1.3)
+- Total plans completed: 35 (16 v1.0 + 7 v1.1 + 6 v1.2 + 6 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -55,6 +55,8 @@ v1.3 decisions to date:
 - Phase 16 test pages removed once real overview page exists
 - file() loader slug pattern: use entry.data.id not entry.id for URL params
 - BuiltinLanguage cast needed for Astro Code component lang prop type safety
+- OG helper extraction: shared renderOgPng/brandingRow/accentBar functions reduce duplication
+- Radar chart embedded in OG images via SVG base64 data URI in Satori VNode tree
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 17-03-PLAN.md (Language Detail Pages) -- Phase 17 complete
+Stopped at: Completed 18-01-PLAN.md (Beauty Index OG Images)
 Resume file: None
-Next: Phase 18 (Methodology Page)
+Next: 18-02 (Methodology Page & Social Sharing)
