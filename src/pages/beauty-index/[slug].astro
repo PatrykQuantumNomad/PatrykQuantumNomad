@@ -4,7 +4,7 @@
  * Generates 25 static pages at /beauty-index/{id}/ using getStaticPaths.
  * Each page shows a radar chart, score breakdown, tier badge, character sketch,
  * syntax-highlighted code snippet, and prev/next navigation.
- * Ships ZERO client-side JavaScript.
+ * Includes client-side JavaScript for SVG-to-PNG share controls.
  */
 import { getCollection } from 'astro:content';
 import { Code } from 'astro:components';
@@ -12,6 +12,7 @@ import type { BuiltinLanguage } from 'shiki';
 import Layout from '../../layouts/Layout.astro';
 import RadarChart from '../../components/beauty-index/RadarChart.astro';
 import ScoreBreakdown from '../../components/beauty-index/ScoreBreakdown.astro';
+import ShareControls from '../../components/beauty-index/ShareControls.astro';
 import TierBadge from '../../components/beauty-index/TierBadge.astro';
 import LanguageNav from '../../components/beauty-index/LanguageNav.astro';
 import { totalScore } from '../../lib/beauty-index/schema';
@@ -63,8 +64,9 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
 
     {/* Chart + Scores row */}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-      <div class="flex justify-center">
+      <div class="flex flex-col items-center gap-2">
         <RadarChart language={language} size={300} />
+        <ShareControls languageName={language.name} languageId={language.id} />
       </div>
       <div class="flex items-center">
         <ScoreBreakdown language={language} />
