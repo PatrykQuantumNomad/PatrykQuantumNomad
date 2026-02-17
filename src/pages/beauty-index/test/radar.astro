@@ -1,0 +1,81 @@
+---
+/**
+ * Radar Chart Test Page — Beauty Index
+ * Development-only page for visual validation of RadarChart, TierBadge,
+ * and ScoreBreakdown components with real content collection data.
+ */
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import RadarChart from '../../../components/beauty-index/RadarChart.astro';
+import TierBadge from '../../../components/beauty-index/TierBadge.astro';
+import ScoreBreakdown from '../../../components/beauty-index/ScoreBreakdown.astro';
+import { totalScore } from '../../../lib/beauty-index/schema';
+import { generateRadarSvgString } from '../../../lib/beauty-index/radar-math';
+import { DIMENSIONS } from '../../../lib/beauty-index/dimensions';
+import { getTierColor } from '../../../lib/beauty-index/tiers';
+import { dimensionScores } from '../../../lib/beauty-index/schema';
+
+const languages = await getCollection('languages');
+
+// Pick one representative from each tier
+const tiers = ['beautiful', 'handsome', 'practical', 'workhorses'] as const;
+const representatives = tiers.map((tierName) => {
+  const match = languages.find((l) => l.data.tier === tierName);
+  return match!;
+});
+
+// Build-time validation of generateRadarSvgString (for Phase 18 Satori compatibility)
+const testLang = representatives[0].data;
+const testLabels = DIMENSIONS.map((d) => `${d.symbol} ${d.shortName}`);
+const testSvg = generateRadarSvgString(
+  200,
+  dimensionScores(testLang),
+  getTierColor(testLang.tier),
+  0.35,
+  testLabels
+);
+const svgValid = testSvg.startsWith('<svg') && testSvg.includes('</svg>') && testSvg.includes('xmlns="http://www.w3.org/2000/svg"') && testSvg.includes('<polygon');
+if (!svgValid) {
+  throw new Error('generateRadarSvgString failed validation: SVG output is invalid');
+}
+---
+
+<Layout title="Radar Chart Test — Beauty Index">
+  <section class="max-w-5xl mx-auto px-6 py-12">
+    <div class="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <p class="text-sm text-yellow-800">
+        This is a development test page. It will not be included in the final site.
+      </p>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-8 text-[var(--color-text-primary)]">
+      Radar Chart Test — Beauty Index
+    </h1>
+
+    <p class="text-sm text-[var(--color-text-secondary)] mb-8">
+      Showing one representative language from each tier. generateRadarSvgString validation: PASSED
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {representatives.map((entry) => (
+        <div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <h2 class="text-xl font-bold text-[var(--color-text-primary)]">
+              {entry.data.name}
+            </h2>
+            <TierBadge tier={entry.data.tier} />
+          </div>
+
+          <div class="flex flex-col items-center gap-4">
+            <RadarChart language={entry.data} size={280} />
+            <ScoreBreakdown language={entry.data} />
+          </div>
+
+          <p class="mt-4 text-sm text-[var(--color-text-secondary)]">
+            Total: {totalScore(entry.data)} / 60
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>
