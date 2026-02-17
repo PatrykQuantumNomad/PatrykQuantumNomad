@@ -2,6 +2,10 @@ import satori from 'satori';
 import sharp from 'sharp';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { generateRadarSvgString } from './beauty-index/radar-math';
+import { getTierColor } from './beauty-index/tiers';
+import { DIMENSIONS } from './beauty-index/dimensions';
+import { totalScore, dimensionScores, type Language } from './beauty-index/schema';
 
 let interFont: Buffer | undefined;
 let spaceGroteskFont: Buffer | undefined;
@@ -447,4 +451,356 @@ export async function generateOgImage(
 
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
   return png;
+}
+
+/** Shared Satori render helper — avoids duplicating font config */
+async function renderOgPng(layout: Record<string, unknown>): Promise<Buffer> {
+  await loadFonts();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Satori accepts plain object VNodes at runtime
+  const svg = await satori(layout as any, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      { name: 'Inter', data: interFont!, weight: 400, style: 'normal' as const },
+      { name: 'Space Grotesk', data: spaceGroteskFont!, weight: 700, style: 'normal' as const },
+    ],
+  });
+
+  return sharp(Buffer.from(svg)).png().toBuffer();
+}
+
+/** Reusable branding row (PG badge + patrykgolabek.dev) */
+function brandingRow() {
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+      },
+      children: [
+        {
+          type: 'div',
+          props: {
+            style: {
+              fontFamily: 'Space Grotesk',
+              fontWeight: 700,
+              fontSize: '16px',
+              color: '#ffffff',
+              backgroundColor: '#c44b20',
+              borderRadius: '6px',
+              padding: '2px 8px',
+            },
+            children: 'PG',
+          },
+        },
+        {
+          type: 'div',
+          props: {
+            style: { fontSize: '16px', color: '#888899' },
+            children: 'patrykgolabek.dev',
+          },
+        },
+      ],
+    },
+  };
+}
+
+/** Accent bar used at top of all OG images */
+function accentBar() {
+  return {
+    type: 'div',
+    props: {
+      style: {
+        position: 'absolute' as const,
+        top: 0,
+        left: 0,
+        width: '1200px',
+        height: '6px',
+        backgroundImage: 'linear-gradient(to right, #c44b20, #e8734a)',
+      },
+    },
+  };
+}
+
+/**
+ * Generates a branded OG image for the Beauty Index overview page.
+ * Text-based layout with title, subtitle, dimension pills, and PG branding.
+ */
+export async function generateOverviewOgImage(): Promise<Buffer> {
+  const dimensionNames = ['Geometry', 'Elegance', 'Clarity', 'Happiness', 'Habitability', 'Integrity'];
+
+  const dimensionPills = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap' as const,
+        gap: '12px',
+        justifyContent: 'center',
+      },
+      children: dimensionNames.map((name) => ({
+        type: 'div',
+        props: {
+          style: {
+            fontSize: '14px',
+            color: '#c44b20',
+            backgroundColor: 'rgba(196,75,32,0.1)',
+            borderRadius: '20px',
+            padding: '6px 18px',
+          },
+          children: name,
+        },
+      })),
+    },
+  };
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Centered content block
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              alignItems: 'center',
+              gap: '24px',
+            },
+            children: [
+              // Title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '64px',
+                    color: '#1a1a2e',
+                  },
+                  children: 'The Beauty Index',
+                },
+              },
+              // Subtitle
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '24px',
+                    color: '#555566',
+                    textAlign: 'center' as const,
+                    maxWidth: '800px',
+                  },
+                  children: 'Ranking 25 programming languages across 6 aesthetic dimensions',
+                },
+              },
+              // Dimension pills
+              dimensionPills,
+            ],
+          },
+        },
+        // Bottom branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/**
+ * Generates a branded OG image for a single Beauty Index language page.
+ * Two-column layout with language details on the left and radar chart on the right.
+ */
+export async function generateLanguageOgImage(language: Language): Promise<Buffer> {
+  const tierColor = getTierColor(language.tier);
+  const scores = dimensionScores(language);
+  const total = totalScore(language);
+  const labels = DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
+  const radarSvg = generateRadarSvgString(300, scores, tierColor, 0.35, labels);
+  const radarDataUri = `data:image/svg+xml;base64,${Buffer.from(radarSvg).toString('base64')}`;
+  const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
+  const sketch = truncate(language.characterSketch, 120);
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column (text)
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '700px',
+              padding: '40px 0px 60px 56px',
+              gap: '16px',
+            },
+            children: [
+              // "The Beauty Index" label
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#c44b20',
+                    fontWeight: 600,
+                  },
+                  children: 'The Beauty Index',
+                },
+              },
+              // Language name
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '56px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: language.name,
+                },
+              },
+              // Score + Tier row
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                  },
+                  children: [
+                    // Score
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '32px',
+                          color: tierColor,
+                        },
+                        children: `${total}/60`,
+                      },
+                    },
+                    // Tier pill
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '16px',
+                          color: '#ffffff',
+                          backgroundColor: tierColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: tierLabel,
+                      },
+                    },
+                  ],
+                },
+              },
+              // Character sketch
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: sketch,
+                },
+              },
+            ],
+          },
+        },
+        // Right column (radar chart)
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '500px',
+              height: '630px',
+            },
+            children: [
+              {
+                type: 'img',
+                props: {
+                  src: radarDataUri,
+                  width: 360,
+                  height: 360,
+                },
+              },
+            ],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
 }
