@@ -1,0 +1,65 @@
+---
+/**
+ * ScoreBreakdown.astro — Individual dimension scores display.
+ * Shows all 6 dimension scores with Greek symbols, names, numeric values,
+ * and proportional visual bar indicators. Includes a total score row.
+ * Ships ZERO client-side JavaScript.
+ */
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+import { DIMENSION_COLORS } from '../../lib/beauty-index/tiers';
+import { type Language, totalScore } from '../../lib/beauty-index/schema';
+
+interface Props {
+  language: Language;
+}
+
+const { language } = Astro.props;
+
+const total = totalScore(language);
+
+// Build dimension rows with scores
+const dimensionRows = DIMENSIONS.map((dim) => {
+  const score = language[dim.key] as number;
+  const color = DIMENSION_COLORS[dim.key];
+  const widthPercent = (score / 10) * 100;
+  return { dim, score, color, widthPercent };
+});
+---
+
+<div class="space-y-2 w-full max-w-xs">
+  {dimensionRows.map((row) => (
+    <div class="flex items-center gap-2">
+      <span
+        class="w-5 text-center font-semibold text-sm"
+        style={`color: ${row.color};`}
+      >
+        {row.dim.symbol}
+      </span>
+      <span class="text-xs text-[var(--color-text-secondary)] w-20 truncate">
+        {row.dim.shortName}
+      </span>
+      <span class="text-xs font-medium w-5 text-right text-[var(--color-text-primary)]">
+        {row.score}
+      </span>
+      <div class="flex-1 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
+        <div
+          class="h-full rounded-full"
+          style={`width: ${row.widthPercent}%; background-color: ${row.color};`}
+        />
+      </div>
+    </div>
+  ))}
+
+  {/* Total score row */}
+  <div class="flex items-center gap-2 pt-2 border-t border-[var(--color-border)]">
+    <span class="w-5 text-center font-bold text-sm text-[var(--color-text-primary)]">
+      B
+    </span>
+    <span class="text-xs text-[var(--color-text-secondary)] w-20">
+      Total
+    </span>
+    <span class="text-sm font-bold text-[var(--color-text-primary)]">
+      {total}
+    </span>
+  </div>
+</div>

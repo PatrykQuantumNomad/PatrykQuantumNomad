@@ -1,0 +1,115 @@
+---
+/**
+ * RadarChart.astro — Build-time SVG radar chart for a single language.
+ * Renders concentric hexagonal grid rings, axis lines, a filled data polygon,
+ * and labeled axes. Ships ZERO client-side JavaScript.
+ */
+import { polarToCartesian, radarPolygonPoints, hexagonRingPoints } from '../../lib/beauty-index/radar-math';
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+import { getTierColor } from '../../lib/beauty-index/tiers';
+import { type Language, dimensionScores } from '../../lib/beauty-index/schema';
+
+interface Props {
+  language: Language;
+  size?: number;
+}
+
+const { language, size = 300 } = Astro.props;
+
+const cx = size / 2;
+const cy = size / 2;
+const maxRadius = size * 0.38;
+const scores = dimensionScores(language);
+const tierColor = getTierColor(language.tier);
+
+// Grid ring levels: scores 2, 4, 6, 8, 10
+const gridLevels = [2, 4, 6, 8, 10];
+
+// Compute axis endpoints for lines from center to outer ring
+const numAxes = 6;
+const angleStep = (2 * Math.PI) / numAxes;
+const axisEndpoints = Array.from({ length: numAxes }, (_, i) => {
+  const angle = i * angleStep;
+  return polarToCartesian(cx, cy, angle, maxRadius);
+});
+
+// Compute label positions outside the chart
+const labelRadius = maxRadius + 24;
+const labelPositions = DIMENSIONS.map((dim, i) => {
+  const angle = i * angleStep;
+  const pos = polarToCartesian(cx, cy, angle, labelRadius);
+
+  // Determine text-anchor based on horizontal position
+  const normalizedX = pos.x - cx;
+  let anchor: string = 'middle';
+  if (normalizedX > 1) anchor = 'start';
+  else if (normalizedX < -1) anchor = 'end';
+
+  // Determine vertical alignment
+  let dominantBaseline: string = 'middle';
+
+  return { ...pos, anchor, dominantBaseline, dim };
+});
+
+// Data polygon points
+const polygonPoints = radarPolygonPoints(cx, cy, maxRadius, scores, 10);
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox={`0 0 ${size} ${size}`}
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label={`Radar chart for ${language.name} showing scores across 6 dimensions`}
+>
+  {/* Concentric hexagonal grid rings */}
+  {gridLevels.map((level) => {
+    const ringRadius = (level / 10) * maxRadius;
+    const points = hexagonRingPoints(cx, cy, ringRadius, 6);
+    return (
+      <polygon
+        points={points}
+        fill="none"
+        stroke="#e5ddd5"
+        stroke-width="1"
+      />
+    );
+  })}
+
+  {/* Axis lines from center to outer vertices */}
+  {axisEndpoints.map((endpoint) => (
+    <line
+      x1={cx}
+      y1={cy}
+      x2={endpoint.x.toFixed(2)}
+      y2={endpoint.y.toFixed(2)}
+      stroke="#e5ddd5"
+      stroke-width="1"
+    />
+  ))}
+
+  {/* Data polygon */}
+  <polygon
+    points={polygonPoints}
+    fill={tierColor}
+    fill-opacity="0.35"
+    stroke={tierColor}
+    stroke-width="2"
+  />
+
+  {/* Axis labels: Greek symbol + short name */}
+  {labelPositions.map((lp) => (
+    <text
+      x={lp.x.toFixed(2)}
+      y={lp.y.toFixed(2)}
+      text-anchor={lp.anchor}
+      dominant-baseline={lp.dominantBaseline}
+      font-size="11"
+      fill="#5a5a5a"
+      font-family="'Noto Sans', 'DM Sans', sans-serif"
+    >
+      {lp.dim.symbol} {lp.dim.shortName}
+    </text>
+  ))}
+</svg>

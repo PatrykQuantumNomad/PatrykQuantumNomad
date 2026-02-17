@@ -1,0 +1,35 @@
+---
+/**
+ * TierBadge.astro — Color-coded tier indicator badge.
+ * Displays the tier label with appropriate tier color styling.
+ * Ships ZERO client-side JavaScript.
+ */
+import { getTierColor, TIERS } from '../../lib/beauty-index/tiers';
+
+interface Props {
+  tier: string;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { tier, size = 'md' } = Astro.props;
+
+const tierConfig = TIERS.find((t) => t.name === tier);
+const label = tierConfig?.label ?? tier;
+const color = getTierColor(tier);
+
+// Size variant classes
+const sizeClasses: Record<string, string> = {
+  sm: 'text-xs px-2 py-0.5',
+  md: 'text-sm px-3 py-1',
+  lg: 'text-base px-4 py-1.5',
+};
+
+const classes = `inline-block rounded-md font-semibold ${sizeClasses[size]}`;
+---
+
+<span
+  class={classes}
+  style={`background-color: ${color}20; color: ${color};`}
+>
+  {label}
+</span>
