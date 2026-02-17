@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 17 of 21 (Overview & Language Detail Pages) -- IN PROGRESS
-Plan: 2 of 3 in current phase (17-01 and 17-02 done, 17-03 remaining)
-Status: Plan 17-02 complete (overview page), Plan 17-03 in progress
-Last activity: 2026-02-17 — Completed 17-02 (Beauty Index Overview Page)
+Phase: 17 of 21 (Overview & Language Detail Pages) -- COMPLETE
+Plan: 3 of 3 in current phase (all plans complete)
+Status: Phase 17 complete (all 3 plans: snippets+components, overview page, detail pages)
+Last activity: 2026-02-17 — Completed 17-03 (Language Detail Pages)
 
-Progress: [==================>............] 17/21 phases (v1.0-v1.2 complete, v1.3 phases 16-17 in progress)
+Progress: [===================>...........] 17/21 phases (v1.0-v1.2 complete, v1.3 phases 16-17 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 33 (16 v1.0 + 7 v1.1 + 6 v1.2 + 4 v1.3)
+- Total plans completed: 34 (16 v1.0 + 7 v1.1 + 6 v1.2 + 5 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -53,6 +53,8 @@ v1.3 decisions to date:
 - CodeSnippet interface as standard shape for language code examples
 - Overview page uses 4 sections: hero, ranking chart, scoring table, radar grid
 - Phase 16 test pages removed once real overview page exists
+- file() loader slug pattern: use entry.data.id not entry.id for URL params
+- BuiltinLanguage cast needed for Astro Code component lang prop type safety
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 17-02-PLAN.md (Beauty Index Overview Page)
+Stopped at: Completed 17-03-PLAN.md (Language Detail Pages) -- Phase 17 complete
 Resume file: None
-Next: Complete 17-03-PLAN.md (language detail pages) to finish Phase 17
+Next: Phase 18 (Methodology Page)

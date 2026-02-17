@@ -92,7 +92,7 @@ Plans:
 Plans:
 - [x] 17-01-PLAN.md — Code snippets data, ScoringTable, LanguageGrid, and LanguageNav components
 - [x] 17-02-PLAN.md — Beauty Index overview page at /beauty-index/
-- [ ] 17-03-PLAN.md — Language detail pages at /beauty-index/[slug]/
+- [x] 17-03-PLAN.md — Language detail pages at /beauty-index/[slug]/
 
 ### Phase 18: OG Images & Shareability
 **Goal**: Every Beauty Index page has a visually rich OG image for social sharing, and users can download or share individual chart images
@@ -177,7 +177,7 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 16. Data Foundation & Charts | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 17. Overview & Detail Pages | v1.3 | 2/3 | In Progress | - |
+| 17. Overview & Detail Pages | v1.3 | 3/3 | Complete | 2026-02-17 |
 | 18. OG Images & Shareability | v1.3 | 0/? | Not started | - |
 | 19. Code Comparison | v1.3 | 0/? | Not started | - |
 | 20. Blog Content | v1.3 | 0/? | Not started | - |
@@ -185,4 +185,4 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 17 plan 02 complete (2/3 plans)*
+*Last updated: 2026-02-17 — Phase 17 complete (3/3 plans)*
