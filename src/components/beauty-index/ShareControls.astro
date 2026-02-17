@@ -1,0 +1,185 @@
+---
+/**
+ * ShareControls.astro — Download, share, and copy buttons for radar chart images.
+ * Converts the inline SVG RadarChart to a 2x PNG via canvas, then offers:
+ *   - Download: saves PNG file to device
+ *   - Share (mobile): opens native OS share sheet with PNG
+ *   - Copy (desktop): copies PNG to clipboard, with text URL fallback
+ */
+interface Props {
+  languageName: string;
+  languageId: string;
+}
+
+const { languageName, languageId } = Astro.props;
+const pageUrl = `https://patrykgolabek.dev/beauty-index/${languageId}/`;
+---
+
+<div
+  class="flex items-center gap-3 mt-4"
+  data-share-controls
+  data-language-name={languageName}
+  data-page-url={pageUrl}
+>
+  <button
+    type="button"
+    data-action="download"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+    aria-label={`Download ${languageName} radar chart as PNG`}
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" />
+    </svg>
+    Download
+  </button>
+
+  <button
+    type="button"
+    data-action="share"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+    aria-label={`Share ${languageName} radar chart`}
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9l4-4m-4 0h4v4M4 7v5h8" />
+    </svg>
+    <span data-share-label>Share</span>
+  </button>
+
+  <div
+    data-toast
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-[var(--color-text-primary)] text-[var(--color-surface)] text-sm opacity-0 pointer-events-none transition-opacity z-50"
+    role="status"
+    aria-live="polite"
+  ></div>
+</div>
+
+<script>
+  function initShareControls() {
+    const container = document.querySelector<HTMLDivElement>('[data-share-controls]');
+    if (!container) return;
+
+    const languageName = container.dataset.languageName || 'Language';
+    const pageUrl = container.dataset.pageUrl || window.location.href;
+
+    const svgElement = document.querySelector<SVGSVGElement>(
+      '[role="img"][aria-label*="Radar chart"]'
+    );
+    if (!svgElement) return;
+
+    // Update button label: "Share" on mobile (Web Share API), "Copy" on desktop
+    const shareLabel = container.querySelector<HTMLSpanElement>('[data-share-label]');
+    if (shareLabel && !(navigator.share && navigator.canShare)) {
+      shareLabel.textContent = 'Copy';
+    }
+
+    async function svgToBlob(svg: SVGSVGElement): Promise<Blob> {
+      await document.fonts.ready;
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svg);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      const w = svg.width.baseVal.value || 300;
+      const h = svg.height.baseVal.value || 300;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w * 2;
+      canvas.height = h * 2;
+      const ctx = canvas.getContext('2d')!;
+      ctx.scale(2, 2);
+
+      return new Promise<Blob>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.fillStyle = '#faf8f5';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Canvas toBlob failed'));
+          }, 'image/png');
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('SVG image load failed'));
+        };
+        img.src = url;
+      });
+    }
+
+    function showToast(message: string) {
+      const toast = container!.querySelector<HTMLDivElement>('[data-toast]');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2000);
+    }
+
+    // Download handler
+    const downloadBtn = container.querySelector<HTMLButtonElement>('[data-action="download"]');
+    downloadBtn?.addEventListener('click', async () => {
+      try {
+        const blob = await svgToBlob(svgElement);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${languageName.toLowerCase().replace(/\s+/g, '-')}-beauty-index.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch {
+        showToast('Download failed');
+      }
+    });
+
+    // Share / Copy handler
+    const shareBtn = container.querySelector<HTMLButtonElement>('[data-action="share"]');
+    shareBtn?.addEventListener('click', async () => {
+      try {
+        const blob = await svgToBlob(svgElement);
+
+        // Try native Web Share API first (mobile)
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], `${languageName}-beauty-index.png`, {
+            type: 'image/png',
+          });
+          const shareData: ShareData = {
+            title: `${languageName} — Beauty Index`,
+            url: pageUrl,
+            files: [file],
+          };
+
+          if (navigator.canShare(shareData)) {
+            try {
+              await navigator.share(shareData);
+              return;
+            } catch (err) {
+              if (err instanceof Error && err.name === 'AbortError') return;
+              // Fall through to clipboard
+            }
+          }
+        }
+
+        // Clipboard fallback (desktop)
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob }),
+          ]);
+          showToast('Chart copied to clipboard');
+        } catch {
+          await navigator.clipboard.writeText(pageUrl);
+          showToast('Link copied to clipboard');
+        }
+      } catch {
+        showToast('Share failed');
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initShareControls);
+</script>
