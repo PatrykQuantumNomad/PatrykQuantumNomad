@@ -1,0 +1,96 @@
+---
+/**
+ * [slug].astro — Language detail page for the Beauty Index.
+ * Generates 25 static pages at /beauty-index/{id}/ using getStaticPaths.
+ * Each page shows a radar chart, score breakdown, tier badge, character sketch,
+ * syntax-highlighted code snippet, and prev/next navigation.
+ * Ships ZERO client-side JavaScript.
+ */
+import { getCollection } from 'astro:content';
+import { Code } from 'astro:components';
+import type { BuiltinLanguage } from 'shiki';
+import Layout from '../../layouts/Layout.astro';
+import RadarChart from '../../components/beauty-index/RadarChart.astro';
+import ScoreBreakdown from '../../components/beauty-index/ScoreBreakdown.astro';
+import TierBadge from '../../components/beauty-index/TierBadge.astro';
+import LanguageNav from '../../components/beauty-index/LanguageNav.astro';
+import { totalScore } from '../../lib/beauty-index/schema';
+import { getSnippet } from '../../data/beauty-index/snippets';
+
+export async function getStaticPaths() {
+  const languages = await getCollection('languages');
+  const sorted = [...languages]
+    .map((entry) => entry.data)
+    .sort((a, b) => totalScore(b) - totalScore(a));
+
+  return sorted.map((lang, index) => ({
+    params: { slug: lang.id },
+    props: {
+      language: lang,
+      prev: index > 0 ? { id: sorted[index - 1].id, name: sorted[index - 1].name } : null,
+      next: index < sorted.length - 1 ? { id: sorted[index + 1].id, name: sorted[index + 1].name } : null,
+      rank: index + 1,
+    },
+  }));
+}
+
+const { language, prev, next, rank } = Astro.props;
+const snippet = getSnippet(language.id);
+const total = totalScore(language);
+---
+
+<Layout
+  title={language.name + " — The Beauty Index | Patryk Golabek"}
+  description={language.characterSketch}
+>
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    {/* Header area */}
+    <header class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div>
+        <h1 class="text-3xl sm:text-4xl font-heading font-bold">
+          {language.name}
+        </h1>
+        <div class="flex items-center gap-3 mt-2">
+          <TierBadge tier={language.tier} size="lg" />
+          <span class="text-[var(--color-text-secondary)]">
+            Rank #{rank} &mdash; {total}/60 points
+          </span>
+        </div>
+      </div>
+    </header>
+
+    {/* Chart + Scores row */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+      <div class="flex justify-center">
+        <RadarChart language={language} size={300} />
+      </div>
+      <div class="flex items-center">
+        <ScoreBreakdown language={language} />
+      </div>
+    </div>
+
+    {/* Character Sketch section */}
+    <section class="mt-12">
+      <h2 class="text-xl font-heading font-bold mb-3">Character</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed text-lg">
+        {language.characterSketch}
+      </p>
+    </section>
+
+    {/* Code Snippet section */}
+    {snippet && (
+      <section class="mt-12">
+        <h2 class="text-xl font-heading font-bold mb-1">Signature Code</h2>
+        <p class="text-sm text-[var(--color-text-secondary)] mb-4">
+          {snippet.label}
+        </p>
+        <div class="rounded-xl overflow-hidden border border-[var(--color-border)]">
+          <Code code={snippet.code} lang={snippet.lang as BuiltinLanguage} />
+        </div>
+      </section>
+    )}
+
+    {/* Navigation */}
+    <LanguageNav prev={prev} next={next} />
+  </article>
+</Layout>
