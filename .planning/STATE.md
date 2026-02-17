@@ -9,18 +9,18 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 16 of 21 (Data Foundation & Chart Components)
-Plan: 1 of 2 in current phase
-Status: Executing phase 16
-Last activity: 2026-02-17 — Completed 16-01 (Data Foundation)
+Phase: 16 of 21 (Data Foundation & Chart Components) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans done)
+Status: Phase 16 complete, ready for Phase 17
+Last activity: 2026-02-17 — Completed 16-02 (Chart Components)
 
-Progress: [================>..............] 15/21 phases (v1.0-v1.2 complete, v1.3 plan 1/2 done)
+Progress: [=================>.............] 16/21 phases (v1.0-v1.2 complete, v1.3 phase 16 done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30 (16 v1.0 + 7 v1.1 + 6 v1.2 + 1 v1.3)
-- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~7 min (v1.3)
+- Total plans completed: 31 (16 v1.0 + 7 v1.1 + 6 v1.2 + 2 v1.3)
+- Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
 
@@ -46,6 +46,9 @@ v1.3 decisions to date:
 - Tier boundaries: 6-19/20-33/34-46/47-60 across 6-60 score range
 - radar-math.ts kept framework-agnostic (pure TS) for Astro + Satori dual use
 - Greek font fallback via Noto Sans unicode-range scoping (not self-hosted)
+- Radar chart maxRadius = size * 0.38 with labelRadius = maxRadius + 24 for label spacing
+- Bar chart uses canonical dimension order for segment stacking with tier group headers
+- Zero-JS chart component pattern: all SVG computation in Astro frontmatter
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 16-01-PLAN.md (Data Foundation)
+Stopped at: Completed 16-02-PLAN.md (Chart Components) -- Phase 16 fully complete
 Resume file: None
-Next: `/gsd:execute-phase 16` to execute 16-02-PLAN.md (Chart Components)
+Next: `/gsd:execute-phase 17` to begin Phase 17 (Beauty Index Pages)
