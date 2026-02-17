@@ -71,11 +71,11 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
   3. A standalone Astro page rendering the ranking bar chart shows all 25 languages sorted by total score with tier color coding — zero client-side JavaScript shipped
   4. The same polar-to-cartesian math utility used by radar chart components also works when imported by a Node/Satori context (validated by generating a test OG image with a radar shape)
   5. Greek dimension symbols render correctly in the site's fonts across Chrome, Firefox, and Safari
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md — Data model, utilities, content collection, and Greek font fallback
+- [ ] 16-02-PLAN.md — Chart components (radar, bar, tier badge, score breakdown) and test pages
 
 ### Phase 17: Overview & Language Detail Pages
 **Goal**: Users can browse the complete Beauty Index — an overview ranking all 25 languages and individual pages with deep profiles for each language
@@ -176,7 +176,7 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 13. Data Model & Bento Grid | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
-| 16. Data Foundation & Charts | v1.3 | 0/? | Not started | - |
+| 16. Data Foundation & Charts | v1.3 | 0/2 | Not started | - |
 | 17. Overview & Detail Pages | v1.3 | 0/? | Not started | - |
 | 18. OG Images & Shareability | v1.3 | 0/? | Not started | - |
 | 19. Code Comparison | v1.3 | 0/? | Not started | - |
@@ -185,4 +185,4 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — v1.3 milestone roadmap created*
+*Last updated: 2026-02-17 — Phase 16 planned (2 plans)*
