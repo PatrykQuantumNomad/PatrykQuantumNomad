@@ -1,0 +1,57 @@
+---
+/**
+ * Beauty Index Overview Page — /beauty-index/
+ * Main entry point for the Beauty Index. Assembles the ranking bar chart,
+ * sortable scoring table, and tier-grouped radar thumbnail grid into a
+ * single cohesive page.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import RankingBarChart from '../../components/beauty-index/RankingBarChart.astro';
+import ScoringTable from '../../components/beauty-index/ScoringTable.astro';
+import LanguageGrid from '../../components/beauty-index/LanguageGrid.astro';
+import { totalScore } from '../../lib/beauty-index/schema';
+
+const languages = await getCollection('languages');
+const allData = languages.map((entry) => entry.data);
+const sorted = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
+---
+
+<Layout
+  title="The Beauty Index | Patryk Golabek"
+  description="Ranking 25 programming languages across 6 aesthetic dimensions. From Haskell's mathematical purity to COBOL's industrial grit — every language has a beauty score."
+>
+  {/* Hero Section */}
+  <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      The Beauty Index
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
+      Ranking 25 programming languages across 6 aesthetic dimensions.
+      Beauty is subjective; this index is deliberately opinionated.
+    </p>
+  </section>
+
+  {/* Ranking Bar Chart Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-heading font-bold mb-6">Rankings</h2>
+    <div class="overflow-x-auto">
+      <RankingBarChart languages={sorted} />
+    </div>
+  </section>
+
+  {/* Scoring Table Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <h2 class="text-2xl font-heading font-bold mb-2">Score Breakdown</h2>
+    <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+      Click any column header to sort
+    </p>
+    <ScoringTable languages={sorted} />
+  </section>
+
+  {/* Radar Grid Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-16">
+    <h2 class="text-2xl font-heading font-bold mb-6">Language Profiles</h2>
+    <LanguageGrid languages={sorted} />
+  </section>
+</Layout>
