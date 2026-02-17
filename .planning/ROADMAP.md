@@ -54,7 +54,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 - [x] **Phase 16: Data Foundation & Chart Components** - Language data schema, shared SVG math, and all build-time chart components — completed 2026-02-17
 - [x] **Phase 17: Overview & Language Detail Pages** - Core user-facing pages with rankings, radar charts, and language profiles (completed 2026-02-17)
-- [ ] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features
+- [x] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features (completed 2026-02-17)
 - [ ] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering
 - [ ] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index
 - [ ] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits
@@ -106,8 +106,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — OG image generators, API routes, and meta tag wiring
-- [ ] 18-02-PLAN.md — ShareControls component (download, share, copy) on detail pages
+- [x] 18-01-PLAN.md — OG image generators, API routes, and meta tag wiring
+- [x] 18-02-PLAN.md — ShareControls component (download, share, copy) on detail pages
 
 ### Phase 19: Code Comparison Page
 **Goal**: Users can compare how 25 programming languages express the same programming concepts side-by-side
@@ -177,12 +177,12 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 16. Data Foundation & Charts | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 17. Overview & Detail Pages | 3/3 | Complete   | 2026-02-17 | 2026-02-17 |
-| 18. OG Images & Shareability | 1/2 | In Progress|  | - |
+| 17. Overview & Detail Pages | v1.3 | 3/3 | Complete | 2026-02-17 |
+| 18. OG Images & Shareability | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 19. Code Comparison | v1.3 | 0/? | Not started | - |
 | 20. Blog Content | v1.3 | 0/? | Not started | - |
 | 21. SEO & Launch | v1.3 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 17 complete (3/3 plans)*
+*Last updated: 2026-02-17 — Phase 18 complete (2/2 plans)*
