@@ -87,12 +87,12 @@ Plans:
   3. The overview page visually groups languages into 4 tiers (Beautiful, Handsome, Practical, Workhorses) with distinct color-coded sections and tier labels
   4. Visiting /beauty-index/rust/ (or any of the 25 language slugs) displays that language's radar chart, 6-dimension score breakdown, tier badge, total score, character sketch narrative, and a syntax-highlighted signature code snippet
   5. Each language detail page has previous/next navigation to adjacent languages and a back-to-overview link
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 17-01: TBD
-- [ ] 17-02: TBD
-- [ ] 17-03: TBD
+- [ ] 17-01-PLAN.md — Code snippets data, ScoringTable, LanguageGrid, and LanguageNav components
+- [ ] 17-02-PLAN.md — Beauty Index overview page at /beauty-index/
+- [ ] 17-03-PLAN.md — Language detail pages at /beauty-index/[slug]/
 
 ### Phase 18: OG Images & Shareability
 **Goal**: Every Beauty Index page has a visually rich OG image for social sharing, and users can download or share individual chart images
@@ -177,7 +177,7 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 14. Visual Design & Cards | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 15. Filtering & Animations | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 16. Data Foundation & Charts | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 17. Overview & Detail Pages | v1.3 | 0/? | Not started | - |
+| 17. Overview & Detail Pages | v1.3 | 0/3 | Planned | - |
 | 18. OG Images & Shareability | v1.3 | 0/? | Not started | - |
 | 19. Code Comparison | v1.3 | 0/? | Not started | - |
 | 20. Blog Content | v1.3 | 0/? | Not started | - |
@@ -185,4 +185,4 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 16 complete (2/2 plans done)*
+*Last updated: 2026-02-17 — Phase 17 planned (3 plans)*
