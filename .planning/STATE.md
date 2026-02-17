@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 17 of 21 (Overview & Language Detail Pages) -- IN PROGRESS
-Plan: 1 of 3 in current phase (17-01 done, 17-02 and 17-03 remaining)
-Status: Plan 17-01 complete (building block components), ready for Plans 02/03
-Last activity: 2026-02-17 — Completed 17-01 (Code Snippets + Components)
+Plan: 2 of 3 in current phase (17-01 and 17-02 done, 17-03 remaining)
+Status: Plan 17-02 complete (overview page), Plan 17-03 in progress
+Last activity: 2026-02-17 — Completed 17-02 (Beauty Index Overview Page)
 
 Progress: [==================>............] 17/21 phases (v1.0-v1.2 complete, v1.3 phases 16-17 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32 (16 v1.0 + 7 v1.1 + 6 v1.2 + 3 v1.3)
+- Total plans completed: 33 (16 v1.0 + 7 v1.1 + 6 v1.2 + 4 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -51,6 +51,8 @@ v1.3 decisions to date:
 - Zero-JS chart component pattern: all SVG computation in Astro frontmatter
 - Inline script with astro:page-load event for sort interactivity (view transition compatible)
 - CodeSnippet interface as standard shape for language code examples
+- Overview page uses 4 sections: hero, ranking chart, scoring table, radar grid
+- Phase 16 test pages removed once real overview page exists
 
 ### Pending Todos
 
@@ -84,6 +86,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 17-01-PLAN.md (Code Snippets + Components) -- Plans 02/03 remaining
+Stopped at: Completed 17-02-PLAN.md (Beauty Index Overview Page)
 Resume file: None
-Next: Execute 17-02-PLAN.md (overview page) and 17-03-PLAN.md (detail pages)
+Next: Complete 17-03-PLAN.md (language detail pages) to finish Phase 17
