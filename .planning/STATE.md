@@ -5,14 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index
+**Current focus:** v1.3 The Beauty Index — Phase 16 (Data Foundation & Chart Components)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-17 — Milestone v1.3 started
+Phase: 16 of 21 (Data Foundation & Chart Components)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-02-17 — Roadmap created for v1.3
+
+Progress: [================>..............] 15/21 phases (v1.0-v1.2 complete, v1.3 not started)
 
 ## Performance Metrics
 
@@ -27,16 +29,20 @@ Last activity: 2026-02-17 — Milestone v1.3 started
 | v1.0 MVP | 1-7 | 15 | 36 | 2026-02-11 |
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
-| **Total** | **15** | **29** | **77** | |
+| v1.3 The Beauty Index | 16-21 | TBD | 37 | in progress |
+| **Total** | **21** | **29+** | **114** | |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-v1.0 decisions archived in milestones/v1.0-ROADMAP.md.
-v1.1 decisions archived in milestones/v1.1-ROADMAP.md.
-v1.2 decisions archived in milestones/v1.2-ROADMAP.md.
+v1.0-v1.2 decisions archived in respective milestone files.
+
+v1.3 decisions to date:
+- Build-time SVG for all charts (no client-side charting libraries)
+- Defer dark mode for Beauty Index v1 (charts work in light mode only)
+- Phase 19 (Code Comparison) flagged for research-phase due to 250 code block complexity
 
 ### Pending Todos
 
@@ -50,6 +56,8 @@ None.
 - [Tech Debt]: Category colors defined in 3 places (ProjectCard, ProjectHero, FloatingOrbs)
 - [Tech Debt]: Filter system inline script (~80 lines) in projects/index.astro
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
+- [v1.3 Gap]: Dark mode strategy deferred — charts use light mode CSS custom properties only
+- [v1.3 Research]: Code comparison lazy-rendering pattern needs validation in Phase 19
 
 ### Quick Tasks Completed
 
@@ -68,6 +76,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Milestone v1.3 initialization
+Stopped at: v1.3 roadmap created (6 phases, 37 requirements mapped)
 Resume file: None
-Next: Define requirements and create roadmap
+Next: `/gsd:plan-phase 16` to plan Data Foundation & Chart Components
