@@ -1,319 +1,280 @@
-# Research Summary: v1.1 Content Refresh
+# Project Research Summary
 
-**Project:** patrykgolabek.dev -- Developer Portfolio + Blog
-**Domain:** Content refresh for existing Astro 5 static portfolio site
-**Synthesized:** 2026-02-11
-**Overall Confidence:** HIGH
-
----
+**Project:** The Beauty Index - Programming Language Aesthetic Ranking
+**Domain:** Interactive data visualization content pillar for static portfolio site
+**Researched:** 2026-02-17
+**Confidence:** HIGH
 
 ## Executive Summary
 
-The v1.1 milestone is a content refresh, not a technical overhaul. All four research dimensions converge on the same conclusion: **zero new npm packages are needed**. The work is schema extension, component modification, content file creation, and data centralization. The existing Astro 5.17.1 stack handles every v1.1 requirement out of the box.
+The Beauty Index is a content pillar featuring 25 programming languages ranked across 6 aesthetic dimensions (readability, expressiveness, consistency, elegance, ecosystem, joy). Research shows this type of content combines elements of interactive data visualization sites (like IEEE Spectrum's language rankings), tier list makers (like TierMaker), and code comparison sites (like Hyperpolyglot). The recommended approach is to extend the existing Astro 5 static site architecture using build-time SVG generation for charts rather than client-side JavaScript charting libraries.
 
-The highest-value change is external blog integration -- surfacing Patryk's 79 external posts (across Translucent Computing and Kubert AI) alongside the single local post. This transforms the blog from a ghost town into a credible content hub. The recommended approach is extending the existing blog content collection schema with optional `externalUrl` and `source` fields, adding curated external posts as lightweight Markdown stub files. This keeps one collection, one query, one sort, and one render path with a conditional branch in BlogCard.
+The critical architectural decision is **avoiding JavaScript charting libraries entirely**. The site currently ships minimal client-side JavaScript and maintains 90+ Lighthouse performance scores. Research across all four areas (STACK, ARCHITECTURE, and PITFALLS) converges on the same conclusion: hand-crafted SVG generated at build time in Astro components is the correct approach. A 6-point radar chart is a single polygon element with trigonometric coordinate calculations (approximately 40 lines of code), while client-side charting libraries add 50-80KB of JavaScript for completely static data. The existing Satori + Sharp OG image pipeline already demonstrates this pattern works for SVG-based visualizations.
 
-The second structural change is creating a centralized site configuration file (`src/data/site.ts`) to eliminate the current pattern of hardcoded social links, email addresses, and hero text scattered across 4+ files. This is not optional -- without it, every content change risks inconsistency between Footer, Contact, Home, and PersonJsonLd, which directly harms SEO and accessibility.
+The primary risk is DOM explosion from 250 code blocks on the comparison page (25 languages × 10 features). Expressive Code processes each block through Shiki at build time, generating 20-50 DOM elements per block. Loading all 250 blocks into the DOM simultaneously would create 5,000-12,500 elements, exceeding Lighthouse's "Excessive DOM Size" threshold. The mitigation strategy is tab-based lazy rendering where only 10-25 code blocks are in the DOM at once, with inactive tab content stored in template elements or loaded on-demand.
 
-Key risks are low severity but require discipline: (1) the blog detail route and OG image generator must filter out external posts to avoid generating empty pages, (2) hero tagline changes must propagate to title tags, meta descriptions, and JSON-LD to maintain keyword alignment, and (3) removing the existing blog post without a redirect creates a 404 for an already-indexed URL.
+## Key Findings
 
----
+### Recommended Stack
 
-## Stack Additions
+**No new runtime dependencies required.** The existing Astro 5 stack already contains everything needed: React 19 for optional interactive components, Tailwind CSS for styling, Expressive Code for syntax highlighting, Satori + Sharp for OG image generation, and GSAP for scroll animations.
 
-**Finding: Nothing to install.** All v1.1 features are achievable with the existing stack.
+**Optional additions (minimal impact):**
+- **html-to-image** (1.11.11 pinned): 12KB gzipped for chart-to-image export if runtime sharing is needed (build-time Satori approach is preferred)
+- **file-saver** (^2.0.5): 3KB gzipped for cross-browser download triggers
+- **@expressive-code/plugin-collapsible-sections** (^0.41.0): Build-time only plugin for collapsing boilerplate in code blocks
 
-| Existing Technology | Role in v1.1 |
-|---|---|
-| Astro 5.17.1 | Content Layer API with Zod schema extension (`externalUrl` optional field) |
-| @astrojs/rss ^4.0.15 | RSS feed -- needs conditional `link` field for external posts |
-| Content Collections + glob() | External blog stubs are just .md files with frontmatter -- glob loader handles them |
-| Tailwind v3.4.19 | No changes needed |
-| Satori + Sharp | OG image generation -- needs filter to skip external posts |
+**Core technologies already present:**
+- **Astro 5.3.0**: Static pages, getStaticPaths() for 25 language detail pages, content collections with file() loader
+- **React 19**: Interactive tab component via client:visible (only on comparison page)
+- **Tailwind CSS 3.4.19**: Component styling, responsive layouts
+- **TypeScript 5.9.3**: Type-safe language data schemas
+- **GSAP 3.14.2**: Scroll-triggered chart entrance animations
+- **Satori 0.19.2 + Sharp 0.34.5**: Build-time OG image generation with radar chart shapes
+- **astro-expressive-code 0.41.6**: Syntax highlighting for 25-language code comparison
 
-**What NOT to add** (all four researchers agree):
-- No RSS feed loader (`astro-loader-rss`) -- adds build-time network dependency for quarterly publishing cadence
-- No icon library (`astro-icon`) -- 2 new SVG icons do not justify a dependency when the codebase uses inline SVGs
-- No CMS -- adding a CMS for 3-5 new stub files is absurd
-- No Tailwind v4 upgrade -- save it for a dedicated infrastructure milestone
-- No animation libraries -- the hero tagline refresh is a text edit, not a visual overhaul
+**Chart rendering decision:** The research revealed a divergence between STACK.md (recommending Recharts 3.7, a 50KB React charting library) and ARCHITECTURE.md + PITFALLS.md (recommending build-time SVG with zero JavaScript). The **correct recommendation is build-time SVG**. Rationale: (1) data is completely static (scores don't change at runtime), (2) radar charts with 6 data points are simple SVG polygons (polar-to-cartesian coordinate conversion is ~40 lines of code), (3) the site's performance philosophy is zero-JS-by-default, and (4) client-side charting libraries would degrade Lighthouse performance scores from 90+ to potentially 70s due to JavaScript payload increase. The existing Satori pipeline already proves this pattern works.
 
----
+### Expected Features
 
-## Feature Analysis
+**Must have (table stakes):**
+- Overall ranking table with sort by dimension
+- 4-tier visual grouping (Beautiful/Handsome/Practical/Workhorses) with color coding
+- Per-language detail pages (25 total) with radar charts and character sketches
+- Radar/spider charts showing 6-dimensional scores
+- Code comparison page (10 features × 25 languages)
+- Methodology blog post explaining scoring rubric
+- Responsive design for mobile
+- OG images for social sharing with chart visuals
+- Accessible data tables behind charts for screen readers
+- Navigation between overview, detail, and comparison pages
 
-### Must Ship (Table Stakes for v1.1)
+**Should have (differentiators):**
+- "Download as Image" button on charts for social sharing
+- Tier badge system (visual badges: gold/silver/bronze/steel)
+- Character sketch narrative for each language (2-3 sentence personality descriptions)
+- Anchor links to specific language rows in ranking table
+- Animated chart entrance on scroll (using existing GSAP)
+- Web Share API integration on mobile
 
-1. **External blog entries in blog listing** -- 8-12 curated posts from Translucent Computing and Kubert AI. Currently the blog shows 1 real post. This is the highest-value change.
-2. **Social links update** -- Add X (@QuantumMentat) and YouTube (@QuantumMentat), remove LinkedIn, update email to pgolabek@gmail.com. Must update all 4 locations atomically (Footer, Contact, Home CTA, PersonJsonLd).
-3. **Hero tagline refresh** -- Remove location, remove "Pre-1.0 Kubernetes adopter", shift to craft and precision tone. Recommended new typing roles: `['Software Architect', 'Systems Engineer', 'AI/ML Builder']`.
-4. **Project curation** -- Remove Full-Stack Applications category (2 projects: self-referential portfolio repo + a fork), remove gemini-beauty-math from AI/ML. Total projects: 19 down to 16.
-5. **Test post cleanup** -- Delete `draft-placeholder.md`.
+**Defer (v2+):**
+- Overlay comparison (pick 2-3 languages, overlay radar charts)
+- User voting/crowd-sourced scores (destroys editorial thesis)
+- Real-time data from GitHub/Stack Overflow APIs (conflates beauty with popularity)
+- Comments section (let debate happen on social media where it generates backlinks)
+- Historical tracking of score changes over time
 
-### Should Ship (Differentiators)
+### Architecture Approach
 
-6. **Visual distinction badge on external posts** -- Source label ("on Kubert AI") and external link icon on BlogCard. Low effort, high UX value -- no bait-and-switch.
-7. **Blog slug page guard** -- Filter external posts from `getStaticPaths()` to prevent generating empty pages. This is technically a bug fix, not a feature.
-8. **RSS feed with external post links** -- External posts appear in RSS with their external URL as the link field.
-9. **OG image skip for external posts** -- No point generating OG images for pages that do not exist.
+**Content pillar integration pattern:** The Beauty Index extends the existing portfolio site structure as a new section alongside `/blog/` and `/projects/`. It uses the same architectural patterns: Astro 5 file() content loader for structured data (languages.json), getStaticPaths() for dynamic routes (25 language pages), Satori + Sharp for OG images, and React islands for the one interactive component (code comparison tabs).
 
-### Defer to v1.2+
+**Major components:**
+1. **Data layer**: languages.json (25 languages with scores, metadata, character descriptions) loaded via Astro 5 content collection with Zod schema validation; code-samples.ts (TypeScript module with 250 code snippets keyed by feature)
+2. **Build-time SVG charts**: RadarChart.astro generates inline SVG radar charts using polar-to-cartesian trigonometry in component frontmatter (zero JavaScript shipped to client); RankingChart.astro generates SVG horizontal bar chart for overview rankings
+3. **Static pages**: /beauty-index/ (overview with rankings chart + language grid), /beauty-index/[slug]/ (per-language detail with radar chart and character), /beauty-index/code/ (feature-tabbed code comparison)
+4. **OG image generation**: Extends existing Satori pipeline with new templates for radar chart layouts; radar shapes drawn as SVG polygons calculated from score data
+5. **Interactive island**: CodeComparison.tsx React component with client:visible for tab switching on comparison page; pre-renders all code blocks at build time via Expressive Code, React only toggles visibility
 
-- Source filtering on blog listing (tabs for "All", "On this site", "Kubert AI", etc.) -- only valuable with 20+ posts
-- About page cross-promotion links
+**Chart rendering architecture:** Hand-crafted SVG generated at build time in Astro component frontmatter. A shared utility (src/lib/radar-svg.ts) contains polar-to-cartesian coordinate conversion used by both Astro components (RadarChart.astro) and OG image generation (beauty-index-og.ts). Charts use CSS custom properties (var(--color-accent), var(--color-border)) for theming, automatically adapting to the site's existing light mode styles.
 
-### Curated External Post Selection
+### Critical Pitfalls
 
-FEATURES research identified 10 specific posts to include, vetted for Patryk's authorship, technical depth, and domain coverage:
+1. **Chart libraries destroy Lighthouse performance** — Adding Chart.js (63KB), Recharts (42KB), or D3 (80KB+) to every page would tank the site's 90+ performance scores. The data is static (known at build time) and the shapes are simple (polygons/rectangles). Solution: Hand-crafted SVG generated in Astro component frontmatter, zero JavaScript payload, instant render.
 
-**From Kubert AI (6 posts):** AI Agent for SQL Server, Kubernetes AI Assistant, Ollama K8s Deployment, Red Teaming LLMs, Golden Paths to Agentic AI, AgentOps and Agentic AI
+2. **250 code blocks explode build time and DOM size** — The comparison page with 25 languages × 10 features = 250 Shiki-highlighted code blocks would generate 5,000-12,500 DOM elements and take 12-50 seconds to build. Solution: Tab-based lazy rendering where only 10-25 blocks are in the DOM at once; store inactive tab content in template elements or load on-demand.
 
-**From Translucent Computing (4 posts):** Apache Airflow Data Pipeline, K8s Cloud Cost Strategies, Workflow Engine Data Pipeline, Zero Trust Security
+3. **Chart-to-image sharing hits CSP violations** — The site has a strict Content Security Policy. DOM-to-image libraries (html2canvas, dom-to-image) inject inline styles and create blob URLs that can be blocked by CSP, plus they're fragile on mobile (2-5 second freeze during capture). Solution: Generate shareable chart images at build time using the existing Satori + Sharp pipeline, avoiding all runtime DOM-to-image issues.
 
----
+4. **Dark mode theme mismatch** — The site has a theme toggle but NO dark mode CSS custom properties are defined (only light mode variables exist in global.css). Charts using CSS custom properties will render identically in both modes. Solution: Decide on dark mode strategy BEFORE building chart components (recommended: defer dark mode for Beauty Index v1, document decision).
 
-## Architecture Impact
+5. **OG image generation increases build time** — Adding 27+ new OG images (overview + 25 languages + comparison page) with radar chart visuals could add 4-11 seconds to build time, potentially 15-20 seconds if complex layouts. Solution: Implement hash-based caching for OG images (skip regeneration if input data unchanged), throttle parallel generation to 4 concurrent, create dedicated generateBeautyIndexOgImage() function.
 
-### Core Pattern: Single Collection with Schema Extension
+## Implications for Roadmap
 
-Extend the existing `blog` collection schema in `src/content.config.ts` with two optional fields:
+Based on research, suggested phase structure:
 
-```typescript
-externalUrl: z.string().url().optional(),  // link to external blog
-source: z.string().optional(),              // "Translucent Computing", "Kubert AI"
-```
+### Phase 1: Data Foundation & Core SVG Components
+**Rationale:** Data model and shared chart math must be established first because every other component reads from languages.json and multiple components (RadarChart.astro, OG images) use the same polar coordinate calculations. Building pages without the data schema means dummy markup that gets replaced.
 
-External posts are Markdown stub files (frontmatter only, no body) in `src/data/blog/`. The glob() loader picks them up. Every page that queries `getCollection('blog')` automatically includes them. BlogCard checks `externalUrl` and branches:
-- Present: link externally with `target="_blank"`, show source badge and external icon
-- Absent: link to `/blog/{id}/` as before
+**Delivers:**
+- languages.json with 3-5 seed languages (complete all 25 later)
+- beautyIndex content collection in content.config.ts with Zod schema
+- src/lib/radar-svg.ts (shared radar geometry math)
+- RadarChart.astro (build-time SVG radar chart component)
+- RankingChart.astro (build-time SVG bar chart component)
+- ScoreBadge.astro (reusable score display pill)
 
-### New File: Centralized Site Configuration
+**Addresses:** Table stakes features T3 (radar charts), foundation for all visual components
 
-Create `src/data/site.ts` exporting:
-- `socialLinks[]` -- platform, url, label, icon identifier
-- `contact.email` -- single source for email address
-- `hero` -- name, tagline, roles array
-- `sameAs` -- derived from socialLinks for JSON-LD
+**Avoids:** Pitfall #1 (no chart library dependency decision made here - SVG-only from start), Pitfall #4 (dark mode strategy documented before building visual components)
 
-This replaces hardcoded strings in Footer.astro, contact.astro, index.astro, and PersonJsonLd.astro.
+**Research flag:** Standard patterns (SVG geometry, Astro components) - skip research-phase
 
-### Files Requiring Modification
+### Phase 2: Overview & Detail Pages
+**Rationale:** Core user-facing pages depend on Phase 1 components but can be built before the complex code comparison page. The overview page (rankings table + language grid) and per-language detail pages (radar chart + character sketch) deliver the essential "ranking index" experience. These pages validate the data model and component patterns before tackling the more complex comparison page.
 
-| File | Change Type | Why |
-|---|---|---|
-| `src/content.config.ts` | Schema extension | Add `externalUrl` and `source` optional fields |
-| `src/data/site.ts` | **NEW FILE** | Centralized social links, contact, hero config |
-| `src/data/blog/*.md` | Add 8-12 stubs | External blog entries |
-| `src/components/BlogCard.astro` | Conditional rendering | External vs internal link logic |
-| `src/pages/blog/[slug].astro` | Filter | Exclude external posts from `getStaticPaths()` |
-| `src/pages/rss.xml.ts` | Conditional link | Use `externalUrl` when present |
-| `src/pages/llms.txt.ts` | Conditional link | Same external URL handling |
-| `src/pages/open-graph/[...slug].png.ts` | Filter | Skip OG generation for external posts |
-| `src/components/Footer.astro` | Import from site.ts | Replace hardcoded social links |
-| `src/pages/contact.astro` | Import from site.ts | Replace hardcoded contact info and social links |
-| `src/pages/index.astro` | Import from site.ts | Hero text, typing roles, CTA updates |
-| `src/components/PersonJsonLd.astro` | Import from site.ts | `sameAs` and `jobTitle` from centralized config |
-| `src/data/projects.ts` | Data removal | Remove 3 projects and 1 category |
+**Delivers:**
+- /beauty-index/ overview page (RankingChart + LanguageCard grid)
+- /beauty-index/[slug]/ per-language detail pages (RadarChart + character content)
+- LanguageCard.astro (composes RadarChart + ScoreBadge for overview grid)
+- CharacterSketch.astro (character illustration wrapper)
+- Navigation integration (add "Beauty Index" to Header.astro navLinks)
 
-### Build Order (Dependency-Driven)
+**Uses:** All Phase 1 components, existing Layout.astro and SEOHead.astro
 
-```
-[1] site.ts (NEW)  +  content.config.ts (schema)   -- data contracts first
-[2] External blog stub .md files                     -- requires schema
-[3] BlogCard.astro conditional logic                 -- requires schema types
-[4] blog/[slug].astro + rss.xml.ts + llms.txt.ts    -- filter/conditional
-    + open-graph/[...slug].png.ts
-[5] Footer + Contact + PersonJsonLd                  -- require site.ts
-[6] index.astro (hero + CTA)                         -- requires site.ts + BlogCard
-[7] projects.ts (remove entries)                     -- independent, any time
-[8] Delete draft-placeholder.md                      -- independent, any time
-```
+**Implements:** Pages and routing architecture from ARCHITECTURE.md
 
----
+**Avoids:** Pitfall #6 (SEO infrastructure built INTO page templates from start: unique meta descriptions per language, canonical URLs, JSON-LD structured data)
 
-## Risk Mitigation
+**Research flag:** Standard patterns (Astro dynamic routes, existing SEO component patterns) - skip research-phase
 
-### Top 5 Pitfalls with Prevention Strategies
+### Phase 3: OG Image Generation
+**Rationale:** OG images can be built in parallel with or after core pages. They depend only on the shared radar math utility (Phase 1) and the data model, not on the page components themselves. Building them as a separate phase allows focus on the Satori template design and build-time optimization without blocking page development.
 
-**1. External blog entries break the content pipeline (CRITICAL)**
-Adding entries to the blog collection that have no renderable body breaks `[slug].astro` page generation, OG image generation, and potentially RSS if links point to nonexistent internal pages.
-- **Prevention:** Add `&& !data.externalUrl` filter in `getStaticPaths()` for `[slug].astro` and `open-graph/[...slug].png.ts`. Use `post.data.externalUrl ?? /blog/${post.id}/` in RSS link field.
-- **Verification:** Build succeeds. No `/blog/ext-*` pages in `dist/`. OG images generated only for internal posts.
+**Delivers:**
+- src/lib/beauty-index-og.ts (OG image generation function with radar chart SVG embedding)
+- /open-graph/beauty-index/overview.png endpoint
+- /open-graph/beauty-index/[slug].png endpoint (27 total images: overview + 25 languages + code page)
+- Hash-based OG image caching to prevent regeneration on every build
+- Throttled parallel generation (p-limit(4)) to avoid CI/CD memory issues
 
-**2. Hero tagline changes create SEO keyword drift (CRITICAL)**
-Hero text, title tag, meta description, JSON-LD jobTitle, and About page bio are defined in 7 different places. Changing one without the others creates inconsistent keyword signals.
-- **Prevention:** Create `src/data/site.ts` FIRST. Import hero data everywhere. Change once, propagate automatically.
-- **Verification:** Title tag, meta description, JSON-LD, and hero H1 all contain the same target keywords.
+**Uses:** Phase 1 radar-svg.ts utility, existing Satori + Sharp pipeline from src/lib/og-image.ts
 
-**3. Social link updates break accessibility and JSON-LD (MODERATE)**
-New SVG icons without `aria-label`, `aria-hidden="true"`, or proper `viewBox` break screen reader accessibility. Updating Footer but not PersonJsonLd creates identity signal mismatch.
-- **Prevention:** Centralize social links in `site.ts`. Derive `sameAs` from the same data. Enforce `aria-label` on every social link.
-- **Verification:** Lighthouse accessibility 90+. JSON-LD validates with Google Rich Results Test.
+**Addresses:** Table stakes feature T8 (OG images), differentiator D3 (shareable social cards)
 
-**4. Removing blog post creates 404 for indexed URL (MODERATE)**
-The existing blog post at `/blog/building-kubernetes-observability-stack/` is indexed by Google. Deleting the file creates a 404. GitHub Pages cannot do 301 redirects.
-- **Prevention:** Do NOT delete the existing real blog post. Only delete `draft-placeholder.md` (which is `draft: true` and never appeared in production). If a published post must be removed in the future, use Astro's `redirects` config for a meta-refresh redirect.
-- **Verification:** No new 404s in build output.
+**Avoids:** Pitfall #5 (OG image build time) via caching and throttling; Pitfall #3 (chart sharing fragility) by using build-time Satori instead of runtime DOM capture
 
-**5. RSS/Sitemap/LLMs.txt drift after content changes (MODERATE)**
-Every content change can cause these output files to reference removed pages, include stale links, or miss new entries.
-- **Prevention:** After every content phase, verify `dist/rss.xml`, `dist/sitemap-0.xml`, and `dist/llms.txt` contain correct entries with valid links.
-- **Verification:** Post-build audit of all three files.
+**Research flag:** Standard patterns (extending existing OG pipeline) - skip research-phase
 
-### Verification Checklist ("Looks Done But Isn't")
+### Phase 4: Code Comparison Page (High Complexity)
+**Rationale:** This is the most architecturally complex feature due to 250 code blocks and tab-based lazy rendering requirements. Deferring it until core pages are stable allows validation of the data model and component patterns first. The comparison page is valuable but not blocking for the core "ranking index" experience.
 
-- [ ] External blog links open the external site, not an internal 404
-- [ ] External posts have `target="_blank"` and `rel="noopener noreferrer"`
-- [ ] No `/blog/ext-*` pages exist in `dist/`
-- [ ] RSS feed entries for external posts link to external URLs
-- [ ] Title tag matches hero text matches JSON-LD jobTitle
-- [ ] All social links have `aria-label` attributes
-- [ ] JSON-LD `sameAs` array matches visible social links
-- [ ] Project count in meta description matches actual data (16)
-- [ ] Lighthouse Performance and Accessibility scores remain 90+
+**Delivers:**
+- src/data/beauty-index/code-samples.ts (TypeScript module with 250 code snippets)
+- /beauty-index/code/ page with tab-based code comparison
+- CodeTabs.tsx React component (client:visible for tab switching)
+- Pre-rendered code blocks via Expressive Code, React only toggles visibility
+- Accessible tab component following WAI-ARIA tab pattern
 
----
+**Uses:** Existing astro-expressive-code integration, React 19 islands, GSAP for optional animations
 
-## Key Recommendations
+**Implements:** Tab-based lazy rendering architecture from ARCHITECTURE.md to avoid DOM explosion
 
-### 1. Use the Single-Collection Approach for External Blog Posts
+**Avoids:** Pitfall #2 (250 code blocks DOM explosion) via tab-based lazy rendering where only 10-25 blocks in DOM at once; Pitfall #9 (tab accessibility) by implementing WAI-ARIA tab pattern with keyboard navigation
 
-STACK, FEATURES, and ARCHITECTURE all converge on extending the existing blog collection with optional `externalUrl` and `source` fields. This is the right call. One collection means one query, one sort, one render path. The alternative (separate collection or separate data file) forces dual-query merging in every listing page for zero user benefit.
+**Research flag:** NEEDS RESEARCH-PHASE - complex interaction between Expressive Code build-time rendering, React hydration, and tab state management; DOM manipulation patterns for 250 code blocks need validation
 
-### 2. Create Centralized Site Configuration Before Touching Any Components
+### Phase 5: Content Completion & Polish
+**Rationale:** With all infrastructure in place, this phase completes the remaining 20-22 language entries (started with 3-5 seeds in Phase 1), writes the methodology blog post, and adds optional shareability features. Content authoring can happen incrementally without blocking technical work.
 
-All four researchers independently identified scattered hardcoded values as a problem. Create `src/data/site.ts` in the first phase. Every subsequent change becomes a single-file edit instead of a 4-file hunt.
+**Delivers:**
+- Complete all 25 languages in languages.json
+- Complete all 250 code snippets in code-samples.ts
+- Methodology blog post (MDX in existing blog collection)
+- Character illustrations (25 PNG files in public/images/)
+- Optional: "Download as Image" button (html-to-image + file-saver if needed)
+- Optional: Web Share API integration on mobile
+- Optional: Animated chart entrance via GSAP ScrollTrigger
 
-### 3. Curate 8-12 External Posts, Not All 79
+**Uses:** All existing infrastructure from Phases 1-4
 
-FEATURES research vetted the external blog catalogs. Most Translucent Computing posts are by other authors. Many Kubert AI posts are product announcements. The recommended 10 posts cover AI agents, Kubernetes, security, data engineering, and platform engineering -- the exact domains Patryk wants to be found for.
+**Addresses:** Remaining differentiator features (D1 download, D5 animations, D10 Web Share)
 
-### 4. Keep LinkedIn in PersonJsonLd sameAs (Decision Flag)
+**Avoids:** Pitfall #7 (GSAP ScrollTrigger conflicts) by registering animations through existing lifecycle, testing page navigation flow
 
-FEATURES and PITFALLS both flag this: LinkedIn is being removed from visible UI, but Google uses `sameAs` for entity recognition. LinkedIn profiles are strong identity signals. **Recommendation: keep LinkedIn in the `sameAs` array even though it is removed from Footer/Contact.** Flag for Patryk to confirm.
+**Research flag:** Standard patterns (content authoring, GSAP patterns already established) - skip research-phase
 
-### 5. Phase the Work: Config First, External Blog Second, Cleanup Last
+### Phase 6: SEO & Launch Readiness
+**Rationale:** Final SEO polish and cross-page linking happens after all content exists. This ensures internal linking strategy can reference all 25 language pages, the comparison page, and the methodology blog post. Launch checklist verification ensures nothing is missing.
 
-The build order is dictated by dependencies. Data contracts (schema + site.ts) must exist before components can import them. External blog integration is the most complex change and should be done while the codebase is closest to its known-good v1.0 state. Content removal is the lowest risk and comes last.
+**Delivers:**
+- BeautyIndexJsonLd.astro (Schema.org structured data for ranking pages)
+- BreadcrumbJsonLd on all Beauty Index pages
+- Internal links FROM existing pages (blog, homepage) TO Beauty Index
+- Sitemap verification (all 27+ pages included)
+- Lighthouse audit on all page types (overview, detail, comparison)
+- Accessibility audit (VoiceOver testing, keyboard navigation)
+- Mobile responsiveness verification
 
----
+**Uses:** Existing SEOHead.astro, sitemap integration, BreadcrumbJsonLd patterns
 
-## Conflicts and Resolutions
+**Addresses:** Pitfall #6 completion (full SEO infrastructure), table stakes feature T9 (navigation/cross-linking)
 
-### Conflict 1: External Blog Integration Approach
+**Research flag:** Standard patterns (existing SEO components, known audit tools) - skip research-phase
 
-| Researcher | Recommendation |
-|---|---|
-| STACK | Single collection with `externalUrl` schema field + stub .md files |
-| FEATURES | Single collection with `externalUrl` schema field (Approach A) |
-| ARCHITECTURE | Single collection with `externalUrl` schema field |
-| PITFALLS | **Separate data source** (`external-posts.ts`) to avoid touching content pipeline |
+### Phase Ordering Rationale
 
-**Resolution: Use the single-collection approach (3-to-1 consensus).** The PITFALLS concern about touching 7+ files is valid but overstated. The changes are small conditionals (`?? externalUrl`, `&& !data.externalUrl`) not architectural rewrites. The separate data source approach would require merging two arrays in every listing page, dual-sorting by date, and maintaining two type interfaces -- more code, not less. The single-collection approach is the standard Astro pattern for mixed content.
+- **Data-first approach:** Phase 1 establishes the data model and shared utilities because every downstream component depends on languages.json schema and radar math calculations. Changing the data schema later would ripple through all components.
 
-### Conflict 2: External Posts in RSS Feed
+- **Core pages before complex features:** Phases 2-3 deliver the essential ranking index experience (overview + detail pages + OG images) before tackling the high-complexity comparison page (Phase 4). This validates architectural patterns with simpler use cases first.
 
-| Researcher | Recommendation |
-|---|---|
-| STACK | Include external posts in RSS with external URL as link |
-| FEATURES | Include external posts in RSS (listed as "Should Ship") |
-| ARCHITECTURE | Include with `link: post.data.externalUrl ?? /blog/${post.id}/` |
-| PITFALLS | **Do NOT add external blog posts to RSS** -- they are someone else's content |
+- **OG images isolated:** Phase 3 can run in parallel with Phase 2 because OG generation only depends on Phase 1 utilities, not on page components. This allows optimization work (caching, throttling) to happen independently.
 
-**Resolution: Include external posts in RSS (3-to-1 consensus).** The RSS feed represents "writing by Patryk" not "pages on this domain." These are Patryk's own articles on his own company blogs, not syndicated third-party content. RSS readers should surface the full breadth of his writing. The `link` field points to the canonical external URL, which is the correct RSS behavior for curated external content.
+- **Comparison page deferred:** Phase 4 is the only feature requiring deep research due to the 250 code block challenge and React hydration complexity. Deferring it prevents blocking core pages while the lazy-rendering pattern is validated.
 
-### Conflict 3: Source Field Type
+- **Content completion flexible:** Phase 5 content authoring (remaining 20 languages, code snippets, character sketches) can happen incrementally and doesn't block technical infrastructure work.
 
-| Researcher | Recommendation |
-|---|---|
-| STACK | `source: z.string().optional()` with free-form strings like "Kubert AI Blog" |
-| FEATURES | `source: z.enum(['local', 'kubert-ai', 'translucent-computing']).default('local')` |
-| ARCHITECTURE | `source: z.string().optional()` |
+- **SEO polish last:** Phase 6 internal linking and cross-references require all content to exist first. Launch readiness checklist ensures comprehensive verification across all page types.
 
-**Resolution: Use `z.string().optional()` (STACK/ARCHITECTURE approach).** An enum is unnecessarily rigid. If Patryk publishes on a third blog or guest posts, the enum needs a schema change and rebuild. A free-form string with a naming convention (set by the stub file author) is more flexible and equally clear. The `source` field is only used for display labels on BlogCard, not for routing or filtering logic.
+### Research Flags
 
----
+**Phases likely needing deeper research during planning:**
+- **Phase 4 (Code Comparison):** Complex interaction between Expressive Code build-time rendering, React client:visible hydration, tab state management, and DOM manipulation for 250 code blocks. The hybrid approach (pre-render via Expressive Code, toggle visibility via React) needs validation. Alternative vanilla JS approach may be simpler.
+
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1:** SVG geometry and Astro component patterns are well-documented; polar-to-cartesian conversion is standard trigonometry
+- **Phase 2:** Astro dynamic routes via getStaticPaths() follows existing blog pattern; SEO components already established
+- **Phase 3:** Satori + Sharp pipeline already proven for blog OG images; extending with new templates is straightforward
+- **Phase 5:** Content authoring, GSAP scroll animations, and Web Share API are established patterns
+- **Phase 6:** SEO audit, Lighthouse testing, and accessibility verification use standard tools and existing component patterns
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
-|---|---|---|
-| Stack | HIGH | Zero new dependencies. All features use existing Astro 5.17.1 capabilities verified in official docs. |
-| Features | HIGH | Requirements are well-defined content changes. External blog catalog vetted with author attribution. Curated post list ready. |
-| Architecture | HIGH | Single-collection approach is standard Astro pattern. Centralized config is straightforward TypeScript. All file modifications mapped with code examples. |
-| Pitfalls | HIGH | All risks are moderate severity with documented prevention strategies. No unknown-unknowns for a content refresh of this scope. |
+|------|------------|-------|
+| Stack | HIGH | No new runtime dependencies needed; existing Astro 5 stack sufficient; SVG-first approach proven by existing Satori OG pipeline |
+| Features | HIGH | Clear table stakes from competitive analysis (TIOBE, IEEE Spectrum, TierMaker); differentiators based on social shareability patterns; anti-features well-reasoned |
+| Architecture | HIGH | Extends established Astro patterns (content collections, dynamic routes, React islands); build-time SVG approach matches site performance philosophy; OG pipeline proven |
+| Pitfalls | HIGH | Verified against codebase analysis, Astro docs, known CSP issues, web performance research, and accessibility standards; all pitfalls have concrete mitigation strategies |
 
-**Overall: HIGH.** This is well-trodden ground. The v1.0 site is already built and working. The v1.1 changes are incremental.
+**Overall confidence:** HIGH
 
-### Gaps to Address During Planning
+### Gaps to Address
 
-1. **Hero tagline final copy** -- Three options proposed in FEATURES research (Architect's Identity, Craft-Forward, Minimalist). Patryk needs to choose. Recommendation: Option A.
-2. **LinkedIn sameAs decision** -- Keep or remove from JSON-LD structured data. Low SEO impact either way, but needs a conscious decision.
-3. **External post titles and descriptions** -- The 10 recommended posts need final title/description text verified against the actual external blog posts (some titles were inferred from URLs).
-4. **Existing blog post fate** -- `building-kubernetes-observability-stack.md` is a real published post. It stays. Only `draft-placeholder.md` is deleted. Confirm this is understood.
+**Dark mode strategy needs decision:** The site has a theme toggle but incomplete dark mode implementation (no dark CSS custom properties defined, only Expressive Code themes respond to .dark class). Decision required: (A) defer dark mode for Beauty Index v1 and ensure charts work in light mode only, or (B) complete dark mode color palette in global.css before building chart components. Recommendation: Option A for v1 MVP, document decision in Phase 1.
 
----
+**Code comparison lazy-rendering pattern needs validation:** The hybrid approach (Expressive Code pre-renders at build time, React island toggles visibility) is architecturally sound but the exact mechanics need validation during Phase 4 planning. Alternative: pure vanilla JavaScript tab controller without React hydration overhead. This is flagged for research-phase in Phase 4.
 
-## Suggested Phase Structure for Roadmap
+**Character illustration art style:** The 25 character sketches need a consistent visual style. This is content creation work (illustration/design) outside of technical implementation. Consider placeholder illustrations for Phase 1-4, commission final art for Phase 5.
 
-### Phase 1: Configuration Foundation
-**Rationale:** Establishes data contracts that all subsequent phases depend on.
-**Delivers:** `src/data/site.ts` (social links, contact, hero) + `src/content.config.ts` schema extension (externalUrl, source)
-**Features:** None visible yet -- this is infrastructure.
-**Avoids:** Pitfall 2 (hero keyword drift), Pitfall 5 (social link inconsistency)
-**Research needed:** No -- standard TypeScript and Zod patterns.
-
-### Phase 2: External Blog Integration
-**Rationale:** Highest-value change, most architecturally complex. Do it while codebase is closest to known-good state.
-**Delivers:** 8-12 external blog entries appearing in blog listing, external link badges, slug page guard, RSS/LLMs.txt external URL handling, OG skip for external posts.
-**Features:** External blog entries (P1), visual distinction badge (P1), slug page guard (P1), RSS inclusion (P1)
-**Avoids:** Pitfall 1 (external entries break pipeline), Pitfall 3 (RSS/sitemap drift), Pitfall 6 (OG generation breaks)
-**Research needed:** No -- single-collection approach is well-documented.
-
-### Phase 3: Social Links and Contact Update
-**Rationale:** Consumes centralized site.ts from Phase 1. Safe refactors replacing hardcoded strings with imports.
-**Delivers:** X and YouTube links in Footer/Contact/PersonJsonLd, LinkedIn removed from UI, email updated, Home CTA updated.
-**Features:** Social links update (P1), PersonJsonLd update (P1), Home page CTA update (P1)
-**Avoids:** Pitfall 5 (accessibility/JSON-LD breakage)
-**Research needed:** No -- HTML/SVG editing.
-
-### Phase 4: Hero Tagline and Content Curation
-**Rationale:** Content changes that propagate through centralized config. Low risk, independent of Phases 2-3.
-**Delivers:** New hero subtitle and typing roles, project removals (3 projects, 1 category), draft placeholder deletion, meta description count update.
-**Features:** Hero tagline refresh (P1), project curation (P1), test post cleanup (P1)
-**Avoids:** Pitfall 4 (hero keyword drift -- mitigated by site.ts), Pitfall 9 (project count stale)
-**Research needed:** No -- text editing.
-
-### Phase 5: Verification and Polish
-**Rationale:** Every content change can cause RSS/sitemap/OG drift. A dedicated verification pass catches what individual phases miss.
-**Delivers:** Verified sitemap, RSS, LLMs.txt, OG images. Lighthouse audit. JSON-LD validation. Cross-browser social sharing test.
-**Features:** None new -- quality assurance.
-**Avoids:** Pitfall 3 (RSS/sitemap drift), Pitfall 10 (stale CDN cache)
-**Research needed:** No.
-
----
+**Greek symbols/mathematical notation:** If dimension names or formulas use Greek characters, test rendering in all three site fonts (Bricolage Grotesque, DM Sans, Fira Code) early in Phase 1. Add fallback font with Greek support to font stack if needed.
 
 ## Sources
 
-Aggregated from all four research files. Full citation lists in individual research documents.
+### Primary (HIGH confidence)
+- Codebase analysis: package.json, astro.config.mjs, tsconfig.json, src/content.config.ts, src/lib/og-image.ts, src/pages/open-graph/[...slug].png.ts, src/components/Header.astro, src/components/SEOHead.astro, src/layouts/Layout.astro, src/styles/global.css
+- [Astro 5 Content Collections documentation](https://docs.astro.build/en/guides/content-collections/) — file() loader, Zod schema, getCollection API
+- [Astro Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/) — file() loader specification
+- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) — client:visible directive, partial hydration
+- [Recharts GitHub releases v3.7.0](https://github.com/recharts/recharts/releases) — evaluated and REJECTED in favor of build-time SVG
+- [Satori GitHub repository](https://github.com/vercel/satori) — CSS/HTML subset, SVG generation capabilities
+- [Satori SVG support issue #86](https://github.com/vercel/satori/issues/86) — SVG data URI embedding approach confirmed
 
-### HIGH Confidence
-- [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/)
-- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/)
-- [Astro Content Loader API Reference](https://docs.astro.build/en/reference/content-loader-reference/)
-- [Astro RSS Recipes](https://docs.astro.build/en/recipes/rss/)
-- [Astro Routing / Redirects](https://docs.astro.build/en/guides/routing/)
-- [Content Layer Deep Dive (Astro Blog)](https://astro.build/blog/content-layer-deep-dive/)
-- Direct codebase analysis of all files listed in Architecture modifications table
+### Secondary (MEDIUM confidence)
+- [TIOBE Index](https://www.tiobe.com/tiobe-index/), [IEEE Spectrum Top Programming Languages 2025](https://spectrum.ieee.org/top-programming-languages-2025), [TierMaker](https://tiermaker.com/categories/technology/programming-languages--32215) — competitive feature analysis
+- [Hyperpolyglot](https://hyperpolyglot.org/), [Rosetta Code](https://rosettacode.org/) — code comparison patterns
+- [Chart.js CSP requirement GitHub Issue #8108](https://github.com/chartjs/Chart.js/issues/8108) — why Chart.js conflicts with strict CSP
+- [Monday.com DOM-to-Image performance challenges](https://engineering.monday.com/capturing-dom-as-image-is-harder-than-you-think-how-we-solved-it-at-monday-com/) — why to avoid runtime DOM-to-image
+- [html-to-image npm comparison](https://npm-compare.com/dom-to-image,html-to-image,html2canvas) — library evaluation (rejected for build-time Satori approach)
+- [SVG Radar Charts without D3](https://data-witches.com/2023/12/radar-chart-fun-with-svgs-aka-no-small-multiples-no-problem/) — pure SVG polar coordinate approach
+- [Accessible SVG Charts for Khan Academy — Sara Soueidan](https://www.sarasoueidan.com/blog/accessible-data-charts-for-khan-academy-2018-annual-report/) — accessibility patterns for charts
+- [WAI-ARIA Authoring Practices 1.1 Tabs Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) — accessible tab implementation
 
-### MEDIUM Confidence
-- [Syncing dev.to Posts with Astro Blog](https://logarithmicspirals.com/blog/updating-astro-blog-to-pull-devto-posts/)
-- [Adding Local Markdown Posts to Hashnode-Powered Astro Blog](https://akoskm.com/hashnode-local-astro-hybrid-setup/)
-- [Hero Section Copywriting Tips](https://zoconnected.com/blog/how-to-write-hero-section-website-copy/)
-- [H1 Tags Ranking Factor 2026](https://www.rankability.com/ranking-factors/google/h1-tags/)
-- [Social Media Icons Accessibility](https://www.boia.org/blog/check-your-websites-social-media-icons-for-this-common-accessibility-error)
+### Tertiary (LOW confidence)
+- [Expressive Code plugin documentation](https://expressive-code.com/plugins/collapsible-sections/) — optional build-time plugin for code block enhancement
+- [Web Share API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share) — optional mobile share feature
+- [Clipboard API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) — optional copy-to-clipboard feature
 
 ---
-*Research synthesis for: patrykgolabek.dev v1.1 Content Refresh*
-*Synthesized: 2026-02-11*
+*Research completed: 2026-02-17*
 *Ready for roadmap: yes*

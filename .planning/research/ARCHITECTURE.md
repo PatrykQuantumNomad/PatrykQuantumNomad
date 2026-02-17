@@ -1,525 +1,756 @@
-# Architecture Research: v1.1 Content Refresh
+# Architecture: The Beauty Index Integration
 
-**Domain:** Integration of external blog entries, social links configuration, hero updates, and project curation into existing Astro 5 portfolio site
-**Researched:** 2026-02-11
-**Confidence:** HIGH
-**Scope:** Modifications to existing architecture -- NOT a from-scratch build
+**Domain:** Content pillar for existing Astro 5 portfolio site
+**Researched:** 2026-02-17
+**Overall confidence:** HIGH -- based on direct codebase analysis and verified Astro 5 / Satori documentation
 
-## Integration with Existing System
+## Recommended Architecture
 
-### Current Architecture Snapshot
+The Beauty Index integrates as a **new content pillar** alongside `/blog/` and `/projects/`, using the same architectural patterns already established in the codebase: a JSON data file with the Astro 5 `file()` content loader for structured data, `getStaticPaths()` for dynamic routes, Satori + Sharp for OG images, and a React island for the one interactive component.
 
-The v1.0 site at patrykgolabek.dev is a fully operational Astro 5 static site with:
+### High-Level Data Flow
 
-- **Content config:** `src/content.config.ts` defines a single `blog` collection using `glob()` loader pointed at `./src/data/blog`
-- **Blog schema:** Zod object with `title`, `description`, `publishedDate`, `updatedDate?`, `tags[]`, `draft`
-- **Blog listing:** `src/pages/blog/index.astro` queries `getCollection('blog')`, sorts by date, renders `BlogCard` components
-- **Blog detail:** `src/pages/blog/[slug].astro` uses `getStaticPaths()` + `render()` to generate individual post pages
-- **Home page:** `src/pages/index.astro` shows 3 latest posts with hardcoded hero text and typing animation roles array
-- **Projects:** `src/data/projects.ts` TypeScript module (NOT a content collection) with typed `Project[]` array and `categories` const
-- **Social links:** Hardcoded as inline HTML in `Footer.astro` (GitHub, LinkedIn, Translucent Computing Blog) and `contact.astro` (same + Kubert AI Blog)
-- **Contact info:** Hardcoded email (`patryk@translucentcomputing.com`) in `index.astro` CTA and `contact.astro`
-- **SEO data:** `PersonJsonLd.astro` has hardcoded `sameAs` array; `SEOHead.astro` has no centralized site data import
+```
+src/data/beauty-index/languages.json     (25 languages, scores, metadata)
+src/data/beauty-index/code-samples.ts    (code snippets per feature per language)
+        |
+        v
+src/content.config.ts                    (file() loader + Zod schema for beautyIndex)
+        |
+        +---> src/pages/beauty-index/index.astro           (overview + rankings)
+        +---> src/pages/beauty-index/[slug].astro          (per-language detail)
+        +---> src/pages/beauty-index/code/index.astro      (feature-tabbed comparison)
+        +---> src/pages/open-graph/beauty-index/[...slug].png.ts  (OG images)
+        |
+        v
+src/components/beauty-index/
+        RadarChart.astro           (build-time SVG, zero JS)
+        RankingChart.astro         (build-time SVG bar chart, zero JS)
+        CodeComparison.tsx         (React island, client:visible)
+        LanguageCard.astro         (static card for overview grid)
+        ScoreBadge.astro           (reusable score pill)
+        CharacterSketch.astro      (character illustration wrapper)
+        BeautyIndexJsonLd.astro    (structured data)
+```
 
-### What Changes, What Stays
+### Component Boundaries
 
-| Component | Status | Change Summary |
-|-----------|--------|----------------|
-| `src/content.config.ts` | **MODIFY** | Add `externalUrl` optional field to blog schema |
-| `src/data/blog/*.md` | **ADD/REMOVE** | Add external blog entry stubs; remove unwanted posts |
-| `src/data/projects.ts` | **MODIFY** | Remove specific project entries from the array |
-| `src/data/site.ts` (NEW) | **CREATE** | Centralized site config: social links, contact info, hero text |
-| `src/components/BlogCard.astro` | **MODIFY** | Conditional link: external URL vs internal `/blog/{id}/` |
-| `src/pages/blog/index.astro` | **MINOR MODIFY** | No structural change; BlogCard handles link logic |
-| `src/pages/blog/[slug].astro` | **MODIFY** | Filter out external posts from `getStaticPaths()` |
-| `src/pages/index.astro` | **MODIFY** | Import hero text from `site.ts`; import social links; update typing roles |
-| `src/components/Footer.astro` | **MODIFY** | Import social links from `site.ts` instead of hardcoding |
-| `src/pages/contact.astro` | **MODIFY** | Import contact info and social links from `site.ts` |
-| `src/components/PersonJsonLd.astro` | **MODIFY** | Import `sameAs` URLs from `site.ts` |
-| `src/pages/rss.xml.ts` | **MODIFY** | Handle external posts: use `externalUrl` as link for external entries |
-| `src/pages/llms.txt.ts` | **MODIFY** | Same external URL handling |
-| `src/pages/open-graph/[...slug].png.ts` | **MODIFY** | Skip OG image generation for external posts |
-| `astro.config.mjs` | **NO CHANGE** | No configuration changes needed |
-| `src/layouts/Layout.astro` | **NO CHANGE** | Layout is unchanged |
-| `src/components/Header.astro` | **NO CHANGE** | Navigation unchanged |
-| `src/pages/blog/tags/[tag].astro` | **MODIFY** | BlogCard handles link logic; tags page needs no structural change |
+| Component | Responsibility | Communicates With | JS Shipped to Client |
+|-----------|---------------|-------------------|----------------------|
+| `languages.json` | Single source of truth for all 25 languages + 6 scores + metadata | Content collection via `file()` loader | None |
+| `code-samples.ts` | Feature-keyed code snippets for all languages | `CodeComparison.tsx`, code page | None |
+| `RadarChart.astro` | Generates inline SVG radar chart at build time from 6 score values | Language detail pages, language cards | **0 bytes** |
+| `RankingChart.astro` | Generates SVG horizontal bar chart of overall rankings | Overview page | **0 bytes** |
+| `CodeComparison.tsx` | Interactive tabbed code viewer with feature/language switching | React island on `/beauty-index/code/` | ~3-5kb hydrated |
+| `LanguageCard.astro` | Static card showing language name, rank, overall score, mini radar | Overview page grid | 0 bytes |
+| `ScoreBadge.astro` | Colored score pill (gradient based on value) | Cards, detail pages | 0 bytes |
+| `CharacterSketch.astro` | Wraps character illustration image with caption | Language detail pages | 0 bytes |
+| `BeautyIndexJsonLd.astro` | Schema.org structured data for SEO | Layout head slot | 0 bytes |
+| OG image endpoints | Build-time PNG generation via Satori + Sharp | Social sharing | 0 bytes (build only) |
 
 ---
 
-## Component Modifications
+## Data Model Design
 
-### 1. Blog Schema Extension (`src/content.config.ts`)
+### Primary Data: `src/data/beauty-index/languages.json`
 
-**Current state:**
+Use the Astro 5 `file()` content loader because it provides Zod validation, TypeScript types, and `getCollection()` / `getEntry()` APIs -- matching the existing blog collection pattern. This is strictly better than a raw TypeScript array (like the current `projects.ts`) because it gives type-safe querying, Zod schema validation at build time, and avoids importing the full dataset into every page.
+
+**Confidence:** HIGH -- verified against [Astro 5 Content Collections docs](https://docs.astro.build/en/guides/content-collections/) and the [Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/). The `file()` loader accepts a base file path to a JSON file, requires each entry to have a unique `id` property, and supports Zod schema validation. The existing `content.config.ts` in this codebase already uses content collections.
+
+**Example entry in `languages.json`:**
+
+```json
+[
+  {
+    "id": "python",
+    "name": "Python",
+    "slug": "python",
+    "rank": 1,
+    "year": 1991,
+    "paradigm": "multi-paradigm",
+    "tagline": "Readability counts.",
+    "description": "Python's beauty lies in its insistence that there should be one obvious way to do it...",
+    "characterName": "The Zen Poet",
+    "characterDescription": "Calm, deliberate, believes less is more...",
+    "characterImage": "/images/beauty-index/characters/python.png",
+    "scores": {
+      "readability": 9.2,
+      "expressiveness": 8.5,
+      "consistency": 8.8,
+      "elegance": 8.0,
+      "ecosystem": 9.5,
+      "joy": 8.7
+    },
+    "overallScore": 8.78,
+    "color": "#3776ab",
+    "accentColor": "#ffd43b",
+    "funFact": "Python was named after Monty Python, not the snake.",
+    "tags": ["beginner-friendly", "data-science", "scripting", "web"]
+  }
+]
+```
+
+### Content Collection Schema: `src/content.config.ts`
+
+Extend the existing config. The blog collection remains unchanged. Add the `beautyIndex` collection alongside it:
+
 ```typescript
-schema: z.object({
-  title: z.string(),
-  description: z.string(),
-  publishedDate: z.coerce.date(),
-  updatedDate: z.coerce.date().optional(),
-  tags: z.array(z.string()).default([]),
-  draft: z.boolean().default(false),
-}),
+import { defineCollection, z } from 'astro:content';
+import { glob, file } from 'astro/loaders';
+
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    publishedDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+    coverImage: z.string().optional(),
+    externalUrl: z.string().url().optional(),
+    source: z.enum(['Kubert AI', 'Translucent Computing']).optional(),
+  }),
+});
+
+const beautyIndex = defineCollection({
+  loader: file('src/data/beauty-index/languages.json'),
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    rank: z.number().int().positive(),
+    year: z.number().int(),
+    paradigm: z.string(),
+    tagline: z.string(),
+    description: z.string(),
+    characterName: z.string(),
+    characterDescription: z.string(),
+    characterImage: z.string(),
+    scores: z.object({
+      readability: z.number().min(0).max(10),
+      expressiveness: z.number().min(0).max(10),
+      consistency: z.number().min(0).max(10),
+      elegance: z.number().min(0).max(10),
+      ecosystem: z.number().min(0).max(10),
+      joy: z.number().min(0).max(10),
+    }),
+    overallScore: z.number().min(0).max(10),
+    color: z.string(),
+    accentColor: z.string(),
+    funFact: z.string(),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { blog, beautyIndex };
 ```
 
-**Target state -- add two optional fields:**
+**Why the `file()` loader and not `glob()` or a TypeScript module:**
+- `glob()` is for markdown/MDX files. Language data is structured JSON, not prose content.
+- A TypeScript module (`languages.ts`) like `projects.ts` works but loses Zod validation at build time and does not integrate with `getCollection()` / `getEntry()` APIs.
+- `file()` gives the best of both worlds: JSON data with schema validation, type inference, and the collection query API.
+
+### Code Samples: `src/data/beauty-index/code-samples.ts`
+
+Code samples stay as a TypeScript file (not JSON) because they contain multi-line template literal strings that are painful to escape in JSON. They are keyed by feature, then contain an array of language samples:
+
 ```typescript
-schema: z.object({
-  title: z.string(),
-  description: z.string(),
-  publishedDate: z.coerce.date(),
-  updatedDate: z.coerce.date().optional(),
-  tags: z.array(z.string()).default([]),
-  draft: z.boolean().default(false),
-  externalUrl: z.string().url().optional(),  // NEW: link to external blog
-  source: z.string().optional(),              // NEW: "Translucent Computing", "Kubert AI", etc.
-}),
-```
-
-**Rationale:** This is the simplest approach that keeps ALL blog entries in one collection. External posts are just markdown stubs with minimal body content and an `externalUrl` in frontmatter. This avoids creating a second collection, a custom loader, or any merge logic. The `glob()` loader still works -- external entries are just `.md` files with a special frontmatter field. The `source` field provides a display label for where the post lives (shown on the card as a badge).
-
-**Why NOT a separate collection or custom inline loader:**
-- A second collection (e.g., `externalBlogs`) would require merging two arrays in every page that lists posts, manually sorting the combined result, and maintaining two schemas. This adds complexity for minimal benefit.
-- A custom inline loader that programmatically defines entries would work but loses the ergonomics of writing markdown files. Adding an external post should be "create a .md file with frontmatter" -- the same workflow as internal posts.
-- The single-collection approach means `getCollection('blog')` returns everything, already sorted by date, with no merge step. Pages just need to check `post.data.externalUrl` to decide behavior.
-
-**Confidence:** HIGH -- this is a standard Zod `.optional()` field on an existing schema. Astro's content layer treats it as any other frontmatter field. Verified via [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/).
-
-### 2. External Blog Entry Files (`src/data/blog/`)
-
-**Structure of an external blog stub file:**
-```markdown
----
-title: "Building RAG Pipelines with LangChain and Kubernetes"
-description: "A deep dive into production RAG architecture using LangChain, vector databases, and Kubernetes orchestration."
-publishedDate: 2025-11-15
-tags: ["ai", "rag", "kubernetes", "langchain"]
-externalUrl: "https://translucentcomputing.com/blog/rag-pipelines-langchain-kubernetes/"
-source: "Translucent Computing"
----
-
-Originally published on Translucent Computing Blog.
-```
-
-The body content is minimal -- it exists only because the `glob()` loader requires a markdown file. The body is never rendered for external posts. The filename (e.g., `rag-pipelines-langchain-kubernetes.md`) determines the `post.id` but no static page is generated for it.
-
-### 3. BlogCard Component (`src/components/BlogCard.astro`)
-
-**Current behavior:** Always links to `/blog/${post.id}/`
-
-**Modified behavior:** Check `post.data.externalUrl`. If present, link there with `target="_blank"` and an external link indicator. If absent, link internally as before.
-
-```astro
----
-import type { CollectionEntry } from 'astro:content';
-
-interface Props {
-  post: CollectionEntry<'blog'>;
+export interface CodeSample {
+  language: string;  // slug matching languages.json id
+  label: string;     // display name
+  code: string;      // the actual code snippet
 }
 
-const { post } = Astro.props;
-const { title, description, publishedDate, tags, externalUrl, source } = post.data;
-const isExternal = !!externalUrl;
-const href = isExternal ? externalUrl : `/blog/${post.id}/`;
----
+export interface Feature {
+  id: string;
+  name: string;
+  description: string;
+  samples: CodeSample[];
+}
 
-<article class="group relative p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] hover:border-[var(--color-accent)] transition-colors">
-  <a
-    href={href}
-    class="absolute inset-0 z-0"
-    aria-label={title}
-    {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-  ></a>
-  <div class="flex items-center gap-2">
-    <time datetime={publishedDate.toISOString()} class="text-sm text-[var(--color-text-secondary)]">
-      {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
-    </time>
-    {isExternal && source && (
-      <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-text-secondary)]/10 text-[var(--color-text-secondary)]">
-        {source}
-      </span>
-    )}
-  </div>
-  <h2 class="text-xl font-heading font-bold mt-2 group-hover:text-[var(--color-accent)] transition-colors">
-    {title}
-    {isExternal && (
-      <svg class="inline-block w-4 h-4 ml-1 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M7 17L17 7" />
-        <path d="M7 7h10v10" />
-      </svg>
-    )}
-  </h2>
-  <p class="mt-2 text-[var(--color-text-secondary)]">{description}</p>
-  {tags.length > 0 && (
-    <div class="flex flex-wrap gap-2 mt-4">
-      {tags.map((tag) => (
-        <a
-          href={`/blog/tags/${tag}/`}
-          class="relative z-10 text-xs px-2 py-1 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors"
-        >
-          {tag}
-        </a>
-      ))}
-    </div>
-  )}
-</article>
+export const features: Feature[] = [
+  {
+    id: 'hello-world',
+    name: 'Hello World',
+    description: 'The classic first program.',
+    samples: [
+      { language: 'python', label: 'Python', code: `print("Hello, World!")` },
+      { language: 'rust', label: 'Rust', code: `fn main() {\n    println!("Hello, World!");\n}` },
+      // ... 25 languages
+    ],
+  },
+  // ... more features (error handling, iteration, pattern matching, etc.)
+];
 ```
 
-**Key design decisions:**
-- External posts get a small arrow icon next to the title (same icon used on projects page -- visual consistency)
-- External posts show a `source` badge next to the date
-- External links open in a new tab (`target="_blank"`)
-- Tag links still work and point to internal tag pages -- this is intentional so external posts contribute to the site's tag ecosystem
-- The card structure and styling remain identical -- external posts look like first-class content, not second-class citizens
+**Why not a content collection for code samples?** The code comparison page needs to access ALL samples at once grouped by feature. Content collections are optimized for per-entry access. A TypeScript import gives direct array access without async `getCollection()` overhead and allows complex grouping logic. The data model is inherently two-dimensional (features x languages), which maps better to nested TypeScript arrays than flat collection entries.
 
-### 4. Dynamic Blog Route (`src/pages/blog/[slug].astro`)
+---
 
-**Critical change:** Filter out external posts from `getStaticPaths()`. External posts must NOT generate local pages -- they have no renderable body content.
+## Routing Strategy
 
-```astro
+### New Pages
+
+| Route | File | Data Source | Purpose |
+|-------|------|-------------|---------|
+| `/beauty-index/` | `src/pages/beauty-index/index.astro` | `getCollection('beautyIndex')` | Overview: rankings chart, language grid, intro |
+| `/beauty-index/[slug]/` | `src/pages/beauty-index/[slug].astro` | `getStaticPaths()` from collection | Per-language: radar chart, scores, character, full description |
+| `/beauty-index/code/` | `src/pages/beauty-index/code/index.astro` | `import { features }` from code-samples.ts | Feature-tabbed code comparison (React island) |
+
+### Dynamic Route Pattern
+
+This mirrors the exact pattern used by `src/pages/blog/[slug].astro`:
+
+```typescript
+// src/pages/beauty-index/[slug].astro
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import RadarChart from '../../components/beauty-index/RadarChart.astro';
+import ScoreBadge from '../../components/beauty-index/ScoreBadge.astro';
+import CharacterSketch from '../../components/beauty-index/CharacterSketch.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => {
-    return (import.meta.env.PROD ? data.draft !== true : true) && !data.externalUrl;
-  });
-
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post },
+  const languages = await getCollection('beautyIndex');
+  return languages.map((lang) => ({
+    params: { slug: lang.data.slug },
+    props: { language: lang },
   }));
 }
+
+const { language } = Astro.props;
+const { name, scores, description, tagline, rank, overallScore } = language.data;
+const ogImageURL = new URL(
+  `/open-graph/beauty-index/${language.data.slug}.png`,
+  Astro.site
+).toString();
+---
+
+<Layout
+  title={`${name} — The Beauty Index | Patryk Golabek`}
+  description={`${name} scores ${overallScore}/10 in The Beauty Index. ${tagline}`}
+  ogImage={ogImageURL}
+>
+  <!-- page content: radar chart, scores grid, character, description -->
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: `${Astro.site}` },
+    { name: "Beauty Index", url: `${new URL('/beauty-index/', Astro.site)}` },
+    { name: name, url: `${new URL(`/beauty-index/${language.data.slug}/`, Astro.site)}` },
+  ]} />
+</Layout>
 ```
 
-The only change is adding `&& !data.externalUrl` to the filter. Everything else in the file stays the same.
+**Confidence:** HIGH -- this is the exact same `getStaticPaths` + props pattern used by `src/pages/blog/[slug].astro` in this codebase. The only difference is the data source (content collection vs content collection).
 
-### 5. Centralized Site Configuration (`src/data/site.ts` -- NEW FILE)
+---
 
-**Current problem:** Social links, contact email, and hero text are scattered as hardcoded strings across `Footer.astro`, `contact.astro`, `index.astro`, and `PersonJsonLd.astro`. Updating the email requires changes in 3 files. Adding a social link requires editing 2-3 components.
+## Chart Rendering Strategy
 
-**Solution:** A single TypeScript data file that exports typed configuration objects.
+### Decision: Build-Time SVG (not client-side JS charts)
+
+**Use pure SVG generated at build time in Astro components.** Do NOT use Chart.js, D3, Recharts, or any client-side charting library.
+
+**Rationale:**
+1. The data is static (scores do not change at runtime) -- there is no interactivity needed on charts
+2. SVG renders instantly with zero JavaScript payload
+3. The site is statically generated -- build time is the correct time to compute SVG paths
+4. Matches the site's performance philosophy (GSAP for scroll animations, not for rendering content)
+5. SVG supports dark/light theme adaptation via CSS `currentColor` and `var(--color-*)` custom properties
+6. SVG is accessible -- `aria-label` on the root element, semantic structure
+
+**Confidence:** HIGH -- the math is standard polar-to-cartesian coordinate conversion. SVG polygon and path elements are universally supported by all browsers.
+
+### Radar Chart: `src/components/beauty-index/RadarChart.astro`
+
+Generate SVG polygon paths from the 6 scores using trigonometry in the Astro component frontmatter. The core math is approximately 40 lines:
 
 ```typescript
-// src/data/site.ts
-
-export interface SocialLink {
-  platform: string;
-  url: string;
-  label: string;
-  icon: string; // SVG path data or icon identifier
+// In the frontmatter of RadarChart.astro
+interface Props {
+  scores: Record<string, number>;
+  size?: number;
+  showLabels?: boolean;
+  color?: string;
 }
 
-export const socialLinks: SocialLink[] = [
-  {
-    platform: 'github',
-    url: 'https://github.com/PatrykQuantumNomad',
-    label: 'GitHub profile',
-    icon: 'github',
-  },
-  {
-    platform: 'linkedin',
-    url: 'https://www.linkedin.com/in/patrykgolabek/',
-    label: 'LinkedIn profile',
-    icon: 'linkedin',
-  },
-  {
-    platform: 'blog-tc',
-    url: 'https://translucentcomputing.com/blog/',
-    label: 'Translucent Computing Blog',
-    icon: 'book',
-  },
-  {
-    platform: 'blog-kubert',
-    url: 'https://mykubert.com/blog/',
-    label: 'Kubert AI Blog',
-    icon: 'sparkle',
-  },
-];
+const { scores, size = 200, showLabels = true, color = 'var(--color-accent)' } = Astro.props;
 
-export const contact = {
-  email: 'patryk@translucentcomputing.com',
-};
+const categories = Object.keys(scores);
+const values = Object.values(scores);
+const count = categories.length; // 6
+const cx = size / 2;
+const cy = size / 2;
+const radius = (size / 2) - (showLabels ? 30 : 10); // padding for labels
 
-export const hero = {
-  name: 'Patryk Golabek',
-  tagline: 'Building resilient cloud-native systems and AI-powered solutions for 17+ years. Pre-1.0 Kubernetes adopter. Ontario, Canada.',
-  roles: ['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder'],
-};
+function polarToCartesian(angle: number, r: number): [number, number] {
+  // Offset by -90 degrees so first axis points up
+  const radian = ((angle - 90) * Math.PI) / 180;
+  return [cx + r * Math.cos(radian), cy + r * Math.sin(radian)];
+}
 
-export const sameAs = socialLinks.map((link) => link.url);
+const angleStep = 360 / count;
+
+// Grid rings (3 concentric hexagons for the 6-axis chart)
+const rings = [0.33, 0.66, 1.0];
+
+// Score polygon points
+const points = values.map((val, i) => {
+  const normalizedRadius = (val / 10) * radius;
+  return polarToCartesian(i * angleStep, normalizedRadius);
+});
+
+const polygonPoints = points.map(([x, y]) => `${x},${y}`).join(' ');
 ```
 
-**Why `src/data/site.ts` and not `src/lib/constants.ts`:**
-The existing project uses `src/data/` for content data files (blog posts, projects). Site configuration is data, not library code. Keeping it in `src/data/` follows the established convention. The v1.0 architecture research recommended `src/lib/constants.ts`, but the actual implementation never created that file -- the data ended up hardcoded in components. This is the opportunity to centralize it.
+The template renders pure SVG:
 
-**Why a TypeScript file and not JSON/YAML:**
-- Type safety: interfaces are defined alongside the data
-- Computed properties: `sameAs` derives from `socialLinks` automatically
-- Import ergonomics: `import { socialLinks } from '../data/site'` works cleanly in `.astro` files
-
-### 6. Footer Social Links (`src/components/Footer.astro`)
-
-**Current state:** Three hardcoded `<a>` tags with inline SVG icons for GitHub, LinkedIn, and Translucent Computing Blog.
-
-**Modified state:** Import `socialLinks` from `src/data/site.ts` and render dynamically. SVG icons are mapped via a helper or kept as a simple conditional block since there are only 3-4 links.
-
-The SVG icons are currently inline in the template. For maintainability, the simplest approach is a map of platform-to-SVG-markup within the component, or keep using inline SVGs but drive the `href` and `aria-label` from the imported data. Full icon-component abstraction is over-engineering for 4 social links.
-
-**Recommended approach -- minimal change:**
-```astro
----
-import { socialLinks } from '../data/site';
-const currentYear = new Date().getFullYear();
----
-```
-Then iterate `socialLinks` to render each `<a>` tag. The SVG icon rendering can use a simple `{link.icon === 'github' && (...)}` conditional or a small `SocialIcon` helper component.
-
-### 7. Home Page Hero (`src/pages/index.astro`)
-
-**Current state:** Hero text is hardcoded directly in the template. The typing roles array is in an inline `<script is:inline>` block.
-
-**What changes:**
-1. Import `hero` from `src/data/site.ts` for the name, tagline, and static role text
-2. Import `contact` for the CTA email link
-3. The typing `roles` array in the inline script should also reference the config -- but since `<script is:inline>` does not have access to Astro variables at runtime, the roles array needs to be injected via a `data-*` attribute or a `<script>` block that reads from a rendered element
-
-**Recommended pattern for typing roles:**
-```astro
-<span id="typing-role" class="typing-cursor" data-roles={JSON.stringify(hero.roles)}>
-  {hero.roles[0]}
-</span>
-
-<script is:inline>
-  (function() {
-    if (window.__typingInterval) clearInterval(window.__typingInterval);
-    const el = document.getElementById('typing-role');
-    if (!el) return;
-    const roles = JSON.parse(el.dataset.roles || '[]');
-    let i = 0;
-    if (roles.length > 1) {
-      window.__typingInterval = setInterval(function() {
-        i = (i + 1) % roles.length;
-        el.textContent = roles[i];
-      }, 3000);
-    }
-  })();
-</script>
+```html
+<svg viewBox={`0 0 ${size} ${size}`} class="radar-chart"
+     role="img" aria-label={`Radar chart showing scores: ${categories.map((c, i) => `${c} ${values[i]}`).join(', ')}`}>
+  <!-- Grid rings -->
+  {rings.map((scale) => (
+    <polygon
+      points={Array.from({ length: count }, (_, i) =>
+        polarToCartesian(i * angleStep, radius * scale).join(',')
+      ).join(' ')}
+      fill="none"
+      stroke="var(--color-border)"
+      stroke-width="1"
+    />
+  ))}
+  <!-- Axis lines -->
+  {categories.map((_, i) => {
+    const [x, y] = polarToCartesian(i * angleStep, radius);
+    return <line x1={cx} y1={cy} x2={x} y2={y} stroke="var(--color-border)" stroke-width="0.5" />;
+  })}
+  <!-- Score polygon (filled area) -->
+  <polygon points={polygonPoints} fill={`${color}20`} stroke={color} stroke-width="2" />
+  <!-- Score dots -->
+  {points.map(([x, y]) => (
+    <circle cx={x} cy={y} r="3" fill={color} />
+  ))}
+  <!-- Labels -->
+  {showLabels && categories.map((cat, i) => {
+    const [x, y] = polarToCartesian(i * angleStep, radius + 18);
+    return (
+      <text x={x} y={y} text-anchor="middle" dominant-baseline="central"
+            class="text-[10px] fill-[var(--color-text-secondary)] font-mono uppercase">
+        {cat}
+      </text>
+    );
+  })}
+</svg>
 ```
 
-This keeps the roles defined in one place (`site.ts`) and injects them into the DOM via `data-roles`. The inline script reads them at runtime.
+**No external library needed.** The `svg-radar-chart` package (9kb) exists but is unnecessary overhead for what amounts to ~40 lines of trigonometry. Keeping it inline means zero dependencies, full control over styling with CSS custom properties, and no virtual-dom-to-string conversion step.
 
-### 8. Contact Page (`src/pages/contact.astro`)
+### Shared Radar Math: `src/lib/radar-svg.ts`
 
-**Current state:** Hardcoded email, LinkedIn URL, GitHub URL, blog URLs as inline HTML.
-
-**Modified state:** Import `socialLinks` and `contact` from `src/data/site.ts`. Map social links to contact cards. The page layout stays the same, but URLs come from the centralized config.
-
-### 9. PersonJsonLd (`src/components/PersonJsonLd.astro`)
-
-**Current state:** Hardcoded `sameAs` array with 4 URLs.
-
-**Modified state:** Import `sameAs` from `src/data/site.ts`. The structured data stays accurate as social links are added or removed.
-
-### 10. RSS Feed (`src/pages/rss.xml.ts`)
-
-**Current state:** All blog posts get `/blog/${post.id}/` as the link.
-
-**Modified state:** External posts should use their `externalUrl` as the RSS link. This way RSS readers link directly to the external article.
+Extract the polar-to-cartesian math into a shared utility because BOTH the Astro component and the OG image generator need the same calculations:
 
 ```typescript
-items: posts.map((post) => ({
-  title: post.data.title,
-  pubDate: post.data.publishedDate,
-  description: post.data.description,
-  link: post.data.externalUrl ?? `/blog/${post.id}/`,
-})),
+// src/lib/radar-svg.ts
+export interface RadarConfig {
+  scores: Record<string, number>;
+  size: number;
+  padding: number;
+}
+
+export interface RadarGeometry {
+  cx: number;
+  cy: number;
+  radius: number;
+  angleStep: number;
+  points: [number, number][];
+  polygonPoints: string;
+  axisEndpoints: [number, number][];
+  labelPositions: [number, number][];
+}
+
+export function computeRadarGeometry(config: RadarConfig): RadarGeometry {
+  // ... shared math used by RadarChart.astro and beauty-index-og.ts
+}
+
+export function generateRadarSvgString(config: RadarConfig, color: string): string {
+  // Returns a complete SVG string (for embedding as data URI in OG images)
+}
 ```
 
-### 11. LLMs.txt (`src/pages/llms.txt.ts`)
+### Ranking Bar Chart: `src/components/beauty-index/RankingChart.astro`
 
-**Same pattern as RSS:** External posts should link to their `externalUrl`.
+Generate horizontal SVG bars at build time. Each bar width is proportional to the overall score. This is even simpler than the radar chart -- just `<rect>` elements with `<text>` labels. The maximum score (10.0) maps to 100% width; each language bar scales proportionally.
 
-### 12. OG Image Generation (`src/pages/open-graph/[...slug].png.ts`)
+### Theme Compatibility
 
-**Filter out external posts:** External posts do not have local pages, so they should not have OG images generated. Add `&& !data.externalUrl` to the filter in `getStaticPaths`.
+Both charts use `var(--color-*)` CSS custom properties, which means they automatically adapt to the site's existing light theme defined in `src/styles/global.css`. The CSS custom properties are:
+- `var(--color-border)` for grid lines and axes
+- `var(--color-text-secondary)` for labels
+- `var(--color-accent)` as default polygon fill/stroke (overridable per-language via `color` prop)
 
-### 13. Project Data Curation (`src/data/projects.ts`)
-
-**Change type:** Data removal only. Remove specific entries from the `projects` array. No structural changes to the `Project` interface, `categories` array, or the projects page component.
+If dark mode is added later, the charts will adapt with zero changes because they inherit from CSS variables.
 
 ---
 
-## Data Flow for External Blog Entries
+## OG Image Strategy
 
-### Build-Time Flow
+### Approach: Extend Existing Satori + Sharp Pipeline
 
+The site already generates OG images at `/open-graph/[...slug].png` using Satori + Sharp (see `src/lib/og-image.ts`). The Beauty Index OG images follow the exact same pattern with a custom layout.
+
+### New OG Image Endpoints
+
+| Route | File | What It Shows |
+|-------|------|---------------|
+| `/open-graph/beauty-index/overview.png` | `src/pages/open-graph/beauty-index/overview.png.ts` | "The Beauty Index" title card with top-5 ranking snippet |
+| `/open-graph/beauty-index/[slug].png` | `src/pages/open-graph/beauty-index/[slug].png.ts` | Language name, rank badge, overall score, mini radar chart |
+| `/open-graph/beauty-index/code.png` | `src/pages/open-graph/beauty-index/code.png.ts` | "Code Comparison" title card |
+
+### Radar Chart in OG Images via Satori
+
+Satori supports SVG elements embedded as data URIs inside `<img>` tags. This was confirmed via [vercel/satori#86](https://github.com/vercel/satori/issues/86), resolved in PR #98. The implementation serializes SVG to an XML string encoded as a data URI and embeds it within an `<img>` element. The approach:
+
+1. Generate the radar chart SVG string using `generateRadarSvgString()` from `src/lib/radar-svg.ts`
+2. Encode as a data URI: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
+3. Embed in the Satori layout tree as an `<img>` element with `width` and `height`
+
+```typescript
+// src/lib/beauty-index-og.ts
+import { generateRadarSvgString } from './radar-svg';
+import { loadOgFonts, renderOgPng } from './og-shared';
+
+export async function generateBeautyIndexOgImage(
+  name: string,
+  rank: number,
+  overallScore: number,
+  scores: Record<string, number>,
+  color: string,
+): Promise<Buffer> {
+  await loadOgFonts();
+
+  const radarSvg = generateRadarSvgString({ scores, size: 200, padding: 10 }, color);
+  const radarUri = `data:image/svg+xml;base64,${Buffer.from(radarSvg).toString('base64')}`;
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: { width: '1200px', height: '630px', display: 'flex', /* ... */ },
+      children: [
+        // Left column: "The Beauty Index", language name, rank, score
+        // Right column: <img src={radarUri} width={200} height={200} />
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
 ```
-src/data/blog/
- |
- +-- building-kubernetes-observability-stack.md  (internal, externalUrl: undefined)
- +-- draft-placeholder.md                        (internal, draft: true)
- +-- rag-pipelines-langchain-kubernetes.md        (EXTERNAL, externalUrl: "https://...")
- +-- kubert-ai-multi-agent-systems.md             (EXTERNAL, externalUrl: "https://...")
- |
- v  glob() loader
- |
- v  Zod schema validation (externalUrl is optional -- both pass)
- |
-Content Collection Store
- |
- +---> getCollection('blog')
-        |
-        +---> blog/index.astro      --> ALL posts (internal + external)
-        |     renders BlogCard      --> BlogCard checks externalUrl
-        |                               - internal: href="/blog/{id}/"
-        |                               - external: href=externalUrl, target="_blank"
-        |
-        +---> blog/[slug].astro     --> ONLY internal posts (filter: !externalUrl)
-        |     getStaticPaths()          No static page generated for external posts
-        |     render(post)              render() only called on internal posts
-        |
-        +---> index.astro           --> 3 latest posts (internal + external mixed)
-        |     "Latest Writing"          Same BlogCard conditional logic
-        |
-        +---> blog/tags/[tag].astro --> Tag pages include external posts
-        |     getStaticPaths()          External posts tagged "kubernetes" appear on /blog/tags/kubernetes/
-        |                               BlogCard handles link logic
-        |
-        +---> rss.xml.ts            --> ALL non-draft posts
-        |     link = externalUrl ?? `/blog/${post.id}/`
-        |
-        +---> llms.txt.ts           --> ALL non-draft posts
-        |     link = externalUrl ?? local path
-        |
-        +---> open-graph/[...slug]  --> ONLY internal posts (filter: !externalUrl)
-              No OG images for external posts
+
+**Important Satori limitation:** Satori does not support native inline SVG elements in its JSX tree. You MUST use the `<img>` + data URI approach for embedding SVG content. This is a documented design decision, not a bug.
+
+**Confidence:** HIGH -- the existing `src/lib/og-image.ts` already uses Satori + Sharp with the exact same rendering pattern. The SVG data URI embedding approach is documented and tested.
+
+### Shared OG Utility Refactor
+
+Extract common branding elements from the existing `src/lib/og-image.ts` to avoid duplication:
+
+```typescript
+// src/lib/og-shared.ts -- extracted from og-image.ts
+export async function loadOgFonts(): Promise<{ inter: Buffer; spaceGrotesk: Buffer }> { ... }
+export function brandingRow(): object { ... }      // "PG" badge + "patrykgolabek.dev"
+export function accentBar(): object { ... }        // Gradient bar at top
+export async function renderOgPng(layout: object): Promise<Buffer> { ... }  // Satori + Sharp
 ```
 
-### What Does NOT Change in the Data Flow
-
-- The `glob()` loader, Zod validation pipeline, and `getCollection()` API all work unchanged
-- The sort-by-date logic is unchanged -- external posts sort alongside internal posts by `publishedDate`
-- The draft filtering logic is unchanged -- external posts can also be drafts
-- Tag pages automatically include external posts because tags come from the same collection
-- View Transitions, theme toggle, scroll reveals -- all client-side behavior is unaffected
+This is an optional refactor. If time-constrained, the Beauty Index OG file can duplicate the branding elements from `og-image.ts` (they are ~30 lines). The refactor is cleaner but not blocking.
 
 ---
 
-## New: Centralized Configuration Data Flow
+## Code Comparison: Interactive Tab Component
 
+### Decision: React Island with `client:visible`
+
+The code comparison page needs tab switching to select a feature (e.g., "Error Handling") and see code samples from all 25 languages. This is the ONE place in the Beauty Index that requires client-side JavaScript.
+
+**Use a React component** because:
+1. React is already installed and configured (`@astrojs/react` in `astro.config.mjs`, React 19 in `package.json`)
+2. The project already ships React for the Three.js 3D head scene on the about page
+3. Managing two-dimensional tab state (feature selection + language filtering) is more ergonomic in React than vanilla JS
+4. `client:visible` means the component hydrates only when scrolled into view
+
+### Implementation Approach: Pre-rendered Code + React Tab Controller
+
+The code blocks themselves are **pre-rendered at build time** using `astro-expressive-code`. The React island only handles tab state and visibility toggling. This keeps the JavaScript payload minimal (~3-5kb) because the heavy lifting (syntax highlighting) happens at build time.
+
+```astro
+<!-- src/pages/beauty-index/code/index.astro -->
+---
+import Layout from '../../../layouts/Layout.astro';
+import { features } from '../../../data/beauty-index/code-samples';
+import { Code } from 'astro-expressive-code/components';
+import CodeTabs from '../../../components/beauty-index/CodeTabs';
+---
+
+<Layout title="Code Comparison — The Beauty Index | Patryk Golabek">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Code Comparison</h1>
+
+    {/* All code blocks pre-rendered into hidden panels */}
+    <div id="code-panels">
+      {features.map((feature) => (
+        <div data-feature={feature.id} class="hidden">
+          {feature.samples.map((sample) => (
+            <div data-language={sample.language} class="hidden">
+              <Code code={sample.code} lang={sample.language} />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+
+    {/* React island only manages which panels are visible */}
+    <CodeTabs
+      client:visible
+      features={features.map(f => ({ id: f.id, name: f.name, description: f.description }))}
+      languages={features[0]?.samples.map(s => ({ slug: s.language, label: s.label })) ?? []}
+    />
+  </section>
+</Layout>
 ```
-src/data/site.ts
- |
- +-- socialLinks[]   --> Footer.astro (social icon links)
- |                   --> contact.astro (contact cards + "Other places" section)
- |                   --> PersonJsonLd.astro (sameAs array)
- |
- +-- contact.email   --> index.astro (CTA "Get in Touch" mailto:)
- |                   --> contact.astro (email card mailto:)
- |
- +-- hero.name       --> index.astro (h1)
- +-- hero.tagline    --> index.astro (subtitle paragraph)
- +-- hero.roles      --> index.astro (typing animation via data-roles attribute)
-```
+
+The React `CodeTabs` component is lightweight -- it renders feature tabs and language pills, then toggles `hidden` classes on the pre-rendered DOM elements via `document.querySelector`. It ships no code rendering logic and no syntax highlighting runtime.
+
+**Fallback if the hybrid approach proves tricky:** Use vanilla JavaScript with `data-*` attributes for tab switching. The pre-rendered code blocks pattern works the same way. This is a valid alternative if passing feature/language metadata between Astro's static render and React's hydration creates friction.
+
+**Confidence:** MEDIUM -- the hybrid pre-render + React tab controller pattern is architecturally sound, but the exact mechanics of a React island manipulating sibling DOM elements (not its own children) needs validation during implementation. The vanilla JS fallback is trivial to implement if needed.
 
 ---
 
-## Modification Dependency Graph and Build Order
+## Navigation Integration
 
-The v1.1 changes have clear dependencies that dictate build order:
+### Modified File: `src/components/Header.astro`
 
-```
-[1] src/data/site.ts (NEW)          <-- No dependencies. Create first.
-     |
-     +-----> [2] src/content.config.ts (MODIFY schema)    <-- No dependency on site.ts
-     |                                                         but logical to do alongside
-     |
-     +-----> [3] src/data/blog/*.md (ADD external stubs)   <-- Requires [2] for schema
-     |                                                         validation to pass
-     |
-     +-----> [4] src/components/BlogCard.astro (MODIFY)    <-- Requires [2] for types
-     |
-     +-----> [5a] src/components/Footer.astro (MODIFY)     <-- Requires [1] for imports
-     +-----> [5b] src/components/PersonJsonLd.astro (MODIFY) <-- Requires [1]
-     +-----> [5c] src/pages/contact.astro (MODIFY)         <-- Requires [1]
-     |
-     +-----> [6] src/pages/index.astro (MODIFY hero)       <-- Requires [1], [4]
-     |
-     +-----> [7a] src/pages/blog/[slug].astro (MODIFY)     <-- Requires [2]
-     +-----> [7b] src/pages/rss.xml.ts (MODIFY)            <-- Requires [2]
-     +-----> [7c] src/pages/llms.txt.ts (MODIFY)           <-- Requires [2]
-     +-----> [7d] src/pages/open-graph/[...slug].png.ts    <-- Requires [2]
-     |
-     +-----> [8] src/data/projects.ts (MODIFY -- remove entries) <-- Independent, any time
+Add "Beauty Index" to the `navLinks` array. This is a one-line change:
+
+```typescript
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/beauty-index/', label: 'Beauty Index' },  // NEW
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
 ```
 
-### Recommended Phase Structure for v1.1
+The existing `isActive` logic on line 43 of `Header.astro` already handles nested routes correctly:
 
-**Phase 1: Configuration Foundation**
-1. Create `src/data/site.ts` with social links, contact, hero data
-2. Modify `src/content.config.ts` to add `externalUrl` and `source` fields
+```typescript
+const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+```
 
-**Phase 2: External Blog Integration**
-3. Add external blog entry stub files in `src/data/blog/`
-4. Modify `BlogCard.astro` for conditional internal/external linking
-5. Modify `blog/[slug].astro` to filter out external posts
-6. Modify `rss.xml.ts`, `llms.txt.ts`, `open-graph/[...slug].png.ts` for external post handling
+This means `/beauty-index/python/` will correctly highlight the "Beauty Index" nav link. No other Header changes needed. The mobile menu also iterates `navLinks`, so both desktop and mobile navigation are automatically updated.
 
-**Phase 3: Centralized Config Consumption**
-7. Modify `Footer.astro` to import social links from `site.ts`
-8. Modify `contact.astro` to import social links and email from `site.ts`
-9. Modify `PersonJsonLd.astro` to import `sameAs` from `site.ts`
-10. Modify `index.astro` to import hero data and contact from `site.ts`
+---
 
-**Phase 4: Content Curation**
-11. Remove unwanted blog posts from `src/data/blog/`
-12. Remove unwanted project entries from `src/data/projects.ts`
+## SEO Integration
 
-**Why this order:**
-- Phase 1 establishes the data contracts (schema, config) that all other changes depend on
-- Phase 2 is the most architecturally complex change (external blog integration) and should be done while the codebase is closest to its known-good state
-- Phase 3 is a series of safe refactors (replacing hardcoded strings with imports) that can be done independently
-- Phase 4 is pure content deletion -- the lowest risk and can be done last or in parallel with Phase 3
+### Existing SEO Components: No Changes Needed
+
+The existing `SEOHead.astro` component (at `src/components/SEOHead.astro`) already supports all the props needed:
+- Custom `title` and `description` per page
+- Custom `ogImage` per page
+- `ogType` ("website" for overview, can use "website" for language pages too)
+- Canonical URL auto-generated from `Astro.url.pathname`
+- Twitter Card with `summary_large_image`
+
+The existing `Layout.astro` passes all these through to `SEOHead.astro`. Each Beauty Index page simply provides the correct props. No component modifications required.
+
+### New Structured Data: `BeautyIndexJsonLd.astro`
+
+Add Schema.org `ItemList` structured data for the overview page (ranking of languages) and article-like structured data for individual language pages. Follow the established pattern of `ProjectsJsonLd.astro` and `BlogPostingJsonLd.astro` already in the codebase.
+
+### Breadcrumb Structured Data
+
+Use the existing `BreadcrumbJsonLd.astro` component on all Beauty Index pages:
+- Overview: Home > Beauty Index
+- Language: Home > Beauty Index > [Language Name]
+- Code: Home > Beauty Index > Code Comparison
+
+### Sitemap
+
+The existing `@astrojs/sitemap` integration in `astro.config.mjs` automatically discovers all static pages generated by `getStaticPaths()`. No configuration changes needed -- the 25+ new Beauty Index pages will appear in the sitemap at the next build.
+
+---
+
+## Complete File Manifest
+
+### New Files (create)
+
+| File | Type | Purpose |
+|------|------|---------|
+| `src/data/beauty-index/languages.json` | Data | 25 languages with scores, metadata, characters |
+| `src/data/beauty-index/code-samples.ts` | Data | Code snippets grouped by feature |
+| `src/pages/beauty-index/index.astro` | Page | Overview with rankings chart + language card grid |
+| `src/pages/beauty-index/[slug].astro` | Page | Per-language detail page |
+| `src/pages/beauty-index/code/index.astro` | Page | Feature-tabbed code comparison |
+| `src/pages/open-graph/beauty-index/overview.png.ts` | Endpoint | OG image for overview page |
+| `src/pages/open-graph/beauty-index/[slug].png.ts` | Endpoint | OG images for each language |
+| `src/pages/open-graph/beauty-index/code.png.ts` | Endpoint | OG image for code comparison page |
+| `src/components/beauty-index/RadarChart.astro` | Component | Build-time SVG radar chart |
+| `src/components/beauty-index/RankingChart.astro` | Component | Build-time SVG horizontal bar chart |
+| `src/components/beauty-index/LanguageCard.astro` | Component | Card for overview grid |
+| `src/components/beauty-index/ScoreBadge.astro` | Component | Score display pill with color gradient |
+| `src/components/beauty-index/CharacterSketch.astro` | Component | Character illustration wrapper |
+| `src/components/beauty-index/CodeTabs.tsx` | Component | React island for tab switching |
+| `src/components/beauty-index/BeautyIndexJsonLd.astro` | Component | Schema.org structured data |
+| `src/lib/radar-svg.ts` | Utility | Shared radar chart geometry + SVG string generation |
+| `src/lib/beauty-index-og.ts` | Utility | OG image generation specific to Beauty Index |
+| `public/images/beauty-index/characters/*.png` | Assets | 25 character illustrations |
+
+### Modified Files (edit)
+
+| File | Change | Scope of Change |
+|------|--------|----------------|
+| `src/content.config.ts` | Add `beautyIndex` collection with `file()` loader + Zod schema | ~15 lines added, existing blog collection untouched |
+| `src/components/Header.astro` | Add `{ href: '/beauty-index/', label: 'Beauty Index' }` to `navLinks` | 1 line added |
+
+### Optional Refactor (not blocking)
+
+| File | Change | Reason |
+|------|--------|--------|
+| `src/lib/og-image.ts` | Extract branding helpers to `src/lib/og-shared.ts` | Avoids duplicating accent bar, PG monogram, font loading in beauty-index-og.ts |
+
+### Files NOT Modified
+
+| File | Reason |
+|------|--------|
+| `astro.config.mjs` | No new integrations needed. React already configured. Sitemap auto-discovers. Expressive Code already configured. |
+| `src/layouts/Layout.astro` | Already supports all needed props (title, description, ogImage, tags, canonicalURL) |
+| `src/components/SEOHead.astro` | Already generic enough for Beauty Index pages |
+| `tailwind.config.mjs` | No new Tailwind plugins or theme extensions needed. Existing CSS custom properties are sufficient. |
+| `src/styles/global.css` | Component-scoped styles preferred over global additions |
+| `package.json` | No new npm dependencies required -- all tech is already installed |
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern: Separate Collection for External Posts
+### Anti-Pattern 1: Client-Side Chart Rendering
+**What:** Using Chart.js, D3, Recharts, or any JS charting library to render radar/bar charts in the browser.
+**Why bad:** Adds 50-200kb of JavaScript for completely static data. Causes layout shift as charts render after hydration. Violates the site's zero-JS-by-default philosophy. The data never changes at runtime.
+**Instead:** Generate SVG at build time in Astro component frontmatter. Zero JS, instant render, accessible.
 
-**What it looks like:** Creating a second collection `externalBlogs` with a custom inline loader or JSON file, then merging with the `blog` collection in every page.
+### Anti-Pattern 2: Separate Content Collections per Data Type
+**What:** Creating separate collections for scores, characters, code samples, and metadata.
+**Why bad:** Creates N+1 query patterns. Forces cross-collection joins in page templates. Complicates the build.
+**Instead:** One flat JSON file with all language data. Code samples separate only because they need a different access pattern (grouped by feature, not by language).
 
-**Why it's wrong for this use case:** Doubles the query complexity. Every page that lists posts must query two collections, merge the arrays, and re-sort by date. Type unions get messy. Tag pages need to aggregate tags from both collections. The RSS feed needs both. All for what amounts to adding an optional field to existing entries.
+### Anti-Pattern 3: Using MDX Files for Language Pages
+**What:** Writing each of the 25 languages as an `.mdx` file with frontmatter scores.
+**Why bad:** 25 nearly-identical files with copy-pasted templates. Hard to maintain rankings (changing rank #5 requires editing multiple files). No single-source-of-truth for the ranking order. MDX parsing overhead for what is fundamentally structured data, not prose.
+**Instead:** One JSON file with all 25 languages. One dynamic route `[slug].astro` renders them all from the same template.
 
-**When it WOULD be right:** If external posts had a fundamentally different schema (e.g., fetched live from an API at build time with different fields). Not the case here -- external posts have the same title/description/date/tags structure as internal posts.
+### Anti-Pattern 4: Full Page Hydration for Code Tabs
+**What:** Using `client:load` on a large component that re-renders all code blocks client-side.
+**Why bad:** Ships all 25 * N code samples as JavaScript strings. Slow initial load. Duplicates what Expressive Code already does at build time.
+**Instead:** Pre-render all code blocks at build time with Expressive Code. React island only toggles visibility via DOM class manipulation.
 
-### Anti-Pattern: Generating Static Pages for External Posts Then Redirecting
+### Anti-Pattern 5: Hardcoded Radar Chart SVG Paths
+**What:** Manually computing and pasting SVG path coordinates for each language.
+**Why bad:** Unmaintainable. Any score change requires recalculating coordinates by hand. Error-prone.
+**Instead:** Compute SVG geometry programmatically from scores using `src/lib/radar-svg.ts`.
 
-**What it looks like:** Letting `[slug].astro` generate pages for external posts, then using Astro's `redirect` or a meta refresh tag to send visitors to the external URL.
+### Anti-Pattern 6: Duplicating OG Image Code
+**What:** Copy-pasting the entire `og-image.ts` and modifying it for Beauty Index.
+**Why bad:** Two copies of font loading, branding elements, Satori config, and Sharp conversion. Changes to the PG branding require updates in two places.
+**Instead:** Extract shared helpers (font loading, branding row, accent bar, render-to-PNG) into `og-shared.ts`. Both the existing blog OG and Beauty Index OG import from it.
 
-**Why it's wrong:** Wastes build time generating pages that nobody should visit. Creates URLs that exist but immediately bounce visitors. Confuses search engines. Adds pages to the sitemap that are not real content. On GitHub Pages (static hosting), you cannot do proper 301 redirects -- only meta refresh, which is an SEO anti-pattern.
+---
 
-**Do this instead:** Never generate a page for external posts. Filter them out in `getStaticPaths()`. The blog listing links directly to the external URL.
+## Build Order (Dependency Graph)
 
-### Anti-Pattern: Storing Social Links in astro.config.mjs
+The phases below are ordered by dependency. Items within a phase can be built in parallel.
 
-**What it looks like:** Adding custom fields to `astro.config.mjs` and accessing them via `Astro.config`.
+```
+Phase 1: Data Foundation (no dependencies)
+  1.1  Create src/data/beauty-index/languages.json (start with 3-5 seed languages)
+  1.2  Add beautyIndex collection to src/content.config.ts
+  1.3  Create src/lib/radar-svg.ts (shared radar geometry math)
+       Verify: `astro check` passes, collection is queryable
 
-**Why it's wrong:** `astro.config.mjs` is for Astro framework configuration (build settings, integrations, site URL). Custom application data does not belong there. Astro does not expose arbitrary config fields to components.
+Phase 2: Core Components (depends on 1.1, 1.3)
+  2.1  RadarChart.astro (uses radar-svg.ts for geometry)
+  2.2  ScoreBadge.astro (standalone, no dependencies)
+  2.3  RankingChart.astro (standalone SVG bar chart)
+  2.4  LanguageCard.astro (composes RadarChart + ScoreBadge)
+  2.5  CharacterSketch.astro (standalone image wrapper)
+       Verify: components render correctly in isolation
 
-**Do this instead:** Use a TypeScript data file (`src/data/site.ts`) imported directly by components that need it.
+Phase 3: Pages (depends on Phase 2)
+  3.1  /beauty-index/[slug].astro (uses RadarChart, ScoreBadge, CharacterSketch)
+  3.2  /beauty-index/index.astro (uses RankingChart, LanguageCard, links to [slug])
+       Verify: pages build, routes resolve, layout/nav work
+
+Phase 4: Code Comparison (can be built in parallel with Phase 3)
+  4.1  Create src/data/beauty-index/code-samples.ts
+  4.2  CodeTabs.tsx React component
+  4.3  /beauty-index/code/index.astro
+       Verify: tab switching works, code blocks render with syntax highlighting
+
+Phase 5: OG Images (depends on 1.3, can parallel with Phases 3-4)
+  5.1  src/lib/beauty-index-og.ts (or src/lib/og-shared.ts refactor first)
+  5.2  OG image endpoints (overview.png.ts, [slug].png.ts, code.png.ts)
+       Verify: OG images generate at build time, radar chart visible in PNGs
+
+Phase 6: Integration Polish (depends on all above)
+  6.1  Add "Beauty Index" to Header.astro navLinks
+  6.2  BeautyIndexJsonLd.astro structured data
+  6.3  BreadcrumbJsonLd on all Beauty Index pages
+  6.4  Complete all 25 languages in languages.json
+  6.5  Complete all character illustrations in public/images/
+  6.6  Optional: Add Beauty Index teaser card to homepage
+       Verify: full build passes, sitemap includes all pages, OG images valid
+```
+
+**Phase ordering rationale:**
+- **Data model first** because every other component reads from it. If the schema is wrong, everything downstream breaks.
+- **Shared radar math** in Phase 1 because both Astro components (Phase 2) and OG images (Phase 5) depend on it.
+- **Components before pages** because pages compose components. Building pages without components means dummy markup that gets replaced.
+- **Code comparison is independent** -- it uses its own data source (`code-samples.ts`) and its own component tree. Can be developed in parallel with the main pages.
+- **OG images can also parallel** -- they only depend on the radar math utility, not on the page components.
+- **Navigation last** because it is a one-line edit with zero risk. Adding it early creates dead links during development.
+
+---
+
+## Scalability Considerations
+
+| Concern | At 25 languages (launch) | At 50 languages | At 100+ languages |
+|---------|-------------------------|------------------|--------------------|
+| Build time | Negligible (~25 SVGs + 25 pages + 27 OG images) | Still fast (< 5s additional) | Consider pagination on overview page |
+| `languages.json` size | ~15kb | ~30kb | Split into category files with multiple `file()` loaders |
+| OG image generation | ~27 images, ~10-15s build time | ~52 images, ~20s | Acceptable for static build; cache if needed |
+| Code samples file | ~50kb (25 langs x ~6 features) | ~100kb | Split into per-feature files |
+| Overview page DOM | 25 cards -- fine | 50 cards -- add category filtering | 100+ cards -- paginate or virtualize |
+| Navigation | Single "Beauty Index" link | Same | May need dropdown submenu |
 
 ---
 
 ## Sources
 
-- [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/) -- Content Layer API, `glob()` loader, Zod schemas, optional fields (HIGH confidence)
-- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- `getCollection()`, `render()`, `CollectionEntry` type, filter functions (HIGH confidence)
-- [Astro Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/) -- Inline loaders, entry structure, `rendered` field (HIGH confidence)
-- [Content Layer: A Deep Dive](https://astro.build/blog/content-layer-deep-dive/) -- Architecture of Content Layer, loader invocation, store management (HIGH confidence)
-- [Syncing dev.to Posts with Astro Blog](https://logarithmicspirals.com/blog/updating-astro-blog-to-pull-devto-posts/) -- Pattern for mixing external API posts with local markdown in content collections (MEDIUM confidence)
-- [External Redirects in Astro on Vercel](https://www.jamiekuppens.com/posts/how-to-add-external-redirects-in-astro-on-vercel) -- externalLink frontmatter pattern, postbuild redirect scripts (MEDIUM confidence)
-- [Astro Content Collections Complete 2026 Guide](https://inhaq.com/blog/getting-started-with-astro-content-collections.html) -- Schema patterns, optional fields, Zod URL validation (MEDIUM confidence)
-- [Astro Build a Blog Tutorial: Social Media Footer](https://docs.astro.build/en/tutorial/3-components/2/) -- Centralized social links pattern (HIGH confidence)
+- [Astro 5 Content Collections documentation](https://docs.astro.build/en/guides/content-collections/) -- `file()` loader, Zod schema, `getCollection` API (HIGH confidence)
+- [Astro Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/) -- `file()` loader specification, id requirements (HIGH confidence)
+- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) -- `client:visible` directive, partial hydration (HIGH confidence)
+- [Astro Routing Reference](https://docs.astro.build/en/reference/routing-reference/) -- `getStaticPaths` for dynamic routes (HIGH confidence)
+- [Satori GitHub repository](https://github.com/vercel/satori) -- CSS/HTML subset, SVG generation capabilities, flexbox layout (HIGH confidence)
+- [Satori SVG support issue #86](https://github.com/vercel/satori/issues/86) -- confirmed SVG data URI embedding approach, resolved in PR #98 (HIGH confidence)
+- [SVG Radar Charts without D3](https://data-witches.com/2023/12/radar-chart-fun-with-svgs-aka-no-small-multiples-no-problem/) -- pure SVG polar coordinate approach (MEDIUM confidence)
+- [svg-radar-chart library](https://github.com/derhuerst/svg-radar-chart) -- 9kb alternative considered and rejected in favor of inline math (MEDIUM confidence)
+- Existing codebase files examined: `src/content.config.ts`, `src/pages/blog/[slug].astro`, `src/pages/open-graph/[...slug].png.ts`, `src/lib/og-image.ts`, `src/components/Header.astro`, `src/components/SEOHead.astro`, `src/layouts/Layout.astro`, `src/data/projects.ts`, `src/data/site.ts`, `astro.config.mjs`, `package.json`, `tailwind.config.mjs`, `src/styles/global.css`
 
 ---
-*Architecture research for: v1.1 content refresh integration*
-*Researched: 2026-02-11*
+
+*Architecture research for: The Beauty Index content pillar*
+*Researched: 2026-02-17*

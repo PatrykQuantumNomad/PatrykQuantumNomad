@@ -1,208 +1,306 @@
-# Stack Research: v1.1 Content Refresh
+# Stack Research: The Beauty Index
 
-**Domain:** Content refresh for existing Astro 5 portfolio site (patrykgolabek.dev)
-**Researched:** 2026-02-11
+**Domain:** Interactive data visualization content pillar for static portfolio site
+**Researched:** 2026-02-17
 **Confidence:** HIGH
-**Scope:** Stack additions/changes needed for external blog integration, social link updates, hero copy changes, and content curation
 
-## Executive Finding
+## Existing Stack (DO NOT reinstall)
 
-**Zero new npm packages required.** All v1.1 features are achievable with the existing Astro 5.17.1 stack. The work is content editing, schema extension, and component modification -- not new technology adoption.
+Already present in `package.json` -- validated and working:
 
-This is deliberate: overengineering a content refresh with new dependencies would add maintenance burden, build complexity, and risk for what amounts to editing frontmatter, HTML, and TypeScript data files.
+| Technology | Version | Role in Beauty Index |
+|------------|---------|---------------------|
+| Astro | ^5.3.0 | Static pages, `getStaticPaths()` for 25 language detail pages, content collections |
+| React 19 | ^19.2.4 | Interactive chart islands via `@astrojs/react` (already configured with `client:visible`) |
+| Tailwind CSS | ^3.4.19 | Chart wrapper styling, tab UI, responsive layouts |
+| TypeScript | ^5.9.3 | Type-safe language data schemas, component props |
+| GSAP | ^3.14.2 | Scroll-triggered chart entrance animations (reuse existing scroll reveal patterns) |
+| Satori | ^0.19.2 | Build-time OG image generation for language detail pages (radar chart shapes in SVG) |
+| Sharp | ^0.34.5 | Satori SVG-to-PNG conversion for OG images |
+| astro-expressive-code | ^0.41.6 | Syntax-highlighted code blocks for the 25-language code comparison view |
+| Content Collections + Zod | via Astro 5 | New `languages` collection with typed schemas for scores, code snippets, metadata |
 
-## Existing Stack (Unchanged)
+## Recommended Additions
 
-These are already installed and validated in v1.0. Listed for reference only -- do NOT reinstall or upgrade.
+### 1. Recharts -- Interactive Radar + Bar Charts
 
-| Technology | Installed Version | Role in v1.1 |
-|------------|-------------------|---------------|
-| Astro | 5.17.1 | Content collections with Content Layer API, glob() loader, Zod schemas |
-| @astrojs/mdx | ^4.3.13 | MDX support for blog posts (internal posts only) |
-| @astrojs/rss | ^4.0.15 | RSS feed -- needs update to handle external posts |
-| @astrojs/sitemap | ^3.7.0 | Sitemap generation -- no changes needed |
-| @astrojs/tailwind | ^6.0.2 | Tailwind integration (note: v1.0 used this, not @tailwindcss/vite) |
-| @tailwindcss/typography | ^0.5.19 | Prose styling for blog content |
-| tailwindcss | ^3.4.19 | Utility CSS (note: v1.0 shipped with Tailwind v3, not v4) |
-| astro-expressive-code | ^0.41.6 | Code block syntax highlighting |
-| satori + sharp | ^0.19.2 / ^0.34.5 | OG image generation at build time |
-| reading-time | ^1.5.0 | Blog post reading time estimates |
-| mdast-util-to-string | ^4.0.0 | Markdown AST utility for reading time plugin |
+| Property | Value |
+|----------|-------|
+| **Package** | `recharts` |
+| **Version** | `^3.7.0` (latest stable, released Jan 2025) |
+| **Purpose** | `RadarChart` for 6-dimension spider charts per language; `BarChart` (horizontal) for overall rankings |
+| **Bundle impact** | ~50 KB gzipped (loaded ONLY in chart islands via `client:visible`, zero cost for pages without charts) |
 
-## Recommended Stack Changes for v1.1
+**Why Recharts over alternatives:**
 
-### Feature 1: External Blog Post Integration
+- **React 19 compatible out of the box.** Recharts 3.x removed the `react-smooth` and `recharts-scale` dependencies that caused React 19 conflicts in 2.x. In 3.x, `react`, `react-dom`, and `react-is` are peer dependencies that match whatever React version you install. No `overrides` or `resolutions` hacks needed with the project's React 19.2.4.
+- **Declarative component API.** `<RadarChart>`, `<Radar>`, `<PolarGrid>`, `<PolarAngleAxis>`, `<PolarRadiusAxis>` map directly to the 6-dimension spider chart requirement. No imperative D3 wrangling.
+- **Horizontal BarChart built-in.** `<BarChart layout="vertical">` gives the overall ranking view where the longest bar is the highest-ranked language. Zero custom drawing code.
+- **SVG-based output.** Charts render as inline SVG elements in the DOM. This is critical for two reasons: (a) SVG scales crisply at any resolution, and (b) the share/download feature captures SVG-rendered charts reliably via `html-to-image`.
+- **ResponsiveContainer.** `<ResponsiveContainer width="100%" height={400}>` handles viewport resizing, essential for mobile-first design on a portfolio site.
+- **Perfect Astro islands fit.** React components with `client:visible` hydrate only when the user scrolls to them. A page with three chart islands pays zero JS cost until each chart scrolls into view. For the index page with 25 small charts, this is significant.
+- **Theming via props.** Colors for radar fills, strokes, and bar fills can be passed as Tailwind-derived CSS variables, integrating cleanly with the existing dark/light mode toggle and "Quantum Explorer" theme.
 
-**Approach:** Extend the existing blog content collection schema with an optional `externalUrl` field. Create lightweight Markdown stub files for each external post. The blog listing page renders them alongside internal posts, but links to the external URL instead of an internal route.
+**Recharts 3.x breaking changes to know:**
+- `Cell` component deprecated -- use `cells` prop on Bar/Pie instead
+- Internal state rewrite: `CategoricalChartState` no longer exposed outside
+- `activeIndex` prop removed from Scatter/Bar/Pie
+- All animations now internal (no `react-smooth` needed)
+- None of these affect our use case (RadarChart + BarChart with basic customization)
 
-**Why this approach over alternatives:**
+**Confidence:** HIGH -- verified via [GitHub releases v3.7.0](https://github.com/recharts/recharts/releases), [3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide), React 19 support [issue #4558](https://github.com/recharts/recharts/issues/4558) (closed/resolved), peer dependency [discussion #5701](https://github.com/recharts/recharts/discussions/5701).
 
-| Approach | Verdict | Rationale |
-|----------|---------|-----------|
-| Add `externalUrl` to existing blog schema + stub .md files | **USE THIS** | Zero new dependencies. External posts get the same Zod validation, sorting, tagging, and filtering as internal posts. One unified `getCollection('blog')` call powers everything. Stub files are 5-10 lines of frontmatter each. |
-| Separate `externalBlog` collection with inline loader | Rejected | Adds complexity for no benefit. You would need to merge and sort two collections in every page that lists posts. The blog listing, homepage "Latest Writing", tag pages, and RSS feed would all need dual-query logic. |
-| RSS feed loader (e.g., `astro-loader-rss`) | Rejected | Fetches full RSS feeds at build time. Overkill when you want to curate specific posts, not mirror entire feeds. Adds a network dependency to the build. Fragile if the source RSS changes structure. |
-| JSON/YAML data file (not a content collection) | Rejected | Loses type safety, draft filtering, tag support, and the unified `getCollection()` API. Would require separate rendering logic everywhere. |
+### 2. html-to-image -- Client-Side Chart Export for Social Sharing
 
-**Schema change required in `src/content.config.ts`:**
+| Property | Value |
+|----------|-------|
+| **Package** | `html-to-image` |
+| **Version** | `1.11.11` (PIN this exact version) |
+| **Purpose** | Export rendered chart DOM nodes as PNG blobs for download/sharing |
+| **Bundle impact** | ~12 KB gzipped |
 
-```typescript
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    publishedDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-    // NEW: external blog post support
-    externalUrl: z.string().url().optional(),
-    source: z.string().optional(), // e.g., "Kubert AI Blog", "Translucent Computing"
-  }),
+**Why html-to-image:**
+
+- **DOM-node based.** Takes a ref to any DOM element and captures it as an image. This means we capture the full styled card -- chart SVG + title + scores + branding -- not just the raw chart.
+- **Multiple output formats.** `toPng()`, `toBlob()`, `toSvg()`, `toJpeg()`. We use `toPng()` and `toBlob()` because Twitter/LinkedIn/Reddit do not accept SVG in shared images.
+- **No server required.** Runs entirely client-side. Essential for GitHub Pages static deployment.
+- **Maintained fork of dom-to-image.** The original `dom-to-image` is abandoned. `html-to-image` is the successor with the same API but active bug fixes.
+
+**CRITICAL: Pin to version 1.11.11.** Versions 1.11.12 and 1.11.13 have a documented regression where exported images are blank or incomplete. There is an open GitHub issue. Use `"html-to-image": "1.11.11"` (exact, no caret) in `package.json`.
+
+**Confidence:** MEDIUM -- html-to-image 1.11.11 is stable and widely used, but the library has not had a successful release in over a year. If it becomes fully unmaintained, `modern-screenshot` (v4.6.8, actively published) is the migration target with a similar API.
+
+### 3. file-saver -- Cross-Browser Download Trigger
+
+| Property | Value |
+|----------|-------|
+| **Package** | `file-saver` |
+| **Version** | `^2.0.5` |
+| **Purpose** | Trigger "Save As" dialog from a Blob (the PNG output from html-to-image) |
+| **Bundle impact** | ~3 KB gzipped |
+
+**Why file-saver:**
+
+- **Cross-browser `saveAs()`.** The pattern is: `htmlToImage.toBlob(node)` then `saveAs(blob, 'python-beauty-index.png')`. This works reliably across Chrome, Firefox, Safari, and mobile browsers.
+- **Edge cases handled.** Manual `<a download>` click simulation has known issues in Safari and some mobile WebViews. file-saver handles these.
+- **Tiny.** 3 KB is not worth reimplementing.
+
+**Confidence:** HIGH -- mature, stable, unchanged API for years. 86M+ npm downloads.
+
+### 4. @expressive-code/plugin-collapsible-sections -- Code Block Enhancement
+
+| Property | Value |
+|----------|-------|
+| **Package** | `@expressive-code/plugin-collapsible-sections` |
+| **Version** | `^0.41.0` (match the installed astro-expressive-code ^0.41.6) |
+| **Purpose** | Collapse boilerplate (imports, class declarations, setup) in code comparison snippets |
+| **Bundle impact** | Negligible -- Expressive Code plugins run at build time, no client JS |
+
+**Why this plugin:**
+
+- **First-party Expressive Code ecosystem.** The site already uses `astro-expressive-code ^0.41.6`. This plugin shares the same build pipeline and adds zero runtime cost.
+- **Solves the 25-language code comparison problem.** When comparing feature implementations across 25 languages, boilerplate obscures the comparison-relevant code. `collapse={1-5}` hides imports/setup so users focus on the pattern.
+- **Build-time only.** Processed during `astro build`. Ships as static HTML with CSS-only expand/collapse. No JavaScript in the client bundle.
+
+**Configuration addition to `astro.config.mjs`:**
+
+```javascript
+import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections';
+
+export default defineConfig({
+  integrations: [
+    expressiveCode({
+      themes: ['github-dark', 'github-light'],
+      plugins: [pluginCollapsibleSections()],
+      // ... existing config
+    }),
+    // ... rest
+  ],
 });
 ```
 
-**External post stub file example** (`src/data/blog/external-kubert-ai-post-title.md`):
+**Confidence:** HIGH -- [official plugin documentation](https://expressive-code.com/plugins/collapsible-sections/).
 
-```markdown
----
-title: "The Actual Post Title from Kubert AI"
-description: "Brief description of what the post covers."
-publishedDate: 2025-10-15
-tags: ["ai", "kubernetes", "llm-agents"]
-externalUrl: "https://mykubert.com/blog/the-post-slug/"
-source: "Kubert AI Blog"
----
+## Architecture Integration Points
+
+### How New Libraries Fit the Existing Astro Island Pattern
+
+```
+src/pages/beauty-index/index.astro (Overview page)
+  |
+  +-- [Static] Hero section, methodology text, SEO    -- zero JS
+  |
+  +-- <OverallRanking client:visible />               -- Recharts BarChart island
+  |     Horizontal bar chart of 25 languages ranked.
+  |     Props: sorted score data from content collection.
+  |     ~50 KB loaded only when user scrolls here.
+  |
+  +-- [Static] Grid of 25 language cards               -- zero JS
+  |     Each card links to /beauty-index/[language]
+  |     Shows mini radar preview (pure SVG, no JS)
+  |
+src/pages/beauty-index/[language].astro (Detail page, one per language)
+  |
+  +-- [Static] Language name, description, metadata    -- zero JS
+  |
+  +-- <RadarChart client:visible />                    -- Recharts RadarChart island
+  |     6-axis spider chart for this language.
+  |     ShareButton inside: html-to-image + file-saver.
+  |
+  +-- <CodeComparison client:visible />                -- Custom React island
+  |     Tab UI (10 features as tabs).
+  |     Each tab shows code snippet via Expressive Code <Code> component.
+  |     ~2 KB custom code (useState for tab state).
+  |
+src/pages/open-graph/beauty-index/[language].png.ts
+  |
+  +-- Satori + Sharp (build time)                      -- zero client JS
+       Generates OG image with radar chart shape.
+       Uses the SAME Satori JSX-to-SVG pipeline as existing blog OG images.
+       Radar shape drawn with trigonometry, no Recharts dependency at build time.
 ```
 
-Note: The Markdown body is intentionally empty. These files exist only for their frontmatter metadata. The `externalUrl` field tells components to link externally rather than rendering a post page.
+### Content Collection Extension
 
-**Component changes needed:**
+Extend `src/content.config.ts` (currently has only `blog`):
 
-| Component | Change | Why |
-|-----------|--------|-----|
-| `src/components/BlogCard.astro` | Conditionally use `externalUrl` as href when present; add external link icon and source badge | External posts should open in new tab with `target="_blank"` and `rel="noopener noreferrer"` |
-| `src/pages/blog/index.astro` | No query changes needed -- `getCollection('blog')` already returns all entries | The filtering/sorting logic works as-is because external posts have the same schema shape |
-| `src/pages/blog/[slug].astro` | Filter out external posts from dynamic route generation | External posts should NOT generate local pages; they are link stubs only |
-| `src/pages/index.astro` | BlogCard used inline here -- apply same external link logic | Homepage "Latest Writing" section must handle external posts identically |
-| `src/pages/rss.xml.ts` | Conditionally use `externalUrl` for the `link` field when present | RSS readers should link to the original external post, not a non-existent local page |
-| `src/pages/blog/tags/[tag].astro` | Same BlogCard logic applies -- no query changes | Tag pages already get entries via `getCollection` |
-| `src/pages/open-graph/[...slug].png.ts` | Skip OG image generation for external posts | External posts do not have local pages, so no OG image is needed |
+```typescript
+const languages = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/data/languages' }),
+  schema: z.object({
+    name: z.string(),
+    slug: z.string(),
+    tagline: z.string(),
+    description: z.string(),
+    scores: z.object({
+      readability: z.number().min(0).max(10),
+      performance: z.number().min(0).max(10),
+      ecosystem: z.number().min(0).max(10),
+      safety: z.number().min(0).max(10),
+      expressiveness: z.number().min(0).max(10),
+      learnability: z.number().min(0).max(10),
+    }),
+    overallScore: z.number().min(0).max(10),
+    overallRank: z.number().min(1).max(25),
+    color: z.string(), // Hex color for chart theming
+    features: z.record(z.string(), z.object({
+      code: z.string(),
+      language: z.string(), // Shiki language ID
+      highlights: z.string().optional(), // Line highlight markers
+    })),
+  }),
+});
 
-**Confidence: HIGH** -- This is standard Astro content collection usage. Zod optional fields, glob loader, and conditional rendering are all core Astro features verified in official docs.
+export const collections = { blog, languages };
+```
 
-### Feature 2: YouTube and X (Twitter) Social Link Integration
+### OG Image Generation for Language Pages
 
-**Approach:** Pure HTML/SVG changes. No new packages needed.
+The existing `src/lib/og-image.ts` uses Satori + Sharp to generate blog OG images at build time. The same pattern extends to Beauty Index pages:
 
-**Files to modify:**
+1. Create `src/lib/og-image-beauty.ts` -- a Satori template that includes a radar chart shape
+2. The radar chart shape is drawn using basic trigonometry in Satori's JSX object format (the same `{type: 'div', props: {...}}` pattern already in `og-image.ts`)
+3. Route at `src/pages/open-graph/beauty-index/[language].png.ts` follows the exact pattern of `src/pages/open-graph/[...slug].png.ts`
 
-| File | Change |
-|------|--------|
-| `src/components/Footer.astro` | Remove LinkedIn SVG link. Add YouTube and X (Twitter) SVG icon links. Keep GitHub and Blog links. |
-| `src/pages/contact.astro` | Remove LinkedIn contact card. Add YouTube and X cards. Update "Other places" section. |
-| `src/pages/index.astro` | Remove "Connect on LinkedIn" CTA button. Replace with appropriate alternative (X profile or email). |
-| `src/components/PersonJsonLd.astro` | Update `sameAs` array: remove LinkedIn URL, add YouTube channel URL and X profile URL. |
+**No new dependencies needed for build-time OG images.** Satori + Sharp already handle everything.
 
-**SVG icons for new social links:**
+### Dynamic Routes for Language Detail Pages
 
-YouTube and X (Twitter) icons are well-known standard SVG paths. The existing codebase uses inline SVGs (not an icon library), so maintain the same pattern. No icon library needed.
+Follow the existing `src/pages/blog/[slug].astro` pattern:
 
-- **X (Twitter):** Use the current X logo SVG path (single path, 24x24 viewBox)
-- **YouTube:** Use the standard YouTube play-button SVG path (24x24 viewBox)
+```typescript
+// src/pages/beauty-index/[language].astro
+export const getStaticPaths: GetStaticPaths = async () => {
+  const languages = await getCollection('languages');
+  return languages.map((lang) => ({
+    params: { language: lang.data.slug },
+    props: { language: lang },
+  }));
+};
+```
 
-**Confidence: HIGH** -- This is straightforward HTML editing with no technical risk.
-
-### Feature 3: Hero Tagline Refresh
-
-**Approach:** Direct copy editing in `src/pages/index.astro`. No technical changes.
-
-**What to change:**
-
-| Element | Current Value | What Changes |
-|---------|---------------|--------------|
-| Hero subtitle text | "Building resilient cloud-native systems and AI-powered solutions for 17+ years." | New tagline with craft & precision messaging |
-| Typing role array | `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']` | Potentially update role strings to match new messaging |
-| CTA buttons | "View Projects" + "Read Blog" | Evaluate if these still make sense with new tone |
-
-**No stack implications.** The typing animation is vanilla JS with `setInterval` -- it works with any string array content.
-
-**Confidence: HIGH** -- Pure content editing.
-
-### Feature 4: Content Removal (Projects + Blog Posts)
-
-**Approach:** Delete entries from data files. No technical changes.
-
-**Project removal:**
-
-| Action | File | Details |
-|--------|------|---------|
-| Remove "Full-Stack Applications" category | `src/data/projects.ts` | Delete the entire category from the `categories` array and remove all projects with that category (`PatrykQuantumNomad`, `arjancode_examples`) |
-| Remove `gemini-beauty-math` | `src/data/projects.ts` | Delete the project object from the array (it is in "AI/ML & LLM Agents" category) |
-| Update project count | `src/pages/projects/index.astro` | The description says "19 open-source projects" -- update to reflect new count (16 after removals) |
-
-**Blog post removal:**
-
-| Action | File | Details |
-|--------|------|---------|
-| Remove draft placeholder | `src/data/blog/draft-placeholder.md` | Delete the file entirely. It is `draft: true` so it does not appear in production, but removing it keeps the repo clean. |
-
-**No stack implications.** Deleting entries from TypeScript arrays and removing Markdown files requires no tooling.
-
-**Confidence: HIGH** -- File deletion and array editing.
-
-## What NOT to Add
-
-These are tempting but wrong for a content refresh milestone:
-
-| Avoid | Why | What to Do Instead |
-|-------|-----|---------------------|
-| `astro-loader-rss` or any RSS feed loader | Adds build-time network dependency. You are curating specific posts, not mirroring feeds. If the external blog changes its RSS format, your build breaks. | Markdown stub files with `externalUrl` frontmatter. You control exactly which posts appear. |
-| A separate `externalPosts` content collection | Forces dual-query merging in every listing page (blog index, homepage, tags, RSS). More code, more bugs, for zero user benefit. | Single `blog` collection with optional `externalUrl` field. One query, one sort, one render path with a conditional. |
-| `astro-icon` or any icon library | The codebase uses inline SVGs throughout. Adding an icon library for 2 new social icons (YouTube, X) is dependency bloat. You would need to refactor all existing SVGs for consistency. | Copy-paste the standard YouTube and X SVG paths into the existing inline SVG pattern. |
-| Any new animation library | The hero tagline refresh is a copy change. The typing animation already works. Do not add GSAP, Motion, or any animation library for a text edit. | Edit the string content in the existing `<script>` block. |
-| Tailwind CSS v4 upgrade | v1.0 shipped with Tailwind v3.4.19 + `@astrojs/tailwind`. A major Tailwind version upgrade is a separate milestone, not a content refresh side-effect. | Keep Tailwind v3. Upgrade to v4 in a dedicated infrastructure milestone. |
-| Any CMS or headless content system | The milestone scope is adding 3-5 external blog stubs and editing a few data files. A CMS is wildly disproportionate to the task. | Markdown files with frontmatter. The same pattern that powers the entire v1.0 blog. |
-| `schema-dts` or typed JSON-LD library | The existing `PersonJsonLd.astro` uses a plain object literal. Adding a typed JSON-LD library for a `sameAs` array edit is overengineering. | Edit the `sameAs` array directly in the component. |
+This generates 25 static pages at build time, identical to how blog post pages work today.
 
 ## Installation
 
 ```bash
-# No new packages to install for v1.1.
-# All features are achievable with the existing stack.
+# Runtime dependencies (3 packages)
+npm install recharts@^3.7.0 file-saver@^2.0.5 html-to-image@1.11.11
+
+# Type definitions
+npm install -D @types/file-saver
+
+# Expressive Code plugin (build-time only)
+npm install @expressive-code/plugin-collapsible-sections@^0.41.0
 ```
+
+**Total new packages: 3 runtime + 1 dev types + 1 build plugin = 5 packages**
+**Total new client-side JS (per chart island): ~65 KB gzipped**
+**Pages without charts: 0 KB added**
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not Alternative |
 |----------|-------------|-------------|---------------------|
-| External blog integration | `externalUrl` schema field + stub .md files | Separate collection with inline loader | Dual-query complexity in every listing page for no user benefit |
-| External blog integration | `externalUrl` schema field + stub .md files | RSS feed loader | Build-time network dependency, fragile, fetches too much when you want to curate specific posts |
-| External blog integration | `externalUrl` schema field + stub .md files | JSON data file | Loses content collection features: type safety, draft filtering, tags, unified querying |
-| Social icons | Inline SVG paths | astro-icon + @iconify-json/lucide | Adding a dependency for 2 icons when the entire codebase uses inline SVGs |
-| Social icons | Inline SVG paths | Font Awesome | 30KB+ icon font for 2 icons. Absurd for a performance-focused static site. |
-| Content management | Markdown frontmatter | Headless CMS (Sanity, Contentful) | Massive overengineering for a site with <10 content entries being edited |
+| Charting | Recharts 3.7 | Chart.js / react-chartjs-2 | Canvas-based, not SVG. Harder to export styled images. Less React-native API. |
+| Charting | Recharts 3.7 | D3.js directly | ~70 KB gzipped, imperative API fights React's declarative model, overkill for radar + bar |
+| Charting | Recharts 3.7 | Victory | Opinionated styling clashes with "Quantum Explorer" theme, larger bundle |
+| Charting | Recharts 3.7 | Nivo | ~200 KB, SSR-focused features unnecessary for client islands |
+| Charting | Recharts 3.7 | Custom SVG (no library) | Viable for static charts, but we need interactivity (hover tooltips, animated transitions). Building a custom interactive radar chart is 500+ lines vs 30 lines of Recharts components. |
+| Image export | html-to-image 1.11.11 | html2canvas | Known CSS rendering bugs (box-shadow, gradients), less reliable with SVG content |
+| Image export | html-to-image 1.11.11 | recharts-to-png | Wraps html2canvas (inherits its bugs), and we need to capture the full styled card not just the chart |
+| Image export | html-to-image 1.11.11 | modern-screenshot 4.6.8 | More actively maintained but smaller community. Earmarked as fallback if html-to-image dies. |
+| Image export | html-to-image 1.11.11 | Native SVG serialization + Canvas API | foreignObject rendering inconsistent across browsers (especially Safari). 12 KB cost of html-to-image is trivial for the reliability gain. |
+| Download trigger | file-saver | Manual `<a download>` click | Edge cases in Safari and mobile WebViews. 3 KB not worth debugging. |
+| Code tabs | Custom React useState + Tailwind | Radix Tabs / Headless UI | Adding a UI library for one tab component is unjustified. 30 lines of React vs a new dependency. |
+| Code highlighting | Expressive Code (already installed) | Prism.js / highlight.js | Would create duplicate highlighter bundles. Expressive Code already handles 25+ languages via Shiki. |
+| Collapsible code | EC plugin-collapsible-sections | Custom CSS details/summary | Loses integration with Expressive Code's build-time processing and theming. |
+| Social sharing | Native Web Share API | Share API polyfill | Web Share API works natively on mobile (where sharing matters most). Desktop fallback is copy-to-clipboard. |
 
-## Version Compatibility
+## What NOT to Add
 
-No version compatibility concerns for v1.1. The existing stack is unchanged:
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| **Chart.js / react-chartjs-2** | Canvas-based (not SVG), harder to export styled images, less React-native | Recharts |
+| **D3.js directly** | Massive bundle, imperative API, overkill for 2 chart types | Recharts (uses D3 internally) |
+| **Nivo** | ~200 KB, SSR features unnecessary | Recharts |
+| **html2canvas** | Known CSS rendering bugs, larger, less reliable with SVG | html-to-image |
+| **Puppeteer/Playwright** | Requires Node.js server; incompatible with GitHub Pages | html-to-image (client-side) |
+| **react-svg-radar-chart** | 759 weekly downloads, questionable maintenance | Recharts (40M+ ecosystem) |
+| **Radix UI / Headless UI** | Adding a UI library for one tab component is unjustified bloat | Custom React tabs (~30 lines) |
+| **Any additional icon library** | Existing codebase uses inline SVGs throughout | Continue inline SVG pattern |
+| **Tailwind v4 upgrade** | Major infrastructure change, not scope of this milestone | Keep Tailwind v3 |
+| **Any CMS** | 25 JSON files in a content collection; a CMS adds deployment complexity for no benefit | Content collections + JSON files |
 
-| Package | Installed | Status |
-|---------|-----------|--------|
-| astro | 5.17.1 | Current stable. Content Layer API with Zod schema extension is core functionality. |
-| @astrojs/rss | ^4.0.15 | Supports custom `link` field per item -- needed for external post URLs in RSS. |
-| All other deps | As shipped in v1.0 | No interaction with v1.1 features. |
+## Version Compatibility Matrix
+
+| Package | Version | Compatible With | Verified |
+|---------|---------|-----------------|----------|
+| recharts | ^3.7.0 | React ^19.2.4, react-dom ^19.2.4 | Peer deps resolved in 3.x; no overrides needed |
+| recharts | ^3.7.0 | Astro 5 client:visible islands | SVG output, standard React component |
+| html-to-image | 1.11.11 (pinned) | Any browser DOM | No React peer dep; works with DOM refs |
+| file-saver | ^2.0.5 | Any browser | No framework dependency |
+| @expressive-code/plugin-collapsible-sections | ^0.41.0 | astro-expressive-code ^0.41.6 | Must match EC major.minor version |
 
 ## Sources
 
-- [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/) -- schema definition with Zod, glob() loader, getCollection() API (HIGH confidence)
-- [Astro Content Loader API Reference](https://docs.astro.build/en/reference/content-loader-reference/) -- inline loader pattern, object loader pattern (HIGH confidence)
-- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- getCollection(), CollectionEntry types (HIGH confidence)
-- [Astro Community Loaders](https://astro.build/blog/community-loaders/) -- RSS loader exists but is overkill for curated external links (MEDIUM confidence)
-- Existing codebase analysis of `src/content.config.ts`, `src/components/BlogCard.astro`, `src/pages/blog/index.astro`, `src/pages/rss.xml.ts`, `src/components/Footer.astro`, `src/pages/contact.astro`, `src/components/PersonJsonLd.astro`, `src/data/projects.ts` (HIGH confidence -- direct file inspection)
+- [Recharts GitHub releases v3.7.0](https://github.com/recharts/recharts/releases) -- latest version, Jan 2025 (HIGH confidence)
+- [Recharts 3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide) -- breaking changes documented (HIGH confidence)
+- [Recharts React 19 support issue #4558](https://github.com/recharts/recharts/issues/4558) -- closed, resolved in 3.x (HIGH confidence)
+- [Recharts peer dependency discussion #5701](https://github.com/recharts/recharts/discussions/5701) -- react/react-dom/react-is as peers confirmed (HIGH confidence)
+- [html-to-image npm](https://www.npmjs.com/package/html-to-image) -- v1.11.11 known stable, later versions regressed (MEDIUM confidence)
+- [recharts-to-png package.json](https://github.com/brammitch/recharts-to-png/blob/main/package.json) -- evaluated and rejected (HIGH confidence)
+- [Astro Islands architecture docs](https://docs.astro.build/en/concepts/islands/) -- client:visible directive (HIGH confidence)
+- [Expressive Code collapsible sections plugin](https://expressive-code.com/plugins/collapsible-sections/) -- official plugin docs (HIGH confidence)
+- [Expressive Code component docs](https://expressive-code.com/key-features/code-component/) -- dynamic `<Code>` rendering (HIGH confidence)
+- [Paul Scanlon: SVG radar chart in Astro](https://www.paulie.dev/posts/2023/10/how-to-create-an-svg-radar-chart/) -- pure SVG approach for build-time OG images (HIGH confidence)
+- [modern-screenshot npm](https://www.npmjs.com/package/modern-screenshot) -- v4.6.8, fallback option (MEDIUM confidence)
+- [Best HTML to Canvas Solutions 2025](https://portalzine.de/best-html-to-canvas-solutions-in-2025/) -- library comparison (MEDIUM confidence)
+- [Recharts Radar API](https://recharts.org/?p=%2Fen-US%2Fapi%2FRadar) -- component documentation (HIGH confidence)
+- [shadcn/ui radar chart components](https://ui.shadcn.com/charts/radar) -- Recharts-based reference implementation (HIGH confidence)
+- Existing codebase analysis: `package.json`, `astro.config.mjs`, `tsconfig.json`, `src/content.config.ts`, `src/lib/og-image.ts`, `src/pages/open-graph/[...slug].png.ts` (HIGH confidence -- direct file inspection)
 
 ---
-*Stack research for: patrykgolabek.dev v1.1 Content Refresh*
-*Researched: 2026-02-11*
-*Key finding: Zero new npm packages. All features are schema extensions, component edits, and content file changes.*
+*Stack research for: The Beauty Index content pillar*
+*Researched: 2026-02-17*
+*Key finding: 3 runtime packages (recharts, html-to-image, file-saver) + 1 build plugin. ~65 KB gzipped client-side addition, loaded only in chart islands. Existing Satori + Sharp pipeline handles OG image generation with zero new dependencies.*

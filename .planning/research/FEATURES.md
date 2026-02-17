@@ -1,423 +1,313 @@
-# Feature Research: v1.1 Content Refresh
+# Feature Research: The Beauty Index
 
-**Domain:** Developer portfolio content refresh (existing Astro 5 site at patrykgolabek.dev)
-**Researched:** 2026-02-11
+**Domain:** Interactive programming language ranking/comparison content pillar on a portfolio site
+**Researched:** 2026-02-17
 **Confidence:** HIGH
-**Scope:** External blog integration, social links update, hero tagline refresh, project curation, test post cleanup
+**Scope:** Beauty Index overview page, per-language detail pages, code comparison page, methodology blog post, social shareability infrastructure
+
+---
+
+## Existing Infrastructure (Already Built)
+
+These capabilities exist on patrykgolabek.dev and directly inform what the Beauty Index can leverage without new work:
+
+| Capability | Where | Reuse Potential |
+|------------|-------|-----------------|
+| **OG image generation** | `src/lib/og-image.ts` using Satori + Sharp | HIGH -- extend with new Beauty Index templates (radar chart layouts, tier badges) |
+| **SEO component** | `src/components/SEOHead.astro` | DIRECT -- accepts ogImage, ogType, tags, description |
+| **JSON-LD structured data** | BlogPostingJsonLd, BreadcrumbJsonLd, PersonJsonLd, ProjectsJsonLd | EXTEND -- add Dataset or Article schema for ranking pages |
+| **Content collections** | `src/content.config.ts` with glob loader | EXTEND -- add `beauty-index` collection for per-language data |
+| **Syntax highlighting** | astro-expressive-code (Shiki-based, VS Code engine) | DIRECT -- use for code comparison blocks |
+| **GSAP animations** | ScrollTrigger, Flip, scroll-animations | DIRECT -- animate chart entries, tier transitions |
+| **React integration** | @astrojs/react already configured | DIRECT -- use React islands for interactive charts |
+| **Tailwind CSS** | Already configured with typography plugin | DIRECT -- style all new pages |
+| **Blog infrastructure** | MDX support, reading time, TOC, tags | DIRECT -- methodology blog post slots in naturally |
+| **Sitemap + RSS** | @astrojs/sitemap, @astrojs/rss | DIRECT -- new pages auto-included |
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Must Ship in v1.1)
-
-These are the core deliverables. Without all of them, v1.1 is incomplete.
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| **External blog entries in blog listing** | The portfolio currently shows 1 real blog post. Patryk has 62 posts on Translucent Computing and 17 on Kubert AI. Without surfacing this writing, the site misrepresents his output. Visitors and recruiters need to see the full body of work. | MEDIUM | Two implementation approaches exist (see Detailed Analysis below). Recommend a second Astro content collection with an inline loader that hardcodes curated external entries -- no build-time API fetching needed for a small, manually curated set. |
-| **Social links update (add X, YouTube, email; remove LinkedIn)** | Social links appear in 3 places: Footer, Contact page, PersonJsonLd. All 3 must be updated atomically. Inconsistent social presence across pages is a credibility problem. | LOW | Replace LinkedIn SVG with X (@QuantumMentat), YouTube (@QuantumMentat), and update email to pgolabek@gmail.com. GitHub stays. Keep aria-labels and SVG accessibility. Update `sameAs` array in PersonJsonLd. |
-| **Hero tagline refresh** | Current tagline reads: "Building resilient cloud-native systems and AI-powered solutions for 17+ years. Pre-1.0 Kubernetes adopter. Ontario, Canada." The request is to remove location, remove "Pre-1.0 Kubernetes adopter", and shift to a "craft & precision" tone. The typing roles array also needs review. | LOW | Text-only change in `src/pages/index.astro`. The typing effect roles array and the static subtitle paragraph both need updating. No structural changes. |
-| **Remove Full-Stack Applications category and gemini-beauty-math project** | The Full-Stack Applications category contains only the portfolio repo itself and a fork (arjancode_examples) -- neither demonstrates meaningful engineering work. The gemini-beauty-math project is in AI/ML but is a lightweight demo that dilutes the portfolio's senior architect signal. | LOW | Remove the category from `categories` array and remove 3 projects from `projects` array in `src/data/projects.ts`. Update the projects page meta description to reflect the new count. |
-| **Remove initial test blog post** | The `draft-placeholder.md` file is a draft test post with a future publish date (2026-03-01). While it is filtered out in production builds via the `draft: true` flag, it should be removed entirely to keep the content directory clean. | LOW | Delete `src/data/blog/draft-placeholder.md`. No impact on production output since it was already `draft: true`. |
-
-### Differentiators (Opportunities Within Scope)
-
-Features that go beyond the minimum ask and add meaningful value to the v1.1 refresh.
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| **Visual distinction for external vs local posts** | Blog listing shows external posts with a subtle "external link" indicator (icon + source label like "on Kubert AI" or "on Translucent Computing"). Visitors instantly understand which posts open on the portfolio vs which navigate to an external blog. This is honest UX -- no bait-and-switch. | LOW | Add a small external-link icon and source badge to `BlogCard.astro` when the entry has an `externalUrl`. Conditionally render `target="_blank" rel="noopener noreferrer"` for external entries. |
-| **Source filtering on blog listing** | Allow visitors to filter by "All", "On this site", "Kubert AI", "Translucent Computing" via simple tab-style buttons at the top of the blog page. With potentially 80+ posts across 3 sources, filtering prevents overwhelm. | MEDIUM | Client-side filtering with vanilla JS on data attributes. No framework needed. Progressive enhancement -- without JS, all posts show. |
-| **Curated external post selection (not full feed dump)** | Instead of importing all 79 external posts, hand-pick 8-12 that best represent Patryk's expertise (Kubernetes, AI/ML, platform engineering, DevOps). Quality over quantity. A curated selection signals editorial judgment. | LOW | Manually define entries in the content collection. Each entry has title, description, publishedDate, tags, externalUrl, and source. No API fetching needed. |
-| **Hero typing roles refresh** | Current roles: `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']`. Refresh to match the craft/precision tone. Removing "Pioneer" (which implies early-adopter bragging) and aligning with the new subtitle. | LOW | Update the `roles` array in the inline script on `index.astro`. |
-| **Update PersonJsonLd structured data** | Remove `address` (location is being removed from hero), update `sameAs` to include X and YouTube URLs, remove LinkedIn. Keeps structured data consistent with visible content. | LOW | Edit `src/components/PersonJsonLd.astro`. |
-| **Update contact page CTA on home page** | Home page hero CTA currently links to LinkedIn ("Connect on LinkedIn"). This needs to change since LinkedIn is being removed. Replace with an email CTA or X profile link. | LOW | Edit `src/pages/index.astro` contact CTA section. |
-
-### Anti-Features (Explicitly NOT Building for v1.1)
-
-| Anti-Feature | Why Tempting | Why Avoid | What to Do Instead |
-|--------------|-------------|-----------|-------------------|
-| **Build-time RSS feed fetching from external blogs** | "Automate it! Fetch from WordPress RSS feeds at build time and always stay current." | Both WordPress feeds return only 3-4 recent items (WordPress default is 10, but Translucent Computing shows 4 and Kubert AI shows 3). The feeds are unreliable for historical content. RSS parsing adds a build dependency (rss-parser or similar). Build failures from external API downtime are unacceptable for a static portfolio on GitHub Pages. The external blogs update infrequently (last Kubert post was June 2025, last TC post was April 2025). | Manually curate external entries as static data in a content collection. Update when new posts are published -- which is quarterly at most. Zero build dependencies. |
-| **Full external post content rendered locally** | "Import the full HTML from WordPress and render it on patrykgolabek.dev for better SEO." | Duplicate content harms SEO (Google penalizes it). WordPress content includes shortcodes, custom CSS, and plugin-specific markup that would render incorrectly. Maintaining parity between two rendering engines is a maintenance nightmare. The external blogs have their own design systems. | Link to external posts with `target="_blank"`. The portfolio gets the "content hub" benefit (showing breadth of writing) while the original blogs retain their SEO authority. Use canonical URLs if ever rendering local copies in the future. |
-| **Automated external blog sync via GitHub Actions** | "Schedule a weekly GitHub Action to fetch new posts and commit them." | Over-engineering for quarterly publishing cadence. Adds CI complexity. The curated selection requires editorial judgment (which posts to include) that cannot be automated. | Manual curation. When Patryk publishes a new external post worth showcasing, add a 5-line entry to the external posts data file. 2-minute task. |
-| **LinkedIn removal from PersonJsonLd sameAs** | "User said remove LinkedIn, so remove it everywhere." | LinkedIn may still be a valid `sameAs` for structured data even if not shown in the UI. Google uses `sameAs` for entity recognition, and LinkedIn profiles are strong identity signals. Removing it from visible links is different from removing it from machine-readable metadata. | Consider keeping LinkedIn in the `sameAs` array of PersonJsonLd even though it is removed from visible footer/contact links. Flag this as a decision for Patryk to make. LOW confidence on the SEO impact either way. |
-| **Contact form to replace LinkedIn** | "With LinkedIn gone, add a contact form as the secondary contact method." | Contact forms on static GitHub Pages sites require a third-party service (Formspree, etc.). Adds a dependency for marginal benefit -- recruiters know how to send email. | Email link + X profile link + YouTube link. Three contact methods is sufficient. |
-
----
-
-## Detailed Analysis: External Blog Integration
-
-### The Core Problem
-
-The blog listing at `/blog/` currently queries a single content collection (`blog`) backed by the glob loader reading from `src/data/blog/`. External posts from mykubert.com and translucentcomputing.com need to appear in this listing, sorted chronologically alongside local posts, but linking out to their original URLs instead of rendering locally.
-
-### Approach A: Single Collection with Mixed Entries (RECOMMENDED)
-
-Extend the existing `blog` content collection schema to support an optional `externalUrl` field. Add external posts as minimal Markdown files with frontmatter only (no body content needed).
-
-**Schema change in `src/content.config.ts`:**
-```typescript
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    publishedDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-    externalUrl: z.string().url().optional(),
-    source: z.enum(['local', 'kubert-ai', 'translucent-computing']).default('local'),
-  }),
-});
-```
-
-**External post file example** (`src/data/blog/ext-kubert-ai-agent-sql-server.md`):
-```markdown
----
-title: "Building a Custom AI Agent for SQL Server: Deep Dive into DevOps"
-description: "A hands-on guide to building an AI agent that automates SQL Server operations using LLM orchestration and DevOps patterns."
-publishedDate: 2024-08-29
-tags: ["ai", "devops", "sql-server", "llm-agents"]
-externalUrl: "https://mykubert.com/blog/building-a-custom-ai-agent-for-sql-server-deep-dive-into-devops/"
-source: "kubert-ai"
----
-```
-
-**Advantages:**
-- Uses the existing content collection -- no new collection to define or query
-- All posts (local + external) sort naturally by `publishedDate` in the existing blog listing query
-- BlogCard component gets a simple conditional: if `externalUrl` exists, link externally; otherwise link to `/blog/{slug}/`
-- RSS feed, tag pages, and home page "Latest Writing" section all automatically include external posts with zero additional queries
-- The blog post detail page (`/blog/[slug].astro`) can guard against rendering external-only entries (they have no body)
-
-**Disadvantages:**
-- External post files clutter `src/data/blog/` directory (mitigated by `ext-` prefix convention)
-- Must remember to not generate detail pages for external entries
-
-### Approach B: Separate Collection + Merge at Query Time
-
-Create a second content collection (`externalPosts`) and merge results in every page that lists blog posts.
-
-**Disadvantages that make this inferior:**
-- Every page querying blog content (blog listing, home page, tag pages, RSS) must now query two collections and merge
-- Two separate Zod schemas to maintain
-- Tag pages need dual-collection awareness
-- More code changes, more surface area for bugs
-
-### Recommendation: Approach A
-
-Use the single-collection approach. It requires the smallest code surface change (schema update + BlogCard conditional + slug page guard) and leverages the existing query infrastructure everywhere.
-
-### External Posts to Curate (Recommended Initial Selection)
-
-From the 79 total external posts, select 8-12 that best represent Patryk's core domains. Prioritize posts where Patryk is the author (some Translucent Computing posts are by other authors like Robert Golabek or Mike Lagowski).
-
-**From Kubert AI (mykubert.com) -- Patryk-authored:**
-
-| Post | Date | Why Include |
-|------|------|-------------|
-| "Building a Custom AI Agent for SQL Server: Deep Dive into DevOps" | 2024-08-29 | Hands-on technical depth, AI + DevOps intersection |
-| "Introducing Open Source Kubernetes AI Assistant" | 2024-08-23 | Flagship Kubert product, demonstrates K8s + AI expertise |
-| "Ollama Kubernetes Deployment: Cost-Effective and Secure" | 2024-09-06 | Practical K8s deployment, LLM infrastructure |
-| "Red Teaming LLMs: AI Agent Threats" | 2024-10-01 | Security depth, demonstrates breadth beyond just building |
-| "From Golden Paths to Agentic AI: A New Era of Kubernetes Management" | 2025-01-16 | Platform engineering + AI convergence thesis |
-| "AgentOps and Agentic AI: The Future of DevOps and Cloud Automation" | 2025-06-01 | Most recent Kubert post, forward-looking |
-
-**From Translucent Computing (translucentcomputing.com) -- Patryk-authored:**
-
-| Post | Date | Why Include |
-|------|------|-------------|
-| "Apache Airflow -- Data Pipeline" | 2025-03-22 | Data engineering depth, practical infrastructure |
-| "Strategies for Managing Kubernetes Cloud Cost Part 1" | 2025-03-22 | K8s production expertise, cost optimization |
-| "Workflow Engine Data Pipeline" | 2025-03-22 | Complements Airflow post, data platform breadth |
-| "Why is Zero Trust Security Important for Your Business?" | 2025-03-22 | Security perspective, breadth of architecture thinking |
-
-**Selection criteria applied:**
-1. Patryk must be the author (excluded Robert Golabek and Mike Lagowski posts)
-2. Technical depth over marketing/news content
-3. Covers diverse domains (AI/ML, K8s, security, data engineering, platform engineering)
-4. Recency weighted but not exclusively
-
----
-
-## Detailed Analysis: Hero Tagline Refresh
-
-### Current State
-
-```
-Name:     Patryk Golabek
-Typing:   Cloud-Native Architect | Kubernetes Pioneer | AI/ML Engineer | Platform Builder
-Subtitle: Building resilient cloud-native systems and AI-powered solutions for 17+ years.
-          Pre-1.0 Kubernetes adopter. Ontario, Canada.
-```
-
-### Requirements
-
-- Remove "Pre-1.0 Kubernetes adopter" (bragging tone, not craft/precision)
-- Remove "Ontario, Canada" (location not needed)
-- Shift to "craft & precision" vibe
-- Keep it concise and professional
-
-### Hero Tagline Best Practices (Research Findings)
-
-Based on analysis of effective developer portfolio hero sections:
-
-1. **6-10 words maximum** for the primary tagline (HIGH confidence -- multiple sources agree)
-2. **Lead with what you do, not how long you have done it** -- years of experience can be on the About page
-3. **"Craft" language signals intentionality** -- "I architect" / "I design" / "I craft" vs "I build" (which is generic)
-4. **Precision language signals rigor** -- "engineered for scale" / "measured outcomes" / "deliberate systems"
-5. **Avoid buzzword soup** -- "cloud-native AI-powered DevSecOps platform engineering" says nothing. Pick one clear identity.
-6. **The subtitle supports the headline** -- headline is the identity, subtitle is the value proposition
-
-### Recommended Options
-
-**Option A (Recommended): Architect's Identity**
-```
-Typing:   Software Architect | Systems Engineer | AI/ML Builder
-Subtitle: Designing cloud-native systems with craft and precision.
-          Kubernetes, AI agents, platform engineering.
-```
-Why: "Designing" implies thoughtfulness over speed. "Craft and precision" is explicit. Second line maps competencies without being a buzzword list. Clean, confident, no fluff.
-
-**Option B: Craft-Forward**
-```
-Typing:   Cloud-Native Architect | Systems Designer | AI Engineer
-Subtitle: Engineering resilient systems with deliberate precision.
-          From Kubernetes platforms to AI-powered automation.
-```
-Why: "Deliberate precision" is stronger than "craft and precision" for a technical audience. "Resilient systems" signals production-grade thinking.
-
-**Option C: Minimalist**
-```
-Typing:   Architect | Engineer | Builder
-Subtitle: Cloud-native systems and AI agents, crafted with precision.
-```
-Why: Extremely concise. The typing roles are abstract enough to intrigue. The subtitle does the specificity work.
-
-**Recommendation:** Option A. It balances specificity (recruiters need to understand what you do quickly) with the craft/precision tone. The typing roles cover the three main domains without being overly cute.
-
-### Typing Roles Analysis
-
-Current: `['Cloud-Native Architect', 'Kubernetes Pioneer', 'AI/ML Engineer', 'Platform Builder']`
-
-Issues with current roles:
-- "Kubernetes Pioneer" -- bragging, being removed per requirements
-- "Platform Builder" -- "Builder" is too generic for a 17-year senior architect
-- "Cloud-Native Architect" -- good, keep or refine
-- "AI/ML Engineer" -- good, keep or refine
-
-Recommended roles for Option A: `['Software Architect', 'Systems Engineer', 'AI/ML Builder']`
-
-Alternative set: `['Cloud-Native Architect', 'Systems Designer', 'AI Engineer']`
-
----
-
-## Detailed Analysis: Social Links Update
-
-### Current State
-
-| Location | Links Present |
-|----------|--------------|
-| Footer (`Footer.astro`) | GitHub, LinkedIn, Translucent Computing Blog |
-| Contact page (`contact.astro`) | Email (patryk@translucentcomputing.com), LinkedIn, GitHub, Translucent Computing Blog, Kubert AI Blog |
-| Home page CTA (`index.astro`) | Email (patryk@translucentcomputing.com), LinkedIn |
-| PersonJsonLd (`PersonJsonLd.astro`) | GitHub, LinkedIn, TC Blog, Kubert Blog in `sameAs` |
-
-### Required Changes
-
-| Action | Details |
-|--------|---------|
-| **Add X (Twitter)** | @QuantumMentat -- https://x.com/QuantumMentat |
-| **Add YouTube** | @QuantumMentat -- https://youtube.com/@QuantumMentat |
-| **Update email** | Change from patryk@translucentcomputing.com to pgolabek@gmail.com |
-| **Remove LinkedIn** | Remove from footer, contact page cards, home page CTA |
-| **Keep GitHub** | No change |
-| **Keep external blog links** | Translucent Computing and Kubert AI blog links stay in contact page "Other places" section |
-
-### Files Requiring Changes
-
-1. `src/components/Footer.astro` -- Remove LinkedIn SVG/link, add X and YouTube SVGs/links
-2. `src/pages/contact.astro` -- Replace LinkedIn card with X card, add YouTube card, update email address
-3. `src/pages/index.astro` -- Replace "Connect on LinkedIn" CTA with X or email alternative
-4. `src/components/PersonJsonLd.astro` -- Update `sameAs` array, update email, consider keeping LinkedIn in sameAs (see Anti-Features note)
-
-### SVG Icons Needed
-
-- **X (Twitter):** Standard X logo SVG (24x24 viewBox, single path)
-- **YouTube:** Standard YouTube play button SVG (24x24 viewBox)
-- Both are widely available and license-free for social link usage
-
----
-
-## Detailed Analysis: Project Curation
-
-### Current Categories and Counts
-
-| Category | Count | Projects |
-|----------|-------|----------|
-| AI/ML & LLM Agents | 8 | kps-graph-agent, kps-assistant, kps-assistant-support, kubert-langflow, kps-langflow, tekstack-assistant-library, financial-data-extractor, **gemini-beauty-math** |
-| Kubernetes & Infrastructure | 6 | kps-cluster-deployment, kps-infra-management, kps-basic-package, kps-observability-package, kps-charts, kps-images |
-| Platform & DevOps Tooling | 2 | kps-lobe-chat, jobs |
-| **Full-Stack Applications** | **2** | **PatrykQuantumNomad, arjancode_examples (fork)** |
-| Security & Networking | 1 | networking-tools |
-
-### Required Removals
-
-| Item | Action | Rationale |
-|------|--------|-----------|
-| "Full-Stack Applications" category | Remove from `categories` array | Category only contains the portfolio repo itself and a fork -- neither demonstrates meaningful engineering |
-| `PatrykQuantumNomad` project | Remove from `projects` array | Self-referential (the portfolio site listing itself as a project is circular) |
-| `arjancode_examples` project | Remove from `projects` array | Fork of someone else's code examples -- does not represent original work |
-| `gemini-beauty-math` project | Remove from `projects` array | Lightweight demo from AI/ML category -- dilutes the senior architect signal among the stronger AI agent projects |
-
-### Post-Removal State
-
-| Category | Count | Projects |
-|----------|-------|----------|
-| AI/ML & LLM Agents | 7 | kps-graph-agent, kps-assistant, kps-assistant-support, kubert-langflow, kps-langflow, tekstack-assistant-library, financial-data-extractor |
-| Kubernetes & Infrastructure | 6 | (unchanged) |
-| Platform & DevOps Tooling | 2 | (unchanged) |
-| Security & Networking | 1 | (unchanged) |
-| **Total** | **16** | Down from 19 |
-
-### Implementation Notes
-
-- Update `categories` array: remove `'Full-Stack Applications'`
-- Remove 3 entries from `projects` array
-- Update projects page meta description: "Explore 16 open-source projects..." (was 19)
-- No structural changes to the projects page template
+### Table Stakes (Users Expect These)
+
+Features that visitors to a language ranking site assume exist. Missing any of these makes the content feel half-baked or unfinished. Reference points: TIOBE Index, IEEE Spectrum Top Programming Languages, RedMonk Rankings, TierMaker tier lists.
+
+| # | Feature | Why Expected | Complexity | Dependencies |
+|---|---------|--------------|------------|--------------|
+| T1 | **Overall ranking table with sort** | Every ranking site (TIOBE, IEEE Spectrum, RedMonk) has a primary sortable table. Users need to scan all 25 languages at a glance and sort by total score or individual dimension. Without this, there is no "index." | MEDIUM | Language data JSON |
+| T2 | **Tier grouping with visual distinction** | The 4-tier system (Beautiful/Handsome/Practical/Workhorses) is the core editorial voice. Tiers must be visually distinct with color coding -- this is the TierMaker pattern users recognize immediately. Color-coded rows or sections grouped by tier. | LOW | T1 (ranking table) |
+| T3 | **Per-language detail pages** | Users who see a language ranked will want to understand why. Each of the 25 languages needs its own page with: the 6 dimension scores, a radar chart, the "character sketch" narrative, and signature code sample. This is the depth that makes the index credible. | MEDIUM | Language data JSON, chart library, syntax highlighting |
+| T4 | **Radar/spider charts per language** | Radar charts are the standard visualization for multi-dimensional scoring (6 axes map perfectly). Users expect to see the "shape" of each language at a glance. This is the most screenshot-friendly visual element. | MEDIUM | React charting library (island component) |
+| T5 | **Code comparison page** | The 10 features x 25 languages matrix is core content. Users expect to compare how the same concept looks across languages -- this is the Rosetta Code / Hyperpolyglot pattern. Tabbed by feature (not by language) is the correct UX since users want to see "how does pattern matching look in every language?" | HIGH | Language data JSON, syntax highlighting, tab component |
+| T6 | **Methodology blog post** | A ranking without transparent methodology is dismissed as arbitrary. The long-form essay explaining the 6 dimensions, scoring rubric, and editorial philosophy turns "some guy's opinion" into "a framework for thinking about language aesthetics." Already has blog infrastructure. | LOW | Existing blog/MDX pipeline |
+| T7 | **Responsive design** | Tables, charts, and code blocks must work on mobile. Radar charts need to be readable at 320px width. The ranking table needs horizontal scroll or card-based mobile layout. | MEDIUM | All visual components |
+| T8 | **OG images for social sharing** | Each page (overview, per-language, code comparison) needs a unique OG image. The overview page OG should show the top-tier ranking. Per-language OG images should show that language's radar chart and tier badge. Already have Satori infrastructure. | MEDIUM | Existing OG pipeline, new Satori templates |
+| T9 | **Navigation between pages** | Users must be able to flow naturally: overview -> language detail, language detail -> code comparison, code comparison -> language detail. Breadcrumbs, back links, and cross-references between all Beauty Index pages. | LOW | Astro routing |
+| T10 | **Accessible data tables behind charts** | Screen readers cannot interpret radar chart SVGs. Every chart must have a visually hidden `<table>` with the raw score data. This is both an accessibility requirement and an SEO benefit (Google indexes the table text). WCAG pattern: chart + equivalent data table. | LOW | Language data JSON |
+
+### Differentiators (Competitive Advantage)
+
+Features that set the Beauty Index apart from generic ranking sites (TIOBE, IEEE Spectrum) and tier list makers (TierMaker). These are what make visitors share, bookmark, and return.
+
+| # | Feature | Value Proposition | Complexity | Dependencies |
+|---|---------|-------------------|------------|--------------|
+| D1 | **"Download as Image" button on charts** | The primary shareability driver. Users screenshot charts to share on X/Reddit/HN. A dedicated download button generates a clean, branded PNG (no browser chrome, no cropping needed). Uses `html-to-image` to capture a styled card div containing the radar chart + language name + tier badge + site branding. | MEDIUM | Chart component, html-to-image library |
+| D2 | **"Copy Chart to Clipboard" button** | Even faster than download -- click to copy the chart image to clipboard, then paste directly into Slack, Discord, or social media. Uses the Clipboard API (`navigator.clipboard.write` with `image/png` blob). Falls back gracefully when API is unavailable. | LOW | D1 (same capture mechanism), Clipboard API |
+| D3 | **Shareable social cards per language** | Each language detail page has a pre-designed "card" view optimized for screenshots: radar chart + total score + tier badge + one-line character sketch + site URL watermark. This card is also the OG image template. Dual purpose: OG meta image AND in-page shareable element. | MEDIUM | T4, T8 |
+| D4 | **Overlay comparison (pick 2-3 languages)** | Let users select 2-3 languages and overlay their radar charts on a single spider chart. This is the "Rust vs Go vs Python" viral comparison pattern. IEEE Spectrum allows custom filtering; this goes further with direct visual overlay. | HIGH | T4, selection state management |
+| D5 | **Animated chart entrance** | Radar chart axes animate in on scroll (GSAP ScrollTrigger). Scores "fill in" with a drawing animation. Makes the page feel premium and encourages users to scroll through all languages. The site already uses GSAP extensively. | LOW | GSAP (already installed), T4 |
+| D6 | **Tier badge system** | Each language gets a visual badge: "Beautiful" (gold), "Handsome" (silver), "Practical" (bronze), "Workhorse" (steel). These badges appear on detail pages, in the ranking table, and in OG images. The badge becomes the visual shorthand people share. | LOW | Language data JSON, CSS/SVG |
+| D7 | **Character sketch narrative** | Each language gets a 2-3 sentence "character sketch" -- a literary/personality-style description (e.g., "Haskell is the philosopher who speaks in mathematical proofs"). This is the editorial voice that makes the index uniquely Patryk's and not just another number chart. | LOW | Content authoring (no tech dependency) |
+| D8 | **Code comparison feature tabs with language sub-tabs** | On the code comparison page, organize by feature (Pattern Matching, Error Handling, etc.) as primary tabs. Under each feature, show code for all 25 languages in a scrollable gallery or secondary tab set. Uses existing expressive-code for syntax highlighting. | HIGH | T5, expressive-code |
+| D9 | **Anchor links to specific language rows** | Deep linking: `beauty-index/#python` scrolls to Python's row in the ranking table and highlights it. Enables sharing specific language positions in discussions ("look where PHP landed: [link]"). | LOW | T1 |
+| D10 | **Web Share API integration** | On mobile, trigger the native share sheet (X, Messages, WhatsApp, etc.) instead of showing download/copy buttons. Progressive enhancement: detect `navigator.share` support and show the appropriate UI. | LOW | D1 or D3 |
+
+### Anti-Features (Explicitly NOT Building)
+
+| # | Anti-Feature | Why Tempting | Why Avoid | What to Do Instead |
+|---|--------------|-------------|-----------|-------------------|
+| A1 | **User voting / crowd-sourced scores** | "Let people vote on their own language scores for engagement!" | Destroys the editorial thesis. The entire point is that this is ONE person's informed, opinionated ranking. Crowd-sourced data converges on popularity (which TIOBE already does). Also adds backend complexity (auth, rate limiting, database) to a static site. | The scores are Patryk's editorial opinion. Period. Engagement comes from people disagreeing publicly. |
+| A2 | **Real-time data from GitHub/Stack Overflow APIs** | "Pull real metrics to make it data-driven!" | The Beauty Index explicitly measures AESTHETIC qualities, not popularity or usage. Mixing in API data conflates beauty with prevalence. Also adds build-time API dependencies to a static site deployed on GitHub Pages. | State clearly in methodology that this is subjective. Link to TIOBE/IEEE Spectrum for objective metrics. |
+| A3 | **Comments section on ranking pages** | "People will want to debate the rankings!" | Comments require moderation, a backend service (Giscus, Utterances, Disqus), and attract low-quality "my language should be #1" noise. The discussion should happen on social media where it drives traffic back. | Include share buttons. Let the debate happen on X/Reddit/HN where it generates backlinks and impressions. |
+| A4 | **Drag-and-drop tier list maker** | "Let visitors create their own Beauty Index!" | Massive engineering scope (drag-and-drop, state persistence, share link generation). Dilutes the editorial product into a generic tool. TierMaker already does this perfectly. | Link to TierMaker for users who want to make their own. Keep the Beauty Index as authored content. |
+| A5 | **Language logo/icon images** | "Show each language's logo for visual recognition." | Logo licensing is a legal minefield. Many language logos have restrictive trademark policies (Oracle/Java, Apple/Swift, Google/Go). Using them requires individual license review. | Use a consistent visual identity system instead: colored tier badges, radar chart silhouettes, and the language name in a monospace font. The radar chart shape IS each language's visual identity. |
+| A6 | **Historical tracking / score changes over time** | "Show how scores evolve as languages add features!" | Implies ongoing maintenance and regular re-evaluation. This is a content pillar, not a live dashboard. Creating time-series expectations means the page looks stale 6 months after launch. | Frame the Beauty Index as a "snapshot" with a clear date. If scores change, publish a new blog post about the update. |
+| A7 | **Server-side rendering for charts** | "SSR the charts for better SEO and initial load!" | The site is statically generated on GitHub Pages (output: 'static'). Chart libraries (Chart.js, Recharts) require a DOM/Canvas and cannot render in Node.js SSG without headless browser puppetry. The complexity is massive for minimal SEO benefit since the data table fallback already provides text content for crawlers. | Use React islands (client:visible) for charts. Provide `<noscript>` data tables for crawlers and screen readers. The scores are in the HTML regardless. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[v1.1 Content Refresh]
+[Language Data JSON] (foundation -- all features depend on this)
     |
-    |-- [External Blog Integration]
-    |       |-- requires --> Schema update in content.config.ts (add externalUrl, source fields)
-    |       |-- requires --> External post markdown files in src/data/blog/
-    |       |-- requires --> BlogCard.astro conditional rendering
-    |       |-- requires --> Blog slug page guard (skip rendering for external entries)
-    |       |-- impacts --> RSS feed (external posts should appear with external links)
-    |       |-- impacts --> Home page "Latest Writing" (external posts may appear)
-    |       |-- impacts --> Tag pages (external posts have tags)
-    |       |-- impacts --> OG image generation (skip for external entries -- they have no local page)
+    +---> [T1: Ranking Table]
+    |         +---> [T2: Tier Grouping]
+    |         +---> [D9: Anchor Links]
     |
-    |-- [Social Links Update]
-    |       |-- requires --> X and YouTube SVG icons
-    |       |-- requires --> Footer.astro update
-    |       |-- requires --> Contact page update
-    |       |-- requires --> Home page CTA update
-    |       |-- requires --> PersonJsonLd.astro update
-    |       |-- independent of --> External Blog Integration (no dependency)
+    +---> [T3: Detail Pages]
+    |         +---> [T4: Radar Charts] (React island)
+    |         |         +---> [D1: Download as Image]
+    |         |         |         +---> [D2: Copy to Clipboard]
+    |         |         |         +---> [D10: Web Share API]
+    |         |         +---> [D4: Overlay Comparison]
+    |         |         +---> [D5: Animated Entrance]
+    |         +---> [D6: Tier Badges]
+    |         +---> [D7: Character Sketch]
+    |         +---> [D3: Shareable Social Cards]
     |
-    |-- [Hero Tagline Refresh]
-    |       |-- requires --> index.astro subtitle text update
-    |       |-- requires --> index.astro typing roles array update
-    |       |-- independent of --> Social Links Update (no dependency)
-    |       |-- independent of --> External Blog Integration (no dependency)
+    +---> [T5: Code Comparison Page]
+    |         +---> [D8: Feature Tabs + Language Sub-tabs]
     |
-    |-- [Project Curation]
-    |       |-- requires --> projects.ts data update
-    |       |-- requires --> Projects page meta description update
-    |       |-- independent of --> all other v1.1 features
+    +---> [T6: Methodology Blog Post] (independent of tech features)
     |
-    |-- [Test Post Cleanup]
-    |       |-- requires --> Delete draft-placeholder.md
-    |       |-- independent of --> all other v1.1 features
+    +---> [T8: OG Images] (extends existing Satori pipeline)
+    |         +---> [D3: Shareable Social Cards] (OG image = in-page card)
+    |
+    +---> [T10: Accessible Data Tables] (embedded in T1, T3, T4)
+    |
+    +---> [T9: Navigation] (connects T1, T3, T5)
+
+[T7: Responsive Design] -- cross-cutting concern across all visual features
 ```
 
 ### Dependency Notes
 
-- **External Blog Integration is the only complex feature.** It touches 4-5 files and has downstream impacts on RSS, tags, home page, and OG generation. Everything else is a straightforward text/data edit.
-- **Social Links, Hero Tagline, Project Curation, and Test Post Cleanup are all independent** of each other and can be done in any order or in parallel.
-- **External Blog Integration should be done first** because it is the highest-risk change (schema modification, conditional rendering logic, multiple downstream impacts).
-- **Schema change in content.config.ts is backward-compatible** -- adding optional fields does not break existing entries.
+- **Language Data JSON is the foundation:** Every feature reads from this single data source. It must be designed first and contain: language name, slug, 6 dimension scores, total score, tier, character sketch text, signature code samples, and per-feature code comparison snippets. Estimated ~50-80 lines of JSON per language, ~2000 lines total.
+- **T4 (Radar Charts) enables the entire shareability chain:** D1 -> D2 -> D10 all depend on having a capturable chart DOM element. Build T4 first with a "shareable card" wrapper div from day one.
+- **D3 (Shareable Social Cards) has dual purpose:** The same visual layout serves as both the in-page shareable element AND the Satori OG image template. Design once, render twice (client-side via React island, build-time via Satori).
+- **T5 (Code Comparison) is the most complex feature** with 10 features x 25 languages = 250 code snippets. The data entry alone is significant. Can be phased.
+- **D4 (Overlay Comparison) is the highest-complexity differentiator.** It requires selection state (which languages to compare), re-rendering the radar chart with multiple datasets, and a good UX for picking languages. Build after single-language charts are solid.
 
 ---
 
-## MVP Definition for v1.1
+## Competitor Feature Analysis
 
-### Must Ship
+| Feature | TIOBE Index | IEEE Spectrum | TierMaker | RedMonk | Hyperpolyglot | **Beauty Index** |
+|---------|-------------|---------------|-----------|---------|----------------|------------------|
+| Ranking table | Yes (sortable) | Yes (interactive, weighted) | No (drag-drop tiers) | Yes (scatter plot) | No | Yes (sortable + tier-grouped) |
+| Multi-dimensional scores | No (single metric) | Yes (8 metrics, user-weighted) | No | Yes (2 axes) | No | Yes (6 named dimensions) |
+| Radar/spider chart | No | No | No | No | No | **Yes (unique)** |
+| Per-language detail pages | Partial (history only) | No | No | No | No | **Yes (full page per language)** |
+| Code samples | No | No | No | No | Yes (table format) | **Yes (syntax-highlighted, tabbed)** |
+| Editorial narrative | No (pure data) | Yes (article) | No | Yes (blog post) | No | **Yes (character sketches)** |
+| Download chart as image | No | No | Yes (download tier list) | No | No | **Yes** |
+| OG images with chart data | No | No | Yes (basic) | No | No | **Yes (radar chart in OG)** |
+| Overlay comparison | No | No | No | No | No | **Yes (2-3 language overlay)** |
+| Social share buttons | No | Basic | Yes | No | No | **Yes (native share, copy, download)** |
 
-1. External blog entries appearing in blog listing (8-12 curated posts)
-2. Social links updated across all 4 files (Footer, Contact, Home CTA, PersonJsonLd)
-3. Hero tagline refreshed (subtitle + typing roles)
-4. Full-Stack Applications category and gemini-beauty-math removed
-5. Draft placeholder post deleted
+**Key insight:** No existing language ranking site combines quantitative multi-dimensional scoring with editorial narrative AND social-first shareability. The Beauty Index occupies a unique niche: opinionated, visual, shareable.
 
-### Should Ship (Differentiators)
+---
 
-6. Visual distinction badge on external posts ("on Kubert AI", "on Translucent Computing")
-7. Blog slug page guard preventing 404s for external-only entries
-8. RSS feed updated to include external posts with correct external links
+## MVP Definition
 
-### Defer to v1.2+
+### Launch With (v1 -- Core Beauty Index)
 
-9. Source filtering on blog listing (only valuable after blog has 20+ total entries)
-10. External blog link cards on About page (cross-promotion)
+The minimum set to launch a complete, shareable Beauty Index:
+
+- [x] **Language Data JSON** -- all 25 languages with 6 scores, tier, character sketch, signature code
+- [x] **T1: Ranking table** -- sortable by total score and each dimension, tier-colored rows
+- [x] **T2: Tier grouping** -- visual tier sections with color coding
+- [x] **T3: Per-language detail pages** -- generated from data JSON via `[slug].astro`
+- [x] **T4: Radar charts** -- React island using Chart.js (via react-chartjs-2) or Recharts
+- [x] **T6: Methodology blog post** -- long-form MDX in existing blog collection
+- [x] **T7: Responsive design** -- mobile-first for all pages
+- [x] **T8: OG images** -- at minimum: overview page OG image, per-language OG images via extended Satori pipeline
+- [x] **T9: Navigation** -- breadcrumbs, cross-links between overview/detail/blog
+- [x] **T10: Accessible data tables** -- hidden tables behind every chart
+- [x] **D6: Tier badges** -- visual badge system (CSS, appears everywhere)
+- [x] **D7: Character sketches** -- authored content in data JSON
+- [x] **D9: Anchor links** -- deep linking to language rows
+
+### Add After Launch (v1.1 -- Shareability Polish)
+
+Features that maximize viral potential, added once the core is stable:
+
+- [ ] **D1: Download as Image** -- html-to-image integration for chart card export
+- [ ] **D2: Copy to Clipboard** -- Clipboard API integration
+- [ ] **D3: Shareable social cards** -- styled card component for in-page sharing
+- [ ] **D5: Animated chart entrance** -- GSAP ScrollTrigger on radar charts
+- [ ] **D10: Web Share API** -- mobile native share sheet
+
+### Add in v1.2 (Code Comparison)
+
+The code comparison page is high-effort and can launch separately:
+
+- [ ] **T5: Code comparison page** -- 10 features x 25 languages
+- [ ] **D8: Feature tabs** -- tabbed interface with syntax-highlighted code blocks
+
+### Future Consideration (v2+)
+
+- [ ] **D4: Overlay comparison** -- pick 2-3 languages, overlay radar charts
+- [ ] Update blog post when scores change
+- [ ] Consider expanding beyond 25 languages based on reader feedback
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Risk | Priority |
-|---------|------------|---------------------|------|----------|
-| External blog entries in listing | HIGH | MEDIUM | MEDIUM | P1 |
-| Social links update (all 4 files) | HIGH | LOW | LOW | P1 |
-| Hero tagline refresh | HIGH | LOW | LOW | P1 |
-| Project curation (remove category + projects) | MEDIUM | LOW | LOW | P1 |
-| Test post cleanup | LOW | LOW | LOW | P1 |
-| External post visual distinction badge | MEDIUM | LOW | LOW | P1 |
-| Blog slug page guard for external entries | HIGH | LOW | MEDIUM | P1 |
-| RSS feed external post inclusion | MEDIUM | LOW | LOW | P1 |
-| PersonJsonLd structured data update | MEDIUM | LOW | LOW | P1 |
-| Home page CTA update (LinkedIn removal) | HIGH | LOW | LOW | P1 |
-| Source filtering on blog listing | LOW | MEDIUM | LOW | P2 |
-| About page cross-promotion links | LOW | LOW | LOW | P2 |
-
-**Priority key:**
-- P1: Must complete for v1.1 -- the milestone is incomplete without these
-- P2: Nice to have, defer if needed without blocking the milestone
+| Feature | User Value | Implementation Cost | Priority | Phase |
+|---------|------------|---------------------|----------|-------|
+| Language Data JSON | CRITICAL | MEDIUM (content authoring + structure) | P0 | v1 |
+| T1: Ranking table | HIGH | MEDIUM | P1 | v1 |
+| T2: Tier grouping | HIGH | LOW | P1 | v1 |
+| T3: Detail pages | HIGH | MEDIUM | P1 | v1 |
+| T4: Radar charts | HIGH | MEDIUM | P1 | v1 |
+| T6: Blog post | HIGH | LOW (authoring) | P1 | v1 |
+| T8: OG images | HIGH | MEDIUM | P1 | v1 |
+| T10: Accessible tables | MEDIUM | LOW | P1 | v1 |
+| T9: Navigation | MEDIUM | LOW | P1 | v1 |
+| T7: Responsive | HIGH | MEDIUM (cross-cutting) | P1 | v1 |
+| D6: Tier badges | MEDIUM | LOW | P1 | v1 |
+| D7: Character sketches | HIGH | LOW (content) | P1 | v1 |
+| D9: Anchor links | MEDIUM | LOW | P1 | v1 |
+| D1: Download as Image | HIGH | MEDIUM | P2 | v1.1 |
+| D2: Copy to Clipboard | MEDIUM | LOW | P2 | v1.1 |
+| D3: Social cards | HIGH | MEDIUM | P2 | v1.1 |
+| D5: Animated entrance | LOW | LOW | P2 | v1.1 |
+| D10: Web Share API | MEDIUM | LOW | P2 | v1.1 |
+| T5: Code comparison | HIGH | HIGH (250 code snippets) | P2 | v1.2 |
+| D8: Feature tabs | MEDIUM | MEDIUM | P2 | v1.2 |
+| D4: Overlay comparison | HIGH | HIGH | P3 | v2 |
 
 ---
 
-## Implementation Complexity Summary
+## Shareability Patterns Research
 
-| Feature | Files Changed | Lines of Code (est.) | Risk Level |
-|---------|--------------|---------------------|------------|
-| External blog integration | 5 files (content.config.ts, 8-12 new .md files, BlogCard.astro, blog/[slug].astro, rss.xml.ts) | ~120 LOC changes + ~80 LOC new frontmatter files | MEDIUM -- schema change is the key risk |
-| Social links update | 4 files (Footer.astro, contact.astro, index.astro, PersonJsonLd.astro) | ~80 LOC changes | LOW -- straightforward replacements |
-| Hero tagline refresh | 1 file (index.astro) | ~10 LOC changes | LOW -- text only |
-| Project curation | 1 file (projects.ts) + 1 file (projects/index.astro meta) | ~30 LOC removed | LOW -- data deletion |
-| Test post cleanup | 1 file deletion | 0 LOC (file removal) | LOW |
-| **Total** | **~12 files touched** | **~320 LOC** | **Overall: LOW-MEDIUM** |
+### How Language Rankings Go Viral
+
+Based on analysis of TIOBE, IEEE Spectrum, TierMaker, and Stack Overflow Survey sharing patterns:
+
+1. **The screenshot-and-argue pattern:** Users screenshot a surprising ranking position and post it to X/Reddit/HN with commentary like "No way [Language] is rated higher than [Language]." The Beauty Index should be designed so that every chart and table row looks good as a screenshot with clear branding visible.
+
+2. **The comparison provocation pattern:** "Rust vs Go" or "Python vs C++" comparisons drive the most engagement. The overlay comparison feature (D4) directly enables this, but even without it, side-by-side detail page links serve the same purpose.
+
+3. **The tier badge identity pattern:** TierMaker tier lists go viral because people identify with their tier placement. "My main language is Beautiful tier" becomes a badge of honor. The tier badge system (D6) feeds this identity-driven sharing.
+
+4. **The methodology debate pattern:** Publishing a transparent methodology invites productive disagreement about the criteria themselves, not just the results. The blog post (T6) serves this purpose.
+
+### OG Image Strategy (Extends Existing Infrastructure)
+
+The site already generates OG images via Satori + Sharp at build time. The Beauty Index needs 3 new OG templates:
+
+| Page Type | OG Image Content | Template Approach |
+|-----------|-----------------|-------------------|
+| **Overview page** | Top 5 languages with scores + "The Beauty Index" title + tier color strip | New Satori layout in `og-image.ts` or separate function |
+| **Per-language detail** | Language name + radar chart shape (rendered as simple SVG polygons in Satori) + total score + tier badge | Satori can render SVG directly -- draw the radar polygon from score data |
+| **Code comparison** | "Code Comparison: 25 Languages x 10 Features" text treatment | Simple text-based Satori layout (like existing no-cover blog OG) |
+| **Blog post** | Already handled by existing OG pipeline | No new work |
+
+**Key constraint:** Satori renders a subset of CSS/HTML (no Canvas, no actual chart library). Radar charts in OG images must be drawn as SVG `<polygon>` elements calculated from the 6 dimension scores. This is straightforward geometry (6 points on a hexagon scaled by score values).
+
+### Download-as-Image Technical Pattern
+
+**Recommended library:** `html-to-image` (1.6M+ weekly downloads, actively maintained, TypeScript support, better performance than html2canvas for DOM-heavy content).
+
+**Implementation pattern:**
+1. Wrap each shareable element in a `<div data-shareable>` with a styled "card" layout including site branding
+2. On "Download" click: call `toPng()` from html-to-image on the wrapper div
+3. Create a temporary `<a>` element with `download` attribute and trigger click
+4. On "Copy" click: call `toBlob()`, then `navigator.clipboard.write([new ClipboardItem({'image/png': blob})])`
+5. On "Share" click (mobile): call `navigator.share({ files: [new File([blob], 'chart.png', { type: 'image/png' })] })`
+
+**Clipboard API browser support (as of 2025):** Baseline Newly Available (March 2025). Chrome, Edge, Firefox, Safari all support `navigator.clipboard.write` with `image/png`. Secure context (HTTPS) required. User gesture required.
+
+### Social Media Image Dimensions
+
+| Platform | Recommended Size | Aspect Ratio |
+|----------|-----------------|--------------|
+| X / Twitter | 1200 x 675 | 16:9 |
+| Facebook | 1200 x 630 | ~1.91:1 |
+| LinkedIn | 1200 x 627 | ~1.91:1 |
+| Reddit | 1200 x 628 | ~1.91:1 |
+| OG standard | 1200 x 630 | 1.91:1 |
+| Discord embed | 1200 x 630 | 1.91:1 |
+
+**Use 1200 x 630 for all OG images** (already the standard in the existing pipeline). For download-as-image cards, use the same dimensions so shared images match OG previews.
 
 ---
 
 ## Sources
 
-### HIGH Confidence (Official Documentation)
-- [Astro Content Collections docs](https://docs.astro.build/en/guides/content-collections/) -- Collection definition, loaders, querying, merging multiple collections
-- [Astro Content Loader API Reference](https://docs.astro.build/en/reference/content-loader-reference/) -- Custom loader interface, inline loaders, object loaders, LoaderContext
-- [Astro Content Collections API Reference](https://docs.astro.build/en/reference/modules/astro-content/) -- getCollection(), getEntry(), schema validation
+### Ranking Site Analysis
+- [TIOBE Index](https://www.tiobe.com/tiobe-index/) -- single-metric ranking table, historical charts, no per-language pages
+- [IEEE Spectrum Top Programming Languages 2025](https://spectrum.ieee.org/top-programming-languages-2025) -- interactive, user-weighted multi-metric, editorial article format
+- [RedMonk Programming Language Rankings](https://redmonk.com/sogrady/2025/06/18/language-rankings-1-25/) -- two-axis scatter plot, blog post format
+- [TierMaker Programming Languages](https://tiermaker.com/categories/technology/programming-languages--32215) -- drag-and-drop tier lists, download/share, community voting
 
-### MEDIUM Confidence (Verified Patterns)
-- [Syncing dev.to Posts with Astro Blog](https://logarithmicspirals.com/blog/updating-astro-blog-to-pull-devto-posts/) -- Real-world pattern for mixing local + external posts, canonical URL handling
-- [Adding Local Markdown Posts to Hashnode-Powered Astro Blog](https://akoskm.com/hashnode-local-astro-hybrid-setup/) -- Hybrid local/external content approach
-- [Building an RSS Aggregator with Astro (Raymond Camden)](https://www.raymondcamden.com/2026/02/02/building-an-rss-aggregator-with-astro) -- RSS parsing patterns, rss-parser library
-- [Hero Section Copywriting Tips](https://zoconnected.com/blog/how-to-write-hero-section-website-copy/) -- 6-10 word headline, clarity over cleverness
-- [Hero Section Examples Analysis (Thrive Themes)](https://thrivethemes.com/hero-section-examples/) -- Headline + subtitle structure, CTA placement
-- [Developer Portfolio Best Practices 2025 (CodeTap)](https://codetap.org/blog/developer-portfolio-2025) -- Social link placement, contact info visibility
+### Code Comparison Sites
+- [Hyperpolyglot](https://hyperpolyglot.org/) -- side-by-side table format, minimal interactivity, grouped by language family
+- [Rosetta Code](https://rosettacode.org/wiki/Language_Comparison_Table) -- wiki-based, per-task code samples, 379 languages
+- [Side Rosetta](https://rosetta.fiatjaf.com/) -- two-column side-by-side comparison fetched from Rosetta Code
 
-### Verified External Blog Data
-- Translucent Computing blog (`translucentcomputing.com/blog/`) -- WordPress site, RSS at `/feed/`, 62 posts in sitemap, 4 in RSS feed, Patryk + other authors
-- Kubert AI blog (`mykubert.com/blog/`) -- WordPress site, RSS at `/feed/`, 17 posts in sitemap, 3 in RSS feed, Patryk primary author
-- Both blogs confirmed accessible via standard WordPress RSS feeds and XML sitemaps (Yoast SEO + W3 Total Cache)
+### Shareability & Image Export
+- [html-to-image npm comparison](https://npm-compare.com/dom-to-image,html-to-image,html2canvas) -- html-to-image recommended over html2canvas for modern projects
+- [Clipboard API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) -- Baseline Newly Available as of March 2025
+- [Web Share API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share) -- native mobile share sheet
+- [OG Image Tips 2025](https://myogimage.com/blog/og-image-tips-2025-social-sharing-guide) -- 40-50% CTR increase with optimized OG images
+
+### OG Image Generation (Astro + Satori)
+- [Dynamic OG Images with Satori and Astro](https://knaap.dev/posts/dynamic-og-images-with-any-static-site-generator/) -- pattern for SSG OG generation
+- [satori-og utility library](https://github.com/LucJosin/satori-og) -- utility wrapper for Satori in SSGs
+- [Vercel OG Image Generation](https://vercel.com/docs/og-image-generation) -- reference implementation
+
+### Chart Libraries
+- [Chart.js Radar Chart docs](https://www.chartjs.org/docs/latest/charts/radar.html) -- native radar chart support
+- [react-chartjs-2 Radar](https://react-chartjs-2.js.org/examples/radar-chart/) -- React wrapper for Chart.js
+- [Recharts vs Chart.js comparison (LogRocket)](https://blog.logrocket.com/best-react-chart-libraries-2025/) -- Recharts better for large datasets, Chart.js lighter for small ones
+- [React Graph Gallery - Radar Chart](https://www.react-graph-gallery.com/radar-chart) -- D3-based radar chart patterns
+
+### Accessibility
+- [Chart.js Accessibility docs](https://www.chartjs.org/docs/latest/general/accessibility.html) -- ARIA patterns for canvas charts
+- [Accessible Data Charts (Sara Soueidan)](https://www.sarasoueidan.com/blog/accessible-data-charts-for-khan-academy-2018-annual-report/) -- data table fallback pattern
+- [Deque: How to make interactive charts accessible](https://www.deque.com/blog/how-to-make-interactive-charts-accessible/) -- screen reader best practices
+- [W3C ARIA roles for charts](https://www.w3.org/wiki/SVG_Accessibility/ARIA_roles_for_charts) -- ARIA role specifications
+
+### Syntax Highlighting
+- [Expressive Code](https://expressive-code.com/key-features/syntax-highlighting/) -- already in use, supports 100+ languages
+- [Astro Syntax Highlighting docs](https://docs.astro.build/en/guides/syntax-highlighting/) -- built-in Shiki integration
 
 ---
-*Feature research for: patrykgolabek.dev v1.1 Content Refresh*
-*Researched: 2026-02-11*
+*Feature research for: The Beauty Index content pillar*
+*Researched: 2026-02-17*
