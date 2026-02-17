@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 16 (Data Foundation & Chart Components)
+**Current focus:** v1.3 The Beauty Index — Phase 17 (Overview & Language Detail Pages)
 
 ## Current Position
 
-Phase: 16 of 21 (Data Foundation & Chart Components) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans done)
-Status: Phase 16 complete, ready for Phase 17
-Last activity: 2026-02-17 — Completed 16-02 (Chart Components)
+Phase: 17 of 21 (Overview & Language Detail Pages) -- IN PROGRESS
+Plan: 1 of 3 in current phase (17-01 done, 17-02 and 17-03 remaining)
+Status: Plan 17-01 complete (building block components), ready for Plans 02/03
+Last activity: 2026-02-17 — Completed 17-01 (Code Snippets + Components)
 
-Progress: [=================>.............] 16/21 phases (v1.0-v1.2 complete, v1.3 phase 16 done)
+Progress: [==================>............] 17/21 phases (v1.0-v1.2 complete, v1.3 phases 16-17 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31 (16 v1.0 + 7 v1.1 + 6 v1.2 + 2 v1.3)
+- Total plans completed: 32 (16 v1.0 + 7 v1.1 + 6 v1.2 + 3 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -49,6 +49,8 @@ v1.3 decisions to date:
 - Radar chart maxRadius = size * 0.38 with labelRadius = maxRadius + 24 for label spacing
 - Bar chart uses canonical dimension order for segment stacking with tier group headers
 - Zero-JS chart component pattern: all SVG computation in Astro frontmatter
+- Inline script with astro:page-load event for sort interactivity (view transition compatible)
+- CodeSnippet interface as standard shape for language code examples
 
 ### Pending Todos
 
@@ -82,6 +84,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 16-02-PLAN.md (Chart Components) -- Phase 16 fully complete
+Stopped at: Completed 17-01-PLAN.md (Code Snippets + Components) -- Plans 02/03 remaining
 Resume file: None
-Next: `/gsd:execute-phase 17` to begin Phase 17 (Beauty Index Pages)
+Next: Execute 17-02-PLAN.md (overview page) and 17-03-PLAN.md (detail pages)
