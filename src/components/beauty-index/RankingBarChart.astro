@@ -1,0 +1,210 @@
+---
+/**
+ * RankingBarChart.astro — Build-time SVG horizontal stacked bar chart.
+ * Renders all languages sorted by total beauty score with 6 dimension-colored
+ * segments per bar, tier group dividers, score labels, and a color legend.
+ * Ships ZERO client-side JavaScript.
+ */
+import { type Language, totalScore, dimensionScores } from '../../lib/beauty-index/schema';
+import { TIERS, DIMENSION_COLORS, getTierByScore } from '../../lib/beauty-index/tiers';
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+
+interface Props {
+  languages: Language[];
+  width?: number;
+  rowHeight?: number;
+  labelWidth?: number;
+}
+
+const { languages, width = 800, rowHeight = 28, labelWidth = 120 } = Astro.props;
+
+// Sort languages by total score descending
+const sorted = [...languages]
+  .map((lang) => ({
+    lang,
+    total: totalScore(lang),
+    scores: dimensionScores(lang),
+    tier: getTierByScore(totalScore(lang)),
+  }))
+  .sort((a, b) => b.total - a.total);
+
+// Layout constants
+const padding = 50;
+const barMaxWidth = width - labelWidth - padding;
+const maxPossibleScore = 60;
+const legendHeight = 40;
+const legendPadding = 12;
+const tierHeaderHeight = 24;
+
+// Group languages by tier to insert tier headers
+type RenderRow =
+  | { type: 'tier-header'; tierName: string; tierLabel: string; tierColor: string; y: number }
+  | { type: 'language'; lang: Language; total: number; scores: number[]; tierColor: string; y: number };
+
+const rows: RenderRow[] = [];
+let currentTier = '';
+let yOffset = legendHeight + legendPadding;
+
+for (const entry of sorted) {
+  if (entry.tier.name !== currentTier) {
+    currentTier = entry.tier.name;
+    rows.push({
+      type: 'tier-header',
+      tierName: entry.tier.name,
+      tierLabel: entry.tier.label,
+      tierColor: entry.tier.color,
+      y: yOffset,
+    });
+    yOffset += tierHeaderHeight;
+  }
+
+  rows.push({
+    type: 'language',
+    lang: entry.lang,
+    total: entry.total,
+    scores: entry.scores,
+    tierColor: entry.tier.color,
+    y: yOffset,
+  });
+  yOffset += rowHeight;
+}
+
+const totalHeight = yOffset + 8;
+
+// Dimension keys in canonical order for segment coloring
+const dimensionKeys = DIMENSIONS.map((d) => d.key);
+---
+
+<svg
+  width={width}
+  height={totalHeight}
+  viewBox={`0 0 ${width} ${totalHeight}`}
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Ranking chart showing all 25 languages sorted by total beauty score"
+>
+  {/* Legend: dimension colors with short names */}
+  {DIMENSIONS.map((dim, i) => {
+    const legendX = labelWidth + i * 110;
+    const color = DIMENSION_COLORS[dim.key];
+    return (
+      <g>
+        <rect x={legendX} y={8} width={12} height={12} rx={2} fill={color} />
+        <text
+          x={legendX + 16}
+          y={18}
+          font-size="10"
+          fill="#5a5a5a"
+          font-family="'Noto Sans', 'DM Sans', sans-serif"
+          dominant-baseline="middle"
+        >
+          {dim.symbol} {dim.shortName}
+        </text>
+      </g>
+    );
+  })}
+
+  {/* Render rows: tier headers and language bars */}
+  {rows.map((row) => {
+    if (row.type === 'tier-header') {
+      return (
+        <g>
+          {/* Tier divider line */}
+          <line
+            x1={labelWidth - 8}
+            y1={row.y}
+            x2={width - 8}
+            y2={row.y}
+            stroke={row.tierColor}
+            stroke-width="1"
+            stroke-opacity="0.4"
+          />
+          {/* Tier label */}
+          <text
+            x={labelWidth - 8}
+            y={row.y + tierHeaderHeight * 0.65}
+            font-size="11"
+            font-weight="700"
+            fill={row.tierColor}
+            font-family="'Bricolage Grotesque', 'DM Sans', sans-serif"
+          >
+            {row.tierLabel}
+          </text>
+        </g>
+      );
+    }
+
+    // Language row
+    const barY = row.y + 4;
+    const barHeight = rowHeight - 8;
+    let segmentX = labelWidth;
+
+    return (
+      <g>
+        {/* Subtle tier background band */}
+        <rect
+          x={0}
+          y={row.y}
+          width={width}
+          height={rowHeight}
+          fill={row.tierColor}
+          fill-opacity="0.05"
+        />
+
+        {/* Language name */}
+        <text
+          x={labelWidth - 12}
+          y={row.y + rowHeight / 2}
+          text-anchor="end"
+          font-size="11"
+          fill="#2c2c2c"
+          font-family="'DM Sans', sans-serif"
+          dominant-baseline="middle"
+        >
+          {row.lang.name}
+        </text>
+
+        {/* Stacked dimension segments */}
+        {row.scores.map((score, si) => {
+          const segWidth = (score / maxPossibleScore) * barMaxWidth;
+          const x = segmentX;
+          segmentX += segWidth;
+          const color = DIMENSION_COLORS[dimensionKeys[si]];
+          return (
+            <rect
+              x={x}
+              y={barY}
+              width={segWidth}
+              height={barHeight}
+              fill={color}
+              rx={si === 0 ? 3 : 0}
+            />
+          );
+        })}
+
+        {/* Round the right end of the last segment */}
+        <rect
+          x={segmentX - 3}
+          y={barY}
+          width={3}
+          height={barHeight}
+          fill={DIMENSION_COLORS[dimensionKeys[5]]}
+          rx={0}
+        />
+
+        {/* Total score label */}
+        <text
+          x={segmentX + 6}
+          y={row.y + rowHeight / 2}
+          font-size="10"
+          font-weight="600"
+          fill="#5a5a5a"
+          font-family="'DM Sans', sans-serif"
+          dominant-baseline="middle"
+        >
+          {row.total}
+        </text>
+      </g>
+    );
+  })}
+</svg>
