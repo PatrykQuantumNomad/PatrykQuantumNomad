@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.3 The Beauty Index — Phase 20 complete, Phase 21 next (Final Verification)
+**Current focus:** v1.3 The Beauty Index — Phase 21 in progress (SEO & Launch Readiness)
 
 ## Current Position
 
 Phase: 21 of 21 (Final Verification)
-Plan: 0 of TBD in current phase (not yet planned)
-Status: Phase 20 complete, Phase 21 pending planning
-Last activity: 2026-02-17 — Completed 20-01 (Blog Content & Cross-Linking)
+Plan: 2 of 3 in current phase
+Status: Phase 21 in progress — 21-02 complete
+Last activity: 2026-02-17 — Completed 21-02 (Cross-Links & Accessibility)
 
 Progress: [======================>........] 20/21 phases (v1.0-v1.2 complete, v1.3 phases 16-20 complete, 21 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39 (16 v1.0 + 7 v1.1 + 6 v1.2 + 10 v1.3)
+- Total plans completed: 40 (16 v1.0 + 7 v1.1 + 6 v1.2 + 11 v1.3)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -67,6 +67,9 @@ v1.3 decisions to date:
 - content-visibility: auto on tab panels for deferred paint performance
 - Blog post uses prose dimension descriptions rather than importing data files
 - Back-links in hero sections (overview, code) and after Character section (detail pages)
+- Button-inside-th pattern per Adrian Roselli sortable table guidance (not role=button on th)
+- aria-sort omitted from non-active columns (not aria-sort=none) per WAI-ARIA best practice
+- Beauty Index callout placed between What I Build and Latest Writing for natural content flow
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 20-01-PLAN.md (Blog Content & Cross-Linking)
+Stopped at: Completed 21-02-PLAN.md (Cross-Links & Accessibility)
 Resume file: None
-Next: Phase 21 (Final Verification) — needs planning
+Next: Phase 21 plans 01 and 03 remaining
