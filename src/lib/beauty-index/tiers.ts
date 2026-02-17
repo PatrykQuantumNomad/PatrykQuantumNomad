@@ -8,8 +8,10 @@ export interface TierConfig {
   minScore: number;
   /** Maximum total score (inclusive) */
   maxScore: number;
-  /** Brand color as hex string */
+  /** Brand color as hex string (for decorative/graphical elements) */
   color: string;
+  /** WCAG AA compliant text color (4.5:1 contrast against #fffaf7 background) */
+  textColor: string;
 }
 
 /**
@@ -17,10 +19,10 @@ export interface TierConfig {
  * Score boundaries span 6-60 (6 dimensions x 1-10 each).
  */
 export const TIERS: TierConfig[] = [
-  { name: 'workhorses', label: 'Workhorses', minScore: 6, maxScore: 19, color: '#8B8FA3' },
-  { name: 'practical', label: 'Practical', minScore: 20, maxScore: 33, color: '#5B8A72' },
-  { name: 'handsome', label: 'Handsome', minScore: 34, maxScore: 46, color: '#C47F17' },
-  { name: 'beautiful', label: 'Beautiful', minScore: 47, maxScore: 60, color: '#B84A1C' },
+  { name: 'workhorses', label: 'Workhorses', minScore: 6, maxScore: 19, color: '#8B8FA3', textColor: '#686b7a' },
+  { name: 'practical', label: 'Practical', minScore: 20, maxScore: 33, color: '#5B8A72', textColor: '#4a7360' },
+  { name: 'handsome', label: 'Handsome', minScore: 34, maxScore: 46, color: '#C47F17', textColor: '#8a5a10' },
+  { name: 'beautiful', label: 'Beautiful', minScore: 47, maxScore: 60, color: '#B84A1C', textColor: '#af461b' },
 ];
 
 /** Color palette for each dimension, keyed by dimension key */

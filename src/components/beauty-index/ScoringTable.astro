@@ -91,7 +91,7 @@ const sorted = [...languages].sort((a, b) => totalScore(b) - totalScore(a));
                 href={`/beauty-index/${lang.id}/`}
                 class="text-[var(--color-accent)] hover:underline font-medium"
               >
-                {lang.name}
+                {lang.name}<span class="sr-only"> Beauty Index profile</span>
               </a>
             </td>
             {DIMENSIONS.map((dim) => (

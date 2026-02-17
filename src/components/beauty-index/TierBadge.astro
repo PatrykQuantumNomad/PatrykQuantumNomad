@@ -16,6 +16,7 @@ const { tier, size = 'md' } = Astro.props;
 const tierConfig = TIERS.find((t) => t.name === tier);
 const label = tierConfig?.label ?? tier;
 const color = getTierColor(tier);
+const textColor = tierConfig?.textColor ?? color;
 
 // Size variant classes
 const sizeClasses: Record<string, string> = {
@@ -29,7 +30,7 @@ const classes = `inline-block rounded-md font-semibold ${sizeClasses[size]}`;
 
 <span
   class={classes}
-  style={`background-color: ${color}20; color: ${color};`}
+  style={`background-color: ${color}20; color: ${textColor};`}
 >
   {label}
 </span>

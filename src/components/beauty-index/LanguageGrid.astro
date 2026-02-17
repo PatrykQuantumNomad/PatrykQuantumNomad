@@ -31,7 +31,7 @@ const tierGroups = TIERS.slice().reverse().map((tier) => {
       <div class="flex items-baseline gap-3 mb-4">
         <h3
           class="text-lg font-bold"
-          style={`color: ${tier.color};`}
+          style={`color: ${tier.textColor};`}
         >
           {tier.label}
         </h3>
@@ -45,6 +45,7 @@ const tierGroups = TIERS.slice().reverse().map((tier) => {
           <a
             href={`/beauty-index/${lang.id}/`}
             class="rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors bg-[var(--color-surface)] p-3 flex flex-col items-center"
+            aria-label={`${lang.name} Beauty Index profile — ${totalScore(lang)} points`}
           >
             <RadarChart language={lang} size={160} />
             <span class="text-sm font-medium mt-1 text-[var(--color-text-primary)]">

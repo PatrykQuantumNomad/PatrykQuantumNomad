@@ -36,7 +36,7 @@ const sorted = [...languages].sort((a, b) => a.name.localeCompare(b.name));
               href={`/beauty-index/${lang.id}/`}
               class="text-[var(--color-accent)] hover:underline"
             >
-              {lang.name}
+              {lang.name}<span class="sr-only"> Beauty Index profile</span>
             </a>
           </td>
           {CODE_FEATURES.map((feature) => (
