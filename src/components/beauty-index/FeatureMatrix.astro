@@ -1,0 +1,87 @@
+---
+/**
+ * FeatureMatrix.astro — Build-time feature support matrix for the code comparison page.
+ * Renders a 25-row x 10-column HTML table showing which languages support each code feature.
+ * Uses checkmark (check) and dash (dash) indicators for clear visual scanning.
+ */
+import { CODE_FEATURES } from '../../data/beauty-index/code-features';
+import languages from '../../data/beauty-index/languages.json';
+
+// Sort languages by name for the matrix display
+const sorted = [...languages].sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full text-sm border-collapse">
+    <thead>
+      <tr class="border-b-2 border-[var(--color-border)]">
+        <th class="px-3 py-2 text-left font-medium sticky left-0 bg-[var(--color-surface)] z-10">
+          Language
+        </th>
+        {CODE_FEATURES.map((feature) => (
+          <th
+            class="px-2 py-2 text-center font-medium text-xs whitespace-nowrap"
+            title={feature.description}
+          >
+            {feature.name}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {sorted.map((lang) => (
+        <tr class="border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-alt)] transition-colors">
+          <td class="px-3 py-1.5 font-medium sticky left-0 bg-[var(--color-surface)] z-10">
+            <a
+              href={`/beauty-index/${lang.id}/`}
+              class="text-[var(--color-accent)] hover:underline"
+            >
+              {lang.name}
+            </a>
+          </td>
+          {CODE_FEATURES.map((feature) => (
+            <td class="px-2 py-1.5 text-center">
+              {feature.snippets[lang.id] !== undefined ? (
+                <span class="text-green-600" aria-label="Supported" title="Supported">&#10003;</span>
+              ) : (
+                <span class="text-[var(--color-text-secondary)]" aria-label="Not supported" title="Not supported">&mdash;</span>
+              )}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  /* Sticky first column shadow for horizontal scroll hint */
+  td:first-child::after,
+  th:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0,0,0,0.04), transparent);
+  }
+
+  td:first-child,
+  th:first-child {
+    position: relative;
+  }
+
+  /* Scrollbar styling for horizontal overflow */
+  .overflow-x-auto {
+    scrollbar-width: thin;
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+</style>
