@@ -1,110 +1,249 @@
 ---
-title: "The Beauty Index: Scoring 25 Programming Languages on Aesthetics"
-description: "The methodology behind ranking Haskell, Rust, Python, and 22 other languages across 6 aesthetic dimensions — from mathematical elegance to practitioner happiness."
+title: "The Beauty Index: A Subjectively Objective Ranking of Programming Language Aesthetics"
+description: "There are indices for popularity, admiration, and usage. None measure beauty. The Beauty Index ranks 25 programming languages across 6 aesthetic dimensions: from mathematical elegance to practitioner happiness."
 publishedDate: 2026-02-17
 tags: ["programming-languages", "beauty-index", "software-aesthetics", "code-quality"]
+coverImage: "/images/beauty-index-golden-ratio.svg"
 draft: false
 ---
 
-import Lede from '../../components/blog/Lede.astro';
+import OpeningStatement from '../../components/blog/OpeningStatement.astro';
 import TldrSummary from '../../components/blog/TldrSummary.astro';
-import Callout from '../../components/blog/Callout.astro';
 import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
 
-<Lede>How do you measure the beauty of a programming language? You don't, not objectively. But that didn't stop me from trying.</Lede>
+<figure class="not-prose mb-12 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/beauty-index-golden-ratio.svg" alt="Golden ratio spiral with six Greek letters representing the Beauty Index dimensions: Phi, Omega, Lambda, Psi, Gamma, and Sigma" class="w-full rounded-lg" />
+</figure>
 
-Beauty in code is one of those topics that starts arguments at conferences and keeps going in the bar afterward. Every programmer has opinions about what makes a language pleasant to write, satisfying to read, or just plain ugly. Most of those opinions live in gut feelings and Twitter threads. I wanted to do something more structured with mine — not more scientific, but more deliberate.
+<OpeningStatement>There are at least a dozen indices that tell you which programming language is the most popular. None of them tell you which one is the most beautiful.</OpeningStatement>
 
-The Beauty Index is my attempt to take that ineffable sense of aesthetic quality and break it into dimensions you can actually talk about. It ranks 25 programming languages across 6 aesthetic criteria, each scored from 1 to 10, producing a total score from 6 to 60. The result is an opinionated ranking that is meant to provoke thought, not settle debates.
+The <a href="https://www.tiobe.com/tiobe-index/" target="_blank" rel="noopener noreferrer">TIOBE Index</a> counts search-engine mentions. <a href="https://spectrum.ieee.org/top-programming-languages-2025" target="_blank" rel="noopener noreferrer">IEEE Spectrum</a> blends data from GitHub, Stack Overflow, and job boards. <a href="https://redmonk.com/dberkholz/2013/03/25/programming-languages-ranked-by-expressiveness/" target="_blank" rel="noopener noreferrer">RedMonk</a> plots GitHub repos against Stack Overflow tags. The <a href="https://survey.stackoverflow.co/2025/technology" target="_blank" rel="noopener noreferrer">Stack Overflow Developer Survey</a> asks hundreds of thousands of developers what they actually use day to day. These are serious, well-constructed rankings that measure essentially the same thing: *how many people use a given language, and where*.
 
-This is not a language popularity contest. It is not a benchmark. It is one architect's editorial judgment on what makes code beautiful, applied consistently across two and a half decades of languages I have worked with, studied, or simply admired from a distance.
+But popularity is not beauty. [Java](/beauty-index/java/) has been in the top three of every major index for the past two decades. Nobody writes love letters to [Java](/beauty-index/java/)'s syntax. [PHP](/beauty-index/php/) runs roughly 77% of all websites with a known server-side language. [PHP](/beauty-index/php/) developers themselves joke about it. Meanwhile, [Haskell](/beauty-index/haskell/), a language whose community literally uses the phrase "avoid success at all costs," produces code that can make experienced programmers stop scrolling and stare.
+
+The closest thing we have to a "beauty metric" is Stack Overflow's annual "Most Admired" ranking. [Rust](/beauty-index/rust/) has topped it for more than seven consecutive years, most recently at 72% in the 2025 survey, with [Gleam](/beauty-index/gleam/) and [Elixir](/beauty-index/elixir/) close behind. But admiration is broader than beauty. You can admire [Rust](/beauty-index/rust/) for its memory-safety guarantees without finding
+
+```rust title="Rust"
+impl<'a, T: AsRef<[u8]>> From<&'a T> for Bytes
+```
+
+particularly pretty to look at.
+
+Academic researchers have circled the question without quite landing on it. A <a href="https://journals.sagepub.com/doi/epub/10.1177/01622439241245746" target="_blank" rel="noopener noreferrer">2025 ethnographic study</a> found that developers at Yandex routinely called code "beautiful" and "ugly" in daily work. Still, the researchers found that no one actually agreed on what those words meant. Developers maintained entirely different aesthetic ideals under the same vocabulary. The organization functioned not because everyone shared a definition of "beautiful," but because senior engineers enforced a shared definition of "ugly". Using code review to socialize newcomers into what the researchers called a *Professional Vision*. A 2023 <a href="https://theses.hal.science/tel-04588711v1/file/These_DEPAZ_Pierre_2023.pdf" target="_blank" rel="noopener noreferrer">doctoral thesis by Pierre Depaz</a> attempted to formalize the aesthetic dimensions of source code, identifying categories like "literary beauty," "architectural beauty," and "cognitive aesthetics." But even that ambitious work stopped short of scoring and ranking actual languages.
+
+So here we are. This Beauty Index is my attempt to fill that gap. Based on my experience and friends whispering in my ear, and not with a popularity survey or a search-engine scrape, but with a structured, opinionated, multi-dimensional ranking of 25 programming languages based on how beautiful they are. I'll define what I mean by beauty, show my scoring framework, give you code to look at, and hand you a scorecard to disagree with me.
+
+Let's start with the hardest question.
 
 <TldrSummary>
 
-- **25 languages** scored across **6 aesthetic dimensions**
+- **25 languages** scored across **6 aesthetic dimensions** (Phi, Omega, Lambda, Psi, Gamma, Sigma)
 - Each dimension rated **1-10**, total score range **6-60**
 - Languages grouped into **4 tiers**: Workhorses, Practical, Handsome, and Beautiful
 - Scoring is **editorial judgment**, not empirical measurement
-- Explore the full rankings at the [Beauty Index overview](/beauty-index/)
+- Explore the full rankings at the [Beauty Index](/beauty-index/)
+- Compare code side-by-side at the [Code Comparison](/beauty-index/code/) page
 
 </TldrSummary>
 
-## The Six Dimensions
+## What Does "Beauty" Even Mean for a Programming Language?
 
-The challenge with aesthetics is that "beautiful" can mean wildly different things. A mathematician's idea of beauty is not the same as a designer's, and neither maps neatly onto a working programmer's experience of writing code at 2 AM. So instead of trying to reduce beauty to a single axis, I split it into six dimensions, each capturing a different facet of what makes a language feel considered, coherent, or just right.
+<figure class="not-prose my-8 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/beauty-index-wordcloud.svg" alt="Word cloud of beauty philosophies and programming languages: Wabi-Sabi, Bauhaus, Haskell, Rust, Python, and more" class="w-full rounded-lg" />
+</figure>
 
-Each dimension is identified by a Greek letter, partly because the notation gives the system a sense of formality, and partly because I think naming things well is itself an act of design.
+I know what you're thinking. Beauty is subjective. You can't quantify it. This whole exercise is doomed.
 
-### Phi — Aesthetic Geometry
+Maybe. But art critics disagree about paintings, and we still have aesthetic theory. Film critics disagree about movies, and we still hand out Oscars. Wine critics disagree about wine, and they still assign scores. The value of a subjective framework isn't that it's objectively correct; it's that it provides a shared vocabulary for productive argument.
 
-Visual cleanliness and proportional structure. How code looks on a screen before you even read what it does. Some languages produce blocks of text that feel grid-ordered and balanced. Others sprawl or stutter. Phi captures whether the language produces code that is pleasant to look at as a visual artifact — the whitespace, the indentation patterns, the ratio of syntax characters to meaningful content.
+The word *aesthetics* itself comes from the Greek *aisthetikos*, which derives from *aisthanomai*: "I perceive, I feel, I sense." At its root, aesthetics is about the embodied experience of encountering something. When you open a file and scan a block of code, you're having an aesthetic experience, whether you frame it that way or not. Your eye tracks the indentation. You notice the balance between blank space and characters. You feel the rhythm of short lines and long lines. You register, almost instantly, whether this code looks *clean* or *messy*, *intentional* or *accidental*.
 
-### Omega — Mathematical Elegance
+A <a href="https://www.sciencedirect.com/science/article/pii/S0164121225001621" target="_blank" rel="noopener noreferrer">2025 study</a> confirmed that this instinct is meaningful: the researchers found that the perceived beauty of code actually correlates with perceived quality. Even before reading closely, engineers rate aesthetically pleasing code as higher quality. An earlier <a href="https://www.researchgate.net/publication/232443360_The_Aesthetics_of_Software_Code_A_Quantitative_Exploration" target="_blank" rel="noopener noreferrer">quantitative study</a> found that judgments of "ugly" code are reported significantly *faster* than judgments of "beautiful" code, and both are identified far more rapidly than judgments of correctness. Our aesthetic sense is a cognitive shortcut that picks up on real structural signals. Beauty isn't superficial. It's a fast heuristic for good design.
 
-The sense of inevitability and economy in a language's core constructs. Languages that score high on Omega feel like their features are consequences of a small set of powerful ideas — algorithms that seem to come straight from Erdos's "The Book." This dimension rewards languages where solutions feel discovered rather than constructed, where there is an unexpectedness to how cleanly things fit together.
+## The Factory and the Garden
 
-### Lambda — Linguistic Clarity
+<figure class="not-prose my-8 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/beauty-index-factory-garden.svg" alt="The Factory (Bauhaus) vs The Garden (Wabi-Sabi) — two competing aesthetic ideals in programming language design" class="w-full rounded-lg" />
+</figure>
 
-Code that reads like well-written prose. Signal-to-noise ratio at the level of meaning, not just syntax. Lambda is about whether reading someone else's code in this language gives you the sense that you are being told something clearly, or whether you are decoding a cipher. It measures how naturally a language communicates intent to a human reader.
+But what kind of beauty are we talking about? There are at least two competing ideals, and the tension between them runs through every language on this list.
 
-### Psi — Practitioner Happiness
+The first comes from the **Bauhaus tradition**, the early twentieth-century school that sought to unify art, craft, and technology through grid-based order and the principle of "less is more." In code, the Bauhaus ideal is geometric perfection: flawless indentation, proportional visual blocks, zero noise, layout as an isomorphism of logic. Think of a well-formatted [Go](/beauty-index/go/) program where `gofmt` has enforced absolute uniformity. Think of [Python](/beauty-index/python/), where indentation isn't just style, it's syntax. The beauty of the factory: precise, consistent, machine-aligned.
 
-The felt experience of writing and reading code day to day. Flow states, community warmth, tooling that works without drama. Psi is the most subjective of the six dimensions because it is rooted in emotional response. A language can be mathematically elegant but miserable to use in practice. This dimension captures whether programmers actually enjoy the experience of working in the language — the ecosystem, the error messages, the compile times, the community culture.
+The second comes from **Wabi-Sabi**, the Japanese aesthetic philosophy that finds beauty in the imperfect, the impermanent, and the incomplete. Richard Gabriel, in his influential <a href="https://www.dreamsongs.com/Files/PatternsOfSoftware.pdf" target="_blank" rel="noopener noreferrer">essays</a> on software, called it "Habitability": code as a *place where people live*, not a monument to perfection. Wabi-Sabi code has growth points, intentional asymmetries and hooks that allow future developers to extend the system without fighting it. It's transparent, honest, and humble rather than impressively clever. The beauty of the garden: organic, evolving, human-shaped.
 
-### Gamma — Organic Habitability
+The most beautiful programming languages don't commit to one pole exclusively. They find a way to offer geometric clarity *and* organic growth. The scoring framework below tries to measure both.
 
-Code as a place where programmers can live. Growth points, graceful aging, and extensibility. Gamma rewards languages that feel like well-designed houses — they have room to grow, they age gracefully as codebases scale, and they do not fight you when requirements change. A high Gamma score means the language accommodates real-world evolution rather than penalizing it.
+### One more distinction
 
-### Sigma — Conceptual Integrity
+There's the beauty of **code written in a language**, which depends on the skill of the programmer, and the beauty of **the language itself**: its syntax, grammar, design philosophy, and the tools it gives you. A talented programmer can write elegant code in almost any language. But some languages make elegance the path of least resistance, while others make you fight for it.
 
-A coherent design philosophy where features feel like natural consequences of a single idea. Sigma is about whether the language feels like it was designed by a mind with a clear vision, or assembled by a committee adding features from a wish list. Languages that score high on Sigma have an internal logic that makes new features feel predictable — once you understand the core idea, you can often guess how the language will handle a new concept.
+This beauty index focuses on the language itself. Not what the best programmer in the world could produce in it, but what the language **offers**, the raw materials of its aesthetics.
 
-## The Scoring Rubric
+It's also worth acknowledging that the Yandex researchers identified three tiers of aesthetic judgment: Beautiful, Not Ugly, and Ugly. Most production code, most of what actually ships, lives in the "Not Ugly" middle zone: it mimics the existing codebase, follows style guides, and gets the job done. The purpose of this index isn't to shame workhorses like [Java](/beauty-index/java/). It's to articulate what separates *good* from *great*, what makes the difference between code that merely works and code that makes you want to keep reading.
 
-Each language receives a score from 1 to 10 on every dimension, and the six scores are summed into a total ranging from 6 to 60. The scoring is deliberately editorial. There is no formula that takes in GitHub stars and lines of code and produces a number. Instead, each score reflects my judgment after years of working across these ecosystems.
+## The Scoring Framework: Six Dimensions
 
-A score of 1-3 means the language actively works against you on that dimension. A score of 4-5 is neutral — the language neither excels nor offends. A score of 6-7 means the language shows real strength. And 8-10 is reserved for cases where the language is genuinely exemplary on that axis — where it sets a standard that other languages aspire to.
+Rather than reducing beauty to a single gut feeling, I've broken it into six dimensions rooted in distinct aesthetic traditions. Each is scored from 1 to 10. The maximum possible score is 60.
 
-The total score matters less than the shape of the scores across dimensions. A language with a flat profile of 5s everywhere (total: 30) tells a different story than one with three 9s and three 2s (total: 33). The former is solidly competent across the board. The latter is brilliantly specialized, with sharp trade-offs. Both are valid design outcomes.
+<figure class="not-prose my-8 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/beauty-index-formula.svg" alt="The Beauty Index formula: Beauty = Phi + Omega + Lambda + Psi + Gamma + Sigma — six aesthetic dimensions for scoring programming languages" class="w-full rounded-lg" />
+</figure>
 
-## The Four Tiers
+Here's what each dimension measures.
 
-The total scores map to four tiers, each with a name that reflects the character of the languages it contains.
+### &Phi; Phi — Aesthetic Geometry
 
-**Workhorses (6-19)** — Languages that get the job done without aesthetic pretense. They exist to solve problems, not to be admired. This is not an insult — the world runs on workhorses. They earned their place through sheer utility, even if writing them feels more like filling out paperwork than crafting prose. These languages prioritize backward compatibility, enterprise adoption, or domain-specific pragmatism over design elegance.
+*Grounded in: Bauhaus design, Plato's Theory of Forms, Kepler's Harmonices Mundi*
 
-**Practical (20-33)** — Functional beauty with pragmatic design choices. Languages in this tier have moments of genuine aesthetic quality alongside real compromises. They balance beauty with accessibility, elegance with ecosystem size, purity with getting things shipped. Most mainstream languages land here, and there is no shame in it.
+How the code looks on a screen: visual cleanliness, grid-based order, proportional structure. A language scores high here if its code has a natural visual rhythm, if indentation and structure emerge organically, and if a screenful of code looks like architecture rather than a tax form. We're measuring what Code Aesthetic Metrics (CAM) researchers call "visual regularity", the geometric coherence of the source code as a visual artifact.
 
-**Handsome (34-46)** — Languages where craft and aesthetics are evident in the design. These are languages where someone clearly cared about how the language feels, not just what it does. The design choices are intentional, the trade-offs are considered, and the result is a language that rewards attention. Writing in a Handsome-tier language often feels like working with well-made tools.
+Compare iterating through a collection:
 
-**Beautiful (47-60)** — Languages that feel like art. These are the languages that make you stop and appreciate the design itself. They achieve something rare: coherence across multiple aesthetic dimensions simultaneously. Scoring this high requires excellence in most dimensions with no catastrophic weaknesses. These languages tend to attract devotees who appreciate them not just as tools, but as intellectual achievements.
+```python title="Python"
+for item in collection:
+    process(item)
+```
+<br />
 
-<Callout type="tip" title="Tier placement is not a quality judgment">
-A language's tier reflects aesthetic scoring, not its value as a tool. COBOL runs global banking. Java powers half the enterprise. PHP serves a massive portion of the web. A lower beauty score does not mean a language is bad — it means the language optimized for concerns other than aesthetics, and that is a perfectly valid design choice.
-</Callout>
+```java title="Java"
+for (int i = 0; i < collection.size(); i++) {
+    process(collection.get(i));
+}
+```
 
-## Notable Rankings
+Both accomplish the same thing. One has the visual serenity of a well-set table; the other is cluttered with indexing ceremonies.
 
-With 25 languages scored, the full ranking table tells an interesting story. Here are a few entries that stand out.
+### &Omega; Omega — Mathematical Elegance
 
-**[Haskell](/beauty-index/haskell/)** sits at the top of the Beautiful tier, and this will surprise no one who has spent time with it. Its mathematical foundations give it near-perfect scores on Omega and Sigma — the language feels like a consequence of lambda calculus rather than a human design decision. Where Haskell pays the price is in Psi (practitioner happiness), because the learning curve and ecosystem friction are real, even if the devotees consider it worth the climb.
+*Grounded in: G.H. Hardy's "A Mathematician's Apology," Paul Erdős's concept of "The Book"*
 
-**[Rust](/beauty-index/rust/)** occupies an interesting position in the rankings. It scores exceptionally well on Sigma (conceptual integrity) — the ownership system is a single idea with far-reaching consequences, and the language feels designed rather than accumulated. But Rust also demands a lot from its practitioners, and the borrow checker's learning curve affects its Psi and Gamma scores. It is a language that earns its beauty through rigor rather than ease.
+Hardy argued that mathematical beauty has three qualities: inevitability (the proof could not have been otherwise), unexpectedness (it reveals a surprising connection), and economy (no unnecessary steps). The same criteria apply to code. A high Omega score means the language lets you write algorithms that feel "straight from The Book", the imaginary repository of God's most perfect proofs.
 
-**[Python](/beauty-index/python/)** is one of the most interesting cases in the index. It scores very well on Lambda (linguistic clarity) — Python code reads like pseudocode, which is a genuine design achievement. And its Psi score reflects the fact that millions of people genuinely enjoy writing Python. But Python's Phi (aesthetic geometry) is dragged down by some visual inconsistencies, and its Sigma suffers from the tension between its "one obvious way" philosophy and the reality of a language that has accumulated features over three decades.
+```haskell title="Haskell"
+fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+```
 
-**[COBOL](/beauty-index/cobol/)** anchors the Workhorses tier, and honestly, it wears that position with dignity. COBOL was designed to read like English business prose, which gives it a certain Lambda clarity in its own domain. But on nearly every other dimension — visual geometry, mathematical elegance, conceptual integrity — it reflects an era of computing that predates the design sensibilities we now take for granted. COBOL's beauty, such as it is, lies in its stubbornness: it has outlived languages that were more fashionable and continues to process trillions of dollars daily.
+That single line defines an infinite list by self-reference. It's dense, but once you understand it, it feels inevitable, as though it could not have been written any other way.
 
-**[Kotlin](/beauty-index/kotlin/)** stands out as a language that punches above its weight on Psi (practitioner happiness). It took the pain points of Java and systematically addressed them with null safety, data classes, coroutines, and concise syntax. The result is a language that feels like it was designed by people who actually write code for a living. Its Gamma score is strong too — Kotlin codebases tend to age well thanks to the language's emphasis on pragmatic evolution.
+### &Lambda; Lambda — Linguistic Clarity
+
+*Grounded in: Donald Knuth's Literate Programming*
+
+Knuth proposed that programs should be written as essays for human readers, with the machine as an incidental audience. He criticized code that was "plodding and excruciating to read", lacking what he called *wit*, the ability to communicate complex intent with graceful economy. A high Lambda score means the language encourages code that reads like well-written prose: variable names are evocative, logic is self-evident, and comments explain *why* rather than *what*. Knuth's Linguistic Economy in practice, signal-to-noise ratio, but measured at the level of meaning rather than characters.
+
+```ruby title="Ruby"
+File.readlines("data.txt")
+    .map(&:strip)
+    .reject(&:empty?)
+    .each_with_index { |line, i| puts "#{i + 1}: #{line}" }
+```
+
+You can read that aloud, and it makes sense. That's Lambda at work.
+
+### &Psi; Psi — Practitioner Happiness
+
+*Grounded in: Developer experience research, Stack Overflow's "Most Admired" survey data*
+
+Beauty that nobody enjoys isn't beauty; it's an academic exercise. This dimension measures the felt experience of writing and reading code in a language: Does the language induce flow states? Does the community love working in it, or merely tolerate it? Does the tooling, REPL, formatter, compiler messages, contribute to a sense of aesthetic pleasure or friction?
+
+[Rust](/beauty-index/rust/) has topped Stack Overflow's "Most Admired" list at 72% in 2025. [Gleam](/beauty-index/gleam/) is at 70%. [Elixir](/beauty-index/elixir/) at 66%. These aren't popularity contests; they measure the percentage of developers who *used* a language and want to *continue* using it. That's practitioner happiness quantified. By contrast, languages like MATLAB (29%) and VBA (19%) are used by many people who would rather be using something else.
+
+### &Gamma; Gamma — Organic Habitability
+
+*Grounded in: Richard Gabriel's "Habitability," Japanese Wabi-Sabi philosophy*
+
+The Wabi-Sabi dimension is the counterweight to Bauhaus perfection. Gabriel argued that code should be a *place where programmers can live*, not a pristine museum. Habitable code has growth points: intentional hooks and asymmetries that invite future developers to extend the system naturally. It embodies what the Wabi-Sabi tradition calls *Kanso* (simplicity), *Fukinsei* (deliberate asymmetry that creates space for growth), and *Shizen* (a logic that flows according to the domain's natural boundaries rather than forced conventions).
+
+A language scores high here if idiomatic code ages well, accommodates change gracefully, and feels "lived-in" rather than fragile. Languages that encourage over-engineered abstractions or brittle type gymnastics score low. Languages where the community has converged on patterns that are easy to extend and modify score high.
+
+```elixir title="Elixir"
+"hello world"
+|> String.split()
+|> Enum.map(&String.capitalize/1)
+|> Enum.join(" ")
+```
+
+Elixir's pipeline style is a growth-point idiom: you can insert a new transformation step anywhere in the chain without restructuring the rest of the pipeline. That's habitability.
+
+### &Sigma; Sigma — Conceptual Integrity
+
+*Grounded in: Aristotelian consistency (order, symmetry, definiteness), Kolmogorov complexity*
+
+Does the language have a soul? A clear worldview? A reason for existing beyond "we needed something that compiles to X"? This dimension draws on the information-theoretic insight that a beautiful object has a short description relative to the observer's prior knowledge. The most beautiful languages are *about* something:
+
+- **[Python](/beauty-index/python/):** "There should be one, and preferably only one, obvious way to do it."
+- **[Clojure](/beauty-index/clojure/):** "Code is data, data is code."
+- **[C](/beauty-index/c/):** "Trust the programmer."
+- **[Rust](/beauty-index/rust/):** "Safety without sacrificing control."
+- **[Go](/beauty-index/go/):** "Simplicity is complicated."
+
+A high Sigma score means the language's features feel like natural consequences of a single idea, not a feature checklist assembled by committee. The Yandex researchers described this as the codebase maintaining "the illusion of being written by a single, coherent mind." The same principle applies to language design.
+
+## What the Scores Reveal
+
+Step back from the individual entries and patterns emerge.
+
+**The Factory-Garden balance predicts overall beauty.** The highest-scoring languages ([Elixir](/beauty-index/elixir/), [Ruby](/beauty-index/ruby/), [Python](/beauty-index/python/), and [Rust](/beauty-index/rust/)) aren't purely Bauhaus or purely Wabi-Sabi. They score well on both Phi (geometric clarity) and Gamma (organic habitability). The languages that commit fully to one pole, [Go](/beauty-index/go/)'s extreme Bauhaus uniformity, [Haskell](/beauty-index/haskell/)'s extreme mathematical elegance, score slightly lower overall.
+
+**Functional languages dominate the top on Omega.** [Haskell](/beauty-index/haskell/) (10), [F#](/beauty-index/fsharp/) (9), [OCaml](/beauty-index/ocaml/) (9), [Clojure](/beauty-index/clojure/) (9), [Scala](/beauty-index/scala/) (8). There's something about the mathematical heritage of functional programming composition over mutation, expressions over statements, that produces code closer to Hardy's ideal. But Omega alone doesn't make a language beautiful. Lower Psi and Gamma offset [Haskell](/beauty-index/haskell/)'s perfect Omega.
+
+**The auteur effect shows up in Sigma.** Languages designed by one person or a small, opinionated team score highest on Conceptual Integrity: [Haskell](/beauty-index/haskell/) (10), [Clojure](/beauty-index/clojure/) (10), [Rust](/beauty-index/rust/) (10), [Go](/beauty-index/go/) (9), [Python](/beauty-index/python/) (9), [C](/beauty-index/c/) (9), [Elixir](/beauty-index/elixir/) (9), [Gleam](/beauty-index/gleam/) (9). Languages evolved through decades of committee additions, [C++](/beauty-index/cpp/) (5), [JavaScript](/beauty-index/javascript/) (3), [PHP](/beauty-index/php/) (3), score lowest. A language that feels *designed* rather than *accumulated* has an inherent aesthetic advantage.
+
+**Psi correlates more closely with Stack Overflow's "Most Admired" than any other dimension.** [Rust](/beauty-index/rust/) (Psi=9, admired 72%), [Ruby](/beauty-index/ruby/) (Psi=10, admired 64%), [Elixir](/beauty-index/elixir/) (Psi=9, admired 66%), and [Gleam](/beauty-index/gleam/) (Psi=9, admired 70%). The developers who actually use these languages love them.
+
+**Popularity and beauty are almost inversely correlated.** The languages at the top of TIOBE, [Python](/beauty-index/python/) (the exception), [JavaScript](/beauty-index/javascript/), [Java](/beauty-index/java/), [C](/beauty-index/c/)/[C++](/beauty-index/cpp/), and [PHP](/beauty-index/php/), are heavily concentrated in the lower tiers of this index. Some of the top languages by this framework, [Haskell](/beauty-index/haskell/), [Elixir](/beauty-index/elixir/), [Clojure](/beauty-index/clojure/), [F#](/beauty-index/fsharp/), [OCaml](/beauty-index/ocaml/), are niche. Beauty doesn't pay the bills. But the "Most Admired" survey tracks much more closely with this beauty index than the "Most Used" survey does.
+
+## The Soul Gap: Beauty in the Age of AI
+
+<figure class="not-prose my-8 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/beauty-index-soul-gap.svg" alt="The Soul Gap: AI as bricklayer handles syntax and correctness, while the human architect provides intentionality and soul — the Beauty Index bridges the gap" class="w-full rounded-lg" />
+</figure>
+
+There's one more reason this index matters now, and it has nothing to do with nostalgia.
+
+In 2025, the number of questions posted per week on Stack Exchange dropped to 22% of what it was in 2024. Developers are increasingly turning to AI assistants for code generation, and these assistants are becoming remarkably capable. GitHub Copilot, Claude, and their successors can produce correct, functional code in nearly any language almost instantly.
+
+But correct isn't beautiful. AI-generated code tends to live in the "Not Ugly" zone, functional, conventional, mimicking patterns from training data. It follows style guides. It passes tests. It is, in the Yandex framework, competent mimicry. What it rarely achieves is the kind of beauty that requires intent: the growth points that signal awareness of future developers, the algorithmic inevitability that reflects deep understanding of the problem domain, the Knuthian wit that communicates insight, not just instructions.
+
+As Terence Tao noted in his work on AI-assisted mathematics, we are shifting toward what he calls a "laboratory science" model,a "scattershot approach" where AI handles the manual rigor and the human focuses on high-level architecture, taste, and judgment. The programmer's role is evolving from construction worker to architect-critic. And what does an architect-critic need most? A framework for evaluating beauty.
+
+The Beauty Index, or something like it, becomes a practical tool in this context. When your AI generates five implementations of a function and asks you to choose, you need aesthetic criteria. When you're reviewing AI-generated pull requests, you need to articulate why one version is better than another beyond "it works." The six dimensions (&Phi;, &Omega;, &Lambda;, &Psi;, &Gamma;, &Sigma;) provide that vocabulary.
+
+Languages that score high on this index may have another advantage in the AI era: they constrain generation in useful ways. A language with strong &Sigma; (Conceptual Integrity), like [Rust](/beauty-index/rust/) or [Go](/beauty-index/go/), produces AI-generated code that's more likely to be idiomatically correct, because the language itself has strong opinions. A language with weak &Sigma;, like [JavaScript](/beauty-index/javascript/) or [PHP](/beauty-index/php/), gives the AI too many degrees of freedom, producing code that works but lacks aesthetic appeal.
+
+## A Note on Methodology (and an Invitation)
+
+I want to be transparent about what this is. These scores are one person's informed opinion, shaped by my aesthetic preferences, which lean toward clean syntax, functional patterns, and strong type systems. My rubric may overvalue languages like [Haskell](/beauty-index/haskell/) and [Rust](/beauty-index/rust/); languages whose beauty lives in domains I'm less attuned to ([R](/beauty-index/r/)'s statistical elegance, [Lua](/beauty-index/lua/)'s embedding simplicity) may be undervalued.
+
+That's fine. The point of a subjective index isn't to be right. It's meant to be specific enough to be wrong in interesting ways, giving you a framework for your own aesthetic arguments.
+
+The guide's scoring rubric maps to a broader scale worth keeping in mind: scores of 1–3 represent "Ugly" code (high complexity, spaghetti logic, no wit); 4–6 represent the "Not Ugly" baseline (the dominant industrial category, follows style guides, mimics the codebase, gets the job done); 7–9 represent "Beautiful" (high regularity, linguistic wit, growth points, Hardy's criteria); and a 10 is "The Book", transcendental elegance that feels inevitable, like it could not have been written any other way.
+
+If you think I've under-rated [Go](/beauty-index/go/) or over-rated [Haskell](/beauty-index/haskell/), I want to hear why. If there's a seventh dimension I'm missing (error message clarity, tooling beauty or ecosystem aesthetics), tell me about it.
+
+Because the only thing more interesting than one person's taste is a thousand people arguing about it.
 
 ## Explore the Index
 
 The Beauty Index is more than this blog post. The full interactive experience lives across several pages.
 
-The [Beauty Index overview](/beauty-index/) shows the complete rankings with a stacked bar chart, a sortable scoring table, and radar chart thumbnails for all 25 languages. Each language links to its own detail page with a full radar chart, score breakdown, character sketch, and signature code snippet — you can explore [Haskell](/beauty-index/haskell/), [Rust](/beauty-index/rust/), [Python](/beauty-index/python/), [COBOL](/beauty-index/cobol/), [Kotlin](/beauty-index/kotlin/), [Elixir](/beauty-index/elixir/), and the rest.
+The [Beauty Index](/beauty-index/) shows the complete rankings with a stacked bar chart, a sortable scoring table, and radar chart thumbnails for all 25 languages. Each language links to its own detail page with a full radar chart, score breakdown, character sketch, and signature code snippet, you can explore [Haskell](/beauty-index/haskell/), [Rust](/beauty-index/rust/), [Python](/beauty-index/python/), [Gleam](/beauty-index/gleam/), [Kotlin](/beauty-index/kotlin/), [Elixir](/beauty-index/elixir/), and the rest.
 
-The [Code Comparison](/beauty-index/code/) page puts all 25 languages side by side across 10 programming features, letting you see how each language expresses the same concept. It is one thing to say a language is beautiful in the abstract — it is another to see the code.
+The [Code Comparison](/beauty-index/code/) page puts all 25 languages side by side across 10 programming features, letting you see how each language expresses the same concept. It's one thing to say a language is beautiful in the abstract, it's another to see the code.
+
+## Why Beauty Matters
+
+This whole exercise might seem frivolous. Programming languages are tools. What matters is whether they work, not whether they're pretty.
+
+But the research says otherwise. Perceived beauty correlates with perceived quality. Beautiful code signals intention, that the author cared enough to make their logic clear, their names meaningful, and their structure deliberate. And a beautiful language makes it easy to send those signals.
+
+Beautiful languages attract communities. Communities write libraries, documentation, and tutorials. Libraries make the language more useful. Usefulness attracts more developers. Beauty is an evolutionary advantage.
+
+The Bauhaus school believed that the harmonious integration of technology and the human spirit was the ultimate measure of design excellence. The Wabi-Sabi tradition held that authentic beauty emerges when we stop trying to be perfect and start trying to be honest. The best programming languages do both: they impose just enough geometric order to be clear, and leave just enough organic space to be human.
+
+We spend more time reading code than writing it. Most estimates put the ratio at 5:1 to 10:1. A beautiful language to read respects its users' time and cognitive energy.
 
 <KeyTakeaway title="Beauty as Craft">
-The Beauty Index is not about declaring a winner. It is about taking seriously the idea that programming languages are designed artifacts, and that design quality matters. The way a language shapes how you think, how it looks on a screen, how it feels to use at 2 AM when nothing is working — these things matter. Caring about the aesthetics of code is not superficial. It is about valuing the craft of expression, and recognizing that the best tools are also the ones that respect the humans who use them.
+Beauty, in the end, is a form of kindness.
 </KeyTakeaway>

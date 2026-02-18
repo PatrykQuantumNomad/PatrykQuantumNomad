@@ -2,7 +2,7 @@
 /**
  * BeautyIndexJsonLd.astro — Dataset + ItemList JSON-LD structured data
  * for the Beauty Index overview page. Helps search engines understand
- * the ranking dataset and list all 25 languages with their URLs.
+ * the ranking dataset and list all 25 languages with their URLs and scores.
  */
 import { type Language, totalScore } from '../lib/beauty-index/schema';
 import { DIMENSIONS } from '../lib/beauty-index/dimensions';
@@ -19,8 +19,13 @@ const schema = {
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "The Beauty Index",
+  "alternateName": "Programming Language Beauty Index 2026",
   "description": "Ranking 25 programming languages across 6 aesthetic dimensions: Aesthetic Geometry, Mathematical Elegance, Linguistic Clarity, Practitioner Happiness, Organic Habitability, and Conceptual Integrity.",
   "url": "https://patrykgolabek.dev/beauty-index/",
+  "datePublished": "2026-02-17",
+  "dateModified": "2026-02-18",
+  "version": "2026 Edition",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
   "creator": {
     "@type": "Person",
     "@id": "https://patrykgolabek.dev/#person",
@@ -31,6 +36,7 @@ const schema = {
     "language ranking",
     "software aesthetics",
     "beauty index",
+    "most beautiful programming language",
   ],
   "variableMeasured": DIMENSIONS.map((dim) => dim.name),
   "measurementTechnique": "Editorial scoring: each dimension rated 1-10 by expert judgment",
@@ -41,7 +47,7 @@ const schema = {
     "itemListElement": sorted.map((lang, index) => ({
       "@type": "ListItem",
       "position": index + 1,
-      "name": lang.name,
+      "name": `${lang.name} (${totalScore(lang)}/60)`,
       "url": `https://patrykgolabek.dev/beauty-index/${lang.id}/`,
     })),
   },

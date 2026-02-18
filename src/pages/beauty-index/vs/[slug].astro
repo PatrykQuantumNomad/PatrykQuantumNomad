@@ -1,0 +1,247 @@
+---
+/**
+ * [slug].astro — Versus comparison page for two Beauty Index languages.
+ * Generates 600 static pages (25 × 24 ordered pairs) at /beauty-index/vs/{langA}-vs-{langB}/.
+ * Both directions are supported: python-vs-ruby and ruby-vs-python are separate pages.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import VsJsonLd from '../../../components/beauty-index/VsJsonLd.astro';
+import OverlayRadarChart, { VS_COLOR_A, VS_COLOR_B } from '../../../components/beauty-index/OverlayRadarChart.astro';
+import TierBadge from '../../../components/beauty-index/TierBadge.astro';
+import { DIMENSIONS } from '../../../lib/beauty-index/dimensions';
+import { DIMENSION_COLORS } from '../../../lib/beauty-index/tiers';
+import { totalScore, type Language } from '../../../lib/beauty-index/schema';
+
+export async function getStaticPaths() {
+  const languages = await getCollection('languages');
+  const langs = languages.map((e) => e.data);
+
+  const pairs: { params: { slug: string }; props: { langA: Language; langB: Language } }[] = [];
+
+  for (let i = 0; i < langs.length; i++) {
+    for (let j = 0; j < langs.length; j++) {
+      if (i === j) continue;
+      pairs.push({
+        params: { slug: `${langs[i].id}-vs-${langs[j].id}` },
+        props: { langA: langs[i], langB: langs[j] },
+      });
+    }
+  }
+
+  return pairs;
+}
+
+const { langA, langB } = Astro.props;
+
+const totalA = totalScore(langA);
+const totalB = totalScore(langB);
+const tierLabelA = langA.tier.charAt(0).toUpperCase() + langA.tier.slice(1);
+const tierLabelB = langB.tier.charAt(0).toUpperCase() + langB.tier.slice(1);
+
+const ogImageURL = new URL(`/open-graph/beauty-index/vs/${langA.id}-vs-${langB.id}.png`, Astro.site).toString();
+const pageTitle = `${langA.name} vs ${langB.name} — Beauty Index | Patryk Golabek`;
+const metaDescription = `${langA.name} (${totalA}/60, ${tierLabelA}) vs ${langB.name} (${totalB}/60, ${tierLabelB}) — side-by-side Beauty Index comparison across 6 aesthetic dimensions.`;
+
+// Dimension comparison data
+const dimensions = DIMENSIONS.map((dim) => {
+  const scoreA = langA[dim.key] as number;
+  const scoreB = langB[dim.key] as number;
+  const delta = scoreA - scoreB;
+  const color = DIMENSION_COLORS[dim.key];
+  return { dim, scoreA, scoreB, delta, color };
+});
+
+// Compute verdict sentence for LLM extractability
+const totalDelta = totalA - totalB;
+const winsA = dimensions.filter((d) => d.delta > 0).map((d) => d.dim.shortName);
+const winsB = dimensions.filter((d) => d.delta < 0).map((d) => d.dim.shortName);
+const ties = dimensions.filter((d) => d.delta === 0).map((d) => d.dim.shortName);
+
+let verdict: string;
+if (totalDelta === 0) {
+  if (winsA.length === 0) {
+    verdict = `${langA.name} and ${langB.name} are perfectly matched at ${totalA}/60, tying in all 6 dimensions.`;
+  } else {
+    verdict = `${langA.name} and ${langB.name} tie at ${totalA}/60 overall. ${langA.name} leads in ${winsA.join(' and ')}; ${langB.name} leads in ${winsB.join(' and ')}.`;
+  }
+} else {
+  const leader = totalDelta > 0 ? langA.name : langB.name;
+  const leaderWins = totalDelta > 0 ? winsA : winsB;
+  const diff = Math.abs(totalDelta);
+  if (leaderWins.length === 6) {
+    verdict = `${leader} scores ${diff} points higher than ${totalDelta > 0 ? langB.name : langA.name} overall, leading in all 6 dimensions.`;
+  } else {
+    verdict = `${leader} scores ${diff} points higher overall (${totalDelta > 0 ? totalA : totalB}/60 vs ${totalDelta > 0 ? totalB : totalA}/60), leading in ${leaderWins.join(', ')}.`;
+  }
+}
+---
+
+<Layout
+  title={pageTitle}
+  description={metaDescription}
+  ogImage={ogImageURL}
+  ogImageAlt={`Beauty Index comparison: ${langA.name} vs ${langB.name} radar charts`}
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: "https://patrykgolabek.dev/" },
+    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+    { name: `${langA.name} vs ${langB.name}`, url: `https://patrykgolabek.dev/beauty-index/vs/${langA.id}-vs-${langB.id}/` },
+  ]} />
+  <VsJsonLd
+    langAName={langA.name}
+    langBName={langB.name}
+    pageTitle={pageTitle}
+    description={metaDescription}
+    url={`https://patrykgolabek.dev/beauty-index/vs/${langA.id}-vs-${langB.id}/`}
+  />
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <a href="/beauty-index/" class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6">
+      <span aria-hidden="true">&larr;</span> Back to Beauty Index
+    </a>
+
+    {/* Header */}
+    <header class="text-center">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold">
+        {langA.name} <span class="text-[var(--color-text-secondary)] font-normal">vs</span> {langB.name}
+      </h1>
+      <div class="flex items-center justify-center gap-6 mt-4">
+        <div class="flex items-center gap-2">
+          <TierBadge tier={langA.tier} size="md" />
+          <span class="text-lg font-bold">{totalA}/60</span>
+        </div>
+        <span class="text-[var(--color-text-secondary)]">vs</span>
+        <div class="flex items-center gap-2">
+          <TierBadge tier={langB.tier} size="md" />
+          <span class="text-lg font-bold">{totalB}/60</span>
+        </div>
+      </div>
+    </header>
+
+    {/* Overlay Radar Chart */}
+    <div class="flex flex-col items-center mt-10">
+      <OverlayRadarChart langA={langA} langB={langB} size={360} />
+      {/* Legend */}
+      <div class="flex items-center gap-6 mt-4">
+        <div class="flex items-center gap-2">
+          <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke={VS_COLOR_A} stroke-width="2" /></svg>
+          <span class="text-sm font-medium">{langA.name}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke={VS_COLOR_B} stroke-width="2" stroke-dasharray="6,3" /></svg>
+          <span class="text-sm font-medium">{langB.name}</span>
+        </div>
+      </div>
+      {/* Download button */}
+      <a
+        href={`/open-graph/beauty-index/vs/${langA.id}-vs-${langB.id}.png`}
+        download={`${langA.id}-vs-${langB.id}-beauty-index.png`}
+        class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" />
+        </svg>
+        Download comparison image
+      </a>
+    </div>
+
+    {/* Verdict */}
+    <p class="text-center text-[var(--color-text-secondary)] mt-8 text-sm leading-relaxed max-w-2xl mx-auto">
+      {verdict}
+    </p>
+
+    {/* Dimension Comparison Table */}
+    <section class="mt-8">
+      <h2 class="text-xl font-heading font-bold mb-4">Dimension Breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[var(--color-border)]">
+              <th class="text-left py-2 pr-4 font-medium text-[var(--color-text-secondary)]">Dimension</th>
+              <th class="text-center py-2 px-2 font-medium">{langA.name}</th>
+              <th class="text-center py-2 px-2 font-medium">{langB.name}</th>
+              <th class="text-center py-2 pl-2 font-medium text-[var(--color-text-secondary)]">Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dimensions.map((row) => (
+              <tr class="border-b border-[var(--color-border)]/50">
+                <td class="py-3 pr-4">
+                  <span class="font-bold mr-1.5" style={`color: ${row.color};`}>{row.dim.symbol}</span>
+                  <span class="text-[var(--color-text-secondary)]">{row.dim.shortName}</span>
+                </td>
+                <td class="text-center py-3 px-2">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-16 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
+                      <div class="h-full rounded-full" style={`width: ${row.scoreA * 10}%; background-color: ${row.color};`} />
+                    </div>
+                    <span class="font-medium w-5 text-right">{row.scoreA}</span>
+                  </div>
+                </td>
+                <td class="text-center py-3 px-2">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-16 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
+                      <div class="h-full rounded-full" style={`width: ${row.scoreB * 10}%; background-color: ${row.color};`} />
+                    </div>
+                    <span class="font-medium w-5 text-right">{row.scoreB}</span>
+                  </div>
+                </td>
+                <td class="text-center py-3 pl-2">
+                  {row.delta > 0 ? (
+                    <span class="text-green-600 font-medium">+{row.delta}</span>
+                  ) : row.delta < 0 ? (
+                    <span class="text-red-500 font-medium">{row.delta}</span>
+                  ) : (
+                    <span class="text-[var(--color-text-secondary)]">=</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {/* Total row */}
+            <tr class="border-t-2 border-[var(--color-border)]">
+              <td class="py-3 pr-4 font-bold">Total</td>
+              <td class="text-center py-3 px-2 font-bold text-lg">{totalA}</td>
+              <td class="text-center py-3 px-2 font-bold text-lg">{totalB}</td>
+              <td class="text-center py-3 pl-2">
+                {totalA - totalB > 0 ? (
+                  <span class="text-green-600 font-bold">+{totalA - totalB}</span>
+                ) : totalA - totalB < 0 ? (
+                  <span class="text-red-500 font-bold">{totalA - totalB}</span>
+                ) : (
+                  <span class="text-[var(--color-text-secondary)] font-bold">=</span>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {/* Character Sketches */}
+    <section class="mt-12">
+      <h2 class="text-xl font-heading font-bold mb-4">Character Sketches</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="font-heading font-bold text-lg mb-2">
+          <a href={`/beauty-index/${langA.id}/`} class="text-[var(--color-accent)] hover:underline">{langA.name}</a>
+        </h3>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{langA.characterSketch}</p>
+      </div>
+      <div>
+        <h3 class="font-heading font-bold text-lg mb-2">
+          <a href={`/beauty-index/${langB.id}/`} class="text-[var(--color-accent)] hover:underline">{langB.name}</a>
+        </h3>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{langB.characterSketch}</p>
+      </div>
+      </div>
+    </section>
+
+    <p class="text-sm text-[var(--color-text-secondary)] mt-10 text-center">
+      <a href="/blog/the-beauty-index/" class="text-[var(--color-accent)] hover:underline">
+        Read the methodology &rarr;
+      </a>
+    </p>
+  </article>
+</Layout>

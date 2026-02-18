@@ -9,6 +9,8 @@ const schemas = projects.map((project) => ({
   "codeRepository": project.url,
   "url": project.liveUrl ?? project.url,
   "programmingLanguage": project.language,
+  "keywords": project.technologies.join(', '),
+  "applicationCategory": project.category,
   "author": {
     "@type": "Person",
     "@id": "https://patrykgolabek.dev/#person"

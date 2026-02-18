@@ -7,9 +7,12 @@ interface Props {
   url: string;
   tags?: string[];
   image?: string;
+  articleSection?: string;
+  wordCount?: number;
+  about?: { type: string; name: string; url: string };
 }
 
-const { title, description, publishedDate, updatedDate, url, tags, image } = Astro.props;
+const { title, description, publishedDate, updatedDate, url, tags, image, articleSection, wordCount, about } = Astro.props;
 
 const schema: Record<string, unknown> = {
   "@context": "https://schema.org",
@@ -42,6 +45,22 @@ if (tags && tags.length > 0) {
   schema["keywords"] = tags.join(', ');
 }
 
+if (articleSection) {
+  schema["articleSection"] = articleSection;
+}
+
+if (wordCount) {
+  schema["wordCount"] = wordCount;
+}
+
+if (about) {
+  schema["about"] = {
+    "@type": about.type,
+    "name": about.name,
+    "url": about.url,
+  };
+}
+
 if (image) {
   schema["image"] = {
     "@type": "ImageObject",
@@ -50,6 +69,11 @@ if (image) {
     "height": 630
   };
 }
+
+schema["speakable"] = {
+  "@type": "SpeakableSpecification",
+  "cssSelector": [".prose h2", ".prose p:first-of-type", "[data-tldr]", "[data-key-takeaway]"]
+};
 ---
 
 <script type="application/ld+json" set:html={JSON.stringify(schema)} />

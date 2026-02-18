@@ -6,26 +6,30 @@
  * using Astro's Code component, with client-side tab switching via
  * the CodeComparisonTabs React island.
  */
-import { Code } from 'astro:components';
-import type { BuiltinLanguage } from 'shiki';
+import { Code } from 'astro-expressive-code/components';
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import { CODE_FEATURES } from '../../../data/beauty-index/code-features';
 import CodeComparisonTabs from '../../../components/beauty-index/CodeComparisonTabs.tsx';
+import LanguageFilter from '../../../components/beauty-index/LanguageFilter.tsx';
 import FeatureMatrix from '../../../components/beauty-index/FeatureMatrix.astro';
 import { totalScore } from '../../../lib/beauty-index/schema';
 
 const languages = await getCollection('languages');
 const allData = languages.map((entry) => entry.data);
 const sortedLanguages = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
+const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString();
 const features = CODE_FEATURES;
 const featureNames = features.map((f) => f.name);
+const filterLanguages = sortedLanguages.map((l) => ({ id: l.id, name: l.name, tier: l.tier }));
 ---
 
 <Layout
   title="Code Comparison | Beauty Index | Patryk Golabek"
   description="Compare how 25 programming languages express the same concepts side-by-side. From variable declarations to pattern matching."
+  ogImage={ogImageURL}
+  ogImageAlt="Beauty Index — Code Comparison across 25 programming languages"
 >
   <BreadcrumbJsonLd crumbs={[
     { name: "Home", url: "https://patrykgolabek.dev/" },
@@ -35,31 +39,29 @@ const featureNames = features.map((f) => f.name);
 
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
-    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
-      <ol class="flex items-center gap-1 justify-center">
-        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><a href="/beauty-index/" class="hover:text-[var(--color-accent)] transition-colors">Beauty Index</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li aria-current="page">Code Comparison</li>
-      </ol>
-    </nav>
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">
       Code Comparison
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
-      See how 25 languages express the same programming concepts.
+      See how 25 languages express the same programming concepts. <br />
       Click tabs to switch features.
     </p>
-    <p class="text-sm text-[var(--color-text-secondary)] mt-3">
+    <p class="text-sm text-[var(--color-text-secondary)] mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+      <a href="/beauty-index/" class="text-[var(--color-accent)] hover:underline">
+        &larr; Back to Beauty Index
+      </a>
       <a href="/blog/the-beauty-index/" class="text-[var(--color-accent)] hover:underline">
         Read the methodology &rarr;
       </a>
+      <a href="/beauty-index/justifications/" class="text-[var(--color-accent)] hover:underline">
+        Score justifications &rarr;
+      </a>      
     </p>
   </section>
 
   {/* Tabbed Code Comparison Section */}
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <LanguageFilter client:load languages={filterLanguages} />
     <CodeComparisonTabs client:load features={featureNames}>
       {features.map((feature, featureIndex) => (
         <div
@@ -75,13 +77,13 @@ const featureNames = features.map((f) => f.name);
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {sortedLanguages.map((language) => (
-              <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
+              <div data-language-id={language.id} class="rounded-lg border border-[var(--color-border)] overflow-hidden">
                 <div class="px-4 py-2 bg-[var(--color-surface-alt)] border-b border-[var(--color-border)]">
-                  <span class="text-sm font-medium">{language.name}</span>
+                  <a href={`/beauty-index/${language.id}/`} class="text-sm font-medium hover:text-[var(--color-accent)] transition-colors">{language.name}</a>
                 </div>
                 {feature.snippets[language.id] !== undefined ? (
                   <div class="code-block-wrapper">
-                    <Code code={feature.snippets[language.id]!.code} lang={feature.snippets[language.id]!.lang as BuiltinLanguage} />
+                    <Code code={feature.snippets[language.id]!.code} lang={feature.snippets[language.id]!.lang} class="dark" />
                   </div>
                 ) : (
                   <div class="px-4 py-6 text-center text-sm text-[var(--color-text-secondary)] italic">

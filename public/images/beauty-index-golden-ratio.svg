@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" width="1200" height="690">
+  <defs>
+    <linearGradient id="spiral-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A90D9"/>
+      <stop offset="20%" stop-color="#7B68EE"/>
+      <stop offset="40%" stop-color="#2AAA8A"/>
+      <stop offset="60%" stop-color="#E8734A"/>
+      <stop offset="80%" stop-color="#8FBC5A"/>
+      <stop offset="100%" stop-color="#D4A843"/>
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4A90D9"/>
+      <stop offset="20%" stop-color="#7B68EE"/>
+      <stop offset="40%" stop-color="#2AAA8A"/>
+      <stop offset="60%" stop-color="#E8734A"/>
+      <stop offset="80%" stop-color="#8FBC5A"/>
+      <stop offset="100%" stop-color="#D4A843"/>
+    </linearGradient>
+    <radialGradient id="bg-glow" cx="55%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f23"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="soft-glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="spiral-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="690" fill="url(#bg-glow)"/>
+
+  <!-- Subtle radial rings -->
+  <circle cx="740" cy="390" r="350" fill="none" stroke="white" stroke-opacity="0.015" stroke-width="0.5"/>
+  <circle cx="740" cy="390" r="250" fill="none" stroke="white" stroke-opacity="0.02" stroke-width="0.5"/>
+  <circle cx="740" cy="390" r="150" fill="none" stroke="white" stroke-opacity="0.025" stroke-width="0.5"/>
+
+  <!-- Title -->
+  <text x="600" y="40" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="white" fill-opacity="0.8" text-anchor="middle" letter-spacing="8">THE BEAUTY INDEX</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       Golden Rectangle: 700 × 433 (ratio ≈ 1.617 ≈ φ)
+       Centered at roughly (600, 315)
+       Origin: (250, 98.5)
+       ═══════════════════════════════════════════════════ -->
+
+  <!-- Golden rectangle subdivisions (thin lines) -->
+  <!-- Outer rectangle -->
+  <rect x="250" y="98.5" width="700" height="433" fill="none" stroke="white" stroke-opacity="0.35" stroke-width="1"/>
+
+  <!-- Square 1 divider: x=683 -->
+  <line x1="683" y1="98.5" x2="683" y2="531.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Square 2 divider: y=365.5 -->
+  <line x1="683" y1="365.5" x2="950" y2="365.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Square 3 divider: x=784 -->
+  <line x1="784" y1="365.5" x2="784" y2="531.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Square 4 divider: y=430.5 -->
+  <line x1="683" y1="430.5" x2="784" y2="430.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Square 5 divider: x=748 -->
+  <line x1="748" y1="365.5" x2="748" y2="430.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Square 6 divider: y=401.5 -->
+  <line x1="748" y1="401.5" x2="784" y2="401.5" stroke="white" stroke-opacity="0.35" stroke-width="0.75"/>
+
+  <!-- Fibonacci spiral (quarter-circle arcs, clockwise inward) -->
+  <path
+    d="M 250 531.5
+       A 433 433 0 0 1 683 98.5
+       A 267 267 0 0 1 950 365.5
+       A 166 166 0 0 1 784 531.5
+       A 101 101 0 0 1 683 430.5
+       A 65 65 0 0 1 748 365.5
+       A 36 36 0 0 1 784 401.5"
+    fill="none"
+    stroke="#4A90D9"
+    stroke-width="2.5"
+    stroke-opacity="0.7"
+    stroke-linecap="round"
+    filter="url(#spiral-glow)"
+  />
+
+  <!-- Faint spiral echo (outer glow) -->
+  <path
+    d="M 250 531.5
+       A 433 433 0 0 1 683 98.5
+       A 267 267 0 0 1 950 365.5
+       A 166 166 0 0 1 784 531.5
+       A 101 101 0 0 1 683 430.5
+       A 65 65 0 0 1 748 365.5
+       A 36 36 0 0 1 784 401.5"
+    fill="none"
+    stroke="#4A90D9"
+    stroke-width="8"
+    stroke-opacity="0.08"
+    stroke-linecap="round"
+  />
+
+  <!-- ═══════════════════════════════
+       Greek letters in each square
+       ═══════════════════════════════ -->
+
+  <!-- Φ — Square 1 (433px) — Aesthetic Geometry -->
+  <text x="430" y="330" font-family="Georgia,'Times New Roman',serif" font-size="90" font-weight="bold" fill="#4A90D9" fill-opacity="0.85" text-anchor="middle" filter="url(#glow)">&#934;</text>
+  <text x="430" y="365" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#4A90D9" fill-opacity="0.5" text-anchor="middle" letter-spacing="2">AESTHETIC GEOMETRY</text>
+
+  <!-- Ω — Square 2 (267px) — Mathematical Elegance -->
+  <text x="816" y="245" font-family="Georgia,'Times New Roman',serif" font-size="64" font-weight="bold" fill="#7B68EE" fill-opacity="0.85" text-anchor="middle" filter="url(#glow)">&#937;</text>
+  <text x="816" y="272" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="#7B68EE" fill-opacity="0.5" text-anchor="middle" letter-spacing="2">MATHEMATICAL ELEGANCE</text>
+
+  <!-- Λ — Square 3 (166px) — Linguistic Clarity -->
+  <text x="867" y="462" font-family="Georgia,'Times New Roman',serif" font-size="42" font-weight="bold" fill="#2AAA8A" fill-opacity="0.85" text-anchor="middle" filter="url(#soft-glow)">&#923;</text>
+  <text x="867" y="482" font-family="Helvetica,Arial,sans-serif" font-size="8" fill="#2AAA8A" fill-opacity="0.5" text-anchor="middle" letter-spacing="1.5">LINGUISTIC CLARITY</text>
+
+  <!-- Ψ — Square 4 (101px) — Practitioner Happiness -->
+  <text x="733" y="490" font-family="Georgia,'Times New Roman',serif" font-size="28" font-weight="bold" fill="#E8734A" fill-opacity="0.8" text-anchor="middle" filter="url(#soft-glow)">&#936;</text>
+  <text x="733" y="505" font-family="Helvetica,Arial,sans-serif" font-size="6" fill="#E8734A" fill-opacity="0.45" text-anchor="middle" letter-spacing="1">HAPPINESS</text>
+
+  <!-- Γ — Square 5 (65px) — Organic Habitability -->
+  <text x="715" y="405" font-family="Georgia,'Times New Roman',serif" font-size="18" font-weight="bold" fill="#8FBC5A" fill-opacity="0.75" text-anchor="middle">&#915;</text>
+
+  <!-- Σ — Square 6 (36px) — Conceptual Integrity -->
+  <text x="766" y="389" font-family="Georgia,'Times New Roman',serif" font-size="11" font-weight="bold" fill="#D4A843" fill-opacity="0.7" text-anchor="middle">&#931;</text>
+
+  <!-- φ symbol at spiral center -->
+  <text x="775" y="404" font-family="Georgia,'Times New Roman',serif" font-size="7" fill="white" fill-opacity="0.3" text-anchor="middle">&#966;</text>
+
+  
+  <!-- Tagline -->
+  <text x="600" y="605" font-family="Georgia,'Times New Roman',serif" font-size="16" fill="white" fill-opacity="0.6" text-anchor="middle" font-style="italic">"Beauty is the Ultimate Defense Against Complexity"</text>
+  <text x="840" y="605" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.6" text-anchor="middle" font-style="italic">- David Gelernter -</text>
+  <!-- Attribution -->
+  <text x="600" y="655" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/beauty-index</text>
+</svg>

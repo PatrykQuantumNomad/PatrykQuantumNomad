@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import ProjectsJsonLd from '../../components/ProjectsJsonLd.astro';
+import FAQPageJsonLd from '../../components/FAQPageJsonLd.astro';
 import ProjectFilterBar from '../../components/ProjectFilterBar.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { projects, categories } from '../../data/projects';
@@ -26,7 +27,7 @@ const grouped = categories.map((category) => ({
   title="Projects — Patryk Golabek | Open-Source Portfolio"
   description="Explore 18 open-source projects by Patryk Golabek — the Kubert Kubernetes Platform, AI agents and LLM tools, and standalone open-source utilities."
 >
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 dot-grid-bg">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 dot-grid-bg overflow-x-clip overflow-y-visible">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4" data-word-reveal>Projects</h1>
     <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl mb-12" data-reveal>
       Open-source work spanning the Kubert Kubernetes Platform, AI agents, and
@@ -87,6 +88,20 @@ const grouped = categories.map((category) => ({
     { name: "Projects", url: `${new URL('/projects/', Astro.site)}` },
   ]} />
   <ProjectsJsonLd />
+  <FAQPageJsonLd items={[
+    {
+      question: "What is the Kubert Kubernetes Platform?",
+      answer: "The Kubert Kubernetes Platform is a suite of open-source tools by Patryk Golabek for Kubernetes deployment, management, and AI-powered operations. It includes kubert-assistant-lite (an AI-powered Kubectl agent), webinar-slack-bot (a production Slack bot on Kubernetes), and related infrastructure tools."
+    },
+    {
+      question: "What AI and LLM projects has Patryk Golabek built?",
+      answer: "Patryk has built several AI projects including a financial data extractor using FastAPI, Next.js, and LLM-powered PDF parsing; JobFlow, a multi-platform job scraper with AI scoring and 544 tests; and kubert-assistant-lite, an AI-powered DevOps tool combining Kubernetes deployment with an intelligent Kubectl agent."
+    },
+    {
+      question: "Are Patryk Golabek's projects open source?",
+      answer: "Yes, all 18 projects showcased on this page are open source and available on GitHub at github.com/PatrykQuantumNomad. They span Kubernetes platform tools, AI agents, and standalone developer utilities."
+    },
+  ]} />
 
   <script>
     import { gsap } from 'gsap';

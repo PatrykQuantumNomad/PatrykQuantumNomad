@@ -1,5 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { useStore } from '@nanostores/react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { activeTab, setActiveTab } from '../../stores/tabStore';
 
 interface CodeComparisonTabsProps {
@@ -21,8 +20,15 @@ interface CodeComparisonTabsProps {
  * Usage with client:load in an Astro page for immediate interactivity.
  */
 export default function CodeComparisonTabs({ features, children }: CodeComparisonTabsProps) {
-  const currentTab = useStore(activeTab);
+  // Start at 0 to match server-rendered HTML, then sync from store after hydration
+  const [currentTab, setCurrentTab] = useState(0);
   const tablistRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentTab(activeTab.get());
+    const unsub = activeTab.subscribe((val) => setCurrentTab(val));
+    return unsub;
+  }, []);
 
   // Sync panel visibility when active tab changes
   useEffect(() => {

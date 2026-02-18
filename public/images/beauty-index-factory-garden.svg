@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f23"/>
+    </radialGradient>
+    <linearGradient id="divider-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0"/>
+      <stop offset="20%" stop-color="white" stop-opacity="0.3"/>
+      <stop offset="80%" stop-color="white" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="url(#bg-glow)"/>
+
+  <!-- ═══════════════════════════════════
+       Center divider
+       ═══════════════════════════════════ -->
+  <line x1="600" y1="30" x2="600" y2="520" stroke="url(#divider-grad)" stroke-width="1"/>
+
+  <!-- ═══════════════════════════════════
+       LEFT: THE FACTORY (Bauhaus) — centered at x=400 (1/3 line)
+       ═══════════════════════════════════ -->
+
+  <!-- Factory grid background — perfectly regular -->
+  <g stroke="#4A90D9" stroke-opacity="0.06" stroke-width="0.5">
+    <!-- Vertical lines -->
+    <line x1="180" y1="70" x2="180" y2="470"/>
+    <line x1="240" y1="70" x2="240" y2="470"/>
+    <line x1="300" y1="70" x2="300" y2="470"/>
+    <line x1="360" y1="70" x2="360" y2="470"/>
+    <line x1="420" y1="70" x2="420" y2="470"/>
+    <line x1="480" y1="70" x2="480" y2="470"/>
+    <line x1="540" y1="70" x2="540" y2="470"/>
+    <!-- Horizontal lines -->
+    <line x1="150" y1="110" x2="570" y2="110"/>
+    <line x1="150" y1="170" x2="570" y2="170"/>
+    <line x1="150" y1="230" x2="570" y2="230"/>
+    <line x1="150" y1="290" x2="570" y2="290"/>
+    <line x1="150" y1="350" x2="570" y2="350"/>
+    <line x1="150" y1="410" x2="570" y2="410"/>
+    <line x1="150" y1="470" x2="570" y2="470"/>
+  </g>
+
+  <!-- Factory geometric icon — Bauhaus building/column -->
+  <g transform="translate(400, 180)" stroke="#4A90D9" fill="none" stroke-opacity="0.5" stroke-width="1.5">
+    <!-- Base rectangle -->
+    <rect x="-50" y="20" width="100" height="80" rx="1"/>
+    <!-- Column flutes (vertical lines inside) -->
+    <line x1="-35" y1="25" x2="-35" y2="95"/>
+    <line x1="-20" y1="25" x2="-20" y2="95"/>
+    <line x1="-5" y1="25" x2="-5" y2="95"/>
+    <line x1="10" y1="25" x2="10" y2="95"/>
+    <line x1="25" y1="25" x2="25" y2="95"/>
+    <line x1="40" y1="25" x2="40" y2="95"/>
+    <!-- Capital (top plate) -->
+    <rect x="-60" y="5" width="120" height="15" rx="1"/>
+    <!-- Pediment (triangle on top) -->
+    <path d="M -45 5 L 0 -30 L 45 5" stroke-linejoin="miter"/>
+    <!-- Base plate -->
+    <rect x="-60" y="100" width="120" height="10" rx="1"/>
+  </g>
+
+  <!-- Factory title -->
+  <text x="400" y="58" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="#4A90D9" fill-opacity="0.9" text-anchor="middle" letter-spacing="6" font-weight="bold">THE FACTORY</text>
+  <text x="400" y="78" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="#4A90D9" fill-opacity="0.45" text-anchor="middle" letter-spacing="2" font-style="italic">Bauhaus</text>
+
+  <!-- Factory details (left-aligned with title start x≈304) -->
+  <g font-family="Helvetica,Arial,sans-serif" fill="white" fill-opacity="0.55" font-size="11">
+    <text x="304" y="370" fill-opacity="0.7" font-size="12">Languages:</text>
+    <text x="390" y="370">Go, Java, Python</text>
+    <text x="304" y="392" fill-opacity="0.7" font-size="12">Motto:</text>
+    <text x="351" y="392" font-style="italic">"Form Follows Function"</text>
+    <text x="304" y="414" fill-opacity="0.7" font-size="12">Aesthetic:</text>
+    <text x="372" y="414">Grid systems, Linters</text>
+    <text x="304" y="436" fill-opacity="0.7" font-size="12">Goal:</text>
+    <text x="343" y="436">Scalability &amp; Efficiency</text>
+  </g>
+
+  <!-- ═══════════════════════════════════
+       RIGHT: THE GARDEN (Wabi-Sabi) — centered at x=800 (2/3 line)
+       ═══════════════════════════════════ -->
+
+  <!-- Garden organic background — irregular, flowing curves -->
+  <g stroke="#E8734A" stroke-opacity="0.05" stroke-width="0.75" fill="none">
+    <path d="M 640 120 Q 710 100, 790 130 Q 870 160, 940 120 Q 1010 80, 1060 140"/>
+    <path d="M 660 200 Q 740 170, 830 210 Q 920 250, 1010 190"/>
+    <path d="M 630 280 Q 720 310, 820 270 Q 910 230, 1000 290 Q 1040 320, 1070 270"/>
+    <path d="M 650 350 Q 740 380, 840 340 Q 930 300, 1020 370"/>
+    <path d="M 630 430 Q 730 400, 830 440 Q 920 470, 1020 420 Q 1060 390, 1080 440"/>
+    <path d="M 660 160 Q 770 140, 860 180 Q 940 210, 1040 150"/>
+    <path d="M 640 390 Q 760 360, 860 400 Q 950 430, 1050 380"/>
+  </g>
+
+  <!-- Garden organic icon — flowing branch with leaves -->
+  <g transform="translate(800, 210)" stroke="#E8734A" fill="none" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round">
+    <!-- Main branch — flowing S-curve (taller, from bottom to top) -->
+    <path d="M -10 90 Q -20 60, -5 35 Q 10 10, 0 -15 Q -10 -40, 5 -60" stroke-width="2"/>
+    <!-- Side branches -->
+    <path d="M -5 35 Q -35 20, -55 30"/>
+    <path d="M 0 -15 Q 30 -30, 50 -20"/>
+    <path d="M 5 -60 Q 25 -75, 40 -65"/>
+    <path d="M -10 60 Q 20 50, 35 60"/>
+    <!-- Leaves (organic tear shapes) -->
+    <path d="M -55 30 Q -70 15, -60 5 Q -50 15, -55 30" fill="#E8734A" fill-opacity="0.12"/>
+    <path d="M 50 -20 Q 65 -35, 68 -18 Q 58 -12, 50 -20" fill="#E8734A" fill-opacity="0.1"/>
+    <path d="M 40 -65 Q 55 -80, 55 -62 Q 47 -58, 40 -65" fill="#E8734A" fill-opacity="0.08"/>
+    <path d="M 35 60 Q 50 48, 48 62 Q 40 68, 35 60" fill="#E8734A" fill-opacity="0.1"/>
+  </g>
+
+  <!-- Garden title -->
+  <text x="800" y="58" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="#E8734A" fill-opacity="0.9" text-anchor="middle" letter-spacing="6" font-weight="bold">THE GARDEN</text>
+  <text x="800" y="78" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="#E8734A" fill-opacity="0.45" text-anchor="middle" letter-spacing="2" font-style="italic">Wabi-Sabi</text>
+
+  <!-- Garden details (left-aligned with title start x≈710) -->
+  <g font-family="Helvetica,Arial,sans-serif" fill="white" fill-opacity="0.55" font-size="11">
+    <text x="710" y="370" fill-opacity="0.7" font-size="12">Languages:</text>
+    <text x="796" y="370">Ruby, Lisp, Smalltalk</text>
+    <text x="710" y="392" fill-opacity="0.7" font-size="12">Motto:</text>
+    <text x="757" y="392" font-style="italic">"Beauty in Imperfection"</text>
+    <text x="710" y="414" fill-opacity="0.7" font-size="12">Aesthetic:</text>
+    <text x="778" y="414">Asymmetry, Naturalness</text>
+    <text x="710" y="436" fill-opacity="0.7" font-size="12">Goal:</text>
+    <text x="749" y="436">Authenticity &amp; Happiness</text>
+  </g>
+
+  <!-- ═══════════════════════════════════
+       Bottom tagline
+       ═══════════════════════════════════ -->
+  <text x="600" y="505" font-family="Georgia,'Times New Roman',serif" font-size="13" fill="white" fill-opacity="0.7" text-anchor="middle" font-style="italic">The most beautiful languages find a way to offer geometric clarity and organic growth.</text>
+
+  <!-- Attribution -->
+  <text x="600" y="555" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/beauty-index</text>
+</svg>

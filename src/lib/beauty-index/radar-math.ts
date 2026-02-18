@@ -92,6 +92,7 @@ export function hexagonRingPoints(
  * @param fillColor - Fill color for the data polygon (hex)
  * @param fillOpacity - Opacity of the data polygon fill (0-1)
  * @param labels - Labels for each axis (one per axis)
+ * @param labelColors - Optional per-label fill colors (defaults to #666 for all)
  * @returns Complete SVG element as a string with xmlns attribute
  */
 export function generateRadarSvgString(
@@ -99,7 +100,8 @@ export function generateRadarSvgString(
   values: number[],
   fillColor: string,
   fillOpacity: number,
-  labels: string[]
+  labels: string[],
+  labelColors?: string[]
 ): string {
   const cx = size / 2;
   const cy = size / 2;
@@ -148,11 +150,19 @@ export function generateRadarSvgString(
       if (normalizedY < -1) dy = '0.8em';
       else if (normalizedY > 1) dy = '-0.2em';
 
-      return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="${anchor}" dy="${dy}" font-family="sans-serif" font-size="${(size * 0.035).toFixed(1)}" fill="#666">${label}</text>`;
+      const color = labelColors?.[i] ?? '#666';
+      return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="${anchor}" dy="${dy}" font-family="sans-serif" font-size="${(size * 0.035).toFixed(1)}" fill="${color}" font-weight="600">${label}</text>`;
     })
     .join('\n    ');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  // Add padding so axis labels outside the chart area are not clipped
+  const pad = size * 0.18;
+  const vbX = -pad;
+  const vbY = -pad;
+  const vbW = size + 2 * pad;
+  const vbH = size + 2 * pad;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}">
     ${gridRings}
     ${axisLines}
     ${dataPolygon}

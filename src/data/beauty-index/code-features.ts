@@ -30,7 +30,7 @@ const ALL_LANGS = [
   'haskell', 'rust', 'elixir', 'kotlin', 'swift', 'python', 'ruby',
   'typescript', 'scala', 'clojure', 'fsharp', 'ocaml', 'go', 'csharp',
   'dart', 'julia', 'lua', 'zig', 'java', 'javascript', 'c', 'cpp',
-  'php', 'perl', 'cobol',
+  'php', 'gleam', 'r',
 ] as const;
 
 // ─── Feature 1: Variable Declaration ──────────────────────────────────────────
@@ -255,7 +255,7 @@ const languages = [_][]const u8{ "Zig", "C" };
 count += 1;
 
 const x: u32 = 10;
-comptime var y: u32 = 20;`,
+const y: u32 = 20;`,
     },
     java: {
       lang: 'java',
@@ -319,31 +319,28 @@ $count++;
 define('MAX_SIZE', 1024);
 const VERSION = '8.3';`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Sigil-based declarations',
-      code: `my $name = 'Perl';
-my $count = 0;
-my @languages = ('Perl', 'Ruby');
+    gleam: {
+      lang: 'gleam',
+      label: 'Let bindings with types',
+      code: `let name = "Gleam"
+let count: Int = 0
+let languages = ["Gleam", "Erlang"]
 
-$count++;
+let #(x, y) = #(10, 20)
 
-my ($x, $y) = (10, 20);
-my %config = (max => 1024, min => 0);
-use constant PI => 3.14159;`,
+let result = count + x + y`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Working storage section',
-      code: `DATA DIVISION.
-WORKING-STORAGE SECTION.
-01  WS-NAME      PIC X(20) VALUE "COBOL".
-01  WS-COUNT     PIC 9(4)  VALUE ZERO.
-01  WS-LANGS.
-    05  WS-LANG-1 PIC X(10) VALUE "COBOL".
-    05  WS-LANG-2 PIC X(10) VALUE "FORTRAN".
-01  WS-X         PIC 9(4)  VALUE 10.
-01  WS-Y         PIC 9(4)  VALUE 20.`,
+    r: {
+      lang: 'r',
+      label: 'Assignment and vectors',
+      code: `name <- "R"
+count <- 0L
+languages <- c("R", "Python")
+
+count <- count + 1L
+
+x <- 10; y <- 20
+MAX_SIZE <- 1024L`,
     },
   },
 };
@@ -399,7 +396,7 @@ end`,
     swift: {
       lang: 'swift',
       label: 'If/else with binding',
-      code: `let label: String
+      code: `var label: String
 if score >= 90 {
     label = "excellent"
 } else if score >= 70 {
@@ -613,33 +610,28 @@ if (score >= 90) {
     default      => 'needs improvement',
 };`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'If/elsif/else',
-      code: `my $label;
-if ($score >= 90) {
-    $label = "excellent";
-} elsif ($score >= 70) {
-    $label = "good";
-} elsif ($score >= 50) {
-    $label = "average";
-} else {
-    $label = "needs improvement";
+    gleam: {
+      lang: 'gleam',
+      label: 'Case expression',
+      code: `let label = case score {
+  s if s >= 90 -> "excellent"
+  s if s >= 70 -> "good"
+  s if s >= 50 -> "average"
+  _ -> "needs improvement"
 }`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Evaluate statement',
-      code: `EVALUATE TRUE
-    WHEN WS-SCORE >= 90
-        MOVE "EXCELLENT" TO WS-LABEL
-    WHEN WS-SCORE >= 70
-        MOVE "GOOD" TO WS-LABEL
-    WHEN WS-SCORE >= 50
-        MOVE "AVERAGE" TO WS-LABEL
-    WHEN OTHER
-        MOVE "NEEDS IMPROVEMENT" TO WS-LABEL
-END-EVALUATE.`,
+    r: {
+      lang: 'r',
+      label: 'If/else and ifelse()',
+      code: `label <- if (score >= 90) {
+  "excellent"
+} else if (score >= 70) {
+  "good"
+} else if (score >= 50) {
+  "average"
+} else {
+  "needs improvement"
+}`,
     },
   },
 };
@@ -683,8 +675,8 @@ end)
 
 for x <- 1..10, rem(x, 2) == 0, do: x * x
 
-defp sum_to(0), do: 0
-defp sum_to(n), do: n + sum_to(n - 1)`,
+def sum_to(0), do: 0
+def sum_to(n), do: n + sum_to(n - 1)`,
     },
     kotlin: {
       lang: 'kotlin',
@@ -785,7 +777,7 @@ while sum < 100 do sum += 10`,
       code: `for i in 1 .. 10 do
     printfn "%d" i
 
-for index, value in List.indexed items do
+for (index, value) in List.indexed items do
     printfn "%d: %A" index value
 
 let mutable total = 0
@@ -884,7 +876,7 @@ end`,
     zig: {
       lang: 'zig',
       label: 'For and while loops',
-      code: `for (items) |item, index| {
+      code: `for (items, 0..) |item, index| {
     std.debug.print("{}: {s}\\n", .{ index, item });
 }
 
@@ -967,31 +959,35 @@ for ($i = 0; $i < 10; $i++) {
 $sum = 0;
 while ($sum < 100) { $sum += 10; }`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'For and foreach',
-      code: `for my $i (0..9) {
-    say $i;
+    gleam: {
+      lang: 'gleam',
+      label: 'List recursion and iterators',
+      code: `import gleam/list
+import gleam/io
+
+pub fn print_items(items: List(String)) {
+  list.each(items, fn(item) { io.println(item) })
 }
 
-foreach my $item (@items) {
-    say $item;
-}
-
-my $sum = 0;
-$sum += 10 while $sum < 100;`,
+pub fn sum(items: List(Int)) -> Int {
+  list.fold(items, 0, fn(acc, n) { acc + n })
+}`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Perform varying',
-      code: `PERFORM VARYING WS-I FROM 1 BY 1
-    UNTIL WS-I > 10
-    DISPLAY WS-I
-END-PERFORM.
+    r: {
+      lang: 'r',
+      label: 'For and while loops',
+      code: `for (i in 1:10) {
+  print(i)
+}
 
-PERFORM UNTIL WS-SUM >= 100
-    ADD 10 TO WS-SUM
-END-PERFORM.`,
+for (item in items) {
+  print(item)
+}
+
+total <- 0
+while (total < 100) {
+  total <- total + 10
+}`,
     },
   },
 };
@@ -1034,7 +1030,7 @@ let double = |x: i32| x * 2;`,
   "Hello, #{name}!"
 end
 
-defp validate(input) when is_binary(input) do
+def validate(input) when is_binary(input) do
   {:ok, input}
 end
 
@@ -1182,7 +1178,7 @@ var sum = numbers.Aggregate(0, (acc, n) => acc + n);`,
 
 T apply<T>(T Function(T) f, T x) => f(x);
 
-final double = (int x) => x * 2;
+final doubler = (int x) => x * 2;
 
 void forEach<T>(List<T> items, void Function(T) action) {
   for (final item in items) action(item);
@@ -1286,36 +1282,37 @@ $double = fn($x) => $x * 2;
 
 $makeAdder = fn($n) => fn($x) => $x + $n;`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Sub and anonymous subs',
-      code: `sub greet {
-    my ($name) = @_;
-    return "Hello, $name!";
+    gleam: {
+      lang: 'gleam',
+      label: 'Pub fn and anonymous functions',
+      code: `import gleam/string
+
+pub fn greet(name: String) -> String {
+  string.concat(["Hello, ", name, "!"])
 }
 
-my $double = sub { $_[0] * 2 };
-my $apply = sub { $_[0]->($_[1]) };
+pub fn apply(f: fn(a) -> b, x: a) -> b {
+  f(x)
+}
 
-sub make_adder {
-    my ($n) = @_;
-    return sub { $_[0] + $n };
+pub fn double(x: Int) -> Int {
+  x * 2
 }`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Paragraphs and sections',
-      code: `PROCEDURE DIVISION.
-MAIN-LOGIC.
-    PERFORM GREET-USER.
-    PERFORM CALCULATE-TOTAL.
-    STOP RUN.
+    r: {
+      lang: 'r',
+      label: 'Functions and closures',
+      code: `greet <- function(name) {
+  paste0("Hello, ", name, "!")
+}
 
-GREET-USER.
-    DISPLAY "Hello, " WS-NAME "!".
+apply_fn <- function(f, x) f(x)
 
-CALCULATE-TOTAL.
-    ADD WS-PRICE TO WS-TOTAL.`,
+double <- function(x) x * 2
+
+make_adder <- function(n) {
+  function(x) x + n
+}`,
     },
   },
 };
@@ -1668,36 +1665,38 @@ User user = { .name = "Alice", .email = "a@b.c", .age = 30 };`,
     }
 }`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Bless-based class',
-      code: `package User;
-sub new {
-    my ($class, %args) = @_;
-    bless {
-        name  => $args{name},
-        email => $args{email},
-        age   => $args{age} // 0,
-    }, $class;
+    gleam: {
+      lang: 'gleam',
+      label: 'Custom type with methods',
+      code: `import gleam/string
+
+pub type User {
+  User(name: String, email: String, age: Int)
 }
 
-sub greeting {
-    my ($self) = @_;
-    return "Hello, $self->{name}!";
+pub fn greeting(user: User) -> String {
+  string.concat(["Hello, ", user.name, "!"])
+}
+
+pub fn new_user(name: String, email: String) -> User {
+  User(name: name, email: email, age: 0)
 }`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Group-level record',
-      code: `01  USER-RECORD.
-    05  USER-NAME     PIC X(30).
-    05  USER-EMAIL    PIC X(50).
-    05  USER-AGE      PIC 9(3).
+    r: {
+      lang: 'r',
+      label: 'S3 class and list',
+      code: `new_user <- function(name, email, age = 0L) {
+  structure(
+    list(name = name, email = email, age = age),
+    class = "User"
+  )
+}
 
-MOVE "Alice"        TO USER-NAME.
-MOVE "alice@ex.com" TO USER-EMAIL.
-MOVE 30             TO USER-AGE.
-DISPLAY "Hello, " USER-NAME "!".`,
+greeting <- function(user, ...) UseMethod("greeting")
+
+greeting.User <- function(user, ...) {
+  paste0("Hello, ", user$name, "!")
+}`,
     },
   },
 };
@@ -1740,8 +1739,11 @@ describe xs = case xs of
   _ -> "other"
 end
 
-def handle({:ok, result}), do: result
-def handle({:error, reason}), do: raise reason`,
+# Function clause pattern matching (inside a module)
+# def handle({:ok, result}), do: result
+# def handle({:error, reason}), do: raise reason
+
+{:ok, value} = {:ok, 42}`,
     },
     kotlin: {
       lang: 'kotlin',
@@ -1893,6 +1895,25 @@ describe(s::String) = "string: $s"
 describe(v::Vector) = isempty(v) ? "empty" : "list"
 describe(_) = "unknown"`,
     },
+    gleam: {
+      lang: 'gleam',
+      label: 'Case with destructuring',
+      code: `pub fn describe(items: List(Int)) -> String {
+  case items {
+    [] -> "empty"
+    [x] -> "singleton"
+    [x, ..] if x > 0 -> "starts positive"
+    _ -> "other"
+  }
+}
+
+pub fn unwrap(result: Result(a, b), default: a) -> a {
+  case result {
+    Ok(value) -> value
+    Error(_) -> default
+  }
+}`,
+    },
     // Languages without native pattern matching
     go: undefined,
     c: undefined,
@@ -1900,10 +1921,9 @@ describe(_) = "unknown"`,
     java: undefined,
     javascript: undefined,
     php: undefined,
-    perl: undefined,
+    r: undefined,
     lua: undefined,
     zig: undefined,
-    cobol: undefined,
   },
 };
 
@@ -2194,8 +2214,9 @@ local ok2, val = xpcall(risky_fn, debug.traceback)`,
       code: `const ParseError = error{InvalidInput};
 
 fn parseNumber(s: []const u8) ParseError!i32 {
-    return std.fmt.parseInt(i32, s, 10) catch
-        return ParseError.InvalidInput;
+    return std.fmt.parseInt(i32, s, 10) catch {
+        return error.InvalidInput;
+    };
 }
 
 const result = parseNumber("42") catch |err| {
@@ -2288,36 +2309,39 @@ try {
     cleanup();
 }`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Eval and die',
-      code: `sub parse_number {
-    my ($s) = @_;
-    die "Invalid input: $s\\n" unless $s =~ /^\\d+$/;
-    return int($s);
+    gleam: {
+      lang: 'gleam',
+      label: 'Result type',
+      code: `import gleam/int
+import gleam/result
+
+pub fn parse_number(s: String) -> Result(Int, String) {
+  int.parse(s)
+  |> result.replace_error("Invalid: " <> s)
 }
 
-my $result = eval { parse_number("42") };
-if ($@) {
-    warn "Error: $@";
-    $result = -1;
+pub fn compute(input: String) -> Result(Int, String) {
+  use n <- result.try(parse_number(input))
+  Ok(n * 2)
 }`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Declaratives and on error',
-      code: `PROCEDURE DIVISION.
-DECLARATIVES.
-INPUT-ERROR SECTION.
-    USE AFTER STANDARD ERROR PROCEDURE ON INPUT.
-    DISPLAY "Error reading input file".
-END DECLARATIVES.
+    r: {
+      lang: 'r',
+      label: 'tryCatch and conditions',
+      code: `parse_number <- function(s) {
+  tryCatch(
+    as.integer(s),
+    warning = function(w) stop(paste("Invalid:", s))
+  )
+}
 
-MAIN-LOGIC.
-    READ INPUT-FILE
-        AT END MOVE "Y" TO WS-EOF
-        NOT AT END PERFORM PROCESS-RECORD
-    END-READ.`,
+result <- tryCatch(
+  parse_number("42"),
+  error = function(e) {
+    message("Error: ", conditionMessage(e))
+    -1L
+  }
+)`,
     },
   },
 };
@@ -2330,14 +2354,15 @@ const stringInterpolation: CodeFeature = {
     haskell: {
       lang: 'haskell',
       label: 'Concatenation (no native interpolation)',
-      code: `-- Haskell uses concatenation or printf
+      code: `import Text.Printf (printf)
+
+-- Haskell uses concatenation or printf
 greeting :: String -> Int -> String
 greeting name age =
   "Hello, " ++ name ++ "! You are "
     ++ show age ++ " years old."
 
--- With Text.Printf
-import Text.Printf
+msg :: String
 msg = printf "Hello, %s! Age: %d" name age`,
     },
     rust: {
@@ -2548,12 +2573,13 @@ const msg = std.fmt.bufPrint(&buf, "Welcome to {s}", .{name})
 int version = 21;
 
 String msg = "Hello, %s! Version: %d".formatted(name, version);
-String template = STR."Hello, \\{name}! Version: \\{version}";
 
 String multi = """
     Welcome to %s.
     Version: %d
-    """.formatted(name, version);`,
+    """.formatted(name, version);
+
+String concat = "Hello, " + name + "! Version: " + version;`,
     },
     javascript: {
       lang: 'javascript',
@@ -2598,7 +2624,7 @@ std::println("Welcome to {}. Version: {}", name, version);`,
 $version = 8.3;
 
 $msg = "Hello, $name! Version: $version";
-$expr = "Length: {$name}[" . strlen($name) . "]";
+$expr = "Length: " . strlen($name) . ", Upper: " . strtoupper($name);
 $heredoc = <<<EOT
 Welcome to $name.
 Version: $version
@@ -2606,33 +2632,33 @@ EOT;
 
 $formatted = sprintf("%-10s | %5.1f", $name, $version);`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Double-quoted interpolation',
-      code: `my $name = "Perl";
-my $version = 5.38;
+    gleam: {
+      lang: 'gleam',
+      label: 'String concatenation with <>',
+      code: `import gleam/int
+import gleam/string
 
-my $msg = "Hello, $name! Version: $version";
-my $expr = "Length: @{[length($name)]}";
-my $heredoc = <<~END;
-    Welcome to $name.
-    Version: $version
-    END
+let name = "Gleam"
+let version = 1
 
-printf "%-10s | %5.1f\\n", $name, $version;`,
+let msg = "Hello, " <> name <> "! Version: " <> int.to_string(version)
+
+let multi = string.concat([
+  "Welcome to ", name, ".\\n",
+  "Version: ", int.to_string(version),
+])`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'String concatenation',
-      code: `01  WS-NAME    PIC X(10) VALUE "COBOL".
-01  WS-MSG     PIC X(50).
+    r: {
+      lang: 'r',
+      label: 'Paste and sprintf',
+      code: `name <- "R"
+version <- 4.3
 
-STRING "HELLO, " DELIMITED BY SIZE
-       WS-NAME  DELIMITED BY SPACES
-       "!"      DELIMITED BY SIZE
-    INTO WS-MSG.
+msg <- paste0("Hello, ", name, "! Version: ", version)
+expr <- paste("Length:", nchar(name))
 
-DISPLAY WS-MSG.`,
+formatted <- sprintf("%-10s | %5.1f", name, version)
+glued <- glue::glue("Welcome to {name}. Version: {version}")`,
     },
   },
 };
@@ -2886,7 +2912,7 @@ for (numbers) |n| {
 var evens: [5]i32 = undefined;
 var idx: usize = 0;
 for (numbers) |n| {
-    if (@mod(n, 2) == 0) { evens[idx] = n; idx += 1; }
+    if (@rem(n, 2) == 0) { evens[idx] = n; idx += 1; }
 }`,
     },
     java: {
@@ -2952,33 +2978,33 @@ $result = array_map(
     array_filter($numbers, fn($n) => $n % 2 === 0)
 );`,
     },
-    perl: {
-      lang: 'perl',
-      label: 'Map and grep',
-      code: `my @numbers = (1..10);
+    gleam: {
+      lang: 'gleam',
+      label: 'List module pipeline',
+      code: `import gleam/list
+import gleam/int
 
-my @doubled = map { $_ * 2 } @numbers;
-my @evens = grep { $_ % 2 == 0 } @numbers;
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-use List::Util qw(reduce sum);
-my $total = sum @numbers;
+let doubled = list.map(numbers, fn(n) { n * 2 })
+let evens = list.filter(numbers, int.is_even)
+let total = list.fold(numbers, 0, fn(acc, n) { acc + n })
 
-my @result = map { $_ ** 2 }
-             grep { $_ % 2 == 0 } @numbers;`,
+let result = numbers
+  |> list.filter(int.is_even)
+  |> list.map(fn(n) { n * n })`,
     },
-    cobol: {
-      lang: 'cobol',
-      label: 'Perform through array',
-      code: `01  WS-NUMBERS.
-    05  WS-NUM PIC 9(4) OCCURS 10 TIMES.
-01  WS-SUM     PIC 9(6) VALUE ZERO.
-01  WS-I       PIC 9(2).
+    r: {
+      lang: 'r',
+      label: 'Vectorized and apply functions',
+      code: `numbers <- 1:10
 
-PERFORM VARYING WS-I FROM 1 BY 1
-    UNTIL WS-I > 10
-    ADD WS-NUM(WS-I) TO WS-SUM
-END-PERFORM.
-DISPLAY "Sum: " WS-SUM.`,
+doubled <- numbers * 2
+evens <- numbers[numbers %% 2 == 0]
+total <- sum(numbers)
+
+result <- Filter(function(n) n %% 2 == 0, numbers) |>
+  sapply(function(n) n^2)`,
     },
   },
 };

@@ -1,49 +1,150 @@
 ---
 /**
- * ShareControls.astro — Download, share, and copy buttons for radar chart images.
- * Converts the inline SVG RadarChart to a 2x PNG via canvas, then offers:
- *   - Download: saves PNG file to device
- *   - Share (mobile): opens native OS share sheet with PNG
- *   - Copy (desktop): copies PNG to clipboard, with text URL fallback
+ * ShareControls.astro — Download, social share, and copy controls for language detail pages.
+ * - Download: generates a composite Canvas 2D image at 2x resolution
+ * - Share: inline icon buttons for X, LinkedIn, Reddit, Bluesky, Copy Link
+ * - Mobile: additional "More" button via Web Share API
  */
 interface Props {
   languageName: string;
   languageId: string;
+  tier: string;
+  total: number;
+  rank: number;
+  phi: number;
+  omega: number;
+  lambda: number;
+  psi: number;
+  gamma: number;
+  sigma: number;
 }
 
-const { languageName, languageId } = Astro.props;
+const { languageName, languageId, tier, total, rank, phi, omega, lambda, psi, gamma, sigma } = Astro.props;
 const pageUrl = `https://patrykgolabek.dev/beauty-index/${languageId}/`;
+
+const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+const shareText = `${languageName} scored ${total}/60 on the Beauty Index — a ${tierLabel} language!`;
+const hashtags = 'BeautyIndex,programming';
+
+// Share intent URLs (all values will be encoded)
+const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}&hashtags=${hashtags}&via=QuantumMentat`;
+const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+const redditUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(pageUrl)}&title=${encodeURIComponent(`${languageName} scored ${total}/60 on the Beauty Index — how beautiful is your language?`)}`;
+const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(`${shareText} ${pageUrl}`)}`;
 ---
 
 <div
-  class="flex items-center gap-3 mt-4"
+  class="flex flex-col gap-3 mt-4"
   data-share-controls
   data-language-name={languageName}
   data-page-url={pageUrl}
+  data-tier={tier}
+  data-total={total}
+  data-rank={rank}
+  data-phi={phi}
+  data-omega={omega}
+  data-lambda={lambda}
+  data-psi={psi}
+  data-gamma={gamma}
+  data-sigma={sigma}
 >
-  <button
-    type="button"
-    data-action="download"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
-    aria-label={`Download ${languageName} radar chart as PNG`}
-  >
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" />
-    </svg>
-    Download
-  </button>
+  {/* Download button */}
+  <div class="flex items-center gap-3">
+    <button
+      type="button"
+      data-action="download"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+      aria-label={`Download ${languageName} radar chart as PNG`}
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" />
+      </svg>
+      Download
+    </button>
+  </div>
 
-  <button
-    type="button"
-    data-action="share"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
-    aria-label={`Share ${languageName} radar chart`}
-  >
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 9l4-4m-4 0h4v4M4 7v5h8" />
-    </svg>
-    <span data-share-label>Share</span>
-  </button>
+  {/* Share buttons */}
+  <nav aria-label="Share this page" class="flex items-center gap-2 flex-wrap">
+
+    {/* X / Twitter */}
+    <a
+      href={xUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
+      aria-label={`Share ${languageName} Beauty Index score on X (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    </a>
+
+    {/* LinkedIn */}
+    <a
+      href={linkedInUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#0A66C2] hover:text-[#0A66C2] transition-colors"
+      aria-label={`Share ${languageName} Beauty Index score on LinkedIn (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+      </svg>
+    </a>
+
+    {/* Reddit */}
+    <a
+      href={redditUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#FF4500] hover:text-[#FF4500] transition-colors"
+      aria-label={`Share ${languageName} Beauty Index score on Reddit (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+      </svg>
+    </a>
+
+    {/* Bluesky */}
+    <a
+      href={blueskyUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#0085FF] hover:text-[#0085FF] transition-colors"
+      aria-label={`Share ${languageName} Beauty Index score on Bluesky (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.785 2.627 3.59 3.513 6.182 3.258-4.34.422-8.143 1.878-3.146 6.544 5.347 4.617 7.695-1.222 8.34-3.31C12.295 18.078 12.397 18 12 18c-.397 0-.295.078 0 .738.645 2.089 2.993 7.928 8.34 3.311 4.997-4.666 1.194-6.122-3.146-6.544 2.592.255 5.397-.631 6.182-3.258C23.622 11.418 24 6.458 24 5.768c0-.69-.139-1.861-.902-2.203-.659-.3-1.664-.62-4.3 1.24C16.046 6.747 13.087 10.686 12 12.8z" />
+      </svg>
+    </a>
+
+    {/* Copy Link */}
+    <button
+      type="button"
+      data-action="copy-link"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+      aria-label="Copy link to clipboard"
+    >
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6.5 8.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" />
+        <path d="M9.5 7.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" />
+      </svg>
+    </button>
+
+    {/* More (Web Share API — mobile only, hidden by default) */}
+    <button
+      type="button"
+      data-action="web-share"
+      class="hidden items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+      aria-label={`More sharing options for ${languageName}`}
+    >
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <circle cx="3" cy="8" r="1.5" />
+        <circle cx="8" cy="8" r="1.5" />
+        <circle cx="13" cy="8" r="1.5" />
+      </svg>
+    </button>
+  </nav>
 
   <div
     data-toast
@@ -61,51 +162,299 @@ const pageUrl = `https://patrykgolabek.dev/beauty-index/${languageId}/`;
     const languageName = container.dataset.languageName || 'Language';
     const pageUrl = container.dataset.pageUrl || window.location.href;
 
-    const svgElement = document.querySelector<SVGSVGElement>(
-      '[role="img"][aria-label*="Radar chart"]'
-    );
-    if (!svgElement) return;
-
-    // Update button label: "Share" on mobile (Web Share API), "Copy" on desktop
-    const shareLabel = container.querySelector<HTMLSpanElement>('[data-share-label]');
-    if (shareLabel && !(navigator.share && navigator.canShare)) {
-      shareLabel.textContent = 'Copy';
+    // Show "More" button on devices that support Web Share API
+    const webShareBtn = container.querySelector<HTMLButtonElement>('[data-action="web-share"]');
+    if (webShareBtn && 'share' in navigator) {
+      webShareBtn.classList.remove('hidden');
+      webShareBtn.classList.add('inline-flex');
     }
 
-    async function svgToBlob(svg: SVGSVGElement): Promise<Blob> {
+    // --- Data from container attributes ---
+    const tier = container.dataset.tier || 'practical';
+    const total = parseInt(container.dataset.total || '0', 10);
+    const rank = parseInt(container.dataset.rank || '0', 10);
+
+    const SCORES = [
+      { symbol: '\u03A6', name: 'Geometry',     score: parseInt(container.dataset.phi || '0', 10),    color: '#4A90D9' },
+      { symbol: '\u03A9', name: 'Elegance',     score: parseInt(container.dataset.omega || '0', 10),  color: '#7B68EE' },
+      { symbol: '\u039B', name: 'Clarity',      score: parseInt(container.dataset.lambda || '0', 10), color: '#2AAA8A' },
+      { symbol: '\u03A8', name: 'Happiness',    score: parseInt(container.dataset.psi || '0', 10),    color: '#E8734A' },
+      { symbol: '\u0393', name: 'Habitability', score: parseInt(container.dataset.gamma || '0', 10),  color: '#8FBC5A' },
+      { symbol: '\u03A3', name: 'Integrity',    score: parseInt(container.dataset.sigma || '0', 10),  color: '#D4A843' },
+    ];
+
+    const TIER_MAP: Record<string, { label: string; color: string }> = {
+      workhorses: { label: 'Workhorses', color: '#8B8FA3' },
+      practical:  { label: 'Practical',  color: '#5B8A72' },
+      handsome:   { label: 'Handsome',   color: '#C47F17' },
+      beautiful:  { label: 'Beautiful',  color: '#B84A1C' },
+    };
+    const tierInfo = TIER_MAP[tier] || TIER_MAP.practical;
+
+    // --- Canvas helpers ---
+    function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+    }
+
+    function polarToCartesian(cx: number, cy: number, angle: number, radius: number) {
+      const a = angle - Math.PI / 2; // first axis at 12 o'clock
+      return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
+    }
+
+    // --- Composite image renderer ---
+    async function compositeImageBlob(): Promise<Blob> {
       await document.fonts.ready;
 
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svg);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-
-      const w = svg.width.baseVal.value || 300;
-      const h = svg.height.baseVal.value || 300;
+      const W = 800;
+      const H = 500;
+      const DPR = 2;
 
       const canvas = document.createElement('canvas');
-      canvas.width = w * 2;
-      canvas.height = h * 2;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
       const ctx = canvas.getContext('2d')!;
-      ctx.scale(2, 2);
+      ctx.scale(DPR, DPR);
+
+      // 1. Background
+      ctx.fillStyle = '#faf8f5';
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Accent gradient bar (top 5px)
+      const grad = ctx.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0, '#c44b20');
+      grad.addColorStop(1, '#e8734a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, 5);
+
+      // 3. Header
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+
+      // Language name
+      ctx.font = 'bold 24px "Bricolage Grotesque", "DM Sans", sans-serif';
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillText(languageName, 28, 38);
+
+      // Rank (after language name with spacing)
+      const nameWidth = ctx.measureText(languageName).width;
+      ctx.font = '14px "DM Sans", sans-serif';
+      ctx.fillStyle = '#888899';
+      ctx.fillText(`#${rank}`, 28 + nameWidth + 16, 38);
+
+      // Tier badge (right side)
+      ctx.font = '600 13px "DM Sans", sans-serif';
+      const badgeText = tierInfo.label;
+      const badgeTextW = ctx.measureText(badgeText).width;
+      const badgePad = 12;
+      const badgeW = badgeTextW + badgePad * 2;
+      const badgeX = W - 28 - badgeW;
+      const badgeY = 24;
+      const badgeH = 28;
+      ctx.fillStyle = tierInfo.color;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 6);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(badgeText, badgeX + badgePad, badgeY + badgeH / 2);
+
+      // Total score (left of badge)
+      ctx.font = 'bold 22px "DM Sans", sans-serif';
+      ctx.fillStyle = tierInfo.color;
+      ctx.textAlign = 'right';
+      ctx.fillText(`${total}/60`, badgeX - 16, 38);
+      ctx.textAlign = 'left';
+
+      // 4. Header separator
+      ctx.strokeStyle = '#e5ddd5';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(28, 62);
+      ctx.lineTo(W - 28, 62);
+      ctx.stroke();
+
+      // 5. Radar chart (left panel: x=0..400, y=62..450)
+      const chartCx = 205;
+      const chartCy = 272;
+      const maxR = 140;
+      const numAxes = 6;
+      const angleStep = (2 * Math.PI) / numAxes;
+
+      function p2c(angle: number, r: number) {
+        return polarToCartesian(chartCx, chartCy, angle, r);
+      }
+
+      // Grid rings
+      ctx.strokeStyle = '#e5ddd5';
+      ctx.lineWidth = 1;
+      for (const level of [2, 4, 6, 8, 10]) {
+        const r = (level / 10) * maxR;
+        ctx.beginPath();
+        for (let i = 0; i <= numAxes; i++) {
+          const pt = p2c(i * angleStep, r);
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // Axis lines
+      for (let i = 0; i < numAxes; i++) {
+        const pt = p2c(i * angleStep, maxR);
+        ctx.beginPath();
+        ctx.moveTo(chartCx, chartCy);
+        ctx.lineTo(pt.x, pt.y);
+        ctx.stroke();
+      }
+
+      // Data polygon
+      ctx.beginPath();
+      SCORES.forEach((s, i) => {
+        const r = (s.score / 10) * maxR;
+        const pt = p2c(i * angleStep, r);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = tierInfo.color + '59';
+      ctx.fill();
+      ctx.strokeStyle = tierInfo.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Score dots on vertices
+      SCORES.forEach((s, i) => {
+        const r = (s.score / 10) * maxR;
+        const pt = p2c(i * angleStep, r);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = tierInfo.color;
+        ctx.fill();
+      });
+
+      // Axis labels: colored Greek letter only
+      ctx.font = 'bold 16px Georgia, "Noto Sans", serif';
+      ctx.lineWidth = 1;
+      SCORES.forEach((s, i) => {
+        const labelR = maxR + 22;
+        const pt = p2c(i * angleStep, labelR);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = s.color;
+        ctx.fillText(s.symbol, pt.x, pt.y);
+      });
+
+      // 6. Score bars (right panel: x=410..772, y=90..420)
+      const barStartY = 105;
+      const rowHeight = 50;
+      const barLeft = 580;
+      const barRight = W - 32;
+      const barMaxW = barRight - barLeft;
+      const barH = 10;
+
+      SCORES.forEach((s, i) => {
+        const y = barStartY + i * rowHeight;
+
+        ctx.font = 'bold 16px "Noto Sans", "DM Sans", sans-serif';
+        ctx.fillStyle = s.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(s.symbol, 425, y);
+
+        ctx.font = '13px "DM Sans", sans-serif';
+        ctx.fillStyle = '#5a5a5a';
+        ctx.textAlign = 'left';
+        ctx.fillText(s.name, 444, y);
+
+        ctx.font = 'bold 14px "DM Sans", sans-serif';
+        ctx.fillStyle = '#2c2c2c';
+        ctx.textAlign = 'right';
+        ctx.fillText(String(s.score), 570, y);
+
+        ctx.fillStyle = '#f0ebe5';
+        roundRect(ctx, barLeft, y - barH / 2, barMaxW, barH, 5);
+        ctx.fill();
+
+        const fillW = Math.max(4, (s.score / 10) * barMaxW);
+        ctx.fillStyle = s.color;
+        roundRect(ctx, barLeft, y - barH / 2, fillW, barH, 5);
+        ctx.fill();
+      });
+
+      // Total row
+      const totalY = barStartY + 6 * rowHeight + 4;
+      ctx.strokeStyle = '#e5ddd5';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(415, totalY - 18);
+      ctx.lineTo(barRight, totalY - 18);
+      ctx.stroke();
+
+      ctx.font = 'bold 16px "DM Sans", sans-serif';
+      ctx.fillStyle = tierInfo.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('B', 425, totalY);
+
+      ctx.font = '13px "DM Sans", sans-serif';
+      ctx.fillStyle = '#5a5a5a';
+      ctx.textAlign = 'left';
+      ctx.fillText('Total', 444, totalY);
+
+      ctx.font = 'bold 15px "DM Sans", sans-serif';
+      ctx.fillStyle = '#2c2c2c';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${total}/60`, 570, totalY);
+
+      ctx.fillStyle = '#f0ebe5';
+      roundRect(ctx, barLeft, totalY - barH / 2, barMaxW, barH, 5);
+      ctx.fill();
+      const totalFillW = Math.max(4, (total / 60) * barMaxW);
+      ctx.fillStyle = tierInfo.color;
+      roundRect(ctx, barLeft, totalY - barH / 2, totalFillW, barH, 5);
+      ctx.fill();
+
+      // 7. Footer separator
+      ctx.strokeStyle = '#e5ddd5';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(28, H - 48);
+      ctx.lineTo(W - 28, H - 48);
+      ctx.stroke();
+
+      // PG badge
+      const pgX = 28;
+      const pgY = H - 32;
+      ctx.fillStyle = '#c44b20';
+      roundRect(ctx, pgX, pgY - 11, 30, 22, 5);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('PG', pgX + 15, pgY);
+
+      ctx.fillStyle = '#888899';
+      ctx.font = '12px "DM Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('patrykgolabek.dev', pgX + 38, pgY);
+
+      const domainW = ctx.measureText('patrykgolabek.dev').width;
+      const dotX = pgX + 38 + domainW + 10;
+      ctx.fillStyle = '#bbbbbb';
+      ctx.beginPath();
+      ctx.arc(dotX, pgY, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#c44b20';
+      ctx.font = '12px "DM Sans", sans-serif';
+      ctx.fillText('Beauty Index', dotX + 10, pgY);
 
       return new Promise<Blob>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          ctx.fillStyle = '#faf8f5';
-          ctx.fillRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
-          URL.revokeObjectURL(url);
-          canvas.toBlob((blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error('Canvas toBlob failed'));
-          }, 'image/png');
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('SVG image load failed'));
-        };
-        img.src = url;
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Canvas toBlob failed'));
+        }, 'image/png');
       });
     }
 
@@ -123,7 +472,7 @@ const pageUrl = `https://patrykgolabek.dev/beauty-index/${languageId}/`;
     const downloadBtn = container.querySelector<HTMLButtonElement>('[data-action="download"]');
     downloadBtn?.addEventListener('click', async () => {
       try {
-        const blob = await svgToBlob(svgElement);
+        const blob = await compositeImageBlob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -137,45 +486,27 @@ const pageUrl = `https://patrykgolabek.dev/beauty-index/${languageId}/`;
       }
     });
 
-    // Share / Copy handler
-    const shareBtn = container.querySelector<HTMLButtonElement>('[data-action="share"]');
-    shareBtn?.addEventListener('click', async () => {
+    // Copy Link handler
+    const copyLinkBtn = container.querySelector<HTMLButtonElement>('[data-action="copy-link"]');
+    copyLinkBtn?.addEventListener('click', async () => {
       try {
-        const blob = await svgToBlob(svgElement);
-
-        // Try native Web Share API first (mobile)
-        if (navigator.share && navigator.canShare) {
-          const file = new File([blob], `${languageName}-beauty-index.png`, {
-            type: 'image/png',
-          });
-          const shareData: ShareData = {
-            title: `${languageName} — Beauty Index`,
-            url: pageUrl,
-            files: [file],
-          };
-
-          if (navigator.canShare(shareData)) {
-            try {
-              await navigator.share(shareData);
-              return;
-            } catch (err) {
-              if (err instanceof Error && err.name === 'AbortError') return;
-              // Fall through to clipboard
-            }
-          }
-        }
-
-        // Clipboard fallback (desktop)
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ [blob.type]: blob }),
-          ]);
-          showToast('Chart copied to clipboard');
-        } catch {
-          await navigator.clipboard.writeText(pageUrl);
-          showToast('Link copied to clipboard');
-        }
+        await navigator.clipboard.writeText(pageUrl);
+        showToast('Link copied to clipboard');
       } catch {
+        showToast('Copy failed');
+      }
+    });
+
+    // Web Share API handler (mobile "More" button)
+    webShareBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: `${languageName} — Beauty Index`,
+          text: `${languageName} scored ${total}/60 on the Beauty Index!`,
+          url: pageUrl,
+        });
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         showToast('Share failed');
       }
     });

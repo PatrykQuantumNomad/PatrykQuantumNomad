@@ -12,6 +12,7 @@ import BeautyIndexJsonLd from '../../components/BeautyIndexJsonLd.astro';
 import RankingBarChart from '../../components/beauty-index/RankingBarChart.astro';
 import ScoringTable from '../../components/beauty-index/ScoringTable.astro';
 import LanguageGrid from '../../components/beauty-index/LanguageGrid.astro';
+import VsComparePicker from '../../components/beauty-index/VsComparePicker.tsx';
 import { totalScore } from '../../lib/beauty-index/schema';
 
 const languages = await getCollection('languages');
@@ -19,12 +20,16 @@ const allData = languages.map((entry) => entry.data);
 const sorted = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
 
 const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString();
+
+// Build top-5 summary for AI-extractable paragraph
+const top5 = sorted.slice(0, 5).map((l, i) => `${i + 1}. ${l.name} (${totalScore(l)}/60)`);
 ---
 
 <Layout
   title="The Beauty Index | Patryk Golabek"
-  description="Ranking 25 programming languages across 6 aesthetic dimensions. From Haskell's mathematical purity to COBOL's industrial grit — every language has a beauty score."
+  description="Which programming languages look and feel the best? Explore 25 languages ranked across 6 aesthetic dimensions — from functional purity to industrial pragmatism."
   ogImage={ogImageURL}
+  ogImageAlt="The Beauty Index — Ranking 25 programming languages by aesthetic beauty"
 >
   <BreadcrumbJsonLd crumbs={[
     { name: "Home", url: "https://patrykgolabek.dev/" },
@@ -34,23 +39,33 @@ const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString(
 
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
-    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
-      <ol class="flex items-center gap-1 justify-center">
-        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li aria-current="page">Beauty Index</li>
-      </ol>
-    </nav>
+    <span class="inline-block text-xs font-mono text-[var(--color-accent)] border border-[var(--color-accent)]/30 rounded-full px-3 py-1 mb-4">2026 Edition</span>
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">
       The Beauty Index
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
       Ranking 25 programming languages across 6 aesthetic dimensions.
+    </p>
+    <p class="text-lg font-medium text-[var(--color-accent-secondary)] mt-2 max-w-2xl mx-auto text-center">
       Beauty is subjective; this index is deliberately opinionated.
     </p>
-    <p class="text-sm text-[var(--color-text-secondary)] mt-3">
+    <img
+      src="/images/beauty-index-golden-ratio-light.svg"
+      alt="Golden ratio spiral with Greek letters representing the six aesthetic dimensions"
+      width="544"
+      height="200"
+      class="mx-auto mt-8 mb-4"
+      loading="eager"
+    />
+    <p class="text-sm text-[var(--color-text-secondary)] mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
       <a href="/blog/the-beauty-index/" class="text-[var(--color-accent)] hover:underline">
         Read the methodology &rarr;
+      </a>
+      <a href="/beauty-index/code/" class="text-[var(--color-accent)] hover:underline">
+        Compare code side-by-side &rarr;
+      </a>
+      <a href="/beauty-index/justifications/" class="text-[var(--color-accent)] hover:underline">
+        Score justifications &rarr;
       </a>
     </p>
   </section>
@@ -76,5 +91,38 @@ const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString(
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-16">
     <h2 class="text-2xl font-heading font-bold mb-6">Language Profiles</h2>
     <LanguageGrid languages={sorted} />
+  </section>
+
+  {/* VS Comparison Picker */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <h2 class="text-2xl font-heading font-bold mb-2">Head-to-Head Comparison</h2>
+    <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+      Pick two languages to compare side-by-side across all 6 dimensions.
+    </p>
+    <VsComparePicker
+      client:load
+      languages={sorted.map((l) => ({ id: l.id, name: l.name }))}
+    />
+    <p class="text-xs text-[var(--color-text-secondary)] mt-4 text-center flex flex-wrap justify-center gap-x-1 gap-y-0.5">
+      <span>Popular:</span>
+      <a href="/beauty-index/vs/python-vs-rust/" class="text-[var(--color-accent)] hover:underline">Python vs Rust</a> &middot;
+      <a href="/beauty-index/vs/haskell-vs-go/" class="text-[var(--color-accent)] hover:underline">Haskell vs Go</a> &middot;
+      <a href="/beauty-index/vs/typescript-vs-javascript/" class="text-[var(--color-accent)] hover:underline">TypeScript vs JavaScript</a> &middot;
+      <a href="/beauty-index/vs/rust-vs-go/" class="text-[var(--color-accent)] hover:underline">Rust vs Go</a> &middot;
+      <a href="/beauty-index/vs/python-vs-ruby/" class="text-[var(--color-accent)] hover:underline">Python vs Ruby</a> &middot;
+      <a href="/beauty-index/vs/kotlin-vs-swift/" class="text-[var(--color-accent)] hover:underline">Kotlin vs Swift</a> &middot;
+      <a href="/beauty-index/vs/elixir-vs-clojure/" class="text-[var(--color-accent)] hover:underline">Elixir vs Clojure</a> &middot;
+      <a href="/beauty-index/vs/python-vs-javascript/" class="text-[var(--color-accent)] hover:underline">Python vs JavaScript</a>
+    </p>
+  </section>
+
+  {/* Citation Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <details class="text-sm text-[var(--color-text-secondary)] border border-[var(--color-border)] rounded-lg px-4 py-3">
+      <summary class="cursor-pointer hover:text-[var(--color-accent)] transition-colors font-medium">How to Cite This Index</summary>
+      <p class="mt-3 font-mono text-xs leading-relaxed bg-[var(--color-surface-alt)] rounded px-3 py-2">
+        Golabek, P. (2026). <em>The Beauty Index: Ranking 25 Programming Languages by Aesthetic Beauty</em> (2026 Edition). patrykgolabek.dev. https://patrykgolabek.dev/beauty-index/
+      </p>
+    </details>
   </section>
 </Layout>

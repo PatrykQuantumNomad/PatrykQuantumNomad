@@ -83,22 +83,36 @@ const dimensionKeys = DIMENSIONS.map((d) => d.key);
   role="img"
   aria-label="Ranking chart showing all 25 languages sorted by total beauty score"
 >
-  {/* Legend: dimension colors with short names */}
+  {/* Legend: Greek letter inside color box + short name */}
   {DIMENSIONS.map((dim, i) => {
-    const legendX = labelWidth + i * 110;
+    const spacing = barMaxWidth / DIMENSIONS.length;
+    const legendX = labelWidth + i * spacing;
     const color = DIMENSION_COLORS[dim.key];
+    const boxSize = 20;
     return (
       <g>
-        <rect x={legendX} y={8} width={12} height={12} rx={2} fill={color} />
+        <rect x={legendX} y={4} width={boxSize} height={boxSize} rx={3} fill={color} />
         <text
-          x={legendX + 16}
-          y={18}
+          x={legendX + boxSize / 2}
+          y={14}
+          font-size="12"
+          font-weight="700"
+          fill="white"
+          font-family="Georgia, serif"
+          text-anchor="middle"
+          dominant-baseline="middle"
+        >
+          {dim.symbol}
+        </text>
+        <text
+          x={legendX + boxSize + 5}
+          y={14}
           font-size="10"
           fill="#5a5a5a"
           font-family="'Noto Sans', 'DM Sans', sans-serif"
           dominant-baseline="middle"
         >
-          {dim.symbol} {dim.shortName}
+          {dim.shortName}
         </text>
       </g>
     );
@@ -164,21 +178,38 @@ const dimensionKeys = DIMENSIONS.map((d) => d.key);
           {row.lang.name}
         </text>
 
-        {/* Stacked dimension segments */}
+        {/* Stacked dimension segments with Greek letters */}
         {row.scores.map((score, si) => {
           const segWidth = (score / maxPossibleScore) * barMaxWidth;
           const x = segmentX;
           segmentX += segWidth;
           const color = DIMENSION_COLORS[dimensionKeys[si]];
           return (
-            <rect
-              x={x}
-              y={barY}
-              width={segWidth}
-              height={barHeight}
-              fill={color}
-              rx={si === 0 ? 3 : 0}
-            />
+            <g>
+              <rect
+                x={x}
+                y={barY}
+                width={segWidth}
+                height={barHeight}
+                fill={color}
+                rx={si === 0 ? 3 : 0}
+              />
+              {segWidth > 14 && (
+                <text
+                  x={x + segWidth / 2}
+                  y={barY + barHeight / 2}
+                  font-size="8"
+                  font-weight="700"
+                  fill="white"
+                  fill-opacity="0.85"
+                  font-family="Georgia, serif"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                >
+                  {DIMENSIONS[si].symbol}
+                </text>
+              )}
+            </g>
           );
         })}
 

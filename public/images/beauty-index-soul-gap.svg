@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f23"/>
+    </radialGradient>
+    <linearGradient id="tower-grad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#4A90D9" stop-opacity="0.15"/>
+      <stop offset="60%" stop-color="#4A90D9" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#E8734A" stop-opacity="0.08"/>
+    </linearGradient>
+    <!-- Transition zone glow -->
+    <radialGradient id="transition-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E8734A" stop-opacity="0.15"/>
+      <stop offset="60%" stop-color="#E8734A" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#E8734A" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Panel inner gradient -->
+    <linearGradient id="panel-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0.02"/>
+      <stop offset="50%" stop-color="white" stop-opacity="0"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0.01"/>
+    </linearGradient>
+    <!-- Separator gradient -->
+    <linearGradient id="sep-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E8734A" stop-opacity="0"/>
+      <stop offset="15%" stop-color="#E8734A" stop-opacity="0.3"/>
+      <stop offset="85%" stop-color="#E8734A" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#E8734A" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Connecting line gradient -->
+    <linearGradient id="connect-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E8734A" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0.06"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="soft-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="particle-glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="url(#bg-glow)"/>
+
+  <!-- ═══════════════════════════════════
+       LEFT: The Tower — AI base + Human spire
+       ═══════════════════════════════════ -->
+
+  <!-- Tower structure centered at x=380 -->
+  <g transform="translate(380, 80)">
+
+    <!-- AI base (bottom) — regular, grid-like, mechanical -->
+    <!-- Building body -->
+    <rect x="-55" y="180" width="110" height="280" fill="url(#tower-grad)" stroke="#4A90D9" stroke-opacity="0.4" stroke-width="1"/>
+
+    <!-- Faint scan lines across AI section -->
+    <g stroke="#4A90D9" stroke-opacity="0.04" stroke-width="0.5">
+      <line x1="-55" y1="205" x2="55" y2="205"/>
+      <line x1="-55" y1="225" x2="55" y2="225"/>
+      <line x1="-55" y1="245" x2="55" y2="245"/>
+      <line x1="-55" y1="265" x2="55" y2="265"/>
+      <line x1="-55" y1="285" x2="55" y2="285"/>
+      <line x1="-55" y1="305" x2="55" y2="305"/>
+      <line x1="-55" y1="325" x2="55" y2="325"/>
+      <line x1="-55" y1="345" x2="55" y2="345"/>
+      <line x1="-55" y1="365" x2="55" y2="365"/>
+      <line x1="-55" y1="385" x2="55" y2="385"/>
+      <line x1="-55" y1="405" x2="55" y2="405"/>
+      <line x1="-55" y1="425" x2="55" y2="425"/>
+      <line x1="-55" y1="445" x2="55" y2="445"/>
+    </g>
+
+    <!-- Grid windows — brightness gradient (brighter near top, dimmer at bottom) -->
+    <!-- Row 1 (brightest) -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.25">
+      <rect x="-42" y="195" width="16" height="12" rx="1"/>
+      <rect x="-20" y="195" width="16" height="12" rx="1"/>
+      <rect x="4" y="195" width="16" height="12" rx="1"/>
+      <rect x="28" y="195" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 2 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.23">
+      <rect x="-42" y="215" width="16" height="12" rx="1"/>
+      <rect x="-20" y="215" width="16" height="12" rx="1"/>
+      <rect x="4" y="215" width="16" height="12" rx="1"/>
+      <rect x="28" y="215" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 3 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.21">
+      <rect x="-42" y="235" width="16" height="12" rx="1"/>
+      <rect x="-20" y="235" width="16" height="12" rx="1"/>
+      <rect x="4" y="235" width="16" height="12" rx="1"/>
+      <rect x="28" y="235" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 4 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.19">
+      <rect x="-42" y="255" width="16" height="12" rx="1"/>
+      <rect x="-20" y="255" width="16" height="12" rx="1"/>
+      <rect x="4" y="255" width="16" height="12" rx="1"/>
+      <rect x="28" y="255" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 5 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.17">
+      <rect x="-42" y="275" width="16" height="12" rx="1"/>
+      <rect x="-20" y="275" width="16" height="12" rx="1"/>
+      <rect x="4" y="275" width="16" height="12" rx="1"/>
+      <rect x="28" y="275" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 6 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.16">
+      <rect x="-42" y="295" width="16" height="12" rx="1"/>
+      <rect x="-20" y="295" width="16" height="12" rx="1"/>
+      <rect x="4" y="295" width="16" height="12" rx="1"/>
+      <rect x="28" y="295" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 7 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.14">
+      <rect x="-42" y="315" width="16" height="12" rx="1"/>
+      <rect x="-20" y="315" width="16" height="12" rx="1"/>
+      <rect x="4" y="315" width="16" height="12" rx="1"/>
+      <rect x="28" y="315" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 8 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.13">
+      <rect x="-42" y="335" width="16" height="12" rx="1"/>
+      <rect x="-20" y="335" width="16" height="12" rx="1"/>
+      <rect x="4" y="335" width="16" height="12" rx="1"/>
+      <rect x="28" y="335" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 9 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.12">
+      <rect x="-42" y="355" width="16" height="12" rx="1"/>
+      <rect x="-20" y="355" width="16" height="12" rx="1"/>
+      <rect x="4" y="355" width="16" height="12" rx="1"/>
+      <rect x="28" y="355" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 10 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.11">
+      <rect x="-42" y="375" width="16" height="12" rx="1"/>
+      <rect x="-20" y="375" width="16" height="12" rx="1"/>
+      <rect x="4" y="375" width="16" height="12" rx="1"/>
+      <rect x="28" y="375" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 11 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.10">
+      <rect x="-42" y="395" width="16" height="12" rx="1"/>
+      <rect x="-20" y="395" width="16" height="12" rx="1"/>
+      <rect x="4" y="395" width="16" height="12" rx="1"/>
+      <rect x="28" y="395" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 12 -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.09">
+      <rect x="-42" y="415" width="16" height="12" rx="1"/>
+      <rect x="-20" y="415" width="16" height="12" rx="1"/>
+      <rect x="4" y="415" width="16" height="12" rx="1"/>
+      <rect x="28" y="415" width="16" height="12" rx="1"/>
+    </g>
+    <!-- Row 13 (dimmest) -->
+    <g stroke="none" fill="#4A90D9" fill-opacity="0.08">
+      <rect x="-42" y="435" width="16" height="12" rx="1"/>
+      <rect x="-20" y="435" width="16" height="12" rx="1"/>
+      <rect x="4" y="435" width="16" height="12" rx="1"/>
+      <rect x="28" y="435" width="16" height="12" rx="1"/>
+    </g>
+
+    <!-- Transition zone glow (warm radial at the boundary) -->
+    <ellipse cx="0" cy="180" rx="80" ry="30" fill="url(#transition-glow)"/>
+
+    <!-- Transition zone — setbacks (where AI meets human) -->
+    <line x1="-55" y1="180" x2="55" y2="180" stroke="#E8734A" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+
+    <!-- Human spire (top) — Art Deco crown, aspirational -->
+    <!-- Setback 1 -->
+    <rect x="-45" y="140" width="90" height="40" fill="none" stroke="#E8734A" stroke-opacity="0.35" stroke-width="1"/>
+    <!-- Setback 2 -->
+    <rect x="-35" y="105" width="70" height="35" fill="none" stroke="#E8734A" stroke-opacity="0.35" stroke-width="1"/>
+    <!-- Setback 3 -->
+    <rect x="-25" y="75" width="50" height="30" fill="none" stroke="#E8734A" stroke-opacity="0.35" stroke-width="1"/>
+    <!-- Crown arches — span full setback 3 width -->
+    <path d="M -25 75 Q -20 58, -15 75" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75" fill="none"/>
+    <path d="M -15 75 Q -10 55, -5 75" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75" fill="none"/>
+    <path d="M -5 75 Q 0 52, 5 75" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75" fill="none"/>
+    <path d="M 5 75 Q 10 55, 15 75" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75" fill="none"/>
+    <path d="M 15 75 Q 20 58, 25 75" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75" fill="none"/>
+    <!-- Spire needle — extends into setback 3 for solid connection -->
+    <line x1="0" y1="80" x2="0" y2="15" stroke="#E8734A" stroke-opacity="0.6" stroke-width="1.5"/>
+    <line x1="-8" y1="67" x2="0" y2="15" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75"/>
+    <line x1="8" y1="67" x2="0" y2="15" stroke="#E8734A" stroke-opacity="0.3" stroke-width="0.75"/>
+    <!-- Spire tip glow -->
+    <circle cx="0" cy="15" r="3" fill="#E8734A" fill-opacity="0.4" filter="url(#soft-glow)"/>
+
+    <!-- Rising particles from spire tip -->
+    <circle cx="-3" cy="5" r="1.2" fill="#E8734A" fill-opacity="0.25" filter="url(#particle-glow)"/>
+    <circle cx="4" cy="-5" r="1" fill="#E8734A" fill-opacity="0.18" filter="url(#particle-glow)"/>
+    <circle cx="-1" cy="-14" r="0.8" fill="#E8734A" fill-opacity="0.12" filter="url(#particle-glow)"/>
+    <circle cx="2" cy="-22" r="0.6" fill="#E8734A" fill-opacity="0.08"/>
+    <circle cx="-4" cy="-30" r="0.5" fill="#E8734A" fill-opacity="0.05"/>
+  </g>
+
+  <!-- ═══════════════════════════════════
+       Bracket annotations
+       ═══════════════════════════════════ -->
+
+  <!-- AI bracket (bottom portion) -->
+  <g stroke="#4A90D9" stroke-opacity="0.5" stroke-width="1" fill="none">
+    <path d="M 300 275 L 290 275 L 290 460 L 300 460"/>
+  </g>
+  <text x="280" y="372" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#4A90D9" fill-opacity="0.7" text-anchor="end">AI Generation</text>
+  <text x="280" y="386" font-family="Georgia,'Times New Roman',serif" font-size="9" fill="#4A90D9" fill-opacity="0.45" text-anchor="end" font-style="italic">The Bricklayer</text>
+  <text x="280" y="402" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="white" fill-opacity="0.35" text-anchor="end">Syntax &amp; Correctness</text>
+
+  <!-- Human bracket (top portion) -->
+  <g stroke="#E8734A" stroke-opacity="0.5" stroke-width="1" fill="none">
+    <path d="M 300 100 L 290 100 L 290 258 L 300 258"/>
+  </g>
+  <text x="280" y="170" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#E8734A" fill-opacity="0.7" text-anchor="end">Human Verification</text>
+  <text x="280" y="184" font-family="Georgia,'Times New Roman',serif" font-size="9" fill="#E8734A" fill-opacity="0.45" text-anchor="end" font-style="italic">The Architect</text>
+  <text x="280" y="200" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="white" fill-opacity="0.35" text-anchor="end">Intentionality &amp; Soul</text>
+
+  <!-- ═══════════════════════════════════
+       Connecting line (tower → panel)
+       ═══════════════════════════════════ -->
+  <line x1="440" y1="260" x2="580" y2="260" stroke="url(#connect-grad)" stroke-width="0.75" stroke-dasharray="3,4"/>
+
+  <!-- ═══════════════════════════════════
+       RIGHT: The Soul Gap text panel
+       ═══════════════════════════════════ -->
+
+  <!-- Panel background fill -->
+  <rect x="580" y="90" width="520" height="380" rx="4" fill="url(#panel-grad)"/>
+  <!-- Panel border -->
+  <rect x="580" y="90" width="520" height="380" rx="4" fill="none" stroke="white" stroke-opacity="0.1" stroke-width="0.75"/>
+
+  <!-- Panel title — larger, more presence -->
+  <text x="620" y="175" font-family="Helvetica,Arial,sans-serif" font-size="22" fill="#E8734A" fill-opacity="0.9" letter-spacing="4" font-weight="bold">THE SOUL GAP</text>
+
+  <!-- Panel content — vertically centered -->
+  <g font-family="Georgia,'Times New Roman',serif" fill="white" fill-opacity="0.6" font-size="14">
+    <text x="620" y="225">AI can generate correct code,</text>
+    <text x="620" y="248">but it lacks intentionality.</text>
+  </g>
+
+  <!-- Decorative separator -->
+  <line x1="620" y1="285" x2="1070" y2="285" stroke="url(#sep-grad)" stroke-width="0.5"/>
+
+  <!-- Conclusion — refined layout -->
+  <text x="620" y="330" font-family="Georgia,'Times New Roman',serif" font-size="14" fill="white" fill-opacity="0.55">The programmer's role evolves from</text>
+  <text x="620" y="360" font-family="Georgia,'Times New Roman',serif" font-size="15" fill="white" fill-opacity="0.7" font-style="italic" font-weight="bold">construction worker</text>
+  <text x="814" y="360" font-family="Georgia,'Times New Roman',serif" font-size="13" fill="white" fill-opacity="0.35">  &#8594;  </text>
+  <text x="860" y="360" font-family="Georgia,'Times New Roman',serif" font-size="15" fill="#E8734A" fill-opacity="0.8" font-style="italic" font-weight="bold">architect-critic.</text>
+
+  <!-- ═══════════════════════════════════
+       Bottom
+       ═══════════════════════════════════ -->
+
+  <!-- Attribution -->
+  <text x="600" y="560" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/beauty-index</text>
+
+</svg>

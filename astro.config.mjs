@@ -11,15 +11,7 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://patrykgolabek.dev',
   output: 'static',
-  integrations: [expressiveCode({
-    themes: ['github-dark', 'github-light'],
-    themeCssSelector: (theme) => {
-      if (theme.name === 'github-dark') return '.dark';
-      if (theme.name === 'github-light') return ':root:not(.dark)';
-      return undefined;
-    },
-    useDarkModeMediaQuery: false,
-  }), mdx(), tailwind(), sitemap({
+  integrations: [expressiveCode(), mdx(), tailwind(), sitemap({
     customPages: [
       'https://networking-tools.patrykgolabek.dev/',
       'https://financial-data-extractor.patrykgolabek.dev/',

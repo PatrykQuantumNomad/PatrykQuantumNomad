@@ -3,29 +3,71 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import BlogPostingJsonLd from '../../components/BlogPostingJsonLd.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import FAQPageJsonLd from '../../components/FAQPageJsonLd.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => {
-    const isPublished = import.meta.env.PROD ? data.draft !== true : true;
-    return isPublished && !data.externalUrl;
+  const allPosts = await getCollection('blog', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
   });
+  const nativePosts = allPosts.filter((p) => !p.data.externalUrl);
 
-  return posts.map((post) => ({
+  return nativePosts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, allPosts },
   }));
 }
 
-const { post } = Astro.props;
+const { post, allPosts } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
 const { title, description, publishedDate, tags } = post.data;
+
+// Compute related posts by tag overlap
+const relatedPosts = allPosts
+  .filter((p) => p.id !== post.id)
+  .map((p) => {
+    const overlap = p.data.tags.filter((t) => tags.includes(t)).length;
+    return { post: p, overlap };
+  })
+  .filter((r) => r.overlap > 0)
+  .sort((a, b) => b.overlap - a.overlap || b.post.data.publishedDate.valueOf() - a.post.data.publishedDate.valueOf())
+  .slice(0, 5)
+  .map((r) => r.post);
 const postURL = new URL('/blog/' + post.id + '/', Astro.site).toString();
 const ogImageURL = new URL('/open-graph/blog/' + post.id + '.png?cb=20260216', Astro.site).toString();
+const wordCount = remarkPluginFrontmatter.words as number | undefined;
+
+const isBeautyIndexPost = post.id === 'the-beauty-index';
+const articleSection = isBeautyIndexPost ? 'Programming Languages' : undefined;
+const aboutDataset = isBeautyIndexPost
+  ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
+  : undefined;
+
+const beautyIndexFAQ = isBeautyIndexPost ? [
+  {
+    question: 'What does "beauty" mean for a programming language?',
+    answer: 'Beauty in programming languages is the embodied experience of encountering code — visual rhythm, balance of whitespace and characters, and whether code looks intentional or accidental. Research shows perceived beauty correlates with perceived quality, and aesthetic judgments of code are made faster than judgments of correctness. The Beauty Index measures it across 6 dimensions: Aesthetic Geometry, Mathematical Elegance, Linguistic Clarity, Practitioner Happiness, Organic Habitability, and Conceptual Integrity.',
+  },
+  {
+    question: 'How are programming languages scored in the Beauty Index?',
+    answer: 'Each language is scored 1-10 across six aesthetic dimensions (Phi, Omega, Lambda, Psi, Gamma, Sigma) for a maximum of 60 points. Scores of 1-3 represent "Ugly" code, 4-6 the "Not Ugly" baseline, 7-9 "Beautiful" code, and 10 is "The Book" — transcendental elegance. Languages are then grouped into four tiers: Workhorses, Practical, Handsome, and Beautiful.',
+  },
+  {
+    question: 'What are the six aesthetic dimensions of the Beauty Index?',
+    answer: 'The six dimensions are: Phi (Aesthetic Geometry) — visual cleanliness and grid-based order; Omega (Mathematical Elegance) — inevitability, unexpectedness, and economy à la Hardy; Lambda (Linguistic Clarity) — Knuthian literate readability; Psi (Practitioner Happiness) — developer experience and community love; Gamma (Organic Habitability) — Wabi-Sabi growth points and lived-in quality; Sigma (Conceptual Integrity) — whether the language has a coherent design philosophy.',
+  },
+] : [];
+
+// Shorten title tag for SEO (Google truncates ~60 chars)
+const suffix = ' — Patryk Golabek';
+const titleTag = (title.length + suffix.length > 65)
+  ? `${title.split(':')[0]}${suffix}`
+  : `${title}${suffix}`;
+
 ---
 
 <Layout
-  title={`${title} — Patryk Golabek`}
+  title={titleTag}
   description={description}
   ogType="article"
   publishedDate={publishedDate}
@@ -58,9 +100,14 @@ const ogImageURL = new URL('/open-graph/blog/' + post.id + '.png?cb=20260216', A
     <div class="mb-8">
       <TableOfContents headings={headings} />
     </div>
-    <div class="prose max-w-none mt-8">
+    <div class:list={['prose max-w-none mt-8', { 'dark-code': isBeautyIndexPost }]}>
       <Content />
     </div>
+    {isBeautyIndexPost && (
+      <script is:inline>
+        document.querySelectorAll('.dark-code .expressive-code').forEach(function(el) { el.classList.add('dark'); });
+      </script>
+    )}
     <BlogPostingJsonLd
       title={title}
       description={description}
@@ -69,13 +116,54 @@ const ogImageURL = new URL('/open-graph/blog/' + post.id + '.png?cb=20260216', A
       url={postURL}
       tags={tags}
       image={ogImageURL}
+      articleSection={articleSection}
+      wordCount={wordCount}
+      about={aboutDataset}
     />
+    {beautyIndexFAQ.length > 0 && <FAQPageJsonLd items={beautyIndexFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: "Home", url: `${Astro.site}` },
       { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
       { name: title, url: postURL },
     ]} />
   </article>
+  {relatedPosts.length > 0 && (
+    <aside class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <h2 class="text-xl font-heading font-bold mb-6">Related Articles</h2>
+      <div class="space-y-4">
+        {relatedPosts.map((related) => {
+          const isExternal = !!related.data.externalUrl;
+          const href = isExternal ? related.data.externalUrl : `/blog/${related.id}/`;
+          return (
+            <a
+              href={href}
+              class="block p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors"
+              {...isExternal && { target: "_blank", rel: "noopener noreferrer" }}
+            >
+              <div class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                <time datetime={related.data.publishedDate.toISOString()}>
+                  {related.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'short' })}
+                </time>
+                {related.data.source && (
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                    {related.data.source}
+                  </span>
+                )}
+                {isExternal && (
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <h3 class="font-heading font-bold mt-1 hover:text-[var(--color-accent)] transition-colors">
+                {related.data.title}
+              </h3>
+            </a>
+          );
+        })}
+      </div>
+    </aside>
+  )}
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
     <a href="/blog/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors">
       &larr; Back to Blog

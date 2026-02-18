@@ -7,11 +7,12 @@
  * Includes client-side JavaScript for SVG-to-PNG share controls.
  */
 import { getCollection } from 'astro:content';
-import { Code } from 'astro:components';
-import type { BuiltinLanguage } from 'shiki';
+import { Code } from 'astro-expressive-code/components';
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+
 import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+import { JUSTIFICATIONS } from '../../data/beauty-index/justifications';
 import RadarChart from '../../components/beauty-index/RadarChart.astro';
 import ScoreBreakdown from '../../components/beauty-index/ScoreBreakdown.astro';
 import ShareControls from '../../components/beauty-index/ShareControls.astro';
@@ -26,6 +27,39 @@ export async function getStaticPaths() {
     .map((entry) => entry.data)
     .sort((a, b) => totalScore(b) - totalScore(a));
 
+  // Build comparison partners for each language
+  function comparePartners(index: number) {
+    const lang = sorted[index];
+    const partners = [] as { id: string; name: string }[];
+    const used = new Set([lang.id]);
+
+    function add(i: number) {
+      const l = sorted[i];
+      if (!used.has(l.id)) {
+        used.add(l.id);
+        partners.push({ id: l.id, name: l.name });
+      }
+    }
+
+    // Neighbors by rank
+    if (index > 0) add(index - 1);
+    if (index < sorted.length - 1) add(index + 1);
+
+    // Cross-tier contrast: pick from opposite end of the rankings
+    const opposite = index < sorted.length / 2
+      ? sorted.length - 1 - index
+      : sorted.length - 1 - index + Math.floor(sorted.length / 2);
+    if (opposite >= 0 && opposite < sorted.length) add(opposite);
+
+    // Fill to 5 with spread picks
+    const step = Math.floor(sorted.length / 6);
+    for (let k = 0; partners.length < 5 && k < sorted.length; k += step) {
+      if (k !== index) add(k);
+    }
+
+    return partners.slice(0, 5);
+  }
+
   return sorted.map((lang, index) => ({
     params: { slug: lang.id },
     props: {
@@ -33,37 +67,74 @@ export async function getStaticPaths() {
       prev: index > 0 ? { id: sorted[index - 1].id, name: sorted[index - 1].name } : null,
       next: index < sorted.length - 1 ? { id: sorted[index + 1].id, name: sorted[index + 1].name } : null,
       rank: index + 1,
+      vsPartners: comparePartners(index),
     },
   }));
 }
 
-const { language, prev, next, rank } = Astro.props;
+const { language, prev, next, rank, vsPartners } = Astro.props;
 const snippet = getSnippet(language.id);
+const justifications = JUSTIFICATIONS[language.id];
 const total = totalScore(language);
 const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.site).toString();
+const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
+const fullDescription = `${language.name} scores ${total}/60 in the Beauty Index, ranking #${rank} among 25 programming languages (${tierLabel} tier). ${language.characterSketch}`;
+const metaDescription = fullDescription.length <= 155
+  ? fullDescription
+  : fullDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';
+
+const languageSchema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": `${language.name} — Beauty Index Score`,
+  "description": fullDescription,
+  "url": `https://patrykgolabek.dev/beauty-index/${language.id}/`,
+  "datePublished": "2026-02-17",
+  "dateModified": "2026-02-18",
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "isPartOf": {
+    "@type": "Dataset",
+    "name": "The Beauty Index",
+    "url": "https://patrykgolabek.dev/beauty-index/",
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": total,
+    "bestRating": 60,
+    "worstRating": 6,
+    "ratingCount": 1,
+    "author": {
+      "@type": "Person",
+      "@id": "https://patrykgolabek.dev/#person",
+    },
+  },
+  "about": {
+    "@type": "ComputerLanguage",
+    "name": language.name,
+  },
+};
 ---
 
 <Layout
   title={language.name + " — The Beauty Index | Patryk Golabek"}
-  description={language.characterSketch}
+  description={metaDescription}
   ogImage={ogImageURL}
+  ogImageAlt={`Beauty Index radar chart for ${language.name} — ${total}/60 points, ${tierLabel} tier`}
 >
   <BreadcrumbJsonLd crumbs={[
     { name: "Home", url: "https://patrykgolabek.dev/" },
     { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
     { name: language.name, url: `https://patrykgolabek.dev/beauty-index/${language.id}/` },
   ]} />
+  <script type="application/ld+json" set:html={JSON.stringify(languageSchema)} />
 
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <nav aria-label="Breadcrumb" class="text-sm text-[var(--color-text-secondary)] mb-4">
-      <ol class="flex items-center gap-1">
-        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><a href="/beauty-index/" class="hover:text-[var(--color-accent)] transition-colors">Beauty Index</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li aria-current="page">{language.name}</li>
-      </ol>
-    </nav>
+    <a href="/beauty-index/" class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6">
+      <span aria-hidden="true">&larr;</span> Back to Beauty Index
+    </a>
 
     {/* Header area */}
     <header class="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -84,7 +155,19 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
       <div class="flex flex-col items-center gap-2">
         <RadarChart language={language} size={300} />
-        <ShareControls languageName={language.name} languageId={language.id} />
+        <ShareControls
+          languageName={language.name}
+          languageId={language.id}
+          tier={language.tier}
+          total={total}
+          rank={rank}
+          phi={language.phi}
+          omega={language.omega}
+          lambda={language.lambda}
+          psi={language.psi}
+          gamma={language.gamma}
+          sigma={language.sigma}
+        />
       </div>
       <div class="flex items-center">
         <ScoreBreakdown language={language} />
@@ -113,6 +196,25 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
       </p>
     </section>
 
+    {/* Dimension Analysis */}
+    {justifications && (
+      <section class="mt-12">
+        <h2 class="text-xl font-heading font-bold mb-6">Dimension Analysis</h2>
+        <div class="space-y-6">
+          {DIMENSIONS.map((dim) => justifications[dim.key] && (
+            <div>
+              <h3 class="font-heading font-bold text-base flex items-center gap-2">
+                <span class="text-[var(--color-accent)]">{dim.symbol}</span>
+                {dim.name}
+                <span class="meta-mono text-sm text-[var(--color-text-secondary)]">{language[dim.key]}/10</span>
+              </h3>
+              <p class="text-[var(--color-text-secondary)] leading-relaxed mt-1" set:html={justifications[dim.key]} />
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
     <p class="text-sm text-[var(--color-text-secondary)] mt-8">
       How are these scores calculated?
       <a href="/blog/the-beauty-index/" class="text-[var(--color-accent)] hover:underline ml-1">
@@ -128,7 +230,24 @@ const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.
           {snippet.label}
         </p>
         <div class="rounded-xl overflow-hidden border border-[var(--color-border)]">
-          <Code code={snippet.code} lang={snippet.lang as BuiltinLanguage} />
+          <Code code={snippet.code} lang={snippet.lang} />
+        </div>
+      </section>
+    )}
+
+    {/* Compare links */}
+    {vsPartners && vsPartners.length > 0 && (
+      <section class="mt-12">
+        <h2 class="text-xl font-heading font-bold mb-3">Compare {language.name}</h2>
+        <div class="flex flex-wrap gap-2">
+          {vsPartners.map((partner) => (
+            <a
+              href={`/beauty-index/vs/${language.id}-vs-${partner.id}/`}
+              class="text-sm px-3 py-1.5 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-accent)] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+            >
+              vs {partner.name}
+            </a>
+          ))}
         </div>
       </section>
     )}

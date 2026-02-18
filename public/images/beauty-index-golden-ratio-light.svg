@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1088 400" width="1088" height="400">
+
+  <!-- Golden Rectangle: 620 × 383 (φ ≈ 1.618)
+       Origin: (234, 8) — centered horizontally -->
+
+  <!-- Outer rectangle -->
+  <rect x="234" y="8" width="620" height="383" fill="none" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="1"/>
+
+  <!-- Square dividers -->
+  <line x1="617" y1="8" x2="617" y2="391" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+  <line x1="617" y1="245" x2="854" y2="245" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+  <line x1="708" y1="245" x2="708" y2="391" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+  <line x1="617" y1="300" x2="708" y2="300" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+  <line x1="672" y1="245" x2="672" y2="300" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+  <line x1="672" y1="281" x2="708" y2="281" stroke="#1a1a2e" stroke-opacity="0.1" stroke-width="0.75"/>
+
+  <!-- Fibonacci spiral -->
+  <path
+    d="M 234 391
+       A 383 383 0 0 1 617 8
+       A 237 237 0 0 1 854 245
+       A 146 146 0 0 1 708 391
+       A 91 91 0 0 1 617 300
+       A 55 55 0 0 1 672 245
+       A 36 36 0 0 1 708 281"
+    fill="none"
+    stroke="#c44b20"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+
+  <!-- Greek letters — solid colors -->
+
+  <!-- Φ — Square 1 — Aesthetic Geometry -->
+  <text x="410" y="215" font-family="Georgia,'Times New Roman',serif" font-size="72" font-weight="bold" fill="#4A90D9" text-anchor="middle">&#934;</text>
+
+  <!-- Ω — Square 2 — Mathematical Elegance -->
+  <text x="735" y="145" font-family="Georgia,'Times New Roman',serif" font-size="50" font-weight="bold" fill="#7B68EE" text-anchor="middle">&#937;</text>
+
+  <!-- Λ — Square 3 — Linguistic Clarity -->
+  <text x="781" y="335" font-family="Georgia,'Times New Roman',serif" font-size="34" font-weight="bold" fill="#2AAA8A" text-anchor="middle">&#923;</text>
+
+  <!-- Ψ — Square 4 — Practitioner Happiness -->
+  <text x="662" y="360" font-family="Georgia,'Times New Roman',serif" font-size="22" font-weight="bold" fill="#E8734A" text-anchor="middle">&#936;</text>
+
+  <!-- Γ — Square 5 — Organic Habitability -->
+  <text x="644" y="280" font-family="Georgia,'Times New Roman',serif" font-size="14" font-weight="bold" fill="#8FBC5A" text-anchor="middle">&#915;</text>
+
+  <!-- Σ — Square 6 — Conceptual Integrity -->
+  <text x="690" y="268" font-family="Georgia,'Times New Roman',serif" font-size="9" font-weight="bold" fill="#D4A843" text-anchor="middle">&#931;</text>
+
+  <!-- φ at spiral center -->
+  <text x="698" y="281" font-family="Georgia,'Times New Roman',serif" font-size="6" fill="#1a1a2e" fill-opacity="0.3" text-anchor="middle">&#966;</text>
+
+</svg>

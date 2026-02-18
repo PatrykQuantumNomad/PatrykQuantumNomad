@@ -9,6 +9,7 @@ interface Props {
   tags?: string[];
   ogImage?: string;
   ogImageAlt?: string;
+  robots?: string;
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   tags,
   ogImage,
   ogImageAlt = 'Patryk Golabek — Cloud-Native Software Architect',
+  robots = 'index, follow',
 } = Astro.props;
 ---
 
@@ -28,7 +30,9 @@ const {
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL.toString()} />
-<meta name="robots" content="index, follow">
+<meta name="robots" content={robots}>
+<link rel="alternate" hreflang="en-CA" href={canonicalURL.toString()} />
+<link rel="alternate" hreflang="x-default" href={canonicalURL.toString()} />
 
 <!-- Open Graph -->
 <meta property="og:type" content={ogType} />
@@ -62,3 +66,6 @@ const {
 {ogType === 'article' && tags?.map((tag) => (
   <meta property="article:tag" content={tag} />
 ))}
+{ogType === 'article' && (
+  <meta property="article:author" content="https://patrykgolabek.dev/about/" />
+)}

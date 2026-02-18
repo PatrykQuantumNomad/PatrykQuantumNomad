@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { generateRadarSvgString } from './beauty-index/radar-math';
-import { getTierColor } from './beauty-index/tiers';
+import { getTierColor, DIMENSION_COLORS } from './beauty-index/tiers';
 import { DIMENSIONS } from './beauty-index/dimensions';
 import { totalScore, dimensionScores, type Language } from './beauty-index/schema';
 
@@ -20,12 +20,15 @@ function truncate(text: string, maxLength: number): string {
   return text.slice(0, maxLength - 1).trimEnd() + '\u2026';
 }
 
-async function loadCoverImage(coverImage: string): Promise<string | null> {
+async function loadCoverImage(
+  coverImage: string,
+  fit: 'contain' | 'cover' = 'contain',
+): Promise<string | null> {
   try {
     const filePath = join('./public', coverImage);
     const buffer = await readFile(filePath);
     const resized = await sharp(buffer)
-      .resize(1088, 400, { fit: 'contain', background: { r: 250, g: 248, b: 245, alpha: 1 } })
+      .resize(1088, 400, { fit, background: { r: 250, g: 248, b: 245, alpha: 1 } })
       .png()
       .toBuffer();
     return `data:image/png;base64,${resized.toString('base64')}`;
@@ -527,9 +530,10 @@ function accentBar() {
 
 /**
  * Generates a branded OG image for the Beauty Index overview page.
- * Text-based layout with title, subtitle, dimension pills, and PG branding.
+ * Cover-image layout with golden ratio SVG, title, dimension pills, and PG branding.
  */
 export async function generateOverviewOgImage(): Promise<Buffer> {
+  const coverDataUri = await loadCoverImage('/images/beauty-index-golden-ratio-light.svg');
   const dimensionNames = ['Geometry', 'Elegance', 'Clarity', 'Happiness', 'Habitability', 'Integrity'];
 
   const dimensionPills = {
@@ -538,8 +542,7 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
       style: {
         display: 'flex',
         flexWrap: 'wrap' as const,
-        gap: '12px',
-        justifyContent: 'center',
+        gap: '8px',
       },
       children: dimensionNames.map((name) => ({
         type: 'div',
@@ -549,7 +552,7 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
             color: '#c44b20',
             backgroundColor: 'rgba(196,75,32,0.1)',
             borderRadius: '20px',
-            padding: '6px 18px',
+            padding: '4px 14px',
           },
           children: name,
         },
@@ -564,24 +567,24 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
         width: '1200px',
         height: '630px',
         display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'row' as const,
         backgroundColor: '#faf8f5',
         position: 'relative' as const,
         fontFamily: 'Inter',
       },
       children: [
         accentBar(),
-        // Centered content block
+        // Left column: text
         {
           type: 'div',
           props: {
             style: {
               display: 'flex',
               flexDirection: 'column' as const,
-              alignItems: 'center',
-              gap: '24px',
+              justifyContent: 'center',
+              width: '620px',
+              padding: '40px 0px 60px 56px',
+              gap: '20px',
             },
             children: [
               // Title
@@ -591,8 +594,9 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
                   style: {
                     fontFamily: 'Space Grotesk',
                     fontWeight: 700,
-                    fontSize: '64px',
+                    fontSize: '56px',
                     color: '#1a1a2e',
+                    lineHeight: 1.15,
                   },
                   children: 'The Beauty Index',
                 },
@@ -602,10 +606,9 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
                 type: 'div',
                 props: {
                   style: {
-                    fontSize: '24px',
+                    fontSize: '22px',
                     color: '#555566',
-                    textAlign: 'center' as const,
-                    maxWidth: '800px',
+                    lineHeight: 1.5,
                   },
                   children: 'Ranking 25 programming languages across 6 aesthetic dimensions',
                 },
@@ -615,7 +618,32 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
             ],
           },
         },
-        // Bottom branding
+        // Right column: golden ratio logo
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '580px',
+              height: '630px',
+            },
+            children: coverDataUri
+              ? [
+                  {
+                    type: 'img',
+                    props: {
+                      src: coverDataUri,
+                      width: 500,
+                      height: 184,
+                    },
+                  },
+                ]
+              : [],
+          },
+        },
+        // Bottom-left branding
         {
           type: 'div',
           props: {
@@ -646,7 +674,8 @@ export async function generateLanguageOgImage(language: Language): Promise<Buffe
   const scores = dimensionScores(language);
   const total = totalScore(language);
   const labels = DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
-  const radarSvg = generateRadarSvgString(300, scores, tierColor, 0.35, labels);
+  const labelColors = DIMENSIONS.map((d) => DIMENSION_COLORS[d.key] ?? '#666');
+  const radarSvg = generateRadarSvgString(300, scores, tierColor, 0.35, labels, labelColors);
   const radarDataUri = `data:image/svg+xml;base64,${Buffer.from(radarSvg).toString('base64')}`;
   const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
   const sketch = truncate(language.characterSketch, 120);
@@ -796,6 +825,212 @@ export async function generateLanguageOgImage(language: Language): Promise<Buffe
               gap: '10px',
             },
             children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/** Helper to build a language column for the vs OG image */
+function vsLanguageColumn(language: Language, radarDataUri: string) {
+  const tierColor = getTierColor(language.tier);
+  const total = totalScore(language);
+  const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
+
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '530px',
+        height: '580px',
+        gap: '8px',
+      },
+      children: [
+        {
+          type: 'div',
+          props: {
+            style: {
+              fontFamily: 'Space Grotesk',
+              fontWeight: 700,
+              fontSize: '36px',
+              color: '#1a1a2e',
+              lineHeight: 1.15,
+            },
+            children: language.name,
+          },
+        },
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '28px',
+                    color: tierColor,
+                  },
+                  children: `${total}/60`,
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    backgroundColor: tierColor,
+                    borderRadius: '20px',
+                    padding: '3px 14px',
+                    fontWeight: 600,
+                  },
+                  children: tierLabel,
+                },
+              },
+            ],
+          },
+        },
+        {
+          type: 'img',
+          props: {
+            src: radarDataUri,
+            width: 380,
+            height: 380,
+          },
+        },
+      ],
+    },
+  };
+}
+
+/**
+ * Generates a branded OG image for a Beauty Index versus comparison page.
+ * Side-by-side layout with two radar charts, language names, scores, and a "vs" divider.
+ */
+/** Fixed comparison palette — matches OverlayRadarChart.astro */
+const VS_COLOR_A = '#4A90D9'; // blue
+const VS_COLOR_B = '#E8734A'; // coral
+
+export async function generateVsOgImage(langA: Language, langB: Language): Promise<Buffer> {
+  const labels = DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
+  const labelColors = DIMENSIONS.map((d) => DIMENSION_COLORS[d.key] ?? '#666');
+
+  const scoresA = dimensionScores(langA);
+  const radarSvgA = generateRadarSvgString(400, scoresA, VS_COLOR_A, 0.35, labels, labelColors);
+  const radarDataUriA = `data:image/svg+xml;base64,${Buffer.from(radarSvgA).toString('base64')}`;
+
+  const scoresB = dimensionScores(langB);
+  const radarSvgB = generateRadarSvgString(400, scoresB, VS_COLOR_B, 0.35, labels, labelColors);
+  const radarDataUriB = `data:image/svg+xml;base64,${Buffer.from(radarSvgB).toString('base64')}`;
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'row' as const,
+              alignItems: 'center',
+              width: '1200px',
+              height: '580px',
+            },
+            children: [
+              vsLanguageColumn(langA, radarDataUriA),
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '140px',
+                    height: '580px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '32px',
+                          color: '#bbb',
+                        },
+                        children: 'vs',
+                      },
+                    },
+                  ],
+                },
+              },
+              vsLanguageColumn(langB, radarDataUriB),
+            ],
+          },
+        },
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '16px',
+              left: '0px',
+              width: '1200px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '14px',
+                    color: '#c44b20',
+                    fontWeight: 600,
+                  },
+                  children: 'The Beauty Index',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    backgroundColor: '#bbb',
+                  },
+                },
+              },
+              ...brandingRow().props.children,
+            ],
           },
         },
       ],

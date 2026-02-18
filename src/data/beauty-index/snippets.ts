@@ -96,7 +96,9 @@ struct Circle: Drawable {
   python: {
     lang: 'python',
     label: 'Generators + comprehensions',
-    code: `def fibonacci():
+    code: `from itertools import takewhile
+
+def fibonacci():
     a, b = 0, 1
     while True:
         yield a
@@ -104,8 +106,8 @@ struct Circle: Drawable {
 
 squares = {
     n: n**2
-    for n in fibonacci()
-    if n > 0 and n < 100
+    for n in takewhile(lambda x: x < 100, fibonacci())
+    if n > 0
 }`,
   },
 
@@ -383,38 +385,20 @@ public:
 );`,
   },
 
-  perl: {
-    lang: 'perl',
-    label: 'Regex + map',
-    code: `my %word_count;
-while (<STDIN>) {
-    chomp;
-    my @words = map { lc } /([a-z']+)/gi;
-    $word_count{$_}++ for @words;
-}
-
-my @top = (sort { $word_count{$b} <=> $word_count{$a} }
-           keys %word_count)[0..9];
-printf "%4d %s\\n", $word_count{$_}, $_ for @top;`,
+  gleam: {
+    lang: 'gleam',
+    label: 'Pipeline + io',
+    code: `pub fn main() {
+  "Hello, Joe!"
+  |> string.uppercase
+  |> io.println
+}`,
   },
 
-  cobol: {
-    lang: 'cobol',
-    label: 'Procedural division',
-    code: `IDENTIFICATION DIVISION.
-PROGRAM-ID. PAYROLL.
-
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-01  WS-HOURS     PIC 9(3)V99.
-01  WS-RATE      PIC 9(3)V99.
-01  WS-GROSS     PIC 9(5)V99.
-
-PROCEDURE DIVISION.
-    MULTIPLY WS-HOURS BY WS-RATE
-        GIVING WS-GROSS.
-    DISPLAY "GROSS PAY: $" WS-GROSS.
-    STOP RUN.`,
+  r: {
+    lang: 'r',
+    label: 'Vectorized filter',
+    code: `result <- numbers[numbers %% 2 == 0] * 2`,
   },
 };
 

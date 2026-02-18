@@ -1,0 +1,30 @@
+---
+interface Props {
+  langAName: string;
+  langBName: string;
+  pageTitle: string;
+  description: string;
+  url: string;
+}
+
+const { langAName, langBName, pageTitle, description, url } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": pageTitle,
+  "description": description,
+  "url": url,
+  "about": [
+    { "@type": "ComputerLanguage", "name": langAName },
+    { "@type": "ComputerLanguage", "name": langBName },
+  ],
+  "isPartOf": {
+    "@type": "Dataset",
+    "name": "The Beauty Index",
+    "url": "https://patrykgolabek.dev/beauty-index/",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

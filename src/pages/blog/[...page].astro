@@ -18,6 +18,14 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page } = Astro.props;
 
+const pageTitle = page.currentPage === 1
+  ? "Blog — Patryk Golabek | Cloud-Native & AI/ML Articles"
+  : `Blog — Page ${page.currentPage} — Patryk Golabek | Cloud-Native & AI/ML Articles`;
+
+const pageDescription = page.currentPage === 1
+  ? "Technical articles on Kubernetes, cloud-native architecture, AI/ML engineering, LLM agents, RAG pipelines, and platform engineering by Patryk Golabek."
+  : `Page ${page.currentPage} of ${page.lastPage} — Technical articles on Kubernetes, cloud-native architecture, AI/ML engineering, and platform engineering by Patryk Golabek.`;
+
 // For tag cloud and stats, use the full collection
 const allPosts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
@@ -49,12 +57,36 @@ const totalPosts = allSorted.length;
 const allYears = [...new Set(allSorted.map((p) => p.data.publishedDate.getFullYear()))];
 const oldestYear = Math.min(...allYears);
 const newestYear = Math.max(...allYears);
+
+const collectionSchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": pageTitle,
+  "description": pageDescription,
+  "url": new URL(page.currentPage === 1 ? '/blog/' : `/blog/${page.currentPage}/`, Astro.site).toString(),
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://patrykgolabek.dev/#website",
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": totalPosts,
+    "itemListElement": page.data.map((post, i) => ({
+      "@type": "ListItem",
+      "position": (page.currentPage - 1) * 10 + i + 1,
+      "url": post.data.externalUrl ?? `https://patrykgolabek.dev/blog/${post.id}/`,
+      "name": post.data.title,
+    })),
+  },
+};
 ---
 
 <Layout
-  title="Blog — Patryk Golabek | Cloud-Native & AI/ML Articles"
-  description="Technical articles on Kubernetes, cloud-native architecture, AI/ML engineering, LLM agents, RAG pipelines, and platform engineering by Patryk Golabek."
+  title={pageTitle}
+  description={pageDescription}
 >
+  {page.url.prev && <link slot="head" rel="prev" href={new URL(page.url.prev, Astro.site).toString()} />}
+  {page.url.next && <link slot="head" rel="next" href={new URL(page.url.next, Astro.site).toString()} />}
   <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
     {/* Hero Section */}
@@ -138,6 +170,7 @@ const newestYear = Math.max(...allYears);
     { name: "Home", url: `${Astro.site}` },
     { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
   ]} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 </Layout>
 
 <script>

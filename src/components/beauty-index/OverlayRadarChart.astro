@@ -1,0 +1,126 @@
+---
+/**
+ * OverlayRadarChart.astro — Build-time SVG radar chart overlaying two languages.
+ * Renders concentric hexagonal grid, axis lines, TWO data polygons (one per language),
+ * and colored Greek letter labels. Ships ZERO client-side JavaScript.
+ */
+import { polarToCartesian, radarPolygonPoints, hexagonRingPoints } from '../../lib/beauty-index/radar-math';
+import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
+import { DIMENSION_COLORS } from '../../lib/beauty-index/tiers';
+import { type Language, dimensionScores } from '../../lib/beauty-index/schema';
+
+/** Fixed comparison palette — always distinguishable regardless of tier */
+export const VS_COLOR_A = '#4A90D9'; // blue
+export const VS_COLOR_B = '#E8734A'; // coral
+
+interface Props {
+  langA: Language;
+  langB: Language;
+  size?: number;
+}
+
+const { langA, langB, size = 360 } = Astro.props;
+
+const pad = 24;
+const vbSize = size + pad * 2;
+const cx = vbSize / 2;
+const cy = vbSize / 2;
+const maxRadius = size * 0.44;
+
+const scoresA = dimensionScores(langA);
+const scoresB = dimensionScores(langB);
+const colorA = VS_COLOR_A;
+const colorB = VS_COLOR_B;
+
+const gridLevels = [2, 4, 6, 8, 10];
+const numAxes = 6;
+const angleStep = (2 * Math.PI) / numAxes;
+
+const axisEndpoints = Array.from({ length: numAxes }, (_, i) => {
+  const angle = i * angleStep;
+  return polarToCartesian(cx, cy, angle, maxRadius);
+});
+
+const labelRadius = maxRadius + 20;
+const labelPositions = DIMENSIONS.map((dim, i) => {
+  const angle = i * angleStep;
+  const pos = polarToCartesian(cx, cy, angle, labelRadius);
+  const color = DIMENSION_COLORS[dim.key] || '#5a5a5a';
+  return { ...pos, dim, color };
+});
+
+const polygonPointsA = radarPolygonPoints(cx, cy, maxRadius, scoresA, 10);
+const polygonPointsB = radarPolygonPoints(cx, cy, maxRadius, scoresB, 10);
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox={`0 0 ${vbSize} ${vbSize}`}
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label={`Overlay radar chart comparing ${langA.name} and ${langB.name} across 6 dimensions`}
+>
+  <title>{`Overlay radar chart comparing ${langA.name} and ${langB.name} across 6 dimensions`}</title>
+
+  {/* Concentric hexagonal grid rings */}
+  {gridLevels.map((level) => {
+    const ringRadius = (level / 10) * maxRadius;
+    const points = hexagonRingPoints(cx, cy, ringRadius, 6);
+    return (
+      <polygon
+        points={points}
+        fill="none"
+        stroke="#e5ddd5"
+        stroke-width="1"
+      />
+    );
+  })}
+
+  {/* Axis lines from center to outer vertices */}
+  {axisEndpoints.map((endpoint) => (
+    <line
+      x1={cx}
+      y1={cy}
+      x2={endpoint.x.toFixed(2)}
+      y2={endpoint.y.toFixed(2)}
+      stroke="#e5ddd5"
+      stroke-width="1"
+    />
+  ))}
+
+  {/* Language A polygon — solid stroke */}
+  <polygon
+    points={polygonPointsA}
+    fill={colorA}
+    fill-opacity="0.35"
+    stroke={colorA}
+    stroke-width="2"
+  />
+
+  {/* Language B polygon — dashed stroke */}
+  <polygon
+    points={polygonPointsB}
+    fill={colorB}
+    fill-opacity="0.2"
+    stroke={colorB}
+    stroke-width="2"
+    stroke-dasharray="6,3"
+  />
+
+  {/* Axis labels: colored Greek letter */}
+  {labelPositions.map((lp) => (
+    <text
+      x={lp.x.toFixed(2)}
+      y={lp.y.toFixed(2)}
+      text-anchor="middle"
+      dominant-baseline="middle"
+      font-size="14"
+      font-weight="bold"
+      fill={lp.color}
+      font-family="Georgia, 'Noto Sans', serif"
+    >
+      {lp.dim.symbol}
+    </text>
+  ))}
+</svg>

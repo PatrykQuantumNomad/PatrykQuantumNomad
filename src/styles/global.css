@@ -226,10 +226,8 @@ button:focus-visible,
   background: rgba(248, 248, 252, 0.7);
 }
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 12px 40px var(--category-glow, var(--color-accent-glow)),
-    0 0 60px var(--category-glow, var(--color-glow-neon));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-color: var(--color-accent);
 }
 
@@ -520,7 +518,6 @@ body::before {
   position: relative;
   padding-left: 1rem;
   border-left: 3px solid var(--color-accent);
-  margin-top: 3rem;
   margin-bottom: 1.25rem;
 }
 .prose h2::before {
@@ -536,7 +533,6 @@ body::before {
 }
 .prose h3 {
   color: var(--color-accent);
-  margin-top: 2rem;
 }
 .prose > p:first-of-type::first-letter {
   float: left;

@@ -1,0 +1,152 @@
+---
+/**
+ * Score Justifications Page — /beauty-index/justifications/
+ * Displays the editorial reasoning behind every dimension score
+ * for all 25 languages, grouped by tier.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import { totalScore } from '../../../lib/beauty-index/schema';
+import { DIMENSIONS } from '../../../lib/beauty-index/dimensions';
+import { DIMENSION_COLORS, TIERS, getTierColor } from '../../../lib/beauty-index/tiers';
+import { JUSTIFICATIONS } from '../../../data/beauty-index/justifications';
+
+const languages = await getCollection('languages');
+const allData = languages.map((entry) => entry.data);
+const sorted = [...allData].sort((a, b) => totalScore(b) - totalScore(a));
+
+const ogImageURL = new URL('/open-graph/beauty-index.png', Astro.site).toString();
+
+const tiers = ['beautiful', 'handsome', 'practical', 'workhorses'] as const;
+const tierNames: Record<string, string> = {
+  beautiful: 'Beautiful',
+  handsome: 'Handsome',
+  practical: 'Practical',
+  workhorses: 'Workhorses',
+};
+---
+
+<Layout
+  title="Score Justifications | Beauty Index | Patryk Golabek"
+  description="The editorial reasoning behind every dimension score in the Beauty Index. 25 languages, 6 dimensions, 150 justifications."
+  ogImage={ogImageURL}
+  ogImageAlt="Beauty Index — Score Justifications for 25 programming languages"
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: "Home", url: "https://patrykgolabek.dev/" },
+    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+    { name: "Score Justifications", url: "https://patrykgolabek.dev/beauty-index/justifications/" },
+  ]} />
+
+  {/* Hero Section */}
+  <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      Score Justifications
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
+      The editorial reasoning behind every dimension score.
+    </p>
+    <p class="text-sm text-[var(--color-text-secondary)] mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+      <a href="/beauty-index/" class="text-[var(--color-accent)] hover:underline">
+        &larr; Back to Beauty Index
+      </a>
+      <a href="/blog/the-beauty-index/" class="text-[var(--color-accent)] hover:underline">
+        Read the methodology &rarr;
+      </a>
+      <a href="/beauty-index/code/" class="text-[var(--color-accent)] hover:underline">
+        Compare code side-by-side &rarr;
+      </a>
+    </p>
+  </section>
+
+  {/* Tier Jump Links */}
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8" aria-label="Jump to tier">
+    <div class="flex flex-wrap gap-3 justify-center">
+      {tiers.map((tier) => (
+        <a
+          href={`#tier-${tier}`}
+          class="text-sm px-3 py-1.5 rounded-full border transition-colors hover:bg-[var(--color-surface-alt)]"
+          style={`border-color: ${getTierColor(tier)}; color: ${getTierColor(tier)};`}
+        >
+          {tierNames[tier]}
+        </a>
+      ))}
+    </div>
+  </nav>
+
+  {/* Per-tier Sections */}
+  {tiers.map((tier) => {
+    const tierLangs = sorted.filter((l) => l.tier === tier);
+    return (
+      <section id={`tier-${tier}`} class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <h2
+          class="text-2xl font-heading font-bold mb-6 pl-4 border-l-4"
+          style={`border-color: ${getTierColor(tier)};`}
+        >
+          {tierNames[tier]}
+        </h2>
+
+        {tierLangs.map((lang) => {
+          const total = totalScore(lang);
+          const justifications = JUSTIFICATIONS[lang.id] || {};
+          return (
+            <div class="rounded-lg border border-[var(--color-border)] overflow-hidden mb-8">
+              {/* Language header */}
+              <div class="px-4 py-3 bg-[var(--color-surface-alt)] border-b border-[var(--color-border)] flex items-center justify-between">
+                <a
+                  href={`/beauty-index/${lang.id}/`}
+                  class="text-lg font-heading font-bold hover:text-[var(--color-accent)] transition-colors"
+                >
+                  {lang.name}
+                </a>
+                <div class="flex items-center gap-3">
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={`color: ${getTierColor(tier)}; background: ${getTierColor(tier)}15;`}
+                  >
+                    {tierNames[tier]}
+                  </span>
+                  <span class="text-sm font-mono text-[var(--color-text-secondary)]">{total}/60</span>
+                </div>
+              </div>
+
+              {/* Dimension justification rows */}
+              <div class="divide-y divide-[var(--color-border)]/50">
+                {DIMENSIONS.map((dim) => (
+                  <div class="px-4 py-3">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span
+                        class="font-semibold text-sm"
+                        style={`color: ${DIMENSION_COLORS[dim.key]};`}
+                      >
+                        {dim.symbol}
+                      </span>
+                      <span class="text-sm font-medium">{dim.shortName}</span>
+                      <span class="text-sm font-mono text-[var(--color-text-secondary)]">
+                        {lang[dim.key]}/10
+                      </span>
+                    </div>
+                    <p
+                      class="justification-text text-sm text-[var(--color-text-secondary)] leading-relaxed"
+                      set:html={justifications[dim.key] || ''}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+    );
+  })}
+
+  {/* Bottom spacing */}
+  <div class="pb-16" />
+</Layout>
+
+<style is:global>
+  .justification-text code {
+    font-variant-ligatures: none;
+  }
+</style>

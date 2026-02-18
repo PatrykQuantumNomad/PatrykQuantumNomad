@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import FAQPageJsonLd from '../components/FAQPageJsonLd.astro';
 import HeadSceneWrapper from '../components/HeadSceneWrapper.astro';
 import avatarImg from '../assets/images/anime.jpeg';
 import familyImg from '../assets/images/meandfamily.jpg';
@@ -328,6 +329,20 @@ const highlights = [
   <BreadcrumbJsonLd crumbs={[
     { name: "Home", url: `${Astro.site}` },
     { name: "About", url: `${new URL('/about/', Astro.site)}` },
+  ]} />
+  <FAQPageJsonLd items={[
+    {
+      question: "What technologies does Patryk Golabek specialize in?",
+      answer: "Patryk specializes in Kubernetes and cloud-native architecture (pre-1.0 adopter), AI/ML systems including LLM agents and RAG pipelines, platform engineering with Terraform and GitOps, and full-stack development with Python, Java, TypeScript, React, and Angular."
+    },
+    {
+      question: "How many years of experience does Patryk Golabek have?",
+      answer: "Patryk has over 17 years of production software engineering experience, spanning backend services, frontend applications, infrastructure, data science, and AI/ML systems. He has held CTO and co-founder roles."
+    },
+    {
+      question: "Where is Patryk Golabek based?",
+      answer: "Patryk is based in Ontario, Canada. He is a Cloud-Native Software Architect currently open to new opportunities in software architecture, staff engineering, or engineering leadership."
+    },
   ]} />
 </Layout>
 

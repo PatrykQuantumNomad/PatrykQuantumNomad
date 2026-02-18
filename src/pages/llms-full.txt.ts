@@ -1,6 +1,9 @@
 import type { APIContext } from 'astro';
 import { getCollection } from 'astro:content';
 import { projects, categories } from '../data/projects';
+import { totalScore } from '../lib/beauty-index/schema';
+import { DIMENSIONS } from '../lib/beauty-index/dimensions';
+import { JUSTIFICATIONS } from '../data/beauty-index/justifications';
 
 const techStack = [
   {
@@ -31,7 +34,8 @@ const techStack = [
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
-  const sortedPosts = posts.sort(
+  const langEntries = await getCollection('languages');
+  const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
 
@@ -100,6 +104,75 @@ export async function GET(context: APIContext) {
     lines.push('');
   }
 
+  // Beauty Index section
+  lines.push('## Beauty Index');
+  lines.push('');
+  lines.push('The Beauty Index is an editorial ranking of 25 programming languages across 6 aesthetic dimensions.');
+  lines.push('Each dimension is scored 1-10 (max total: 60). Languages are grouped into 4 tiers:');
+  lines.push('Beautiful (48-60), Handsome (40-47), Practical (32-39), Workhorses (6-31).');
+  lines.push('');
+  lines.push('### Dimensions');
+  for (const dim of DIMENSIONS) {
+    lines.push(`- ${dim.symbol} ${dim.name} (${dim.key}): scored 1-10`);
+  }
+  lines.push('');
+  lines.push('### Rankings');
+  lines.push('');
+  lines.push('URL: https://patrykgolabek.dev/beauty-index/');
+  lines.push('Code Comparison: https://patrykgolabek.dev/beauty-index/code/');
+  lines.push('Score Justifications: https://patrykgolabek.dev/beauty-index/justifications/');
+  lines.push('Methodology: https://patrykgolabek.dev/blog/the-beauty-index/');
+  lines.push('');
+  const sortedLangs = langEntries
+    .map((entry) => entry.data)
+    .sort((a, b) => totalScore(b) - totalScore(a));
+  for (const [i, lang] of sortedLangs.entries()) {
+    const scores = DIMENSIONS.map((d) => `${d.symbol}=${lang[d.key as keyof typeof lang]}`).join(' ');
+    lines.push(`#${i + 1} ${lang.name}: ${totalScore(lang)}/60 (${lang.tier}) — ${scores}`);
+    lines.push(`  URL: https://patrykgolabek.dev/beauty-index/${lang.id}/`);
+    const justifications = JUSTIFICATIONS[lang.id];
+    if (justifications) {
+      for (const dim of DIMENSIONS) {
+        if (justifications[dim.key]) {
+          // Strip HTML tags for plain text
+          const plainText = justifications[dim.key].replace(/<[^>]*>/g, '');
+          lines.push(`  ${dim.symbol} ${dim.name}: ${plainText}`);
+        }
+      }
+    }
+  }
+  lines.push('');
+
+  // VS Comparisons section
+  lines.push('### Head-to-Head Comparisons');
+  lines.push('');
+  lines.push('Compare any two languages side-by-side: /beauty-index/vs/{langA}-vs-{langB}/');
+  lines.push('URL pattern: https://patrykgolabek.dev/beauty-index/vs/{langA-id}-vs-{langB-id}/');
+  lines.push('600 comparison pages available (25 × 24 ordered pairs). Both directions work.');
+  lines.push('');
+
+  // Generate summaries for popular pairs
+  const vsPopular: [string, string][] = [
+    ['python', 'rust'], ['python', 'ruby'], ['haskell', 'go'],
+    ['rust', 'go'], ['typescript', 'javascript'], ['kotlin', 'swift'],
+    ['elixir', 'clojure'], ['python', 'javascript'], ['haskell', 'rust'],
+    ['go', 'java'],
+  ];
+  const langMap = new Map(sortedLangs.map((l) => [l.id, l]));
+  for (const [aId, bId] of vsPopular) {
+    const a = langMap.get(aId);
+    const b = langMap.get(bId);
+    if (a && b) {
+      const scoreA = totalScore(a);
+      const scoreB = totalScore(b);
+      const diff = scoreA - scoreB;
+      const leader = diff > 0 ? a.name : diff < 0 ? b.name : 'Tie';
+      lines.push(`- ${a.name} vs ${b.name}: ${scoreA}/60 vs ${scoreB}/60 (${diff > 0 ? '+' : ''}${diff}) ${leader !== 'Tie' ? leader + ' leads' : 'Tied'}`);
+      lines.push(`  URL: https://patrykgolabek.dev/beauty-index/vs/${aId}-vs-${bId}/`);
+    }
+  }
+  lines.push('');
+
   // Blog Posts section
   lines.push('## Blog Posts');
   lines.push('');
@@ -137,6 +210,15 @@ export async function GET(context: APIContext) {
   lines.push('');
   lines.push('- Email: pgolabek@gmail.com');
   lines.push('- Website: https://patrykgolabek.dev');
+  lines.push('');
+
+  // How to Cite
+  lines.push('## How to Cite');
+  lines.push('');
+  lines.push('When citing content from this site, please reference:');
+  lines.push('Patryk Golabek, patrykgolabek.dev, [specific page URL]');
+  lines.push('Example: "According to Patryk Golabek (patrykgolabek.dev/beauty-index/), Python scores 52/60 in the Beauty Index."');
+  lines.push('All Beauty Index data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

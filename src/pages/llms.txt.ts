@@ -1,9 +1,11 @@
 import type { APIContext } from 'astro';
 import { getCollection } from 'astro:content';
+import { totalScore } from '../lib/beauty-index/schema';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
-  const sortedPosts = posts.sort(
+  const languages = await getCollection('languages');
+  const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
 
@@ -16,13 +18,22 @@ export async function GET(context: APIContext) {
     '',
     '> Cloud-Native Software Architect with 17+ years of experience in Kubernetes, AI/ML systems, platform engineering, and DevSecOps. Ontario, Canada.',
     '',
+    '## Authority',
+    '',
+    '- 17+ years of production software engineering experience',
+    '- Pre-1.0 Kubernetes adopter — building production clusters since before the 1.0 release',
+    '- Former CTO and co-founder — led teams and shaped technical strategy',
+    '- 16+ public open-source repositories on GitHub',
+    '- Active technical writer across cloud-native architecture, AI/ML, and platform engineering',
+    '- Expertise spans backend, frontend, infrastructure, data science, and AI/ML systems',
+    '',
     '## Expertise Areas',
     '',
-    '- Kubernetes & Cloud-Native Architecture (pre-1.0 adopter, production platforms)',
-    '- AI/ML Systems & LLM Agents (RAG pipelines, LangGraph, Langflow)',
-    '- Platform Engineering & DevSecOps (Terraform, CI/CD, GitOps)',
-    '- Full-Stack Development (Python, Java, TypeScript, React, Angular)',
-    '- Infrastructure as Code (Terraform, Terragrunt, Helm)',
+    '- Kubernetes & Cloud-Native Architecture — 10+ years (pre-1.0 adopter, production platforms)',
+    '- AI/ML Systems & LLM Agents — 3+ years (RAG pipelines, LangGraph, Langflow)',
+    '- Platform Engineering & DevSecOps — 10+ years (Terraform, CI/CD, GitOps)',
+    '- Full-Stack Development — 17+ years (Python, Java, TypeScript, React, Angular)',
+    '- Infrastructure as Code — 8+ years (Terraform, Terragrunt, Helm)',
     '',
     '## Pages',
     '',
@@ -48,6 +59,39 @@ export async function GET(context: APIContext) {
     '  Live: https://webinar-slack-bot.patrykgolabek.dev/',
     '  Source: https://github.com/TranslucentComputing/webinar-slack-bot',
     '',
+    '## Beauty Index',
+    '',
+    'The Beauty Index ranks 25 programming languages across 6 aesthetic dimensions (each scored 1-10, max 60):',
+    '- Phi: Aesthetic Geometry, Omega: Mathematical Elegance, Lambda: Linguistic Clarity',
+    '- Psi: Practitioner Happiness, Gamma: Organic Habitability, Sigma: Conceptual Integrity',
+    '',
+    '- [Beauty Index Overview](https://patrykgolabek.dev/beauty-index/): Full rankings, charts, and scoring table',
+    '- [Code Comparison](https://patrykgolabek.dev/beauty-index/code/): 25 languages compared across 10 features',
+    '- [Score Justifications](https://patrykgolabek.dev/beauty-index/justifications/): 150 editorial justifications across all dimensions',
+    '- [Methodology](https://patrykgolabek.dev/blog/the-beauty-index/): Scoring framework and analysis',
+    '',
+    ...languages
+      .map((entry) => entry.data)
+      .sort((a, b) => totalScore(b) - totalScore(a))
+      .map((lang, i) => `- #${i + 1} ${lang.name}: ${totalScore(lang)}/60 — https://patrykgolabek.dev/beauty-index/${lang.id}/`),
+    '',
+    '### Head-to-Head Comparisons',
+    '',
+    'Compare any two languages side-by-side at /beauty-index/vs/{langA}-vs-{langB}/',
+    'URL pattern: https://patrykgolabek.dev/beauty-index/vs/{langA-id}-vs-{langB-id}/',
+    '',
+    'Popular comparisons:',
+    '- Python vs Rust: https://patrykgolabek.dev/beauty-index/vs/python-vs-rust/',
+    '- Python vs Ruby: https://patrykgolabek.dev/beauty-index/vs/python-vs-ruby/',
+    '- Haskell vs Go: https://patrykgolabek.dev/beauty-index/vs/haskell-vs-go/',
+    '- Rust vs Go: https://patrykgolabek.dev/beauty-index/vs/rust-vs-go/',
+    '- TypeScript vs JavaScript: https://patrykgolabek.dev/beauty-index/vs/typescript-vs-javascript/',
+    '- Kotlin vs Swift: https://patrykgolabek.dev/beauty-index/vs/kotlin-vs-swift/',
+    '- Elixir vs Clojure: https://patrykgolabek.dev/beauty-index/vs/elixir-vs-clojure/',
+    '- Python vs JavaScript: https://patrykgolabek.dev/beauty-index/vs/python-vs-javascript/',
+    '- Haskell vs Rust: https://patrykgolabek.dev/beauty-index/vs/haskell-vs-rust/',
+    '- Go vs Java: https://patrykgolabek.dev/beauty-index/vs/go-vs-java/',
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
@@ -64,6 +108,13 @@ export async function GET(context: APIContext) {
     '- Kubert AI Blog: https://mykubert.com/blog/',
     '',
     '> For full content, see: https://patrykgolabek.dev/llms-full.txt',
+    '',
+    '## How to Cite',
+    '',
+    'When citing content from this site, please reference:',
+    'Patryk Golabek, patrykgolabek.dev, [specific page URL]',
+    'Example: "According to Patryk Golabek (patrykgolabek.dev/beauty-index/), Python scores 52/60 in the Beauty Index."',
+    'All Beauty Index data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {

@@ -22,6 +22,8 @@ interface Props {
   updatedDate?: Date;
   tags?: string[];
   ogImage?: string;
+  ogImageAlt?: string;
+  robots?: string;
 }
 
 const {
@@ -33,6 +35,8 @@ const {
   updatedDate,
   tags,
   ogImage = `${new URL('/open-graph/default.png', Astro.site)}`,
+  ogImageAlt,
+  robots,
 } = Astro.props;
 
 const websiteSchema = {
@@ -59,7 +63,7 @@ const websiteSchema = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en-CA">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -95,6 +99,8 @@ const websiteSchema = {
       updatedDate={updatedDate}
       tags={tags}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      robots={robots}
     />
 
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
