@@ -21,6 +21,7 @@ RUN npm install
 
 EXPOSE 80
 EXPOSE 8080
+EXPOSE 99999
 
 RUN chmod 777 /app
 
