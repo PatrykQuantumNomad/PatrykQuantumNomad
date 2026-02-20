@@ -1,0 +1,228 @@
+---
+title: "Death by a Thousand Arrows: The Cost of \"Cleaner\" Code"
+description: "Arrow functions are not easier to read or write. A case for clarity over cleverness, examining how the function keyword got eroded one implicit return at a time."
+publishedDate: 2026-02-20
+tags: ["javascript", "programming-languages", "code-quality", "software-aesthetics"]
+coverImage: "/images/death-by-a-thousand-arrows-cover.svg"
+draft: false
+---
+
+import OpeningStatement from '../../components/blog/OpeningStatement.astro';
+import TldrSummary from '../../components/blog/TldrSummary.astro';
+import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
+
+<figure class="not-prose mb-12 -mx-4 sm:-mx-6 lg:-mx-8">
+  <img src="/images/death-by-a-thousand-arrows-cover.svg" alt="The word function rendered in amber monospace font, battered by a rain of red arrow function symbols (=> and ->) falling from above, with cracks and damage marks across the letters" class="w-full rounded-lg" />
+</figure>
+
+<OpeningStatement>Arrow functions are not easier to read or write.</OpeningStatement>
+
+There, I said it. Before you dismiss this as a stubborn opinion, know that I use arrow functions daily and have shipped them to production. This isn't nostalgia; it's an argument for clarity over cleverness. If you've read [The Beauty Index](/blog/the-beauty-index/), you know I care about how code looks and reads. This is the same instinct, applied to a single syntactic choice.
+
+<TldrSummary>
+
+- The `function` keyword **signals intent directly**, no guesswork
+- Arrow functions trade **readability for brevity**, and brevity is not the bottleneck
+- The erosion happens **one implicit return at a time** — six small steps from clear to cryptic
+- This is a **cross-language epidemic**: `=>`, `->`, `|..|`, `\`, `lambda`, every language picked a different symbol
+- Arrow functions have **legitimate uses** (callbacks, `.map()` chains, inline transforms), but the problem is "use everywhere"
+
+</TldrSummary>
+
+## The Case for Tradition
+
+Take a look at this code using a traditional function expression:
+
+```javascript title="JavaScript"
+app.get('/api/users/:id', async function(req, res) {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Failed to fetch user', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+```
+
+You see `function` and know it's a function. The keyword signals its intent directly: "I am a function. I do things." No guesswork, just clarity.
+
+Now here's the same route written the "modern" way:
+
+```javascript title="JavaScript"
+app.get('/api/users/:id', async ({ params: { id } }, res) => {
+    try {
+        const user = await User.findById(id);
+        return user
+            ? res.json(user)
+            : res.status(404).json({ error: 'User not found' });
+    } catch (error) {
+        console.error('Failed to fetch user', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+```
+
+What did we gain? Destructured parameters obscure the `id`, and a ternary operator complicates the control flow. Fewer lines, but these shortcuts slow down future readers.
+
+I'm not claiming this out of familiarity or habit.
+
+## Where the Confusion Creeps In
+
+Let's use a simpler example to illustrate the point:
+
+```javascript title="JavaScript"
+// Traditional function
+function multiply(a, b) {
+  return a * b;
+}
+
+// Arrow function
+const multiply = (a, b) => a * b;
+```
+
+The traditional function is explicit. Even at 2 AM after a few beers, it's clear: `function` signals intent, `return` forms a contract. No ambiguity here.
+
+The arrow version is clever and terse. But in a codebase for a tired team, these are not always virtues.
+
+## The Slow Erosion of Function
+
+To understand how we got here, let's watch a perfectly readable function get "improved" to death, step by step.
+
+**Step 1:** A named function. Clear. Honest. No tricks.
+
+```javascript title="JavaScript"
+function greet(name) {
+    return 'Hello, ' + name;
+}
+```
+
+**Step 2:** Assign it to a variable. Still has `function`, still readable.
+
+```javascript title="JavaScript"
+const greet = function(name) {
+    return 'Hello, ' + name;
+};
+```
+
+**Step 3:** Drop `function`, add an arrow. Now it's "modern."
+
+```javascript title="JavaScript"
+const greet = (name) => {
+    return 'Hello, ' + name;
+};
+```
+
+**Step 4:** Single parameter? Drop the parentheses.
+
+```javascript title="JavaScript"
+const greet = name => {
+    return 'Hello, ' + name;
+};
+```
+
+**Step 5:** One-liner? Drop the braces and `return`.
+
+```javascript title="JavaScript"
+const greet = name => 'Hello, ' + name;
+```
+
+**Step 6:** Use a template literal, because why not?
+
+```javascript title="JavaScript"
+const greet = name => `Hello, ${name}`;
+```
+
+We started with a function that anyone could read. Six steps later, we have a line that requires you to know about implicit returns, optional parentheses, arrow syntax, and template literals, just to say hello.
+
+Each step felt reasonable. The destination is not.
+
+## A Cross-Language Epidemic
+
+JavaScript isn't alone. This trend has spread across programming like a flu. Nearly every language in the [Beauty Index](/beauty-index/) has adopted some form of shorthand function syntax.
+
+```python title="Python"
+multiply = lambda a, b: a * b
+```
+<br />
+```ruby title="Ruby"
+multiply = ->(a, b) { a * b }
+```
+<br />
+```csharp title="C#"
+Func<int, int, int> multiply = (a, b) => a * b;
+```
+<br />
+```java title="Java"
+BiFunction<Integer, Integer, Integer> multiply = (a, b) -> a * b;
+```
+<br />
+```swift title="Swift"
+let multiply: (Int, Int) -> Int = { a, b in a * b }
+```
+<br />
+```kotlin title="Kotlin"
+val multiply: (Int, Int) -> Int = { a, b -> a * b }
+```
+<br />
+```scala title="Scala"
+val multiply = (a: Int, b: Int) => a * b
+```
+<br />
+```rust title="Rust"
+let multiply = |a, b| a * b;
+```
+<br />
+```haskell title="Haskell"
+multiply = \a b -> a * b
+```
+<br />
+```php title="PHP"
+$multiply = fn($a, $b) => $a * $b;
+```
+<br />
+```dart title="Dart"
+var multiply = (int a, int b) => a * b;
+```
+<br />
+```elixir title="Elixir"
+multiply = fn a, b -> a * b end
+```
+
+Aaaaah. Every language now offers a new way to write a function, with a cute little arrow.
+
+`=>`, `->`, `|..|`, `\`, `in`, `fn`, `lambda`. Every language decided the world needed a shorter way to write a function, and every language picked a different symbol to do it. If you work across even two or three of these, your brain is constantly re-parsing what "short function" looks like today.
+
+## The Real Problem
+
+Allow me to be clear: I'm not saying arrow functions are bad. They have legitimate uses. Callbacks, `.map()` chains, short inline transformations, sure, fine, go wild. The implicit return is genuinely nice when you're doing something trivial.
+
+### When Arrow Functions Make Sense
+
+1. **Callbacks** in `.map()`, `.filter()`, `.reduce()` — short, inline, disposable
+2. **Single-expression transforms** where the implicit return reads naturally
+3. **Preserving `this` context** inside class methods or event handlers
+4. **Framework conventions** where arrow syntax is idiomatic (React components, Vue composition API)
+
+But "useful in context" became "use everywhere." When codebases are forests of `=>`, you lose readability for a few saved keystrokes. Autocomplete exists. Keystrokes aren't the bottleneck.
+
+The bottleneck is the developer, months later at 3 AM, trying to understand your code, possibly you.
+
+## Death by a Thousand Arrows
+
+No single arrow function ruined a codebase. No single `=>` was the mistake. It happened gradually, one implicit return, one destructured parameter, and one dropped `function` keyword at a time.
+
+Each cut was small. Each cut was "cleaner." Each cut was approved in code review because who pushes back on fewer lines?
+
+And then one day you open a file and it's a wall of arrows pointing in every direction, and you can't tell where a callback ends and a component begins, and the person who wrote it left the company six months ago, and it's 3 AM, and the only thing you know for certain is that none of this is easier to read.
+
+That's the cost of "cleaner" code. Not a catastrophic failure, just a slow, quiet erosion of clarity that nobody noticed because every individual change looked like progress.
+
+---
+
+<KeyTakeaway>
+Occasionally writing out `function` adds clarity to the codebase. Not always. Not everywhere. But when you reach for the arrow out of habit rather than intent, pause and ask: *is this actually easier to read?*
+</KeyTakeaway>

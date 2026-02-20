@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#111018"/>
+      <stop offset="60%" stop-color="#0a0910"/>
+      <stop offset="100%" stop-color="#06050a"/>
+    </radialGradient>
+
+    <!-- Warm glow behind function word -->
+    <radialGradient id="functionGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f5a623" stop-opacity="0.12"/>
+      <stop offset="60%" stop-color="#f5a623" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Red impact glow -->
+    <radialGradient id="impactGlow" cx="50%" cy="40%" r="45%">
+      <stop offset="0%" stop-color="#ff3333" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ff3333" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="strongGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="warmGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="erosionBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+
+    <radialGradient id="vignette" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.75"/>
+    </radialGradient>
+
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.05"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="overlay"/>
+    </filter>
+
+    <!-- Clip for the eroded function text -->
+    <clipPath id="functionClip">
+      <rect x="340" y="230" width="520" height="90"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGlow)"/>
+  <rect width="1200" height="630" filter="url(#noise)" opacity="0.4"/>
+
+  <!-- Warm glow behind function -->
+  <ellipse cx="600" cy="280" rx="280" ry="120" fill="url(#functionGlow)"/>
+
+  <!-- Impact zone glow -->
+  <ellipse cx="600" cy="240" rx="350" ry="250" fill="url(#impactGlow)"/>
+
+  <!-- ============================================ -->
+  <!-- FALLING ARROWS — dense rain from top         -->
+  <!-- ============================================ -->
+  <g font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" font-weight="bold">
+
+    <!-- Far background arrows — faint, small -->
+    <g opacity="0.06" fill="#ff4444">
+      <text x="95" y="35" font-size="12" transform="rotate(82, 95, 35)">=&gt;</text>
+      <text x="185" y="20" font-size="11" transform="rotate(88, 185, 20)">-&gt;</text>
+      <text x="270" y="45" font-size="10" transform="rotate(78, 270, 45)">=&gt;</text>
+      <text x="360" y="15" font-size="12" transform="rotate(85, 360, 15)">-&gt;</text>
+      <text x="440" y="30" font-size="11" transform="rotate(90, 440, 30)">=&gt;</text>
+      <text x="530" y="10" font-size="10" transform="rotate(84, 530, 10)">=&gt;</text>
+      <text x="620" y="40" font-size="12" transform="rotate(76, 620, 40)">-&gt;</text>
+      <text x="710" y="18" font-size="11" transform="rotate(92, 710, 18)">=&gt;</text>
+      <text x="800" y="35" font-size="10" transform="rotate(80, 800, 35)">-&gt;</text>
+      <text x="890" y="25" font-size="12" transform="rotate(87, 890, 25)">=&gt;</text>
+      <text x="970" y="42" font-size="11" transform="rotate(83, 970, 42)">-&gt;</text>
+      <text x="1060" y="15" font-size="10" transform="rotate(90, 1060, 15)">=&gt;</text>
+      <text x="1140" y="38" font-size="12" transform="rotate(79, 1140, 38)">-&gt;</text>
+    </g>
+
+    <!-- Mid-background arrows -->
+    <g opacity="0.10" fill="#ff3333">
+      <text x="65" y="85" font-size="14" transform="rotate(84, 65, 85)">=&gt;</text>
+      <text x="150" y="100" font-size="13" transform="rotate(78, 150, 100)">-&gt;</text>
+      <text x="240" y="75" font-size="15" transform="rotate(90, 240, 75)">=&gt;</text>
+      <text x="325" y="110" font-size="13" transform="rotate(82, 325, 110)">-&gt;</text>
+      <text x="415" y="80" font-size="14" transform="rotate(86, 415, 80)">=&gt;</text>
+      <text x="505" y="95" font-size="13" transform="rotate(75, 505, 95)">-&gt;</text>
+      <text x="590" y="70" font-size="15" transform="rotate(88, 590, 70)">=&gt;</text>
+      <text x="680" y="105" font-size="13" transform="rotate(80, 680, 105)">-&gt;</text>
+      <text x="765" y="78" font-size="14" transform="rotate(92, 765, 78)">=&gt;</text>
+      <text x="855" y="100" font-size="13" transform="rotate(77, 855, 100)">-&gt;</text>
+      <text x="940" y="72" font-size="15" transform="rotate(85, 940, 72)">-&gt;</text>
+      <text x="1025" y="108" font-size="13" transform="rotate(90, 1025, 108)">=&gt;</text>
+      <text x="1110" y="82" font-size="14" transform="rotate(81, 1110, 82)">-&gt;</text>
+    </g>
+
+    <!-- Mid arrows — getting closer -->
+    <g opacity="0.16" fill="#ff3333">
+      <text x="80" y="155" font-size="16" transform="rotate(83, 80, 155)">=&gt;</text>
+      <text x="170" y="140" font-size="15" transform="rotate(90, 170, 140)">-&gt;</text>
+      <text x="260" y="165" font-size="17" transform="rotate(77, 260, 165)">=&gt;</text>
+      <text x="350" y="135" font-size="15" transform="rotate(86, 350, 135)">=&gt;</text>
+      <text x="445" y="160" font-size="16" transform="rotate(80, 445, 160)">-&gt;</text>
+      <text x="535" y="145" font-size="17" transform="rotate(92, 535, 145)">=&gt;</text>
+      <text x="625" y="130" font-size="15" transform="rotate(84, 625, 130)">-&gt;</text>
+      <text x="715" y="158" font-size="16" transform="rotate(78, 715, 158)">-&gt;</text>
+      <text x="805" y="140" font-size="17" transform="rotate(88, 805, 140)">=&gt;</text>
+      <text x="895" y="162" font-size="15" transform="rotate(82, 895, 162)">=&gt;</text>
+      <text x="985" y="138" font-size="16" transform="rotate(90, 985, 138)">-&gt;</text>
+      <text x="1075" y="155" font-size="17" transform="rotate(76, 1075, 155)">=&gt;</text>
+    </g>
+
+    <!-- Foreground arrows — larger, brighter, denser near center -->
+    <g opacity="0.25" fill="#ff4444" filter="url(#strongGlow)">
+      <text x="310" y="195" font-size="20" transform="rotate(85, 310, 195)">=&gt;</text>
+      <text x="390" y="205" font-size="19" transform="rotate(78, 390, 205)">-&gt;</text>
+      <text x="470" y="190" font-size="22" transform="rotate(90, 470, 190)">=&gt;</text>
+      <text x="550" y="210" font-size="20" transform="rotate(82, 550, 210)">-&gt;</text>
+      <text x="630" y="195" font-size="21" transform="rotate(88, 630, 195)">=&gt;</text>
+      <text x="710" y="208" font-size="19" transform="rotate(76, 710, 208)">-&gt;</text>
+      <text x="790" y="192" font-size="22" transform="rotate(84, 790, 192)">=&gt;</text>
+      <text x="870" y="200" font-size="20" transform="rotate(90, 870, 200)">-&gt;</text>
+    </g>
+
+    <!-- Closest arrows — striking near the function word -->
+    <g opacity="0.35" fill="#ff5555" filter="url(#strongGlow)">
+      <text x="380" y="240" font-size="24" transform="rotate(82, 380, 240)">=&gt;</text>
+      <text x="480" y="235" font-size="22" transform="rotate(90, 480, 235)">-&gt;</text>
+      <text x="575" y="245" font-size="25" transform="rotate(78, 575, 245)">=&gt;</text>
+      <text x="670" y="232" font-size="23" transform="rotate(86, 670, 232)">-&gt;</text>
+      <text x="760" y="242" font-size="24" transform="rotate(83, 760, 242)">=&gt;</text>
+    </g>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- THE WORD "function" — eroding under assault  -->
+  <!-- ============================================ -->
+  
+  <!-- Faded/eroded copies underneath for depth -->
+  <text x="600" y="305" font-size="90" fill="#f5a623" text-anchor="middle" 
+    font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" 
+    font-weight="bold" opacity="0.04" filter="url(#erosionBlur)">function</text>
+
+  <!-- Main function text — warm amber, still standing -->
+  <text x="600" y="305" font-size="90" fill="#f5a623" text-anchor="middle" 
+    font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" 
+    font-weight="bold" opacity="0.85" filter="url(#warmGlow)">function</text>
+
+  <!-- Cracks/scratches over function — thin red lines suggesting damage -->
+  <g opacity="0.25" stroke="#ff3333" stroke-width="1" stroke-linecap="round">
+    <line x1="420" y1="270" x2="435" y2="310"/>
+    <line x1="510" y1="265" x2="520" y2="295"/>
+    <line x1="580" y1="272" x2="595" y2="308"/>
+    <line x1="660" y1="268" x2="670" y2="300"/>
+    <line x1="735" y1="275" x2="748" y2="305"/>
+  </g>
+
+  <!-- Small arrow debris scattered below — arrows that have passed through -->
+  <g font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" opacity="0.12" fill="#ff3333">
+    <text x="350" y="370" font-size="14" transform="rotate(85, 350, 370)">=&gt;</text>
+    <text x="430" y="385" font-size="12" transform="rotate(78, 430, 385)">-&gt;</text>
+    <text x="520" y="365" font-size="15" transform="rotate(90, 520, 365)">=&gt;</text>
+    <text x="610" y="380" font-size="13" transform="rotate(82, 610, 380)">-&gt;</text>
+    <text x="690" y="372" font-size="14" transform="rotate(88, 690, 372)">-&gt;</text>
+    <text x="770" y="388" font-size="12" transform="rotate(76, 770, 388)">=&gt;</text>
+    <text x="850" y="368" font-size="15" transform="rotate(84, 850, 368)">=&gt;</text>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- TITLE AND SUBTITLE                           -->
+  <!-- ============================================ -->
+
+  <!-- Title -->
+  <text x="600" y="480" text-anchor="middle" font-family="'Playfair Display', 'Crimson Text', 'EB Garamond', Georgia, serif" font-size="44" fill="#e8e0e0" letter-spacing="0.5" filter="url(#textGlow)">Death by a Thousand Arrows</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="520" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="16" fill="#807070" letter-spacing="3">THE COST OF <tspan fill="#ff6b6b">"CLEANER"</tspan> CODE</text>
+
+  <!-- Vignette -->
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+</svg>
