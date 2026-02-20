@@ -51,10 +51,10 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### Content
 
-- [ ] **BLOG-01**: Companion blog post covering Dockerfile best practices and tool architecture deep-dive
-- [ ] **BLOG-02**: Cross-links between blog post and tool page (bidirectional)
-- [ ] **DOCS-01**: 40 rule documentation pages at /tools/dockerfile-analyzer/rules/[code]
-- [ ] **DOCS-02**: Each rule page includes: explanation, fix suggestion, before/after code, related rules
+- [x] **BLOG-01**: Companion blog post covering Dockerfile best practices and tool architecture deep-dive
+- [x] **BLOG-02**: Cross-links between blog post and tool page (bidirectional)
+- [x] **DOCS-01**: 40 rule documentation pages at /tools/dockerfile-analyzer/rules/[code]
+- [x] **DOCS-02**: Each rule page includes: explanation, fix suggestion, before/after code, related rules
 
 ### SEO & Navigation
 
@@ -119,10 +119,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESULT-04 | Phase 24 | Complete |
 | RESULT-05 | Phase 24 | Complete |
 | RESULT-06 | Phase 24 | Complete |
-| BLOG-01 | Phase 25 | Pending |
-| BLOG-02 | Phase 25 | Pending |
-| DOCS-01 | Phase 25 | Pending |
-| DOCS-02 | Phase 25 | Pending |
+| BLOG-01 | Phase 25 | Complete |
+| BLOG-02 | Phase 25 | Complete |
+| DOCS-01 | Phase 25 | Complete |
+| DOCS-02 | Phase 25 | Complete |
 | NAV-01 | Phase 26 | Pending |
 | NAV-02 | Phase 26 | Pending |
 | SEO-01 | Phase 26 | Pending |

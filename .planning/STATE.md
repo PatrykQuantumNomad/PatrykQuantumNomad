@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 24 complete (Results Display & Interaction)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 25 complete (Content & Rule Documentation)
 
 ## Current Position
 
-Phase: 24 of 27 (Results Display & Interaction) -- COMPLETE
+Phase: 25 of 27 (Content & Rule Documentation) -- COMPLETE
 Plan: 2 of 2 complete
-Status: Phase 24 complete. All results display components built. Ready for Phase 25.
-Last activity: 2026-02-20 — Completed 24-02-PLAN.md (results panel UI components)
+Status: Phase 25 complete. 39 rule documentation pages + companion blog post with cross-links. Ready for Phase 26.
+Last activity: 2026-02-20 — Completed 25-02-PLAN.md (companion blog post + cross-links)
 
-Progress: [############................] 50% of v1.4 (3/6 phases)
+Progress: [################............] 67% of v1.4 (4/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 51 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 7 v1.4)
+- Total plans completed: 53 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 9 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [############................] 50% of v1.4 (3/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 7 | 38 | In progress |
-| **Total** | **27** | **51** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 9 | 38 | In progress |
+| **Total** | **27** | **53** | **152** | |
 
 ## Accumulated Context
 
@@ -79,6 +79,14 @@ v1.4 execution decisions (Phase 24):
 - Category bar widths use inline style percentage for dynamic score values
 - Fix code blocks use grid-cols-1 sm:grid-cols-2 for mobile-responsive layout
 
+v1.4 execution decisions (Phase 25):
+- Astro Code component for Dockerfile syntax-highlighted before/after blocks (no extra dependency)
+- Related rules sorted by severity priority (error > warning > info) via SEVERITY_ORDER record
+- Stripped trailing slash from Astro.site before BreadcrumbJsonLd URL construction
+- Companion blog post follows exact pattern from the-beauty-index.mdx (OpeningStatement, TldrSummary, KeyTakeaway)
+- Blog post links to 14 rule documentation pages (exceeding 5+ requirement)
+- Tool page back-link uses aside element after DockerfileAnalyzer component
+
 ### Pending Todos
 
 None.
@@ -98,6 +106,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 24-02-PLAN.md (results panel UI components)
+Stopped at: Completed 25-02-PLAN.md (companion blog post + cross-links)
 Resume file: None
-Next: Phase 25 (Content & Rule Documentation)
+Next: Phase 26 (Testing & Polish)
