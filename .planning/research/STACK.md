@@ -1,306 +1,369 @@
-# Stack Research: The Beauty Index
+# Stack Research: Dockerfile Analyzer Tool
 
-**Domain:** Interactive data visualization content pillar for static portfolio site
-**Researched:** 2026-02-17
+**Domain:** Interactive browser-based Dockerfile analysis tool for static Astro 5 portfolio site
+**Researched:** 2026-02-20
 **Confidence:** HIGH
 
 ## Existing Stack (DO NOT reinstall)
 
 Already present in `package.json` -- validated and working:
 
-| Technology | Version | Role in Beauty Index |
-|------------|---------|---------------------|
-| Astro | ^5.3.0 | Static pages, `getStaticPaths()` for 25 language detail pages, content collections |
-| React 19 | ^19.2.4 | Interactive chart islands via `@astrojs/react` (already configured with `client:visible`) |
-| Tailwind CSS | ^3.4.19 | Chart wrapper styling, tab UI, responsive layouts |
-| TypeScript | ^5.9.3 | Type-safe language data schemas, component props |
-| GSAP | ^3.14.2 | Scroll-triggered chart entrance animations (reuse existing scroll reveal patterns) |
-| Satori | ^0.19.2 | Build-time OG image generation for language detail pages (radar chart shapes in SVG) |
-| Sharp | ^0.34.5 | Satori SVG-to-PNG conversion for OG images |
-| astro-expressive-code | ^0.41.6 | Syntax-highlighted code blocks for the 25-language code comparison view |
-| Content Collections + Zod | via Astro 5 | New `languages` collection with typed schemas for scores, code snippets, metadata |
+| Technology | Version | Role in Dockerfile Analyzer |
+|------------|---------|----------------------------|
+| Astro | ^5.3.0 | Static page at `/tools/dockerfile-analyzer`, island hydration |
+| React 19 | ^19.2.4 | Interactive editor island via `@astrojs/react` |
+| Tailwind CSS | ^3.4.19 | Editor wrapper, results panel, responsive layout |
+| TypeScript | ^5.9.3 | Rule engine types, CodeMirror extension types, AST types |
+| Nanostores | ^1.1.0 | Shared state between editor island and results panel |
+| @nanostores/react | ^1.0.0 | React bindings for nanostores |
 
 ## Recommended Additions
 
-### 1. Recharts -- Interactive Radar + Bar Charts
+### 1. CodeMirror 6 Core -- Code Editor
 
-| Property | Value |
-|----------|-------|
-| **Package** | `recharts` |
-| **Version** | `^3.7.0` (latest stable, released Jan 2025) |
-| **Purpose** | `RadarChart` for 6-dimension spider charts per language; `BarChart` (horizontal) for overall rankings |
-| **Bundle impact** | ~50 KB gzipped (loaded ONLY in chart islands via `client:visible`, zero cost for pages without charts) |
+CodeMirror 6 is highly modular. DO NOT install the `codemirror` meta-package blindly -- it pulls in `@codemirror/autocomplete`, `@codemirror/search`, and `@codemirror/lint` as dependencies, all of which we actually need. For our use case (an editor with Dockerfile highlighting, lint gutter, and line numbers), the `codemirror` meta-package is the right entry point.
 
-**Why Recharts over alternatives:**
+| Package | Version | Purpose | Bundle Impact |
+|---------|---------|---------|---------------|
+| `codemirror` | `^6.0.2` | Meta-package: re-exports `@codemirror/state`, `@codemirror/view`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/search`, `@codemirror/autocomplete`, `@codemirror/lint` | ~135 KB gzipped with basicSetup; ~75 KB gzipped with minimalSetup |
+| `@codemirror/legacy-modes` | `^6.5.2` | Dockerfile syntax mode via `StreamLanguage.define()` | ~2 KB (only the dockerfile mode file is bundled, tree-shaking drops all other modes) |
+| `@codemirror/lint` | `^6.9.4` | Custom linter integration for Dockerfile rules, `lintGutter()` | Included via `codemirror` meta-package |
+| `@codemirror/theme-one-dark` | `^6.1.3` | Dark theme for the editor (matches portfolio dark mode) | ~3 KB gzipped |
 
-- **React 19 compatible out of the box.** Recharts 3.x removed the `react-smooth` and `recharts-scale` dependencies that caused React 19 conflicts in 2.x. In 3.x, `react`, `react-dom`, and `react-is` are peer dependencies that match whatever React version you install. No `overrides` or `resolutions` hacks needed with the project's React 19.2.4.
-- **Declarative component API.** `<RadarChart>`, `<Radar>`, `<PolarGrid>`, `<PolarAngleAxis>`, `<PolarRadiusAxis>` map directly to the 6-dimension spider chart requirement. No imperative D3 wrangling.
-- **Horizontal BarChart built-in.** `<BarChart layout="vertical">` gives the overall ranking view where the longest bar is the highest-ranked language. Zero custom drawing code.
-- **SVG-based output.** Charts render as inline SVG elements in the DOM. This is critical for two reasons: (a) SVG scales crisply at any resolution, and (b) the share/download feature captures SVG-rendered charts reliably via `html-to-image`.
-- **ResponsiveContainer.** `<ResponsiveContainer width="100%" height={400}>` handles viewport resizing, essential for mobile-first design on a portfolio site.
-- **Perfect Astro islands fit.** React components with `client:visible` hydrate only when the user scrolls to them. A page with three chart islands pays zero JS cost until each chart scrolls into view. For the index page with 25 small charts, this is significant.
-- **Theming via props.** Colors for radar fills, strokes, and bar fills can be passed as Tailwind-derived CSS variables, integrating cleanly with the existing dark/light mode toggle and "Quantum Explorer" theme.
+**Why these specific packages:**
 
-**Recharts 3.x breaking changes to know:**
-- `Cell` component deprecated -- use `cells` prop on Bar/Pie instead
-- Internal state rewrite: `CategoricalChartState` no longer exposed outside
-- `activeIndex` prop removed from Scatter/Bar/Pie
-- All animations now internal (no `react-smooth` needed)
-- None of these affect our use case (RadarChart + BarChart with basic customization)
+- **`codemirror` meta-package over individual `@codemirror/*` packages:** The meta-package ensures compatible versions across all core modules. Individual package installation risks version mismatches between `@codemirror/state`, `@codemirror/view`, etc. The `codemirror` package exports `minimalSetup` and `basicSetup` -- we use `basicSetup` because it includes line numbers, bracket matching, and fold gutter, all of which are expected in a Dockerfile editor.
+- **`@codemirror/legacy-modes` for Dockerfile syntax:** There is NO `@codemirror/lang-dockerfile` package. Dockerfile support exists only as a legacy mode ported from CodeMirror 5. The integration pattern is `StreamLanguage.define(dockerfile)` where `dockerfile` is imported from `@codemirror/legacy-modes/mode/dockerfile`. This is the official, documented approach.
+- **`@codemirror/lint` for inline diagnostics:** Already included in the `codemirror` meta-package. Provides `linter()` function that accepts a `LintSource` -- a function that receives the `EditorView` and returns `Diagnostic[]`. Each diagnostic has `from`, `to` (character positions), `severity` ("error" | "warning" | "info"), and `message`. The `lintGutter()` extension adds gutter markers. This is exactly what we need to display Dockerfile analysis results inline.
+- **`@codemirror/theme-one-dark` for dark mode:** The portfolio site has dark mode. CodeMirror requires explicit theme extensions -- it does not inherit page CSS. `one-dark` is the official dark theme. For light mode, CodeMirror's default (no theme extension) is a clean light theme. We switch themes dynamically using `EditorView.theme()` compartments.
 
-**Confidence:** HIGH -- verified via [GitHub releases v3.7.0](https://github.com/recharts/recharts/releases), [3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide), React 19 support [issue #4558](https://github.com/recharts/recharts/issues/4558) (closed/resolved), peer dependency [discussion #5701](https://github.com/recharts/recharts/discussions/5701).
+**CodeMirror 6 architecture note:** CodeMirror 6 uses its own internal CSS-in-JS system. It does NOT require a separate CSS file import. Styles are injected into the DOM automatically when the editor mounts. This plays nicely with Astro islands -- the editor is self-contained.
 
-### 2. html-to-image -- Client-Side Chart Export for Social Sharing
+**Confidence:** HIGH -- verified via [npm registry](https://registry.npmjs.org/codemirror/latest), [@codemirror/legacy-modes README](https://github.com/codemirror/legacy-modes/blob/main/README.md), [CodeMirror bundling docs](https://codemirror.net/examples/bundle/), [CodeMirror lint example](https://codemirror.net/examples/lint/).
 
-| Property | Value |
-|----------|-------|
-| **Package** | `html-to-image` |
-| **Version** | `1.11.11` (PIN this exact version) |
-| **Purpose** | Export rendered chart DOM nodes as PNG blobs for download/sharing |
-| **Bundle impact** | ~12 KB gzipped |
+### 2. React Integration -- Vanilla useRef/useEffect (NOT a wrapper library)
 
-**Why html-to-image:**
+| Decision | Rationale |
+|----------|-----------|
+| Use vanilla CodeMirror + `useRef`/`useEffect` | NOT `@uiw/react-codemirror` |
 
-- **DOM-node based.** Takes a ref to any DOM element and captures it as an image. This means we capture the full styled card -- chart SVG + title + scores + branding -- not just the raw chart.
-- **Multiple output formats.** `toPng()`, `toBlob()`, `toSvg()`, `toJpeg()`. We use `toPng()` and `toBlob()` because Twitter/LinkedIn/Reddit do not accept SVG in shared images.
-- **No server required.** Runs entirely client-side. Essential for GitHub Pages static deployment.
-- **Maintained fork of dom-to-image.** The original `dom-to-image` is abandoned. `html-to-image` is the successor with the same API but active bug fixes.
+**Why NOT `@uiw/react-codemirror`:**
 
-**CRITICAL: Pin to version 1.11.11.** Versions 1.11.12 and 1.11.13 have a documented regression where exported images are blank or incomplete. There is an open GitHub issue. Use `"html-to-image": "1.11.11"` (exact, no caret) in `package.json`.
+1. **Unnecessary abstraction overhead.** `@uiw/react-codemirror` adds `@babel/runtime`, `@uiw/codemirror-extensions-basic-setup` (their own fork of basicSetup), and `@codemirror/theme-one-dark` as hard dependencies. While `@babel/runtime` is already in our tree, the wrapper adds ~15 KB of its own code for features we do not need (controlled mode, onChange handler that converts between React state and CodeMirror state).
+2. **Re-render performance concern.** The wrapper has known re-render issues documented in community discussions. Our use case is simple: the editor is a single instance, mounted once, never unmounted during page lifecycle. The vanilla approach avoids React reconciliation overhead entirely.
+3. **We need direct access to `EditorView`.** The Dockerfile analyzer must read the document from CodeMirror, pass it to `dockerfile-ast`, and then push diagnostics back via `linter()`. This requires direct `EditorView` access. With `@uiw/react-codemirror`, you get this via a ref callback, but the indirection adds complexity without benefit.
+4. **The existing codebase pattern supports this.** The `CodeComparisonTabs.tsx` component already uses `useRef`, `useEffect`, and direct DOM manipulation. A vanilla CodeMirror island follows the same pattern.
 
-**Confidence:** MEDIUM -- html-to-image 1.11.11 is stable and widely used, but the library has not had a successful release in over a year. If it becomes fully unmaintained, `modern-screenshot` (v4.6.8, actively published) is the migration target with a similar API.
-
-### 3. file-saver -- Cross-Browser Download Trigger
-
-| Property | Value |
-|----------|-------|
-| **Package** | `file-saver` |
-| **Version** | `^2.0.5` |
-| **Purpose** | Trigger "Save As" dialog from a Blob (the PNG output from html-to-image) |
-| **Bundle impact** | ~3 KB gzipped |
-
-**Why file-saver:**
-
-- **Cross-browser `saveAs()`.** The pattern is: `htmlToImage.toBlob(node)` then `saveAs(blob, 'python-beauty-index.png')`. This works reliably across Chrome, Firefox, Safari, and mobile browsers.
-- **Edge cases handled.** Manual `<a download>` click simulation has known issues in Safari and some mobile WebViews. file-saver handles these.
-- **Tiny.** 3 KB is not worth reimplementing.
-
-**Confidence:** HIGH -- mature, stable, unchanged API for years. 86M+ npm downloads.
-
-### 4. @expressive-code/plugin-collapsible-sections -- Code Block Enhancement
-
-| Property | Value |
-|----------|-------|
-| **Package** | `@expressive-code/plugin-collapsible-sections` |
-| **Version** | `^0.41.0` (match the installed astro-expressive-code ^0.41.6) |
-| **Purpose** | Collapse boilerplate (imports, class declarations, setup) in code comparison snippets |
-| **Bundle impact** | Negligible -- Expressive Code plugins run at build time, no client JS |
-
-**Why this plugin:**
-
-- **First-party Expressive Code ecosystem.** The site already uses `astro-expressive-code ^0.41.6`. This plugin shares the same build pipeline and adds zero runtime cost.
-- **Solves the 25-language code comparison problem.** When comparing feature implementations across 25 languages, boilerplate obscures the comparison-relevant code. `collapse={1-5}` hides imports/setup so users focus on the pattern.
-- **Build-time only.** Processed during `astro build`. Ships as static HTML with CSS-only expand/collapse. No JavaScript in the client bundle.
-
-**Configuration addition to `astro.config.mjs`:**
-
-```javascript
-import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections';
-
-export default defineConfig({
-  integrations: [
-    expressiveCode({
-      themes: ['github-dark', 'github-light'],
-      plugins: [pluginCollapsibleSections()],
-      // ... existing config
-    }),
-    // ... rest
-  ],
-});
-```
-
-**Confidence:** HIGH -- [official plugin documentation](https://expressive-code.com/plugins/collapsible-sections/).
-
-## Architecture Integration Points
-
-### How New Libraries Fit the Existing Astro Island Pattern
-
-```
-src/pages/beauty-index/index.astro (Overview page)
-  |
-  +-- [Static] Hero section, methodology text, SEO    -- zero JS
-  |
-  +-- <OverallRanking client:visible />               -- Recharts BarChart island
-  |     Horizontal bar chart of 25 languages ranked.
-  |     Props: sorted score data from content collection.
-  |     ~50 KB loaded only when user scrolls here.
-  |
-  +-- [Static] Grid of 25 language cards               -- zero JS
-  |     Each card links to /beauty-index/[language]
-  |     Shows mini radar preview (pure SVG, no JS)
-  |
-src/pages/beauty-index/[language].astro (Detail page, one per language)
-  |
-  +-- [Static] Language name, description, metadata    -- zero JS
-  |
-  +-- <RadarChart client:visible />                    -- Recharts RadarChart island
-  |     6-axis spider chart for this language.
-  |     ShareButton inside: html-to-image + file-saver.
-  |
-  +-- <CodeComparison client:visible />                -- Custom React island
-  |     Tab UI (10 features as tabs).
-  |     Each tab shows code snippet via Expressive Code <Code> component.
-  |     ~2 KB custom code (useState for tab state).
-  |
-src/pages/open-graph/beauty-index/[language].png.ts
-  |
-  +-- Satori + Sharp (build time)                      -- zero client JS
-       Generates OG image with radar chart shape.
-       Uses the SAME Satori JSX-to-SVG pipeline as existing blog OG images.
-       Radar shape drawn with trigonometry, no Recharts dependency at build time.
-```
-
-### Content Collection Extension
-
-Extend `src/content.config.ts` (currently has only `blog`):
+**Vanilla React integration pattern (what to implement):**
 
 ```typescript
-const languages = defineCollection({
-  loader: glob({ pattern: '**/*.json', base: './src/data/languages' }),
-  schema: z.object({
-    name: z.string(),
-    slug: z.string(),
-    tagline: z.string(),
-    description: z.string(),
-    scores: z.object({
-      readability: z.number().min(0).max(10),
-      performance: z.number().min(0).max(10),
-      ecosystem: z.number().min(0).max(10),
-      safety: z.number().min(0).max(10),
-      expressiveness: z.number().min(0).max(10),
-      learnability: z.number().min(0).max(10),
-    }),
-    overallScore: z.number().min(0).max(10),
-    overallRank: z.number().min(1).max(25),
-    color: z.string(), // Hex color for chart theming
-    features: z.record(z.string(), z.object({
-      code: z.string(),
-      language: z.string(), // Shiki language ID
-      highlights: z.string().optional(), // Line highlight markers
-    })),
-  }),
-});
+import { useRef, useEffect } from 'react';
+import { EditorView, basicSetup } from 'codemirror';
+import { EditorState } from '@codemirror/state';
+import { StreamLanguage } from '@codemirror/language';
+import { dockerfile } from '@codemirror/legacy-modes/mode/dockerfile';
+import { linter, lintGutter } from '@codemirror/lint';
+import { oneDark } from '@codemirror/theme-one-dark';
 
-export const collections = { blog, languages };
+function DockerfileEditor() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const view = new EditorView({
+      state: EditorState.create({
+        doc: '# Paste your Dockerfile here\nFROM ubuntu:latest\n',
+        extensions: [
+          basicSetup,
+          StreamLanguage.define(dockerfile),
+          lintGutter(),
+          linter(dockerfileLinter),  // custom linter function
+          oneDark,                    // or conditionally based on theme
+        ],
+      }),
+      parent: containerRef.current,
+    });
+
+    viewRef.current = view;
+    return () => view.destroy();
+  }, []);
+
+  return <div ref={containerRef} />;
+}
 ```
 
-### OG Image Generation for Language Pages
+**Confidence:** HIGH -- this is the pattern recommended by [CodeMirror's own documentation](https://codemirror.net/docs/guide/) and used by major projects like CodePen's CM6 integration.
 
-The existing `src/lib/og-image.ts` uses Satori + Sharp to generate blog OG images at build time. The same pattern extends to Beauty Index pages:
+### 3. dockerfile-ast -- Dockerfile Parsing
 
-1. Create `src/lib/og-image-beauty.ts` -- a Satori template that includes a radar chart shape
-2. The radar chart shape is drawn using basic trigonometry in Satori's JSX object format (the same `{type: 'div', props: {...}}` pattern already in `og-image.ts`)
-3. Route at `src/pages/open-graph/beauty-index/[language].png.ts` follows the exact pattern of `src/pages/open-graph/[...slug].png.ts`
+| Property | Value |
+|----------|-------|
+| **Package** | `dockerfile-ast` |
+| **Version** | `^0.7.1` (latest, published August 2024) |
+| **Purpose** | Parse Dockerfile text into an AST with typed instruction nodes |
+| **Bundle impact** | ~35 KB gzipped (239 KB unpacked, includes 74 compiled JS files) |
 
-**No new dependencies needed for build-time OG images.** Satori + Sharp already handle everything.
+**Why dockerfile-ast:**
 
-### Dynamic Routes for Language Detail Pages
+- **TypeScript-first.** Written in TypeScript with full type definitions shipped. Exports `DockerfileParser.parse(content: string): Dockerfile` which returns a fully typed AST.
+- **Browser-safe. Verified.** I audited all 34 source files -- zero imports of `fs`, `path`, `os`, `child_process`, or any Node.js-specific module. The only dependencies are `vscode-languageserver-textdocument` and `vscode-languageserver-types`, both of which have explicit `"browser"` export fields in their `package.json` pointing to ESM bundles. Vite will resolve these correctly.
+- **Rich AST for rule implementation.** The AST exposes `getInstructions()` returning typed objects for each Dockerfile instruction (FROM, RUN, COPY, etc.) with line ranges, arguments, flags, and heredoc support. Each instruction knows its `Keyword` type, making rule implementation straightforward.
+- **Same AST approach as Hadolint.** Hadolint (the industry-standard Dockerfile linter, written in Haskell) also parses into an AST and runs rules against it. Our TypeScript rule engine follows the same architectural pattern, just in the browser.
 
-Follow the existing `src/pages/blog/[slug].astro` pattern:
+**Key API surface for our rule engine:**
 
 ```typescript
-// src/pages/beauty-index/[language].astro
-export const getStaticPaths: GetStaticPaths = async () => {
-  const languages = await getCollection('languages');
-  return languages.map((lang) => ({
-    params: { language: lang.data.slug },
-    props: { language: lang },
-  }));
+import { DockerfileParser } from 'dockerfile-ast';
+
+const dockerfile = DockerfileParser.parse(editorContent);
+
+// Iterate instructions
+for (const instruction of dockerfile.getInstructions()) {
+  const keyword = instruction.getKeyword();     // "FROM", "RUN", etc.
+  const range = instruction.getRange();          // { start: {line, character}, end: {line, character} }
+  const args = instruction.getArguments();       // Argument[] with ranges
+  // Apply rules...
+}
+
+// Access specific instruction types
+const froms = dockerfile.getFROMs();             // From[] with image name, tag, digest
+const runs = dockerfile.getRUNs();               // ... (not available, iterate and filter)
+const envs = dockerfile.getENVs();               // Env[] with key-value pairs
+```
+
+**Dependency chain concern -- `vscode-languageserver-types`:**
+
+This package (`^3.17.3`) defines LSP types like `Range`, `Position`, `TextDocumentIdentifier`. It is ~50 KB unpacked but has ZERO dependencies of its own. It will not pull in VS Code or any server-side code. The `"browser"` export field routes to `./lib/esm/main.js`. No polyfills needed.
+
+**Confidence:** HIGH -- verified via [npm registry](https://registry.npmjs.org/dockerfile-ast/latest), [GitHub source audit](https://github.com/rcjsuen/dockerfile-ast), [vscode-languageserver-textdocument exports](https://registry.npmjs.org/vscode-languageserver-textdocument/latest) showing `"browser": "./lib/esm/main.js"`.
+
+## Architecture Integration: Astro Island Strategy
+
+### Which client directive to use: `client:idle`
+
+| Directive | What It Does | Why NOT for Us |
+|-----------|-------------|----------------|
+| `client:load` | Hydrates immediately on page load | Overkill. The editor is the main content but the user needs to read the intro text first. Saves ~200ms of main-thread blocking on mobile. |
+| `client:visible` | Hydrates when scrolled into viewport | Risky. If the editor IS above the fold (which it will be on desktop), `client:visible` fires immediately anyway, adding IntersectionObserver overhead. On mobile where it might be below fold, we want it ready by the time the user scrolls -- `client:idle` achieves this. |
+| **`client:idle`** | **Hydrates once browser is idle (requestIdleCallback)** | **Correct choice.** Lets the static shell (page title, description, example templates) render instantly, then hydrates the editor + parser during idle time. The user reads the intro while the ~350 KB of JS loads. On fast connections this is imperceptible. On slow connections it prevents blocking the initial paint. |
+| `client:only="react"` | Renders only on client, no SSR | Viable but loses the static HTML shell. With `client:idle`, Astro renders a placeholder div server-side, and the editor materializes during idle. With `client:only`, there is a visible flash of nothing. |
+
+**Pattern for the page:**
+
+```astro
+---
+// src/pages/tools/dockerfile-analyzer.astro
+import Layout from '../../layouts/Layout.astro';
+import DockerfileAnalyzer from '../../components/tools/DockerfileAnalyzer';
+---
+
+<Layout title="Dockerfile Analyzer" description="...">
+  <!-- Static content: title, description, methodology -->
+  <section class="...">
+    <h1>Dockerfile Analyzer</h1>
+    <p>Paste your Dockerfile to get instant best-practice analysis...</p>
+  </section>
+
+  <!-- Interactive island: editor + results panel -->
+  <DockerfileAnalyzer client:idle />
+
+  <!-- Static content: rules explanation, methodology, SEO content -->
+  <section class="...">
+    <h2>Rules</h2>
+    ...
+  </section>
+</Layout>
+```
+
+### State Management: Nanostores (existing)
+
+The analyzer needs shared state between:
+1. The CodeMirror editor (document content)
+2. The analysis results panel (diagnostics)
+3. Optional: template selector (loads example Dockerfiles)
+
+Use the **existing nanostores pattern** from `src/stores/tabStore.ts` and `src/stores/languageFilterStore.ts`:
+
+```typescript
+// src/stores/dockerfileStore.ts
+import { atom, computed } from 'nanostores';
+
+export const dockerfileContent = atom<string>('');
+export const analysisResults = atom<Diagnostic[]>([]);
+export const isAnalyzing = atom<boolean>(false);
+export const selectedTemplate = atom<string | null>(null);
+```
+
+**Confidence:** HIGH -- follows established codebase patterns.
+
+## Bundle Size Analysis
+
+### Total New Client JS Estimate
+
+| Component | Gzipped Size | Notes |
+|-----------|-------------|-------|
+| CodeMirror core (basicSetup) | ~135 KB | state, view, commands, language, search, autocomplete, lint |
+| @codemirror/legacy-modes (dockerfile only) | ~2 KB | Tree-shaking drops all other 100+ modes |
+| @codemirror/theme-one-dark | ~3 KB | Conditional: only loaded in dark mode |
+| dockerfile-ast + deps | ~35 KB | vscode-languageserver-textdocument + types |
+| Custom rule engine | ~15 KB | Estimate for 20-30 rules with descriptions |
+| React island overhead | ~2 KB | useRef/useEffect wrapper, minimal |
+| **Total** | **~192 KB gzipped** | **Loaded only on /tools/dockerfile-analyzer** |
+
+This is well under the 350 KB budget mentioned in the project context. The actual total is ~192 KB gzipped, not 350 KB.
+
+### Bundling Considerations for Astro/Vite
+
+**No custom Vite configuration needed.** Astro's default Vite config handles this correctly because:
+
+1. **Island isolation.** The `client:idle` directive creates a separate entry point for the analyzer island. Vite automatically code-splits this into its own chunk(s). Other pages pay ZERO cost.
+2. **Tree-shaking.** `@codemirror/legacy-modes` exports each mode as a separate file (`mode/dockerfile.js`). Vite/Rollup's tree-shaking will include only the dockerfile mode, not the 100+ other modes.
+3. **Vendor chunk splitting.** Vite automatically splits `node_modules` imports into vendor chunks. CodeMirror packages will land in a shared vendor chunk if they are used by multiple islands (unlikely in our case -- only one page uses CodeMirror).
+4. **No SSR complications.** `dockerfile-ast`'s dependencies (`vscode-languageserver-textdocument`, `vscode-languageserver-types`) have `"browser"` export conditions. Vite resolves these during build. No `ssr.noExternal` config needed because the analyzer component runs client-only.
+
+**Optional optimization (NOT required for MVP):**
+
+If Lighthouse audits show the ~192 KB chunk blocking LCP on mobile, split CodeMirror into a lazy chunk:
+
+```typescript
+// Lazy-load CodeMirror only when user clicks "Open Editor"
+const loadEditor = async () => {
+  const { EditorView, basicSetup } = await import('codemirror');
+  const { StreamLanguage } = await import('@codemirror/language');
+  const { dockerfile } = await import('@codemirror/legacy-modes/mode/dockerfile');
+  // ... initialize
 };
 ```
 
-This generates 25 static pages at build time, identical to how blog post pages work today.
+This is a performance escape hatch, not the default approach. `client:idle` already defers loading until the browser is idle.
 
 ## Installation
 
 ```bash
-# Runtime dependencies (3 packages)
-npm install recharts@^3.7.0 file-saver@^2.0.5 html-to-image@1.11.11
+# CodeMirror 6 (editor + syntax + linting + theme)
+npm install codemirror@^6.0.2 @codemirror/legacy-modes@^6.5.2 @codemirror/theme-one-dark@^6.1.3
 
-# Type definitions
-npm install -D @types/file-saver
-
-# Expressive Code plugin (build-time only)
-npm install @expressive-code/plugin-collapsible-sections@^0.41.0
+# Dockerfile parser (browser-compatible)
+npm install dockerfile-ast@^0.7.1
 ```
 
-**Total new packages: 3 runtime + 1 dev types + 1 build plugin = 5 packages**
-**Total new client-side JS (per chart island): ~65 KB gzipped**
-**Pages without charts: 0 KB added**
+**Total new packages: 4 direct dependencies**
+**Transitive dependencies added: ~7 (`@codemirror/state`, `@codemirror/view`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/search`, `@codemirror/autocomplete`, `@codemirror/lint` -- all pulled by `codemirror` meta-package, plus `vscode-languageserver-textdocument`, `vscode-languageserver-types` pulled by `dockerfile-ast`)**
+**No dev dependencies needed** (types are included in all packages)
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not Alternative |
 |----------|-------------|-------------|---------------------|
-| Charting | Recharts 3.7 | Chart.js / react-chartjs-2 | Canvas-based, not SVG. Harder to export styled images. Less React-native API. |
-| Charting | Recharts 3.7 | D3.js directly | ~70 KB gzipped, imperative API fights React's declarative model, overkill for radar + bar |
-| Charting | Recharts 3.7 | Victory | Opinionated styling clashes with "Quantum Explorer" theme, larger bundle |
-| Charting | Recharts 3.7 | Nivo | ~200 KB, SSR-focused features unnecessary for client islands |
-| Charting | Recharts 3.7 | Custom SVG (no library) | Viable for static charts, but we need interactivity (hover tooltips, animated transitions). Building a custom interactive radar chart is 500+ lines vs 30 lines of Recharts components. |
-| Image export | html-to-image 1.11.11 | html2canvas | Known CSS rendering bugs (box-shadow, gradients), less reliable with SVG content |
-| Image export | html-to-image 1.11.11 | recharts-to-png | Wraps html2canvas (inherits its bugs), and we need to capture the full styled card not just the chart |
-| Image export | html-to-image 1.11.11 | modern-screenshot 4.6.8 | More actively maintained but smaller community. Earmarked as fallback if html-to-image dies. |
-| Image export | html-to-image 1.11.11 | Native SVG serialization + Canvas API | foreignObject rendering inconsistent across browsers (especially Safari). 12 KB cost of html-to-image is trivial for the reliability gain. |
-| Download trigger | file-saver | Manual `<a download>` click | Edge cases in Safari and mobile WebViews. 3 KB not worth debugging. |
-| Code tabs | Custom React useState + Tailwind | Radix Tabs / Headless UI | Adding a UI library for one tab component is unjustified. 30 lines of React vs a new dependency. |
-| Code highlighting | Expressive Code (already installed) | Prism.js / highlight.js | Would create duplicate highlighter bundles. Expressive Code already handles 25+ languages via Shiki. |
-| Collapsible code | EC plugin-collapsible-sections | Custom CSS details/summary | Loses integration with Expressive Code's build-time processing and theming. |
-| Social sharing | Native Web Share API | Share API polyfill | Web Share API works natively on mobile (where sharing matters most). Desktop fallback is copy-to-clipboard. |
+| Editor | CodeMirror 6 (vanilla) | Monaco Editor | Monaco is ~2.5 MB, designed for full IDE experiences. Overkill for a single-file Dockerfile editor. Also difficult to bundle -- requires worker files and has SSR complications. |
+| Editor | CodeMirror 6 (vanilla) | Prism.js + textarea | No real editing experience. No line numbers, no bracket matching, no gutter. We need inline diagnostics which Prism cannot do. |
+| Editor | CodeMirror 6 (vanilla) | Ace Editor | Legacy. CodeMirror 6 is the modern standard with better tree-shaking and modular architecture. |
+| React wrapper | Vanilla useRef/useEffect | @uiw/react-codemirror | Adds ~15 KB wrapper code, @babel/runtime dependency, known re-render issues. Our use case is a single editor instance mounted once -- wrapper provides no benefit. |
+| React wrapper | Vanilla useRef/useEffect | @codemirror-toolkit/react | Lighter (1.5 KB) but still an unnecessary abstraction for a single-instance editor. |
+| Dockerfile parser | dockerfile-ast | Custom regex parser | Would miss edge cases: multi-line RUN with `\`, heredoc syntax, escape directives, variable resolution. dockerfile-ast handles all of these correctly. |
+| Dockerfile parser | dockerfile-ast | dockerfilelint (npm) | Last published 2019, 4 years abandoned. Uses Node.js `fs` module. Not browser-compatible. |
+| Dockerfile parser | dockerfile-ast | hadolint (WASM) | Hadolint is Haskell. WASM compilation would be ~5 MB. Not viable for a client-side tool on a portfolio site. |
+| Dockerfile rules | Custom TypeScript rules | hadolint-wasm | See above. Also, custom rules allow portfolio-specific explanations and educational content. |
+| Client directive | client:idle | client:load | Blocks initial paint with ~192 KB. No benefit since user reads intro text first. |
+| Client directive | client:idle | client:visible | If editor is above fold (desktop), fires immediately with IntersectionObserver overhead. If below fold (mobile), client:idle fires sooner during scroll. |
+| State management | Nanostores (existing) | React Context / useState | Would work but Nanostores is already in the project and provides cross-island state sharing if we later split the analyzer into multiple islands. |
 
 ## What NOT to Add
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| **Chart.js / react-chartjs-2** | Canvas-based (not SVG), harder to export styled images, less React-native | Recharts |
-| **D3.js directly** | Massive bundle, imperative API, overkill for 2 chart types | Recharts (uses D3 internally) |
-| **Nivo** | ~200 KB, SSR features unnecessary | Recharts |
-| **html2canvas** | Known CSS rendering bugs, larger, less reliable with SVG | html-to-image |
-| **Puppeteer/Playwright** | Requires Node.js server; incompatible with GitHub Pages | html-to-image (client-side) |
-| **react-svg-radar-chart** | 759 weekly downloads, questionable maintenance | Recharts (40M+ ecosystem) |
-| **Radix UI / Headless UI** | Adding a UI library for one tab component is unjustified bloat | Custom React tabs (~30 lines) |
-| **Any additional icon library** | Existing codebase uses inline SVGs throughout | Continue inline SVG pattern |
-| **Tailwind v4 upgrade** | Major infrastructure change, not scope of this milestone | Keep Tailwind v3 |
-| **Any CMS** | 25 JSON files in a content collection; a CMS adds deployment complexity for no benefit | Content collections + JSON files |
+| **Monaco Editor** | 2.5 MB bundle, worker file complexity, SSR issues | CodeMirror 6 (~135 KB gzipped) |
+| **@uiw/react-codemirror** | Unnecessary abstraction for single-instance editor, re-render overhead | Vanilla `useRef`/`useEffect` pattern |
+| **`codemirror` basicSetup import without lint** | `basicSetup` does NOT include lint -- `lintGutter()` and `linter()` must be added explicitly to extensions | Import `lintGutter` and `linter` from `@codemirror/lint` (already available via `codemirror` dep) |
+| **dockerfilelint (npm)** | Abandoned (2019), uses Node.js `fs`, not browser-compatible | `dockerfile-ast` + custom rules |
+| **hadolint WASM** | ~5 MB WASM binary, impractical for portfolio site | `dockerfile-ast` + custom rules implementing hadolint-inspired DL rule subset |
+| **Any CSS framework for the editor** | CodeMirror 6 has built-in CSS-in-JS | Use `EditorView.theme()` for customization |
+| **Separate Dockerfile language server** | LSP is for IDE integrations, not browser tools | Direct `dockerfile-ast` parsing in the client |
+| **Web Workers for parsing** | dockerfile-ast parses a typical Dockerfile in <5ms. Worker overhead (serialization/deserialization, message passing) would ADD latency | Direct main-thread parsing with `requestIdleCallback` debounce |
 
 ## Version Compatibility Matrix
 
 | Package | Version | Compatible With | Verified |
 |---------|---------|-----------------|----------|
-| recharts | ^3.7.0 | React ^19.2.4, react-dom ^19.2.4 | Peer deps resolved in 3.x; no overrides needed |
-| recharts | ^3.7.0 | Astro 5 client:visible islands | SVG output, standard React component |
-| html-to-image | 1.11.11 (pinned) | Any browser DOM | No React peer dep; works with DOM refs |
-| file-saver | ^2.0.5 | Any browser | No framework dependency |
-| @expressive-code/plugin-collapsible-sections | ^0.41.0 | astro-expressive-code ^0.41.6 | Must match EC major.minor version |
+| codemirror | ^6.0.2 | All @codemirror/* ^6.x packages (meta-package pins compatible ranges) | npm registry, exports field |
+| @codemirror/legacy-modes | ^6.5.2 | @codemirror/language ^6.0.0 (peer dep) | npm registry |
+| @codemirror/theme-one-dark | ^6.1.3 | @codemirror/view ^6.0.0, @codemirror/language ^6.0.0 | npm registry |
+| dockerfile-ast | ^0.7.1 | Browser (ESM via Vite), no Node.js APIs used | Source audit of all 34 .ts files |
+| vscode-languageserver-textdocument | ^1.0.8 (transitive) | Browser: `"browser": "./lib/esm/main.js"` in package.json exports | npm registry exports field |
+| vscode-languageserver-types | ^3.17.3 (transitive) | Browser: `"browser": "./lib/esm/main.js"` in package.json exports | npm registry exports field |
+| React 19 | ^19.2.4 (existing) | CodeMirror 6 (no React dependency -- vanilla DOM) | N/A, CodeMirror is framework-agnostic |
+| Astro 5 | ^5.3.0 (existing) | client:idle directive, island architecture | Astro docs |
+
+## Dockerfile Syntax Highlighting Setup
+
+Since there is no `@codemirror/lang-dockerfile`, the setup uses the legacy mode bridge:
+
+```typescript
+import { StreamLanguage } from '@codemirror/language';
+import { dockerfile } from '@codemirror/legacy-modes/mode/dockerfile';
+
+// Use as a CodeMirror extension:
+const dockerfileLanguage = StreamLanguage.define(dockerfile);
+```
+
+The `StreamLanguage.define()` adapter converts the CodeMirror 5 stream parser into a CodeMirror 6 Language extension. This provides:
+- Keyword highlighting (FROM, RUN, COPY, ENV, etc.)
+- Comment highlighting (lines starting with `#`)
+- String highlighting (quoted arguments)
+- Variable highlighting (`$VAR` and `${VAR}`)
+
+It does NOT provide:
+- Full Lezer tree parsing (no AST from the highlighter -- we use `dockerfile-ast` for that)
+- Semantic analysis
+- Folding (no `foldService` -- acceptable for Dockerfiles which are typically <100 lines)
+
+## Custom Linter Integration Pattern
+
+The CodeMirror `linter()` API bridges our rule engine to inline diagnostics:
+
+```typescript
+import { linter, Diagnostic } from '@codemirror/lint';
+import { DockerfileParser } from 'dockerfile-ast';
+import { analyzeDockerfile } from './rules'; // our custom rule engine
+
+const dockerfileLinter = linter((view) => {
+  const content = view.state.doc.toString();
+  const ast = DockerfileParser.parse(content);
+  const issues = analyzeDockerfile(ast);
+
+  // Convert our rule engine output to CodeMirror Diagnostics
+  return issues.map((issue) => ({
+    from: view.state.doc.line(issue.line + 1).from + issue.startChar,
+    to: view.state.doc.line(issue.line + 1).from + issue.endChar,
+    severity: issue.severity, // "error" | "warning" | "info"
+    message: issue.message,
+  }));
+});
+```
+
+Key detail: CodeMirror `Diagnostic.from` and `Diagnostic.to` are **character offsets from the start of the document**, not line/column pairs. The `view.state.doc.line(n)` method provides the `.from` offset of a given line number (1-based). The `dockerfile-ast` range uses 0-based line numbers, so add 1 when calling `view.state.doc.line()`.
 
 ## Sources
 
-- [Recharts GitHub releases v3.7.0](https://github.com/recharts/recharts/releases) -- latest version, Jan 2025 (HIGH confidence)
-- [Recharts 3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide) -- breaking changes documented (HIGH confidence)
-- [Recharts React 19 support issue #4558](https://github.com/recharts/recharts/issues/4558) -- closed, resolved in 3.x (HIGH confidence)
-- [Recharts peer dependency discussion #5701](https://github.com/recharts/recharts/discussions/5701) -- react/react-dom/react-is as peers confirmed (HIGH confidence)
-- [html-to-image npm](https://www.npmjs.com/package/html-to-image) -- v1.11.11 known stable, later versions regressed (MEDIUM confidence)
-- [recharts-to-png package.json](https://github.com/brammitch/recharts-to-png/blob/main/package.json) -- evaluated and rejected (HIGH confidence)
-- [Astro Islands architecture docs](https://docs.astro.build/en/concepts/islands/) -- client:visible directive (HIGH confidence)
-- [Expressive Code collapsible sections plugin](https://expressive-code.com/plugins/collapsible-sections/) -- official plugin docs (HIGH confidence)
-- [Expressive Code component docs](https://expressive-code.com/key-features/code-component/) -- dynamic `<Code>` rendering (HIGH confidence)
-- [Paul Scanlon: SVG radar chart in Astro](https://www.paulie.dev/posts/2023/10/how-to-create-an-svg-radar-chart/) -- pure SVG approach for build-time OG images (HIGH confidence)
-- [modern-screenshot npm](https://www.npmjs.com/package/modern-screenshot) -- v4.6.8, fallback option (MEDIUM confidence)
-- [Best HTML to Canvas Solutions 2025](https://portalzine.de/best-html-to-canvas-solutions-in-2025/) -- library comparison (MEDIUM confidence)
-- [Recharts Radar API](https://recharts.org/?p=%2Fen-US%2Fapi%2FRadar) -- component documentation (HIGH confidence)
-- [shadcn/ui radar chart components](https://ui.shadcn.com/charts/radar) -- Recharts-based reference implementation (HIGH confidence)
-- Existing codebase analysis: `package.json`, `astro.config.mjs`, `tsconfig.json`, `src/content.config.ts`, `src/lib/og-image.ts`, `src/pages/open-graph/[...slug].png.ts` (HIGH confidence -- direct file inspection)
+- [npm registry: codemirror@6.0.2](https://registry.npmjs.org/codemirror/latest) -- dependencies verified (HIGH confidence)
+- [npm registry: @codemirror/legacy-modes@6.5.2](https://registry.npmjs.org/@codemirror/legacy-modes/latest) -- dockerfile mode available (HIGH confidence)
+- [npm registry: dockerfile-ast@0.7.1](https://registry.npmjs.org/dockerfile-ast/latest) -- dependencies and version verified (HIGH confidence)
+- [npm registry: vscode-languageserver-textdocument](https://registry.npmjs.org/vscode-languageserver-textdocument/latest) -- browser export field verified (HIGH confidence)
+- [npm registry: vscode-languageserver-types](https://registry.npmjs.org/vscode-languageserver-types/latest) -- browser export field verified (HIGH confidence)
+- [CodeMirror legacy-modes README](https://github.com/codemirror/legacy-modes/blob/main/README.md) -- StreamLanguage.define() pattern (HIGH confidence)
+- [CodeMirror legacy-modes /mode directory](https://github.com/codemirror/legacy-modes/tree/main/mode) -- dockerfile mode exists in list of 207 modes (HIGH confidence)
+- [CodeMirror bundling docs](https://codemirror.net/examples/bundle/) -- bundle size benchmarks: ~135 KB gzipped with basicSetup (HIGH confidence)
+- [CodeMirror lint example](https://codemirror.net/examples/lint/) -- custom linter API, Diagnostic interface (HIGH confidence)
+- [CodeMirror styling example](https://codemirror.net/examples/styling/) -- EditorView.theme(), dark mode via {dark: true} (HIGH confidence)
+- [GitHub source: rcjsuen/dockerfile-ast](https://github.com/rcjsuen/dockerfile-ast) -- all 34 source files audited for Node.js imports, zero found (HIGH confidence)
+- [Astro islands architecture docs](https://docs.astro.build/en/concepts/islands/) -- client:idle directive behavior (HIGH confidence)
+- [Astro directives reference](https://docs.astro.build/en/reference/directives-reference/) -- client:idle uses requestIdleCallback (HIGH confidence)
+- [Hadolint GitHub](https://github.com/hadolint/hadolint) -- DL rule categories for rule engine inspiration (HIGH confidence)
+- Existing codebase: `package.json`, `astro.config.mjs`, `src/stores/tabStore.ts`, `src/components/beauty-index/CodeComparisonTabs.tsx` -- island patterns and nanostores usage (HIGH confidence)
 
 ---
-*Stack research for: The Beauty Index content pillar*
-*Researched: 2026-02-17*
-*Key finding: 3 runtime packages (recharts, html-to-image, file-saver) + 1 build plugin. ~65 KB gzipped client-side addition, loaded only in chart islands. Existing Satori + Sharp pipeline handles OG image generation with zero new dependencies.*
+*Stack research for: Dockerfile Analyzer Tool*
+*Researched: 2026-02-20*
+*Key finding: 4 new packages (codemirror, @codemirror/legacy-modes, @codemirror/theme-one-dark, dockerfile-ast). ~192 KB gzipped client-side, loaded only on /tools/dockerfile-analyzer via client:idle. No React wrapper needed -- vanilla useRef/useEffect. dockerfile-ast is browser-safe (verified by source audit). Dockerfile syntax via legacy mode StreamLanguage bridge.*

@@ -1,394 +1,473 @@
-# Pitfalls Research: The Beauty Index
+# Pitfalls Research: Dockerfile Analyzer Tool
 
-**Domain:** Adding interactive data visualization, shareable chart images, and large-scale code comparison pages to an existing Astro 5 static portfolio site
-**Researched:** 2026-02-17
-**Confidence:** HIGH (verified against codebase analysis, Astro docs, Chart.js CSP issues, web performance research, and accessibility standards)
+**Domain:** Adding a browser-based Dockerfile editor with linting, scoring, and inline annotations to an existing Astro 5 static portfolio site
+**Researched:** 2026-02-20
+**Confidence:** HIGH (verified against CodeMirror 6 docs, Astro docs, codebase analysis, dockerfile-ast source inspection, community issue trackers, and bundle size analysis)
 
-**Context:** This is a SUBSEQUENT milestone pitfalls document. The site (patrykgolabek.dev) is a live Astro 5 static site with Lighthouse 90+ scores, GSAP animations, React Three Fiber for the 3D hero, Expressive Code for syntax highlighting, Satori-based OG image generation, dark/light theme toggle, and a strict Content Security Policy meta tag. These pitfalls are specific to the risk of degrading existing performance, accessibility, and SEO while adding interactive charts, 250 code blocks, 25 language detail pages, and chart-to-image sharing.
+**Context:** This is a SUBSEQUENT milestone pitfalls document. The site (patrykgolabek.dev) is a live Astro 5 static site with Lighthouse 90+ scores, GSAP animations, a React Three Fiber 3D hero scene, Expressive Code for syntax highlighting, Satori-based OG image generation, dark/light theme toggle, strict Content Security Policy, and ClientRouter (View Transitions). This is the FIRST major client-side interactive tool being added to the site -- approximately 350KB of new JavaScript (CodeMirror 6 ~300KB + dockerfile-ast ~50KB) entering what has been a predominantly static site.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Chart Libraries Destroy Lighthouse Performance Score by Shipping Too Much JavaScript
+### Pitfall 1: CodeMirror 6 Requires `client:only` -- Not `client:visible` -- and SSR Will Break the Build
 
 **What goes wrong:**
-The current site ships minimal client-side JavaScript. The only hydrated React component is the Three.js 3D head scene (`HeadScene.tsx` via `client:visible`). Adding a charting library like Chart.js (63KB min+gzip), Recharts (42KB + React), or D3.js (80KB+) to every language page and the comparison page will balloon the JavaScript payload. If charts are loaded eagerly on page load, Total Blocking Time (TBT) spikes, First Contentful Paint (FCP) degrades, and the Lighthouse performance score drops from 90+ to 70 or below. This is especially devastating because the site's current near-perfect scores are a competitive differentiator.
+CodeMirror 6 depends entirely on browser APIs: DOM manipulation, MutationObserver, requestAnimationFrame, layout queries, and contenteditable. It cannot be server-rendered. If you use `client:visible` or `client:load` on a React/Preact wrapper component containing CodeMirror, Astro will attempt to server-render the component during the static build. This causes either:
 
-The site already loads GSAP (26KB gzip), Lenis (4KB), Three.js (~150KB gzip via the 3D head scene), and React (~45KB gzip). Adding another charting library on top of these pushes the total JavaScript well past the 300KB "performance budget" threshold where Lighthouse starts penalizing.
+1. A build-time crash with "document is not defined" or "window is not defined" errors
+2. A hydration mismatch where the server-rendered placeholder HTML does not match the client-rendered CodeMirror DOM, causing React to throw warnings and potentially fail to hydrate
+
+The site currently uses `client:visible` for the Three.js 3D head scene (`HeadSceneWrapper.astro`), but Three.js has server-safe imports. CodeMirror does not. The EditorView constructor immediately accesses the DOM.
 
 **Why it happens:**
-Developers reach for full-featured charting libraries because they handle axes, tooltips, animations, and responsive behavior. But for radar/spider charts with only 6 data points per language and bar charts comparing 25 languages on a single dimension, these libraries are massive overkill. The data is static (known at build time) and the shapes are simple (polygons and rectangles).
+Developers assume `client:visible` (lazy hydration) is always better than `client:only` (skip SSR entirely). For most components this is true. But CodeMirror is architecturally incompatible with SSR -- it creates its DOM structure imperatively, not declaratively. There is no meaningful HTML to server-render as a placeholder.
 
 **How to avoid:**
-1. **Use hand-crafted SVG for radar charts.** A radar/spider chart with 6 axes and 6 data points is a single `<polygon>` element inside an `<svg>` with 6 labeled axis lines. This is roughly 30 lines of Astro template code, zero JavaScript, zero bundle size, and renders instantly as static HTML. The data is known at build time -- there is no reason to use a JavaScript charting library for static data.
-2. **Use CSS-only bar charts for comparison views.** Bar charts comparing scores across 25 languages can be pure CSS with `width` percentages on colored `<div>` elements. Zero JavaScript. Lighthouse will not penalize this at all.
-3. **If interactivity is needed (tooltips, hover effects), use vanilla JS or GSAP** (already loaded). A tooltip on hover is 20 lines of vanilla JS, not a 60KB library.
-4. **Reserve `client:visible` for genuinely interactive features only.** If a chart component needs JavaScript (e.g., for animated drawing), use `client:visible` so it only loads when scrolled into view.
-5. **Set a performance budget:** Total page JavaScript must stay under 200KB gzip for any new page. Run `npx astro build && npx lighthouse --budget-path=budget.json` as part of CI.
+1. **Use `client:only="react"` (or `client:only="preact"`)** for the CodeMirror editor island. This tells Astro to skip server rendering entirely and mount the component client-side only. The SSR output will be an empty placeholder div.
+2. **Design a meaningful loading state** to render in place of the editor during the SSR placeholder phase. A skeleton with the right dimensions prevents Cumulative Layout Shift (CLS) when the editor mounts. Use a `<div>` with matching height, a subtle border, and "Loading editor..." text.
+3. **Do NOT dynamically import CodeMirror inside a `client:visible` component** as a workaround. While this avoids the build crash, it creates a double-loading scenario: Astro loads the wrapper, then the wrapper loads CodeMirror. Use `client:only` for a clean single load.
+4. **Test the build pipeline early.** Run `astro build` after adding the first CodeMirror import to catch SSR issues before building the full feature.
 
 **Warning signs:**
-- Any `npm install chart.js` or `npm install d3` in the project
-- `client:load` directive on any chart component (should be `client:visible` at minimum)
-- Lighthouse Performance score drops below 90 after adding chart pages
-- TBT exceeds 200ms on any Beauty Index page
+- Build errors containing "document is not defined" or "ReferenceError: window is not defined"
+- Hydration mismatch warnings in the browser console
+- CodeMirror editor appears briefly, then disappears during hydration
+- Empty white space where the editor should be after navigation
 
 **Phase to address:**
-The very first phase: chart component design. Decide on SVG-first, no-library approach BEFORE writing any chart code.
+Phase 1: Editor integration scaffolding. The `client:only` decision must be made BEFORE writing any CodeMirror code. This is a foundational architectural choice.
 
 ---
 
-### Pitfall 2: 250 Code Blocks on the Comparison Page Explode Build Time and DOM Size
+### Pitfall 2: ~350KB of Client JS Tanks Lighthouse Performance Unless Aggressively Lazy-Loaded
 
 **What goes wrong:**
-The code comparison page has 25 languages times 10 features = 250 code blocks. Expressive Code (astro-expressive-code) processes each code block through Shiki for syntax highlighting at build time, generating unique CSS class mappings and HTML for each block. With 250 blocks on a single page:
+The site currently loads GSAP (~26KB gzip), Lenis (~4KB), Three.js (~150KB gzip via the 3D head scene), and React (~45KB gzip). Adding CodeMirror 6 (~75KB gzip minimal, ~120KB with linting+syntax+search extensions) plus dockerfile-ast (~15KB gzip) plus the custom rule engine pushes the total page JavaScript well past comfortable thresholds. If the editor loads eagerly, Total Blocking Time (TBT) -- which determines 30% of the Lighthouse Performance score -- will spike.
 
-1. **Build time:** Each Shiki-highlighted block takes 50-200ms to process. 250 blocks = 12-50 seconds just for this one page, potentially doubling the total site build time. Known Astro issue: multiple Code components on a single page slow dev server significantly (GitHub issue #3123).
-2. **DOM size:** Each syntax-highlighted code block generates 20-50 DOM elements (spans for tokens, line numbers, wrapper divs). 250 blocks = 5,000-12,500 extra DOM elements. Lighthouse flags pages with >1,500 DOM elements as "Excessive DOM Size" and penalizes the performance score.
-3. **Page weight:** Each highlighted code block includes inline styles for token colors. 250 blocks could add 200-500KB of HTML markup to a single page.
+Critical numbers:
+- TBT > 200ms = Lighthouse starts penalizing
+- TBT > 600ms = Lighthouse "poor" rating
+- CodeMirror initialization (parsing extensions, building DOM, setting up MutationObserver) takes 50-150ms on desktop, 200-400ms on low-end mobile
+- This is ON TOP OF existing Three.js/GSAP initialization
+
+The Dockerfile Analyzer page will be the heaviest page on the site by far. If it loads eagerly alongside the global animation scripts, it will be the first page to break the Lighthouse 90+ threshold.
 
 **Why it happens:**
-The natural approach is to render all 250 code blocks into a single page with tabs for filtering. This works fine for 5-10 code blocks but breaks at 250 because every block is in the DOM even if hidden by CSS (`display: none`). The browser still parses and styles all of them.
+CodeMirror 6's modular architecture is both its strength and its trap. The `basicSetup` convenience package pulls in 15+ extensions including search, autocomplete, bracket matching, and history -- most of which are needed for a good editor experience. Developers import `basicSetup` to get started quickly, not realizing it bundles far more than a minimal Dockerfile editor needs.
 
 **How to avoid:**
-1. **Tab-based lazy rendering is essential.** Do NOT render all 250 code blocks in the initial HTML. Instead:
-   - Render only the active tab's code blocks (10 blocks for the selected language OR 25 blocks for the selected feature).
-   - Use Astro's `client:visible` on a lightweight tab controller that swaps content.
-   - Store code block HTML in `<template>` elements or `data-*` attributes and inject them into the DOM only when the tab is selected.
-2. **Consider splitting into separate pages** instead of a single mega-page. Instead of one comparison page with 250 code blocks, have a comparison page with 10 feature tabs where each tab loads 25 short snippets. Or 25 language tabs where each tab loads 10 snippets. Either way, only 10-25 blocks are in the DOM at once.
-3. **Pre-render code blocks as static HTML fragments** using Astro's build pipeline, then dynamically load them via fetch when a tab is clicked. This keeps the initial page payload small while avoiding runtime syntax highlighting.
-4. **Use Astro's built-in `<Code />` component** rather than Expressive Code for the comparison page if Expressive Code's features (copy button, frames, etc.) are not needed for short snippets. The built-in component is lighter.
+1. **Use `minimalSetup` instead of `basicSetup`** and add only the extensions you actually need. For a Dockerfile linting tool, you need: syntax highlighting, line numbers, lint gutter, fold gutter (maybe), and the lint panel. You do NOT need: search/replace, autocomplete, bracket matching (Dockerfiles barely use brackets), or multi-cursor.
+2. **Dynamically import CodeMirror** via the `client:only` directive (which already defers loading until page render). Combined with the fact that this is a dedicated `/tools/dockerfile-analyzer` page (not the homepage), the JS only loads when users navigate to this specific page.
+3. **Set a page-specific performance budget.** The Dockerfile Analyzer page has a different budget than the homepage. Target: Lighthouse Performance 85+ (not 90+) for this interactive tool page. Document this exception.
+4. **Split the editor initialization** into phases: mount the editor view first (fast), then add linting extension after a 100ms delay using `requestIdleCallback` or `setTimeout`. This prevents the lint engine from adding to the initial TBT.
+5. **Measure with `?lighthouse=true` query parameter** during development to easily toggle Lighthouse-focused testing.
 
 **Warning signs:**
-- Build time exceeds 30 seconds for the comparison page alone
-- Lighthouse reports "Excessive DOM Size" (>1,500 elements)
-- Browser DevTools shows >500ms of "Parse HTML" in the Performance tab
-- Users on mobile experience janky scrolling or unresponsive tab switching
+- `import { basicSetup } from 'codemirror'` in any file (should be `minimalSetup` with selective additions)
+- Lighthouse Performance score below 85 on the Dockerfile Analyzer page
+- TBT exceeds 300ms on the Dockerfile Analyzer page
+- The editor page loads noticeably slower than other pages on 4G throttle
 
 **Phase to address:**
-The code comparison architecture phase. The tab/lazy-loading strategy must be decided BEFORE building the comparison page.
+Phase 1: Editor integration. Bundle size decisions are architectural -- wrong choices here require rearchitecting later.
 
 ---
 
-### Pitfall 3: Chart-to-Image Sharing Hits CSP Violations and Cross-Browser Failures
+### Pitfall 3: View Transitions (ClientRouter) Destroy and Fail to Recreate the CodeMirror Instance
 
 **What goes wrong:**
-The "share your chart as an image" feature requires converting DOM elements (SVG charts, surrounding text) into a raster image (PNG) that users can download or share to social media. The standard approaches all have serious issues on this specific site:
+The site uses Astro's `<ClientRouter />` for smooth page-to-page navigation. When navigating away from and back to the Dockerfile Analyzer page, the ClientRouter replaces the page DOM. This destroys the CodeMirror editor's DOM elements, but the JavaScript EditorView instance -- with its MutationObserver, event listeners, and internal state -- may survive in memory as a zombie reference. When the user navigates back, Astro creates fresh DOM but the orphaned EditorView still references the old (now removed) DOM nodes. Result: the editor is blank, broken, or throws errors.
 
-1. **`html2canvas` / `dom-to-image`:** These libraries screenshot DOM elements by cloning them into a `<canvas>`. But the site has a strict Content Security Policy meta tag that restricts `script-src` and `style-src`. `html2canvas` injects inline styles and creates blob URLs, which can be blocked by the CSP.
-2. **Canvas `toDataURL()`:** Requires the canvas to not be "tainted" by cross-origin resources. If the chart SVG references Google Fonts via CSS (the site uses Google Fonts for DM Sans, Bricolage Grotesque, Fira Code), the canvas is tainted and `toDataURL()` throws a SecurityError.
-3. **`html2canvas` performance:** Monday.com's engineering team reported that capturing 10 DOM widgets took 21 seconds. Capturing a full radar chart with labels and styling could take 2-5 seconds on mobile, during which the UI freezes.
+Specific failure scenarios:
+1. **Navigate away, navigate back:** Editor is blank. The `client:only` component remounts, but if the framework (React/Preact) tries to reuse the old component tree, the EditorView's DOM root is gone.
+2. **Browser back button:** View Transitions replay the cached page, but the editor island does not re-execute its initialization script because Astro considers it already loaded.
+3. **Unsaved user content is lost:** The user types a Dockerfile, navigates away, presses back -- their content is gone. This is expected for a stateless tool, but feels like a bug to users.
 
-Additionally, the site's CSP meta tag explicitly sets `img-src 'self' data: blob:` and `connect-src 'self' ...` which helps, but `style-src 'self' 'unsafe-inline'` is already required. Chart.js specifically requires `style-src 'unsafe-inline'` for canvas element dimension setting (GitHub issue #8108), and removing it breaks chart rendering entirely.
+The site's existing `astro:before-swap` cleanup (in `Layout.astro`) calls `gsap.killTweensOf('*')` and destroys Lenis. It does NOT know about CodeMirror instances.
 
 **Why it happens:**
-DOM-to-image conversion is fundamentally fragile. It works by serializing the DOM into an intermediate format (SVG foreignObject or canvas), which requires all resources (fonts, images, styles) to be available inline. External resources, CSP restrictions, and browser security models all create failure modes that are invisible during development but break in production.
+Astro's ClientRouter performs a soft DOM swap, not a full page reload. For static content this works perfectly. For stateful client-side components like code editors, the gap between "DOM was replaced" and "component was properly unmounted" creates zombie state. The `astro:page-load` event fires after the swap, but `client:only` components may or may not re-initialize depending on framework behavior and caching.
 
 **How to avoid:**
-1. **Generate shareable images at build time using Satori, not at runtime.** The site already has a Satori + Sharp pipeline for OG images (`src/lib/og-image.ts`). Extend this same pipeline to generate "shareable chart cards" for each language at build time. This avoids ALL runtime DOM-to-image issues, CSP problems, and cross-browser inconsistencies.
-2. **The Satori approach:** For each of the 25 languages, generate a pre-rendered PNG at build time showing the radar chart, language name, and scores. Store these as static assets in `/beauty-index/share/{language}.png`. The "Share" button simply links to this pre-built image.
-3. **If runtime image generation is truly needed** (e.g., user customizes the chart), use a server endpoint (Astro SSR endpoint or serverless function) that runs Satori on the server side with the same approach as OG image generation. This sidesteps all client-side CSP and canvas security issues.
-4. **Do NOT use `html2canvas` or `dom-to-image`.** These libraries are fragile, slow on mobile, break under strict CSP, and produce inconsistent results across browsers.
+1. **Explicitly destroy the EditorView on `astro:before-swap`.** In the editor component, listen for this event and call `view.destroy()` to release all resources:
+   ```javascript
+   document.addEventListener('astro:before-swap', () => {
+     if (editorView) {
+       editorView.destroy();
+       editorView = null;
+     }
+   });
+   ```
+2. **Re-initialize the editor on `astro:page-load`.** After the swap completes, the `client:only` component should remount cleanly. Verify this works by testing the full navigation cycle.
+3. **Consider `transition:persist` with extreme caution.** While Astro's `transition:persist` directive can keep an island alive across navigations, it has known issues with React hooks not triggering re-renders after persist (GitHub issue #13287). For CodeMirror, persistence adds complexity around document state. It is simpler and safer to destroy and recreate.
+4. **Optionally persist the Dockerfile content to `sessionStorage`** before navigation, and restore it on remount. This gives users the UX benefit of content persistence without the complexity of keeping the editor alive across transitions.
+5. **Test the full navigation matrix:** Home -> Analyzer -> Back -> Forward -> Analyzer (direct URL). Each path exercises different ClientRouter code paths.
 
 **Warning signs:**
-- Console errors mentioning "Refused to apply inline style" or "SecurityError: tainted canvas"
-- Share button works in Chrome dev mode but fails on production deployment
-- Share images render with missing fonts, wrong colors, or broken layout
-- UI freezes for 2+ seconds when user clicks "Share"
+- Editor is blank after pressing the browser Back button
+- Console errors: "Cannot read properties of null" referencing CodeMirror DOM elements
+- Memory leaks: navigating to/from the Analyzer page repeatedly causes increasing memory usage (orphaned EditorView instances)
+- Lint annotations appear on wrong lines after navigation
 
 **Phase to address:**
-The chart sharing/social image phase. Choose the Satori build-time approach in the design phase, not after implementing runtime DOM capture.
+Phase 1: Editor integration. The view transition lifecycle hooks must be part of the editor component from day one, not bolted on later.
 
 ---
 
-### Pitfall 4: Dark Mode Theme Mismatch Causes Invisible Charts and Broken Visuals
+### Pitfall 4: dockerfile-ast Depends on VS Code Language Server Types -- Bundle May Balloon or Break
 
 **What goes wrong:**
-The site has a dark/light theme toggle that adds/removes a `.dark` class on `<html>` and stores the preference in `localStorage`. However, upon inspection of the codebase, there are NO dark mode CSS custom properties defined anywhere. The global CSS defines light-mode variables only:
+The `dockerfile-ast` npm package has two runtime dependencies:
+- `vscode-languageserver-textdocument` (^1.0.8)
+- `vscode-languageserver-types` (^3.17.3)
 
-```css
-:root {
-  --color-surface: #fffaf7;
-  --color-text-primary: #2c2c2c;
-  --color-accent: #c44b20;
-  /* ... */
-}
-```
+These are pure TypeScript type/interface packages from Microsoft's VS Code ecosystem. While they do NOT use Node.js built-in modules (no `fs`, `path`, `child_process`), they were designed for VS Code extensions, not browser applications. Potential issues:
 
-There is no `.dark { --color-surface: #1a1a2e; ... }` block. The only component that responds to `.dark` is Expressive Code's theme switching (between `github-dark` and `github-light` code block themes). The theme toggle appears to be partially implemented -- it toggles the class but the site does not visually change because no dark mode styles exist.
-
-If charts use CSS custom properties for colors (e.g., `fill: var(--color-accent)` for chart elements, `var(--color-surface)` for backgrounds), they will render identically in both modes. But if charts use hardcoded colors that look good on the light background (`#fffaf7`) but are invisible on a dark background (e.g., light-colored text on dark surface), users who have `.dark` class active (from a previous session's localStorage) will see broken charts.
+1. **Unexpected bundle size:** `vscode-languageserver-types` contains the entire Language Server Protocol type definitions (hundreds of interfaces for capabilities like document symbols, code actions, folding ranges, completion items). Most of this is dead code for a Dockerfile parser. If the bundler does not tree-shake effectively, you ship 50-100KB of unused type infrastructure.
+2. **Module format mismatches:** These packages may use CommonJS (`require`), which Vite (Astro's bundler) must transform. While Vite handles CJS-to-ESM conversion, edge cases with re-exports can cause "named export not found" errors.
+3. **The `TextDocument` dependency is structural:** `dockerfile-ast` uses `TextDocument` from `vscode-languageserver-textdocument` to represent file content. You must create a `TextDocument` to use the parser. This means you cannot just import the parser standalone -- you must also import the text document factory.
 
 **Why it happens:**
-The dark mode toggle exists as infrastructure but was never completed. Code blocks work because Expressive Code handles its own theming. But new visual elements (charts, comparison tables, score indicators) will need to handle BOTH modes, or the inconsistency becomes glaringly visible on pages with heavy visual content.
+`dockerfile-ast` was written by the author of the Docker VS Code extension (Remy Suen) specifically for that extension's language server. It is a mature, well-tested parser, but its API surface assumes VS Code extension contexts where `vscode-languageserver-*` packages are already available.
 
 **How to avoid:**
-1. **Decide on dark mode strategy BEFORE building chart components.** Either:
-   - **Option A (recommended for this milestone):** Do NOT support dark mode for Beauty Index pages. The charts and visualizations are complex enough without dual-theming. Remove or disable the dark mode toggle on Beauty Index pages, or ensure it only affects code blocks (which already work).
-   - **Option B:** Define the full dark mode color palette in `global.css` before building any chart components. This is a bigger effort but makes all future components consistent.
-2. **If using SVG charts with CSS custom properties,** always test both states. Add to the development workflow: after any visual change, click the theme toggle and verify the chart is still visible and readable.
-3. **For build-time shareable images (Satori),** hardcode the light theme colors. OG images and share cards should always use the light palette since social media platforms display them on white/light backgrounds.
-4. **Expressive Code blocks on the comparison page will work fine** in both modes because this is already handled by the Astro config's `themeCssSelector` setting.
+1. **Verify browser bundling works before committing to dockerfile-ast.** Create a minimal test: import `DockerfileParser.parse()` in a Vite project, build it, and check the output bundle size. If it bundles cleanly at <20KB gzip with tree shaking, proceed. If not, evaluate alternatives.
+2. **Alternative: Write a lightweight Dockerfile parser.** Dockerfiles have a simple line-oriented grammar (INSTRUCTION arguments, with continuation lines via `\`). A 200-line parser handling FROM, RUN, COPY, EXPOSE, ENV, ARG, LABEL, WORKDIR, ENTRYPOINT, CMD, HEALTHCHECK, USER, and comments covers 95% of real-world Dockerfiles. This eliminates the VS Code dependency entirely.
+3. **If using dockerfile-ast, verify tree shaking.** After building, inspect the output bundle with `npx vite-bundle-visualizer` or `source-map-explorer`. If `vscode-languageserver-types` contributes >10KB gzip, the tree shaking failed and a custom parser is warranted.
+4. **If using dockerfile-ast, create a thin wrapper** that accepts raw strings (not `TextDocument` objects) and internally creates the `TextDocument`. This isolates the VS Code dependency from the rest of the application.
 
 **Warning signs:**
-- Chart text is invisible (same color as background)
-- Chart lines or fills disappear when theme is toggled
-- Radar chart axis labels become unreadable in one mode
-- Share images look different from the live chart because they use different color values
+- Bundle size for the Analyzer page exceeds 200KB gzip
+- Build warnings about "Could not resolve" or "Missing export" from vscode-languageserver-* packages
+- Runtime error: `TextDocument is not a constructor` or similar
+- `vite-bundle-visualizer` shows large chunks of unused LSP type definitions
 
 **Phase to address:**
-The first phase of UI component design. Make the dark mode decision and document it before any visual component work begins.
+Phase 1: Technology validation. Test the dockerfile-ast import in a minimal Vite build BEFORE integrating it into the Astro site. This is a go/no-go gate.
 
 ---
 
-### Pitfall 5: OG Image Generation for 25+ New Pages Significantly Increases Build Time
+### Pitfall 5: CodeMirror Dark Mode Requires Compartment Reconfiguration -- CSS Classes Alone Will Not Work
 
 **What goes wrong:**
-The existing OG image pipeline uses Satori + Sharp to generate PNG images for each blog post at build time. The current `[...slug].png.ts` endpoint already iterates over all blog posts. Adding 25 language detail pages plus a main Beauty Index page plus a comparison page = 27+ new OG images to generate at build time.
+The site toggles dark mode by adding/removing a `.dark` class on `<html>` (via `ThemeToggle.astro`). This works for CSS-variable-based components. But CodeMirror 6 has its own theming system that is orthogonal to CSS classes on ancestor elements. CodeMirror themes are JavaScript extensions that inject scoped CSS via `EditorView.theme()`. Simply adding `.dark` to `<html>` does NOT change CodeMirror's syntax highlighting colors.
 
-Each Satori render takes 100-300ms, and Sharp PNG conversion takes another 50-100ms. That's 150-400ms per image. For 27 new pages: 4-11 seconds of additional build time. Combined with the existing blog post OG images, this starts to add up. More critically, if the Beauty Index OG images use more complex layouts (radar charts rendered as SVG inside Satori), the rendering time per image could be 500ms+, pushing total OG generation to 15-20 seconds.
+The result: the user toggles dark mode, the page background and text change, but the code editor remains in light mode (or vice versa). The visual mismatch makes the editor look broken -- light editor on dark page, or dark editor on light page.
 
-The existing `generateOgImage()` function in `src/lib/og-image.ts` is designed for blog post layouts (title, description, tags). It would need significant modification or a new function to render radar chart visuals in OG images.
+Worse: the site's current dark mode is partially implemented (the toggle exists, localStorage persistence works, but no CSS custom properties for `.dark` are defined in `global.css`). This means the editor's dark mode implementation must work with a partially complete system.
 
 **Why it happens:**
-Satori renders every OG image from scratch on every build. There is no caching layer. The `sharp` PNG conversion is CPU-bound. Building 50+ images in parallel without throttling can saturate the CPU and cause memory spikes during CI/CD.
+CodeMirror's CSS-in-JS theming is intentionally isolated from the page's CSS to prevent style conflicts. This is a good architectural decision for a library, but it means theme switching requires CodeMirror-specific code. Developers assume adding a CSS class to a parent element will cascade into the editor -- it does not.
 
 **How to avoid:**
-1. **Implement OG image caching.** Before generating each image, hash the input data (title, scores, language name). If the hash matches a previously generated image, skip regeneration. Store hashes in a `.cache/og-hashes.json` file. This reduces subsequent builds to near-zero for unchanged content.
-2. **Throttle parallel generation** using `p-limit` or similar: `const limit = pLimit(4)` to prevent CPU saturation. Generate at most 4 OG images concurrently.
-3. **Create a dedicated `generateBeautyIndexOgImage()` function** rather than overloading the blog OG function. The Beauty Index OG images will have a different layout (radar chart, language name, score summary) than blog OG images (title, description, tags).
-4. **Use a separate `[...slug].png.ts` route** for Beauty Index pages (e.g., `src/pages/beauty-index/og/[lang].png.ts`) to keep the OG generation pipeline modular and independently testable.
-5. **Consider simpler OG layouts** for language pages. A clean card with the language name, 6 dimension scores as text, and the site branding is faster to render than trying to embed a full radar chart in the OG image.
+1. **Use `codemirror-theme-vars` by Anthony Fu** to bridge CodeMirror themes to CSS custom properties. This library defines CodeMirror theme colors as CSS variables (`--cm-background`, `--cm-foreground`, `--cm-keyword`, etc.) that you can override in `:root` and `.dark` selectors. This integrates CodeMirror into the site's existing theming approach.
+2. **Alternative: Use a Compartment for dynamic theme switching.** Create two themes (light and dark), wrap them in a `Compartment`, and dispatch a reconfigure effect when the theme toggle fires:
+   ```javascript
+   import { Compartment } from '@codemirror/state';
+   const themeConfig = new Compartment();
+   // On toggle:
+   view.dispatch({
+     effects: themeConfig.reconfigure(isDark ? darkTheme : lightTheme)
+   });
+   ```
+3. **Listen for the theme toggle event.** The existing `ThemeToggle.astro` dispatches no custom event -- it only toggles the CSS class and writes to localStorage. Add a `MutationObserver` on `document.documentElement` watching for class attribute changes, or dispatch a custom `theme-change` event from the toggle.
+4. **Define the dark editor palette using the site's Tropical Sunset color system.** Map `--color-surface` to `--cm-background`, `--color-text-primary` to `--cm-foreground`, and `--color-accent` to `--cm-keyword`. This keeps visual consistency.
 
 **Warning signs:**
-- Build time exceeds 60 seconds (current build is likely under 30s)
-- CI/CD pipeline times out or runs out of memory
-- `sharp` throws "Input buffer contains unsupported image format" errors during parallel generation
-- OG images for Beauty Index pages are visually broken or cut off
+- Editor background color does not match the page background after theme toggle
+- Syntax highlighting colors are unreadable against the page background
+- Two distinct visual "zones" on the page -- one themed, one not
+- Users toggle dark mode and the editor flashes or re-renders entirely
 
 **Phase to address:**
-The OG image generation phase. Implement caching and a dedicated generator function before creating all 25+ language OG images.
+Phase 2: Editor theming and styling. Must be completed BEFORE the editor is considered "done" -- theme mismatch is immediately visible to users.
 
 ---
 
-### Pitfall 6: New Pages Lack Proper SEO Infrastructure (JSON-LD, Canonical URLs, Internal Linking)
+### Pitfall 6: Scoring Algorithm Becomes Gameable, Opaque, or Meaningless Without Careful Weighting Design
 
 **What goes wrong:**
-The existing site has carefully structured SEO: `PersonJsonLd`, `BlogPostingJsonLd`, `BreadcrumbJsonLd`, `SEOHead` with Open Graph tags, canonical URLs, and sitemap integration. Adding 25+ new pages without matching this SEO infrastructure creates orphan pages that search engines rank poorly. Specifically:
+A Dockerfile scoring algorithm with 40 rules must assign weights and calculate a composite score. Common failure modes:
 
-1. **Missing JSON-LD structured data:** Language detail pages should use `SoftwareSourceCode` or `TechArticle` schema. The comparison page should use `Dataset` or `Table` schema. Without this, Google cannot generate rich snippets.
-2. **No internal linking strategy:** If the Beauty Index pages only link to each other but not to/from the blog, projects, or home page, they become isolated clusters with low PageRank flow.
-3. **Dynamic routes without canonical URLs:** The `[lang].astro` pages must define canonical URLs properly or Google may treat them as duplicate content (25 pages with similar structure).
-4. **Sitemap bloat without priority signals:** Adding 27+ pages to the sitemap without `<priority>` and `<lastmod>` dilutes the sitemap's effectiveness.
-5. **Missing meta descriptions:** Each of 25 language pages needs a unique, keyword-rich meta description. Using the same description for all 25 pages triggers Google's duplicate content detection.
+1. **Gaming:** Users discover that adding a single `HEALTHCHECK` instruction jumps their score from 60 to 85, so they add a meaningless `HEALTHCHECK CMD true` to game the score. The tool rewards form over substance.
+2. **Meaningless perfect scores:** If most rules check for things that competent developers already do (like using specific base image tags), the majority of reasonable Dockerfiles score 95-100 and the tool provides no actionable feedback. The score has no discriminating power.
+3. **Inconsistent weighting:** If "pin apt-get package versions" (a minor best practice) and "do not run as root" (a critical security issue) both carry 2 points, the scoring sends wrong signals about relative importance.
+4. **Cliff effects:** A Dockerfile with `RUN apt-get update && apt-get install` (combined) scores 10 points higher than one with separate `RUN apt-get update` and `RUN apt-get install` lines, even though the combined form is only marginally better. The score difference is disproportionate to the actual impact.
+5. **Category blindness:** A Dockerfile could score 95/100 by acing all "efficiency" and "formatting" rules while having critical security vulnerabilities (running as root, using `latest` tag, copying secrets). The aggregate score hides category-level failures.
+
+Hadolint, the industry-standard Dockerfile linter, deliberately avoids numerical scoring -- it reports issues by severity (error/warning/info/style) without aggregating them into a single number. This is intentional: Dockerfile quality is multidimensional and a single score oversimplifies it.
 
 **Why it happens:**
-SEO infrastructure is invisible to users and is often the last thing built. Developers focus on visual design and interactivity, then add SEO tags as an afterthought. But for a portfolio site targeting recruiter and developer discovery, SEO is the primary distribution channel.
+Scoring algorithms are easy to build and hard to calibrate. The initial implementation feels satisfying (numbers go up/down based on changes), but without extensive testing against real-world Dockerfiles of varying quality, the weights are arbitrary. The developer calibrates against 5-10 test Dockerfiles and ships, then discovers the scoring breaks down for the other 90% of real Dockerfiles.
 
 **How to avoid:**
-1. **Define the SEO template BEFORE building pages.** Create a `BeautyIndexSEO.astro` component that handles title, description, OG image, canonical URL, and JSON-LD for language pages. Use it from day one.
-2. **Generate unique meta descriptions from data.** Each language has unique scores and characteristics. Template: "Python scores {score}/10 on The Beauty Index. Explore its {dimension} strengths with radar charts and code examples across {N} features." This is unique per language AND keyword-rich.
-3. **Add internal links FROM existing pages TO Beauty Index.** The blog post about The Beauty Index should link to the comparison page. The home page "latest projects" section should feature it. The About page should reference it.
-4. **Use `BreadcrumbJsonLd` for navigation hierarchy:** Home > Beauty Index > Python. This helps Google understand the site structure.
-5. **Set canonical URLs explicitly** in the `Layout` component for each language page: `https://patrykgolabek.dev/beauty-index/{language}/`.
+1. **Show category sub-scores, not just the aggregate.** Display: Security: 8/10, Efficiency: 6/10, Maintainability: 9/10, Best Practices: 7/10. This prevents a high aggregate from hiding a critical security failure.
+2. **Weight security rules at 3-5x compared to style rules.** A "do not run as root" violation (security) should drop the score dramatically, while "use LABEL for metadata" (style) should be a minor ding.
+3. **Use severity tiers aligned with Hadolint's model:** Error (blocks deploy) > Warning (should fix) > Info (nice to have) > Style (cosmetic). Map each tier to a scoring impact: Error = -10pts, Warning = -5pts, Info = -2pts, Style = -1pt.
+4. **Test against 50+ real-world Dockerfiles** from GitHub before finalizing weights. Include: minimal Alpine images, multi-stage builds, development containers, CI images, and deliberately bad Dockerfiles. The score distribution should form a meaningful curve, not cluster at 90+.
+5. **Make the scoring formula transparent.** Show users exactly which rules contributed to their score and by how much. Opaque scores breed distrust. Display: "Using latest tag: -5 points (Security)" next to each finding.
+6. **Validate against Hadolint output.** For the same Dockerfile, your tool's "severe" findings should align with Hadolint's errors/warnings. If they diverge, your weighting is likely wrong.
 
 **Warning signs:**
-- Google Search Console shows Beauty Index pages with "Discovered, not indexed" status
-- No rich snippets appear in search results for Beauty Index pages
-- Beauty Index pages have 0 internal links pointing to them (check with Screaming Frog or similar)
-- All 25 language pages share identical meta descriptions in the sitemap
+- Most test Dockerfiles score 85-100 (insufficient discrimination)
+- A known-bad Dockerfile (running as root, using latest, no healthcheck) scores above 70
+- Adding a trivial fix changes the score by 20+ points
+- Users report that the score "does not match" their Dockerfile quality
 
 **Phase to address:**
-The page scaffolding/routing phase. Build SEO infrastructure INTO the page template from the start, not as a separate SEO phase later.
+Phase 3: Rule engine and scoring design. The weight calibration must happen BEFORE the UI shows scores. Ship the lint results first, add scoring after calibration.
 
 ---
 
 ## Moderate Pitfalls
 
-### Pitfall 7: GSAP ScrollTrigger Conflicts with New Interactive Components
+### Pitfall 7: CodeMirror Keyboard Trap Violates WCAG 2.1.2 -- Tab Key Does Not Leave the Editor
 
 **What goes wrong:**
-The site's animation lifecycle is tightly managed: `initScrollAnimations()` registers ScrollTriggers on page load, and `cleanupAnimations()` kills them all on page navigation. If Beauty Index pages add their own ScrollTrigger instances (e.g., for animating chart drawing on scroll, or parallax effects on the comparison table), these instances may be orphaned during cleanup or may conflict with the global animation system.
+When users press Tab inside CodeMirror, it inserts an indent character (if `indentWithTab` is enabled) instead of moving focus to the next focusable element. This creates a "keyboard trap" -- users who rely on keyboard navigation cannot leave the editor without knowing the escape hatch (press Escape, then Tab). WCAG 2.1.2 ("No Keyboard Trap") requires that keyboard focus can always be moved away from any component using standard keyboard interactions.
 
-The `cleanupAnimations()` function calls `gsap.killTweensOf('*')` which kills ALL active tweens globally. If a chart is mid-animation when the user navigates away, the cleanup is fine. But if a chart component registers its own cleanup handler that runs AFTER the global cleanup, it will try to kill already-dead tweens, causing console errors.
+CodeMirror 6 is aware of this and deliberately does NOT bind Tab by default. But most CodeMirror integration tutorials include `indentWithTab` from `@codemirror/commands` because Dockerfile content needs indentation. The moment you add `indentWithTab`, you create the trap.
 
-**How to avoid:**
-- Register Beauty Index ScrollTriggers through the existing animation lifecycle, not independently.
-- Ensure chart animation components check for element existence before animating: `if (!chartEl) return;`
-- If using `client:visible` for chart hydration, the component may hydrate AFTER `initScrollAnimations()` runs. Register new ScrollTriggers inside the component's own lifecycle and call `ScrollTrigger.refresh()` after adding them.
-- Do NOT use `ScrollTrigger.refresh()` multiple times in rapid succession (use a debounced wrapper).
+The existing site has strong accessibility patterns: skip links, ARIA labels, `prefers-reduced-motion` fallbacks, `focus-visible` outlines. Adding a keyboard trap would be a significant regression.
 
-**Warning signs:**
-- Console errors: "Cannot read properties of null" in animation code after page navigation
-- Charts animate but then freeze or jump when scrolling
-- Global scroll animations (text reveal, card stagger) stop working on Beauty Index pages
-
-**Phase to address:**
-The interactive chart animation phase. Test page navigation TO and FROM Beauty Index pages to verify cleanup works.
-
----
-
-### Pitfall 8: Greek Symbols and Mathematical Notation Render Inconsistently Across Browsers
-
-**What goes wrong:**
-The Beauty Index uses Greek symbols (phi, sigma, etc.) in dimension names, formulas, and explanatory text. The site loads three Google Fonts: Bricolage Grotesque, DM Sans, and Fira Code. None of these fonts include comprehensive Greek character support. When the browser encounters a Greek character in a font that does not include it, it falls back to the system font stack, causing:
-
-1. **Visual inconsistency:** Greek letters render in a different typeface than surrounding text, looking like a font loading error.
-2. **Size/baseline misalignment:** System fallback fonts have different metrics, causing layout shifts (CLS) around Greek characters.
-3. **Fira Code (monospace) Greek gaps:** If code blocks contain Greek variable names, Fira Code may not render them with the expected monospace width, breaking code alignment.
+**Why it happens:**
+Developers add `indentWithTab` because Dockerfile editing feels wrong without Tab indentation. They test with a mouse and never discover the keyboard trap because they click out of the editor.
 
 **How to avoid:**
-1. **Use HTML entities or Unicode characters** (`&phi;`, `&Sigma;`, `&#x03C6;`) rather than raw UTF-8 Greek characters in HTML. These are more reliably rendered.
-2. **Test Greek rendering in all three site fonts** before using them. DM Sans (body) has good Unicode coverage. Bricolage Grotesque (headings) may not.
-3. **For mathematical formulas,** use KaTeX or MathJax ONLY if complex expressions are needed. For simple symbols (phi, sigma), plain Unicode with proper font fallbacks is sufficient and avoids another JS dependency.
-4. **Add explicit fallback fonts for Greek:** `font-family: 'DM Sans', 'Noto Sans', system-ui, sans-serif;` -- Noto Sans has complete Greek coverage.
-5. **In code blocks,** Fira Code handles basic Greek letters. Test with actual code snippets containing the specific Greek characters used.
-
-**Warning signs:**
-- Greek letters appear in a visually different font than surrounding text
-- Layout shifts when Greek characters load (measure CLS in Lighthouse)
-- Code blocks with Greek variable names have broken alignment
-
-**Phase to address:**
-The content creation phase. Test Greek rendering early with actual content samples in all three fonts.
-
----
-
-### Pitfall 9: Comparison Page Tab Navigation Breaks Keyboard Accessibility and ARIA
-
-**What goes wrong:**
-The comparison page will have a tabbed interface (25 language tabs OR 10 feature tabs) that shows/hides code blocks. If this is implemented as a set of `<button>` elements that toggle `display: none` on content panels, several accessibility requirements are commonly missed:
-
-1. **Missing ARIA roles:** Tabs need `role="tablist"` on the container, `role="tab"` on each tab button, and `role="tabpanel"` on each content panel.
-2. **Missing `aria-selected`:** The active tab must have `aria-selected="true"`, others `aria-selected="false"`.
-3. **No keyboard navigation:** WAI-ARIA tab pattern requires Arrow Left/Right to move between tabs, Home/End to jump to first/last tab, and Enter/Space to activate.
-4. **Hidden panels not properly hidden:** Using `display: none` is correct but `aria-hidden="true"` must also be set on inactive panels, and `tabindex="-1"` on their content to prevent keyboard focus from landing on hidden elements.
-5. **Focus management:** When activating a tab via keyboard, focus should remain on the tab bar, not jump to the panel content.
-
-The existing site already has good accessibility patterns (skip links, ARIA labels on interactive elements, `prefers-reduced-motion` support). Breaking this standard on the most interactive new pages would be a regression.
-
-**How to avoid:**
-1. **Follow the WAI-ARIA Authoring Practices 1.1 Tabs Pattern exactly.** Do not invent a custom tab interaction. The spec is clear and well-tested.
-2. **Use a minimal, accessible tab component** that handles all ARIA attributes and keyboard interactions. Build it once, use it for both the language comparison tabs and the feature tabs.
-3. **Test with VoiceOver (macOS: Cmd+F5)** after building the tab component. Navigate through tabs using only the keyboard. Verify:
-   - Arrow keys move between tab buttons
-   - Tab content is announced when activated
-   - Hidden panels are not reachable via Tab key
-4. **Do not use `<a>` elements for tabs.** Tabs are buttons, not links. Using links causes screen readers to announce them as navigation links, confusing users.
-
-**Warning signs:**
-- Lighthouse accessibility score drops below 90
-- Tab content is reachable via Tab key when the panel is visually hidden
-- Arrow keys do not move between tabs
-- VoiceOver announces tabs as "link" instead of "tab"
-
-**Phase to address:**
-The comparison page UI phase. Build the accessible tab component FIRST, then add code content.
-
----
-
-### Pitfall 10: ClientRouter (View Transitions) Cause Stale State on Beauty Index Pages
-
-**What goes wrong:**
-The site uses Astro's `<ClientRouter />` (View Transitions API) for smooth page-to-page navigation. When navigating between Beauty Index pages (e.g., from Python's page to JavaScript's page), the client-side router swaps the page content via the View Transitions API. However:
-
-1. **React islands may not re-initialize.** If chart components are React islands with `client:visible`, the View Transition swap replaces the DOM but the React root may not remount properly, leaving a stale or blank chart.
-2. **Tab state persists incorrectly.** If the user was viewing "Feature 5" tab on Python's page, then navigates to JavaScript's page, the tab controller may still show "Feature 5" content from Python.
-3. **ScrollTrigger positions become invalid.** After a View Transition swap, all GSAP ScrollTrigger positions are calculated against the OLD page's layout. `ScrollTrigger.refresh()` must be called after the swap completes.
-
-The existing site handles this for animations via the `astro:page-load` and `astro:before-swap` events in `Layout.astro`. But Beauty Index components that have their own state (active tab, animation progress, scroll position) need to listen to these events independently.
-
-**How to avoid:**
-1. **Listen to `astro:page-load`** in every Beauty Index component that has client-side state. Reset all state on this event:
+1. **Add visible instructions near the editor:** "Press Escape then Tab to leave the editor" or "Ctrl+M to toggle tab focus mode." This is the WCAG-recommended approach for complex widgets that intentionally capture Tab.
+2. **Implement a visual indicator for Tab Focus Mode.** When the user presses Escape or Ctrl+M, show a subtle notification: "Tab key now moves focus. Press Ctrl+M to re-enable indentation." CodeMirror exposes `toggleTabFocusMode` for this.
+3. **Add `aria-label` to the editor.** CodeMirror creates an internal `<div role="textbox" aria-multiline="true">` but does not propagate `aria-label` from the wrapper. Use the `EditorView.contentAttributes` facet to add it:
    ```javascript
-   document.addEventListener('astro:page-load', () => {
-     resetTabs();
-     refreshChartData();
-     ScrollTrigger.refresh();
-   });
+   EditorView.contentAttributes.of({
+     'aria-label': 'Dockerfile editor. Press Escape then Tab to leave.',
+     'aria-describedby': 'editor-instructions'
+   })
    ```
-2. **Listen to `astro:before-swap`** to clean up component-specific resources (event listeners, animation instances).
-3. **For React chart islands,** use `client:visible` with a `key` prop tied to the language slug. This forces React to remount the component on navigation instead of reusing the stale instance.
-4. **Test the full navigation flow:** Home -> Beauty Index -> Python -> JavaScript -> Back -> Forward. Verify charts render correctly at each step.
-5. **Consider using `transition:animate="none"` on chart containers** to prevent the View Transition API from trying to morph between charts on different language pages (which would look glitchy).
+4. **Provide a "Skip editor" link before the editor** in the DOM, similar to the site's existing "Skip to main content" link. This gives keyboard users an immediate escape route.
+5. **Test with keyboard-only navigation.** Tab into the editor, type content, then Tab out. Verify focus moves to the next element (Analyze button or results panel).
 
 **Warning signs:**
-- Charts show data from the PREVIOUS language page after navigation
-- Tab state persists across page navigations
-- Blank spaces where charts should be after using the browser back button
-- Console errors about null references to DOM elements after navigation
+- Lighthouse Accessibility audit flags "Keyboard trap" or "No accessible name on textbox"
+- Users cannot Tab out of the editor to reach the "Analyze" button
+- Screen readers announce the editor as "textbox" without a descriptive label
+- `axe DevTools` reports WCAG 2.1.2 violation
 
 **Phase to address:**
-The page routing/navigation phase. Build navigation testing into the development workflow from the start.
+Phase 2: Editor UX and accessibility. The Tab escape mechanism and ARIA labels must be part of the editor component, not an afterthought.
+
+---
+
+### Pitfall 8: Lint Annotations Re-Run on Every Keystroke and Freeze the Editor
+
+**What goes wrong:**
+CodeMirror's `@codemirror/lint` package calls the linter function on document changes. If the linter runs 40 rules against every instruction on every keystroke, the lint computation can take 10-50ms per run. At 60+ WPM typing speed, that is a lint call every 100-200ms. If the lint computation exceeds the typing interval, the editor stutters because the main thread is blocked by lint processing while trying to handle input events.
+
+For a 50-line Dockerfile with 15 instructions and 40 rules, that is 600 rule evaluations per lint run. Each rule may traverse the AST, check string patterns, or evaluate conditions. At 0.05ms per rule evaluation, that is 30ms of blocking time -- enough to cause perceptible input lag.
+
+**Why it happens:**
+Developers test with short Dockerfiles (5-10 lines) where lint completes in <5ms. The performance issue only surfaces with longer, realistic Dockerfiles (40-100 lines) or when the user pastes a large Dockerfile from a production project.
+
+**How to avoid:**
+1. **Use CodeMirror's built-in lint debouncing.** The `linter()` function accepts a `delay` option (milliseconds to wait after changes before re-running). Set it to 300-500ms:
+   ```javascript
+   linter(dockerfileLinter, { delay: 500 })
+   ```
+   This ensures linting only runs when the user pauses typing, not on every keystroke.
+2. **Parse the Dockerfile once, run rules against the cached AST.** Do not re-parse with `DockerfileParser.parse()` for each rule. Parse once per lint cycle, then pass the parsed result to all 40 rules.
+3. **Cache lint results for unchanged lines.** If lines 1-20 are unchanged and only line 21 was edited, rules that only depend on line 21's instruction do not need to re-evaluate lines 1-20. Implement incremental linting for line-scoped rules.
+4. **Profile with Chrome DevTools Performance tab.** Record a typing session and look for long tasks in the flame chart caused by the linting function. Target: lint computation should never exceed 16ms (one frame at 60fps).
+5. **Consider running the lint in a Web Worker** if it consistently exceeds 16ms. CodeMirror supports async linters that return a Promise. Parse the Dockerfile and run rules in a Worker, then return diagnostics to the main thread.
+
+**Warning signs:**
+- Input lag when typing in Dockerfiles longer than 30 lines
+- Chrome DevTools shows "Long Task" entries during typing, attributed to the lint function
+- Users report the editor feels "sluggish" compared to a plain textarea
+- Lint results flicker rapidly during typing (insufficient debounce)
+
+**Phase to address:**
+Phase 3: Rule engine implementation. Set up the debounced linting pipeline architecture BEFORE writing individual rules.
+
+---
+
+### Pitfall 9: Mobile Experience Is Terrible Without Explicit Design -- CodeMirror on Touch Is Fragile
+
+**What goes wrong:**
+CodeMirror 6 has documented issues with mobile browsers:
+
+1. **iOS Safari:** Touch to set cursor position does not always work. Selection drag handles may be missing. The virtual keyboard covers half the screen, making the editor feel cramped.
+2. **Android Chrome:** Aggressive scrolling when the caret reaches the viewport edge (scrolls 5+ lines instead of 1). Keyboard flicker when backspacing near widgets/decorations.
+3. **Small screens:** A Dockerfile editor with line numbers, lint gutter, and a results panel side-by-side simply does not fit on a 375px-wide screen. If forced into a single-column layout, the results panel pushes below the fold, and users cannot see their code and the lint results simultaneously.
+4. **Touch targets:** Lint gutter markers (the icons showing warnings/errors next to line numbers) are typically 16x16px -- far below the 44x44px minimum for touch targets.
+
+The site targets recruiter and developer discovery. Recruiters often browse portfolios on phones. A broken mobile editor creates a worse impression than no editor at all.
+
+**Why it happens:**
+Code editors are fundamentally desktop tools. The CodeMirror team acknowledges mobile support is a work in progress. Developers test on desktop and assume the responsive layout handles mobile. It does not -- code editing on mobile requires deliberate UX decisions.
+
+**How to avoid:**
+1. **Design a mobile-specific experience that is NOT a full editor.** On screens below 768px, show a simplified interface: a `<textarea>` for pasting Dockerfiles (not CodeMirror), with results shown in an expandable panel below. The textarea is lightweight, accessible, and works on all devices.
+2. **Alternatively, make the editor read-only on mobile** with a pre-loaded example Dockerfile. The user sees the lint results and score for the example, with a "Try on desktop for full editing" message.
+3. **If using CodeMirror on mobile, configure it for touch:** Increase gutter marker sizes to 44px tap targets, disable line wrapping (use horizontal scroll), set a minimum editor height of 300px, and add a "Scroll to results" button below the editor.
+4. **Test on real devices.** Simulator testing does not catch touch selection issues, keyboard behavior, or scroll jank. Test on an iPhone (Safari) and an Android device (Chrome) with a 20+ line Dockerfile.
+5. **Use the `@media (pointer: coarse)` query** (already used in the site's global CSS for cursor effects) to detect touch devices and apply mobile-specific overrides.
+
+**Warning signs:**
+- Editor is unusable on iPhone (cannot place cursor, cannot select text)
+- Virtual keyboard covers the editor content and there is no scroll
+- Lint gutter markers are too small to tap accurately
+- Results panel is pushed off-screen on mobile and users cannot find it
+
+**Phase to address:**
+Phase 2: Editor layout and responsive design. Make the mobile decision BEFORE building the results panel layout.
+
+---
+
+### Pitfall 10: Inline Lint Annotations + Results Panel + Gutter Markers Create Information Overload
+
+**What goes wrong:**
+Showing lint feedback in three places simultaneously -- inline squiggly underlines in the editor, gutter icons next to line numbers, AND a separate results panel below the editor -- overwhelms users and creates visual noise. For a 30-line Dockerfile with 12 lint findings, the editor becomes a sea of red/yellow markers. Users cannot distinguish critical issues from minor style suggestions because everything screams for attention equally.
+
+Additionally, CodeMirror's `lintGutter` shows only an icon per line. If a single line has 3 different lint findings (e.g., `RUN apt-get install -y curl wget` triggers: "pin package versions," "combine with update," and "consider using --no-install-recommends"), only one gutter icon appears. Users click the gutter icon, see one finding, and miss the other two unless they also check the panel.
+
+**Why it happens:**
+Developers build each feedback mechanism independently (gutter, inline, panel) because CodeMirror supports all three and they each seem useful. Without a unified information hierarchy, all three fight for attention.
+
+**How to avoid:**
+1. **Establish a clear information hierarchy:**
+   - **Gutter markers** = quick severity indicator (red/yellow/blue dot). Click to jump to the detail in the panel.
+   - **Inline underlines** = contextual location marker. Hover for a tooltip with the rule message.
+   - **Results panel** = comprehensive list with rule explanations, fix suggestions, and links to best practices.
+2. **Show inline underlines only for error/warning severity.** Do not underline info/style findings -- show them only in the panel. This reduces visual noise.
+3. **Sort the results panel by severity** (errors first, then warnings, then info). Include the line number so users can cross-reference.
+4. **Limit simultaneous inline annotations** to avoid overwhelming the view. If a Dockerfile has 20+ findings, show the top 10 most severe inline and collapse the rest to "and 10 more findings in the results panel."
+5. **Use color coding consistently** across all three mechanisms: red = error, yellow/orange = warning, blue = info, gray = style. Match the site's existing color system (use `--color-accent` for errors, `--color-accent-secondary` for info).
+
+**Warning signs:**
+- The editor looks "angry" with red marks everywhere, even for a reasonable Dockerfile
+- Users cannot distinguish critical issues from style suggestions
+- Users click a gutter marker expecting to see all findings for that line, but only see one
+- The results panel shows issues users cannot find in the editor (or vice versa)
+
+**Phase to address:**
+Phase 4: Lint result display and UX. Design the information hierarchy BEFORE implementing the display mechanisms.
+
+---
+
+### Pitfall 11: CSP Meta Tag May Block CodeMirror's Internal Style Injection
+
+**What goes wrong:**
+The site has a strict Content Security Policy via meta tag:
+```
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
+```
+
+CodeMirror 6 injects styles dynamically via JavaScript (its CSS-in-JS theming system creates `<style>` elements at runtime). While the current CSP allows `'unsafe-inline'` for styles (which covers dynamically injected `<style>` tags), there are edge cases:
+
+1. If the CSP is ever tightened to use nonce-based style policies (removing `'unsafe-inline'`), CodeMirror's style injection will break silently -- the editor renders but with no syntax highlighting colors, no gutter styling, and broken layout.
+2. CodeMirror creates blob URLs for certain operations. The CSP has `worker-src 'self' blob:` and `connect-src 'self' ... blob:`, but if CodeMirror's internal operations hit other CSP restrictions, failures are silent (no visible error, just missing styles).
+
+**Why it happens:**
+CSP violations for styles are not thrown as JavaScript errors -- they only appear as console warnings. The editor appears to "work" but looks visually broken. Developers testing without checking the console miss these failures entirely.
+
+**How to avoid:**
+1. **The current CSP already allows `style-src 'unsafe-inline'`**, so CodeMirror's style injection will work. Document this dependency: "CodeMirror requires `style-src 'unsafe-inline'` -- do not remove this directive."
+2. **After integrating CodeMirror, check the browser console** for any CSP violation warnings. Filter by "Content-Security-Policy" in the console.
+3. **If the CSP is ever tightened, use CodeMirror's static CSS extraction** approach: pre-build the theme CSS at build time and include it as a static `<link>` stylesheet instead of relying on runtime injection.
+4. **Test with a stricter CSP in development** (temporarily remove `'unsafe-inline'` from `style-src`) to see what breaks. This reveals all dynamic style dependencies proactively.
+
+**Warning signs:**
+- Editor renders but has no syntax highlighting (all text is same color)
+- Editor gutter and line numbers are missing or unstyled
+- Console shows "Refused to apply inline style because it violates the following Content Security Policy directive"
+- Editor layout is broken (no proper padding, backgrounds, or borders)
+
+**Phase to address:**
+Phase 1: Editor integration. Verify CSP compatibility as part of the initial "does it work in our site?" check.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable during The Beauty Index build but create long-term problems.
+Shortcuts that seem reasonable during the Dockerfile Analyzer build but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using Chart.js/D3 for static data charts | Quick chart rendering with tooltips | 60-80KB JS per page, Lighthouse score tanks, ongoing dependency updates | Never for static data -- use SVG |
-| Rendering all 250 code blocks in DOM with `display:none` | Simple implementation, no lazy loading code | >1,500 DOM elements, Lighthouse penalizes, mobile browsers struggle | Never -- lazy render via tabs |
-| Using `html2canvas` for chart sharing | Works quickly in development | Fails under strict CSP, slow on mobile, inconsistent across browsers | Never -- use Satori build-time approach |
-| Hardcoding chart colors instead of CSS custom properties | Faster development, no theme consideration | Charts break if dark mode is ever completed; inflexible for future theming | MVP only -- migrate to variables before v1.0 of Beauty Index |
-| Generating OG images without caching | Simpler build pipeline | Build time grows linearly with content; 27+ images regenerated every build | Only during initial development; add caching before going live |
-| Skipping JSON-LD on language pages | Faster page scaffolding | Pages lack rich snippets; search engines cannot understand content structure | Never -- add schema from day one |
-| Using generic meta descriptions for all 25 language pages | Less content to write | Google treats as duplicate content; pages may not be indexed | Never -- generate unique descriptions from data |
+| Using `basicSetup` instead of selective extensions | Quick setup, feature-complete editor | 40-60KB extra gzipped JS for unused features (search, autocomplete, bracket matching) | Never -- use `minimalSetup` + selective imports |
+| Hardcoding Dockerfile rules as string checks instead of AST-based | Faster to write initial rules | Cannot handle multi-line RUN commands, continuation lines, or build arguments; false positives on comments | Only for prototype/proof-of-concept; rewrite against AST before shipping |
+| Using `dockerfile-ast` without testing browser bundle first | Proven parser, skip writing your own | May ship 50-100KB of unused VS Code LSP types; CJS-to-ESM conversion may break | Test bundle first; if bundle is clean (<20KB gzip), use it |
+| Skipping mobile design ("it is a developer tool") | Faster to ship desktop-only | Recruiters browse on phones; broken mobile = negative impression; tool feels unfinished | MVP only -- add mobile experience before announcing |
+| Single aggregate score without category breakdown | Simpler UI, one number to show | Score is gameable, opaque, and meaningless for multidimensional quality; users distrust it | Never -- always show category sub-scores alongside aggregate |
+| No lint debounce (relying on CodeMirror default) | Immediate feedback feels responsive | Input lag on Dockerfiles > 30 lines; 40 rules x 15 instructions = 600 evaluations per keystroke | Never -- set explicit 300-500ms debounce from the start |
+| Inline `<script>` for the editor initialization | Works, avoids module setup | Cannot tree-shake, cannot import CodeMirror modules properly, breaks the Astro build pipeline | Never -- use proper island component |
 
 ## Integration Gotchas
 
-Common mistakes when connecting Beauty Index features to existing site infrastructure.
+Common mistakes when connecting the Dockerfile Analyzer to existing site infrastructure.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Expressive Code + 250 blocks | Assuming unlimited code blocks per page perform well | Lazy-render via tabs; limit to 10-25 visible blocks at a time |
-| Satori OG images + new routes | Extending the blog OG endpoint for completely different layouts | Create a separate OG endpoint for Beauty Index with its own layout function |
-| GSAP animations + chart animations | Adding independent ScrollTrigger instances that conflict with global lifecycle | Register through the existing animation lifecycle; listen to `astro:page-load` |
-| React islands + View Transitions | Expecting React components to re-render automatically on navigation | Use `key` prop tied to page data; listen to `astro:page-load` for state reset |
-| CSP meta tag + Chart.js canvas | Assuming Canvas rendering works under strict CSP | SVG charts avoid CSP entirely; if Canvas is needed, verify `style-src 'unsafe-inline'` is present (it is) |
-| Sitemap + 27 new pages | Letting sitemap auto-discover all pages without priority | Configure sitemap serialization to set appropriate `<priority>` and `<changefreq>` for Beauty Index pages |
-| Google Fonts + Greek symbols | Assuming body font covers all Unicode characters needed | Test Greek rendering in DM Sans, Bricolage Grotesque, and Fira Code; add fallback font with Greek support |
+| CodeMirror + Astro SSR | Using `client:visible` or `client:load` | Use `client:only="react"` to skip SSR entirely |
+| CodeMirror + View Transitions | Not destroying EditorView on navigation | Listen to `astro:before-swap`, call `view.destroy()`, re-init on `astro:page-load` |
+| CodeMirror + Dark Mode Toggle | Assuming CSS class on `<html>` cascades into editor | Use `Compartment` for runtime theme switching OR `codemirror-theme-vars` for CSS variable integration |
+| CodeMirror + Site Fonts (Fira Code) | Assuming CodeMirror uses the page's font-family | Explicitly configure CodeMirror's `fontFamily` via `EditorView.theme()` to use Fira Code |
+| dockerfile-ast + Vite bundler | Importing without testing CJS-to-ESM conversion | Create a minimal Vite test build first; verify tree shaking and bundle size |
+| Lint engine + CodeMirror diagnostics | Running all 40 rules synchronously on every change | Use debounced linting (delay: 300-500ms), parse AST once per cycle, pass to all rules |
+| GSAP animations + CodeMirror page | `cleanupAnimations()` kills tweens but not the editor | Add CodeMirror-specific cleanup to the `astro:before-swap` handler |
+| CSP + CodeMirror CSS-in-JS | Assuming styles will work without checking | Verify `style-src 'unsafe-inline'` is present; check console for CSP violations |
+| Scoring UI + Existing design system | Using colors not from the site's Tropical Sunset palette | Map severity colors to existing CSS custom properties: `--color-accent` for errors, `--color-accent-secondary` for info |
 
 ## Performance Traps
 
-Patterns that work in development but fail at production scale or on real devices.
+Patterns that work in development but fail on real devices or under Lighthouse audit.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| All 250 code blocks in DOM | Smooth in Chrome desktop | Tab-based lazy rendering; `<template>` elements for hidden content | Mobile browsers with <4GB RAM; Lighthouse audit |
-| Chart animations on scroll with GSAP | Fluid on M-series Mac | Gate animations behind `prefers-reduced-motion`; use `will-change` sparingly | Low-end Android devices; when >5 charts animate simultaneously |
-| Satori rendering 27+ images per build | Fast locally with high-end CPU | Implement caching + p-limit(4) throttling | CI/CD with limited CPU; GitHub Actions free tier |
-| Google Fonts loaded for chart labels | Fast on cached pages | Ensure fonts are preloaded; use font-display: swap; test with throttled 3G | First visit on slow connection; fonts block chart label rendering |
-| Inline SVG radar charts with complex gradients | Renders fine on modern browsers | Test in Safari (gradient rendering differences); avoid `<filter>` elements for performance | Safari mobile; older WebKit versions |
+| CodeMirror `basicSetup` import | Editor works perfectly | Use `minimalSetup` + selective extensions; measure bundle with `vite-bundle-visualizer` | Lighthouse audit; bundle analysis shows 120KB+ gzip for editor page |
+| Lint runs on every keystroke without debounce | Fast for 5-line Dockerfiles | Set `linter(fn, { delay: 500 })` explicitly | Dockerfiles > 30 lines; users pasting large files |
+| Eager CodeMirror initialization | Editor appears instantly | Use `client:only` which already defers; split init phases with `requestIdleCallback` | Pages with both 3D head scene AND editor; TBT > 300ms |
+| All lint rules as synchronous main-thread work | Lint completes fast for 10 rules | Profile with 40 rules against 50-line Dockerfile; use Web Worker if >16ms | Production rule set with 40 rules; realistic Dockerfiles |
+| CodeMirror creates DOM on mount, triggers layout thrashing | Invisible in fast desktop dev | Wrap editor mount in `requestAnimationFrame`; set explicit dimensions before mount | Low-end mobile devices; Lighthouse lab environment |
+
+## Security Mistakes
+
+Domain-specific security issues for a Dockerfile analysis tool.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Executing or evaluating user-provided Dockerfile content | Users paste malicious content that could exploit XSS if rendered as HTML | Treat ALL Dockerfile content as plain text; never use `innerHTML` with user content; CodeMirror handles this correctly by default |
+| Displaying lint messages with user-controlled content unsanitized | If a lint rule message includes Dockerfile content (e.g., "Invalid instruction: `<script>alert(1)</script>`"), the message could execute as HTML | Escape all user-derived content in lint messages; use `textContent` not `innerHTML` for the results panel |
+| Sharing analysis results via URL parameters | Dockerfile content in URL could contain sensitive information (API keys, registry credentials); URL may be logged by proxies/analytics | Do NOT put Dockerfile content in URLs; use client-side only processing; add a warning "Never paste Dockerfiles containing secrets" |
+| Storing Dockerfile content in localStorage for persistence | Users may paste Dockerfiles containing credentials; localStorage persists beyond the session | If using sessionStorage/localStorage for content persistence, add a clear warning; prefer sessionStorage over localStorage (session-scoped) |
 
 ## UX Pitfalls
 
-Common user experience mistakes when building data visualization and code comparison features.
+Common user experience mistakes when building browser-based linting tools.
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Radar chart with no axis labels | Users cannot tell which axis represents which dimension | Always label each axis; use abbreviations if space is tight, with a legend |
-| Color-only encoding on bar charts | Color-blind users (8% of men) cannot distinguish bars | Add patterns, labels, or position encoding alongside color |
-| Code comparison tabs with no "active" indicator | Users lose track of which language/feature they are viewing | Bold tab text, underline or background highlight, `aria-selected` for screen readers |
-| Share button that downloads a file silently | Users do not realize the download happened; no feedback | Show a toast notification, open a preview modal, or copy to clipboard with confirmation |
-| Radar chart that is too small on mobile | 6 dimension labels overlap; chart becomes unreadable | Minimum chart size 280px diameter on mobile; consider a simplified list view as fallback |
-| Long-form blog content with no table of contents | Users on the main Beauty Index essay cannot jump to sections | Reuse the existing `TableOfContents.astro` component from the blog infrastructure |
-| Tab interface that resets to first tab on every visit | Users exploring multiple tabs lose their place when scrolling away and back | Persist active tab in URL hash (`#python`) so bookmarking and browser back work |
+| Editor opens empty with no guidance | Users stare at a blank editor, unsure what to do | Pre-load a sample Dockerfile with intentional lint issues; show "Paste your Dockerfile or edit this example" |
+| Results appear only after clicking "Analyze" | Friction; users expect real-time feedback from a modern tool | Use CodeMirror's live linting (debounced) -- results update as users type |
+| Score shown without explanation | Users see "72/100" but do not understand what to fix | Show the score breakdown by category with expandable rule explanations |
+| Lint errors reference line numbers but editor has no line numbers | Users cannot find the issue in their Dockerfile | Enable line numbers in CodeMirror (part of `minimalSetup`); clicking a result should scroll to and highlight the line |
+| "Analyze" button looks like a form submit | Users worry their Dockerfile will be sent to a server | Add prominent "100% client-side - your code never leaves your browser" messaging |
+| Results panel is far below the editor | Users edit, then scroll down to see results, then scroll back up to edit | Use a side-by-side layout on desktop (editor left, results right) or a sticky/pinned results panel |
+| No way to copy improved Dockerfile | Users fix issues but have no easy way to get the fixed content | Add a "Copy to clipboard" button on the editor |
 
 ## "Looks Done But Isn't" Checklist
 
 Things that appear complete but are missing critical pieces.
 
-- [ ] **Radar chart renders:** Visually correct -- but verify it has `role="img"`, a `<title>` element, a `<desc>` element for screen readers, `aria-labelledby` linking to both, and alt text that describes the data ("Python scores: Expressiveness 9/10, Readability 9/10, ...")
-- [ ] **Code comparison page loads:** All tabs work -- but verify DOM size is under 1,500 elements, hidden tab content is not in the DOM, keyboard navigation works (Arrow keys between tabs), and `aria-selected` updates on tab change
-- [ ] **Share button works:** Image downloads -- but verify it works under the production CSP policy, fonts render correctly in the shared image, the image includes the site branding/URL, and the filename is descriptive (`python-beauty-index.png`, not `download.png`)
-- [ ] **25 language pages exist:** Routes work -- but verify each has a unique meta description, canonical URL, JSON-LD structured data, OG image, and at least one internal link from another page
-- [ ] **Charts look good in light mode:** Visual check passes -- but verify charts are also readable when `.dark` class is present on `<html>` (even if dark mode is not fully implemented, users may have it set in localStorage from previous sessions)
-- [ ] **Blog post about Beauty Index published:** Content renders -- but verify it links to the Beauty Index pages (internal linking for SEO), the OG image is generated, it appears in RSS, and it appears in the sitemap
-- [ ] **Lighthouse score maintained:** Performance 90+ -- but run Lighthouse on ALL new pages (main page, comparison page, AND a language detail page), not just one. The comparison page is most likely to fail.
-- [ ] **Mobile responsive:** Charts resize -- but verify radar chart labels do not overlap at 320px width, tab bar is horizontally scrollable if 25 tabs overflow, and code blocks have horizontal scroll without breaking the page layout
+- [ ] **Editor mounts and works:** But verify it works after a View Transition (navigate away and back). Check that `view.destroy()` fires on `astro:before-swap` and the editor reinitializes on return.
+- [ ] **Dark mode toggles the editor theme:** But verify syntax highlighting colors are readable in BOTH modes. Check that the gutter, active line, and selection colors also switch.
+- [ ] **Lint results appear:** But verify they update live as the user types (not just on button click). Check that the debounce delay (300-500ms) is set and lint does not run on every keystroke.
+- [ ] **Score displays correctly:** But verify the scoring formula is transparent (users can see which rules contributed). Check that category sub-scores are shown. Test against 10+ real Dockerfiles of varying quality.
+- [ ] **Editor has line numbers:** But verify clicking a result in the panel scrolls to and highlights the corresponding line in the editor.
+- [ ] **Editor is keyboard accessible:** But verify Tab focus mode works (Escape then Tab exits the editor). Check `aria-label` on the editor element. Test with VoiceOver.
+- [ ] **Works on desktop Chrome:** But test in Safari (different contenteditable behavior), Firefox, and on an actual iPhone and Android device.
+- [ ] **Lighthouse Performance 85+:** But run Lighthouse on the Analyzer page AFTER navigating to it via View Transition (not direct URL load). View Transition scripts add overhead.
+- [ ] **CSP allows CodeMirror styles:** But check the browser console for ANY CSP warnings, not just visible breakage.
+- [ ] **Example Dockerfile loads correctly:** But verify the example has at least 3-5 intentional issues of different severities so users see how the tool works.
 
 ## Recovery Strategies
 
@@ -396,54 +475,67 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Chart library bloats JS (P1) | MEDIUM | Replace library charts with hand-crafted SVG; may require rewriting chart components but data layer stays the same |
-| 250 code blocks crash DOM (P2) | HIGH | Requires architectural change to lazy-render tabs; existing code blocks need to be refactored into template/fetch pattern |
-| Chart sharing fails under CSP (P3) | MEDIUM | Switch from runtime DOM capture to build-time Satori generation; requires new build endpoint but produces more reliable results |
-| Dark mode breaks charts (P4) | LOW | Add CSS custom property fallbacks to all chart components; 1-2 hours of work per component |
-| OG images slow build (P5) | LOW | Add caching layer to build pipeline; hash-based cache check is ~50 lines of code |
-| Missing SEO infrastructure (P6) | MEDIUM | Retrofit JSON-LD, meta descriptions, and internal links; tedious but not architecturally difficult |
-| GSAP conflicts (P7) | LOW | Add lifecycle event listeners to chart components; straightforward debugging |
-| Greek symbol rendering (P8) | LOW | Add fallback font to font stack; test and fix individual instances |
-| Tab accessibility broken (P9) | MEDIUM | Rewrite tab component following WAI-ARIA spec; needs thorough testing with screen reader |
-| View Transitions stale state (P10) | MEDIUM | Add `astro:page-load` listeners to all stateful components; requires testing full navigation matrix |
+| SSR build crash from CodeMirror (P1) | LOW | Switch from `client:visible` to `client:only` -- one line change in the Astro template |
+| Bundle size tanks Lighthouse (P2) | MEDIUM | Replace `basicSetup` with `minimalSetup` + selective imports; requires auditing all extension imports |
+| View Transitions break editor (P3) | MEDIUM | Add lifecycle event listeners (`astro:before-swap`, `astro:page-load`); requires understanding CodeMirror's destroy/create cycle |
+| dockerfile-ast bundle bloat (P4) | HIGH if discovered late | Replace with custom parser (200-400 lines); requires rewriting the parsing layer |
+| Dark mode mismatch (P5) | LOW-MEDIUM | Add `Compartment`-based theme switching or integrate `codemirror-theme-vars`; 50-100 lines of code |
+| Score gaming/meaninglessness (P6) | HIGH | Requires re-calibrating all 40 rule weights against real-world Dockerfiles; may need scoring formula redesign |
+| Keyboard trap (P7) | LOW | Add `aria-label`, visible escape instructions, and Tab focus mode toggle; 20-30 lines of code |
+| Lint performance on long files (P8) | MEDIUM | Add debounce delay, AST caching, potentially Web Worker; requires pipeline refactoring |
+| Broken mobile experience (P9) | MEDIUM-HIGH | Redesign mobile layout as simplified textarea + results; architectural change |
+| Information overload in lint display (P10) | LOW | Adjust severity thresholds for inline display; sort panel by severity; CSS changes + minor logic |
+| CSP blocks CodeMirror styles (P11) | LOW | Verify `style-src 'unsafe-inline'` is present (it is); document the dependency |
 
 ## Pitfall-to-Phase Mapping
 
-How Beauty Index roadmap phases should address these pitfalls.
+How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Chart library JS bloat (P1) | Chart component design | No charting library in `package.json`; SVG-only charts; Lighthouse Performance 90+ on chart pages |
-| 250 code blocks DOM explosion (P2) | Comparison page architecture | DOM element count < 1,500 on comparison page; build time < 30s for comparison page |
-| Chart sharing CSP failures (P3) | Social sharing design | Share images generated via Satori at build time; no runtime DOM-to-image code; test under production CSP |
-| Dark mode theme mismatch (P4) | UI component design (first phase) | Document dark mode decision; test all charts with `.dark` class present; no invisible elements |
-| OG image build time (P5) | OG image generation | Caching implemented; build time increase < 10s for 27 new OG images; dedicated Beauty Index OG endpoint |
-| Missing SEO infrastructure (P6) | Page scaffolding/routing | Every language page has unique meta description, canonical URL, JSON-LD, and OG image |
-| GSAP ScrollTrigger conflicts (P7) | Chart animation | No console errors during page navigation; global animations still work on Beauty Index pages |
-| Greek symbol rendering (P8) | Content creation | Greek characters render in correct font; no layout shifts from font fallback; tested in all three site fonts |
-| Tab accessibility (P9) | Comparison page UI | WAI-ARIA tab pattern fully implemented; keyboard navigation works; VoiceOver reads tabs correctly |
-| View Transitions stale state (P10) | Page routing/navigation | Navigate Python -> JavaScript -> Back -> Forward with correct chart data at each step |
+| SSR crash -- `client:only` required (P1) | Phase 1: Editor scaffolding | `astro build` completes without errors; editor mounts on page load |
+| Bundle size impact (P2) | Phase 1: Editor scaffolding | `vite-bundle-visualizer` shows editor page <200KB gzip; Lighthouse Performance 85+ |
+| View Transitions break editor (P3) | Phase 1: Editor scaffolding | Navigate Home -> Analyzer -> Home -> Analyzer; editor works each time; no console errors |
+| dockerfile-ast browser compatibility (P4) | Phase 1: Technology validation | Minimal Vite test build confirms bundle <20KB gzip for parser; no CJS conversion errors |
+| Dark mode theme mismatch (P5) | Phase 2: Editor styling | Toggle dark mode with editor visible; syntax highlighting colors change; no visual mismatch |
+| Scoring algorithm design (P6) | Phase 3: Rule engine | Test 50+ real Dockerfiles; score distribution has meaningful range (30-95); security issues visibly drop score |
+| Keyboard trap accessibility (P7) | Phase 2: Editor accessibility | Escape+Tab exits editor; `aria-label` present; Lighthouse Accessibility 90+ |
+| Lint performance (P8) | Phase 3: Rule engine | Type in a 50-line Dockerfile; no input lag; Chrome DevTools shows no long tasks during typing |
+| Mobile experience (P9) | Phase 2: Responsive design | Open Analyzer on iPhone Safari; editor or fallback loads; results are visible and scrollable |
+| Information overload (P10) | Phase 4: Results display | Show editor to 3 people; ask "what is the most important issue?" -- they identify it within 5 seconds |
+| CSP compatibility (P11) | Phase 1: Editor scaffolding | Zero CSP warnings in browser console on the Analyzer page |
 
 ## Sources
 
-- [Astro Islands Architecture -- Official Docs](https://docs.astro.build/en/concepts/islands/) (HIGH confidence)
-- [Astro Syntax Highlighting -- Official Docs](https://docs.astro.build/en/guides/syntax-highlighting/) (HIGH confidence)
-- [Astro `<Code />` component slow with many instances -- GitHub Issue #3123](https://github.com/withastro/astro/issues/3123) (HIGH confidence)
-- [Astro build performance discussion -- GitHub Roadmap #1112](https://github.com/withastro/roadmap/discussions/1112) (HIGH confidence)
-- [Chart.js CSP `style-src 'unsafe-inline'` requirement -- GitHub Issue #8108](https://github.com/chartjs/Chart.js/issues/8108) (HIGH confidence)
-- [Chart.js CSP workaround limitations -- GitHub Issue #5208](https://github.com/chartjs/Chart.js/issues/5208) (HIGH confidence)
-- [Monday.com DOM-to-Image performance challenges](https://engineering.monday.com/capturing-dom-as-image-is-harder-than-you-think-how-we-solved-it-at-monday-com/) (HIGH confidence)
-- [Satori OG image build-time caching for Astro](https://ainoya.dev/posts/astro-ogp-build-cache/) (MEDIUM confidence)
-- [SVG Accessibility: Creating Inclusive Vector Graphics](https://www.svgai.org/blog/svg-accessibility-inclusive-design) (MEDIUM confidence)
-- [Creating Accessible SVG Charts and Infographics](https://accessibility-test.org/blog/compliance/creating-accessible-svg-charts-and-infographics/) (MEDIUM confidence)
-- [Accessible SVG Charts for Khan Academy -- Sara Soueidan](https://www.sarasoueidan.com/blog/accessible-data-charts-for-khan-academy-2018-annual-report/) (HIGH confidence)
-- [Accessibility in D3 Bar Charts -- a11y with Lindsey](https://www.a11ywithlindsey.com/blog/accessibility-d3-bar-charts/) (MEDIUM confidence)
-- [CLS Optimization -- web.dev](https://web.dev/articles/optimize-cls) (HIGH confidence)
-- [Astro Performance Optimization Guide](https://eastondev.com/blog/en/posts/dev/20251202-astro-performance-optimization/) (MEDIUM confidence)
-- [Charting Libraries Performance Comparison](https://chart.pdfmunk.com/blog/charting-libraries-performance-comparison) (MEDIUM confidence)
-- [SVG Theming Systems: Dark Mode Compatible Vector Graphics](https://www.svgai.org/blog/svg-theming-systems) (MEDIUM confidence)
-- Codebase analysis: `astro.config.mjs`, `Layout.astro`, `global.css`, `ThemeToggle.astro`, `og-image.ts`, `animation-lifecycle.ts`, `HeadSceneWrapper.astro`, CSP meta tag (HIGH confidence -- direct code inspection)
+- [CodeMirror 6 System Guide -- Destroy/Cleanup](https://codemirror.net/docs/guide/) (HIGH confidence -- official docs)
+- [CodeMirror 6 Tab Handling and Accessibility](https://codemirror.net/examples/tab/) (HIGH confidence -- official docs)
+- [CodeMirror 6 Lint Example](https://codemirror.net/examples/lint/) (HIGH confidence -- official docs)
+- [CodeMirror 6 Bundling Example](https://codemirror.net/examples/bundle/) (HIGH confidence -- official docs)
+- [CodeMirror 6 Styling and Theming](https://codemirror.net/examples/styling/) (HIGH confidence -- official docs)
+- [CodeMirror 6 Dynamic Dark/Light Mode Discussion](https://discuss.codemirror.net/t/dynamic-light-mode-dark-mode-how/4709) (HIGH confidence -- official forum)
+- [CodeMirror 6 Minimal Setup Discussion](https://discuss.codemirror.net/t/minimal-setup-because-by-default-v6-is-50kb-compared-to-v5/4514) (HIGH confidence -- official forum)
+- [CodeMirror 6 Mobile Touch Issues](https://discuss.codemirror.net/t/touch-on-ios-iphone-not-working-in-codemirror-6/3345) (HIGH confidence -- official forum)
+- [CodeMirror 6 iOS Selection Handles Missing](https://discuss.codemirror.net/t/ios-safari-missing-selection-drag-handles/9679) (HIGH confidence -- official forum)
+- [CodeMirror 6 Mobile Scrolling Issues](https://discuss.codemirror.net/t/mobile-keyboard-scrolling-too-aggressive-scrolls-5-lines-instead-of-1-when-caret-reaches-viewport-edge/9492) (HIGH confidence -- official forum)
+- [CodeMirror 6 Accessibility -- Screen Reader Survey](https://discuss.codemirror.net/t/code-editor-screen-reader-accessiblity-survey/1790) (MEDIUM confidence -- community)
+- [CodeMirror 6 ARIA Label Propagation Issue](https://discuss.codemirror.net/t/aria-label-from-our-textarea-not-propagating-to-cm-textarea/4344) (HIGH confidence -- official forum)
+- [CodeMirror 6 Accessibility Textbox Label Violation](https://discuss.codemirror.net/t/accessibility-violation-form-control-with-textbox-role-has-no-associated-label/7378) (HIGH confidence -- official forum)
+- [CodeMirror 6 Bundle Size Issue #760](https://github.com/codemirror/dev/issues/760) (HIGH confidence -- official GitHub)
+- [codemirror-theme-vars -- CSS Variable Theming](https://github.com/antfu/codemirror-theme-vars) (HIGH confidence -- well-maintained library)
+- [dockerfile-ast GitHub Repository](https://github.com/rcjsuen/dockerfile-ast) (HIGH confidence -- source code inspection)
+- [dockerfile-ast package.json Dependencies](https://github.com/rcjsuen/dockerfile-ast/blob/master/package.json) (HIGH confidence -- direct source)
+- [vscode-languageserver-textdocument npm](https://www.npmjs.com/package/vscode-languageserver-textdocument) (HIGH confidence -- official package)
+- [Hadolint -- Dockerfile Linter](https://github.com/hadolint/hadolint) (HIGH confidence -- industry standard)
+- [Astro View Transitions Documentation](https://docs.astro.build/en/guides/view-transitions/) (HIGH confidence -- official docs)
+- [Astro Template Directives -- client:only](https://docs.astro.build/en/reference/directives-reference/) (HIGH confidence -- official docs)
+- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) (HIGH confidence -- official docs)
+- [Astro transition:persist for React State](https://astropatterns.dev/p/react-love/view-transitions-and-react-state) (MEDIUM confidence -- community patterns)
+- [Astro transition:persist React Re-render Bug #13287](https://github.com/withastro/astro/issues/13287) (HIGH confidence -- official issue tracker)
+- [Sourcegraph Monaco to CodeMirror Migration -- Bundle Savings](https://sourcegraph.com/blog/migrating-monaco-codemirror) (HIGH confidence -- engineering blog)
+- [Chrome Lighthouse -- Total Blocking Time](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time) (HIGH confidence -- official docs)
+- [Chrome Lighthouse -- Reduce JavaScript Execution Time](https://developer.chrome.com/docs/lighthouse/performance/bootup-time) (HIGH confidence -- official docs)
+- Codebase analysis: `astro.config.mjs`, `Layout.astro`, `global.css`, `ThemeToggle.astro`, `animation-lifecycle.ts`, `tabStore.ts`, CSP meta tag (HIGH confidence -- direct code inspection)
 
 ---
-*Pitfalls research for: The Beauty Index -- adding interactive data visualization, chart sharing, and large-scale code comparison to existing Astro 5 portfolio site*
-*Researched: 2026-02-17*
+*Pitfalls research for: Dockerfile Analyzer Tool -- adding CodeMirror 6 + dockerfile-ast linting tool to existing Astro 5 static portfolio site*
+*Researched: 2026-02-20*

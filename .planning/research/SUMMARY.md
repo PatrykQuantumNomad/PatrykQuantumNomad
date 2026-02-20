@@ -1,280 +1,206 @@
 # Project Research Summary
 
-**Project:** The Beauty Index - Programming Language Aesthetic Ranking
-**Domain:** Interactive data visualization content pillar for static portfolio site
-**Researched:** 2026-02-17
+**Project:** Dockerfile Analyzer Tool
+**Domain:** Interactive browser-based Dockerfile linting, scoring, and annotation tool integrated into an existing Astro 5 static portfolio site
+**Researched:** 2026-02-20
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The Beauty Index is a content pillar featuring 25 programming languages ranked across 6 aesthetic dimensions (readability, expressiveness, consistency, elegance, ecosystem, joy). Research shows this type of content combines elements of interactive data visualization sites (like IEEE Spectrum's language rankings), tier list makers (like TierMaker), and code comparison sites (like Hyperpolyglot). The recommended approach is to extend the existing Astro 5 static site architecture using build-time SVG generation for charts rather than client-side JavaScript charting libraries.
+This project adds a browser-based Dockerfile analyzer to an existing Astro 5 static portfolio site (patrykgolabek.dev). The tool is a React island at `/tools/dockerfile-analyzer/` that uses CodeMirror 6 for the editor, `dockerfile-ast` for parsing, and a custom 40-rule engine to produce inline annotations, category scores, and an overall letter grade. All processing is fully client-side — no backend, no API calls, no user data transmitted. The architecture follows the same Astro island pattern already used for the site's 3D head scene and Beauty Index tool: static Astro shell with a `client:only="react"` island for the interactive component.
 
-The critical architectural decision is **avoiding JavaScript charting libraries entirely**. The site currently ships minimal client-side JavaScript and maintains 90+ Lighthouse performance scores. Research across all four areas (STACK, ARCHITECTURE, and PITFALLS) converges on the same conclusion: hand-crafted SVG generated at build time in Astro components is the correct approach. A 6-point radar chart is a single polygon element with trigonometric coordinate calculations (approximately 40 lines of code), while client-side charting libraries add 50-80KB of JavaScript for completely static data. The existing Satori + Sharp OG image pipeline already demonstrates this pattern works for SVG-based visualizations.
+The recommended approach is well-validated by competitive analysis: NO existing Dockerfile web linter (Hadolint online, fromlatest.io, EaseCloud) provides inline CodeMirror annotations, a category-weighted score, or expert-voice rule explanations. This combination is the differentiated value proposition. The stack is lean — 4 new npm packages (`codemirror`, `@codemirror/legacy-modes`, `@codemirror/theme-one-dark`, `dockerfile-ast`), totaling approximately 192 KB gzipped, loaded only on the tool page. The entire implementation fits within the existing site architecture with zero new frameworks and minimal configuration changes.
 
-The primary risk is DOM explosion from 250 code blocks on the comparison page (25 languages × 10 features). Expressive Code processes each block through Shiki at build time, generating 20-50 DOM elements per block. Loading all 250 blocks into the DOM simultaneously would create 5,000-12,500 elements, exceeding Lighthouse's "Excessive DOM Size" threshold. The mitigation strategy is tab-based lazy rendering where only 10-25 code blocks are in the DOM at once, with inactive tab content stored in template elements or loaded on-demand.
+The primary risks cluster around three areas: CodeMirror's incompatibility with Astro's SSR (must use `client:only="react"`, not `client:load` or `client:visible`), View Transitions lifecycle management (the CodeMirror EditorView must be explicitly destroyed on `astro:before-swap`), and `dockerfile-ast` bundle compatibility with Vite (must be verified by running an actual build before committing to it). These are all solvable with known patterns, and they must be addressed in Phase 1 before any UI work begins. The scoring algorithm requires careful calibration against real-world Dockerfiles to avoid being gameable or meaningless — this is the highest-risk design decision after the technical foundation is confirmed.
 
 ## Key Findings
 
 ### Recommended Stack
 
-**No new runtime dependencies required.** The existing Astro 5 stack already contains everything needed: React 19 for optional interactive components, Tailwind CSS for styling, Expressive Code for syntax highlighting, Satori + Sharp for OG image generation, and GSAP for scroll animations.
+The site already has all required framework-level dependencies: Astro 5.3, React 19, Tailwind CSS, TypeScript, and Nanostores. Only 4 new packages are needed: `codemirror` (meta-package that pulls in state, view, commands, language, search, autocomplete, and lint modules), `@codemirror/legacy-modes` (provides the Dockerfile syntax mode via `StreamLanguage.define()`), `@codemirror/theme-one-dark` (dark theme), and `dockerfile-ast` (TypeScript Dockerfile parser, browser-safe per source audit). The React integration should use vanilla `useRef`/`useEffect` — NOT `@uiw/react-codemirror`, which adds unnecessary abstraction, known re-render issues, and ~15 KB overhead for a single-instance editor.
 
-**Optional additions (minimal impact):**
-- **html-to-image** (1.11.11 pinned): 12KB gzipped for chart-to-image export if runtime sharing is needed (build-time Satori approach is preferred)
-- **file-saver** (^2.0.5): 3KB gzipped for cross-browser download triggers
-- **@expressive-code/plugin-collapsible-sections** (^0.41.0): Build-time only plugin for collapsing boilerplate in code blocks
+`dockerfile-ast` (by rcjsuen, used in the VS Code Docker extension) is the correct parser choice. Its 34-file source has been audited and contains zero Node.js-specific imports. Its two transitive dependencies (`vscode-languageserver-textdocument`, `vscode-languageserver-types`) both have `"browser"` export fields in their `package.json`. Vite resolves these correctly without polyfills. Bundle impact is approximately 35 KB gzipped for the parser, giving a total new client JS of approximately 192 KB gzipped — well within budget, loaded only on `/tools/dockerfile-analyzer/`.
 
-**Core technologies already present:**
-- **Astro 5.3.0**: Static pages, getStaticPaths() for 25 language detail pages, content collections with file() loader
-- **React 19**: Interactive tab component via client:visible (only on comparison page)
-- **Tailwind CSS 3.4.19**: Component styling, responsive layouts
-- **TypeScript 5.9.3**: Type-safe language data schemas
-- **GSAP 3.14.2**: Scroll-triggered chart entrance animations
-- **Satori 0.19.2 + Sharp 0.34.5**: Build-time OG image generation with radar chart shapes
-- **astro-expressive-code 0.41.6**: Syntax highlighting for 25-language code comparison
-
-**Chart rendering decision:** The research revealed a divergence between STACK.md (recommending Recharts 3.7, a 50KB React charting library) and ARCHITECTURE.md + PITFALLS.md (recommending build-time SVG with zero JavaScript). The **correct recommendation is build-time SVG**. Rationale: (1) data is completely static (scores don't change at runtime), (2) radar charts with 6 data points are simple SVG polygons (polar-to-cartesian coordinate conversion is ~40 lines of code), (3) the site's performance philosophy is zero-JS-by-default, and (4) client-side charting libraries would degrade Lighthouse performance scores from 90+ to potentially 70s due to JavaScript payload increase. The existing Satori pipeline already proves this pattern works.
+**Core technologies:**
+- `codemirror` ^6.0.2: editor with Dockerfile syntax highlighting, inline lint gutter, and dark theme — recommended over Monaco (2.5 MB) and Ace (legacy)
+- `@codemirror/legacy-modes` ^6.5.2: Dockerfile syntax mode via `StreamLanguage.define()` — the only available approach since no `@codemirror/lang-dockerfile` exists
+- `dockerfile-ast` ^0.7.1: TypeScript Dockerfile parser, browser-safe (source-audited), same AST-based approach as Hadolint
+- Nanostores (existing): cross-concern state bridge between the CodeMirror linter callback and the React results panel
+- React 19 with `useRef`/`useEffect` (existing): island component using vanilla CodeMirror mounting pattern
 
 ### Expected Features
 
-**Must have (table stakes):**
-- Overall ranking table with sort by dimension
-- 4-tier visual grouping (Beautiful/Handsome/Practical/Workhorses) with color coding
-- Per-language detail pages (25 total) with radar charts and character sketches
-- Radar/spider charts showing 6-dimensional scores
-- Code comparison page (10 features × 25 languages)
-- Methodology blog post explaining scoring rubric
-- Responsive design for mobile
-- OG images for social sharing with chart visuals
-- Accessible data tables behind charts for screen readers
-- Navigation between overview, detail, and comparison pages
+Competitive analysis of five tools (Hadolint online, fromlatest.io, EaseCloud, DockAdvisor, dockerfilelint) reveals clear unmet gaps. No existing Dockerfile web linter provides inline editor annotations, and only DockAdvisor provides any numerical score. The expert-voice explanation angle — architect-level "why this matters in production Kubernetes clusters" — is available in none of them.
 
-**Should have (differentiators):**
-- "Download as Image" button on charts for social sharing
-- Tier badge system (visual badges: gold/silver/bronze/steel)
-- Character sketch narrative for each language (2-3 sentence personality descriptions)
-- Anchor links to specific language rows in ranking table
-- Animated chart entrance on scroll (using existing GSAP)
-- Web Share API integration on mobile
+**Must have (table stakes):**
+- Syntax-highlighted code editor (CodeMirror 6) — users expect a real editor, not a textarea
+- Paste-and-analyze workflow with a clear "Analyze" trigger — every linter follows this pattern
+- Severity levels (error/warning/hint) with color coding — red/amber/blue
+- Line number association — each finding references the source line in the Dockerfile
+- Rule codes (DL-prefixed matching Hadolint, PG-prefixed for custom rules)
+- Actionable fix suggestions per rule — "what to do instead" with before/after examples
+- Category grouping (Security, Efficiency, Reliability, Maintainability, Best Practice)
+- Responsive layout — stacked on mobile, side-by-side on desktop
+- Client-side only execution with prominent privacy messaging
+- Pre-populated sample Dockerfile with deliberate issues across all categories
+
+**Should have (competitive differentiators):**
+- Inline CodeMirror annotations (squiggly underlines + gutter markers) — no competitor does this
+- Category-weighted score (0-100) with letter grade (A+ through F) — shareable and memorable
+- Category breakdown panel (sub-scores per dimension) — "Security: 95%, Efficiency: 60%"
+- Expert-voice explanations per rule — architect perspective on production consequences
+- Pre-loaded example Dockerfiles (3-4 scenarios) — lowers first-interaction barrier
+- Keyboard shortcuts (Cmd+Enter to analyze, Ctrl+Shift+M for diagnostics panel)
+- Dark/light theme matching the site's existing toggle
+
+**Defer (v1.1):**
+- Shareable score badge (PNG download)
+- URL state encoding for shareable analysis links (lz-string compression into URL hash)
 
 **Defer (v2+):**
-- Overlay comparison (pick 2-3 languages, overlay radar charts)
-- User voting/crowd-sourced scores (destroys editorial thesis)
-- Real-time data from GitHub/Stack Overflow APIs (conflates beauty with popularity)
-- Comments section (let debate happen on social media where it generates backlinks)
-- Historical tracking of score changes over time
+- 40 individual rule documentation pages at `/tools/dockerfile-analyzer/rules/[code]` — massive SEO play, fully independent of the tool itself
+
+**Anti-features (explicitly not building):**
+- AI-powered analysis — contradicts the human-expertise positioning
+- ShellCheck integration — no browser-compatible implementation exists
+- Auto-fix — too many edge cases, risks generating broken Dockerfiles
+- Real-time as-you-type linting — debounced linting on pause is better UX than constant red squigglies during typing
+- CI/CD API endpoint — static site architecture precludes it
 
 ### Architecture Approach
 
-**Content pillar integration pattern:** The Beauty Index extends the existing portfolio site structure as a new section alongside `/blog/` and `/projects/`. It uses the same architectural patterns: Astro 5 file() content loader for structured data (languages.json), getStaticPaths() for dynamic routes (25 language pages), Satori + Sharp for OG images, and React islands for the one interactive component (code comparison tabs).
+The Dockerfile Analyzer is a single React island at `/tools/dockerfile-analyzer/`. The Astro page shell provides static content (title, description, SEO metadata, breadcrumbs) while one `DockerfileAnalyzer.tsx` root component mounts CodeMirror and owns the entire interactive experience. The critical integration point is the CodeMirror `linter()` callback, which performs parse → lint → score in a single pass and outputs BOTH CodeMirror `Diagnostic[]` objects (for inline editor markers) AND a Nanostore update (for the React results panel). This dual-output pattern from a single lint cycle prevents double-parsing and keeps inline annotations and the results panel in sync.
 
 **Major components:**
-1. **Data layer**: languages.json (25 languages with scores, metadata, character descriptions) loaded via Astro 5 content collection with Zod schema validation; code-samples.ts (TypeScript module with 250 code snippets keyed by feature)
-2. **Build-time SVG charts**: RadarChart.astro generates inline SVG radar charts using polar-to-cartesian trigonometry in component frontmatter (zero JavaScript shipped to client); RankingChart.astro generates SVG horizontal bar chart for overview rankings
-3. **Static pages**: /beauty-index/ (overview with rankings chart + language grid), /beauty-index/[slug]/ (per-language detail with radar chart and character), /beauty-index/code/ (feature-tabbed code comparison)
-4. **OG image generation**: Extends existing Satori pipeline with new templates for radar chart layouts; radar shapes drawn as SVG polygons calculated from score data
-5. **Interactive island**: CodeComparison.tsx React component with client:visible for tab switching on comparison page; pre-renders all code blocks at build time via Expressive Code, React only toggles visibility
+1. `src/pages/tools/dockerfile-analyzer.astro` — Astro shell: title, SEO metadata, breadcrumbs, `<DockerfileAnalyzer client:only="react" />`
+2. `src/components/tools/DockerfileAnalyzer.tsx` — root island; mounts CodeMirror, owns layout (EditorPanel + ResultsPanel)
+3. `src/lib/tools/useCodeMirror.ts` — React hook that creates EditorView with basicSetup, Dockerfile language mode, lintGutter, linter extension, and theme
+4. `src/lib/tools/dockerfile-analyzer/` — rule engine: `types.ts`, `parser.ts`, `engine.ts`, `scorer.ts`, `dockerfile-linter.ts`, `editor-theme.ts`, and `rules/` organized by category (one file per rule)
+5. `src/stores/dockerfileAnalyzerStore.ts` — Nanostore: bridge between CodeMirror linter callback and React ResultsPanel
+6. `src/components/tools/ResultsPanel.tsx`, `ScoreGauge.tsx`, `CategoryScores.tsx`, `ViolationList.tsx` — results display components reading from the Nanostore
 
-**Chart rendering architecture:** Hand-crafted SVG generated at build time in Astro component frontmatter. A shared utility (src/lib/radar-svg.ts) contains polar-to-cartesian coordinate conversion used by both Astro components (RadarChart.astro) and OG image generation (beauty-index-og.ts). Charts use CSS custom properties (var(--color-accent), var(--color-border)) for theming, automatically adapting to the site's existing light mode styles.
+**Key patterns:**
+- Each rule is a standalone file implementing `check(dockerfile, rawText): LintResult[]` — independently testable and scalable to 40+ rules without touching engine code
+- Scoring uses category weights: Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10% — reflecting production impact hierarchy
+- Click-to-navigate from results panel to editor line: `viewRef.current.dispatch()` is the only place React directly touches CodeMirror; all other communication flows through Nanostore
+- `client:only="react"` (not `client:load` or `client:visible`) — CodeMirror cannot be server-rendered and must skip SSR entirely
 
 ### Critical Pitfalls
 
-1. **Chart libraries destroy Lighthouse performance** — Adding Chart.js (63KB), Recharts (42KB), or D3 (80KB+) to every page would tank the site's 90+ performance scores. The data is static (known at build time) and the shapes are simple (polygons/rectangles). Solution: Hand-crafted SVG generated in Astro component frontmatter, zero JavaScript payload, instant render.
+1. **CodeMirror requires `client:only="react"`, not `client:load` or `client:visible`** — CodeMirror accesses the DOM immediately on construction; Astro's SSR will crash the build or produce hydration mismatches with any other directive. This is a foundational decision that must precede all other implementation. Prevention: use `client:only="react"` on the island and design a skeleton loading state for the SSR placeholder to prevent layout shift.
 
-2. **250 code blocks explode build time and DOM size** — The comparison page with 25 languages × 10 features = 250 Shiki-highlighted code blocks would generate 5,000-12,500 DOM elements and take 12-50 seconds to build. Solution: Tab-based lazy rendering where only 10-25 blocks are in the DOM at once; store inactive tab content in template elements or load on-demand.
+2. **View Transitions (ClientRouter) destroy and orphan the CodeMirror instance** — navigating away and back leaves zombie EditorView references that hold stale DOM nodes, resulting in a blank or broken editor. Prevention: listen to `astro:before-swap` and call `view.destroy()` explicitly; optionally persist Dockerfile content to `sessionStorage` before navigation and restore on remount.
 
-3. **Chart-to-image sharing hits CSP violations** — The site has a strict Content Security Policy. DOM-to-image libraries (html2canvas, dom-to-image) inject inline styles and create blob URLs that can be blocked by CSP, plus they're fragile on mobile (2-5 second freeze during capture). Solution: Generate shareable chart images at build time using the existing Satori + Sharp pipeline, avoiding all runtime DOM-to-image issues.
+3. **`dockerfile-ast` bundle compatibility must be verified before committing to it** — the package's VS Code LSP type dependencies could cause bundle bloat (50-100 KB of unused types) or CJS-to-ESM conversion errors in Vite. Prevention: run a minimal `astro build` immediately after adding the import and inspect with `vite-bundle-visualizer`. Fallback: write a lightweight custom parser (~200 lines) if bundle exceeds 20 KB gzipped.
 
-4. **Dark mode theme mismatch** — The site has a theme toggle but NO dark mode CSS custom properties are defined (only light mode variables exist in global.css). Charts using CSS custom properties will render identically in both modes. Solution: Decide on dark mode strategy BEFORE building chart components (recommended: defer dark mode for Beauty Index v1, document decision).
+4. **CodeMirror dark mode requires Compartment reconfiguration, not CSS class cascading** — the site's `.dark` class on `<html>` does not cascade into CodeMirror's CSS-in-JS theming system. Toggling dark mode leaves the editor in its original theme. Prevention: use a `Compartment`-based dynamic theme switch or `codemirror-theme-vars` (by Anthony Fu) to bridge CSS custom properties into CodeMirror's theme.
 
-5. **OG image generation increases build time** — Adding 27+ new OG images (overview + 25 languages + comparison page) with radar chart visuals could add 4-11 seconds to build time, potentially 15-20 seconds if complex layouts. Solution: Implement hash-based caching for OG images (skip regeneration if input data unchanged), throttle parallel generation to 4 concurrent, create dedicated generateBeautyIndexOgImage() function.
+5. **Scoring algorithm must be calibrated against real Dockerfiles or it becomes gameable and meaningless** — Hadolint deliberately avoids numerical scoring because Dockerfile quality is multidimensional. A score that clusters at 85-100 for most Dockerfiles, or where a trivial fix swings the score by 20 points, destroys user trust. Prevention: test against 50+ real-world Dockerfiles before finalizing weights, always show category sub-scores alongside the aggregate, and make deductions transparent ("Using latest tag: -5 points, Security category").
+
+6. **Lint debounce is mandatory — running 40 rules on every keystroke causes input lag** — at 0.05ms per rule evaluation against 15 instructions, each lint cycle is ~30ms of blocking time, which causes perceptible input lag in longer Dockerfiles. Prevention: set `linter(fn, { delay: 500 })` from day one, parse the AST once per cycle (not once per rule).
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+### Phase 1: Foundation and Technology Validation
+**Rationale:** The highest-risk decisions — `client:only` directive, `dockerfile-ast` bundle compatibility, View Transitions lifecycle, and CSP compatibility — must be validated before any UI work. Building the rule engine on top of a parser that turns out incompatible with Vite would require scrapping the parsing layer. This phase is a go/no-go gate.
+**Delivers:** Confirmed technology choices, working editor scaffold with no rules yet, `astro build` passes without errors, navigation to/from the page works without console errors or orphaned instances.
+**Addresses:** T1 (paste-and-analyze workflow skeleton), T2 (syntax highlighting via legacy-modes), T9 (client-side architecture enforced)
+**Avoids:** Pitfalls 1 (SSR crash), 3 (View Transitions lifecycle), 4 (dockerfile-ast bundle bloat), 11 (CSP style injection)
+**Research flag:** SKIP deeper research — all decisions are documented in STACK.md and PITFALLS.md with known solutions and verified sources.
 
-### Phase 1: Data Foundation & Core SVG Components
-**Rationale:** Data model and shared chart math must be established first because every other component reads from languages.json and multiple components (RadarChart.astro, OG images) use the same polar coordinate calculations. Building pages without the data schema means dummy markup that gets replaced.
+### Phase 2: Editor Styling, Accessibility, and Mobile Layout
+**Rationale:** Styling and accessibility decisions are architectural — they shape every subsequent component. The dark mode Compartment pattern and mobile layout decision (full CodeMirror vs simplified textarea fallback) must be made before building the results panel, which must fit within the chosen container geometry.
+**Delivers:** Themed editor matching site dark/light mode, accessible editor (ARIA labels, Tab focus mode, Skip link before editor), responsive layout (desktop side-by-side, mobile stacked or simplified).
+**Addresses:** T8 (responsive layout), D10 (theme matching site toggle)
+**Avoids:** Pitfalls 5 (dark mode visual mismatch), 7 (WCAG keyboard trap violation), 9 (broken mobile experience)
+**Research flag:** SKIP — Compartment theme switching is a documented CodeMirror pattern; `codemirror-theme-vars` is a drop-in alternative; Tab focus mode escape is in CodeMirror's official accessibility example.
 
-**Delivers:**
-- languages.json with 3-5 seed languages (complete all 25 later)
-- beautyIndex content collection in content.config.ts with Zod schema
-- src/lib/radar-svg.ts (shared radar geometry math)
-- RadarChart.astro (build-time SVG radar chart component)
-- RankingChart.astro (build-time SVG bar chart component)
-- ScoreBadge.astro (reusable score display pill)
+### Phase 3: Rule Engine and Scoring
+**Rationale:** The rule engine is the core product logic. Building it before the results display UI means display components receive real data from day one. Scoring weight calibration (requiring testing against 50+ Dockerfiles) must happen in this phase — retrofitting weights after the UI is built creates unnecessary churn.
+**Delivers:** 40 rules organized by category (one file per rule), working `linter()` extension producing CodeMirror Diagnostics and Nanostore updates in one pass, category-weighted scorer with letter grade output, debounced pipeline at 300-500ms.
+**Addresses:** T3-T7 (severity levels, line numbers, rule codes, fix suggestions, category grouping), D1 (inline annotations — comes "free" from linter output once Diagnostics are returned), D2 (scoring algorithm), D3 (category breakdown data)
+**Avoids:** Pitfalls 6 (gameable or meaningless scoring), 8 (lint performance input lag)
+**Research flag:** NEEDS attention on scoring calibration. The weight values (30/25/20/15/10) are a research-informed starting point, not a validated formula. Plan a calibration task with real-world Dockerfiles as part of this phase before finalizing the scoring UI.
 
-**Addresses:** Table stakes features T3 (radar charts), foundation for all visual components
+### Phase 4: Results Display Components
+**Rationale:** Results panel components are shaped by the real data structures from Phase 3. Building display after the data layer ensures components receive accurate output rather than mock interfaces that may diverge from the actual rule engine output.
+**Delivers:** ScoreGauge (SVG circular gauge), CategoryScores (horizontal bar charts), ViolationList (severity-sorted cards with click-to-navigate), ResultsPanel (composition), pre-loaded example Dockerfiles, empty state.
+**Addresses:** D2 (score display with letter grade), D3 (category breakdown panel), D4 (expert-voice explanations — content authoring per rule), D6 (example Dockerfiles), D8 (keyboard shortcut hints), T10 (pre-populated sample)
+**Avoids:** Pitfall 10 (information overload — established hierarchy: gutter = severity indicator, inline underlines = location marker, panel = comprehensive detail; inline underlines only for error/warning, not hint)
+**Research flag:** SKIP — component structure and information hierarchy are fully specified in ARCHITECTURE.md and PITFALLS.md.
 
-**Avoids:** Pitfall #1 (no chart library dependency decision made here - SVG-only from start), Pitfall #4 (dark mode strategy documented before building visual components)
+### Phase 5: Page Integration and SEO
+**Rationale:** Integration work (Header navigation link, page routing, breadcrumbs, SEO metadata) is a thin final layer once the island works. Doing it last ensures the page title, meta description, and structured data reflect the actual finished tool, not a placeholder.
+**Delivers:** Live page at `/tools/dockerfile-analyzer/`, Header navigation entry, BreadcrumbJsonLd, SEO head with description and OG metadata, sitemap auto-inclusion, Lighthouse audit pass.
+**Addresses:** T9 (prominent "analyzed in your browser" client-side messaging), full Lighthouse performance and accessibility audits
+**Avoids:** Performance regressions from over-eager JS loading; Lighthouse accessibility regression from missing ARIA or focus management
+**Research flag:** SKIP — existing site infrastructure (SEOHead, BreadcrumbJsonLd, sitemap integration) is directly reusable per FEATURES.md existing infrastructure analysis.
 
-**Research flag:** Standard patterns (SVG geometry, Astro components) - skip research-phase
-
-### Phase 2: Overview & Detail Pages
-**Rationale:** Core user-facing pages depend on Phase 1 components but can be built before the complex code comparison page. The overview page (rankings table + language grid) and per-language detail pages (radar chart + character sketch) deliver the essential "ranking index" experience. These pages validate the data model and component patterns before tackling the more complex comparison page.
-
-**Delivers:**
-- /beauty-index/ overview page (RankingChart + LanguageCard grid)
-- /beauty-index/[slug]/ per-language detail pages (RadarChart + character content)
-- LanguageCard.astro (composes RadarChart + ScoreBadge for overview grid)
-- CharacterSketch.astro (character illustration wrapper)
-- Navigation integration (add "Beauty Index" to Header.astro navLinks)
-
-**Uses:** All Phase 1 components, existing Layout.astro and SEOHead.astro
-
-**Implements:** Pages and routing architecture from ARCHITECTURE.md
-
-**Avoids:** Pitfall #6 (SEO infrastructure built INTO page templates from start: unique meta descriptions per language, canonical URLs, JSON-LD structured data)
-
-**Research flag:** Standard patterns (Astro dynamic routes, existing SEO component patterns) - skip research-phase
-
-### Phase 3: OG Image Generation
-**Rationale:** OG images can be built in parallel with or after core pages. They depend only on the shared radar math utility (Phase 1) and the data model, not on the page components themselves. Building them as a separate phase allows focus on the Satori template design and build-time optimization without blocking page development.
-
-**Delivers:**
-- src/lib/beauty-index-og.ts (OG image generation function with radar chart SVG embedding)
-- /open-graph/beauty-index/overview.png endpoint
-- /open-graph/beauty-index/[slug].png endpoint (27 total images: overview + 25 languages + code page)
-- Hash-based OG image caching to prevent regeneration on every build
-- Throttled parallel generation (p-limit(4)) to avoid CI/CD memory issues
-
-**Uses:** Phase 1 radar-svg.ts utility, existing Satori + Sharp pipeline from src/lib/og-image.ts
-
-**Addresses:** Table stakes feature T8 (OG images), differentiator D3 (shareable social cards)
-
-**Avoids:** Pitfall #5 (OG image build time) via caching and throttling; Pitfall #3 (chart sharing fragility) by using build-time Satori instead of runtime DOM capture
-
-**Research flag:** Standard patterns (extending existing OG pipeline) - skip research-phase
-
-### Phase 4: Code Comparison Page (High Complexity)
-**Rationale:** This is the most architecturally complex feature due to 250 code blocks and tab-based lazy rendering requirements. Deferring it until core pages are stable allows validation of the data model and component patterns first. The comparison page is valuable but not blocking for the core "ranking index" experience.
-
-**Delivers:**
-- src/data/beauty-index/code-samples.ts (TypeScript module with 250 code snippets)
-- /beauty-index/code/ page with tab-based code comparison
-- CodeTabs.tsx React component (client:visible for tab switching)
-- Pre-rendered code blocks via Expressive Code, React only toggles visibility
-- Accessible tab component following WAI-ARIA tab pattern
-
-**Uses:** Existing astro-expressive-code integration, React 19 islands, GSAP for optional animations
-
-**Implements:** Tab-based lazy rendering architecture from ARCHITECTURE.md to avoid DOM explosion
-
-**Avoids:** Pitfall #2 (250 code blocks DOM explosion) via tab-based lazy rendering where only 10-25 blocks in DOM at once; Pitfall #9 (tab accessibility) by implementing WAI-ARIA tab pattern with keyboard navigation
-
-**Research flag:** NEEDS RESEARCH-PHASE - complex interaction between Expressive Code build-time rendering, React hydration, and tab state management; DOM manipulation patterns for 250 code blocks need validation
-
-### Phase 5: Content Completion & Polish
-**Rationale:** With all infrastructure in place, this phase completes the remaining 20-22 language entries (started with 3-5 seeds in Phase 1), writes the methodology blog post, and adds optional shareability features. Content authoring can happen incrementally without blocking technical work.
-
-**Delivers:**
-- Complete all 25 languages in languages.json
-- Complete all 250 code snippets in code-samples.ts
-- Methodology blog post (MDX in existing blog collection)
-- Character illustrations (25 PNG files in public/images/)
-- Optional: "Download as Image" button (html-to-image + file-saver if needed)
-- Optional: Web Share API integration on mobile
-- Optional: Animated chart entrance via GSAP ScrollTrigger
-
-**Uses:** All existing infrastructure from Phases 1-4
-
-**Addresses:** Remaining differentiator features (D1 download, D5 animations, D10 Web Share)
-
-**Avoids:** Pitfall #7 (GSAP ScrollTrigger conflicts) by registering animations through existing lifecycle, testing page navigation flow
-
-**Research flag:** Standard patterns (content authoring, GSAP patterns already established) - skip research-phase
-
-### Phase 6: SEO & Launch Readiness
-**Rationale:** Final SEO polish and cross-page linking happens after all content exists. This ensures internal linking strategy can reference all 25 language pages, the comparison page, and the methodology blog post. Launch checklist verification ensures nothing is missing.
-
-**Delivers:**
-- BeautyIndexJsonLd.astro (Schema.org structured data for ranking pages)
-- BreadcrumbJsonLd on all Beauty Index pages
-- Internal links FROM existing pages (blog, homepage) TO Beauty Index
-- Sitemap verification (all 27+ pages included)
-- Lighthouse audit on all page types (overview, detail, comparison)
-- Accessibility audit (VoiceOver testing, keyboard navigation)
-- Mobile responsiveness verification
-
-**Uses:** Existing SEOHead.astro, sitemap integration, BreadcrumbJsonLd patterns
-
-**Addresses:** Pitfall #6 completion (full SEO infrastructure), table stakes feature T9 (navigation/cross-linking)
-
-**Research flag:** Standard patterns (existing SEO components, known audit tools) - skip research-phase
+### Phase 6: Shareability and Rule Documentation Pages
+**Rationale:** Shareability features (URL state, score badge) and rule documentation pages are fully independent of the core tool and can ship after launch without blocking it. Rule documentation pages represent the largest SEO opportunity — 40 indexable URLs targeting long-tail DevOps queries like "dockerfile pin base image version" or "hadolint DL3006 explained" — but require significant content authoring effort that does not block Phase 1-5 delivery.
+**Delivers:** Shareable score badge (PNG download), URL state encoding of Dockerfile content into URL hash, 40 rule documentation pages at `/tools/dockerfile-analyzer/rules/[code]`.
+**Addresses:** D5 (shareable score badge), D9 (URL state for sharing), D7 (rule documentation pages — massive SEO play)
+**Research flag:** NEEDS research on URL state encoding approach: `lz-string` vs `URLSearchParams` vs hash-based encoding. Need to verify URL length limits (2048 chars max for broad compatibility) and encoding round-trip fidelity for multi-line Dockerfiles with special characters.
 
 ### Phase Ordering Rationale
 
-- **Data-first approach:** Phase 1 establishes the data model and shared utilities because every downstream component depends on languages.json schema and radar math calculations. Changing the data schema later would ripple through all components.
-
-- **Core pages before complex features:** Phases 2-3 deliver the essential ranking index experience (overview + detail pages + OG images) before tackling the high-complexity comparison page (Phase 4). This validates architectural patterns with simpler use cases first.
-
-- **OG images isolated:** Phase 3 can run in parallel with Phase 2 because OG generation only depends on Phase 1 utilities, not on page components. This allows optimization work (caching, throttling) to happen independently.
-
-- **Comparison page deferred:** Phase 4 is the only feature requiring deep research due to the 250 code block challenge and React hydration complexity. Deferring it prevents blocking core pages while the lazy-rendering pattern is validated.
-
-- **Content completion flexible:** Phase 5 content authoring (remaining 20 languages, code snippets, character sketches) can happen incrementally and doesn't block technical infrastructure work.
-
-- **SEO polish last:** Phase 6 internal linking and cross-references require all content to exist first. Launch readiness checklist ensures comprehensive verification across all page types.
+- Technology validation comes first because `dockerfile-ast` browser compatibility is a go/no-go gate — discovering it fails in Phase 3 would require rewriting the parsing layer.
+- Styling and accessibility before results panel because the mobile layout decision (CodeMirror vs textarea fallback) determines the container geometry the results panel must fit within.
+- Rule engine before display components because display components must be shaped by real data structures, not assumptions. The linter callback's dual-output pattern (Diagnostics + Nanostore update) is the integration point between Phase 3 and Phase 4.
+- Page integration after the tool works so SEO metadata reflects the actual finished product.
+- Shareability and SEO content last because they depend on a stable URL structure and finalized rule set.
 
 ### Research Flags
 
-**Phases likely needing deeper research during planning:**
-- **Phase 4 (Code Comparison):** Complex interaction between Expressive Code build-time rendering, React client:visible hydration, tab state management, and DOM manipulation for 250 code blocks. The hybrid approach (pre-render via Expressive Code, toggle visibility via React) needs validation. Alternative vanilla JS approach may be simpler.
+Phases needing deeper research during planning:
+- **Phase 3 (Rule Engine):** Scoring weight calibration requires testing against real-world Dockerfiles. The 30/25/20/15/10 weight split is a research-informed starting point, not a validated formula. Plan a calibration task with 50+ Dockerfiles as part of this phase.
+- **Phase 6 (Shareability):** `lz-string` vs native URL compression for encoding Dockerfiles into URL hashes. Need to verify URL length limits and encoding round-trip fidelity before committing to an approach.
 
-**Phases with standard patterns (skip research-phase):**
-- **Phase 1:** SVG geometry and Astro component patterns are well-documented; polar-to-cartesian conversion is standard trigonometry
-- **Phase 2:** Astro dynamic routes via getStaticPaths() follows existing blog pattern; SEO components already established
-- **Phase 3:** Satori + Sharp pipeline already proven for blog OG images; extending with new templates is straightforward
-- **Phase 5:** Content authoring, GSAP scroll animations, and Web Share API are established patterns
-- **Phase 6:** SEO audit, Lighthouse testing, and accessibility verification use standard tools and existing component patterns
+Phases with well-documented patterns (skip research):
+- **Phase 1:** `client:only="react"` directive, View Transitions lifecycle hooks, CSP verification — all documented in official Astro and CodeMirror sources with confirmed solutions in PITFALLS.md.
+- **Phase 2:** Compartment-based theme switching is a documented CodeMirror pattern; Tab focus mode is in CodeMirror's accessibility example.
+- **Phase 4:** Component structure is fully specified in ARCHITECTURE.md with TypeScript interfaces and data flow diagrams.
+- **Phase 5:** Existing site infrastructure (SEOHead, BreadcrumbJsonLd, sitemap) is directly reusable with zero configuration changes per FEATURES.md existing infrastructure table.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | No new runtime dependencies needed; existing Astro 5 stack sufficient; SVG-first approach proven by existing Satori OG pipeline |
-| Features | HIGH | Clear table stakes from competitive analysis (TIOBE, IEEE Spectrum, TierMaker); differentiators based on social shareability patterns; anti-features well-reasoned |
-| Architecture | HIGH | Extends established Astro patterns (content collections, dynamic routes, React islands); build-time SVG approach matches site performance philosophy; OG pipeline proven |
-| Pitfalls | HIGH | Verified against codebase analysis, Astro docs, known CSP issues, web performance research, and accessibility standards; all pitfalls have concrete mitigation strategies |
+| Stack | HIGH | All 4 new packages verified via npm registry, source audits, and official docs. `dockerfile-ast` browser safety confirmed by 34-file source audit. Bundle sizes calculated from verified gzip benchmarks. One MEDIUM item: actual Vite bundle output needs build-time confirmation. |
+| Features | HIGH | Competitive analysis covers all 5 major Dockerfile linting tools. Feature gaps (no inline annotations, no category scoring, no expert explanations) are confirmed unimplemented by competitors. Scoring algorithm approaches modeled on Pylint, DockAdvisor, and SonarQube with clear rationale. |
+| Architecture | HIGH | Component structure, data flow, and rule engine patterns are fully specified with TypeScript interfaces. The dual-output linter callback pattern is documented in official CodeMirror examples. Nanostore-as-message-bus pattern is established in the existing codebase. |
+| Pitfalls | HIGH | 11 pitfalls identified with specific prevention strategies, warning signs, phase mapping, and recovery costs. All critical pitfalls sourced from official CodeMirror forum, Astro issue tracker, and direct codebase analysis. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-**Dark mode strategy needs decision:** The site has a theme toggle but incomplete dark mode implementation (no dark CSS custom properties defined, only Expressive Code themes respond to .dark class). Decision required: (A) defer dark mode for Beauty Index v1 and ensure charts work in light mode only, or (B) complete dark mode color palette in global.css before building chart components. Recommendation: Option A for v1 MVP, document decision in Phase 1.
-
-**Code comparison lazy-rendering pattern needs validation:** The hybrid approach (Expressive Code pre-renders at build time, React island toggles visibility) is architecturally sound but the exact mechanics need validation during Phase 4 planning. Alternative: pure vanilla JavaScript tab controller without React hydration overhead. This is flagged for research-phase in Phase 4.
-
-**Character illustration art style:** The 25 character sketches need a consistent visual style. This is content creation work (illustration/design) outside of technical implementation. Consider placeholder illustrations for Phase 1-4, commission final art for Phase 5.
-
-**Greek symbols/mathematical notation:** If dimension names or formulas use Greek characters, test rendering in all three site fonts (Bricolage Grotesque, DM Sans, Fira Code) early in Phase 1. Add fallback font with Greek support to font stack if needed.
+- **dockerfile-ast Vite bundling:** Classified MEDIUM confidence because actual browser bundle output needs build-time confirmation. Mitigate by running `astro build` with the import as the first task in Phase 1 — a 30-minute validation that eliminates the risk before any other work.
+- **Scoring weight calibration:** Initial weights (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%) are educated guesses. Treat Phase 3 weights as a starting hypothesis; calibrate with a real-world Dockerfile test suite before shipping.
+- **Dark mode implementation completeness:** PITFALLS.md notes the site's dark mode is partially implemented — the toggle exists but no CSS custom properties for `.dark` are defined in `global.css`. The Compartment-based CodeMirror theme switching depends on the mechanism the site uses to signal theme changes. Verify during Phase 2.
+- **Mobile experience decision:** PITFALLS.md identifies two viable approaches (full CodeMirror on mobile vs simplified textarea fallback). This decision must be made in Phase 2 before building the results panel layout, as the choice affects the container geometry.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Codebase analysis: package.json, astro.config.mjs, tsconfig.json, src/content.config.ts, src/lib/og-image.ts, src/pages/open-graph/[...slug].png.ts, src/components/Header.astro, src/components/SEOHead.astro, src/layouts/Layout.astro, src/styles/global.css
-- [Astro 5 Content Collections documentation](https://docs.astro.build/en/guides/content-collections/) — file() loader, Zod schema, getCollection API
-- [Astro Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/) — file() loader specification
-- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) — client:visible directive, partial hydration
-- [Recharts GitHub releases v3.7.0](https://github.com/recharts/recharts/releases) — evaluated and REJECTED in favor of build-time SVG
-- [Satori GitHub repository](https://github.com/vercel/satori) — CSS/HTML subset, SVG generation capabilities
-- [Satori SVG support issue #86](https://github.com/vercel/satori/issues/86) — SVG data URI embedding approach confirmed
+- [CodeMirror 6 official docs and examples](https://codemirror.net/docs/) — lint API, Diagnostic interface, styling, theming, accessibility (Tab handling), bundle size benchmarks
+- [CodeMirror 6 official forum](https://discuss.codemirror.net) — dark mode switching (Compartment pattern), mobile touch issues, bundle size, ARIA label propagation
+- [npm registry: codemirror, @codemirror/legacy-modes, @codemirror/theme-one-dark, dockerfile-ast](https://registry.npmjs.org) — versions, dependency trees, package.json exports fields
+- [dockerfile-ast GitHub source (rcjsuen)](https://github.com/rcjsuen/dockerfile-ast) — all 34 source files audited for Node.js imports; zero found
+- [Astro official docs](https://docs.astro.build) — islands architecture, client directives reference, View Transitions, Nanostore state-sharing recipe
+- [Hadolint GitHub](https://github.com/hadolint/hadolint) — DL rule codes, rule categories, severity model (industry standard)
+- [Docker official best practices](https://docs.docker.com/build/building/best-practices/) — authoritative source for rule definitions
+- Existing codebase — `package.json`, `astro.config.mjs`, `Layout.astro`, `Header.astro`, `ThemeToggle.astro`, `global.css`, `languageFilterStore.ts`, `tabStore.ts`, `CodeComparisonTabs.tsx`
 
 ### Secondary (MEDIUM confidence)
-- [TIOBE Index](https://www.tiobe.com/tiobe-index/), [IEEE Spectrum Top Programming Languages 2025](https://spectrum.ieee.org/top-programming-languages-2025), [TierMaker](https://tiermaker.com/categories/technology/programming-languages--32215) — competitive feature analysis
-- [Hyperpolyglot](https://hyperpolyglot.org/), [Rosetta Code](https://rosettacode.org/) — code comparison patterns
-- [Chart.js CSP requirement GitHub Issue #8108](https://github.com/chartjs/Chart.js/issues/8108) — why Chart.js conflicts with strict CSP
-- [Monday.com DOM-to-Image performance challenges](https://engineering.monday.com/capturing-dom-as-image-is-harder-than-you-think-how-we-solved-it-at-monday-com/) — why to avoid runtime DOM-to-image
-- [html-to-image npm comparison](https://npm-compare.com/dom-to-image,html-to-image,html2canvas) — library evaluation (rejected for build-time Satori approach)
-- [SVG Radar Charts without D3](https://data-witches.com/2023/12/radar-chart-fun-with-svgs-aka-no-small-multiples-no-problem/) — pure SVG polar coordinate approach
-- [Accessible SVG Charts for Khan Academy — Sara Soueidan](https://www.sarasoueidan.com/blog/accessible-data-charts-for-khan-academy-2018-annual-report/) — accessibility patterns for charts
-- [WAI-ARIA Authoring Practices 1.1 Tabs Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) — accessible tab implementation
+- [fromlatest.io](https://www.fromlatest.io/), [EaseCloud Dockerfile Linter](https://www.easecloud.io/tools/docker/dockerfile-linter/), [DockAdvisor GitHub](https://github.com/deckrun/dockadvisor) — competitor UX patterns, feature gap analysis
+- [codemirror-theme-vars by Anthony Fu](https://github.com/antfu/codemirror-theme-vars) — CSS variable bridge approach for CodeMirror dark mode theming
+- [Astro transition:persist React re-render bug #13287](https://github.com/withastro/astro/issues/13287) — informs the lifecycle management approach (destroy/recreate over persist)
+- [Pylint scoring formula](https://docs.pylint.org/en/1.6.0/faq.html), [SonarQube metrics](https://docs.sonarsource.com/sonarqube-server/user-guide/code-metrics/metrics-definition) — scoring algorithm design references
 
 ### Tertiary (LOW confidence)
-- [Expressive Code plugin documentation](https://expressive-code.com/plugins/collapsible-sections/) — optional build-time plugin for code block enhancement
-- [Web Share API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share) — optional mobile share feature
-- [Clipboard API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) — optional copy-to-clipboard feature
+- Community estimate of CodeMirror bundle size ~75kb gzipped with basicSetup — actual measurement required during Phase 1; official benchmarks cite ~135kb with full basicSetup
 
 ---
-*Research completed: 2026-02-17*
+*Research completed: 2026-02-20*
 *Ready for roadmap: yes*

@@ -1,587 +1,699 @@
-# Architecture: The Beauty Index Integration
+# Architecture: Dockerfile Analyzer Tool Integration
 
-**Domain:** Content pillar for existing Astro 5 portfolio site
-**Researched:** 2026-02-17
-**Overall confidence:** HIGH -- based on direct codebase analysis and verified Astro 5 / Satori documentation
+**Domain:** Interactive browser-based Dockerfile linting and scoring tool
+**Researched:** 2026-02-20
+**Overall confidence:** HIGH -- based on direct codebase analysis, verified CodeMirror 6 and Astro 5 documentation, and confirmed dockerfile-ast API
+
+---
 
 ## Recommended Architecture
 
-The Beauty Index integrates as a **new content pillar** alongside `/blog/` and `/projects/`, using the same architectural patterns already established in the codebase: a JSON data file with the Astro 5 `file()` content loader for structured data, `getStaticPaths()` for dynamic routes, Satori + Sharp for OG images, and a React island for the one interactive component.
+The Dockerfile Analyzer is a **single-page client-side tool** at `/tools/dockerfile-analyzer/` that integrates into the existing Astro 5 static site as a React island. The page is a static Astro shell wrapping one large interactive island that contains the CodeMirror editor, rule engine, scorer, and results panel. All processing happens in the browser -- no server, no API calls.
 
-### High-Level Data Flow
+### Why a Single React Island (Not Multiple Islands)
+
+The editor, lint results, and score panel are tightly coupled: every keystroke triggers parse -> lint -> score -> display. Splitting these into separate islands would require cross-island communication via Nanostores for every update, adding latency and complexity to what is fundamentally a single interactive widget. The Beauty Index used multiple small islands because each was independent (filter bar, compare picker, code tabs). The Dockerfile Analyzer is one cohesive tool.
+
+**Use React** because:
+1. React 19 + `@astrojs/react` are already installed and configured
+2. `@nanostores/react` is already a dependency
+3. The site already ships 4 React islands (`HeadScene.tsx`, `LanguageFilter.tsx`, `CodeComparisonTabs.tsx`, `VsComparePicker.tsx`)
+4. CodeMirror 6 has well-documented React integration patterns via refs and `useEffect`
+5. No additional framework installation needed -- zero new dependencies in `astro.config.mjs`
+
+**Rejected alternative: Vanilla JS island.** CodeMirror 6 is vanilla JS at its core, so a vanilla approach is technically feasible. However, managing the results panel's reactive state (40 diagnostics updating on every keystroke, expandable rule details, severity filtering, score animation) without a framework leads to imperative DOM spaghetti. React's declarative rendering is the right tool here. The existing codebase already pays the React cost -- the marginal bundle addition for this page is near zero since React is already in the shared chunk.
+
+**Rejected alternative: Preact/Svelte/Solid.** Would require installing a new integration (`@astrojs/preact`, etc.) and adding a new framework to the build pipeline. The marginal size savings (Preact ~3kb vs React already loaded) do not justify the maintenance cost of a second UI framework in the codebase.
+
+---
+
+## High-Level Data Flow
 
 ```
-src/data/beauty-index/languages.json     (25 languages, scores, metadata)
-src/data/beauty-index/code-samples.ts    (code snippets per feature per language)
+User pastes/types Dockerfile
         |
         v
-src/content.config.ts                    (file() loader + Zod schema for beautyIndex)
+CodeMirror EditorView (input)
         |
-        +---> src/pages/beauty-index/index.astro           (overview + rankings)
-        +---> src/pages/beauty-index/[slug].astro          (per-language detail)
-        +---> src/pages/beauty-index/code/index.astro      (feature-tabbed comparison)
-        +---> src/pages/open-graph/beauty-index/[...slug].png.ts  (OG images)
-        |
+        | EditorView.updateListener (docChanged)
         v
-src/components/beauty-index/
-        RadarChart.astro           (build-time SVG, zero JS)
-        RankingChart.astro         (build-time SVG bar chart, zero JS)
-        CodeComparison.tsx         (React island, client:visible)
-        LanguageCard.astro         (static card for overview grid)
-        ScoreBadge.astro           (reusable score pill)
-        CharacterSketch.astro      (character illustration wrapper)
-        BeautyIndexJsonLd.astro    (structured data)
+Parse: dockerfile-ast DockerfileParser.parse(text)
+        |
+        | Returns: Dockerfile AST (instructions, comments, args)
+        v
+Lint: RuleEngine.run(ast, rawText)
+        |
+        | 40 rules, each returns LintResult[]
+        v
+Score: Scorer.compute(lintResults)
+        |
+        | Returns: { overall, categories: { security, efficiency, ... } }
+        v
+Display (two outputs):
+  1. CodeMirror Diagnostics (inline markers in editor via setDiagnostics)
+  2. React State (results panel: score gauge, rule violations list, suggestions)
 ```
 
-### Component Boundaries
+### Key Design Decision: `linter()` Extension vs `setDiagnostics`
 
-| Component | Responsibility | Communicates With | JS Shipped to Client |
-|-----------|---------------|-------------------|----------------------|
-| `languages.json` | Single source of truth for all 25 languages + 6 scores + metadata | Content collection via `file()` loader | None |
-| `code-samples.ts` | Feature-keyed code snippets for all languages | `CodeComparison.tsx`, code page | None |
-| `RadarChart.astro` | Generates inline SVG radar chart at build time from 6 score values | Language detail pages, language cards | **0 bytes** |
-| `RankingChart.astro` | Generates SVG horizontal bar chart of overall rankings | Overview page | **0 bytes** |
-| `CodeComparison.tsx` | Interactive tabbed code viewer with feature/language switching | React island on `/beauty-index/code/` | ~3-5kb hydrated |
-| `LanguageCard.astro` | Static card showing language name, rank, overall score, mini radar | Overview page grid | 0 bytes |
-| `ScoreBadge.astro` | Colored score pill (gradient based on value) | Cards, detail pages | 0 bytes |
-| `CharacterSketch.astro` | Wraps character illustration image with caption | Language detail pages | 0 bytes |
-| `BeautyIndexJsonLd.astro` | Schema.org structured data for SEO | Layout head slot | 0 bytes |
-| OG image endpoints | Build-time PNG generation via Satori + Sharp | Social sharing | 0 bytes (build only) |
+**Use the `linter()` extension from `@codemirror/lint`**, not manual `setDiagnostics` dispatches.
+
+The `linter()` function accepts a callback `(view: EditorView) => Diagnostic[]` that CodeMirror calls automatically on document changes with built-in debouncing. This is simpler and more correct than manually wiring `updateListener` -> debounce -> `setDiagnostics`. The linter callback is the natural place to run the parse -> lint pipeline and return CodeMirror `Diagnostic` objects. The results panel updates are triggered by a parallel Nanostore subscription to the same lint results.
+
+**Confidence:** HIGH -- the `linter()` function and `Diagnostic` interface are documented at [codemirror.net/examples/lint/](https://codemirror.net/examples/lint/) and verified in the `@codemirror/lint` 6.9.4 package.
 
 ---
 
-## Data Model Design
+## Component Boundaries
 
-### Primary Data: `src/data/beauty-index/languages.json`
+### Page Shell: `src/pages/tools/dockerfile-analyzer.astro`
 
-Use the Astro 5 `file()` content loader because it provides Zod validation, TypeScript types, and `getCollection()` / `getEntry()` APIs -- matching the existing blog collection pattern. This is strictly better than a raw TypeScript array (like the current `projects.ts`) because it gives type-safe querying, Zod schema validation at build time, and avoids importing the full dataset into every page.
+An Astro page that imports the Layout and renders the React island. Minimal static content: page title, SEO metadata, introductory text, and the island mount.
 
-**Confidence:** HIGH -- verified against [Astro 5 Content Collections docs](https://docs.astro.build/en/guides/content-collections/) and the [Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/). The `file()` loader accepts a base file path to a JSON file, requires each entry to have a unique `id` property, and supports Zod schema validation. The existing `content.config.ts` in this codebase already uses content collections.
-
-**Example entry in `languages.json`:**
-
-```json
-[
-  {
-    "id": "python",
-    "name": "Python",
-    "slug": "python",
-    "rank": 1,
-    "year": 1991,
-    "paradigm": "multi-paradigm",
-    "tagline": "Readability counts.",
-    "description": "Python's beauty lies in its insistence that there should be one obvious way to do it...",
-    "characterName": "The Zen Poet",
-    "characterDescription": "Calm, deliberate, believes less is more...",
-    "characterImage": "/images/beauty-index/characters/python.png",
-    "scores": {
-      "readability": 9.2,
-      "expressiveness": 8.5,
-      "consistency": 8.8,
-      "elegance": 8.0,
-      "ecosystem": 9.5,
-      "joy": 8.7
-    },
-    "overallScore": 8.78,
-    "color": "#3776ab",
-    "accentColor": "#ffd43b",
-    "funFact": "Python was named after Monty Python, not the snake.",
-    "tags": ["beginner-friendly", "data-science", "scripting", "web"]
-  }
-]
-```
-
-### Content Collection Schema: `src/content.config.ts`
-
-Extend the existing config. The blog collection remains unchanged. Add the `beautyIndex` collection alongside it:
-
-```typescript
-import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
-
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    publishedDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-    coverImage: z.string().optional(),
-    externalUrl: z.string().url().optional(),
-    source: z.enum(['Kubert AI', 'Translucent Computing']).optional(),
-  }),
-});
-
-const beautyIndex = defineCollection({
-  loader: file('src/data/beauty-index/languages.json'),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    rank: z.number().int().positive(),
-    year: z.number().int(),
-    paradigm: z.string(),
-    tagline: z.string(),
-    description: z.string(),
-    characterName: z.string(),
-    characterDescription: z.string(),
-    characterImage: z.string(),
-    scores: z.object({
-      readability: z.number().min(0).max(10),
-      expressiveness: z.number().min(0).max(10),
-      consistency: z.number().min(0).max(10),
-      elegance: z.number().min(0).max(10),
-      ecosystem: z.number().min(0).max(10),
-      joy: z.number().min(0).max(10),
-    }),
-    overallScore: z.number().min(0).max(10),
-    color: z.string(),
-    accentColor: z.string(),
-    funFact: z.string(),
-    tags: z.array(z.string()).default([]),
-  }),
-});
-
-export const collections = { blog, beautyIndex };
-```
-
-**Why the `file()` loader and not `glob()` or a TypeScript module:**
-- `glob()` is for markdown/MDX files. Language data is structured JSON, not prose content.
-- A TypeScript module (`languages.ts`) like `projects.ts` works but loses Zod validation at build time and does not integrate with `getCollection()` / `getEntry()` APIs.
-- `file()` gives the best of both worlds: JSON data with schema validation, type inference, and the collection query API.
-
-### Code Samples: `src/data/beauty-index/code-samples.ts`
-
-Code samples stay as a TypeScript file (not JSON) because they contain multi-line template literal strings that are painful to escape in JSON. They are keyed by feature, then contain an array of language samples:
-
-```typescript
-export interface CodeSample {
-  language: string;  // slug matching languages.json id
-  label: string;     // display name
-  code: string;      // the actual code snippet
-}
-
-export interface Feature {
-  id: string;
-  name: string;
-  description: string;
-  samples: CodeSample[];
-}
-
-export const features: Feature[] = [
-  {
-    id: 'hello-world',
-    name: 'Hello World',
-    description: 'The classic first program.',
-    samples: [
-      { language: 'python', label: 'Python', code: `print("Hello, World!")` },
-      { language: 'rust', label: 'Rust', code: `fn main() {\n    println!("Hello, World!");\n}` },
-      // ... 25 languages
-    ],
-  },
-  // ... more features (error handling, iteration, pattern matching, etc.)
-];
-```
-
-**Why not a content collection for code samples?** The code comparison page needs to access ALL samples at once grouped by feature. Content collections are optimized for per-entry access. A TypeScript import gives direct array access without async `getCollection()` overhead and allows complex grouping logic. The data model is inherently two-dimensional (features x languages), which maps better to nested TypeScript arrays than flat collection entries.
-
+```astro
 ---
-
-## Routing Strategy
-
-### New Pages
-
-| Route | File | Data Source | Purpose |
-|-------|------|-------------|---------|
-| `/beauty-index/` | `src/pages/beauty-index/index.astro` | `getCollection('beautyIndex')` | Overview: rankings chart, language grid, intro |
-| `/beauty-index/[slug]/` | `src/pages/beauty-index/[slug].astro` | `getStaticPaths()` from collection | Per-language: radar chart, scores, character, full description |
-| `/beauty-index/code/` | `src/pages/beauty-index/code/index.astro` | `import { features }` from code-samples.ts | Feature-tabbed code comparison (React island) |
-
-### Dynamic Route Pattern
-
-This mirrors the exact pattern used by `src/pages/blog/[slug].astro`:
-
-```typescript
-// src/pages/beauty-index/[slug].astro
----
-import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import RadarChart from '../../components/beauty-index/RadarChart.astro';
-import ScoreBadge from '../../components/beauty-index/ScoreBadge.astro';
-import CharacterSketch from '../../components/beauty-index/CharacterSketch.astro';
+import DockerfileAnalyzer from '../../components/tools/DockerfileAnalyzer';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
-
-export async function getStaticPaths() {
-  const languages = await getCollection('beautyIndex');
-  return languages.map((lang) => ({
-    params: { slug: lang.data.slug },
-    props: { language: lang },
-  }));
-}
-
-const { language } = Astro.props;
-const { name, scores, description, tagline, rank, overallScore } = language.data;
-const ogImageURL = new URL(
-  `/open-graph/beauty-index/${language.data.slug}.png`,
-  Astro.site
-).toString();
 ---
 
 <Layout
-  title={`${name} — The Beauty Index | Patryk Golabek`}
-  description={`${name} scores ${overallScore}/10 in The Beauty Index. ${tagline}`}
-  ogImage={ogImageURL}
+  title="Dockerfile Analyzer -- Best Practice Linter & Scorer | Patryk Golabek"
+  description="Paste your Dockerfile and get instant feedback on security, efficiency, and maintainability. 40+ lint rules with inline annotations and an overall score."
 >
-  <!-- page content: radar chart, scores grid, character, description -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2">
+      Dockerfile Analyzer
+    </h1>
+    <p class="text-[var(--color-text-secondary)] mb-8 max-w-2xl">
+      Paste your Dockerfile below for instant best-practice analysis.
+      40 rules covering security, efficiency, maintainability, and more.
+    </p>
+
+    <DockerfileAnalyzer client:load />
+  </section>
+
   <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: `${Astro.site}` },
-    { name: "Beauty Index", url: `${new URL('/beauty-index/', Astro.site)}` },
-    { name: name, url: `${new URL(`/beauty-index/${language.data.slug}/`, Astro.site)}` },
+    { name: "Home", url: Astro.site?.toString() ?? "/" },
+    { name: "Tools", url: new URL("/tools/", Astro.site).toString() },
+    { name: "Dockerfile Analyzer", url: new URL("/tools/dockerfile-analyzer/", Astro.site).toString() },
   ]} />
 </Layout>
 ```
 
-**Confidence:** HIGH -- this is the exact same `getStaticPaths` + props pattern used by `src/pages/blog/[slug].astro` in this codebase. The only difference is the data source (content collection vs content collection).
+**Why `client:load` not `client:visible`:** The editor IS the page content. Users navigate here specifically to use the tool. Deferring hydration until scroll would make the editor appear broken (empty textarea with no syntax highlighting) until it enters the viewport. For tool pages, immediate hydration is correct.
+
+### React Island: `src/components/tools/DockerfileAnalyzer.tsx`
+
+The root island component. Manages the overall layout (editor panel + results panel), initializes CodeMirror, and coordinates state flow.
+
+```
+DockerfileAnalyzer.tsx
+  |
+  +-- useCodeMirror hook (creates EditorView, attaches extensions)
+  |     |
+  |     +-- Dockerfile syntax highlighting (StreamLanguage from legacy-modes)
+  |     +-- Custom linter extension (parse -> lint -> Diagnostic[])
+  |     +-- Theme extension (matches site's CSS custom properties)
+  |     +-- Basic editor extensions (line numbers, bracket matching, etc.)
+  |
+  +-- <EditorPanel />  (mounts CodeMirror into a div ref)
+  |
+  +-- <ResultsPanel /> (reads from analysisStore, renders score + violations)
+       |
+       +-- <ScoreGauge />     (overall score 0-100, circular or bar visual)
+       +-- <CategoryScores /> (security, efficiency, maintainability, etc.)
+       +-- <ViolationList />  (grouped by severity, expandable details)
+```
+
+### Component Breakdown
+
+| Component | Responsibility | State Source | JS Weight (est.) |
+|-----------|---------------|-------------|-----------------|
+| `DockerfileAnalyzer.tsx` | Root island, layout, CodeMirror init | Local + store | ~2kb own code |
+| `useCodeMirror.ts` | Hook: creates EditorView, manages extensions | EditorView ref | ~1kb |
+| `EditorPanel.tsx` | Mounts CodeMirror, sample Dockerfile button, clear button | EditorView ref | ~0.5kb |
+| `ResultsPanel.tsx` | Reads analysis store, renders score + violations | `analysisStore` | ~2kb |
+| `ScoreGauge.tsx` | SVG circular gauge for overall score (0-100) | Props from parent | ~1kb |
+| `CategoryScores.tsx` | Bar charts per category (security, efficiency, etc.) | Props from parent | ~1kb |
+| `ViolationList.tsx` | Sorted violation cards with severity badges | Props from parent | ~1.5kb |
+| CodeMirror packages | Editor, state, lint, language, legacy-modes | N/A | ~75kb gzipped |
+| dockerfile-ast | Dockerfile parser | N/A | ~15kb gzipped |
+
+**Total estimated JS for the page:** ~100kb gzipped (dominated by CodeMirror). This is acceptable for a tool page -- users expect tool pages to load heavier than content pages.
 
 ---
 
-## Chart Rendering Strategy
+## State Management Architecture
 
-### Decision: Build-Time SVG (not client-side JS charts)
+### Two State Domains
 
-**Use pure SVG generated at build time in Astro components.** Do NOT use Chart.js, D3, Recharts, or any client-side charting library.
+**1. Editor State (owned by CodeMirror)**
+CodeMirror manages its own document state, cursor position, selections, undo history, and inline diagnostics. React does NOT control the editor content -- CodeMirror is the source of truth for the document. The React component holds a `ref` to the `EditorView` instance.
 
-**Rationale:**
-1. The data is static (scores do not change at runtime) -- there is no interactivity needed on charts
-2. SVG renders instantly with zero JavaScript payload
-3. The site is statically generated -- build time is the correct time to compute SVG paths
-4. Matches the site's performance philosophy (GSAP for scroll animations, not for rendering content)
-5. SVG supports dark/light theme adaptation via CSS `currentColor` and `var(--color-*)` custom properties
-6. SVG is accessible -- `aria-label` on the root element, semantic structure
-
-**Confidence:** HIGH -- the math is standard polar-to-cartesian coordinate conversion. SVG polygon and path elements are universally supported by all browsers.
-
-### Radar Chart: `src/components/beauty-index/RadarChart.astro`
-
-Generate SVG polygon paths from the 6 scores using trigonometry in the Astro component frontmatter. The core math is approximately 40 lines:
+**2. Analysis State (owned by Nanostore)**
+The parsed analysis results (score, violations, categories) live in a Nanostore atom. This is the bridge between the CodeMirror linter callback and the React results panel.
 
 ```typescript
-// In the frontmatter of RadarChart.astro
-interface Props {
-  scores: Record<string, number>;
-  size?: number;
-  showLabels?: boolean;
-  color?: string;
+// src/stores/dockerfileAnalyzerStore.ts
+import { atom } from 'nanostores';
+
+export interface LintViolation {
+  ruleId: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  line: number;
+  column: number;
+  endLine?: number;
+  endColumn?: number;
+  fix?: string;        // suggested fix text
+  docUrl?: string;     // link to docs
+  category: RuleCategory;
 }
 
-const { scores, size = 200, showLabels = true, color = 'var(--color-accent)' } = Astro.props;
+export type RuleCategory =
+  | 'security'
+  | 'efficiency'
+  | 'maintainability'
+  | 'correctness'
+  | 'style';
 
-const categories = Object.keys(scores);
-const values = Object.values(scores);
-const count = categories.length; // 6
-const cx = size / 2;
-const cy = size / 2;
-const radius = (size / 2) - (showLabels ? 30 : 10); // padding for labels
-
-function polarToCartesian(angle: number, r: number): [number, number] {
-  // Offset by -90 degrees so first axis points up
-  const radian = ((angle - 90) * Math.PI) / 180;
-  return [cx + r * Math.cos(radian), cy + r * Math.sin(radian)];
+export interface AnalysisResult {
+  violations: LintViolation[];
+  score: number;          // 0-100
+  categoryScores: Record<RuleCategory, number>;  // 0-100 each
+  instructionCount: number;
+  stageCount: number;     // multi-stage build stages
+  baseImage: string;      // first FROM image
 }
 
-const angleStep = 360 / count;
+export const analysisResult = atom<AnalysisResult | null>(null);
+export const isAnalyzing = atom<boolean>(false);
 
-// Grid rings (3 concentric hexagons for the 6-axis chart)
-const rings = [0.33, 0.66, 1.0];
+export function setAnalysis(result: AnalysisResult) {
+  analysisResult.set(result);
+  isAnalyzing.set(false);
+}
 
-// Score polygon points
-const points = values.map((val, i) => {
-  const normalizedRadius = (val / 10) * radius;
-  return polarToCartesian(i * angleStep, normalizedRadius);
-});
-
-const polygonPoints = points.map(([x, y]) => `${x},${y}`).join(' ');
+export function clearAnalysis() {
+  analysisResult.set(null);
+}
 ```
 
-The template renders pure SVG:
+### Data Flow Between CodeMirror and React
 
-```html
-<svg viewBox={`0 0 ${size} ${size}`} class="radar-chart"
-     role="img" aria-label={`Radar chart showing scores: ${categories.map((c, i) => `${c} ${values[i]}`).join(', ')}`}>
-  <!-- Grid rings -->
-  {rings.map((scale) => (
-    <polygon
-      points={Array.from({ length: count }, (_, i) =>
-        polarToCartesian(i * angleStep, radius * scale).join(',')
-      ).join(' ')}
-      fill="none"
-      stroke="var(--color-border)"
-      stroke-width="1"
-    />
-  ))}
-  <!-- Axis lines -->
-  {categories.map((_, i) => {
-    const [x, y] = polarToCartesian(i * angleStep, radius);
-    return <line x1={cx} y1={cy} x2={x} y2={y} stroke="var(--color-border)" stroke-width="0.5" />;
-  })}
-  <!-- Score polygon (filled area) -->
-  <polygon points={polygonPoints} fill={`${color}20`} stroke={color} stroke-width="2" />
-  <!-- Score dots -->
-  {points.map(([x, y]) => (
-    <circle cx={x} cy={y} r="3" fill={color} />
-  ))}
-  <!-- Labels -->
-  {showLabels && categories.map((cat, i) => {
-    const [x, y] = polarToCartesian(i * angleStep, radius + 18);
-    return (
-      <text x={x} y={y} text-anchor="middle" dominant-baseline="central"
-            class="text-[10px] fill-[var(--color-text-secondary)] font-mono uppercase">
-        {cat}
-      </text>
-    );
-  })}
-</svg>
-```
-
-**No external library needed.** The `svg-radar-chart` package (9kb) exists but is unnecessary overhead for what amounts to ~40 lines of trigonometry. Keeping it inline means zero dependencies, full control over styling with CSS custom properties, and no virtual-dom-to-string conversion step.
-
-### Shared Radar Math: `src/lib/radar-svg.ts`
-
-Extract the polar-to-cartesian math into a shared utility because BOTH the Astro component and the OG image generator need the same calculations:
+The linter callback is the integration point. When CodeMirror's built-in linter runs (on document change, debounced):
 
 ```typescript
-// src/lib/radar-svg.ts
-export interface RadarConfig {
-  scores: Record<string, number>;
-  size: number;
-  padding: number;
-}
+// Inside the linter extension factory
+import { linter, type Diagnostic } from '@codemirror/lint';
+import { setAnalysis } from '../../stores/dockerfileAnalyzerStore';
 
-export interface RadarGeometry {
-  cx: number;
-  cy: number;
-  radius: number;
-  angleStep: number;
-  points: [number, number][];
-  polygonPoints: string;
-  axisEndpoints: [number, number][];
-  labelPositions: [number, number][];
-}
+export function dockerfileLinter() {
+  return linter((view) => {
+    const text = view.state.doc.toString();
+    if (!text.trim()) {
+      clearAnalysis();
+      return [];
+    }
 
-export function computeRadarGeometry(config: RadarConfig): RadarGeometry {
-  // ... shared math used by RadarChart.astro and beauty-index-og.ts
-}
+    // 1. Parse
+    const dockerfile = DockerfileParser.parse(text);
 
-export function generateRadarSvgString(config: RadarConfig, color: string): string {
-  // Returns a complete SVG string (for embedding as data URI in OG images)
+    // 2. Lint (all rules)
+    const violations = runAllRules(dockerfile, text);
+
+    // 3. Score
+    const score = computeScore(violations);
+
+    // 4. Update Nanostore (triggers React re-render of results panel)
+    setAnalysis({
+      violations,
+      score: score.overall,
+      categoryScores: score.categories,
+      instructionCount: dockerfile.getInstructions().length,
+      stageCount: countStages(dockerfile),
+      baseImage: getBaseImage(dockerfile),
+    });
+
+    // 5. Return CodeMirror Diagnostics (inline markers in editor)
+    return violations.map((v): Diagnostic => ({
+      from: view.state.doc.line(v.line).from + (v.column - 1),
+      to: v.endLine
+        ? view.state.doc.line(v.endLine).from + (v.endColumn ?? v.column) - 1
+        : view.state.doc.line(v.line).to,
+      severity: v.severity === 'info' ? 'info' : v.severity,
+      message: `[${v.ruleId}] ${v.message}`,
+      source: 'dockerfile-analyzer',
+    }));
+  });
 }
 ```
 
-### Ranking Bar Chart: `src/components/beauty-index/RankingChart.astro`
+This dual-output pattern is key: one lint run produces BOTH CodeMirror diagnostics (for inline annotations) AND Nanostore updates (for the results panel). No double-parsing, no sync issues.
 
-Generate horizontal SVG bars at build time. Each bar width is proportional to the overall score. This is even simpler than the radar chart -- just `<rect>` elements with `<text>` labels. The maximum score (10.0) maps to 100% width; each language bar scales proportionally.
-
-### Theme Compatibility
-
-Both charts use `var(--color-*)` CSS custom properties, which means they automatically adapt to the site's existing light theme defined in `src/styles/global.css`. The CSS custom properties are:
-- `var(--color-border)` for grid lines and axes
-- `var(--color-text-secondary)` for labels
-- `var(--color-accent)` as default polygon fill/stroke (overridable per-language via `color` prop)
-
-If dark mode is added later, the charts will adapt with zero changes because they inherit from CSS variables.
+**Confidence:** HIGH -- this pattern is documented in the CodeMirror lint example. The `linter()` function signature `(view: EditorView) => Diagnostic[]` is stable API. Nanostore `.set()` inside the callback is synchronous and safe.
 
 ---
 
-## OG Image Strategy
+## CodeMirror Integration Details
 
-### Approach: Extend Existing Satori + Sharp Pipeline
-
-The site already generates OG images at `/open-graph/[...slug].png` using Satori + Sharp (see `src/lib/og-image.ts`). The Beauty Index OG images follow the exact same pattern with a custom layout.
-
-### New OG Image Endpoints
-
-| Route | File | What It Shows |
-|-------|------|---------------|
-| `/open-graph/beauty-index/overview.png` | `src/pages/open-graph/beauty-index/overview.png.ts` | "The Beauty Index" title card with top-5 ranking snippet |
-| `/open-graph/beauty-index/[slug].png` | `src/pages/open-graph/beauty-index/[slug].png.ts` | Language name, rank badge, overall score, mini radar chart |
-| `/open-graph/beauty-index/code.png` | `src/pages/open-graph/beauty-index/code.png.ts` | "Code Comparison" title card |
-
-### Radar Chart in OG Images via Satori
-
-Satori supports SVG elements embedded as data URIs inside `<img>` tags. This was confirmed via [vercel/satori#86](https://github.com/vercel/satori/issues/86), resolved in PR #98. The implementation serializes SVG to an XML string encoded as a data URI and embeds it within an `<img>` element. The approach:
-
-1. Generate the radar chart SVG string using `generateRadarSvgString()` from `src/lib/radar-svg.ts`
-2. Encode as a data URI: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
-3. Embed in the Satori layout tree as an `<img>` element with `width` and `height`
+### Hook: `useCodeMirror.ts`
 
 ```typescript
-// src/lib/beauty-index-og.ts
-import { generateRadarSvgString } from './radar-svg';
-import { loadOgFonts, renderOgPng } from './og-shared';
+// src/lib/tools/useCodeMirror.ts
+import { useRef, useEffect } from 'react';
+import { EditorView, basicSetup } from 'codemirror';
+import { EditorState } from '@codemirror/state';
+import { StreamLanguage } from '@codemirror/language';
+import { dockerFile } from '@codemirror/legacy-modes/mode/dockerfile';
+import { lintGutter } from '@codemirror/lint';
+import { dockerfileLinter } from './dockerfile-linter';
+import { analyzerTheme } from './editor-theme';
 
-export async function generateBeautyIndexOgImage(
-  name: string,
-  rank: number,
-  overallScore: number,
-  scores: Record<string, number>,
-  color: string,
-): Promise<Buffer> {
-  await loadOgFonts();
+export function useCodeMirror(initialDoc: string = '') {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
 
-  const radarSvg = generateRadarSvgString({ scores, size: 200, padding: 10 }, color);
-  const radarUri = `data:image/svg+xml;base64,${Buffer.from(radarSvg).toString('base64')}`;
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  const layout = {
-    type: 'div',
-    props: {
-      style: { width: '1200px', height: '630px', display: 'flex', /* ... */ },
-      children: [
-        // Left column: "The Beauty Index", language name, rank, score
-        // Right column: <img src={radarUri} width={200} height={200} />
+    const state = EditorState.create({
+      doc: initialDoc,
+      extensions: [
+        basicSetup,
+        StreamLanguage.define(dockerFile),
+        dockerfileLinter(),
+        lintGutter(),
+        analyzerTheme,
+        EditorView.lineWrapping,
       ],
-    },
+    });
+
+    const view = new EditorView({
+      state,
+      parent: containerRef.current,
+    });
+
+    viewRef.current = view;
+
+    return () => {
+      view.destroy();
+      viewRef.current = null;
+    };
+  }, []);  // Mount once, CodeMirror manages its own state
+
+  return { containerRef, viewRef };
+}
+```
+
+### Dockerfile Syntax Highlighting
+
+**Use `@codemirror/legacy-modes/mode/dockerfile`** via `StreamLanguage.define()`.
+
+The `@codemirror/legacy-modes` package (v6.5.2) includes a ported Dockerfile mode at `mode/dockerfile.js`. This provides keyword highlighting for `FROM`, `RUN`, `COPY`, `ADD`, `ENV`, `ARG`, `EXPOSE`, `CMD`, `ENTRYPOINT`, `WORKDIR`, `USER`, `VOLUME`, `LABEL`, `STANZA`, `HEALTHCHECK`, `SHELL`, and `ONBUILD`. It also highlights comments (`#`), strings, and heredocs.
+
+**Confidence:** HIGH -- verified via `npm pack --dry-run @codemirror/legacy-modes` which confirms the file `mode/dockerfile.cjs` (8.2kb) and `mode/dockerfile.js` (3.8kb) exist in the package.
+
+### Editor Theme
+
+Create a custom theme that matches the site's CSS custom properties:
+
+```typescript
+// src/lib/tools/editor-theme.ts
+import { EditorView } from '@codemirror/view';
+
+export const analyzerTheme = EditorView.theme({
+  '&': {
+    fontSize: '14px',
+    fontFamily: '"Fira Code", monospace',
+    border: '1px solid var(--color-border)',
+    borderRadius: '0.5rem',
+    backgroundColor: 'var(--color-surface-alt)',
+  },
+  '.cm-content': {
+    caretColor: 'var(--color-accent)',
+    padding: '0.75rem 0',
+  },
+  '.cm-gutters': {
+    backgroundColor: 'var(--color-surface)',
+    borderRight: '1px solid var(--color-border)',
+    color: 'var(--color-text-secondary)',
+  },
+  '.cm-activeLine': {
+    backgroundColor: 'var(--color-accent)08',
+  },
+  '.cm-selectionBackground': {
+    backgroundColor: 'var(--color-accent)20 !important',
+  },
+  '&.cm-focused .cm-cursor': {
+    borderLeftColor: 'var(--color-accent)',
+  },
+  // Lint marker styles
+  '.cm-lintRange-error': {
+    backgroundImage: 'none',
+    textDecoration: 'wavy underline var(--color-error, #e53e3e)',
+  },
+  '.cm-lintRange-warning': {
+    backgroundImage: 'none',
+    textDecoration: 'wavy underline var(--color-warning, #dd6b20)',
+  },
+  '.cm-lintRange-info': {
+    backgroundImage: 'none',
+    textDecoration: 'wavy underline var(--color-info, #3182ce)',
+  },
+});
+```
+
+**Important:** The site already loads Fira Code from Google Fonts (confirmed in `Layout.astro` line 116). The editor inherits the font without additional loading.
+
+---
+
+## Rule Engine Architecture
+
+### Design: Modular Rules with a Registry Pattern
+
+Each rule is a standalone function in its own file. A registry indexes all rules and the engine iterates them. This keeps rules independently testable and easy to add/remove.
+
+### File Structure
+
+```
+src/lib/tools/dockerfile-analyzer/
+  |
+  +-- index.ts                    # Re-exports for clean imports
+  +-- parser.ts                   # Wraps dockerfile-ast, normalizes output
+  +-- scorer.ts                   # Computes overall + category scores
+  +-- engine.ts                   # RuleEngine: runs all rules, collects results
+  +-- types.ts                    # Shared types (LintViolation, Rule, RuleCategory, etc.)
+  +-- editor-theme.ts             # CodeMirror theme
+  +-- dockerfile-linter.ts        # CodeMirror linter() extension factory
+  |
+  +-- rules/
+       +-- index.ts               # Rule registry (imports + exports all rules)
+       +-- _template.ts           # Template for creating new rules
+       |
+       +-- security/
+       |    +-- no-root-user.ts
+       |    +-- no-add-url.ts
+       |    +-- pin-package-versions.ts
+       |    +-- no-secrets-in-env.ts
+       |    +-- use-copy-not-add.ts
+       |    +-- ...
+       |
+       +-- efficiency/
+       |    +-- minimize-layers.ts
+       |    +-- use-multi-stage.ts
+       |    +-- order-commands-for-cache.ts
+       |    +-- combine-run-commands.ts
+       |    +-- no-apt-cache.ts
+       |    +-- ...
+       |
+       +-- maintainability/
+       |    +-- require-labels.ts
+       |    +-- use-specific-base-tag.ts
+       |    +-- use-workdir.ts
+       |    +-- no-latest-tag.ts
+       |    +-- ...
+       |
+       +-- correctness/
+       |    +-- valid-instruction.ts
+       |    +-- expose-port-range.ts
+       |    +-- cmd-exec-form.ts
+       |    +-- entrypoint-exec-form.ts
+       |    +-- ...
+       |
+       +-- style/
+            +-- uppercase-instructions.ts
+            +-- consistent-line-endings.ts
+            +-- sort-packages.ts
+            +-- ...
+```
+
+### Rule Interface
+
+```typescript
+// src/lib/tools/dockerfile-analyzer/types.ts
+import type { Dockerfile } from 'dockerfile-ast';
+
+export type RuleSeverity = 'error' | 'warning' | 'info';
+export type RuleCategory = 'security' | 'efficiency' | 'maintainability' | 'correctness' | 'style';
+
+export interface RuleMeta {
+  id: string;            // e.g., "SEC001"
+  name: string;          // e.g., "no-root-user"
+  title: string;         // e.g., "Avoid running as root"
+  description: string;   // Full explanation
+  severity: RuleSeverity;
+  category: RuleCategory;
+  docUrl?: string;       // Link to external docs/best practices
+  fix?: string;          // Suggested fix description
+}
+
+export interface LintResult {
+  rule: RuleMeta;
+  line: number;
+  column: number;
+  endLine?: number;
+  endColumn?: number;
+  message: string;       // Instance-specific message
+  fix?: string;          // Instance-specific suggested fix
+}
+
+export interface Rule {
+  meta: RuleMeta;
+  check(dockerfile: Dockerfile, rawText: string): LintResult[];
+}
+```
+
+### Rule Registry
+
+```typescript
+// src/lib/tools/dockerfile-analyzer/rules/index.ts
+import type { Rule } from '../types';
+
+// Security rules
+import { noRootUser } from './security/no-root-user';
+import { noAddUrl } from './security/no-add-url';
+// ... 40 imports total
+
+export const allRules: Rule[] = [
+  noRootUser,
+  noAddUrl,
+  // ... all 40 rules
+];
+
+export const rulesByCategory = {
+  security: allRules.filter(r => r.meta.category === 'security'),
+  efficiency: allRules.filter(r => r.meta.category === 'efficiency'),
+  maintainability: allRules.filter(r => r.meta.category === 'maintainability'),
+  correctness: allRules.filter(r => r.meta.category === 'correctness'),
+  style: allRules.filter(r => r.meta.category === 'style'),
+};
+```
+
+### Example Rule Implementation
+
+```typescript
+// src/lib/tools/dockerfile-analyzer/rules/security/no-root-user.ts
+import type { Rule, LintResult } from '../../types';
+import type { Dockerfile } from 'dockerfile-ast';
+
+export const noRootUser: Rule = {
+  meta: {
+    id: 'SEC001',
+    name: 'no-root-user',
+    title: 'Avoid running as root',
+    description: 'Containers should not run as root. Use the USER instruction to switch to a non-root user.',
+    severity: 'warning',
+    category: 'security',
+    fix: 'Add USER nonroot before CMD/ENTRYPOINT',
+  },
+
+  check(dockerfile: Dockerfile, _rawText: string): LintResult[] {
+    const instructions = dockerfile.getInstructions();
+    const hasUser = instructions.some(
+      (inst) => inst.getKeyword() === 'USER'
+    );
+
+    if (!hasUser && instructions.length > 0) {
+      // Flag the last instruction (where USER should appear before)
+      const lastInst = instructions[instructions.length - 1];
+      const range = lastInst.getRange();
+      return [{
+        rule: this.meta,
+        line: range.end.line + 1,
+        column: 1,
+        message: 'No USER instruction found. Container will run as root.',
+        fix: 'Add "USER nonroot" before the final CMD or ENTRYPOINT.',
+      }];
+    }
+
+    return [];
+  },
+};
+```
+
+### Why Modular Files (Not a Single Rules File)
+
+1. **Testability:** Each rule file can be unit-tested in isolation with a mock Dockerfile AST
+2. **Discoverability:** New contributors find rules by browsing `rules/security/` etc.
+3. **Tree-shaking:** If rules are ever made optional (user-configurable), bundler can eliminate unused rules
+4. **Separation of concerns:** Rule metadata, check logic, and fix suggestions are co-located per rule
+5. **Scalability:** Adding rule #41 is "create a file, add to registry" -- not "edit a 2000-line file"
+
+The registry pattern (`rules/index.ts` imports all, exports `allRules[]`) means the engine code never changes when rules are added.
+
+---
+
+## Parser Layer
+
+### `dockerfile-ast` Browser Compatibility
+
+`dockerfile-ast` v0.7.1 depends on:
+- `vscode-languageserver-textdocument` v1.0.12 (zero dependencies, pure JS text document model)
+- `vscode-languageserver-types` v3.17.5 (zero dependencies, pure TypeScript type definitions)
+
+Neither dependency uses Node.js APIs (no `fs`, `path`, `child_process`, etc.). The library is pure TypeScript that compiles to standard ES modules. It will bundle for the browser via Vite (Astro's bundler) without polyfills.
+
+**Confidence:** MEDIUM -- both dependencies have zero npm dependencies and appear to be pure JS/TS from their package metadata. However, I was unable to directly verify the source code for Node API usage. This should be validated during the first build by confirming `astro build` succeeds without Node polyfill errors.
+
+### Parser Wrapper
+
+```typescript
+// src/lib/tools/dockerfile-analyzer/parser.ts
+import { DockerfileParser } from 'dockerfile-ast';
+import type { Dockerfile } from 'dockerfile-ast';
+
+export interface ParseResult {
+  dockerfile: Dockerfile;
+  instructionCount: number;
+  stageCount: number;
+  baseImage: string;
+}
+
+export function parseDockerfile(text: string): ParseResult {
+  const dockerfile = DockerfileParser.parse(text);
+  const instructions = dockerfile.getInstructions();
+
+  const fromInstructions = instructions.filter(
+    (i) => i.getKeyword() === 'FROM'
+  );
+
+  return {
+    dockerfile,
+    instructionCount: instructions.length,
+    stageCount: Math.max(1, fromInstructions.length),
+    baseImage: fromInstructions[0]
+      ? fromInstructions[0].getArguments().map(a => a.getValue()).join(' ')
+      : 'unknown',
+  };
+}
+```
+
+---
+
+## Scoring Engine
+
+### Scoring Model
+
+The scorer computes a 0-100 overall score from the lint violations. Each rule category has a weight, and violations deduct points based on severity.
+
+```typescript
+// src/lib/tools/dockerfile-analyzer/scorer.ts
+import type { LintResult, RuleCategory } from './types';
+
+const CATEGORY_WEIGHTS: Record<RuleCategory, number> = {
+  security: 30,
+  efficiency: 25,
+  maintainability: 20,
+  correctness: 15,
+  style: 10,
+};
+
+const SEVERITY_DEDUCTIONS = {
+  error: 10,
+  warning: 5,
+  info: 2,
+};
+
+export interface ScoreResult {
+  overall: number;
+  categories: Record<RuleCategory, number>;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+}
+
+export function computeScore(violations: LintResult[]): ScoreResult {
+  const categories: Record<RuleCategory, number> = {
+    security: 100,
+    efficiency: 100,
+    maintainability: 100,
+    correctness: 100,
+    style: 100,
   };
 
-  return renderOgPng(layout);
+  for (const v of violations) {
+    const deduction = SEVERITY_DEDUCTIONS[v.rule.severity];
+    categories[v.rule.category] = Math.max(
+      0,
+      categories[v.rule.category] - deduction
+    );
+  }
+
+  // Weighted average
+  const overall = Object.entries(categories).reduce(
+    (sum, [cat, score]) =>
+      sum + score * (CATEGORY_WEIGHTS[cat as RuleCategory] / 100),
+    0
+  );
+
+  const grade =
+    overall >= 90 ? 'A' :
+    overall >= 80 ? 'B' :
+    overall >= 60 ? 'C' :
+    overall >= 40 ? 'D' : 'F';
+
+  return {
+    overall: Math.round(overall),
+    categories,
+    grade,
+  };
 }
 ```
 
-**Important Satori limitation:** Satori does not support native inline SVG elements in its JSX tree. You MUST use the `<img>` + data URI approach for embedding SVG content. This is a documented design decision, not a bug.
+---
 
-**Confidence:** HIGH -- the existing `src/lib/og-image.ts` already uses Satori + Sharp with the exact same rendering pattern. The SVG data URI embedding approach is documented and tested.
+## Results Panel <-> Editor Communication
 
-### Shared OG Utility Refactor
+### Pattern: Nanostore as Message Bus
 
-Extract common branding elements from the existing `src/lib/og-image.ts` to avoid duplication:
+The linter callback writes to `analysisStore`. The React `ResultsPanel` subscribes via `useStore()`. When a user clicks a violation in the results panel, the panel dispatches a cursor movement to the CodeMirror `EditorView` via the shared ref.
+
+```
+Linter callback ---setAnalysis()---> analysisStore ---useStore()---> ResultsPanel
+                                                                         |
+                                                                    (click violation)
+                                                                         |
+ResultsPanel ---viewRef.current.dispatch()---> CodeMirror EditorView (scroll to line)
+```
+
+### Click-to-Navigate Implementation
 
 ```typescript
-// src/lib/og-shared.ts -- extracted from og-image.ts
-export async function loadOgFonts(): Promise<{ inter: Buffer; spaceGrotesk: Buffer }> { ... }
-export function brandingRow(): object { ... }      // "PG" badge + "patrykgolabek.dev"
-export function accentBar(): object { ... }        // Gradient bar at top
-export async function renderOgPng(layout: object): Promise<Buffer> { ... }  // Satori + Sharp
+// Inside ResultsPanel.tsx
+function handleViolationClick(violation: LintViolation) {
+  const view = viewRef.current;
+  if (!view) return;
+
+  const line = view.state.doc.line(violation.line);
+  view.dispatch({
+    selection: { anchor: line.from + violation.column - 1 },
+    effects: EditorView.scrollIntoView(line.from, { y: 'center' }),
+  });
+  view.focus();
+}
 ```
 
-This is an optional refactor. If time-constrained, the Beauty Index OG file can duplicate the branding elements from `og-image.ts` (they are ~30 lines). The refactor is cleaner but not blocking.
-
----
-
-## Code Comparison: Interactive Tab Component
-
-### Decision: React Island with `client:visible`
-
-The code comparison page needs tab switching to select a feature (e.g., "Error Handling") and see code samples from all 25 languages. This is the ONE place in the Beauty Index that requires client-side JavaScript.
-
-**Use a React component** because:
-1. React is already installed and configured (`@astrojs/react` in `astro.config.mjs`, React 19 in `package.json`)
-2. The project already ships React for the Three.js 3D head scene on the about page
-3. Managing two-dimensional tab state (feature selection + language filtering) is more ergonomic in React than vanilla JS
-4. `client:visible` means the component hydrates only when scrolled into view
-
-### Implementation Approach: Pre-rendered Code + React Tab Controller
-
-The code blocks themselves are **pre-rendered at build time** using `astro-expressive-code`. The React island only handles tab state and visibility toggling. This keeps the JavaScript payload minimal (~3-5kb) because the heavy lifting (syntax highlighting) happens at build time.
-
-```astro
-<!-- src/pages/beauty-index/code/index.astro -->
----
-import Layout from '../../../layouts/Layout.astro';
-import { features } from '../../../data/beauty-index/code-samples';
-import { Code } from 'astro-expressive-code/components';
-import CodeTabs from '../../../components/beauty-index/CodeTabs';
----
-
-<Layout title="Code Comparison — The Beauty Index | Patryk Golabek">
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Code Comparison</h1>
-
-    {/* All code blocks pre-rendered into hidden panels */}
-    <div id="code-panels">
-      {features.map((feature) => (
-        <div data-feature={feature.id} class="hidden">
-          {feature.samples.map((sample) => (
-            <div data-language={sample.language} class="hidden">
-              <Code code={sample.code} lang={sample.language} />
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-
-    {/* React island only manages which panels are visible */}
-    <CodeTabs
-      client:visible
-      features={features.map(f => ({ id: f.id, name: f.name, description: f.description }))}
-      languages={features[0]?.samples.map(s => ({ slug: s.language, label: s.label })) ?? []}
-    />
-  </section>
-</Layout>
-```
-
-The React `CodeTabs` component is lightweight -- it renders feature tabs and language pills, then toggles `hidden` classes on the pre-rendered DOM elements via `document.querySelector`. It ships no code rendering logic and no syntax highlighting runtime.
-
-**Fallback if the hybrid approach proves tricky:** Use vanilla JavaScript with `data-*` attributes for tab switching. The pre-rendered code blocks pattern works the same way. This is a valid alternative if passing feature/language metadata between Astro's static render and React's hydration creates friction.
-
-**Confidence:** MEDIUM -- the hybrid pre-render + React tab controller pattern is architecturally sound, but the exact mechanics of a React island manipulating sibling DOM elements (not its own children) needs validation during implementation. The vanilla JS fallback is trivial to implement if needed.
-
----
-
-## Navigation Integration
-
-### Modified File: `src/components/Header.astro`
-
-Add "Beauty Index" to the `navLinks` array. This is a one-line change:
-
-```typescript
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/blog/', label: 'Blog' },
-  { href: '/projects/', label: 'Projects' },
-  { href: '/beauty-index/', label: 'Beauty Index' },  // NEW
-  { href: '/about/', label: 'About' },
-  { href: '/contact/', label: 'Contact' },
-];
-```
-
-The existing `isActive` logic on line 43 of `Header.astro` already handles nested routes correctly:
-
-```typescript
-const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
-```
-
-This means `/beauty-index/python/` will correctly highlight the "Beauty Index" nav link. No other Header changes needed. The mobile menu also iterates `navLinks`, so both desktop and mobile navigation are automatically updated.
-
----
-
-## SEO Integration
-
-### Existing SEO Components: No Changes Needed
-
-The existing `SEOHead.astro` component (at `src/components/SEOHead.astro`) already supports all the props needed:
-- Custom `title` and `description` per page
-- Custom `ogImage` per page
-- `ogType` ("website" for overview, can use "website" for language pages too)
-- Canonical URL auto-generated from `Astro.url.pathname`
-- Twitter Card with `summary_large_image`
-
-The existing `Layout.astro` passes all these through to `SEOHead.astro`. Each Beauty Index page simply provides the correct props. No component modifications required.
-
-### New Structured Data: `BeautyIndexJsonLd.astro`
-
-Add Schema.org `ItemList` structured data for the overview page (ranking of languages) and article-like structured data for individual language pages. Follow the established pattern of `ProjectsJsonLd.astro` and `BlogPostingJsonLd.astro` already in the codebase.
-
-### Breadcrumb Structured Data
-
-Use the existing `BreadcrumbJsonLd.astro` component on all Beauty Index pages:
-- Overview: Home > Beauty Index
-- Language: Home > Beauty Index > [Language Name]
-- Code: Home > Beauty Index > Code Comparison
-
-### Sitemap
-
-The existing `@astrojs/sitemap` integration in `astro.config.mjs` automatically discovers all static pages generated by `getStaticPaths()`. No configuration changes needed -- the 25+ new Beauty Index pages will appear in the sitemap at the next build.
+This is the ONLY place React directly touches the CodeMirror instance. All other communication flows through the Nanostore.
 
 ---
 
@@ -591,166 +703,222 @@ The existing `@astrojs/sitemap` integration in `astro.config.mjs` automatically 
 
 | File | Type | Purpose |
 |------|------|---------|
-| `src/data/beauty-index/languages.json` | Data | 25 languages with scores, metadata, characters |
-| `src/data/beauty-index/code-samples.ts` | Data | Code snippets grouped by feature |
-| `src/pages/beauty-index/index.astro` | Page | Overview with rankings chart + language card grid |
-| `src/pages/beauty-index/[slug].astro` | Page | Per-language detail page |
-| `src/pages/beauty-index/code/index.astro` | Page | Feature-tabbed code comparison |
-| `src/pages/open-graph/beauty-index/overview.png.ts` | Endpoint | OG image for overview page |
-| `src/pages/open-graph/beauty-index/[slug].png.ts` | Endpoint | OG images for each language |
-| `src/pages/open-graph/beauty-index/code.png.ts` | Endpoint | OG image for code comparison page |
-| `src/components/beauty-index/RadarChart.astro` | Component | Build-time SVG radar chart |
-| `src/components/beauty-index/RankingChart.astro` | Component | Build-time SVG horizontal bar chart |
-| `src/components/beauty-index/LanguageCard.astro` | Component | Card for overview grid |
-| `src/components/beauty-index/ScoreBadge.astro` | Component | Score display pill with color gradient |
-| `src/components/beauty-index/CharacterSketch.astro` | Component | Character illustration wrapper |
-| `src/components/beauty-index/CodeTabs.tsx` | Component | React island for tab switching |
-| `src/components/beauty-index/BeautyIndexJsonLd.astro` | Component | Schema.org structured data |
-| `src/lib/radar-svg.ts` | Utility | Shared radar chart geometry + SVG string generation |
-| `src/lib/beauty-index-og.ts` | Utility | OG image generation specific to Beauty Index |
-| `public/images/beauty-index/characters/*.png` | Assets | 25 character illustrations |
+| `src/pages/tools/dockerfile-analyzer.astro` | Page | Astro shell with Layout, SEO, breadcrumbs |
+| `src/components/tools/DockerfileAnalyzer.tsx` | Component | Root React island |
+| `src/components/tools/EditorPanel.tsx` | Component | CodeMirror mount + toolbar |
+| `src/components/tools/ResultsPanel.tsx` | Component | Score gauge + violations list |
+| `src/components/tools/ScoreGauge.tsx` | Component | SVG circular score gauge |
+| `src/components/tools/CategoryScores.tsx` | Component | Per-category score bars |
+| `src/components/tools/ViolationList.tsx` | Component | Violations grouped by severity |
+| `src/stores/dockerfileAnalyzerStore.ts` | Store | Nanostore for analysis results |
+| `src/lib/tools/dockerfile-analyzer/index.ts` | Lib | Re-exports |
+| `src/lib/tools/dockerfile-analyzer/types.ts` | Lib | Shared types |
+| `src/lib/tools/dockerfile-analyzer/parser.ts` | Lib | dockerfile-ast wrapper |
+| `src/lib/tools/dockerfile-analyzer/engine.ts` | Lib | Rule engine (runs all rules) |
+| `src/lib/tools/dockerfile-analyzer/scorer.ts` | Lib | Score computation |
+| `src/lib/tools/dockerfile-analyzer/dockerfile-linter.ts` | Lib | CodeMirror linter extension |
+| `src/lib/tools/dockerfile-analyzer/editor-theme.ts` | Lib | CodeMirror theme |
+| `src/lib/tools/dockerfile-analyzer/rules/index.ts` | Lib | Rule registry |
+| `src/lib/tools/dockerfile-analyzer/rules/_template.ts` | Lib | Rule template |
+| `src/lib/tools/dockerfile-analyzer/rules/security/*.ts` | Lib | ~8 security rules |
+| `src/lib/tools/dockerfile-analyzer/rules/efficiency/*.ts` | Lib | ~10 efficiency rules |
+| `src/lib/tools/dockerfile-analyzer/rules/maintainability/*.ts` | Lib | ~8 maintainability rules |
+| `src/lib/tools/dockerfile-analyzer/rules/correctness/*.ts` | Lib | ~7 correctness rules |
+| `src/lib/tools/dockerfile-analyzer/rules/style/*.ts` | Lib | ~7 style rules |
+| `src/lib/tools/useCodeMirror.ts` | Hook | React hook for CodeMirror lifecycle |
 
 ### Modified Files (edit)
 
-| File | Change | Scope of Change |
-|------|--------|----------------|
-| `src/content.config.ts` | Add `beautyIndex` collection with `file()` loader + Zod schema | ~15 lines added, existing blog collection untouched |
-| `src/components/Header.astro` | Add `{ href: '/beauty-index/', label: 'Beauty Index' }` to `navLinks` | 1 line added |
-
-### Optional Refactor (not blocking)
-
-| File | Change | Reason |
-|------|--------|--------|
-| `src/lib/og-image.ts` | Extract branding helpers to `src/lib/og-shared.ts` | Avoids duplicating accent bar, PG monogram, font loading in beauty-index-og.ts |
+| File | Change | Scope |
+|------|--------|-------|
+| `src/components/Header.astro` | Add `{ href: '/tools/', label: 'Tools' }` or a dropdown | 1 line (or small refactor if dropdown) |
+| `package.json` | Add CodeMirror packages + dockerfile-ast | dependencies section |
 
 ### Files NOT Modified
 
 | File | Reason |
 |------|--------|
-| `astro.config.mjs` | No new integrations needed. React already configured. Sitemap auto-discovers. Expressive Code already configured. |
-| `src/layouts/Layout.astro` | Already supports all needed props (title, description, ogImage, tags, canonicalURL) |
-| `src/components/SEOHead.astro` | Already generic enough for Beauty Index pages |
-| `tailwind.config.mjs` | No new Tailwind plugins or theme extensions needed. Existing CSS custom properties are sufficient. |
-| `src/styles/global.css` | Component-scoped styles preferred over global additions |
-| `package.json` | No new npm dependencies required -- all tech is already installed |
+| `astro.config.mjs` | React already configured. No new integrations needed. |
+| `src/layouts/Layout.astro` | Already supports all needed SEO props. CSP already allows `'unsafe-inline'` for scripts/styles. |
+| `tailwind.config.mjs` | No new theme extensions needed. |
+| `src/styles/global.css` | CodeMirror theme is scoped to the editor. |
+
+### New npm Dependencies
+
+```bash
+npm install codemirror @codemirror/view @codemirror/state @codemirror/lint \
+  @codemirror/language @codemirror/legacy-modes dockerfile-ast
+```
+
+| Package | Version | Size (gzipped) | Purpose |
+|---------|---------|----------------|---------|
+| `codemirror` | 6.0.2 | ~2kb (re-exports) | Meta-package, exports basicSetup |
+| `@codemirror/view` | 6.39.15 | ~45kb | EditorView, DOM rendering |
+| `@codemirror/state` | 6.5.4 | ~15kb | EditorState, transactions |
+| `@codemirror/lint` | 6.9.4 | ~5kb | linter(), Diagnostic, lintGutter |
+| `@codemirror/language` | 6.12.1 | ~8kb | StreamLanguage, indentation |
+| `@codemirror/legacy-modes` | 6.5.2 | ~3.8kb (dockerfile only) | Dockerfile syntax mode |
+| `dockerfile-ast` | 0.7.1 | ~15kb | Dockerfile parser |
+
+**Note:** `@codemirror/view` and `@codemirror/state` are transitive dependencies of `codemirror`, but it is best practice to install them explicitly for direct imports.
+
+---
+
+## Patterns to Follow
+
+### Pattern 1: Astro Shell + React Island (Established)
+
+**What:** Static Astro page wraps a `client:load` React component.
+**When:** The page's primary content is interactive.
+**Existing precedent:** `HeadSceneWrapper.astro` wraps `HeadScene.tsx` with `client:visible`.
+
+### Pattern 2: Nanostore for Cross-Concern State (Established)
+
+**What:** Nanostore atom defined in `src/stores/`, imported by both lib code and React components.
+**When:** State needs to flow between non-React code (linter callback) and React UI (results panel).
+**Existing precedent:** `languageFilterStore.ts` bridges `LanguageFilter.tsx` with DOM manipulation.
+
+### Pattern 3: CodeMirror via Ref (Standard CM6 Pattern)
+
+**What:** `useRef<HTMLDivElement>` for mount target, `useRef<EditorView>` for instance. `useEffect` creates and destroys the view.
+**When:** Wrapping an imperative DOM library in React.
+**Why not `@uiw/react-codemirror`:** Third-party wrapper adds a dependency, limits extension control, and abstracts away the EditorView which we need direct access to for `setDiagnostics` and programmatic cursor control. Direct CodeMirror usage via refs is the recommended pattern for complex integrations.
+
+### Pattern 4: `astro:page-load` Lifecycle (Established)
+
+**What:** Event-based initialization for components using the Astro ClientRouter.
+**When:** Any client-side code that needs to re-initialize after navigation.
+**Note:** This does NOT apply to React islands -- Astro manages React component lifecycle automatically. The `astro:page-load` pattern is only for vanilla JS in `<script>` tags. The React island re-mounts via Astro's hydration system when navigating to/from the page.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Client-Side Chart Rendering
-**What:** Using Chart.js, D3, Recharts, or any JS charting library to render radar/bar charts in the browser.
-**Why bad:** Adds 50-200kb of JavaScript for completely static data. Causes layout shift as charts render after hydration. Violates the site's zero-JS-by-default philosophy. The data never changes at runtime.
-**Instead:** Generate SVG at build time in Astro component frontmatter. Zero JS, instant render, accessible.
+### Anti-Pattern 1: Controlled Editor (React Owns Document State)
 
-### Anti-Pattern 2: Separate Content Collections per Data Type
-**What:** Creating separate collections for scores, characters, code samples, and metadata.
-**Why bad:** Creates N+1 query patterns. Forces cross-collection joins in page templates. Complicates the build.
-**Instead:** One flat JSON file with all language data. Code samples separate only because they need a different access pattern (grouped by feature, not by language).
+**What:** Using React state to hold the editor content and syncing it bidirectionally with CodeMirror.
+**Why bad:** CodeMirror's architecture is specifically designed for uncontrolled use. Bidirectional sync causes cursor jumping, undo stack corruption, and performance degradation. Every keystroke would trigger: CM change -> React setState -> React re-render -> CM update -> CM change (loop).
+**Instead:** Let CodeMirror own document state. React only reads analysis results from the Nanostore. The only React -> CM communication is programmatic cursor movement on violation click.
 
-### Anti-Pattern 3: Using MDX Files for Language Pages
-**What:** Writing each of the 25 languages as an `.mdx` file with frontmatter scores.
-**Why bad:** 25 nearly-identical files with copy-pasted templates. Hard to maintain rankings (changing rank #5 requires editing multiple files). No single-source-of-truth for the ranking order. MDX parsing overhead for what is fundamentally structured data, not prose.
-**Instead:** One JSON file with all 25 languages. One dynamic route `[slug].astro` renders them all from the same template.
+### Anti-Pattern 2: Running Rules in a Web Worker
 
-### Anti-Pattern 4: Full Page Hydration for Code Tabs
-**What:** Using `client:load` on a large component that re-renders all code blocks client-side.
-**Why bad:** Ships all 25 * N code samples as JavaScript strings. Slow initial load. Duplicates what Expressive Code already does at build time.
-**Instead:** Pre-render all code blocks at build time with Expressive Code. React island only toggles visibility via DOM class manipulation.
+**What:** Moving the parse/lint/score pipeline to a Web Worker for "performance."
+**Why bad:** Premature optimization. The `dockerfile-ast` parser is fast (sub-millisecond for typical Dockerfiles). 40 rules iterating over ~10-50 instructions is trivial. Worker communication overhead (serialization + postMessage) would likely exceed the rule execution time. Workers add complexity (serialization boundaries, error handling, build config).
+**Instead:** Run everything synchronously in the linter callback. If profiling shows a problem (it won't for Dockerfiles under 500 lines), add `requestIdleCallback` or worker then.
 
-### Anti-Pattern 5: Hardcoded Radar Chart SVG Paths
-**What:** Manually computing and pasting SVG path coordinates for each language.
-**Why bad:** Unmaintainable. Any score change requires recalculating coordinates by hand. Error-prone.
-**Instead:** Compute SVG geometry programmatically from scores using `src/lib/radar-svg.ts`.
+### Anti-Pattern 3: Global CodeMirror Instance
 
-### Anti-Pattern 6: Duplicating OG Image Code
-**What:** Copy-pasting the entire `og-image.ts` and modifying it for Beauty Index.
-**Why bad:** Two copies of font loading, branding elements, Satori config, and Sharp conversion. Changes to the PG branding require updates in two places.
-**Instead:** Extract shared helpers (font loading, branding row, accent bar, render-to-PNG) into `og-shared.ts`. Both the existing blog OG and Beauty Index OG import from it.
+**What:** Storing the EditorView in a Nanostore or global variable.
+**Why bad:** EditorView holds DOM references. Storing it in a Nanostore means it persists across Astro page navigations (ClientRouter), causing memory leaks and stale DOM references.
+**Instead:** EditorView lives in a React `useRef`, created in `useEffect`, destroyed in cleanup.
+
+### Anti-Pattern 4: Separate Linter + Listener for Results
+
+**What:** Using `linter()` for CodeMirror diagnostics AND `EditorView.updateListener` for the results panel, each independently parsing the Dockerfile.
+**Why bad:** Double-parsing on every keystroke. Results panel and inline diagnostics could get out of sync if debounce timings differ.
+**Instead:** Single `linter()` callback does parse -> lint -> score. It returns `Diagnostic[]` to CodeMirror AND writes to the Nanostore in one pass.
+
+### Anti-Pattern 5: All Rules in One File
+
+**What:** A single `rules.ts` with 40 rule functions.
+**Why bad:** Untestable in isolation (must import everything to test one rule). Difficult to navigate. Merge conflicts when multiple rules are edited. No category organization.
+**Instead:** One file per rule, grouped by category in subdirectories, with a registry index.
 
 ---
 
 ## Build Order (Dependency Graph)
 
-The phases below are ordered by dependency. Items within a phase can be built in parallel.
-
 ```
-Phase 1: Data Foundation (no dependencies)
-  1.1  Create src/data/beauty-index/languages.json (start with 3-5 seed languages)
-  1.2  Add beautyIndex collection to src/content.config.ts
-  1.3  Create src/lib/radar-svg.ts (shared radar geometry math)
-       Verify: `astro check` passes, collection is queryable
+Phase 1: Foundation (no dependencies)
+  1.1  Install npm packages (codemirror, dockerfile-ast)
+  1.2  Create src/lib/tools/dockerfile-analyzer/types.ts (shared types)
+  1.3  Create src/stores/dockerfileAnalyzerStore.ts (Nanostore)
+  1.4  Create src/lib/tools/dockerfile-analyzer/parser.ts (dockerfile-ast wrapper)
+       Verify: `astro build` succeeds, dockerfile-ast bundles for browser
 
-Phase 2: Core Components (depends on 1.1, 1.3)
-  2.1  RadarChart.astro (uses radar-svg.ts for geometry)
-  2.2  ScoreBadge.astro (standalone, no dependencies)
-  2.3  RankingChart.astro (standalone SVG bar chart)
-  2.4  LanguageCard.astro (composes RadarChart + ScoreBadge)
-  2.5  CharacterSketch.astro (standalone image wrapper)
-       Verify: components render correctly in isolation
+Phase 2: Rule Engine (depends on 1.2, 1.4)
+  2.1  Create rules/_template.ts and rules/index.ts (empty registry)
+  2.2  Create engine.ts (iterates rules, collects results)
+  2.3  Create scorer.ts (computes scores from results)
+  2.4  Implement first 5 rules (1 per category) as proof of concept
+       Verify: unit-testable -- import rules, pass mock Dockerfile, check results
 
-Phase 3: Pages (depends on Phase 2)
-  3.1  /beauty-index/[slug].astro (uses RadarChart, ScoreBadge, CharacterSketch)
-  3.2  /beauty-index/index.astro (uses RankingChart, LanguageCard, links to [slug])
-       Verify: pages build, routes resolve, layout/nav work
+Phase 3: CodeMirror Integration (depends on Phase 1)
+  3.1  Create editor-theme.ts (site-matching theme)
+  3.2  Create dockerfile-linter.ts (linter extension factory)
+  3.3  Create src/lib/tools/useCodeMirror.ts (React hook)
+       Verify: editor renders with syntax highlighting and lint markers
 
-Phase 4: Code Comparison (can be built in parallel with Phase 3)
-  4.1  Create src/data/beauty-index/code-samples.ts
-  4.2  CodeTabs.tsx React component
-  4.3  /beauty-index/code/index.astro
-       Verify: tab switching works, code blocks render with syntax highlighting
+Phase 4: React Components (depends on Phases 2, 3)
+  4.1  EditorPanel.tsx (mounts CodeMirror, sample button, clear button)
+  4.2  ScoreGauge.tsx (SVG gauge)
+  4.3  CategoryScores.tsx (bar charts)
+  4.4  ViolationList.tsx (violation cards with click-to-navigate)
+  4.5  ResultsPanel.tsx (composes ScoreGauge, CategoryScores, ViolationList)
+  4.6  DockerfileAnalyzer.tsx (root island, composes EditorPanel + ResultsPanel)
+       Verify: paste Dockerfile -> see inline markers + score + violations
 
-Phase 5: OG Images (depends on 1.3, can parallel with Phases 3-4)
-  5.1  src/lib/beauty-index-og.ts (or src/lib/og-shared.ts refactor first)
-  5.2  OG image endpoints (overview.png.ts, [slug].png.ts, code.png.ts)
-       Verify: OG images generate at build time, radar chart visible in PNGs
+Phase 5: Page Integration (depends on Phase 4)
+  5.1  Create src/pages/tools/dockerfile-analyzer.astro (page shell)
+  5.2  Add navigation link in Header.astro
+  5.3  Add breadcrumb structured data
+       Verify: page loads at /tools/dockerfile-analyzer/, full flow works
 
-Phase 6: Integration Polish (depends on all above)
-  6.1  Add "Beauty Index" to Header.astro navLinks
-  6.2  BeautyIndexJsonLd.astro structured data
-  6.3  BreadcrumbJsonLd on all Beauty Index pages
-  6.4  Complete all 25 languages in languages.json
-  6.5  Complete all character illustrations in public/images/
-  6.6  Optional: Add Beauty Index teaser card to homepage
-       Verify: full build passes, sitemap includes all pages, OG images valid
+Phase 6: Complete Rules (depends on Phase 2 proof-of-concept)
+  6.1  Implement remaining ~35 rules across all categories
+  6.2  Tune scoring weights based on rule coverage
+  6.3  Add sample Dockerfiles (good, mediocre, bad) for demo
+       Verify: all rules fire correctly, scoring feels right
+
+Phase 7: Polish (depends on all above)
+  7.1  Mobile responsive layout (stacked panels on small screens)
+  7.2  URL state (encode Dockerfile in URL hash for sharing?)
+  7.3  Sample Dockerfile presets (dropdown of common scenarios)
+  7.4  Empty state (nice illustration/prompt when no Dockerfile entered)
+  7.5  Performance verification on large Dockerfiles (200+ lines)
+       Verify: full build passes, Lighthouse audit, mobile testing
 ```
 
 **Phase ordering rationale:**
-- **Data model first** because every other component reads from it. If the schema is wrong, everything downstream breaks.
-- **Shared radar math** in Phase 1 because both Astro components (Phase 2) and OG images (Phase 5) depend on it.
-- **Components before pages** because pages compose components. Building pages without components means dummy markup that gets replaced.
-- **Code comparison is independent** -- it uses its own data source (`code-samples.ts`) and its own component tree. Can be developed in parallel with the main pages.
-- **OG images can also parallel** -- they only depend on the radar math utility, not on the page components.
-- **Navigation last** because it is a one-line edit with zero risk. Adding it early creates dead links during development.
+- **Types and parser first** because every rule and the linter depend on them.
+- **Rule engine before components** because the linter callback (Phase 3.2) needs to call `runAllRules` (Phase 2.2). Building the engine with 5 sample rules proves the architecture before investing in 40 rules.
+- **CodeMirror integration in parallel with rule engine** -- the hook and theme don't depend on rules, only on the linter extension which can be stubbed initially.
+- **React components after both engine and CM** because they compose both.
+- **Complete rules AFTER the proof-of-concept works** -- the most time-consuming phase (writing 40 rules) should not block architecture validation.
 
 ---
 
 ## Scalability Considerations
 
-| Concern | At 25 languages (launch) | At 50 languages | At 100+ languages |
-|---------|-------------------------|------------------|--------------------|
-| Build time | Negligible (~25 SVGs + 25 pages + 27 OG images) | Still fast (< 5s additional) | Consider pagination on overview page |
-| `languages.json` size | ~15kb | ~30kb | Split into category files with multiple `file()` loaders |
-| OG image generation | ~27 images, ~10-15s build time | ~52 images, ~20s | Acceptable for static build; cache if needed |
-| Code samples file | ~50kb (25 langs x ~6 features) | ~100kb | Split into per-feature files |
-| Overview page DOM | 25 cards -- fine | 50 cards -- add category filtering | 100+ cards -- paginate or virtualize |
-| Navigation | Single "Beauty Index" link | Same | May need dropdown submenu |
+| Concern | At 40 rules | At 100 rules | At 200+ rules |
+|---------|-------------|-------------|---------------|
+| Lint time per keystroke | <5ms | ~10ms | Consider lazy evaluation or chunking |
+| Bundle size (rules) | ~30kb | ~75kb | Code-split by category, lazy-load |
+| Results panel DOM | 0-40 violations | 0-100 violations | Virtualize the list |
+| Rule registry | Flat array | Flat array still fine | Category-based lazy loading |
+
+For the initial 40 rules targeting Dockerfiles (typically 10-100 lines), performance will not be a concern.
 
 ---
 
 ## Sources
 
-- [Astro 5 Content Collections documentation](https://docs.astro.build/en/guides/content-collections/) -- `file()` loader, Zod schema, `getCollection` API (HIGH confidence)
-- [Astro Content Loader API reference](https://docs.astro.build/en/reference/content-loader-reference/) -- `file()` loader specification, id requirements (HIGH confidence)
-- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) -- `client:visible` directive, partial hydration (HIGH confidence)
-- [Astro Routing Reference](https://docs.astro.build/en/reference/routing-reference/) -- `getStaticPaths` for dynamic routes (HIGH confidence)
-- [Satori GitHub repository](https://github.com/vercel/satori) -- CSS/HTML subset, SVG generation capabilities, flexbox layout (HIGH confidence)
-- [Satori SVG support issue #86](https://github.com/vercel/satori/issues/86) -- confirmed SVG data URI embedding approach, resolved in PR #98 (HIGH confidence)
-- [SVG Radar Charts without D3](https://data-witches.com/2023/12/radar-chart-fun-with-svgs-aka-no-small-multiples-no-problem/) -- pure SVG polar coordinate approach (MEDIUM confidence)
-- [svg-radar-chart library](https://github.com/derhuerst/svg-radar-chart) -- 9kb alternative considered and rejected in favor of inline math (MEDIUM confidence)
-- Existing codebase files examined: `src/content.config.ts`, `src/pages/blog/[slug].astro`, `src/pages/open-graph/[...slug].png.ts`, `src/lib/og-image.ts`, `src/components/Header.astro`, `src/components/SEOHead.astro`, `src/layouts/Layout.astro`, `src/data/projects.ts`, `src/data/site.ts`, `astro.config.mjs`, `package.json`, `tailwind.config.mjs`, `src/styles/global.css`
+- [CodeMirror 6 Lint Example](https://codemirror.net/examples/lint/) -- `linter()` function, `Diagnostic` interface, `lintGutter()` (HIGH confidence)
+- [CodeMirror 6 Language Package Example](https://codemirror.net/examples/lang-package/) -- StreamLanguage vs Lezer, custom language support (HIGH confidence)
+- [CodeMirror 6 Reference Manual](https://codemirror.net/docs/ref/) -- EditorView, EditorState, Decoration API (HIGH confidence)
+- [@codemirror/legacy-modes npm](https://www.npmjs.com/package/@codemirror/legacy-modes) -- Dockerfile mode confirmed v6.5.2 (HIGH confidence)
+- [@codemirror/lint npm](https://www.npmjs.com/package/@codemirror/lint) -- v6.9.4, Diagnostic types (HIGH confidence)
+- [dockerfile-ast GitHub](https://github.com/rcjsuen/dockerfile-ast) -- DockerfileParser.parse(), getInstructions(), getKeyword() API (HIGH confidence)
+- [dockerfile-ast npm](https://www.npmjs.com/package/dockerfile-ast) -- v0.7.1, dependencies confirmed (HIGH confidence)
+- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) -- client:load, client:visible directives (HIGH confidence)
+- [Nanostores GitHub](https://github.com/nanostores/nanostores) -- atom, subscribe, framework-agnostic state (HIGH confidence)
+- [Astro Share State Between Islands](https://docs.astro.build/en/recipes/sharing-state-islands/) -- Nanostore pattern for cross-island communication (HIGH confidence)
+- [CodeMirror 6 Document Change Listener](https://discuss.codemirror.net/t/codemirror-6-proper-way-to-listen-for-changes/2395) -- EditorView.updateListener, docChanged (MEDIUM confidence)
+- [CodeMirror and React](https://thetrevorharmon.com/blog/codemirror-and-react/) -- ref-based mounting pattern (MEDIUM confidence)
+- [CodeMirror 6 Bundle Size Discussion](https://discuss.codemirror.net/t/minimal-setup-because-by-default-v6-is-50kb-compared-to-v5/4514) -- ~75kb gzipped with basicSetup (MEDIUM confidence)
+- Existing codebase files examined: `package.json`, `astro.config.mjs`, `src/layouts/Layout.astro`, `src/components/Header.astro`, `src/components/HeadSceneWrapper.astro`, `src/components/HeadScene.tsx`, `src/components/beauty-index/LanguageFilter.tsx`, `src/components/beauty-index/CodeComparisonTabs.tsx`, `src/components/beauty-index/ShareControls.astro`, `src/components/beauty-index/RadarChart.astro`, `src/stores/languageFilterStore.ts`, `src/stores/tabStore.ts`, `src/lib/beauty-index/schema.ts`
 
 ---
 
-*Architecture research for: The Beauty Index content pillar*
-*Researched: 2026-02-17*
+*Architecture research for: Dockerfile Analyzer Tool Integration*
+*Researched: 2026-02-20*
