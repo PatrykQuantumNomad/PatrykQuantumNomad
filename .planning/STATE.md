@@ -100,4 +100,4 @@ None.
 Last session: 2026-02-20
 Stopped at: Completed 24-02-PLAN.md (results panel UI components)
 Resume file: None
-Next: Phase 25 (Export & Sharing)
+Next: Phase 25 (Content & Rule Documentation)
