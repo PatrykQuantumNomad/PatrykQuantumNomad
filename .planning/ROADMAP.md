@@ -186,10 +186,10 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 22. Editor Foundation | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 23. Rule Engine & Scoring | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 24. Results Display | v1.4 | 2/2 | Complete | 2026-02-20 |
-| 25. Content & Rule Docs | 2/2 | Complete   | 2026-02-20 | - |
+| 25. Content & Rule Docs | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 26. SEO & Launch | v1.4 | 0/TBD | Not started | - |
 | 27. Shareability | v1.4 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-20 — Phase 25 planned (2 plans)*
+*Last updated: 2026-02-20 — Phase 25 complete (2/2 plans)*
