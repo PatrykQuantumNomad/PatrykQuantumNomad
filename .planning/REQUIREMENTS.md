@@ -20,20 +20,20 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### Rule Engine
 
-- [ ] **RULE-01**: 15 Tier 1 critical rules (DL3006, DL3007, DL4000, DL3020, DL3025, DL3000, DL3004, DL3002, DL3059, DL3014, DL3015, DL3008, DL4003, DL4004, DL3061)
+- [x] **RULE-01**: 15 Tier 1 critical rules (DL3006, DL3007, DL4000, DL3020, DL3025, DL3000, DL3004, DL3002, DL3059, DL3014, DL3015, DL3008, DL4003, DL4004, DL3061)
 - [ ] **RULE-02**: 15 Tier 2 high-value rules (DL3003, DL3009, DL3011, DL3027, DL4006, DL3042, DL3013, DL3045, DL3019, DL3012, DL3024, plus custom: secrets in ENV/ARG, curl-pipe-shell, COPY sensitive files)
 - [ ] **RULE-03**: 10 Tier 3 nice-to-have rules (DL4001, DL3057, DL3001, DL3022, inconsistent casing, legacy ENV format, yum/dnf/zypper rules)
-- [ ] **RULE-04**: Modular rule architecture — LintRule interface, one file per rule, category subdirectories
-- [ ] **RULE-05**: Expert-voice explanation per rule with "why this matters in production" architect perspective
-- [ ] **RULE-06**: Actionable fix suggestion per rule with before/after code examples
-- [ ] **RULE-07**: Rule codes: DL-prefixed (Hadolint-compatible) and PG-prefixed (custom rules)
+- [x] **RULE-04**: Modular rule architecture — LintRule interface, one file per rule, category subdirectories
+- [x] **RULE-05**: Expert-voice explanation per rule with "why this matters in production" architect perspective
+- [x] **RULE-06**: Actionable fix suggestion per rule with before/after code examples
+- [x] **RULE-07**: Rule codes: DL-prefixed (Hadolint-compatible) and PG-prefixed (custom rules)
 
 ### Scoring
 
-- [ ] **SCORE-01**: Category-weighted scoring algorithm (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%)
-- [ ] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F)
-- [ ] **SCORE-03**: Per-category sub-scores displayed alongside aggregate
-- [ ] **SCORE-04**: Transparent deductions visible per finding
+- [x] **SCORE-01**: Category-weighted scoring algorithm (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%)
+- [x] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F)
+- [x] **SCORE-03**: Per-category sub-scores displayed alongside aggregate
+- [x] **SCORE-04**: Transparent deductions visible per finding
 
 ### Results Display
 
@@ -102,17 +102,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-06 | Phase 22 | Complete |
 | EDIT-07 | Phase 22 | Complete |
 | EDIT-08 | Phase 22 | Complete |
-| RULE-01 | Phase 23 | Pending |
+| RULE-01 | Phase 23 | Complete |
 | RULE-02 | Phase 23 | Pending |
 | RULE-03 | Phase 23 | Pending |
-| RULE-04 | Phase 23 | Pending |
-| RULE-05 | Phase 23 | Pending |
-| RULE-06 | Phase 23 | Pending |
-| RULE-07 | Phase 23 | Pending |
-| SCORE-01 | Phase 23 | Pending |
-| SCORE-02 | Phase 23 | Pending |
-| SCORE-03 | Phase 23 | Pending |
-| SCORE-04 | Phase 23 | Pending |
+| RULE-04 | Phase 23 | Complete |
+| RULE-05 | Phase 23 | Complete |
+| RULE-06 | Phase 23 | Complete |
+| RULE-07 | Phase 23 | Complete |
+| SCORE-01 | Phase 23 | Complete |
+| SCORE-02 | Phase 23 | Complete |
+| SCORE-03 | Phase 23 | Complete |
+| SCORE-04 | Phase 23 | Complete |
 | RESULT-01 | Phase 24 | Pending |
 | RESULT-02 | Phase 24 | Pending |
 | RESULT-03 | Phase 24 | Pending |

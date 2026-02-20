@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 23 of 27 (Rule Engine & Scoring)
-Plan: 0 of TBD complete
-Status: Phase 22 complete, ready for Phase 23
-Last activity: 2026-02-20 — Phase 22 complete (editor island at /tools/dockerfile-analyzer/ working end-to-end)
+Plan: 1 of 2 complete
+Status: Executing Phase 23
+Last activity: 2026-02-20 — Completed 23-01-PLAN.md (rule engine foundation, 15 Tier 1 rules, scoring algorithm)
 
 Progress: [#####.........................] 17% of v1.4 (1/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 3 v1.4)
+- Total plans completed: 48 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 4 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [#####.........................] 17% of v1.4 (1/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 3 | 38 | In progress |
-| **Total** | **27** | **47** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 4 | 38 | In progress |
+| **Total** | **27** | **48** | **152** | |
 
 ## Accumulated Context
 
@@ -55,6 +55,13 @@ v1.4 execution decisions (Phase 22):
 - lintGutter() without linter(): enables setDiagnostics gutter markers without real-time linting
 - Empty deps array for useCodeMirror useEffect: editor created once, destroyed on unmount only
 
+v1.4 execution decisions (Phase 23):
+- LintRule.check() accepts Dockerfile AST + rawText, returns RuleViolation[] with 1-based line numbers
+- Diminishing returns formula: deduction = baseSeverityPoints / (1 + 0.3 * priorViolationsInCategory)
+- Category weights: Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%
+- DL3020 skips URLs and archives where ADD is valid; only flags plain file copies
+- DL3002 only flags explicit USER root in final stage, not absence of USER instruction
+
 ### Pending Todos
 
 None.
@@ -74,6 +81,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed Phase 22 (22-02-PLAN.md -- CodeMirror editor island)
+Stopped at: Completed 23-01-PLAN.md (rule engine foundation)
 Resume file: None
-Next: Research and plan Phase 23 (Rule Engine & Scoring)
+Next: Execute 23-02-PLAN.md (Tier 2 + Tier 3 rules)
