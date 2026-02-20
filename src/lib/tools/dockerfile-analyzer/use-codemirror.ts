@@ -7,6 +7,12 @@ import { dockerFile } from '@codemirror/legacy-modes/mode/dockerfile';
 import { lintGutter } from '@codemirror/lint';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { editorTheme } from './editor-theme';
+import { highlightLineField } from './highlight-line';
+import {
+  editorViewRef,
+  resultsStale,
+  analysisResult,
+} from '../../../stores/dockerfileAnalyzerStore';
 
 interface UseCodeMirrorOptions {
   initialDoc: string;
@@ -51,7 +57,14 @@ export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
         analyzeKeymap,
         oneDark,
         editorTheme,
+        highlightLineField,
         EditorView.lineWrapping,
+        // Detect stale results: set flag when doc changes after analysis
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged && analysisResult.get() !== null) {
+            resultsStale.set(true);
+          }
+        }),
       ],
     });
 
@@ -61,11 +74,13 @@ export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
     });
 
     viewRef.current = view;
+    editorViewRef.set(view);
 
     // View Transitions safety: destroy on swap even if React cleanup races
     const handleSwap = () => {
       if (viewRef.current) {
         viewRef.current.destroy();
+        editorViewRef.set(null);
         viewRef.current = null;
       }
     };
@@ -74,6 +89,7 @@ export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
     return () => {
       document.removeEventListener('astro:before-swap', handleSwap);
       view.destroy();
+      editorViewRef.set(null);
       viewRef.current = null;
     };
   }, []); // Empty deps: create once, destroy on unmount

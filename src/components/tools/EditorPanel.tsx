@@ -8,7 +8,7 @@ import { runRuleEngine } from '../../lib/tools/dockerfile-analyzer/engine';
 import { computeScore } from '../../lib/tools/dockerfile-analyzer/scorer';
 import { getRuleById } from '../../lib/tools/dockerfile-analyzer/rules';
 import { SAMPLE_DOCKERFILE } from '../../lib/tools/dockerfile-analyzer/sample-dockerfile';
-import { analysisResult, isAnalyzing } from '../../stores/dockerfileAnalyzerStore';
+import { analysisResult, isAnalyzing, resultsStale } from '../../stores/dockerfileAnalyzerStore';
 
 export default function EditorPanel() {
   // Wrap analyze in a ref so the keymap callback always calls the latest version
@@ -23,6 +23,7 @@ export default function EditorPanel() {
       return;
     }
 
+    resultsStale.set(false);
     isAnalyzing.set(true);
 
     try {
