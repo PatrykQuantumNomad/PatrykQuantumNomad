@@ -75,19 +75,55 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Floating parallax orbs behind category sections — v1.2
 - ✓ Magnetic pull effect on CTA buttons — v1.2
 - ✓ All v1.2 animations respect prefers-reduced-motion and touch device fallbacks — v1.2
+- ✓ Language data schema (languages.json) with Zod validation for 25 languages across 6 dimensions — v1.3
+- ✓ Shared radar SVG math utility (radar-math.ts) for Astro components and OG images — v1.3
+- ✓ Content collection integration via Astro 5 file() loader for language data — v1.3
+- ✓ Greek symbol rendering with Noto Sans unicode-range fallback — v1.3
+- ✓ Build-time SVG radar chart component (zero client-side JS) — v1.3
+- ✓ Build-time SVG ranking bar chart with tier group headers — v1.3
+- ✓ Tier badge component with color-coded indicators (Beautiful/Handsome/Practical/Workhorses) — v1.3
+- ✓ Score breakdown display component — v1.3
+- ✓ Overview page at /beauty-index/ with ranking chart, scoring table, and language grid — v1.3
+- ✓ Sortable scoring table with column header sort — v1.3
+- ✓ 4-tier visual grouping with color-coded sections — v1.3
+- ✓ 25 radar charts in overview grid linking to detail pages — v1.3
+- ✓ Per-language detail pages at /beauty-index/[slug]/ for all 25 languages — v1.3
+- ✓ Character sketch narrative per language — v1.3
+- ✓ Signature code snippet with syntax highlighting per language — v1.3
+- ✓ Navigation between languages and back to overview — v1.3
+- ✓ Code comparison page at /beauty-index/code/ with 10 feature-tabbed layout — v1.3
+- ✓ All 25 languages per tab with syntax-highlighted code blocks (240 total) — v1.3
+- ✓ Tab-based lazy rendering with content-visibility: auto — v1.3
+- ✓ Feature support matrix table — v1.3
+- ✓ Build-time OG images with radar chart visuals for overview and all 25 language pages — v1.3
+- ✓ Download-as-image button via client-side SVG-to-PNG at 2x — v1.3
+- ✓ Web Share API on mobile, Clipboard API on desktop, text URL fallback — v1.3
+- ✓ Full Beauty Index methodology blog post as local MDX content — v1.3
+- ✓ Bidirectional cross-links between blog post and Beauty Index pages — v1.3
+- ✓ Navigation link in site header for Beauty Index — v1.3
+- ✓ JSON-LD structured data (Dataset/ItemList + BreadcrumbList) on Beauty Index pages — v1.3
+- ✓ Beauty Index callout on homepage between What I Build and Latest Writing — v1.3
+- ✓ All Beauty Index pages in sitemap — v1.3
+- ✓ Lighthouse 90+ on all Beauty Index page types — v1.3
+- ✓ Accessibility audit (keyboard navigation, screen reader, WCAG 2.1 AA) — v1.3
+- ✓ Nanostores atom for tab state management (286 bytes) — v1.3
+- ✓ Responsive layout across mobile, tablet, and desktop for all Beauty Index pages — v1.3
 
 ### Active
 
-## Current Milestone: v1.3 The Beauty Index
+## Current Milestone: v1.4 Dockerfile Analyzer
 
-**Goal:** Add a new content pillar — The Beauty Index — a subjective multi-dimensional ranking of 25 programming languages by aesthetic beauty, with an interactive overview page, per-language detail pages, a code comparison explorer, and a companion blog post.
+**Goal:** Add an interactive browser-based Dockerfile analysis tool at /tools/dockerfile-analyzer — users paste a Dockerfile, click Analyze, and get an overall quality score plus inline annotations and a categorized findings panel. 40 lint rules based on Hadolint DL codes and professional Kubernetes/cloud-native experience. Companion blog post covering Dockerfile best practices and tool architecture.
 
 **Target features:**
-- Beauty Index blog post (full essay as local blog content)
-- Interactive overview page with ranking chart, scoring table, and 25 radar charts
-- Individual language pages with radar chart, scores, and signature code
-- Code comparison page with feature-tabbed syntax-highlighted examples
-- Social media shareability (clean visuals, screenshot-friendly charts)
+- Interactive Dockerfile editor (CodeMirror 6) with syntax highlighting
+- 40 TypeScript lint rules across 3 tiers (critical, high-value, nice-to-have)
+- Overall quality score (numeric) based on rule results
+- Inline editor annotations (gutter markers, highlighted lines)
+- Summary results panel grouped by severity and category with explanations
+- Browser-only analysis via dockerfile-ast (no server, ~350KB total)
+- Companion blog post: Dockerfile best practices + tool architecture deep-dive
+- Shareable results (screenshot-friendly score display)
 
 ### Out of Scope
 
@@ -109,16 +145,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.2 Projects Page Redesign on top of v1.1 Content Refresh and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations.
+Shipped v1.3 The Beauty Index on top of v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-5,874 lines in src/ across Astro, TypeScript, CSS, MDX, and Markdown files.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 requirements delivered (77 total). Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 requirements delivered (114 total). Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 11 posts (1 local + 10 external from Kubert AI and Translucent Computing).
+Blog shows 12 posts (2 local + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
+Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay. Build-time SVG charts, zero client-side charting libraries.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
-v1.3 adds The Beauty Index — a new content pillar ranking 25 programming languages across 6 aesthetic dimensions (Φ, Ω, Λ, Ψ, Γ, Σ). Includes interactive charts (radar/spider per language, overall ranking bar chart), per-language detail pages, a feature-tabbed code comparison explorer, and a full-length blog essay. Design priority is social media shareability.
+v1.4 adds a Dockerfile Analyzer — the site's first interactive tool. Browser-based Dockerfile linting via dockerfile-ast parser + CodeMirror 6 editor in an Astro island. 40 TypeScript lint rules (Hadolint DL codes + professional experience). Differentiator: expert feedback from a Kubernetes architect, not an AI chatbot. Includes quality scoring and a companion blog post.
 
 ## Key Decisions
 
@@ -163,4 +199,4 @@ v1.3 adds The Beauty Index — a new content pillar ranking 25 programming langu
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-17 after v1.3 milestone start*
+*Last updated: 2026-02-20 after v1.4 milestone start*
