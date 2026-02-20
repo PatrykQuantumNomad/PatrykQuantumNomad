@@ -37,11 +37,11 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### Results Display
 
-- [ ] **RESULT-01**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
+- [x] **RESULT-01**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
 - [ ] **RESULT-02**: Score gauge component (visual gauge with letter grade)
 - [ ] **RESULT-03**: Category breakdown panel with sub-scores per dimension
 - [ ] **RESULT-04**: Violation list grouped by severity with expandable details
-- [ ] **RESULT-05**: Click-to-navigate from results panel to corresponding editor line
+- [x] **RESULT-05**: Click-to-navigate from results panel to corresponding editor line
 - [ ] **RESULT-06**: Clean Dockerfile empty state ("No issues found" with congratulatory message)
 
 ### Shareability
@@ -113,11 +113,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCORE-02 | Phase 23 | Complete |
 | SCORE-03 | Phase 23 | Complete |
 | SCORE-04 | Phase 23 | Complete |
-| RESULT-01 | Phase 24 | Pending |
+| RESULT-01 | Phase 24 | Complete |
 | RESULT-02 | Phase 24 | Pending |
 | RESULT-03 | Phase 24 | Pending |
 | RESULT-04 | Phase 24 | Pending |
-| RESULT-05 | Phase 24 | Pending |
+| RESULT-05 | Phase 24 | Complete |
 | RESULT-06 | Phase 24 | Pending |
 | BLOG-01 | Phase 25 | Pending |
 | BLOG-02 | Phase 25 | Pending |

@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 23 complete, ready for Phase 24 (Results Display)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 24 in progress (Results Display & Interaction)
 
 ## Current Position
 
-Phase: 23 of 27 (Rule Engine & Scoring) -- COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 23 complete. Ready for Phase 24.
-Last activity: 2026-02-20 — Completed 23-02-PLAN.md (24 rules, 39 total, sample calibration)
+Phase: 24 of 27 (Results Display & Interaction)
+Plan: 1 of 2 complete
+Status: Plan 01 complete (editor infrastructure). Plan 02 next (results panel UI).
+Last activity: 2026-02-20 — Completed 24-01-PLAN.md (editor infrastructure for results display)
 
-Progress: [########....................] 33% of v1.4 (2/6 phases)
+Progress: [##########..................] 42% of v1.4 (2.5/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 5 v1.4)
+- Total plans completed: 50 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 6 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [########....................] 33% of v1.4 (2/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 5 | 38 | In progress |
-| **Total** | **27** | **49** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 6 | 38 | In progress |
+| **Total** | **27** | **50** | **152** | |
 
 ## Accumulated Context
 
@@ -68,6 +68,13 @@ v1.4 execution decisions (Phase 23):
 - PG005 determines majority case convention before flagging outliers
 - 39 total rules: 10 security, 8 efficiency, 7 maintainability, 5 reliability, 9 best-practice
 
+v1.4 execution decisions (Phase 24):
+- highlightLineField in separate highlight-line.ts file for clean import by ResultsPanel
+- editorViewRef set directly after EditorView creation, cleared in both cleanup paths
+- Stale results detected via EditorView.updateListener (docChanged + non-null analysisResult)
+- SVG data URL gutter markers with explicit fill/stroke colors (not CSS color override)
+- Import path from lib/tools/dockerfile-analyzer/ to stores/ requires 3 parent traversals
+
 ### Pending Todos
 
 None.
@@ -87,6 +94,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 23-02-PLAN.md (24 rules, 39 total, sample calibration)
+Stopped at: Completed 24-01-PLAN.md (editor infrastructure for results display)
 Resume file: None
-Next: Phase 24 (Results Display)
+Next: Phase 24 Plan 02 (Results Panel UI components)
