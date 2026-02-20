@@ -85,9 +85,9 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full details.
   3. Navigating away from the page and back (via View Transitions) produces a fully functional editor with no console errors, no orphaned EditorView instances, and no blank/broken editor state
   4. Clicking "Analyze" (or pressing Cmd/Ctrl+Enter) triggers a lint cycle that parses the Dockerfile via dockerfile-ast and produces output (even if no rules exist yet, the parser runs and returns an AST without errors)
   5. The editor displays correctly on mobile (stacked layout) and desktop (side-by-side layout) with a dark theme matching the site's Quantum Explorer aesthetic
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 22-01-PLAN.md — Go/no-go gate: install dependencies, verify dockerfile-ast Vite bundle, create foundation modules (types, parser, sample, store)
+- [x] 22-01-PLAN.md — Go/no-go gate: install dependencies, verify dockerfile-ast Vite bundle, create foundation modules (types, parser, sample, store)
 - [ ] 22-02-PLAN.md — CodeMirror editor island: useCodeMirror hook, editor theme, React components, Astro page at /tools/dockerfile-analyzer/
 
 ### Phase 23: Rule Engine & Scoring
@@ -175,7 +175,7 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 19. Code Comparison | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 20. Blog Content | v1.3 | 1/1 | Complete | 2026-02-17 |
 | 21. SEO & Launch | v1.3 | 3/3 | Complete | 2026-02-17 |
-| 22. Editor Foundation | v1.4 | 0/2 | Not started | - |
+| 22. Editor Foundation | 1/2 | In Progress|  | - |
 | 23. Rule Engine & Scoring | v1.4 | 0/TBD | Not started | - |
 | 24. Results Display | v1.4 | 0/TBD | Not started | - |
 | 25. Content & Rule Docs | v1.4 | 0/TBD | Not started | - |

@@ -11,11 +11,11 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 - [ ] **EDIT-01**: CodeMirror 6 editor with Dockerfile syntax highlighting via @codemirror/legacy-modes
 - [ ] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
-- [ ] **EDIT-03**: Pre-loaded sample Dockerfile with deliberate issues across all rule categories
+- [x] **EDIT-03**: Pre-loaded sample Dockerfile with deliberate issues across all rule categories
 - [ ] **EDIT-04**: Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis
 - [ ] **EDIT-05**: Dark-only editor theme (oneDark or custom dark theme matching site aesthetic)
 - [ ] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
-- [ ] **EDIT-07**: React island with `client:only="react"` directive (CodeMirror cannot be SSR'd)
+- [x] **EDIT-07**: React island with `client:only="react"` directive (CodeMirror cannot be SSR'd)
 - [ ] **EDIT-08**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 
 ### Rule Engine
@@ -96,11 +96,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | EDIT-01 | Phase 22 | Pending |
 | EDIT-02 | Phase 22 | Pending |
-| EDIT-03 | Phase 22 | Pending |
+| EDIT-03 | Phase 22 | Complete |
 | EDIT-04 | Phase 22 | Pending |
 | EDIT-05 | Phase 22 | Pending |
 | EDIT-06 | Phase 22 | Pending |
-| EDIT-07 | Phase 22 | Pending |
+| EDIT-07 | Phase 22 | Complete |
 | EDIT-08 | Phase 22 | Pending |
 | RULE-01 | Phase 23 | Pending |
 | RULE-02 | Phase 23 | Pending |
