@@ -69,7 +69,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full details.
 - [x] **Phase 22: Editor Foundation & Technology Validation** - CodeMirror 6 React island with Dockerfile syntax highlighting, dockerfile-ast bundle verification, and View Transitions lifecycle (completed 2026-02-20)
 - [x] **Phase 23: Rule Engine & Scoring** - 40 lint rules across 3 tiers with modular architecture, category-weighted scoring algorithm, and expert-voice explanations (completed 2026-02-20)
 - [x] **Phase 24: Results Display & Interaction** - Score gauge, category breakdown, violation list, inline annotations, click-to-navigate, and empty state (completed 2026-02-20)
-- [ ] **Phase 25: Content & Rule Documentation** - 40 rule documentation pages and companion blog post with bidirectional cross-links
+- [ ] **Phase 25: Content & Rule Documentation** - 39 rule documentation pages and companion blog post with bidirectional cross-links
 - [ ] **Phase 26: SEO, Navigation & Launch Readiness** - Header navigation, breadcrumbs, JSON-LD, sitemap, homepage callout, Lighthouse, and accessibility audits
 - [ ] **Phase 27: Shareability** - Score badge PNG download and URL state encoding for shareable analysis links
 
@@ -121,14 +121,17 @@ Plans:
 - [x] 24-02-PLAN.md — Results UI components: ScoreGauge, CategoryBreakdown, ViolationList, EmptyState, ResultsPanel rewrite with click-to-navigate
 
 ### Phase 25: Content & Rule Documentation
-**Goal**: Every rule has its own SEO-optimized documentation page, and a companion blog post covers Dockerfile best practices and the tool's architecture — creating 42 new indexable URLs
+**Goal**: Every rule has its own SEO-optimized documentation page, and a companion blog post covers Dockerfile best practices and the tool's architecture — creating 41 new indexable URLs
 **Depends on**: Phase 23 (rule definitions must exist), Phase 24 (tool must work for blog screenshots/links)
 **Requirements**: BLOG-01, BLOG-02, DOCS-01, DOCS-02
 **Success Criteria** (what must be TRUE):
-  1. Each of the 40 rules has a documentation page at /tools/dockerfile-analyzer/rules/[code] containing the rule explanation, fix suggestion with before/after code examples, severity and category metadata, and links to related rules
-  2. A companion blog post appears in the blog listing at /blog/, covering Dockerfile best practices informed by the 40 rules and including a tool architecture deep-dive section explaining the browser-based analysis approach
+  1. Each of the 39 rules has a documentation page at /tools/dockerfile-analyzer/rules/[code] containing the rule explanation, fix suggestion with before/after code examples, severity and category metadata, and links to related rules
+  2. A companion blog post appears in the blog listing at /blog/, covering Dockerfile best practices informed by the 39 rules and including a tool architecture deep-dive section explaining the browser-based analysis approach
   3. The blog post links to the analyzer tool page and at least 5 rule documentation pages; the tool page links back to the blog post; rule pages link back to both the tool and the blog post
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 25-01-PLAN.md — Rule documentation pages: getRelatedRules utility and [code].astro dynamic route generating 39 rule pages
+- [ ] 25-02-PLAN.md — Companion blog post and bidirectional cross-links between blog, tool page, and rule pages
 
 ### Phase 26: SEO, Navigation & Launch Readiness
 **Goal**: The Dockerfile Analyzer is fully integrated into the site's navigation, discoverable by search engines, and meets all quality and accessibility standards
@@ -136,8 +139,8 @@ Plans:
 **Requirements**: NAV-01, NAV-02, SEO-01, SEO-02, SEO-03, SEO-04, SEO-05, SEO-06
 **Success Criteria** (what must be TRUE):
   1. The site header navigation includes a link to the Dockerfile Analyzer that is visible and accessible on all pages
-  2. Breadcrumb navigation appears on the tool page and all 40 rule documentation pages, with correct hierarchy (Home > Tools > Dockerfile Analyzer > Rules > [Code])
-  3. The tool page includes JSON-LD structured data using SoftwareApplication schema, and all 42 new pages (tool + 40 rules + blog post) appear in the sitemap with SEO-optimized meta descriptions
+  2. Breadcrumb navigation appears on the tool page and all 39 rule documentation pages, with correct hierarchy (Home > Tools > Dockerfile Analyzer > Rules > [Code])
+  3. The tool page includes JSON-LD structured data using SoftwareApplication schema, and all 41 new pages (tool + 39 rules + blog post) appear in the sitemap with SEO-optimized meta descriptions
   4. The homepage contains a callout section linking to the Dockerfile Analyzer, consistent with the existing Beauty Index callout pattern
   5. Lighthouse audit scores 90+ on Performance, Accessibility, Best Practices, and SEO for the tool page; keyboard navigation works through the editor (with proper Tab escape), results panel, and rule pages; screen readers can access all analysis results
 **Plans**: TBD
@@ -183,10 +186,10 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 22. Editor Foundation | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 23. Rule Engine & Scoring | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 24. Results Display | v1.4 | 2/2 | Complete | 2026-02-20 |
-| 25. Content & Rule Docs | v1.4 | 0/TBD | Not started | - |
+| 25. Content & Rule Docs | v1.4 | 0/2 | Not started | - |
 | 26. SEO & Launch | v1.4 | 0/TBD | Not started | - |
 | 27. Shareability | v1.4 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-20 — Phase 24 complete (2/2 plans)*
+*Last updated: 2026-02-20 — Phase 25 planned (2 plans)*
