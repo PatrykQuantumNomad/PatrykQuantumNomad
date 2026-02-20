@@ -48,117 +48,106 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full details.
 
 </details>
 
-### v1.3 The Beauty Index (SHIPPED 2026-02-17)
+<details>
+<summary>v1.3 The Beauty Index (Phases 16-21) — SHIPPED 2026-02-17</summary>
 
-**Milestone Goal:** Add a new content pillar ranking 25 programming languages across 6 aesthetic dimensions, with interactive overview, per-language detail pages, a code comparison explorer, OG images for social sharing, a methodology blog post, and full SEO integration.
+- [x] Phase 16: Data Foundation & Chart Components (2/2 plans) — completed 2026-02-17
+- [x] Phase 17: Overview & Language Detail Pages (3/3 plans) — completed 2026-02-17
+- [x] Phase 18: OG Images & Shareability (2/2 plans) — completed 2026-02-17
+- [x] Phase 19: Code Comparison Page (2/2 plans) — completed 2026-02-17
+- [x] Phase 20: Blog Content & Cross-Linking (1/1 plan) — completed 2026-02-17
+- [x] Phase 21: SEO & Launch Readiness (3/3 plans) — completed 2026-02-17
 
-- [x] **Phase 16: Data Foundation & Chart Components** - Language data schema, shared SVG math, and all build-time chart components — completed 2026-02-17
-- [x] **Phase 17: Overview & Language Detail Pages** - Core user-facing pages with rankings, radar charts, and language profiles (completed 2026-02-17)
-- [x] **Phase 18: OG Images & Shareability** - Build-time OG images with radar visuals and social sharing features (completed 2026-02-17)
-- [x] **Phase 19: Code Comparison Page** - Feature-tabbed code explorer with 25 languages and lazy rendering (completed 2026-02-17)
-- [x] **Phase 20: Blog Content & Cross-Linking** - Methodology blog post and bidirectional links between blog and index (completed 2026-02-17)
-- [x] **Phase 21: SEO & Launch Readiness** - Navigation, structured data, sitemap, Lighthouse, and accessibility audits (completed 2026-02-17)
+See `.planning/milestones/v1.3-ROADMAP.md` for full details.
+
+</details>
+
+### v1.4 Dockerfile Analyzer
+
+**Milestone Goal:** Add an interactive browser-based Dockerfile analysis tool at /tools/dockerfile-analyzer — users paste a Dockerfile, click Analyze, and get an overall quality score plus inline annotations and a categorized findings panel. 40 lint rules based on Hadolint DL codes and professional Kubernetes/cloud-native experience. Rule documentation pages for SEO. Companion blog post covering Dockerfile best practices and tool architecture.
+
+- [ ] **Phase 22: Editor Foundation & Technology Validation** - CodeMirror 6 React island with Dockerfile syntax highlighting, dockerfile-ast bundle verification, and View Transitions lifecycle
+- [ ] **Phase 23: Rule Engine & Scoring** - 40 lint rules across 3 tiers with modular architecture, category-weighted scoring algorithm, and expert-voice explanations
+- [ ] **Phase 24: Results Display & Interaction** - Score gauge, category breakdown, violation list, inline annotations, click-to-navigate, and empty state
+- [ ] **Phase 25: Content & Rule Documentation** - 40 rule documentation pages and companion blog post with bidirectional cross-links
+- [ ] **Phase 26: SEO, Navigation & Launch Readiness** - Header navigation, breadcrumbs, JSON-LD, sitemap, homepage callout, Lighthouse, and accessibility audits
+- [ ] **Phase 27: Shareability** - Score badge PNG download and URL state encoding for shareable analysis links
 
 ## Phase Details
 
-### Phase 16: Data Foundation & Chart Components
-**Goal**: Establish the data model and visual building blocks that every downstream page depends on
-**Depends on**: Nothing (first phase of v1.3)
-**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, CHART-01, CHART-02, CHART-03, CHART-04
+### Phase 22: Editor Foundation & Technology Validation
+**Goal**: Users can open /tools/dockerfile-analyzer/, see a working code editor with Dockerfile syntax highlighting, type or paste Dockerfile content, and trigger an analysis action — confirming the entire technology stack works end-to-end in the browser
+**Depends on**: Nothing (first phase of v1.4)
+**Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07, EDIT-08
 **Success Criteria** (what must be TRUE):
-  1. A languages.json file with all 25 languages validates against a Zod schema and loads via Astro 5 file() content collection — each entry contains scores across 6 dimensions, tier assignment, character sketch, and metadata
-  2. A standalone Astro page rendering a radar chart for any single language produces correct SVG output with 6 labeled axes and a filled polygon matching the score values — zero client-side JavaScript shipped
-  3. A standalone Astro page rendering the ranking bar chart shows all 25 languages sorted by total score with tier color coding — zero client-side JavaScript shipped
-  4. The same polar-to-cartesian math utility used by radar chart components also works when imported by a Node/Satori context (validated by generating a test OG image with a radar shape)
-  5. Greek dimension symbols render correctly in the site's fonts across Chrome, Firefox, and Safari
-**Plans**: 2 plans
+  1. Visiting /tools/dockerfile-analyzer/ displays a CodeMirror 6 editor with Dockerfile syntax highlighting (FROM, RUN, COPY keywords colored) pre-loaded with a sample Dockerfile containing deliberate issues across all rule categories
+  2. The `astro build` completes without errors with the dockerfile-ast import present — the Vite bundle includes the parser at an acceptable size (under 50 KB gzipped for dockerfile-ast portion) and produces no CJS-to-ESM conversion warnings
+  3. Navigating away from the page and back (via View Transitions) produces a fully functional editor with no console errors, no orphaned EditorView instances, and no blank/broken editor state
+  4. Clicking "Analyze" (or pressing Cmd/Ctrl+Enter) triggers a lint cycle that parses the Dockerfile via dockerfile-ast and produces output (even if no rules exist yet, the parser runs and returns an AST without errors)
+  5. The editor displays correctly on mobile (stacked layout) and desktop (side-by-side layout) with a dark theme matching the site's Quantum Explorer aesthetic
+**Plans**: TBD
 
-Plans:
-- [x] 16-01-PLAN.md — Data model, utilities, content collection, and Greek font fallback
-- [x] 16-02-PLAN.md — Chart components (radar, bar, tier badge, score breakdown) and test pages
-
-### Phase 17: Overview & Language Detail Pages
-**Goal**: Users can browse the complete Beauty Index — an overview ranking all 25 languages and individual pages with deep profiles for each language
-**Depends on**: Phase 16
-**Requirements**: OVER-01, OVER-02, OVER-03, OVER-04, OVER-05, LANG-01, LANG-02, LANG-03, LANG-04, LANG-05, LANG-06
+### Phase 23: Rule Engine & Scoring
+**Goal**: The analysis engine evaluates Dockerfiles against 40 expert rules across 5 categories and produces a meaningful, calibrated quality score with transparent deductions
+**Depends on**: Phase 22
+**Requirements**: RULE-01, RULE-02, RULE-03, RULE-04, RULE-05, RULE-06, RULE-07, SCORE-01, SCORE-02, SCORE-03, SCORE-04
 **Success Criteria** (what must be TRUE):
-  1. Visiting /beauty-index/ displays a ranking bar chart, a scoring table with all 25 languages, and a grid of 25 radar chart thumbnails — each thumbnail links to that language's detail page
-  2. Clicking any column header in the scoring table re-sorts the table by that dimension (client-side sort)
-  3. The overview page visually groups languages into 4 tiers (Beautiful, Handsome, Practical, Workhorses) with distinct color-coded sections and tier labels
-  4. Visiting /beauty-index/rust/ (or any of the 25 language slugs) displays that language's radar chart, 6-dimension score breakdown, tier badge, total score, character sketch narrative, and a syntax-highlighted signature code snippet
-  5. Each language detail page has previous/next navigation to adjacent languages and a back-to-overview link
-**Plans**: 3 plans
+  1. Pasting a Dockerfile with known issues and clicking Analyze produces findings from all 3 rule tiers — the sample Dockerfile triggers at least one rule from each of the 5 categories (Security, Efficiency, Maintainability, Reliability, Best Practice)
+  2. Each finding includes a DL-prefixed or PG-prefixed rule code, a severity level (error/warning/hint), an expert-voice explanation describing production consequences, and a fix suggestion with before/after code
+  3. The overall score (0-100 with letter grade A+ through F) reflects category weights (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%) — a security-only violation produces a larger score drop than a best-practice-only violation of equal count
+  4. Per-category sub-scores are computed alongside the aggregate, and each deduction is traceable to a specific finding
+  5. A clean Dockerfile (no violations) scores 100/A+; the pre-loaded sample Dockerfile scores in a range that demonstrates meaningful differentiation (not clustering at 85-100)
+**Plans**: TBD
+**Research flag**: Scoring weight calibration requires testing against real-world Dockerfiles before finalizing
 
-Plans:
-- [x] 17-01-PLAN.md — Code snippets data, ScoringTable, LanguageGrid, and LanguageNav components
-- [x] 17-02-PLAN.md — Beauty Index overview page at /beauty-index/
-- [x] 17-03-PLAN.md — Language detail pages at /beauty-index/[slug]/
-
-### Phase 18: OG Images & Shareability
-**Goal**: Every Beauty Index page has a visually rich OG image for social sharing, and users can download or share individual chart images
-**Depends on**: Phase 16
-**Requirements**: SHARE-01, SHARE-02, SHARE-03, SHARE-04
+### Phase 24: Results Display & Interaction
+**Goal**: Users see their Dockerfile analysis results through rich visual feedback — inline editor annotations, a score gauge, category breakdown, and an interactive violation list — all driven by real rule engine output
+**Depends on**: Phase 23
+**Requirements**: RESULT-01, RESULT-02, RESULT-03, RESULT-04, RESULT-05, RESULT-06
 **Success Criteria** (what must be TRUE):
-  1. Sharing /beauty-index/ on social media (Twitter, LinkedIn, Discord) shows a custom OG image with the Beauty Index branding and ranking visual
-  2. Sharing any /beauty-index/[slug]/ page shows a custom OG image featuring that language's radar chart and score summary
-  3. Clicking a "Download as Image" button on a radar chart saves a PNG file to the user's device
-  4. On mobile devices, a share button triggers the native OS share sheet via Web Share API; on desktop, a copy-to-clipboard button copies the chart image
-**Plans**: 2 plans
+  1. After analysis, the CodeMirror editor shows inline annotations — squiggly underlines on problematic lines and severity-colored gutter markers (red for error, amber for warning, blue for hint) — visible without scrolling to the results panel
+  2. A score gauge component displays the overall numeric score and letter grade with a visual indicator (circular gauge or similar) that makes the score immediately scannable
+  3. A category breakdown panel shows sub-scores for each of the 5 scoring dimensions (Security, Efficiency, Maintainability, Reliability, Best Practice) as visual bars or similar indicators
+  4. Clicking a violation in the results panel scrolls the editor to and highlights the corresponding line — the connection between finding and source code is one click
+  5. Analyzing a clean Dockerfile (no violations) shows a congratulatory empty state message ("No issues found") instead of an empty results panel
+**Plans**: TBD
 
-Plans:
-- [x] 18-01-PLAN.md — OG image generators, API routes, and meta tag wiring
-- [x] 18-02-PLAN.md — ShareControls component (download, share, copy) on detail pages
-
-### Phase 19: Code Comparison Page
-**Goal**: Users can compare how 25 programming languages express the same programming concepts side-by-side
-**Depends on**: Phase 16
-**Requirements**: CODE-01, CODE-02, CODE-03, CODE-04, CODE-05
-**Research flag**: NEEDS RESEARCH-PHASE (complex interaction between Expressive Code build-time rendering, tab state management, and DOM performance with 250 code blocks)
+### Phase 25: Content & Rule Documentation
+**Goal**: Every rule has its own SEO-optimized documentation page, and a companion blog post covers Dockerfile best practices and the tool's architecture — creating 42 new indexable URLs
+**Depends on**: Phase 23 (rule definitions must exist), Phase 24 (tool must work for blog screenshots/links)
+**Requirements**: BLOG-01, BLOG-02, DOCS-01, DOCS-02
 **Success Criteria** (what must be TRUE):
-  1. Visiting /beauty-index/code/ displays a tabbed interface with 10 feature tabs (Variable Declaration, If/Else, Loops, Functions, Structs, Pattern Matching, Error Handling, String Interpolation, List Operations, Signature Idiom)
-  2. Clicking a tab shows syntax-highlighted code blocks for all 25 languages implementing that feature — only the active tab's code blocks are visible at any time (CSS-based hiding, all blocks in DOM)
-  3. A feature support matrix table shows which languages support each feature, serving as a quick-reference grid
-  4. The page loads and tab-switches without perceptible lag on mobile devices (Lighthouse performance remains 90+)
-**Plans**: 2 plans
+  1. Each of the 40 rules has a documentation page at /tools/dockerfile-analyzer/rules/[code] containing the rule explanation, fix suggestion with before/after code examples, severity and category metadata, and links to related rules
+  2. A companion blog post appears in the blog listing at /blog/, covering Dockerfile best practices informed by the 40 rules and including a tool architecture deep-dive section explaining the browser-based analysis approach
+  3. The blog post links to the analyzer tool page and at least 5 rule documentation pages; the tool page links back to the blog post; rule pages link back to both the tool and the blog post
+**Plans**: TBD
 
-Plans:
-- [x] 19-01-PLAN.md — Code features data, Nanostores setup, tab UI React island, and feature matrix table
-- [x] 19-02-PLAN.md — Code comparison page assembly with 10 feature tabs and 240 build-time code blocks
-
-### Phase 20: Blog Content & Cross-Linking
-**Goal**: A full-length blog post explains the Beauty Index methodology, and all Beauty Index pages and the blog post link to each other
-**Depends on**: Phase 17 (pages must exist to link to)
-**Requirements**: BLOG-01, BLOG-02
+### Phase 26: SEO, Navigation & Launch Readiness
+**Goal**: The Dockerfile Analyzer is fully integrated into the site's navigation, discoverable by search engines, and meets all quality and accessibility standards
+**Depends on**: Phase 24 (tool page complete), Phase 25 (content pages complete)
+**Requirements**: NAV-01, NAV-02, SEO-01, SEO-02, SEO-03, SEO-04, SEO-05, SEO-06
 **Success Criteria** (what must be TRUE):
-  1. A blog post titled "The Beauty Index" (or similar) appears in the blog listing at /blog/, renders as a full local MDX post with methodology explanation, scoring rubric, and editorial commentary
-  2. The blog post links to the overview page, at least 3 individual language pages, and the code comparison page — and those pages link back to the blog post
-**Plans**: 1 plan
+  1. The site header navigation includes a link to the Dockerfile Analyzer that is visible and accessible on all pages
+  2. Breadcrumb navigation appears on the tool page and all 40 rule documentation pages, with correct hierarchy (Home > Tools > Dockerfile Analyzer > Rules > [Code])
+  3. The tool page includes JSON-LD structured data using SoftwareApplication schema, and all 42 new pages (tool + 40 rules + blog post) appear in the sitemap with SEO-optimized meta descriptions
+  4. The homepage contains a callout section linking to the Dockerfile Analyzer, consistent with the existing Beauty Index callout pattern
+  5. Lighthouse audit scores 90+ on Performance, Accessibility, Best Practices, and SEO for the tool page; keyboard navigation works through the editor (with proper Tab escape), results panel, and rule pages; screen readers can access all analysis results
+**Plans**: TBD
 
-Plans:
-- [x] 20-01-PLAN.md — Blog post + bidirectional cross-links
-
-### Phase 21: SEO & Launch Readiness
-**Goal**: The Beauty Index section is fully integrated into site navigation, discoverable by search engines, and meets all quality standards
-**Depends on**: Phase 17, Phase 19, Phase 20 (all content must exist for cross-linking and auditing)
-**Requirements**: SEO-01, SEO-02, SEO-03, SEO-04, SEO-05, SEO-06, SEO-07
+### Phase 27: Shareability
+**Goal**: Users can share their Dockerfile analysis results — as a visual score badge image or as a URL that recreates the exact analysis
+**Depends on**: Phase 24 (score display must exist to capture)
+**Requirements**: SHARE-01, SHARE-02
 **Success Criteria** (what must be TRUE):
-  1. The site header navigation includes a "Beauty Index" link that takes users to /beauty-index/
-  2. All Beauty Index pages include JSON-LD structured data (Dataset/ItemList on overview, breadcrumbs on all pages) and appear in the sitemap
-  3. The homepage and at least 2 existing blog posts contain internal links to Beauty Index pages
-  4. Lighthouse audit scores 90+ on Performance, Accessibility, Best Practices, and SEO for the overview page, a language detail page, and the code comparison page
-  5. Keyboard navigation works across all Beauty Index pages — scoring table sort, tab switching, language navigation — and screen readers can access chart data via accessible alternatives
-**Plans**: 3 plans
-
-Plans:
-- [x] 21-01-PLAN.md — Navigation, structured data (JSON-LD), breadcrumbs, accessible chart alternatives, and sitemap verification
-- [x] 21-02-PLAN.md — Homepage and blog cross-linking, ScoringTable accessibility fixes
-- [x] 21-03-PLAN.md — Lighthouse audit, accessibility verification, and user sign-off
+  1. After analysis, users can download a PNG score badge image showing their overall score, letter grade, and category breakdown — suitable for sharing on social media or in documentation
+  2. Users can copy a shareable URL that encodes their Dockerfile content; opening that URL in a new browser loads the Dockerfile into the editor and triggers analysis, reproducing the same results
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20 -> 21
-Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel with Phase 17 if needed.
+Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
+Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before Phase 25/26 if needed. Phase 25 depends on both 23 and 24.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -183,7 +172,13 @@ Note: Phase 18 depends only on Phase 16 (not 17), so it could run in parallel wi
 | 19. Code Comparison | v1.3 | 2/2 | Complete | 2026-02-17 |
 | 20. Blog Content | v1.3 | 1/1 | Complete | 2026-02-17 |
 | 21. SEO & Launch | v1.3 | 3/3 | Complete | 2026-02-17 |
+| 22. Editor Foundation | v1.4 | 0/TBD | Not started | - |
+| 23. Rule Engine & Scoring | v1.4 | 0/TBD | Not started | - |
+| 24. Results Display | v1.4 | 0/TBD | Not started | - |
+| 25. Content & Rule Docs | v1.4 | 0/TBD | Not started | - |
+| 26. SEO & Launch | v1.4 | 0/TBD | Not started | - |
+| 27. Shareability | v1.4 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 — Phase 21 complete, v1.3 shipped*
+*Last updated: 2026-02-20 — v1.4 Dockerfile Analyzer roadmap added (Phases 22-27)*

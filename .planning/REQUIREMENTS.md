@@ -94,13 +94,51 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| EDIT-01 | Phase 22 | Pending |
+| EDIT-02 | Phase 22 | Pending |
+| EDIT-03 | Phase 22 | Pending |
+| EDIT-04 | Phase 22 | Pending |
+| EDIT-05 | Phase 22 | Pending |
+| EDIT-06 | Phase 22 | Pending |
+| EDIT-07 | Phase 22 | Pending |
+| EDIT-08 | Phase 22 | Pending |
+| RULE-01 | Phase 23 | Pending |
+| RULE-02 | Phase 23 | Pending |
+| RULE-03 | Phase 23 | Pending |
+| RULE-04 | Phase 23 | Pending |
+| RULE-05 | Phase 23 | Pending |
+| RULE-06 | Phase 23 | Pending |
+| RULE-07 | Phase 23 | Pending |
+| SCORE-01 | Phase 23 | Pending |
+| SCORE-02 | Phase 23 | Pending |
+| SCORE-03 | Phase 23 | Pending |
+| SCORE-04 | Phase 23 | Pending |
+| RESULT-01 | Phase 24 | Pending |
+| RESULT-02 | Phase 24 | Pending |
+| RESULT-03 | Phase 24 | Pending |
+| RESULT-04 | Phase 24 | Pending |
+| RESULT-05 | Phase 24 | Pending |
+| RESULT-06 | Phase 24 | Pending |
+| BLOG-01 | Phase 25 | Pending |
+| BLOG-02 | Phase 25 | Pending |
+| DOCS-01 | Phase 25 | Pending |
+| DOCS-02 | Phase 25 | Pending |
+| NAV-01 | Phase 26 | Pending |
+| NAV-02 | Phase 26 | Pending |
+| SEO-01 | Phase 26 | Pending |
+| SEO-02 | Phase 26 | Pending |
+| SEO-03 | Phase 26 | Pending |
+| SEO-04 | Phase 26 | Pending |
+| SEO-05 | Phase 26 | Pending |
+| SEO-06 | Phase 26 | Pending |
+| SHARE-01 | Phase 27 | Pending |
+| SHARE-02 | Phase 27 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 38 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 38
+- Mapped to phases: 38
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after initial definition*
+*Last updated: 2026-02-20 after roadmap creation (traceability populated)*
