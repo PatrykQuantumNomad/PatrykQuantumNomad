@@ -1,0 +1,233 @@
+---
+title: "39 Dockerfile Best Practices From a Kubernetes Architect"
+description: "A production-tested guide to writing secure, efficient, and maintainable Dockerfiles. Each rule explained with real-world consequences and fix examples. Try the free browser-based analyzer."
+publishedDate: 2026-02-20
+tags: ["docker", "kubernetes", "devops", "cloud-native", "security", "containers"]
+draft: false
+---
+
+import OpeningStatement from '../../components/blog/OpeningStatement.astro';
+import TldrSummary from '../../components/blog/TldrSummary.astro';
+import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
+import Callout from '../../components/blog/Callout.astro';
+
+<OpeningStatement>Most Dockerfiles in production right now have at least three preventable issues. I built a tool to find all of them.</OpeningStatement>
+
+After 17 years building cloud-native systems and adopting Kubernetes before it hit version 1.0, I have reviewed thousands of Dockerfiles. They come in pull requests, in vendor evaluations, in incident post-mortems where a bloated or misconfigured image was the root cause. The patterns repeat: hardcoded secrets in `ENV`, images running as root, 900 MB images that should be 90 MB, `CMD` instructions that silently swallow signals. Each of these is a production incident waiting to happen.
+
+I wrote the rules down. Then I turned them into an [analyzer you can run right now](/tools/dockerfile-analyzer/).
+
+This post walks through the 39 rules the analyzer checks, organized by category. Each rule is linked to its own documentation page with before/after code examples and detailed explanations. By the end, you will know what to fix, why it matters, and how to verify it automatically.
+
+<TldrSummary>
+
+- **39 rules** across **5 categories**: Security, Efficiency, Maintainability, Reliability, Best Practice
+- Scoring: **0-100** with letter grades, category-weighted by production impact
+- **100% client-side** -- your Dockerfile never leaves your browser
+- Based on Hadolint DL codes + custom PG rules from production Kubernetes experience
+- Try it now: [Dockerfile Analyzer](/tools/dockerfile-analyzer/)
+
+</TldrSummary>
+
+## Why Your Dockerfile Matters More Than You Think
+
+Dockerfiles are often the last thing engineers write and the first thing they forget. I get it. You have an application to ship. The Dockerfile is two dozen lines of boilerplate. It works. Move on.
+
+But that Dockerfile is the foundation of every container your application runs in. It defines the security surface: which OS libraries are installed, what user the process runs as, whether secrets leak into image layers. It determines your image size, which affects pull time on every deployment across every node in your cluster. It controls your build cache behavior, which decides whether your CI pipeline takes 45 seconds or 12 minutes. And it shapes container reliability: whether your process handles signals correctly, whether health checks exist, whether port declarations match reality.
+
+In Kubernetes, a bad Dockerfile compounds fast. A 900 MB image pulled across 50 nodes on a rolling update is 45 GB of network transfer. An image running as root with a writable filesystem is an escalation path waiting to be found. A missing `HEALTHCHECK` means Kubernetes relies solely on process exit codes to determine pod health, which misses entire classes of failure.
+
+The rules below are not academic. Every one of them comes from a production incident, a security audit finding, or a CI optimization that shaved minutes off deployment pipelines.
+
+## Security Rules: The Non-Negotiables
+
+Security rules carry the highest weight in the analyzer's scoring system at 30%. A single security violation can compromise an entire cluster. These are the rules I enforce as hard gates in every CI pipeline I manage.
+
+### Always Tag Your Base Images
+
+```dockerfile title="Bad: Unpinned base image"
+FROM python
+```
+
+```dockerfile title="Good: Pinned to specific version"
+FROM python:3.12-slim
+```
+
+The `:latest` tag is a moving target. What builds today may break tomorrow when the upstream maintainer pushes a new version. Worse, it makes your builds non-reproducible: the same Dockerfile produces different images depending on when you build it. In a Kubernetes environment, this means a rollback to "the same image" might actually deploy different software. Rule [DL3006](/tools/dockerfile-analyzer/rules/dl3006/) catches untagged base images, and [DL3007](/tools/dockerfile-analyzer/rules/dl3007/) flags explicit `:latest` usage.
+
+I have seen this cause outages twice: once when a Python base image bumped from 3.11 to 3.12 and broke a C extension, and once when an Alpine upgrade changed the `libc` version and segfaulted the application at startup. Pin your versions.
+
+### Never Expose Secrets in ENV or ARG
+
+```dockerfile title="Bad: Secret in ENV"
+ENV DATABASE_PASSWORD=hunter2
+ARG AWS_SECRET_ACCESS_KEY=AKIA...
+```
+
+```dockerfile title="Good: Use BuildKit secrets"
+RUN --mount=type=secret,id=db_password \
+    cat /run/secrets/db_password | setup-db
+```
+
+Every layer in a Docker image is an immutable tarball. If you set a secret via `ENV` or `ARG`, it is baked into the image metadata and can be extracted by anyone with `docker inspect` or `docker history --no-trunc`. Even if you `unset` it in a later layer, the original layer still contains the value. Rule [PG001](/tools/dockerfile-analyzer/rules/pg001/) scans for common secret patterns in `ENV` and `ARG` instructions -- passwords, API keys, tokens, and private keys.
+
+BuildKit's `--mount=type=secret` is the correct approach. The secret is mounted at build time, used, and never persisted to any image layer.
+
+### Do Not Run as Root
+
+```dockerfile title="Bad: No USER instruction (defaults to root)"
+FROM node:20-slim
+COPY . /app
+CMD ["node", "/app/server.js"]
+```
+
+```dockerfile title="Good: Explicit non-root user"
+FROM node:20-slim
+RUN groupadd -r app && useradd -r -g app app
+COPY --chown=app:app . /app
+USER app
+CMD ["node", "/app/server.js"]
+```
+
+Containers run as root by default. If an attacker exploits a vulnerability in your application, they get root inside the container -- and with certain misconfigurations (privileged mode, host mounts, or kernel exploits), that can escalate to root on the host. Rule [DL3002](/tools/dockerfile-analyzer/rules/dl3002/) flags Dockerfiles that explicitly set `USER root` in the final build stage.
+
+In Kubernetes, you can enforce this with `securityContext.runAsNonRoot: true` in your pod spec. But the defense-in-depth approach is to fix it at the Dockerfile level first.
+
+### Do Not COPY Sensitive Files
+
+```dockerfile title="Bad: COPY everything including secrets"
+COPY . /app
+```
+
+```dockerfile title="Good: Use .dockerignore and selective COPY"
+COPY package.json package-lock.json /app/
+COPY src/ /app/src/
+```
+
+`COPY . /app` copies your entire build context into the image, including `.env` files, `.git` directories, SSH keys, and anything else in the directory. Even if those files are deleted in a subsequent layer, they persist in earlier layers. Rule [PG003](/tools/dockerfile-analyzer/rules/pg003/) flags COPY instructions that include known sensitive file patterns. The fix is a proper `.dockerignore` file combined with explicit, selective `COPY` instructions.
+
+## Efficiency Rules: Smaller, Faster Builds
+
+Efficiency rules are weighted at 25%. Every unnecessary megabyte in your image is paid for on every pull, across every node, on every deployment.
+
+### Consolidate RUN Instructions
+
+```dockerfile title="Bad: Separate RUN per command"
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get install -y git
+RUN rm -rf /var/lib/apt/lists/*
+```
+
+```dockerfile title="Good: Single chained RUN"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl git && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+Each `RUN` instruction creates a new image layer. Four separate `RUN` commands mean four layers, four sets of filesystem metadata, and no opportunity for cleanup to reduce the size of earlier layers. Rule [DL3059](/tools/dockerfile-analyzer/rules/dl3059/) flags Dockerfiles with multiple consecutive `RUN` instructions that could be combined.
+
+The single-chain pattern also matters for cache invalidation. If your `apt-get update` is a separate layer from `apt-get install`, Docker may use a cached (stale) package index with a fresh install command, leading to "package not found" errors in CI.
+
+### Remove Package Manager Caches
+
+```dockerfile title="Bad: APT lists left in image"
+RUN apt-get update && apt-get install -y curl
+```
+
+```dockerfile title="Good: Clean up in the same layer"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+The `/var/lib/apt/lists/` directory contains downloaded package indices and typically adds 20-40 MB to your image. Since you never run `apt-get install` in a running container, these files serve no purpose. Rule [DL3009](/tools/dockerfile-analyzer/rules/dl3009/) catches missing cleanup. The same principle applies to pip's cache ([DL3042](/tools/dockerfile-analyzer/rules/dl3042/) flags missing `--no-cache-dir`) and apk's cache ([DL3019](/tools/dockerfile-analyzer/rules/dl3019/) flags missing `--no-cache`).
+
+Combined with `--no-install-recommends` (which rule [DL3015](/tools/dockerfile-analyzer/rules/dl3015/) checks for), these patterns routinely cut image sizes by 30-50%. On a Kubernetes cluster running hundreds of pods, that translates to faster scaling, shorter rollouts, and lower storage costs.
+
+## Maintainability, Reliability, and Best Practices
+
+The remaining three categories cover rules that prevent silent failures, improve readability, and align with community conventions.
+
+### Use JSON Format for CMD and ENTRYPOINT
+
+```dockerfile title="Bad: Shell form"
+CMD npm start
+ENTRYPOINT /app/entrypoint.sh
+```
+
+```dockerfile title="Good: Exec (JSON) form"
+CMD ["npm", "start"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+```
+
+Shell form wraps your command in `/bin/sh -c`, which means your process runs as a child of the shell. Signals like `SIGTERM` (sent by Kubernetes during graceful shutdown) go to the shell, not your application. The result: your application ignores the shutdown signal, Kubernetes waits for the termination grace period to expire, and then sends `SIGKILL`. That is 30 seconds of unnecessary downtime on every deployment. Rule [DL3025](/tools/dockerfile-analyzer/rules/dl3025/) flags shell-form `CMD` and `ENTRYPOINT` instructions.
+
+### Do Not Duplicate CMD or ENTRYPOINT
+
+```dockerfile title="Bad: Multiple CMD instructions"
+FROM node:20-slim
+COPY . /app
+CMD ["node", "worker.js"]
+CMD ["node", "server.js"]
+```
+
+Only the last `CMD` instruction in a Dockerfile takes effect. The earlier ones are silently ignored. This is almost always a mistake -- the author intended to run both processes, or copy-pasted from another Dockerfile without removing the original `CMD`. Rule [DL4003](/tools/dockerfile-analyzer/rules/dl4003/) flags multiple `CMD` instructions, and [DL4004](/tools/dockerfile-analyzer/rules/dl4004/) does the same for `ENTRYPOINT`. If you need multiple processes, use a process manager or separate containers.
+
+### Other Rules Worth Knowing
+
+The analyzer covers 39 rules total. A few more highlights:
+
+- **[DL3000](/tools/dockerfile-analyzer/rules/dl3000/)**: Use absolute paths in `WORKDIR` to avoid ambiguity about the working directory
+- **[DL4001](/tools/dockerfile-analyzer/rules/dl4001/)**: Pick either `wget` or `curl`, not both -- reduces image size and maintenance surface
+- **[DL3057](/tools/dockerfile-analyzer/rules/dl3057/)**: Add a `HEALTHCHECK` instruction so orchestrators know when your container is actually ready
+- **[DL3020](/tools/dockerfile-analyzer/rules/dl3020/)**: Use `COPY` instead of `ADD` unless you specifically need URL fetching or tar extraction
+- **[PG005](/tools/dockerfile-analyzer/rules/pg005/)**: Use consistent casing for Dockerfile instructions (all uppercase or all lowercase, not a mix)
+
+Each rule has its own documentation page with detailed explanations, bad/good code examples, and links to related rules. Browse them all from the [analyzer tool page](/tools/dockerfile-analyzer/).
+
+## How the Analyzer Works: A Browser-Based Approach
+
+Most Dockerfile linters require you to install a CLI tool, pipe your file through it, and parse the output. Some require Docker itself to be running. I wanted something different: an analyzer you can use in 5 seconds from any device, with zero installation, and with a guarantee that your code stays private.
+
+### Why Browser-Based
+
+The Dockerfile Analyzer runs entirely in your browser. When you paste a Dockerfile and click Analyze, the analysis happens in JavaScript on your machine. No server receives your code. No API call is made. No Dockerfile is logged, stored, or transmitted.
+
+This was a deliberate architectural choice. Dockerfiles often contain infrastructure details -- internal registry URLs, service names, organizational patterns -- that you may not want to share with a third-party service. By running client-side, the tool removes that concern entirely. It also means zero backend infrastructure to maintain, zero server costs, and instant results with no network latency.
+
+<KeyTakeaway title="Privacy by Architecture">
+The analyzer runs entirely in your browser. Your Dockerfile never touches a server. There is no backend, no API, no telemetry. What you paste stays on your machine.
+</KeyTakeaway>
+
+### The Technology Stack
+
+The editor is built with **CodeMirror 6**, a modern extensible code editor framework. CodeMirror provides syntax highlighting, line numbers, gutter markers for violations, and the editing experience you would expect from a code editor. It runs as a React island inside an Astro site, hydrated with `client:only="react"` to avoid server-side rendering of browser-dependent code.
+
+For Dockerfile parsing, the analyzer uses **dockerfile-ast**, a TypeScript library that produces a full abstract syntax tree from Dockerfile source text. It bundles at just 21 KB gzipped -- small enough that the entire analyzer loads faster than a typical analytics script. The AST gives the rule engine structured access to every instruction, argument, flag, and comment in the Dockerfile, which is far more reliable than regex-based pattern matching.
+
+### The Scoring Algorithm
+
+The analyzer produces a score from 0 to 100, mapped to letter grades (A+ through F). Scoring uses category weights that reflect production impact:
+
+- **Security**: 30% (breaches are catastrophic)
+- **Efficiency**: 25% (affects every build and deployment)
+- **Maintainability**: 20% (affects long-term velocity)
+- **Reliability**: 15% (affects runtime stability)
+- **Best Practice**: 10% (community conventions)
+
+A clever detail: the scoring uses a **diminishing returns formula** so that multiple violations of the same category do not stack linearly. The fifth security violation hurts less than the first. This prevents a single category from dominating the score and avoids double-penalizing Dockerfiles that have one systemic issue (like missing cleanup across several `RUN` instructions).
+
+### The Rule Engine
+
+Each of the 39 rules is implemented as a self-contained TypeScript module with a single `check()` function. The function receives the parsed AST and raw text, then returns an array of violations with line numbers, messages, and severity levels. This one-file-per-rule architecture makes it straightforward to add new rules, audit existing ones, and test each rule in isolation.
+
+Rules operate on the AST, not on raw text. This means they understand Dockerfile semantics: they know which build stage a `USER` instruction belongs to, whether a `WORKDIR` is relative or absolute, and whether an `ENV` value contains a known secret pattern. AST-based analysis is what separates this from a glorified grep.
+
+## Start Analyzing
+
+If you have made it this far, you know what good Dockerfiles look like. Now find out what yours actually scores.
+
+The [Dockerfile Analyzer](/tools/dockerfile-analyzer/) is free, private, and instant. Paste your Dockerfile, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes before/after code examples and explanations of why the rule exists.
+
+I built this tool because I got tired of giving the same Dockerfile feedback in code reviews. If it saves you one production incident or one hour of debugging an image size problem, it was worth it.
