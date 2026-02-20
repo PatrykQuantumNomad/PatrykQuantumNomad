@@ -1,91 +1,92 @@
 # Requirements: patrykgolabek.dev
 
-**Defined:** 2026-02-17
+**Defined:** 2026-02-20
 **Core Value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for The Beauty Index milestone. Each maps to roadmap phases.
+Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
-### Data Foundation
+### Editor Foundation
 
-- [ ] **DATA-01**: Language data schema (languages.json) with Zod validation for all 25 languages — scores across 6 dimensions, metadata, character sketches, tier assignments
-- [ ] **DATA-02**: Shared radar SVG math utility (polar-to-cartesian coordinate conversion) usable by both Astro components and OG image generation
-- [ ] **DATA-03**: Content collection integration via Astro 5 file() loader for language data
-- [ ] **DATA-04**: Greek symbol rendering validated across site fonts with fallback if needed
+- [ ] **EDIT-01**: CodeMirror 6 editor with Dockerfile syntax highlighting via @codemirror/legacy-modes
+- [ ] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
+- [ ] **EDIT-03**: Pre-loaded sample Dockerfile with deliberate issues across all rule categories
+- [ ] **EDIT-04**: Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis
+- [ ] **EDIT-05**: Dark-only editor theme (oneDark or custom dark theme matching site aesthetic)
+- [ ] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
+- [ ] **EDIT-07**: React island with `client:only="react"` directive (CodeMirror cannot be SSR'd)
+- [ ] **EDIT-08**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 
-### Chart Components
+### Rule Engine
 
-- [ ] **CHART-01**: Build-time SVG radar chart component showing 6 dimensions per language — zero client-side JavaScript
-- [ ] **CHART-02**: Build-time SVG ranking bar chart component showing all 25 languages sorted by total score
-- [ ] **CHART-03**: Tier badge component with color-coded visual indicators (Beautiful/Handsome/Practical/Workhorses)
-- [ ] **CHART-04**: Score breakdown display component showing individual dimension scores
+- [ ] **RULE-01**: 15 Tier 1 critical rules (DL3006, DL3007, DL4000, DL3020, DL3025, DL3000, DL3004, DL3002, DL3059, DL3014, DL3015, DL3008, DL4003, DL4004, DL3061)
+- [ ] **RULE-02**: 15 Tier 2 high-value rules (DL3003, DL3009, DL3011, DL3027, DL4006, DL3042, DL3013, DL3045, DL3019, DL3012, DL3024, plus custom: secrets in ENV/ARG, curl-pipe-shell, COPY sensitive files)
+- [ ] **RULE-03**: 10 Tier 3 nice-to-have rules (DL4001, DL3057, DL3001, DL3022, inconsistent casing, legacy ENV format, yum/dnf/zypper rules)
+- [ ] **RULE-04**: Modular rule architecture — LintRule interface, one file per rule, category subdirectories
+- [ ] **RULE-05**: Expert-voice explanation per rule with "why this matters in production" architect perspective
+- [ ] **RULE-06**: Actionable fix suggestion per rule with before/after code examples
+- [ ] **RULE-07**: Rule codes: DL-prefixed (Hadolint-compatible) and PG-prefixed (custom rules)
 
-### Overview Page
+### Scoring
 
-- [ ] **OVER-01**: Overview page at /beauty-index/ with ranking chart, scoring table, and language grid
-- [ ] **OVER-02**: Scoring table sortable by individual dimensions (click column header to re-sort)
-- [ ] **OVER-03**: 4-tier visual grouping with color-coded sections and tier labels
-- [ ] **OVER-04**: All 25 radar charts displayed in overview grid, each linking to detail page
-- [ ] **OVER-05**: Responsive layout across mobile, tablet, and desktop
+- [ ] **SCORE-01**: Category-weighted scoring algorithm (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%)
+- [ ] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F)
+- [ ] **SCORE-03**: Per-category sub-scores displayed alongside aggregate
+- [ ] **SCORE-04**: Transparent deductions visible per finding
 
-### Language Detail Pages
+### Results Display
 
-- [ ] **LANG-01**: Per-language detail pages at /beauty-index/[slug]/ for all 25 languages via getStaticPaths
-- [ ] **LANG-02**: Radar chart with full 6-dimension score breakdown on each detail page
-- [ ] **LANG-03**: Character sketch narrative (2-3 sentence personality description) per language
-- [ ] **LANG-04**: Signature code snippet with syntax highlighting per language
-- [ ] **LANG-05**: Tier badge and total score prominently displayed
-- [ ] **LANG-06**: Navigation between languages (previous/next) and back to overview
-
-### Code Comparison
-
-- [ ] **CODE-01**: Code comparison page at /beauty-index/code/ with feature-tabbed layout
-- [ ] **CODE-02**: 10 feature tabs (Variable Declaration, If/Else, Loops, Functions, Structs, Pattern Matching, Error Handling, String Interpolation, List Operations, Signature Idiom)
-- [ ] **CODE-03**: All 25 languages displayed per tab with syntax-highlighted code blocks
-- [ ] **CODE-04**: Tab-based lazy rendering to keep DOM under performance threshold
-- [ ] **CODE-05**: Feature support matrix table (Quick-Reference from source data)
+- [ ] **RESULT-01**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
+- [ ] **RESULT-02**: Score gauge component (visual gauge with letter grade)
+- [ ] **RESULT-03**: Category breakdown panel with sub-scores per dimension
+- [ ] **RESULT-04**: Violation list grouped by severity with expandable details
+- [ ] **RESULT-05**: Click-to-navigate from results panel to corresponding editor line
+- [ ] **RESULT-06**: Clean Dockerfile empty state ("No issues found" with congratulatory message)
 
 ### Shareability
 
-- [ ] **SHARE-01**: Build-time OG images with radar chart visuals for overview page and all 25 language pages
-- [ ] **SHARE-02**: Download-as-image button on radar charts for social media sharing
-- [ ] **SHARE-03**: Web Share API integration on mobile devices
-- [ ] **SHARE-04**: Copy-to-clipboard for chart images
+- [ ] **SHARE-01**: Score badge download as PNG image for social media sharing
+- [ ] **SHARE-02**: URL state encoding — Dockerfile content in URL hash for shareable analysis links
 
-### Blog Content
+### Content
 
-- [ ] **BLOG-01**: Full Beauty Index methodology blog post as local MDX content in blog collection
-- [ ] **BLOG-02**: Cross-links between blog post and Beauty Index pages (bidirectional)
+- [ ] **BLOG-01**: Companion blog post covering Dockerfile best practices and tool architecture deep-dive
+- [ ] **BLOG-02**: Cross-links between blog post and tool page (bidirectional)
+- [ ] **DOCS-01**: 40 rule documentation pages at /tools/dockerfile-analyzer/rules/[code]
+- [ ] **DOCS-02**: Each rule page includes: explanation, fix suggestion, before/after code, related rules
 
 ### SEO & Navigation
 
-- [ ] **SEO-01**: Navigation link added to site header for Beauty Index section
-- [ ] **SEO-02**: JSON-LD structured data on Beauty Index pages (Dataset/ItemList schema)
-- [ ] **SEO-03**: Breadcrumb navigation and BreadcrumbJsonLd on all Beauty Index pages
-- [ ] **SEO-04**: Internal cross-linking from existing pages (homepage, blog) to Beauty Index
-- [ ] **SEO-05**: All Beauty Index pages in sitemap
-- [ ] **SEO-06**: Lighthouse 90+ audit on all Beauty Index page types
-- [ ] **SEO-07**: Accessibility audit (keyboard navigation, screen reader, WCAG 2.1 AA)
+- [ ] **NAV-01**: Header navigation link for Dockerfile Analyzer
+- [ ] **NAV-02**: Breadcrumb navigation on tool page and rule documentation pages
+- [ ] **SEO-01**: JSON-LD structured data (SoftwareApplication schema) on tool page
+- [ ] **SEO-02**: Homepage callout linking to the Dockerfile Analyzer
+- [ ] **SEO-03**: All tool and rule pages in sitemap
+- [ ] **SEO-04**: SEO-optimized meta descriptions for tool page and all 40 rule pages
+- [ ] **SEO-05**: Lighthouse 90+ audit on tool page
+- [ ] **SEO-06**: Accessibility audit (keyboard navigation, screen reader, WCAG 2.1 AA)
 
 ## Future Requirements
 
-### v2 Enhancements
+### v1.5 Enhancements
 
-- **COMP-01**: Overlay comparison mode — pick 2-3 languages and overlay their radar charts
-- **ANIM-01**: Animated chart entrance on scroll via GSAP ScrollTrigger
-- **DARK-01**: Full dark mode support for all Beauty Index charts and components
-- **HIST-01**: Historical tracking of score changes over time
+- **THEME-01**: Full dark/light mode sync for CodeMirror editor (Compartment-based theme switching)
+- **SHARE-03**: Social media Open Graph image with score badge for tool page
+- **RULE-08**: Additional custom rules based on user feedback
+- **PERF-01**: Web Worker for lint engine if performance requires it
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| User voting / crowd-sourced scores | Destroys the editorial thesis — this is one person's informed opinion |
-| Real-time GitHub/Stack Overflow data | Conflates beauty with popularity — the entire point is they're different |
-| Comments section | Let debate happen on social media where it generates backlinks and engagement |
-| Client-side charting library (Chart.js, D3, Recharts) | Static data doesn't need runtime JS — build-time SVG maintains Lighthouse 90+ |
-| Language addition form | Curated list of 25, not an open database |
+| AI-powered analysis | Contradicts the human-expertise positioning — this is an expert architect's rules, not an LLM |
+| ShellCheck integration | Requires Haskell runtime, no browser-compatible implementation exists |
+| Auto-fix / auto-correct | Too many edge cases, risks generating broken Dockerfiles |
+| Real-time as-you-type linting | Debounced on-analyze is better UX than constant red squigglies during editing |
+| CI/CD API endpoint | Static site architecture precludes server-side processing |
+| Server-side analysis | All processing must be client-side — no user data transmitted |
+| Monaco Editor | 5-10 MB bundle, overkill for a single-language editor |
 
 ## Traceability
 
@@ -93,49 +94,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 16 | Pending |
-| DATA-02 | Phase 16 | Pending |
-| DATA-03 | Phase 16 | Pending |
-| DATA-04 | Phase 16 | Pending |
-| CHART-01 | Phase 16 | Pending |
-| CHART-02 | Phase 16 | Pending |
-| CHART-03 | Phase 16 | Pending |
-| CHART-04 | Phase 16 | Pending |
-| OVER-01 | Phase 17 | Pending |
-| OVER-02 | Phase 17 | Pending |
-| OVER-03 | Phase 17 | Pending |
-| OVER-04 | Phase 17 | Pending |
-| OVER-05 | Phase 17 | Pending |
-| LANG-01 | Phase 17 | Pending |
-| LANG-02 | Phase 17 | Pending |
-| LANG-03 | Phase 17 | Pending |
-| LANG-04 | Phase 17 | Pending |
-| LANG-05 | Phase 17 | Pending |
-| LANG-06 | Phase 17 | Pending |
-| SHARE-01 | Phase 18 | Pending |
-| SHARE-02 | Phase 18 | Pending |
-| SHARE-03 | Phase 18 | Pending |
-| SHARE-04 | Phase 18 | Pending |
-| CODE-01 | Phase 19 | Pending |
-| CODE-02 | Phase 19 | Pending |
-| CODE-03 | Phase 19 | Pending |
-| CODE-04 | Phase 19 | Pending |
-| CODE-05 | Phase 19 | Pending |
-| BLOG-01 | Phase 20 | Pending |
-| BLOG-02 | Phase 20 | Pending |
-| SEO-01 | Phase 21 | Pending |
-| SEO-02 | Phase 21 | Pending |
-| SEO-03 | Phase 21 | Pending |
-| SEO-04 | Phase 21 | Pending |
-| SEO-05 | Phase 21 | Pending |
-| SEO-06 | Phase 21 | Pending |
-| SEO-07 | Phase 21 | Pending |
+| (populated by roadmapper) | | |
 
 **Coverage:**
-- v1.3 requirements: 37 total
-- Mapped to phases: 37
-- Unmapped: 0
+- v1.4 requirements: 38 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 38
 
 ---
-*Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 — traceability updated with phase mappings*
+*Requirements defined: 2026-02-20*
+*Last updated: 2026-02-20 after initial definition*
