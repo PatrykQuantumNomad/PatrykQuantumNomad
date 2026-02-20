@@ -1,6 +1,6 @@
 import type { LintRule, RuleSeverity, RuleCategory } from '../types';
 
-// Security rules (7)
+// Security rules (10)
 import { DL3006 } from './security/DL3006-tag-version';
 import { DL3007 } from './security/DL3007-no-latest';
 import { DL3008 } from './security/DL3008-pin-apt-versions';
@@ -8,24 +8,41 @@ import { DL3020 } from './security/DL3020-use-copy-not-add';
 import { DL3004 } from './security/DL3004-no-sudo';
 import { DL3002 } from './security/DL3002-no-root-user';
 import { DL3061 } from './security/DL3061-from-first';
+import { PG001 } from './security/PG001-secrets-in-env';
+import { PG002 } from './security/PG002-curl-pipe-shell';
+import { PG003 } from './security/PG003-copy-sensitive-files';
 
-// Efficiency rules (3)
+// Efficiency rules (8)
 import { DL3059 } from './efficiency/DL3059-consolidate-runs';
 import { DL3014 } from './efficiency/DL3014-use-apt-y';
 import { DL3015 } from './efficiency/DL3015-no-install-recommends';
+import { DL3003 } from './efficiency/DL3003-use-workdir';
+import { DL3009 } from './efficiency/DL3009-remove-apt-lists';
+import { DL4006 } from './efficiency/DL4006-set-pipefail';
+import { DL3042 } from './efficiency/DL3042-pip-no-cache-dir';
+import { DL3019 } from './efficiency/DL3019-use-apk-no-cache';
 
-// Maintainability rules (3)
+// Maintainability rules (5)
 import { DL4000 } from './maintainability/DL4000-no-maintainer';
 import { DL3025 } from './maintainability/DL3025-use-json-cmd';
 import { DL3000 } from './maintainability/DL3000-absolute-workdir';
+import { DL3045 } from './maintainability/DL3045-copy-relative-workdir';
+import { PG004 } from './maintainability/PG004-legacy-env-format';
 
-// Reliability rules (2)
+// Reliability rules (5)
 import { DL4003 } from './reliability/DL4003-multiple-cmd';
 import { DL4004 } from './reliability/DL4004-multiple-entrypoint';
+import { DL3011 } from './reliability/DL3011-valid-port';
+import { DL3012 } from './reliability/DL3012-one-healthcheck';
+import { DL3024 } from './reliability/DL3024-unique-from-alias';
+
+// Best Practice rules (2)
+import { DL3027 } from './best-practice/DL3027-no-apt-use-apt-get';
+import { DL3013 } from './best-practice/DL3013-pin-pip-versions';
 
 // Rule registry -- all rules exported as a flat array
 export const allRules: LintRule[] = [
-  // Security
+  // Security (10)
   DL3006,
   DL3007,
   DL3008,
@@ -33,17 +50,33 @@ export const allRules: LintRule[] = [
   DL3004,
   DL3002,
   DL3061,
-  // Efficiency
+  PG001,
+  PG002,
+  PG003,
+  // Efficiency (8)
   DL3059,
   DL3014,
   DL3015,
-  // Maintainability
+  DL3003,
+  DL3009,
+  DL4006,
+  DL3042,
+  DL3019,
+  // Maintainability (5)
   DL4000,
   DL3025,
   DL3000,
-  // Reliability
+  DL3045,
+  PG004,
+  // Reliability (5)
   DL4003,
   DL4004,
+  DL3011,
+  DL3012,
+  DL3024,
+  // Best Practice (2)
+  DL3027,
+  DL3013,
 ];
 
 /** Look up a rule by its ID (e.g., "DL3006"). Returns undefined if not found. */
