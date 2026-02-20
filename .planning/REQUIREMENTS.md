@@ -9,14 +9,14 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### Editor Foundation
 
-- [ ] **EDIT-01**: CodeMirror 6 editor with Dockerfile syntax highlighting via @codemirror/legacy-modes
-- [ ] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
+- [x] **EDIT-01**: CodeMirror 6 editor with Dockerfile syntax highlighting via @codemirror/legacy-modes
+- [x] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
 - [x] **EDIT-03**: Pre-loaded sample Dockerfile with deliberate issues across all rule categories
-- [ ] **EDIT-04**: Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis
-- [ ] **EDIT-05**: Dark-only editor theme (oneDark or custom dark theme matching site aesthetic)
-- [ ] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
+- [x] **EDIT-04**: Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis
+- [x] **EDIT-05**: Dark-only editor theme (oneDark or custom dark theme matching site aesthetic)
+- [x] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
 - [x] **EDIT-07**: React island with `client:only="react"` directive (CodeMirror cannot be SSR'd)
-- [ ] **EDIT-08**: View Transitions lifecycle — destroy/recreate EditorView on navigation
+- [x] **EDIT-08**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 
 ### Rule Engine
 
@@ -94,14 +94,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EDIT-01 | Phase 22 | Pending |
-| EDIT-02 | Phase 22 | Pending |
+| EDIT-01 | Phase 22 | Complete |
+| EDIT-02 | Phase 22 | Complete |
 | EDIT-03 | Phase 22 | Complete |
-| EDIT-04 | Phase 22 | Pending |
-| EDIT-05 | Phase 22 | Pending |
-| EDIT-06 | Phase 22 | Pending |
+| EDIT-04 | Phase 22 | Complete |
+| EDIT-05 | Phase 22 | Complete |
+| EDIT-06 | Phase 22 | Complete |
 | EDIT-07 | Phase 22 | Complete |
-| EDIT-08 | Phase 22 | Pending |
+| EDIT-08 | Phase 22 | Complete |
 | RULE-01 | Phase 23 | Pending |
 | RULE-02 | Phase 23 | Pending |
 | RULE-03 | Phase 23 | Pending |

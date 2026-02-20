@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 22 (Editor Foundation & Technology Validation)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 23 (Rule Engine & Scoring)
 
 ## Current Position
 
-Phase: 22 of 27 (Editor Foundation & Technology Validation)
-Plan: 1 of 2 complete
-Status: Executing phase 22
-Last activity: 2026-02-20 — Plan 22-01 complete (go/no-go gate PASSED, foundation modules created)
+Phase: 23 of 27 (Rule Engine & Scoring)
+Plan: 0 of TBD complete
+Status: Phase 22 complete, ready for Phase 23
+Last activity: 2026-02-20 — Phase 22 complete (editor island at /tools/dockerfile-analyzer/ working end-to-end)
 
-Progress: [####################..........] 0% of v1.4 (0/6 phases)
+Progress: [#####.........................] 17% of v1.4 (1/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 45 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 1 v1.4)
+- Total plans completed: 47 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 3 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [####################..........] 0% of v1.4 (0/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 1 | 38 | In progress |
-| **Total** | **27** | **45** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 3 | 38 | In progress |
+| **Total** | **27** | **47** | **152** | |
 
 ## Accumulated Context
 
@@ -51,6 +51,9 @@ v1.4 execution decisions (Phase 22):
 - dockerfile-ast GO: bundles at 21 KB gzipped (58% under 50 KB budget), no CJS warnings
 - DockerfileParser.parse() accepts plain string directly -- no TextDocument adapter needed
 - Pre-existing tsc errors in open-graph/*.png.ts are out of scope
+- analyzeRef pattern: wrap onAnalyze in useRef to avoid EditorView re-creation on render
+- lintGutter() without linter(): enables setDiagnostics gutter markers without real-time linting
+- Empty deps array for useCodeMirror useEffect: editor created once, destroyed on unmount only
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 22-01-PLAN.md (go/no-go gate + foundation modules)
+Stopped at: Completed Phase 22 (22-02-PLAN.md -- CodeMirror editor island)
 Resume file: None
-Next: Execute 22-02-PLAN.md (CodeMirror editor island)
+Next: Research and plan Phase 23 (Rule Engine & Scoring)
