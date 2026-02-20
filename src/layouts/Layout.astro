@@ -124,6 +124,15 @@ const websiteSchema = {
       />
     </noscript>
 
+    <!-- Google Analytics -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-Z0PWW9KH5R"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Z0PWW9KH5R');
+    </script>
+
     <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-text-primary)]">
