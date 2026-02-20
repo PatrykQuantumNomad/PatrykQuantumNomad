@@ -1,0 +1,182 @@
+---
+import { Code } from 'astro:components';
+import Layout from '../../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../../components/BreadcrumbJsonLd.astro';
+import { allRules } from '../../../../lib/tools/dockerfile-analyzer/rules/index';
+import { getRelatedRules } from '../../../../lib/tools/dockerfile-analyzer/rules/related';
+import type { LintRule, RuleSeverity, RuleCategory } from '../../../../lib/tools/dockerfile-analyzer/types';
+
+export function getStaticPaths() {
+  return allRules.map((rule) => ({
+    params: { code: rule.id.toLowerCase() },
+    props: { rule },
+  }));
+}
+
+interface Props {
+  rule: LintRule;
+}
+
+const { rule } = Astro.props;
+const relatedRules = getRelatedRules(rule.id);
+
+const severityLabel: Record<RuleSeverity, string> = {
+  error: 'Error',
+  warning: 'Warning',
+  info: 'Info',
+};
+
+const categoryLabel: Record<RuleCategory, string> = {
+  security: 'Security',
+  efficiency: 'Efficiency',
+  maintainability: 'Maintainability',
+  reliability: 'Reliability',
+  'best-practice': 'Best Practice',
+};
+
+const severityColor: Record<RuleSeverity, { bg: string; text: string }> = {
+  error: { bg: 'bg-red-100', text: 'text-red-700' },
+  warning: { bg: 'bg-amber-100', text: 'text-amber-700' },
+  info: { bg: 'bg-blue-100', text: 'text-blue-700' },
+};
+
+const pageTitle = `${rule.id}: ${rule.title} -- Dockerfile Analyzer`;
+const truncatedExplanation = rule.explanation.length > 155
+  ? rule.explanation.slice(0, 155) + '...'
+  : rule.explanation;
+const pageDesc = truncatedExplanation;
+const pageUrl = new URL(`/tools/dockerfile-analyzer/rules/${rule.id.toLowerCase()}/`, Astro.site).toString();
+const siteBase = (Astro.site?.toString() ?? 'https://patrykgolabek.dev').replace(/\/$/, '');
+---
+
+<Layout title={pageTitle} description={pageDesc}>
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+    {/* Visual breadcrumb navigation */}
+    <nav aria-label="Breadcrumb" class="mb-8 text-sm text-[var(--color-text-secondary)]">
+      <ol class="flex flex-wrap items-center gap-1">
+        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><a href="/tools/" class="hover:text-[var(--color-accent)] transition-colors">Tools</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><a href="/tools/dockerfile-analyzer/" class="hover:text-[var(--color-accent)] transition-colors">Dockerfile Analyzer</a></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><span class="text-[var(--color-text-primary)]">Rules</span></li>
+        <li aria-hidden="true" class="mx-1">/</li>
+        <li><span aria-current="page" class="text-[var(--color-text-primary)] font-medium">{rule.id}</span></li>
+      </ol>
+    </nav>
+
+    {/* Header section */}
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
+        {rule.id}: {rule.title}
+      </h1>
+      <div class="flex flex-wrap gap-3">
+        <span class:list={[
+          'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
+          severityColor[rule.severity].bg,
+          severityColor[rule.severity].text,
+        ]}>
+          {severityLabel[rule.severity]}
+        </span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+          {categoryLabel[rule.category]}
+        </span>
+      </div>
+    </header>
+
+    {/* Explanation section */}
+    <section class="mb-10">
+      <h2 class="text-2xl font-heading font-bold mb-4">Why This Matters</h2>
+      <div class="prose max-w-none">
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{rule.explanation}</p>
+      </div>
+    </section>
+
+    {/* How to Fix section */}
+    <section class="mb-10">
+      <h2 class="text-2xl font-heading font-bold mb-4">How to Fix</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed mb-6">{rule.fix.description}</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <h3 class="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Before (incorrect)</h3>
+          <Code code={rule.fix.beforeCode} lang="dockerfile" />
+        </div>
+        <div>
+          <h3 class="text-sm font-medium text-[var(--color-text-secondary)] mb-2">After (correct)</h3>
+          <Code code={rule.fix.afterCode} lang="dockerfile" />
+        </div>
+      </div>
+    </section>
+
+    {/* Rule Details section */}
+    <section class="mb-10">
+      <h2 class="text-2xl font-heading font-bold mb-4">Rule Details</h2>
+      <dl class="space-y-3">
+        <div class="flex gap-3">
+          <dt class="text-[var(--color-text-secondary)] min-w-[8rem]">Rule Code</dt>
+          <dd class="font-medium text-[var(--color-text-primary)]">{rule.id}</dd>
+        </div>
+        <div class="flex gap-3">
+          <dt class="text-[var(--color-text-secondary)] min-w-[8rem]">Severity</dt>
+          <dd class="font-medium text-[var(--color-text-primary)]">{severityLabel[rule.severity]}</dd>
+        </div>
+        <div class="flex gap-3">
+          <dt class="text-[var(--color-text-secondary)] min-w-[8rem]">Category</dt>
+          <dd class="font-medium text-[var(--color-text-primary)]">{categoryLabel[rule.category]}</dd>
+        </div>
+      </dl>
+    </section>
+
+    {/* Related Rules section */}
+    {relatedRules.length > 0 && (
+      <section class="mb-10">
+        <h2 class="text-2xl font-heading font-bold mb-4">Related Rules</h2>
+        <div class="space-y-3">
+          {relatedRules.map((related) => (
+            <a
+              href={`/tools/dockerfile-analyzer/rules/${related.id.toLowerCase()}/`}
+              class="block p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors"
+            >
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-medium text-[var(--color-text-primary)]">{related.id}</span>
+                <span class:list={[
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                  severityColor[related.severity].bg,
+                  severityColor[related.severity].text,
+                ]}>
+                  {severityLabel[related.severity]}
+                </span>
+              </div>
+              <p class="mt-1 text-[var(--color-text-secondary)] text-sm">{related.title}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* Back-links footer */}
+    <footer class="pt-8 border-t border-[var(--color-border)] flex flex-col sm:flex-row gap-4">
+      <a
+        href="/tools/dockerfile-analyzer/"
+        class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium"
+      >
+        &larr; Try the Dockerfile Analyzer
+      </a>
+      <a
+        href="/blog/dockerfile-best-practices/"
+        class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium"
+      >
+        Read the best practices guide &rarr;
+      </a>
+    </footer>
+  </article>
+
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: siteBase },
+    { name: 'Tools', url: `${siteBase}/tools/` },
+    { name: 'Dockerfile Analyzer', url: `${siteBase}/tools/dockerfile-analyzer/` },
+    { name: rule.id, url: pageUrl },
+  ]} />
+</Layout>
