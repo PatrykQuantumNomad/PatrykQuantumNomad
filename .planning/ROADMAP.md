@@ -100,8 +100,10 @@ Plans:
   3. The overall score (0-100 with letter grade A+ through F) reflects category weights (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%) — a security-only violation produces a larger score drop than a best-practice-only violation of equal count
   4. Per-category sub-scores are computed alongside the aggregate, and each deduction is traceable to a specific finding
   5. A clean Dockerfile (no violations) scores 100/A+; the pre-loaded sample Dockerfile scores in a range that demonstrates meaningful differentiation (not clustering at 85-100)
-**Plans**: TBD
-**Research flag**: Scoring weight calibration requires testing against real-world Dockerfiles before finalizing
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Foundation: expanded types, rule engine, scorer, 15 Tier 1 rules, EditorPanel integration
+- [ ] 23-02-PLAN.md — Remaining rules: 15 Tier 2 + 9 Tier 3 rules, sample Dockerfile calibration
 
 ### Phase 24: Results Display & Interaction
 **Goal**: Users see their Dockerfile analysis results through rich visual feedback — inline editor annotations, a score gauge, category breakdown, and an interactive violation list — all driven by real rule engine output
@@ -176,7 +178,7 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 20. Blog Content | v1.3 | 1/1 | Complete | 2026-02-17 |
 | 21. SEO & Launch | v1.3 | 3/3 | Complete | 2026-02-17 |
 | 22. Editor Foundation | v1.4 | 2/2 | Complete | 2026-02-20 |
-| 23. Rule Engine & Scoring | v1.4 | 0/TBD | Not started | - |
+| 23. Rule Engine & Scoring | v1.4 | 0/2 | Not started | - |
 | 24. Results Display | v1.4 | 0/TBD | Not started | - |
 | 25. Content & Rule Docs | v1.4 | 0/TBD | Not started | - |
 | 26. SEO & Launch | v1.4 | 0/TBD | Not started | - |
@@ -184,4 +186,4 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-20 — Phase 22 complete (2/2 plans)*
+*Last updated: 2026-02-20 — Phase 23 planned (2 plans)*
