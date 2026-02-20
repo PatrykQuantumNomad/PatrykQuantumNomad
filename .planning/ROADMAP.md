@@ -115,7 +115,10 @@ Plans:
   3. A category breakdown panel shows sub-scores for each of the 5 scoring dimensions (Security, Efficiency, Maintainability, Reliability, Best Practice) as visual bars or similar indicators
   4. Clicking a violation in the results panel scrolls the editor to and highlights the corresponding line — the connection between finding and source code is one click
   5. Analyzing a clean Dockerfile (no violations) shows a congratulatory empty state message ("No issues found") instead of an empty results panel
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 24-01-PLAN.md — Editor infrastructure: severity color overrides, EditorView nanostore ref, highlight-line extension, stale results detection
+- [ ] 24-02-PLAN.md — Results UI components: ScoreGauge, CategoryBreakdown, ViolationList, EmptyState, ResultsPanel rewrite with click-to-navigate
 
 ### Phase 25: Content & Rule Documentation
 **Goal**: Every rule has its own SEO-optimized documentation page, and a companion blog post covers Dockerfile best practices and the tool's architecture — creating 42 new indexable URLs
@@ -179,11 +182,11 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 21. SEO & Launch | v1.3 | 3/3 | Complete | 2026-02-17 |
 | 22. Editor Foundation | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 23. Rule Engine & Scoring | v1.4 | 2/2 | Complete | 2026-02-20 |
-| 24. Results Display | v1.4 | 0/TBD | Not started | - |
+| 24. Results Display | v1.4 | 0/2 | Planned | - |
 | 25. Content & Rule Docs | v1.4 | 0/TBD | Not started | - |
 | 26. SEO & Launch | v1.4 | 0/TBD | Not started | - |
 | 27. Shareability | v1.4 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-20 — Phase 23 complete (2/2 plans)*
+*Last updated: 2026-02-20 — Phase 24 planned (2 plans)*
