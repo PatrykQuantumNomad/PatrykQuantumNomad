@@ -143,7 +143,11 @@ Plans:
   3. The tool page includes JSON-LD structured data using SoftwareApplication schema, and all 41 new pages (tool + 39 rules + blog post) appear in the sitemap with SEO-optimized meta descriptions
   4. The homepage contains a callout section linking to the Dockerfile Analyzer, consistent with the existing Beauty Index callout pattern
   5. Lighthouse audit scores 90+ on Performance, Accessibility, Best Practices, and SEO for the tool page; keyboard navigation works through the editor (with proper Tab escape), results panel, and rule pages; screen readers can access all analysis results
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 26-01-PLAN.md — Navigation + structured data + breadcrumbs + sitemap + meta descriptions
+- [ ] 26-02-PLAN.md — Homepage Dockerfile Analyzer callout
+- [ ] 26-03-PLAN.md — Lighthouse audit + accessibility fixes + user verification
 
 ### Phase 27: Shareability
 **Goal**: Users can share their Dockerfile analysis results — as a visual score badge image or as a URL that recreates the exact analysis
