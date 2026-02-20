@@ -21,8 +21,8 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 ### Rule Engine
 
 - [x] **RULE-01**: 15 Tier 1 critical rules (DL3006, DL3007, DL4000, DL3020, DL3025, DL3000, DL3004, DL3002, DL3059, DL3014, DL3015, DL3008, DL4003, DL4004, DL3061)
-- [ ] **RULE-02**: 15 Tier 2 high-value rules (DL3003, DL3009, DL3011, DL3027, DL4006, DL3042, DL3013, DL3045, DL3019, DL3012, DL3024, plus custom: secrets in ENV/ARG, curl-pipe-shell, COPY sensitive files)
-- [ ] **RULE-03**: 10 Tier 3 nice-to-have rules (DL4001, DL3057, DL3001, DL3022, inconsistent casing, legacy ENV format, yum/dnf/zypper rules)
+- [x] **RULE-02**: 15 Tier 2 high-value rules (DL3003, DL3009, DL3011, DL3027, DL4006, DL3042, DL3013, DL3045, DL3019, DL3012, DL3024, plus custom: secrets in ENV/ARG, curl-pipe-shell, COPY sensitive files)
+- [x] **RULE-03**: 10 Tier 3 nice-to-have rules (DL4001, DL3057, DL3001, DL3022, inconsistent casing, legacy ENV format, yum/dnf/zypper rules)
 - [x] **RULE-04**: Modular rule architecture — LintRule interface, one file per rule, category subdirectories
 - [x] **RULE-05**: Expert-voice explanation per rule with "why this matters in production" architect perspective
 - [x] **RULE-06**: Actionable fix suggestion per rule with before/after code examples
@@ -103,8 +103,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-07 | Phase 22 | Complete |
 | EDIT-08 | Phase 22 | Complete |
 | RULE-01 | Phase 23 | Complete |
-| RULE-02 | Phase 23 | Pending |
-| RULE-03 | Phase 23 | Pending |
+| RULE-02 | Phase 23 | Complete |
+| RULE-03 | Phase 23 | Complete |
 | RULE-04 | Phase 23 | Complete |
 | RULE-05 | Phase 23 | Complete |
 | RULE-06 | Phase 23 | Complete |

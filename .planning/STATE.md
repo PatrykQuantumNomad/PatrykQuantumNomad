@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 23 (Rule Engine & Scoring)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 23 complete, ready for Phase 24 (Results Display)
 
 ## Current Position
 
-Phase: 23 of 27 (Rule Engine & Scoring)
-Plan: 1 of 2 complete
-Status: Executing Phase 23
-Last activity: 2026-02-20 — Completed 23-01-PLAN.md (rule engine foundation, 15 Tier 1 rules, scoring algorithm)
+Phase: 23 of 27 (Rule Engine & Scoring) -- COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 23 complete. Ready for Phase 24.
+Last activity: 2026-02-20 — Completed 23-02-PLAN.md (24 rules, 39 total, sample calibration)
 
-Progress: [#####.........................] 17% of v1.4 (1/6 phases)
+Progress: [########....................] 33% of v1.4 (2/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 4 v1.4)
+- Total plans completed: 49 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 5 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [#####.........................] 17% of v1.4 (1/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 4 | 38 | In progress |
-| **Total** | **27** | **48** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 5 | 38 | In progress |
+| **Total** | **27** | **49** | **152** | |
 
 ## Accumulated Context
 
@@ -61,6 +61,12 @@ v1.4 execution decisions (Phase 23):
 - Category weights: Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%
 - DL3020 skips URLs and archives where ADD is valid; only flags plain file copies
 - DL3002 only flags explicit USER root in final stage, not absence of USER instruction
+- PG001 checks ENV/ARG via Property API for secret keywords and known key patterns
+- DL3045 stage-aware: tracks WORKDIR per build stage using FROM boundaries
+- PG004 uses Property.getAssignmentOperator() === null for legacy ENV detection
+- DL4001/DL3057 use "flag once per Dockerfile" pattern to avoid noise
+- PG005 determines majority case convention before flagging outliers
+- 39 total rules: 10 security, 8 efficiency, 7 maintainability, 5 reliability, 9 best-practice
 
 ### Pending Todos
 
@@ -76,11 +82,11 @@ None.
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
 - [v1.3 Gap]: Dark mode strategy deferred — charts use light mode CSS custom properties only
 - [v1.4 Resolved]: dockerfile-ast Vite bundle compatibility CONFIRMED -- 21 KB gzipped, no CJS errors (Plan 22-01)
-- [v1.4 Risk]: Scoring weight calibration needs real-world Dockerfile testing in Phase 23
+- [v1.4 Resolved]: Scoring calibration verified -- sample Dockerfile triggers all 5 categories with 39 rules
 
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 23-01-PLAN.md (rule engine foundation)
+Stopped at: Completed 23-02-PLAN.md (24 rules, 39 total, sample calibration)
 Resume file: None
-Next: Execute 23-02-PLAN.md (Tier 2 + Tier 3 rules)
+Next: Phase 24 (Results Display)
