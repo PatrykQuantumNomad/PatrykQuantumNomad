@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 import { languageSchema } from './lib/beauty-index/schema';
+import { dbModelSchema } from './lib/db-compass/schema';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
@@ -22,4 +23,9 @@ const languages = defineCollection({
   schema: languageSchema,
 });
 
-export const collections = { blog, languages };
+const dbModels = defineCollection({
+  loader: file('src/data/db-compass/models.json'),
+  schema: dbModelSchema,
+});
+
+export const collections = { blog, languages, dbModels };
