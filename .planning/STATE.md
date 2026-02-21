@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 26 in progress (SEO, Navigation & Launch Readiness)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 26 complete (SEO, Navigation & Launch Readiness)
 
 ## Current Position
 
-Phase: 26 of 27 (SEO, Navigation & Launch Readiness) -- IN PROGRESS
-Plan: 2 of 3 complete
-Status: Plans 26-01 and 26-02 complete. Navigation, breadcrumbs, structured data, and homepage callout done. Ready for Plan 26-03.
-Last activity: 2026-02-20 — Completed 26-01-PLAN.md (navigation, structured data & breadcrumbs)
+Phase: 26 of 27 (SEO, Navigation & Launch Readiness) -- COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 26 complete. Navigation, breadcrumbs, JSON-LD, homepage callout, Lighthouse audits, accessibility fixes all done. Ready for Phase 27.
+Last activity: 2026-02-20 — Completed 26-03-PLAN.md (Lighthouse audit + accessibility + user verification)
 
-Progress: [##################..........] 72% of v1.4 (4.7/6 phases)
+Progress: [####################........] 83% of v1.4 (5/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 54 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 10 v1.4)
+- Total plans completed: 55 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 11 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,8 +30,8 @@ Progress: [##################..........] 72% of v1.4 (4.7/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 9 | 38 | In progress |
-| **Total** | **27** | **53** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 11 | 38 | In progress |
+| **Total** | **27** | **55** | **152** | |
 
 ## Accumulated Context
 
@@ -93,6 +93,9 @@ v1.4 execution decisions (Phase 26):
 - DockerfileAnalyzerJsonLd component uses static data (no props) for single-tool pattern
 - Homepage Dockerfile Analyzer callout uses mb-8 pt-2 (no mt-8) to avoid double spacing after Beauty Index callout
 - "Free Browser Tool" subtitle communicates tool nature at a glance (matching "2026 Edition" pattern)
+- Buffer polyfill via feross/buffer package imported before dockerfile-ast for browser compatibility
+- CSP frame-src 'self' for Astro View Transitions, script-src updated for GTM
+- WCAG AA syntax highlighting replaces oneDark bundled highlighting (comment contrast 5.0:1 vs 3.6:1)
 
 ### Pending Todos
 
@@ -109,10 +112,11 @@ None.
 - [v1.3 Gap]: Dark mode strategy deferred — charts use light mode CSS custom properties only
 - [v1.4 Resolved]: dockerfile-ast Vite bundle compatibility CONFIRMED -- 21 KB gzipped, no CJS errors (Plan 22-01)
 - [v1.4 Resolved]: Scoring calibration verified -- sample Dockerfile triggers all 5 categories with 39 rules
+- [v1.4 Resolved]: Buffer polyfill needed for dockerfile-ast isUTF8BOM (Node.js Buffer API not in browser)
 
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 26-01-PLAN.md (navigation, structured data & breadcrumbs)
+Stopped at: Completed Phase 26 (SEO, Navigation & Launch Readiness)
 Resume file: None
-Next: Phase 26 Plan 03 (final launch readiness)
+Next: Phase 27 (Shareability)
