@@ -133,6 +133,31 @@ COPY src/ /app/src/
 
 `COPY . /app` copies your entire build context into the image, including `.env` files, `.git` directories, SSH keys, and anything else in the directory. Even if those files are deleted in a subsequent layer, they persist in earlier layers. Rule [PG003](/tools/dockerfile-analyzer/rules/pg003/) flags COPY instructions that include known sensitive file patterns. The fix is a proper `.dockerignore` file combined with explicit, selective `COPY` instructions.
 
+### Remove Unnecessary Network Tools from Production Images
+
+```dockerfile title="Bad: curl installed in production image"
+FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y curl \
+    && curl -o app.tar.gz https://example.com/app.tar.gz
+CMD ["./app"]
+```
+<br />
+```dockerfile title="Good: curl stays in the builder stage"
+FROM ubuntu:22.04 AS builder
+RUN apt-get update && apt-get install -y curl \
+    && curl -o app.tar.gz https://example.com/app.tar.gz
+
+FROM ubuntu:22.04
+COPY --from=builder /app.tar.gz /app.tar.gz
+CMD ["./app"]
+```
+
+Tools like `curl`, `wget`, `netcat`, and `nmap` are the first things an attacker reaches for after gaining code execution inside a container. They enable downloading additional payloads from command-and-control servers, establishing reverse shells, and performing network reconnaissance. The Commando Cat campaign in 2024 exploited exactly this pattern: compromised containers used `curl` to retrieve malicious payloads and `netcat` for persistent C2 communication.
+
+The CIS Docker Benchmark (Section 4.3) is explicit: "Do not install unnecessary packages in containers." The OWASP Docker Security Cheat Sheet reinforces this, recommending that containers "should not contain unnecessary software packages which could increase their attack surface."
+
+The fix is straightforward: use multi-stage builds so that network tools exist only in the builder stage, never in the final production image. If a tool is genuinely needed at runtime (for example, `curl` in a `HEALTHCHECK`), consider replacing it with the application's own runtime (`node -e`, `python3 -c`, or a custom health binary) so the general-purpose download tool can be removed. Rule [PG009](/tools/dockerfile-analyzer/rules/pg009/) flags the installation of known network and download tools in the final stage of a Dockerfile. Its companion rule [PG010](/tools/dockerfile-analyzer/rules/pg010/) detects the *usage* of these tools in the final stage, catching cases where tools come pre-installed from the base image rather than being explicitly installed via a package manager.
+
 ## Efficiency Rules: Smaller, Faster Builds
 
 Efficiency rules are weighted at 25%. Every unnecessary megabyte in your image is paid for on every pull, across every node, on every deployment.
