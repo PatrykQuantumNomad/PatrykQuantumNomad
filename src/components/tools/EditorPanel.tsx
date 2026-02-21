@@ -1,3 +1,4 @@
+import '../../lib/tools/dockerfile-analyzer/buffer-polyfill';
 import { useRef, useCallback } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { setDiagnostics } from '@codemirror/lint';
