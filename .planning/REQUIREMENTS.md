@@ -120,8 +120,8 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 **Coverage:**
 - v1.5 requirements: 28 total
 - Mapped to phases: 28
-- Unmapped: 0 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 after roadmap creation*
