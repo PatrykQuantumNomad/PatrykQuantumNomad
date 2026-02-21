@@ -9,6 +9,7 @@ import { ScoreGauge } from './results/ScoreGauge';
 import { CategoryBreakdown } from './results/CategoryBreakdown';
 import { ViolationList } from './results/ViolationList';
 import { EmptyState } from './results/EmptyState';
+import { ShareActions } from './results/ShareActions';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
 
 function severitySummary(
@@ -68,6 +69,7 @@ export default function ResultsPanel() {
               </div>
             )}
             <EmptyState score={result.score.overall} grade={result.score.grade} />
+            <ShareActions />
           </div>
         ) : (
           <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
@@ -95,6 +97,7 @@ export default function ResultsPanel() {
 
             {/* Violation list */}
             <ViolationList violations={result.violations} onNavigate={handleNavigate} />
+            <ShareActions />
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import '../../lib/tools/dockerfile-analyzer/buffer-polyfill';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { setDiagnostics } from '@codemirror/lint';
 import type { Diagnostic } from '@codemirror/lint';
@@ -9,9 +9,16 @@ import { runRuleEngine } from '../../lib/tools/dockerfile-analyzer/engine';
 import { computeScore } from '../../lib/tools/dockerfile-analyzer/scorer';
 import { getRuleById } from '../../lib/tools/dockerfile-analyzer/rules';
 import { SAMPLE_DOCKERFILE } from '../../lib/tools/dockerfile-analyzer/sample-dockerfile';
+import { decodeFromHash } from '../../lib/tools/dockerfile-analyzer/url-state';
 import { analysisResult, isAnalyzing, resultsStale } from '../../stores/dockerfileAnalyzerStore';
 
 export default function EditorPanel() {
+  // Decode shared Dockerfile from URL hash (synchronous, before editor creation)
+  const hashContentRef = useRef<string | null>(
+    typeof window !== 'undefined' ? decodeFromHash() : null,
+  );
+  const initialDoc = hashContentRef.current || SAMPLE_DOCKERFILE;
+
   // Wrap analyze in a ref so the keymap callback always calls the latest version
   // without needing to re-create the EditorView.
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
@@ -94,9 +101,16 @@ export default function EditorPanel() {
   };
 
   const { containerRef, viewRef } = useCodeMirror({
-    initialDoc: SAMPLE_DOCKERFILE,
+    initialDoc,
     onAnalyze: (view) => analyzeRef.current(view),
   });
+
+  // Auto-trigger analysis when loading from a shared URL hash
+  useEffect(() => {
+    if (hashContentRef.current && viewRef.current) {
+      analyzeRef.current(viewRef.current);
+    }
+  }, []);
 
   const handleButtonClick = useCallback(() => {
     if (viewRef.current) {
