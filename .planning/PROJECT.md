@@ -145,7 +145,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — planning next milestone)
+## Current Milestone: v1.5 Database Compass
+
+**Goal:** Build an interactive database model explorer that helps developers understand and select the right database model for their use case.
+
+**Target features:**
+- Complexity spectrum visualization (key-value → graph)
+- 12 database model categories scored across 8 dimensions (ops + dev)
+- Overview page with spectrum, model grid, scoring table
+- 12 detail pages with radar charts, tradeoffs, top databases
+- Companion blog post: "How to Choose a Database in 2026"
+- Full site integration (homepage callout, tools page, JSON-LD, OG images)
 
 ### Out of Scope
 
