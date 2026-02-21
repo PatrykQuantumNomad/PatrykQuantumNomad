@@ -71,7 +71,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full details.
 - [x] **Phase 24: Results Display & Interaction** - Score gauge, category breakdown, violation list, inline annotations, click-to-navigate, and empty state (completed 2026-02-20)
 - [x] **Phase 25: Content & Rule Documentation** - 39 rule documentation pages and companion blog post with bidirectional cross-links (completed 2026-02-20)
 - [x] **Phase 26: SEO, Navigation & Launch Readiness** - Header navigation, breadcrumbs, JSON-LD, sitemap, homepage callout, Lighthouse, and accessibility audits (completed 2026-02-20)
-- [ ] **Phase 27: Shareability** - Score badge PNG download and URL state encoding for shareable analysis links
+- [x] **Phase 27: Shareability** - Score badge PNG download and URL state encoding for shareable analysis links (completed 2026-02-20)
 
 ## Phase Details
 
@@ -130,8 +130,8 @@ Plans:
   3. The blog post links to the analyzer tool page and at least 5 rule documentation pages; the tool page links back to the blog post; rule pages link back to both the tool and the blog post
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 25-01-PLAN.md — Rule documentation pages: getRelatedRules utility and [code].astro dynamic route generating 39 rule pages
-- [ ] 25-02-PLAN.md — Companion blog post and bidirectional cross-links between blog, tool page, and rule pages
+- [x] 25-01-PLAN.md — Rule documentation pages: getRelatedRules utility and [code].astro dynamic route generating 39 rule pages
+- [x] 25-02-PLAN.md — Companion blog post and bidirectional cross-links between blog, tool page, and rule pages
 
 ### Phase 26: SEO, Navigation & Launch Readiness
 **Goal**: The Dockerfile Analyzer is fully integrated into the site's navigation, discoverable by search engines, and meets all quality and accessibility standards
@@ -156,10 +156,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. After analysis, users can download a PNG score badge image showing their overall score, letter grade, and category breakdown — suitable for sharing on social media or in documentation
   2. Users can copy a shareable URL that encodes their Dockerfile content; opening that URL in a new browser loads the Dockerfile into the editor and triggers analysis, reproducing the same results
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 27-01-PLAN.md — Install lz-string, create badge-generator.ts and url-state.ts utility modules
-- [ ] 27-02-PLAN.md — ShareActions UI component, ResultsPanel integration, URL hash restore in EditorPanel
+- [x] 27-01-PLAN.md — Install lz-string, create badge-generator.ts and url-state.ts utility modules
+- [x] 27-02-PLAN.md — ShareActions UI component, ResultsPanel integration, URL hash restore in EditorPanel
 
 ## Progress
 
@@ -195,8 +195,8 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 24. Results Display | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 25. Content & Rule Docs | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 26. SEO & Launch | v1.4 | 3/3 | Complete | 2026-02-20 |
-| 27. Shareability | 1/2 | In Progress|  | - |
+| 27. Shareability | v1.4 | 2/2 | Complete | 2026-02-20 |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-20 — Phase 27 planned (2 plans)*
+*Last updated: 2026-02-20 — Phase 27 complete, v1.4 Dockerfile Analyzer milestone shipped*

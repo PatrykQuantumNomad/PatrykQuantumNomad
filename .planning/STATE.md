@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.4 Dockerfile Analyzer — Phase 27 in progress (Shareability)
+**Current focus:** v1.4 Dockerfile Analyzer — Phase 27 COMPLETE (Shareability). Milestone v1.4 complete.
 
 ## Current Position
 
-Phase: 27 of 27 (Shareability)
-Plan: 1 of 2 complete
-Status: Plan 01 complete. lz-string installed, url-state.ts and badge-generator.ts created. Ready for Plan 02 (ShareActions UI).
-Last activity: 2026-02-20 — Completed 27-01-PLAN.md (Foundation modules for shareability)
+Phase: 27 of 27 (Shareability) -- COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 27 complete. All shareability features shipped (badge download, shareable URLs, URL hash restore). v1.4 Dockerfile Analyzer milestone complete.
+Last activity: 2026-02-20 — Completed 27-02-PLAN.md (ShareActions UI component)
 
-Progress: [#######################.....] 92% of v1.4 (5.5/6 phases)
+Progress: [############################] 100% of v1.4 (6/6 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 12 v1.4)
+- Total plans completed: 57 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4)
 - Average duration: ~10 min (v1.0), ~3 min (v1.1), ~3 min (v1.2), ~5.5 min (v1.3)
 
 **Cumulative Stats:**
@@ -30,9 +30,10 @@ Progress: [#######################.....] 92% of v1.4 (5.5/6 phases)
 | v1.1 Content Refresh | 8-12 | 7 | 18 | 2026-02-12 |
 | v1.2 Projects Page Redesign | 13-15 | 6 | 23 | 2026-02-13 |
 | v1.3 The Beauty Index | 16-21 | 15 | 37 | 2026-02-17 |
-| v1.4 Dockerfile Analyzer | 22-27 | 12 | 38 | In progress |
-| **Total** | **27** | **56** | **152** | |
+| v1.4 Dockerfile Analyzer | 22-27 | 13 | 38 | 2026-02-20 |
+| **Total** | **27** | **57** | **152** | |
 | Phase 27 P01 | 3min | 2 tasks | 3 files |
+| Phase 27 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -104,8 +105,10 @@ v1.4 execution decisions (Phase 27):
 - Canvas devicePixelRatio capped at 3x for retina PNG export without excessive file size
 - SVG badge built as string array joined without separator (not template literal) to avoid whitespace rendering issues
 - Category colors/grade colors duplicated as module constants in badge-generator.ts (avoids importing React components)
-- [Phase 27]: lz-string compressToEncodedURIComponent for URL-safe Dockerfile compression
-- [Phase 27]: Programmatic SVG string builder with inline styles for portable badge rendering
+- ShareActions reads nanostores directly (no props) for zero-coupling integration into ResultsPanel
+- hashContentRef pattern: decode URL hash into useRef before useCodeMirror to prevent race condition with EditorView creation
+- history.replaceState for URL update on Copy Share Link (not window.location.hash to avoid navigation trigger)
+- Auto-analyze useEffect fires after useCodeMirror useEffect due to declaration order with empty deps arrays
 
 ### Pending Todos
 
@@ -127,6 +130,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 27-01-PLAN.md (Foundation modules for shareability)
+Stopped at: Completed 27-02-PLAN.md (ShareActions UI component) -- Phase 27 complete, v1.4 milestone complete
 Resume file: None
-Next: 27-02-PLAN.md (ShareActions UI component)
+Next: None -- v1.4 Dockerfile Analyzer milestone complete
