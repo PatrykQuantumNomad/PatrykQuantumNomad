@@ -19,8 +19,6 @@ export default function EditorPanel() {
   );
   const initialDoc = hashContentRef.current || SAMPLE_DOCKERFILE;
 
-  // Wrap analyze in a ref so the keymap callback always calls the latest version
-  // without needing to re-create the EditorView.
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
 
   analyzeRef.current = (view: EditorView) => {
@@ -100,10 +98,7 @@ export default function EditorPanel() {
     isAnalyzing.set(false);
   };
 
-  const { containerRef, viewRef } = useCodeMirror({
-    initialDoc,
-    onAnalyze: (view) => analyzeRef.current(view),
-  });
+  const { containerRef, viewRef } = useCodeMirror({ initialDoc });
 
   // Auto-trigger analysis when loading from a shared URL hash
   useEffect(() => {
@@ -118,31 +113,49 @@ export default function EditorPanel() {
     }
   }, [viewRef]);
 
-  const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
-  const shortcutHint = isMac ? 'Cmd+Enter' : 'Ctrl+Enter';
+  const handleClear = useCallback(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: '' },
+    });
+    view.dispatch(setDiagnostics(view.state, []));
+    analysisResult.set(null);
+    resultsStale.set(false);
+    view.focus();
+  }, [viewRef]);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 min-h-[40px]">
         <h2 className="text-lg font-heading font-semibold">Editor</h2>
-        <button
-          onClick={handleButtonClick}
-          className="px-4 py-2 rounded-lg font-semibold text-sm transition-all
-            bg-[var(--color-accent)] text-white
-            hover:brightness-110 hover:shadow-lg
-            active:brightness-95
-            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        >
-          Analyze
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleClear}
+            className="px-4 py-2 rounded-lg font-semibold text-sm transition-all
+              border border-[var(--color-border)] bg-transparent
+              hover:bg-white/5
+              active:bg-white/10
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            Clear
+          </button>
+          <button
+            onClick={handleButtonClick}
+            className="px-4 py-2 rounded-lg font-semibold text-sm transition-all
+              bg-[var(--color-accent)] text-white
+              hover:brightness-110 hover:shadow-lg
+              active:brightness-95
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            Analyze
+          </button>
+        </div>
       </div>
       <div
         ref={containerRef}
         className="flex-1 min-h-[300px] lg:min-h-[450px] overflow-hidden rounded-lg"
       />
-      <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-        {shortcutHint} to analyze
-      </p>
     </div>
   );
 }

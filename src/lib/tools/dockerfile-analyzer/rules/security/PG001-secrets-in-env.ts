@@ -21,12 +21,12 @@ export const PG001: LintRule = {
   severity: 'error',
   category: 'security',
   explanation:
-    'Hardcoded secrets in ENV or ARG instructions are baked into the image layers and ' +
-    'visible to anyone who can pull the image. Even if you delete them in a later layer, ' +
-    'they remain in the build history. In production, this is a critical security risk -- ' +
-    'leaked API keys, database passwords, and tokens can be extracted with a simple ' +
-    '`docker history` or `docker inspect`. Use build-time secrets (--mount=type=secret) ' +
-    'or runtime environment variables injected by the orchestrator.',
+    'Hardcoded secrets in ENV or ARG instructions get baked into the image layers and ' +
+    'are visible to anyone who can pull the image. Even if you delete them in a later ' +
+    'layer, they remain in the build history. Leaked API keys, database passwords, and ' +
+    'tokens can be extracted with a simple `docker history` or `docker inspect`. Use ' +
+    'build-time secrets (--mount=type=secret) or runtime environment variables injected ' +
+    'by your orchestrator instead.',
   fix: {
     description:
       'Remove hardcoded secrets and use Docker build secrets or runtime injection',

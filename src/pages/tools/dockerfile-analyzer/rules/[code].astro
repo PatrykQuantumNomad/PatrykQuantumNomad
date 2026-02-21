@@ -1,5 +1,5 @@
 ---
-import { Code } from 'astro:components';
+import { Code as AstroCode } from 'astro:components';
 import Layout from '../../../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../../../components/BreadcrumbJsonLd.astro';
 import { allRules } from '../../../../lib/tools/dockerfile-analyzer/rules/index';
@@ -46,26 +46,16 @@ const truncatedExplanation = rule.explanation.length > 155
   : rule.explanation;
 const pageDesc = truncatedExplanation;
 const pageUrl = new URL(`/tools/dockerfile-analyzer/rules/${rule.id.toLowerCase()}/`, Astro.site).toString();
-const siteBase = (Astro.site?.toString() ?? 'https://patrykgolabek.dev').replace(/\/$/, '');
 ---
 
 <Layout title={pageTitle} description={pageDesc}>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'Dockerfile Analyzer', url: 'https://patrykgolabek.dev/tools/dockerfile-analyzer/' },
+    { name: rule.id, url: pageUrl },
+  ]} />
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
-    {/* Visual breadcrumb navigation */}
-    <nav aria-label="Breadcrumb" class="mb-8 text-sm text-[var(--color-text-secondary)]">
-      <ol class="flex flex-wrap items-center gap-1">
-        <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><a href="/tools/" class="hover:text-[var(--color-accent)] transition-colors">Tools</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><a href="/tools/dockerfile-analyzer/" class="hover:text-[var(--color-accent)] transition-colors">Dockerfile Analyzer</a></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><span class="text-[var(--color-text-primary)]">Rules</span></li>
-        <li aria-hidden="true" class="mx-1">/</li>
-        <li><span aria-current="page" class="text-[var(--color-text-primary)] font-medium">{rule.id}</span></li>
-      </ol>
-    </nav>
 
     {/* Header section */}
     <header class="mb-10">
@@ -101,11 +91,11 @@ const siteBase = (Astro.site?.toString() ?? 'https://patrykgolabek.dev').replace
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <h3 class="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Before (incorrect)</h3>
-          <Code code={rule.fix.beforeCode} lang="dockerfile" />
+          <AstroCode code={rule.fix.beforeCode} lang="dockerfile" />
         </div>
         <div>
           <h3 class="text-sm font-medium text-[var(--color-text-secondary)] mb-2">After (correct)</h3>
-          <Code code={rule.fix.afterCode} lang="dockerfile" />
+          <AstroCode code={rule.fix.afterCode} lang="dockerfile" />
         </div>
       </div>
     </section>
@@ -173,10 +163,4 @@ const siteBase = (Astro.site?.toString() ?? 'https://patrykgolabek.dev').replace
     </footer>
   </article>
 
-  <BreadcrumbJsonLd crumbs={[
-    { name: 'Home', url: siteBase },
-    { name: 'Tools', url: `${siteBase}/tools/` },
-    { name: 'Dockerfile Analyzer', url: `${siteBase}/tools/dockerfile-analyzer/` },
-    { name: rule.id, url: pageUrl },
-  ]} />
 </Layout>

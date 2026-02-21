@@ -8,9 +8,9 @@ export const DL4001: LintRule = {
   category: 'maintainability',
   explanation:
     'Installing both wget and curl in the same image adds unnecessary size since they ' +
-    'serve the same purpose -- downloading files via HTTP. In production, having two ' +
-    'tools for the same job increases the attack surface and creates inconsistency in ' +
-    'how files are fetched. Pick one and use it consistently throughout the Dockerfile.',
+    'serve the same purpose: downloading files via HTTP. Having two tools for the same ' +
+    'job increases the attack surface and creates inconsistency in how files are fetched. ' +
+    'Pick one and use it consistently throughout your Dockerfile.',
   fix: {
     description:
       'Standardize on either curl or wget throughout the Dockerfile',

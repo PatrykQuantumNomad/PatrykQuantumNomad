@@ -10,7 +10,7 @@ export const DL3059: LintRule = {
     'Each RUN instruction creates a new image layer. Consecutive RUN instructions ' +
     'that could be combined into a single RUN with && waste space because files ' +
     'created in one layer and deleted in the next still exist in the earlier layer. ' +
-    'In production, this inflates image size and slows container startup.',
+    'This inflates image size and slows down container startup across your cluster.',
   fix: {
     description: 'Combine consecutive RUN instructions with &&',
     beforeCode: 'RUN apt-get update\nRUN apt-get install -y curl',

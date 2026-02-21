@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import ParticleCanvas from '../components/ParticleCanvas.astro';
 import PersonJsonLd from '../components/PersonJsonLd.astro';
+import FAQPageJsonLd from '../components/FAQPageJsonLd.astro';
 import { siteConfig } from '../data/site';
 import heroImg from '../assets/images/meandbatman.jpg';
 
@@ -41,8 +42,11 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
           <p class="text-2xl sm:text-3xl text-[var(--color-accent)] font-heading font-medium mb-6 min-h-[2rem] sm:min-h-[2.5rem] typing-glow">
             <span id="typing-role" class="typing-cursor" data-roles={JSON.stringify(siteConfig.roles)}>{siteConfig.roles[0]}</span>
           </p>
-          <p class="text-lg text-[var(--color-text-secondary)] max-w-xl mb-8" data-reveal>
+          <p class="text-lg text-[var(--color-text-secondary)] max-w-xl mb-4" data-reveal>
             {siteConfig.tagline}
+          </p>
+          <p class="text-sm text-[var(--color-text-secondary)] max-w-xl mb-8" data-reveal>
+            Patryk Golabek is a Cloud-Native Software Architect based in Ontario, Canada, with over 17 years of production engineering experience. A pre-1.0 Kubernetes adopter and former CTO, he maintains 19+ open-source projects spanning Kubernetes platforms, AI/ML agents, and developer tools.
           </p>
           <div class="flex flex-wrap gap-4" data-reveal>
             <a
@@ -171,7 +175,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
         <h3 class="text-lg font-heading font-bold text-[var(--color-text-primary)]">Dockerfile Analyzer</h3>
         <p class="meta-mono mt-2">Free Browser Tool</p>
         <p class="text-sm text-[var(--color-text-secondary)] mt-2">
-          Paste your Dockerfile, get instant best-practice feedback from a Kubernetes architect. 39 rules across security, efficiency, and maintainability. 100% client-side.
+          Paste your Dockerfile, get instant best-practice feedback from a Kubernetes architect. Dozens of rules across security, efficiency, and maintainability. 100% client-side.
         </p>
       </article>
     </a>
@@ -201,7 +205,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
                 </h3>
                 <p class="meta-mono mt-2">
                   <time datetime={post.data.publishedDate.toISOString()}>
-                    {post.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {post.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                   </time>
                   {post.data.source && (
                     <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
@@ -267,6 +271,20 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   </section>
 
   <PersonJsonLd />
+  <FAQPageJsonLd items={[
+    {
+      question: "Who is Patryk Golabek?",
+      answer: "Patryk Golabek is a Cloud-Native Software Architect based in Ontario, Canada, with over 17 years of production engineering experience. He is a pre-1.0 Kubernetes adopter and former CTO who specializes in Kubernetes platforms, AI/ML systems, platform engineering, and DevSecOps."
+    },
+    {
+      question: "What does Patryk Golabek specialize in?",
+      answer: "Patryk specializes in cloud-native architecture and Kubernetes (pre-1.0 adopter), AI/ML systems including LLM agents and RAG pipelines, platform engineering with Terraform and GitOps, and full-stack development with Python, Java, TypeScript, React, and Next.js."
+    },
+    {
+      question: "Where can I find Patryk Golabek's open-source projects?",
+      answer: "Patryk maintains 19+ open-source projects on GitHub at github.com/PatrykQuantumNomad, spanning the Kubert Kubernetes Platform, AI agents and LLM tools, and standalone developer utilities like the Dockerfile Analyzer and JobFlow."
+    },
+  ]} />
 </Layout>
 
 <style>

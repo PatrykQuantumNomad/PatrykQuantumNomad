@@ -101,7 +101,7 @@ export async function downloadBadgePng(score: ScoreResult): Promise<void> {
         a.download = `dockerfile-score-${score.overall}-${score.grade}.png`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        a.remove();
         URL.revokeObjectURL(a.href);
         resolve();
       }, 'image/png');

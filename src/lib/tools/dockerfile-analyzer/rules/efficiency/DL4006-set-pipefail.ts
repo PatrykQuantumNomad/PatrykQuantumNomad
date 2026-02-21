@@ -9,9 +9,9 @@ export const DL4006: LintRule = {
   explanation:
     'In /bin/sh (the default shell), a piped command like `curl url | tar xz` only ' +
     'reports the exit code of the last command (tar). If curl fails, the build ' +
-    'continues silently with corrupt or missing data. In production, this leads to ' +
-    'images that appear to build successfully but contain broken software. ' +
-    'Set pipefail so the whole pipe fails if any command in it fails.',
+    'continues silently with corrupt or missing data. You end up with images that ' +
+    'appear to build successfully but contain broken software. Set pipefail so the ' +
+    'whole pipe fails if any command in it fails.',
   fix: {
     description:
       'Add a SHELL instruction with pipefail before piped RUN commands',

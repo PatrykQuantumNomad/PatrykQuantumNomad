@@ -7,11 +7,11 @@ export const DL3007: LintRule = {
   severity: 'warning',
   category: 'security',
   explanation:
-    'The :latest tag is a moving target. In production, an image tagged :latest today ' +
-    'may resolve to a completely different image tomorrow after the maintainer pushes ' +
-    'an update. This breaks reproducibility -- your staging and production environments ' +
-    'may run different code despite identical Dockerfiles. Always pin to a specific ' +
-    'version tag (e.g., ubuntu:22.04) or a digest.',
+    'The :latest tag is a moving target. An image tagged :latest today may resolve to ' +
+    'a completely different image tomorrow after the maintainer pushes an update. This ' +
+    'breaks reproducibility because your staging and production environments may run ' +
+    'different code from identical Dockerfiles. Always pin to a specific version tag ' +
+    '(e.g., ubuntu:22.04) or a digest.',
   fix: {
     description: 'Replace :latest with a specific version tag',
     beforeCode: 'FROM ubuntu:latest',

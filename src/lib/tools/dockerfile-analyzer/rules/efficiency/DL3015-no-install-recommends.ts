@@ -8,9 +8,9 @@ export const DL3015: LintRule = {
   category: 'efficiency',
   explanation:
     'By default, apt-get install pulls in "recommended" packages that are not ' +
-    'strictly required. In production containers, these extra packages increase ' +
-    'image size (often by 30-50%) and expand the attack surface with unnecessary ' +
-    'binaries. Use --no-install-recommends to install only essential dependencies.',
+    'strictly required. These extras can increase image size by 30-50% and expand ' +
+    'the attack surface with unnecessary binaries. Use --no-install-recommends to ' +
+    'install only the dependencies you actually need.',
   fix: {
     description: 'Add --no-install-recommends to apt-get install',
     beforeCode: 'RUN apt-get install -y curl wget',

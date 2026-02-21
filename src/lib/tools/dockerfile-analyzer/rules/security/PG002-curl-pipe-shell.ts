@@ -8,10 +8,10 @@ export const PG002: LintRule = {
   category: 'security',
   explanation:
     'Piping curl or wget output directly to a shell (sh, bash, zsh) executes remote ' +
-    'code without any verification. In production, this is a supply-chain attack vector ' +
-    '-- if the remote server is compromised or performs a MITM attack, arbitrary code ' +
-    'runs in your build with full root privileges. Instead, download the script first, ' +
-    'verify its checksum, then execute it.',
+    'code without any verification. If the remote server is compromised or someone ' +
+    'performs a man-in-the-middle attack, arbitrary code runs in your build with full ' +
+    'root privileges. This is a real supply-chain attack vector. Download the script ' +
+    'first, verify its checksum, then execute it.',
   fix: {
     description:
       'Download the script first, verify its checksum, then execute it',

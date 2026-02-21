@@ -8,9 +8,9 @@ export const DL3033: LintRule = {
   category: 'best-practice',
   explanation:
     'Without pinned versions, yum install pulls the latest available package, which ' +
-    'varies between builds. In production, unpinned packages break build reproducibility ' +
-    '-- two builds from the same Dockerfile may contain different package versions. ' +
-    'Pin packages with - syntax (e.g., httpd-2.4.6) for consistent, reproducible builds.',
+    'varies between builds. Unpinned packages break build reproducibility because two ' +
+    'builds from the same Dockerfile may contain different package versions. Pin ' +
+    'packages with - syntax (e.g., httpd-2.4.6) for consistent, reproducible builds.',
   fix: {
     description: 'Pin package versions with - syntax',
     beforeCode: 'RUN yum install -y httpd',
@@ -34,7 +34,7 @@ export const DL3033: LintRule = {
       const afterInstall = args.substring(installIdx + 'install'.length);
 
       const tokens = afterInstall
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0);
 

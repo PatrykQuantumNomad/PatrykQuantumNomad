@@ -8,9 +8,10 @@ export const DL3002: LintRule = {
   category: 'security',
   explanation:
     'Running a container as root gives the process full host-level privileges if it ' +
-    'escapes the container. In production, this is a critical security risk -- a ' +
-    'vulnerability in your application could grant an attacker root access to the host. ' +
-    'Always switch to a non-root user after performing root-only setup tasks.',
+    'escapes the container. A vulnerability in your application could grant an attacker ' +
+    'root access to the host, which is why this is one of the most critical security ' +
+    'risks in containerized workloads. Always switch to a non-root user after ' +
+    'performing root-only setup tasks.',
   fix: {
     description: 'Add a non-root USER instruction at the end of the Dockerfile',
     beforeCode: 'USER root\nCMD ["node", "server.js"]',
@@ -24,7 +25,8 @@ export const DL3002: LintRule = {
     if (froms.length === 0) return violations;
 
     // Find the last FROM instruction (start of final stage)
-    const lastFrom = froms[froms.length - 1];
+    const lastFrom = froms.at(-1);
+    if (!lastFrom) return violations;
     const lastFromLine = lastFrom.getRange().start.line;
 
     // Find USER instructions in the final stage (after the last FROM)
@@ -41,7 +43,8 @@ export const DL3002: LintRule = {
     }
 
     // Check the LAST USER instruction in the final stage
-    const lastUser = userInstructions[userInstructions.length - 1];
+    const lastUser = userInstructions.at(-1);
+    if (!lastUser) return violations;
     const userArg = lastUser.getArgumentsContent()?.trim();
 
     if (userArg === 'root' || userArg === '0') {

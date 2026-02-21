@@ -1,6 +1,5 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import ProjectsJsonLd from '../../components/ProjectsJsonLd.astro';
 import FAQPageJsonLd from '../../components/FAQPageJsonLd.astro';
 import ProjectFilterBar from '../../components/ProjectFilterBar.astro';
@@ -25,7 +24,7 @@ const grouped = categories.map((category) => ({
 
 <Layout
   title="Projects — Patryk Golabek | Open-Source Portfolio"
-  description="Explore 18 open-source projects by Patryk Golabek — the Kubert Kubernetes Platform, AI agents and LLM tools, and standalone open-source utilities."
+  description="Explore 19 open-source projects by Patryk Golabek — the Kubert Kubernetes Platform, AI agents and LLM tools, and standalone open-source utilities."
 >
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 dot-grid-bg overflow-x-clip overflow-y-visible">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4" data-word-reveal>Projects</h1>
@@ -83,10 +82,6 @@ const grouped = categories.map((category) => ({
       </a>
     </div>
   </section>
-  <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: `${Astro.site}` },
-    { name: "Projects", url: `${new URL('/projects/', Astro.site)}` },
-  ]} />
   <ProjectsJsonLd />
   <FAQPageJsonLd items={[
     {
@@ -99,7 +94,7 @@ const grouped = categories.map((category) => ({
     },
     {
       question: "Are Patryk Golabek's projects open source?",
-      answer: "Yes, all 18 projects showcased on this page are open source and available on GitHub at github.com/PatrykQuantumNomad. They span Kubernetes platform tools, AI agents, and standalone developer utilities."
+      answer: "Yes, all 19 projects showcased on this page are open source and available on GitHub at github.com/PatrykQuantumNomad. They span Kubernetes platform tools, AI agents, and standalone developer utilities."
     },
   ]} />
 

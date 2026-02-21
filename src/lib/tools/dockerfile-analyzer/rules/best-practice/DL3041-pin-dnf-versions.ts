@@ -8,9 +8,9 @@ export const DL3041: LintRule = {
   category: 'best-practice',
   explanation:
     'Without pinned versions, dnf install pulls the latest available package, which ' +
-    'varies between builds. In production, unpinned packages break build reproducibility ' +
-    '-- two builds from the same Dockerfile may install different versions. Pin packages ' +
-    'with - syntax (e.g., httpd-2.4.6) for consistent builds.',
+    'varies between builds. Unpinned packages break build reproducibility because two ' +
+    'builds from the same Dockerfile may install different versions. Pin packages with ' +
+    '- syntax (e.g., httpd-2.4.6) for consistent builds.',
   fix: {
     description: 'Pin package versions with - syntax',
     beforeCode: 'RUN dnf install -y httpd',
@@ -34,7 +34,7 @@ export const DL3041: LintRule = {
       const afterInstall = args.substring(installIdx + 'install'.length);
 
       const tokens = afterInstall
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0);
 

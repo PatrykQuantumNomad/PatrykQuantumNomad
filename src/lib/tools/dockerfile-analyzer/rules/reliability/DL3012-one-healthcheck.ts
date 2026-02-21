@@ -8,10 +8,10 @@ export const DL3012: LintRule = {
   category: 'reliability',
   explanation:
     'Only the last HEALTHCHECK instruction takes effect. Multiple HEALTHCHECK ' +
-    'instructions are always a mistake -- the earlier ones are silently overridden. ' +
-    'In production, this causes confusion when health checks do not behave as expected ' +
-    'because the intended check was overridden by a later one. Keep a single ' +
-    'HEALTHCHECK per Dockerfile.',
+    'instructions are always a mistake because the earlier ones are silently overridden. ' +
+    'This causes confusion when health checks do not behave as expected because the ' +
+    'intended check was overridden by a later one. Keep a single HEALTHCHECK per ' +
+    'Dockerfile.',
   fix: {
     description:
       'Remove duplicate HEALTHCHECK instructions, keep only the final one',

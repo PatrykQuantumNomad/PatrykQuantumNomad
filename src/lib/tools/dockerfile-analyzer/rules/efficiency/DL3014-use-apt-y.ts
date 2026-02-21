@@ -8,9 +8,9 @@ export const DL3014: LintRule = {
   category: 'efficiency',
   explanation:
     'apt-get install without -y (or --yes) prompts for confirmation interactively. ' +
-    'In a Dockerfile build there is no terminal to respond, so the build will hang ' +
-    'or fail. In production CI/CD pipelines, this causes silent build failures that ' +
-    'are difficult to diagnose. Always use -y to auto-confirm installations.',
+    'Since there is no terminal to respond during a Docker build, the build will ' +
+    'hang or fail. In CI/CD pipelines, this causes silent build failures that are ' +
+    'difficult to diagnose. Always use -y to auto-confirm installations.',
   fix: {
     description: 'Add -y flag to apt-get install',
     beforeCode: 'RUN apt-get install curl',

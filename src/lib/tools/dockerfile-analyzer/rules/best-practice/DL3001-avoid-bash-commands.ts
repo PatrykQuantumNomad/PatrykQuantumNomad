@@ -17,7 +17,7 @@ const INTERACTIVE_COMMANDS = [
 ];
 
 const commandPattern = new RegExp(
-  `\\b(${INTERACTIVE_COMMANDS.join('|')})\\b`,
+  String.raw`\b(${INTERACTIVE_COMMANDS.join('|')})\b`,
 );
 
 export const DL3001: LintRule = {
@@ -28,9 +28,9 @@ export const DL3001: LintRule = {
   explanation:
     'Commands like ssh, vim, shutdown, service, ps, free, top, kill, and mount are ' +
     'interactive or system-level tools meant for live server administration. In a ' +
-    'Dockerfile, they suggest the container is being used like a VM instead of as an ' +
-    'immutable application package. In production, these commands either do not work ' +
-    'in a container context or indicate architectural anti-patterns.',
+    'Dockerfile, they suggest the container is being treated like a VM instead of as ' +
+    'an immutable application package. These commands either do not work in a container ' +
+    'context or indicate architectural anti-patterns.',
   fix: {
     description:
       'Remove interactive/system commands and use proper container patterns',

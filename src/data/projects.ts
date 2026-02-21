@@ -22,6 +22,18 @@ export type Category = (typeof categories)[number];
 export const projects: Project[] = [
   // Kubert Kubernetes Platform
   {
+    name: 'pincer-ops',
+    description:
+      'GitOps-driven Kubernetes platform — bootstraps a production-grade KIND cluster with ArgoCD, MetalLB, Envoy Gateway, and Sealed Secrets to deploy OpenClaw AI agent runtime in three commands',
+    url: 'https://github.com/PatrykQuantumNomad/pincer-ops',
+    liveUrl: 'https://pincer.patrykgolabek.dev/',
+    language: 'Shell',
+    category: 'Kubert Kubernetes Platform',
+    technologies: ['Shell', 'Kubernetes', 'ArgoCD', 'KIND', 'MetalLB', 'Envoy Gateway'],
+    status: 'active',
+    gridSize: 'large',
+  },
+  {
     name: 'kps-cluster-deployment',
     description:
       'GKE cluster provisioning with Terraform — Calico networking, Cert Manager, NGINX Ingress, and External DNS out of the box',

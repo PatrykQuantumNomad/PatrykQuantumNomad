@@ -7,10 +7,10 @@ export const DL3006: LintRule = {
   severity: 'warning',
   category: 'security',
   explanation:
-    'In production, untagged images default to :latest which can change without ' +
-    'warning. A deployment that worked yesterday can break today because the base ' +
-    'image was updated. Pinning to a specific tag (e.g., node:20-alpine) ensures ' +
-    'reproducible builds and predictable behavior across environments.',
+    'Untagged images default to :latest, which can change without warning. A deployment ' +
+    'that worked yesterday can break today because the base image was updated upstream. ' +
+    'Pin to a specific tag (e.g., node:20-alpine) so your builds are reproducible and ' +
+    'behave the same across environments.',
   fix: {
     description: 'Pin the base image to a specific version tag or digest',
     beforeCode: 'FROM ubuntu',

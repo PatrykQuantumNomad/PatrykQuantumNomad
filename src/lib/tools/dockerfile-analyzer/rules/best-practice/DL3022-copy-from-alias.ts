@@ -9,9 +9,9 @@ export const DL3022: LintRule = {
   explanation:
     'Using numeric references in COPY --from=0 is fragile. If build stages are ' +
     'reordered, added, or removed, the numeric index silently points to the wrong ' +
-    'stage. In production, this causes builds that appear correct but copy files ' +
-    'from the wrong stage, leading to subtle runtime bugs. Named aliases (AS builder) ' +
-    'make multi-stage builds self-documenting and refactor-safe.',
+    'stage. Builds appear correct but copy files from the wrong place, leading to ' +
+    'subtle runtime bugs. Named aliases (AS builder) make multi-stage builds ' +
+    'self-documenting and refactor-safe.',
   fix: {
     description:
       'Use a named alias instead of a numeric stage reference',

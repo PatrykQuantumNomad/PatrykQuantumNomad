@@ -8,10 +8,10 @@ export const DL3024: LintRule = {
   category: 'reliability',
   explanation:
     'Duplicate FROM aliases (AS name) cause ambiguity in multi-stage builds. When ' +
-    'COPY --from=alias is used, Docker resolves to the LAST stage with that alias, ' +
-    'silently ignoring earlier stages. In production, this leads to builds that ' +
-    'copy files from the wrong stage, producing incorrect images that may pass tests ' +
-    'but fail in deployment. Every build stage alias must be unique.',
+    'COPY --from=alias is used, Docker resolves to the last stage with that alias, ' +
+    'silently ignoring earlier stages. This leads to builds that copy files from the ' +
+    'wrong stage, producing incorrect images that may pass tests but fail at deployment. ' +
+    'Every build stage alias must be unique.',
   fix: {
     description: 'Give each build stage a unique alias',
     beforeCode:

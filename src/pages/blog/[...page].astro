@@ -4,8 +4,6 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import BlogCard from '../../components/BlogCard.astro';
 import Pagination from '../../components/Pagination.astro';
-import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
-
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getCollection('blog', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true;
@@ -166,10 +164,6 @@ const collectionSchema = {
       nextUrl={page.url.next}
     />
   </section>
-  <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: `${Astro.site}` },
-    { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
-  ]} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 </Layout>
 

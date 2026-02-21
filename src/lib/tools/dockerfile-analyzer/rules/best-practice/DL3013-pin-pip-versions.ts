@@ -8,9 +8,9 @@ export const DL3013: LintRule = {
   category: 'best-practice',
   explanation:
     'Without pinned versions, pip install pulls the latest package, which can differ ' +
-    'between builds. In production, an unpinned `pip install flask` today may install ' +
-    'Flask 3.0 but tomorrow Flask 3.1 with breaking changes. This violates build ' +
-    'reproducibility and can cause production outages. Pin with == syntax and use a ' +
+    'between builds. An unpinned `pip install flask` today may install Flask 3.0, but ' +
+    'tomorrow it installs Flask 3.1 with breaking changes. This breaks build ' +
+    'reproducibility and can cause outages. Pin with == syntax and use a ' +
     'requirements.txt for complex dependency trees.',
   fix: {
     description: 'Pin package versions with == syntax',
@@ -29,17 +29,17 @@ export const DL3013: LintRule = {
       if (!args) continue;
 
       // Match pip install or pip3 install
-      const pipMatch = args.match(/\bpip3?\s+install\b/);
+      const pipMatch = /\bpip3?\s+install\b/.exec(args);
       if (!pipMatch) continue;
 
       // Extract the portion after "pip install"
       const afterInstall = args.substring(
-        pipMatch.index! + pipMatch[0].length,
+        pipMatch.index + pipMatch[0].length,
       );
 
       // Split into tokens (handle line continuations)
       const tokens = afterInstall
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0);
 

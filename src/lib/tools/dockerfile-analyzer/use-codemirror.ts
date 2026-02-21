@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { EditorView, keymap } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { StreamLanguage } from '@codemirror/language';
@@ -15,7 +15,6 @@ import {
 
 interface UseCodeMirrorOptions {
   initialDoc: string;
-  onAnalyze: (view: EditorView) => void;
 }
 
 /**
@@ -30,22 +29,12 @@ interface UseCodeMirrorOptions {
  * - lintGutter() included without linter(): enables gutter markers when
  *   setDiagnostics pushes diagnostics on-demand (EDIT-02 requires button-triggered only).
  */
-export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
+export function useCodeMirror({ initialDoc }: UseCodeMirrorOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    const analyzeKeymap = keymap.of([
-      {
-        key: 'Mod-Enter',
-        run: (view) => {
-          onAnalyze(view);
-          return true;
-        },
-      },
-    ]);
 
     const state = EditorState.create({
       doc: initialDoc,
@@ -53,7 +42,6 @@ export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
         basicSetup,
         StreamLanguage.define(dockerFile),
         lintGutter(),
-        analyzeKeymap,
         oneDarkTheme,
         a11ySyntaxHighlighting,
         editorTheme,

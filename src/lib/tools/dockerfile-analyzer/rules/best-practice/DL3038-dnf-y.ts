@@ -7,10 +7,10 @@ export const DL3038: LintRule = {
   severity: 'warning',
   category: 'best-practice',
   explanation:
-    'dnf install without -y prompts for confirmation interactively. In a Docker build ' +
-    'there is no terminal to respond, causing the build to hang or fail. In production ' +
-    'CI/CD pipelines, this results in silent build failures. Always use -y to ' +
-    'auto-confirm package installations.',
+    'dnf install without -y prompts for confirmation interactively. Since there is no ' +
+    'terminal to respond during a Docker build, the build will hang or fail. In CI/CD ' +
+    'pipelines, this results in silent build failures. Always use -y to auto-confirm ' +
+    'package installations.',
   fix: {
     description: 'Add -y flag to dnf install',
     beforeCode: 'RUN dnf install httpd',

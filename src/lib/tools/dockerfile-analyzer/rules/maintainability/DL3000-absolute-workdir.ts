@@ -8,10 +8,10 @@ export const DL3000: LintRule = {
   category: 'maintainability',
   explanation:
     'Relative WORKDIR paths depend on the previous WORKDIR value, making the ' +
-    'Dockerfile harder to understand and maintain. In production, a relative ' +
-    'WORKDIR can resolve to unexpected directories if the base image changes its ' +
-    'default working directory. Use absolute paths to make the build deterministic ' +
-    'and self-documenting.',
+    'Dockerfile harder to understand and maintain. If the base image changes its ' +
+    'default working directory, a relative WORKDIR can suddenly resolve to a ' +
+    'completely different location. Use absolute paths to make the build ' +
+    'deterministic and self-documenting.',
   fix: {
     description: 'Use an absolute path for WORKDIR',
     beforeCode: 'WORKDIR app',

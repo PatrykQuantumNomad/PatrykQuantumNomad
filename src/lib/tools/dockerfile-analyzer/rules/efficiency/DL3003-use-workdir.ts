@@ -7,11 +7,11 @@ export const DL3003: LintRule = {
   severity: 'warning',
   category: 'efficiency',
   explanation:
-    'Using `cd` inside RUN instructions does not persist across layers -- each RUN starts ' +
-    'in the WORKDIR. Chaining `cd dir && command` works but makes the Dockerfile harder ' +
-    'to read and maintain. In production, developers often forget that `cd` in one RUN ' +
-    'does not affect the next, leading to path-related bugs. WORKDIR is the idiomatic ' +
-    'way to set the working directory and persists across all subsequent instructions.',
+    'Using `cd` inside RUN instructions does not persist across layers because each RUN ' +
+    'starts in the WORKDIR. Chaining `cd dir && command` works but makes the Dockerfile ' +
+    'harder to read and maintain. Developers often forget that `cd` in one RUN does not ' +
+    'affect the next, which leads to path-related bugs. WORKDIR is the idiomatic way to ' +
+    'set the working directory and it persists across all subsequent instructions.',
   fix: {
     description: 'Replace cd with a WORKDIR instruction',
     beforeCode: 'RUN cd /app && npm install',

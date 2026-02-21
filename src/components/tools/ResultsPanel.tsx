@@ -39,7 +39,9 @@ export default function ResultsPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <h2 className="text-lg font-heading font-semibold mb-3">Results</h2>
+      <div className="flex items-center mb-3 min-h-[40px]">
+        <h2 className="text-lg font-heading font-semibold">Results</h2>
+      </div>
       <div className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4 overflow-y-auto">
         {analyzing ? (
           <div className="flex items-center justify-center h-full">
@@ -48,11 +50,7 @@ export default function ResultsPanel() {
         ) : result === null || result === undefined ? (
           <div className="flex items-center justify-center h-full text-center">
             <p className="text-[var(--color-text-secondary)]">
-              Click <strong>Analyze</strong> or press{' '}
-              <kbd className="px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface-alt)] text-xs font-mono">
-                Cmd/Ctrl+Enter
-              </kbd>{' '}
-              to check your Dockerfile
+              Click <strong>Analyze</strong> to check your Dockerfile
             </p>
           </div>
         ) : !result.parseSuccess ? (

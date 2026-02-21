@@ -7,10 +7,10 @@ export const DL3004: LintRule = {
   severity: 'error',
   category: 'security',
   explanation:
-    'Using sudo in a Dockerfile is almost always unnecessary since the build already ' +
-    'runs as root by default. In production, sudo adds a SUID binary to the image ' +
-    'that can be exploited for privilege escalation. If you need to run a command as ' +
-    'a different user, use the USER instruction to switch users explicitly.',
+    'Using sudo in a Dockerfile is almost always unnecessary because the build already ' +
+    'runs as root by default. Worse, sudo adds a SUID binary to the image that can be ' +
+    'exploited for privilege escalation. If you need to run a command as a different ' +
+    'user, use the USER instruction to switch users explicitly.',
   fix: {
     description:
       'Remove sudo and run the command directly (builds run as root by default)',

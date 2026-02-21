@@ -20,7 +20,7 @@ const href = isExternal ? externalUrl : `/blog/${post.id}/`;
   ></a>
   <div class="flex items-center gap-2">
     <time datetime={publishedDate.toISOString()} class="text-sm text-[var(--color-text-secondary)]">
-      {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+      {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
     </time>
     {source && (
       <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">

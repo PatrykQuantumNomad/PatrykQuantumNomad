@@ -8,9 +8,9 @@ export const DL4003: LintRule = {
   category: 'reliability',
   explanation:
     'Only the last CMD instruction takes effect. Multiple CMD instructions in a ' +
-    'stage are almost always a mistake -- the earlier ones are silently ignored. ' +
-    'In production, this leads to confusion when developers expect a specific CMD ' +
-    'to run but Docker uses only the last one. Keep a single CMD per stage.',
+    'stage are almost always a mistake because the earlier ones are silently ignored. ' +
+    'This leads to confusion when developers expect a specific CMD to run but Docker ' +
+    'quietly uses only the last one. Keep a single CMD per stage.',
   fix: {
     description: 'Remove duplicate CMD instructions, keep only the final one',
     beforeCode: 'CMD ["echo", "first"]\nCMD ["echo", "second"]',

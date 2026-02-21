@@ -7,11 +7,11 @@ export const DL3008: LintRule = {
   severity: 'warning',
   category: 'security',
   explanation:
-    'Without pinned versions, apt-get install pulls the latest available package, ' +
-    'which can differ between builds. In production, this means two images built ' +
-    'from the same Dockerfile may contain different package versions, leading to ' +
-    'inconsistent behavior and hard-to-debug issues. Pin packages with = syntax ' +
-    '(e.g., curl=7.88.1-10+deb12u5) for reproducible builds.',
+    'Without pinned versions, apt-get install pulls whatever version happens to be ' +
+    'latest at build time. Two images built from the same Dockerfile a week apart may ' +
+    'contain different package versions, leading to inconsistent behavior and ' +
+    'hard-to-debug issues. Pin packages with = syntax (e.g., curl=7.88.1-10+deb12u5) ' +
+    'for reproducible builds.',
   fix: {
     description: 'Pin package versions with = syntax',
     beforeCode: 'RUN apt-get install -y curl wget',
@@ -35,7 +35,7 @@ export const DL3008: LintRule = {
 
       // Split into tokens (handle line continuations)
       const tokens = afterInstall
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0);
 

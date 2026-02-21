@@ -8,9 +8,9 @@ export const DL3019: LintRule = {
   category: 'efficiency',
   explanation:
     'Without --no-cache, apk stores a local package index in /var/cache/apk/ that ' +
-    'adds unnecessary size to Alpine-based images. In production, Alpine images are ' +
-    'chosen specifically for their small size (5 MB base), so leaving the apk cache ' +
-    'undermines that advantage. Use --no-cache to avoid storing the index entirely.',
+    'adds unnecessary size to Alpine-based images. Alpine images are chosen specifically ' +
+    'for their small footprint (5 MB base), so leaving the apk cache around undermines ' +
+    'that advantage. Use --no-cache to avoid storing the index entirely.',
   fix: {
     description: 'Add --no-cache to apk add',
     beforeCode: 'RUN apk update && apk add curl',

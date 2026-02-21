@@ -7,11 +7,11 @@ export const DL3027: LintRule = {
   severity: 'warning',
   category: 'best-practice',
   explanation:
-    'The `apt` command is designed for interactive terminal use -- it shows progress ' +
+    'The `apt` command is designed for interactive terminal use. It shows progress ' +
     'bars, colors, and prompts that break in non-interactive Docker builds. apt-get ' +
-    'is the stable, scriptable interface with a guaranteed CLI API. In production, ' +
-    'using `apt` in Dockerfiles can cause build failures when the output format changes ' +
-    'or when running in non-TTY environments. Always use apt-get or apt-cache.',
+    'is the stable, scriptable interface with a guaranteed CLI API. Using `apt` in ' +
+    'Dockerfiles can cause build failures when the output format changes or when ' +
+    'running in non-TTY environments. Always use apt-get or apt-cache instead.',
   fix: {
     description: 'Replace apt with apt-get',
     beforeCode: 'RUN apt install -y curl',

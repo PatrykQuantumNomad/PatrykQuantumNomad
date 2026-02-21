@@ -7,9 +7,9 @@ export const DL4000: LintRule = {
   severity: 'error',
   category: 'maintainability',
   explanation:
-    'The MAINTAINER instruction was deprecated in Docker 1.13 (January 2017). ' +
-    'In production, deprecated instructions create compatibility risks with future ' +
-    'Docker versions and signal unmaintained Dockerfiles to reviewers. Use a LABEL ' +
+    'The MAINTAINER instruction was deprecated in Docker 1.13 back in January 2017. ' +
+    'Deprecated instructions create compatibility risks with future Docker versions ' +
+    'and signal to reviewers that the Dockerfile may be unmaintained. Use a LABEL ' +
     'instruction instead, which provides the same metadata in a standard format.',
   fix: {
     description: 'Replace MAINTAINER with a LABEL instruction',

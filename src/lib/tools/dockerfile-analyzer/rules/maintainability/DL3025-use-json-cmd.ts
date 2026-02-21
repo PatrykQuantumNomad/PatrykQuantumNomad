@@ -7,11 +7,11 @@ export const DL3025: LintRule = {
   severity: 'warning',
   category: 'maintainability',
   explanation:
-    'Shell form (CMD command args) wraps the command in /bin/sh -c, which means ' +
-    'the process runs as a child of the shell. In production, this prevents proper ' +
-    'signal propagation -- SIGTERM sent by Docker to stop a container reaches the ' +
-    'shell, not your application, causing ungraceful shutdowns. JSON form ' +
-    '(CMD ["command", "args"]) runs the process directly and receives signals correctly.',
+    'Shell form (CMD command args) wraps your command in /bin/sh -c, which means ' +
+    'the process runs as a child of the shell. This prevents proper signal propagation ' +
+    'because SIGTERM sent by Docker to stop a container reaches the shell, not your ' +
+    'application, causing ungraceful shutdowns. JSON form (CMD ["command", "args"]) ' +
+    'runs the process directly so it receives signals correctly.',
   fix: {
     description: 'Convert shell form to JSON array form',
     beforeCode: 'CMD node server.js',
@@ -26,7 +26,9 @@ export const DL3025: LintRule = {
       const args = cmd.getArgumentsContent();
       if (!args) continue;
 
-      if (!args.trim().startsWith('[')) {
+      // Skip shell form when it uses variable substitution ($VAR / ${VAR})
+      // -- JSON exec form does not expand variables, so shell form is required
+      if (!args.trim().startsWith('[') && !/\$\{?\w+\}?/.test(args)) {
         const range = cmd.getRange();
         violations.push({
           ruleId: this.id,
@@ -43,7 +45,8 @@ export const DL3025: LintRule = {
       const args = ep.getArgumentsContent();
       if (!args) continue;
 
-      if (!args.trim().startsWith('[')) {
+      // Skip shell form when it uses variable substitution ($VAR / ${VAR})
+      if (!args.trim().startsWith('[') && !/\$\{?\w+\}?/.test(args)) {
         const range = ep.getRange();
         violations.push({
           ruleId: this.id,

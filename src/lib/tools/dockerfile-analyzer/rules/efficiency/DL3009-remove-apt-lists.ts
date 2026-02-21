@@ -8,8 +8,8 @@ export const DL3009: LintRule = {
   category: 'efficiency',
   explanation:
     'After apt-get update && apt-get install, the package lists in /var/lib/apt/lists/ ' +
-    'remain in the image layer, adding 20-40 MB of unnecessary data. In production, ' +
-    'this inflates image size and slows container downloads. Always remove apt lists ' +
+    'remain in the image layer, adding 20-40 MB of unnecessary data. This bloats your ' +
+    'image and slows down container pulls across your cluster. Always remove apt lists ' +
     'in the same RUN instruction to keep the layer lean.',
   fix: {
     description: 'Add rm -rf /var/lib/apt/lists/* in the same RUN instruction',

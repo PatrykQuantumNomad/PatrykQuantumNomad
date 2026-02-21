@@ -1,6 +1,6 @@
 import type { LintRule, RuleSeverity, RuleCategory } from '../types';
 
-// Security rules (10)
+// Security rules (12)
 import { DL3006 } from './security/DL3006-tag-version';
 import { DL3007 } from './security/DL3007-no-latest';
 import { DL3008 } from './security/DL3008-pin-apt-versions';
@@ -11,6 +11,8 @@ import { DL3061 } from './security/DL3061-from-first';
 import { PG001 } from './security/PG001-secrets-in-env';
 import { PG002 } from './security/PG002-curl-pipe-shell';
 import { PG003 } from './security/PG003-copy-sensitive-files';
+import { PG006 } from './security/PG006-prefer-digest';
+import { PG007 } from './security/PG007-explicit-uid-gid';
 
 // Efficiency rules (8)
 import { DL3059 } from './efficiency/DL3059-consolidate-runs';
@@ -31,12 +33,13 @@ import { PG004 } from './maintainability/PG004-legacy-env-format';
 import { DL4001 } from './maintainability/DL4001-wget-or-curl';
 import { DL3057 } from './maintainability/DL3057-missing-healthcheck';
 
-// Reliability rules (5)
+// Reliability rules (6)
 import { DL4003 } from './reliability/DL4003-multiple-cmd';
 import { DL4004 } from './reliability/DL4004-multiple-entrypoint';
 import { DL3011 } from './reliability/DL3011-valid-port';
 import { DL3012 } from './reliability/DL3012-one-healthcheck';
 import { DL3024 } from './reliability/DL3024-unique-from-alias';
+import { PG008 } from './reliability/PG008-use-init-process';
 
 // Best Practice rules (9)
 import { DL3027 } from './best-practice/DL3027-no-apt-use-apt-get';
@@ -51,7 +54,7 @@ import { PG005 } from './best-practice/PG005-inconsistent-casing';
 
 // Rule registry -- all rules exported as a flat array
 export const allRules: LintRule[] = [
-  // Security (10)
+  // Security (12)
   DL3006,
   DL3007,
   DL3008,
@@ -62,6 +65,8 @@ export const allRules: LintRule[] = [
   PG001,
   PG002,
   PG003,
+  PG006,
+  PG007,
   // Efficiency (8)
   DL3059,
   DL3014,
@@ -79,12 +84,13 @@ export const allRules: LintRule[] = [
   PG004,
   DL4001,
   DL3057,
-  // Reliability (5)
+  // Reliability (6)
   DL4003,
   DL4004,
   DL3011,
   DL3012,
   DL3024,
+  PG008,
   // Best Practice (9)
   DL3027,
   DL3013,

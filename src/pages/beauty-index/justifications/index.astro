@@ -6,7 +6,6 @@
  */
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
-import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import { totalScore } from '../../../lib/beauty-index/schema';
 import { DIMENSIONS } from '../../../lib/beauty-index/dimensions';
 import { DIMENSION_COLORS, TIERS, getTierColor } from '../../../lib/beauty-index/tiers';
@@ -33,12 +32,6 @@ const tierNames: Record<string, string> = {
   ogImage={ogImageURL}
   ogImageAlt="Beauty Index — Score Justifications for 25 programming languages"
 >
-  <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: "https://patrykgolabek.dev/" },
-    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
-    { name: "Score Justifications", url: "https://patrykgolabek.dev/beauty-index/justifications/" },
-  ]} />
-
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">

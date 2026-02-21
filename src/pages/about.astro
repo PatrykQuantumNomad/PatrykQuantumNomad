@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 import FAQPageJsonLd from '../components/FAQPageJsonLd.astro';
 import HeadSceneWrapper from '../components/HeadSceneWrapper.astro';
 import avatarImg from '../assets/images/anime.jpeg';
@@ -326,10 +325,6 @@ const highlights = [
       </div>
     </div>
   </section>
-  <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: `${Astro.site}` },
-    { name: "About", url: `${new URL('/about/', Astro.site)}` },
-  ]} />
   <FAQPageJsonLd items={[
     {
       question: "What technologies does Patryk Golabek specialize in?",

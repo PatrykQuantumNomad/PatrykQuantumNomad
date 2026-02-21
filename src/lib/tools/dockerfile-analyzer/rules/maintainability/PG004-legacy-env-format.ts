@@ -9,9 +9,9 @@ export const PG004: LintRule = {
   explanation:
     'The legacy `ENV KEY value` syntax (space-separated) only supports one variable ' +
     'per instruction and can be ambiguous when the value contains spaces. Docker ' +
-    'recommends the `ENV KEY=value` syntax which is explicit, supports multiple ' +
-    'variables per line, and avoids parsing surprises. In production, the legacy ' +
-    'format can cause subtle bugs when values have leading/trailing spaces.',
+    'recommends the `ENV KEY=value` syntax, which is explicit, supports multiple ' +
+    'variables per line, and avoids parsing surprises. The legacy format can cause ' +
+    'subtle bugs when values have leading or trailing spaces.',
   fix: {
     description: 'Use the key=value syntax for ENV instructions',
     beforeCode: 'ENV MY_VAR some value',

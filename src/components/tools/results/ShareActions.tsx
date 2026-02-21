@@ -9,6 +9,7 @@ import {
   buildShareUrl,
   isUrlSafeLength,
 } from '../../../lib/tools/dockerfile-analyzer/url-state';
+import { PromptGenerator } from './PromptGenerator';
 
 export function ShareActions() {
   const result = useStore(analysisResult);
@@ -114,6 +115,8 @@ export function ShareActions() {
         </svg>
         {copied ? 'Copied!' : 'Copy Share Link'}
       </button>
+
+      <PromptGenerator />
 
       {urlWarning && (
         <p className="w-full text-xs text-amber-400 mt-1">{urlWarning}</p>

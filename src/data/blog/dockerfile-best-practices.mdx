@@ -1,7 +1,7 @@
 ---
-title: "39 Dockerfile Best Practices From a Kubernetes Architect"
+title: "Dockerfile Best Practices From a Kubernetes Architect"
 description: "A production-tested guide to writing secure, efficient, and maintainable Dockerfiles. Each rule explained with real-world consequences and fix examples. Try the free browser-based analyzer."
-publishedDate: 2026-02-20
+publishedDate: 2026-02-21
 tags: ["docker", "kubernetes", "devops", "cloud-native", "security", "containers"]
 draft: false
 ---
@@ -17,11 +17,11 @@ After 17 years building cloud-native systems and adopting Kubernetes before it h
 
 I wrote the rules down. Then I turned them into an [analyzer you can run right now](/tools/dockerfile-analyzer/).
 
-This post walks through the 39 rules the analyzer checks, organized by category. Each rule is linked to its own documentation page with before/after code examples and detailed explanations. By the end, you will know what to fix, why it matters, and how to verify it automatically.
+This post walks through the rules the analyzer checks, organized by category. Each rule is linked to its own documentation page with before/after code examples and detailed explanations. By the end, you will know what to fix, why it matters, and how to verify it automatically.
 
 <TldrSummary>
 
-- **39 rules** across **5 categories**: Security, Efficiency, Maintainability, Reliability, Best Practice
+- **Dozens of rules** across **5 categories**: Security, Efficiency, Maintainability, Reliability, Best Practice
 - Scoring: **0-100** with letter grades, category-weighted by production impact
 - **100% client-side** -- your Dockerfile never leaves your browser
 - Based on Hadolint DL codes + custom PG rules from production Kubernetes experience
@@ -48,7 +48,7 @@ Security rules carry the highest weight in the analyzer's scoring system at 30%.
 ```dockerfile title="Bad: Unpinned base image"
 FROM python
 ```
-
+<br />
 ```dockerfile title="Good: Pinned to specific version"
 FROM python:3.12-slim
 ```
@@ -57,13 +57,21 @@ The `:latest` tag is a moving target. What builds today may break tomorrow when 
 
 I have seen this cause outages twice: once when a Python base image bumped from 3.11 to 3.12 and broke a C extension, and once when an Alpine upgrade changed the `libc` version and segfaulted the application at startup. Pin your versions.
 
+But even a pinned tag is not truly immutable. Image maintainers can rebuild and push a new image under the same tag -- `python:3.12-slim` today and `python:3.12-slim` next week may contain different system packages. For production workloads where reproducibility is critical, pin to a **digest**:
+
+```dockerfile title="Best: Pinned to immutable digest"
+FROM python:3.12-slim@sha256:1a2b3c...
+```
+
+A digest is a content-addressable hash of the image manifest. It cannot change. If the upstream maintainer pushes an update, the digest changes and your build continues to pull the exact image you tested against. To get the digest, run `docker pull python:3.12-slim` then `docker inspect --format='{{index .RepoDigests 0}}' python:3.12-slim`. Rule [PG006](/tools/dockerfile-analyzer/rules/pg006/) flags tagged images that lack a digest pin.
+
 ### Never Expose Secrets in ENV or ARG
 
 ```dockerfile title="Bad: Secret in ENV"
 ENV DATABASE_PASSWORD=hunter2
 ARG AWS_SECRET_ACCESS_KEY=AKIA...
 ```
-
+<br />
 ```dockerfile title="Good: Use BuildKit secrets"
 RUN --mount=type=secret,id=db_password \
     cat /run/secrets/db_password | setup-db
@@ -80,7 +88,7 @@ FROM node:20-slim
 COPY . /app
 CMD ["node", "/app/server.js"]
 ```
-
+<br />
 ```dockerfile title="Good: Explicit non-root user"
 FROM node:20-slim
 RUN groupadd -r app && useradd -r -g app app
@@ -93,12 +101,31 @@ Containers run as root by default. If an attacker exploits a vulnerability in yo
 
 In Kubernetes, you can enforce this with `securityContext.runAsNonRoot: true` in your pod spec. But the defense-in-depth approach is to fix it at the Dockerfile level first.
 
+### Use Explicit UID/GID for Container Users
+
+```dockerfile title="Bad: Non-deterministic UID/GID"
+RUN groupadd appgroup
+RUN useradd appuser
+```
+<br />
+```dockerfile title="Good: Explicit UID and GID"
+ARG uid=10001
+ARG gid=10001
+RUN groupadd -g ${gid} appgroup && \
+    useradd -u ${uid} -g appgroup -s /bin/false appuser
+USER appuser
+```
+
+When `useradd` runs without `-u` and `groupadd` runs without `-g`, the system assigns the next available ID. That ID depends on which packages were installed before it, which means a base image update can silently shift your application user to a different UID. On a Kubernetes cluster, if the pod spec sets `securityContext.runAsUser: 10001` but the rebuilt image now has the user at UID 1001, the container fails to start or runs as the wrong identity. Persistent volume data owned by the old UID becomes inaccessible. Rule [PG007](/tools/dockerfile-analyzer/rules/pg007/) flags `useradd` without `-u`/`--uid` and `groupadd` without `-g`/`--gid`.
+
+Why 10001 and not 1000? UIDs below 1000 are reserved for system accounts on most Linux distributions. UIDs 1000-9999 overlap with default host user ranges, which matters when host paths are mounted into the container. IDs above 10000 avoid both collision zones. This is the pattern used by Google's distroless images and Chainguard's hardened base images. The CIS Docker Benchmark (Section 4.1) recommends running containers with a fixed, non-root UID for exactly these reasons.
+
 ### Do Not COPY Sensitive Files
 
 ```dockerfile title="Bad: COPY everything including secrets"
 COPY . /app
 ```
-
+<br />
 ```dockerfile title="Good: Use .dockerignore and selective COPY"
 COPY package.json package-lock.json /app/
 COPY src/ /app/src/
@@ -118,7 +145,7 @@ RUN apt-get install -y curl
 RUN apt-get install -y git
 RUN rm -rf /var/lib/apt/lists/*
 ```
-
+<br />
 ```dockerfile title="Good: Single chained RUN"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl git && \
@@ -134,7 +161,7 @@ The single-chain pattern also matters for cache invalidation. If your `apt-get u
 ```dockerfile title="Bad: APT lists left in image"
 RUN apt-get update && apt-get install -y curl
 ```
-
+<br />
 ```dockerfile title="Good: Clean up in the same layer"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
@@ -155,13 +182,36 @@ The remaining three categories cover rules that prevent silent failures, improve
 CMD npm start
 ENTRYPOINT /app/entrypoint.sh
 ```
-
+<br />
 ```dockerfile title="Good: Exec (JSON) form"
 CMD ["npm", "start"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 ```
 
 Shell form wraps your command in `/bin/sh -c`, which means your process runs as a child of the shell. Signals like `SIGTERM` (sent by Kubernetes during graceful shutdown) go to the shell, not your application. The result: your application ignores the shutdown signal, Kubernetes waits for the termination grace period to expire, and then sends `SIGKILL`. That is 30 seconds of unnecessary downtime on every deployment. Rule [DL3025](/tools/dockerfile-analyzer/rules/dl3025/) flags shell-form `CMD` and `ENTRYPOINT` instructions.
+
+### Use an Init Process for Signal Handling
+
+```dockerfile title="Bad: Application runs as PID 1"
+FROM node:20-slim
+COPY . /app
+CMD ["node", "server.js"]
+```
+<br />
+```dockerfile title="Good: tini handles PID 1 responsibilities"
+FROM node:20-slim
+RUN apt-get update && apt-get install -y --no-install-recommends tini && \
+    rm -rf /var/lib/apt/lists/*
+COPY . /app
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["node", "server.js"]
+```
+
+Even with JSON-form `CMD`, your application still runs as PID 1 inside the container. The Linux kernel treats PID 1 differently from every other process: SIGTERM has no default handler. It is silently ignored. When Kubernetes sends SIGTERM during a rolling update, your application does not receive it. The container sits idle for the entire `terminationGracePeriodSeconds` (default 30 seconds), then Kubernetes sends SIGKILL. That is 30 seconds of unnecessary downtime on every deployment, and any in-flight requests are dropped without cleanup.
+
+The second problem is zombie processes. PID 1 is responsible for calling `wait()` to reap child processes that have exited. Most applications never do this. If your application spawns subprocesses -- worker threads, health check scripts, log rotators -- their exit leaves zombie entries in the kernel's process table. Enough zombies exhaust the PID table (~32,768 entries), after which `fork()` fails and the container becomes unresponsive.
+
+A lightweight init process solves both problems. [tini](https://github.com/krallin/tini) is a ~25 KB binary that sits as PID 1, forwards signals to your application, and reaps zombie children. Docker provides a `--init` flag that injects tini at runtime, and Docker Compose supports `init: true`. But Kubernetes has no equivalent runtime flag -- the init binary must be baked into the image. In multi-stage builds, copy tini from the builder stage: `COPY --from=builder /usr/bin/tini /usr/bin/tini`. Rule [PG008](/tools/dockerfile-analyzer/rules/pg008/) flags Dockerfiles that have no init process wrapping the ENTRYPOINT or CMD.
 
 ### Do Not Duplicate CMD or ENTRYPOINT
 
@@ -176,7 +226,7 @@ Only the last `CMD` instruction in a Dockerfile takes effect. The earlier ones a
 
 ### Other Rules Worth Knowing
 
-The analyzer covers 39 rules total. A few more highlights:
+The analyzer covers dozens of rules. A few more highlights:
 
 - **[DL3000](/tools/dockerfile-analyzer/rules/dl3000/)**: Use absolute paths in `WORKDIR` to avoid ambiguity about the working directory
 - **[DL4001](/tools/dockerfile-analyzer/rules/dl4001/)**: Pick either `wget` or `curl`, not both -- reduces image size and maintenance surface
@@ -220,7 +270,7 @@ A clever detail: the scoring uses a **diminishing returns formula** so that mult
 
 ### The Rule Engine
 
-Each of the 39 rules is implemented as a self-contained TypeScript module with a single `check()` function. The function receives the parsed AST and raw text, then returns an array of violations with line numbers, messages, and severity levels. This one-file-per-rule architecture makes it straightforward to add new rules, audit existing ones, and test each rule in isolation.
+Each rule is implemented as a self-contained TypeScript module with a single `check()` function. The function receives the parsed AST and raw text, then returns an array of violations with line numbers, messages, and severity levels. This one-file-per-rule architecture makes it straightforward to add new rules, audit existing ones, and test each rule in isolation.
 
 Rules operate on the AST, not on raw text. This means they understand Dockerfile semantics: they know which build stage a `USER` instruction belongs to, whether a `WORKDIR` is relative or absolute, and whether an `ENV` value contains a known secret pattern. AST-based analysis is what separates this from a glorified grep.
 

@@ -8,7 +8,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/blog/', label: 'Blog' },
   { href: '/beauty-index/', label: 'Beauty Index' },
-  { href: '/tools/dockerfile-analyzer/', label: 'Tools' },
+  { href: '/tools/', label: 'Tools' },
   { href: '/projects/', label: 'Projects' },
   { href: '/about/', label: 'About' },
   { href: '/contact/', label: 'Contact' },
@@ -146,6 +146,7 @@ const currentPath = Astro.url.pathname;
     const iconClose = document.getElementById('menu-icon-close');
 
     if (!header) return;
+    const headerEl = header;
 
     // Scroll-aware header: hide on scroll down, show on scroll up
     let lastScroll = 0;
@@ -157,16 +158,16 @@ const currentPath = Astro.url.pathname;
 
       // Show/hide border based on scroll position
       if (isScrolled) {
-        header.style.borderColor = 'var(--color-border)';
+        headerEl.style.borderColor = 'var(--color-border)';
       } else {
-        header.style.borderColor = 'transparent';
+        headerEl.style.borderColor = 'transparent';
       }
 
       // Hide on scroll down, show on scroll up
       if (scrollY > lastScroll && scrollY > 80) {
-        header.style.transform = 'translateY(-100%)';
+        headerEl.style.transform = 'translateY(-100%)';
       } else {
-        header.style.transform = 'translateY(0)';
+        headerEl.style.transform = 'translateY(0)';
       }
 
       lastScroll = scrollY;

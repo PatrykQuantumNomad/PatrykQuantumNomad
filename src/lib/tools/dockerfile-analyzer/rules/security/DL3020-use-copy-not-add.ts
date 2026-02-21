@@ -8,10 +8,10 @@ export const DL3020: LintRule = {
   category: 'security',
   explanation:
     'ADD has implicit behaviors that COPY does not: it auto-extracts archives and ' +
-    'can fetch remote URLs. In production, this unpredictability is a security risk -- ' +
-    'ADD from a URL fetches content without checksum verification, and auto-extraction ' +
+    'can fetch remote URLs. This unpredictability is a security concern because ADD ' +
+    'from a URL fetches content without checksum verification, and auto-extraction ' +
     'can unpack unexpected content. Use COPY for straightforward file copies and ' +
-    'explicit commands (curl/wget + tar) for archives and remote resources.',
+    'explicit commands (curl/wget + tar) when you need archives or remote resources.',
   fix: {
     description: 'Replace ADD with COPY for local file copies',
     beforeCode: 'ADD ./config /app/config',

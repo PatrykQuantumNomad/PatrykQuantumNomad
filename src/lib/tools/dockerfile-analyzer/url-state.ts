@@ -12,7 +12,7 @@ export function encodeToHash(content: string): string {
 
 /** Read and decompress Dockerfile content from current URL hash. Returns null if not present. */
 export function decodeFromHash(): string | null {
-  const hash = window.location.hash;
+  const hash = globalThis.location.hash;
   if (!hash.startsWith(HASH_PREFIX)) return null;
   const compressed = hash.slice(HASH_PREFIX.length);
   if (!compressed) return null;
@@ -25,7 +25,7 @@ export function decodeFromHash(): string | null {
 
 /** Build a full shareable URL for the given Dockerfile content */
 export function buildShareUrl(content: string): string {
-  const base = window.location.origin + window.location.pathname;
+  const base = globalThis.location.origin + globalThis.location.pathname;
   return `${base}${encodeToHash(content)}`;
 }
 

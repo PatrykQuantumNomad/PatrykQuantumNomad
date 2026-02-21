@@ -8,10 +8,10 @@ export const PG005: LintRule = {
   category: 'best-practice',
   explanation:
     'Docker instructions are case-insensitive, but mixing uppercase and lowercase ' +
-    '(e.g., FROM with run) creates an inconsistent, unprofessional appearance. The ' +
-    'Docker documentation and community convention is to use UPPERCASE for all ' +
-    'instructions. In production code reviews, inconsistent casing signals carelessness ' +
-    'and reduces readability.',
+    '(e.g., FROM with run) creates an inconsistent, messy appearance. The Docker ' +
+    'documentation and community convention is to use UPPERCASE for all instructions. ' +
+    'Inconsistent casing makes the Dockerfile harder to scan and signals to reviewers ' +
+    'that the file may not have been carefully maintained.',
   fix: {
     description: 'Use consistent uppercase for all Dockerfile instructions',
     beforeCode: 'FROM node:20\nrun npm install\nCOPY . .',

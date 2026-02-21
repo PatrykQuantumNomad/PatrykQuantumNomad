@@ -7,11 +7,11 @@ export const DL3057: LintRule = {
   severity: 'info',
   category: 'maintainability',
   explanation:
-    'Without a HEALTHCHECK, Docker and orchestrators (Kubernetes, Docker Swarm) have no ' +
-    'way to verify the container is functioning correctly. In production, a container ' +
-    'without HEALTHCHECK can appear "running" while the application inside has crashed, ' +
-    'leading to serving errors until manual intervention. Adding HEALTHCHECK enables ' +
-    'automatic detection and restart of unhealthy containers.',
+    'Without a HEALTHCHECK, Docker and orchestrators like Kubernetes have no way to ' +
+    'verify that the container is actually functioning correctly. A container can appear ' +
+    '"running" while the application inside has crashed, and it will keep serving errors ' +
+    'until someone notices and intervenes manually. Adding HEALTHCHECK enables automatic ' +
+    'detection and restart of unhealthy containers.',
   fix: {
     description: 'Add a HEALTHCHECK instruction to verify the app is running',
     beforeCode: 'CMD ["node", "server.js"]',
@@ -29,8 +29,8 @@ export const DL3057: LintRule = {
       // Flag on the last FROM instruction's line, or line 1 if no FROM
       const froms = dockerfile.getFROMs();
       let flagLine = 1;
-      if (froms.length > 0) {
-        const lastFrom = froms[froms.length - 1];
+      const lastFrom = froms.at(-1);
+      if (lastFrom) {
         flagLine = lastFrom.getRange().start.line + 1;
       }
 

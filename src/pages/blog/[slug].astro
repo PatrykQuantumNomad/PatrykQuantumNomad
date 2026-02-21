@@ -80,7 +80,7 @@ const titleTag = (title.length + suffix.length > 65)
       <h1 class="text-3xl sm:text-4xl font-heading font-bold">{title}</h1>
       <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-[var(--color-text-secondary)]">
         <time datetime={publishedDate.toISOString()}>
-          {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+          {publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
         </time>
         <span aria-label="Reading time">{remarkPluginFrontmatter.minutesRead}</span>
       </div>
@@ -122,8 +122,8 @@ const titleTag = (title.length + suffix.length > 65)
     />
     {beautyIndexFAQ.length > 0 && <FAQPageJsonLd items={beautyIndexFAQ} />}
     <BreadcrumbJsonLd crumbs={[
-      { name: "Home", url: `${Astro.site}` },
-      { name: "Blog", url: `${new URL('/blog/', Astro.site)}` },
+      { name: 'Home', url: 'https://patrykgolabek.dev/' },
+      { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },
       { name: title, url: postURL },
     ]} />
   </article>
@@ -142,7 +142,7 @@ const titleTag = (title.length + suffix.length > 65)
             >
               <div class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                 <time datetime={related.data.publishedDate.toISOString()}>
-                  {related.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'short' })}
+                  {related.data.publishedDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', timeZone: 'UTC' })}
                 </time>
                 {related.data.source && (
                   <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">

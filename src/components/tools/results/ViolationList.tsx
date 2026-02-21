@@ -60,9 +60,15 @@ function ViolationItem({
           &#9654;
         </span>
         <SeverityIcon severity={violation.severity} />
-        <span className="font-mono text-xs text-[var(--color-text-secondary)]">
+        <a
+          href={`/tools/dockerfile-analyzer/rules/${violation.ruleId.toLowerCase()}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="font-mono text-xs text-[var(--color-accent)] hover:underline"
+        >
           {violation.ruleId}
-        </span>
+        </a>
         <span className="flex-1 text-sm truncate">{violation.message}</span>
         <button
           onClick={(e) => {

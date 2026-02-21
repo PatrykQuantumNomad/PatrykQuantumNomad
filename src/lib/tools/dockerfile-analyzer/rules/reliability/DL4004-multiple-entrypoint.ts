@@ -8,10 +8,10 @@ export const DL4004: LintRule = {
   category: 'reliability',
   explanation:
     'Only the last ENTRYPOINT instruction takes effect. Multiple ENTRYPOINT ' +
-    'instructions in a stage are almost always a mistake -- the earlier ones are ' +
-    'silently ignored. In production, this is more critical than duplicate CMD because ' +
-    'ENTRYPOINT defines how the container starts. A wrong entrypoint means the ' +
-    'container runs unexpected code.',
+    'instructions in a stage are almost always a mistake because the earlier ones are ' +
+    'silently ignored. This is more critical than a duplicate CMD because ENTRYPOINT ' +
+    'defines how the container starts. A wrong entrypoint means the container runs ' +
+    'unexpected code.',
   fix: {
     description:
       'Remove duplicate ENTRYPOINT instructions, keep only the final one',
@@ -27,7 +27,8 @@ export const DL4004: LintRule = {
     if (froms.length === 0) return violations;
 
     // Find the last FROM instruction (start of final stage)
-    const lastFrom = froms[froms.length - 1];
+    const lastFrom = froms.at(-1);
+    if (!lastFrom) return violations;
     const lastFromLine = lastFrom.getRange().start.line;
 
     // Find ENTRYPOINT instructions in the final stage

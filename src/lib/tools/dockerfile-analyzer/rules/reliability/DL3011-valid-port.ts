@@ -8,8 +8,8 @@ export const DL3011: LintRule = {
   category: 'reliability',
   explanation:
     'EXPOSE with an invalid port number (outside 0-65535) is silently accepted by ' +
-    'Docker but has no effect. In production, this is always a typo or misconfiguration ' +
-    'that wastes debugging time when the expected port is not accessible. Valid TCP/UDP ' +
+    'Docker but has no effect. This is almost always a typo or misconfiguration that ' +
+    'wastes debugging time when the expected port is not accessible. Valid TCP/UDP ' +
     'ports range from 0 to 65535.',
   fix: {
     description: 'Use a valid port number between 0 and 65535',
@@ -31,11 +31,14 @@ export const DL3011: LintRule = {
       const tokens = args.trim().split(/\s+/);
 
       for (const token of tokens) {
+        // Skip variable references (e.g., $PORT, ${PORT}) -- resolved at build time
+        if (/\$\{?\w+\}?/.test(token)) continue;
+
         // Handle port/protocol format (e.g., 8080/tcp)
         const portStr = token.split('/')[0];
-        const port = parseInt(portStr, 10);
+        const port = Number.parseInt(portStr, 10);
 
-        if (isNaN(port) || port < 0 || port > 65535) {
+        if (Number.isNaN(port) || port < 0 || port > 65535) {
           const range = inst.getRange();
           violations.push({
             ruleId: this.id,

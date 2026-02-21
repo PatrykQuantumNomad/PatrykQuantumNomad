@@ -9,9 +9,9 @@ export const DL3045: LintRule = {
   explanation:
     'When COPY uses a relative destination (e.g., COPY . app/) and no WORKDIR has been ' +
     'set in the current build stage, the destination resolves relative to the filesystem ' +
-    'root (/). This is usually unintentional and makes the Dockerfile fragile -- the ' +
-    'behavior depends on the base image default WORKDIR. In production, this leads to ' +
-    'files ending up in unexpected locations. Set WORKDIR before using relative paths.',
+    'root (/). This is usually unintentional and makes the Dockerfile fragile because ' +
+    'the behavior depends on the base image default WORKDIR. Files end up in unexpected ' +
+    'locations and builds break in confusing ways. Set WORKDIR before using relative paths.',
   fix: {
     description: 'Set WORKDIR before COPY with relative destination',
     beforeCode: 'FROM node:20\nCOPY . app/',
@@ -33,14 +33,15 @@ export const DL3045: LintRule = {
 
       // Parse tokens, skipping flags
       const tokens = args
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0 && !t.startsWith('--'));
 
       if (tokens.length < 2) continue;
 
       // Last token is the destination
-      const dest = tokens[tokens.length - 1];
+      const dest = tokens.at(-1);
+      if (!dest) continue;
 
       // Only flag relative destinations (not starting with / or $)
       if (dest.startsWith('/') || dest.startsWith('$')) continue;

@@ -26,10 +26,10 @@ export const PG003: LintRule = {
   category: 'security',
   explanation:
     'Copying sensitive files like private keys, .env files, or credentials into a Docker ' +
-    'image embeds them in the layer history. Even if deleted in a later step, they can ' +
-    'be extracted from earlier layers. In production, this leaks secrets to anyone with ' +
-    'image access. Use .dockerignore to exclude sensitive files, mount secrets at ' +
-    'runtime, or use Docker build secrets (--mount=type=secret).',
+    'image embeds them in the layer history. Even if you delete them in a later step, ' +
+    'they can still be extracted from earlier layers. Anyone with access to the image ' +
+    'can pull out your secrets. Use .dockerignore to exclude sensitive files, mount ' +
+    'secrets at runtime, or use Docker build secrets (--mount=type=secret).',
   fix: {
     description:
       'Add sensitive files to .dockerignore and use build secrets or runtime mounts',
@@ -52,7 +52,7 @@ export const PG003: LintRule = {
       // Split arguments -- last one is destination, rest are sources
       // Handle --from=... and --chown=... flags
       const tokens = args
-        .replace(/\\\n/g, ' ')
+        .replaceAll('\\\n', ' ')
         .split(/\s+/)
         .filter((t) => t.length > 0 && !t.startsWith('--'));
 

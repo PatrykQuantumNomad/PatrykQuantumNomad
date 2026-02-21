@@ -10,7 +10,6 @@ import { getCollection } from 'astro:content';
 import { Code } from 'astro-expressive-code/components';
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
-
 import { DIMENSIONS } from '../../lib/beauty-index/dimensions';
 import { JUSTIFICATIONS } from '../../data/beauty-index/justifications';
 import RadarChart from '../../components/beauty-index/RadarChart.astro';
@@ -124,12 +123,12 @@ const languageSchema = {
   ogImage={ogImageURL}
   ogImageAlt={`Beauty Index radar chart for ${language.name} — ${total}/60 points, ${tierLabel} tier`}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(languageSchema)} />
   <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: "https://patrykgolabek.dev/" },
-    { name: "Beauty Index", url: "https://patrykgolabek.dev/beauty-index/" },
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' },
     { name: language.name, url: `https://patrykgolabek.dev/beauty-index/${language.id}/` },
   ]} />
-  <script type="application/ld+json" set:html={JSON.stringify(languageSchema)} />
 
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <a href="/beauty-index/" class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6">
