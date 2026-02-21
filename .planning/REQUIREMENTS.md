@@ -46,8 +46,8 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### Shareability
 
-- [ ] **SHARE-01**: Score badge download as PNG image for social media sharing
-- [ ] **SHARE-02**: URL state encoding — Dockerfile content in URL hash for shareable analysis links
+- [x] **SHARE-01**: Score badge download as PNG image for social media sharing
+- [x] **SHARE-02**: URL state encoding — Dockerfile content in URL hash for shareable analysis links
 
 ### Content
 
@@ -131,8 +131,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-04 | Phase 26 | Complete |
 | SEO-05 | Phase 26 | Pending |
 | SEO-06 | Phase 26 | Pending |
-| SHARE-01 | Phase 27 | Pending |
-| SHARE-02 | Phase 27 | Pending |
+| SHARE-01 | Phase 27 | Complete |
+| SHARE-02 | Phase 27 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 38 total

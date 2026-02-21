@@ -156,7 +156,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. After analysis, users can download a PNG score badge image showing their overall score, letter grade, and category breakdown — suitable for sharing on social media or in documentation
   2. Users can copy a shareable URL that encodes their Dockerfile content; opening that URL in a new browser loads the Dockerfile into the editor and triggers analysis, reproducing the same results
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 27-01-PLAN.md — Install lz-string, create badge-generator.ts and url-state.ts utility modules
 - [ ] 27-02-PLAN.md — ShareActions UI component, ResultsPanel integration, URL hash restore in EditorPanel
@@ -195,7 +195,7 @@ Note: Phase 27 depends only on Phase 24 (not 25 or 26), so it could run before P
 | 24. Results Display | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 25. Content & Rule Docs | v1.4 | 2/2 | Complete | 2026-02-20 |
 | 26. SEO & Launch | v1.4 | 3/3 | Complete | 2026-02-20 |
-| 27. Shareability | v1.4 | 0/2 | Not started | - |
+| 27. Shareability | 1/2 | In Progress|  | - |
 
 ---
 *Roadmap created: 2026-02-11*
