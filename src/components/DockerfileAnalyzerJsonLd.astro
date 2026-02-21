@@ -1,0 +1,40 @@
+---
+/**
+ * DockerfileAnalyzerJsonLd.astro — SoftwareApplication JSON-LD structured data
+ * for the Dockerfile Analyzer tool page. Helps search engines understand
+ * the tool's purpose, features, and authorship.
+ */
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Dockerfile Analyzer",
+  "description": "Free browser-based Dockerfile linter and best-practice analyzer. 39 rules across security, efficiency, maintainability, reliability, and best practices. Scored by a Kubernetes architect with 17+ years of experience.",
+  "url": "https://patrykgolabek.dev/tools/dockerfile-analyzer/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web Browser",
+  "softwareVersion": "1.0",
+  "featureList": [
+    "39 lint rules based on Hadolint DL codes and production Kubernetes experience",
+    "Category-weighted scoring with letter grades (A+ through F)",
+    "Inline CodeMirror annotations with severity-colored gutter markers",
+    "100% client-side analysis — no data transmitted",
+    "Dockerfile syntax highlighting with CodeMirror 6",
+    "Click-to-navigate from findings to source lines",
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://patrykgolabek.dev/#website",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
