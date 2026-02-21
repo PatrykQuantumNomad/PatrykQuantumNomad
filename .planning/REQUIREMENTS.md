@@ -9,13 +9,13 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 ### Data & Schema
 
-- [ ] **DATA-01**: Database model categories defined in JSON with Zod schema validation for 12 models across 8 dimensions
-- [ ] **DATA-02**: Each model has crossCategory field linking to related model types for multi-model databases
-- [ ] **DATA-03**: Each model has per-dimension justification text explaining why that score was assigned
+- [x] **DATA-01**: Database model categories defined in JSON with Zod schema validation for 12 models across 8 dimensions
+- [x] **DATA-02**: Each model has crossCategory field linking to related model types for multi-model databases
+- [x] **DATA-03**: Each model has per-dimension justification text explaining why that score was assigned
 - [ ] **DATA-04**: Each model lists 3-6 top databases with name, description, license, and DB-Engines external link
-- [ ] **DATA-05**: Content collection registered in content.config.ts with file() loader
-- [ ] **DATA-06**: Dimension definitions with key, symbol, name, and description in dedicated library file
-- [ ] **DATA-07**: CAP theorem profile (CP/AP/CA/Tunable) with notes per model
+- [x] **DATA-05**: Content collection registered in content.config.ts with file() loader
+- [x] **DATA-06**: Dimension definitions with key, symbol, name, and description in dedicated library file
+- [x] **DATA-07**: CAP theorem profile (CP/AP/CA/Tunable) with notes per model
 
 ### Visualization
 
@@ -85,13 +85,13 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 28 | Pending |
-| DATA-02 | Phase 28 | Pending |
-| DATA-03 | Phase 28 | Pending |
+| DATA-01 | Phase 28 | Complete |
+| DATA-02 | Phase 28 | Complete |
+| DATA-03 | Phase 28 | Complete |
 | DATA-04 | Phase 28 | Pending |
-| DATA-05 | Phase 28 | Pending |
-| DATA-06 | Phase 28 | Pending |
-| DATA-07 | Phase 28 | Pending |
+| DATA-05 | Phase 28 | Complete |
+| DATA-06 | Phase 28 | Complete |
+| DATA-07 | Phase 28 | Complete |
 | VIZ-01 | Phase 29 | Pending |
 | VIZ-02 | Phase 29 | Pending |
 | VIZ-03 | Phase 29 | Pending |
