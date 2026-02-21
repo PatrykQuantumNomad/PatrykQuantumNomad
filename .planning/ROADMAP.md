@@ -32,11 +32,11 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
   3. Multi-model databases (Redis, PostgreSQL, Cosmos DB, etc.) have crossCategory fields linking to their secondary model types
   4. Each model entry lists 3-6 top databases with name, description, license, and external link
   5. Dimension definitions exist in a dedicated library file with key, symbol, name, and description for all 8 axes
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 28-01: TBD
-- [ ] 28-02: TBD
+- [ ] 28-01-PLAN.md — Zod schema, dimension definitions, and content collection registration
+- [ ] 28-02-PLAN.md — 12 database model entries with scores, justifications, and metadata
 
 ### Phase 29: Visualization Components
 **Goal**: All visualization primitives render correctly from real data at mobile, tablet, and desktop breakpoints — ready to be assembled into pages
@@ -108,7 +108,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 28. Data Foundation | 0/TBD | Not started | - |
+| 28. Data Foundation | 0/2 | Planning complete | - |
 | 29. Visualization Components | 0/TBD | Not started | - |
 | 30. Overview Page | 0/TBD | Not started | - |
 | 31. Detail Pages | 0/TBD | Not started | - |
