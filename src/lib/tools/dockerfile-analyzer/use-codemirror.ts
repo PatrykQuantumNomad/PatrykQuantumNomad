@@ -5,8 +5,7 @@ import { basicSetup } from 'codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { dockerFile } from '@codemirror/legacy-modes/mode/dockerfile';
 import { lintGutter } from '@codemirror/lint';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { editorTheme } from './editor-theme';
+import { editorTheme, oneDarkTheme, a11ySyntaxHighlighting } from './editor-theme';
 import { highlightLineField } from './highlight-line';
 import {
   editorViewRef,
@@ -55,10 +54,14 @@ export function useCodeMirror({ initialDoc, onAnalyze }: UseCodeMirrorOptions) {
         StreamLanguage.define(dockerFile),
         lintGutter(),
         analyzeKeymap,
-        oneDark,
+        oneDarkTheme,
+        a11ySyntaxHighlighting,
         editorTheme,
         highlightLineField,
         EditorView.lineWrapping,
+        EditorView.contentAttributes.of({
+          'aria-label': 'Dockerfile editor — paste or type your Dockerfile here',
+        }),
         // Detect stale results: set flag when doc changes after analysis
         EditorView.updateListener.of((update) => {
           if (update.docChanged && analysisResult.get() !== null) {

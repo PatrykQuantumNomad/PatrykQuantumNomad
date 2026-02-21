@@ -53,7 +53,8 @@ export function ScoreGauge({ score, grade, size = 120 }: ScoreGaugeProps) {
       {/* Centered text overlay */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center"
-        aria-label={`Score ${score}, Grade ${grade}`}
+        role="status"
+        aria-label={`Dockerfile analysis score: ${score} out of 100, grade ${grade}`}
       >
         <span className="text-2xl font-bold font-heading">{score}</span>
         <span className="text-sm font-semibold" style={{ color: gradeColor }}>
