@@ -1,541 +1,410 @@
-# Pitfalls Research: Dockerfile Analyzer Tool
+# Pitfalls Research: Database Compass
 
-**Domain:** Adding a browser-based Dockerfile editor with linting, scoring, and inline annotations to an existing Astro 5 static portfolio site
-**Researched:** 2026-02-20
-**Confidence:** HIGH (verified against CodeMirror 6 docs, Astro docs, codebase analysis, dockerfile-ast source inspection, community issue trackers, and bundle size analysis)
+**Domain:** Adding an interactive database model explorer (Database Compass) to an existing Astro 5 portfolio site
+**Researched:** 2026-02-21
+**Confidence:** HIGH (verified against codebase analysis, Astro build output, visualization research, SEO best practices, existing content pillar patterns)
 
-**Context:** This is a SUBSEQUENT milestone pitfalls document. The site (patrykgolabek.dev) is a live Astro 5 static site with Lighthouse 90+ scores, GSAP animations, a React Three Fiber 3D hero scene, Expressive Code for syntax highlighting, Satori-based OG image generation, dark/light theme toggle, strict Content Security Policy, and ClientRouter (View Transitions). This is the FIRST major client-side interactive tool being added to the site -- approximately 350KB of new JavaScript (CodeMirror 6 ~300KB + dockerfile-ast ~50KB) entering what has been a predominantly static site.
+**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.5. The site (patrykgolabek.dev) already has 152 requirements across 5 milestones, 714 pages building in 22.17 seconds, and two content pillars: The Beauty Index (25 languages, 6 dimensions, 600+ vs-comparison OG images) and the Dockerfile Analyzer (39 rule pages, interactive CodeMirror editor). Database Compass adds 12 static model category pages + 1 overview + 1 blog post with a new JSON data file scored across 8 dimensions. This is a content-heavy addition, NOT an interactive tool -- zero client-side JS required beyond existing sort tables.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: CodeMirror 6 Requires `client:only` -- Not `client:visible` -- and SSR Will Break the Build
+### Pitfall 1: Multi-Model Database Categorization Creates Credibility Attacks
 
 **What goes wrong:**
-CodeMirror 6 depends entirely on browser APIs: DOM manipulation, MutationObserver, requestAnimationFrame, layout queries, and contenteditable. It cannot be server-rendered. If you use `client:visible` or `client:load` on a React/Preact wrapper component containing CodeMirror, Astro will attempt to server-render the component during the static build. This causes either:
+Putting Redis under "Key-Value" invites immediate criticism: "Redis is also a document store, a time-series database, a pub/sub broker, and a vector database." The same problem applies to PostgreSQL (relational + document + time-series via extensions), Cosmos DB (multi-model by design), DynamoDB (key-value + document), and MongoDB (document + time-series + search). Any rigid single-category placement looks naive to database professionals -- exactly the audience this tool targets.
 
-1. A build-time crash with "document is not defined" or "window is not defined" errors
-2. A hydration mismatch where the server-rendered placeholder HTML does not match the client-rendered CodeMirror DOM, causing React to throw warnings and potentially fail to hydrate
-
-The site currently uses `client:visible` for the Three.js 3D head scene (`HeadSceneWrapper.astro`), but Three.js has server-safe imports. CodeMirror does not. The EditorView constructor immediately accesses the DOM.
+The industry has moved decisively toward multi-model convergence. Redis describes itself as a "multi-model database" on its own website. PostgreSQL's JSONB support makes it a credible document store. Placing these databases in a single category box contradicts how their own vendors market them.
 
 **Why it happens:**
-Developers assume `client:visible` (lazy hydration) is always better than `client:only` (skip SSR entirely). For most components this is true. But CodeMirror is architecturally incompatible with SSR -- it creates its DOM structure imperatively, not declaratively. There is no meaningful HTML to server-render as a placeholder.
+A "12 categories, one database per slot" model imposes false mutual exclusivity on a reality where the lines are blurry. The visual design (12 cards, each with 3-6 databases) encourages clean taxonomy. But database models are not mutually exclusive -- they are capabilities that overlap across engines.
 
 **How to avoid:**
-1. **Use `client:only="react"` (or `client:only="preact"`)** for the CodeMirror editor island. This tells Astro to skip server rendering entirely and mount the component client-side only. The SSR output will be an empty placeholder div.
-2. **Design a meaningful loading state** to render in place of the editor during the SSR placeholder phase. A skeleton with the right dimensions prevents Cumulative Layout Shift (CLS) when the editor mounts. Use a `<div>` with matching height, a subtle border, and "Loading editor..." text.
-3. **Do NOT dynamically import CodeMirror inside a `client:visible` component** as a workaround. While this avoids the build crash, it creates a double-loading scenario: Astro loads the wrapper, then the wrapper loads CodeMirror. Use `client:only` for a clean single load.
-4. **Test the build pipeline early.** Run `astro build` after adding the first CodeMirror import to catch SSR issues before building the full feature.
+1. Categorize by **primary data model** (the native model the engine was designed around), not by all capabilities
+2. Add a `crossCategory` array field in the JSON schema for each database entry (e.g., Redis: `crossCategory: ["document", "time-series", "vector"]`)
+3. On the overview page, add a visible methodology note: "Databases are categorized by their primary data model. Many modern databases support multiple models -- see detail pages for overlap."
+4. On each detail page, render an "Also supports" section that cross-links to the other model categories the listed databases participate in
+5. In the companion blog post, dedicate a paragraph to explaining why rigid categorization is an approximation, not a truth
 
 **Warning signs:**
-- Build errors containing "document is not defined" or "ReferenceError: window is not defined"
-- Hydration mismatch warnings in the browser console
-- CodeMirror editor appears briefly, then disappears during hydration
-- Empty white space where the editor should be after navigation
+- JSON schema has no field for secondary/overlapping model capabilities
+- Detail page copy states "Redis is a key-value database" without qualification
+- No methodology explanation for how "primary model" was determined
+- A database professional could make a factual counter-argument to any placement
 
 **Phase to address:**
-Phase 1: Editor integration scaffolding. The `client:only` decision must be made BEFORE writing any CodeMirror code. This is a foundational architectural choice.
+Data schema design phase. The JSON schema must include `crossCategory` metadata from the start. Retrofitting it later means rewriting every detail page's "databases in this category" section.
 
 ---
 
-### Pitfall 2: ~350KB of Client JS Tanks Lighthouse Performance Unless Aggressively Lazy-Loaded
+### Pitfall 2: Dimension Scores Look Arbitrary Without Transparent Methodology
 
 **What goes wrong:**
-The site currently loads GSAP (~26KB gzip), Lenis (~4KB), Three.js (~150KB gzip via the 3D head scene), and React (~45KB gzip). Adding CodeMirror 6 (~75KB gzip minimal, ~120KB with linting+syntax+search extensions) plus dockerfile-ast (~15KB gzip) plus the custom rule engine pushes the total page JavaScript well past comfortable thresholds. If the editor loads eagerly, Total Blocking Time (TBT) -- which determines 30% of the Lighthouse Performance score -- will spike.
+Scoring 12 database models across 8 dimensions with integer values (1-10) invites "who decided this?" challenges. Unlike the Beauty Index where aesthetic subjectivity is part of the concept ("one architect's aesthetic ranking"), database capability scoring carries an expectation of technical objectivity. If a DBA sees Graph Databases scored 4/10 on "Ecosystem Maturity" with no justification, the entire tool loses credibility.
 
-Critical numbers:
-- TBT > 200ms = Lighthouse starts penalizing
-- TBT > 600ms = Lighthouse "poor" rating
-- CodeMirror initialization (parsing extensions, building DOM, setting up MutationObserver) takes 50-150ms on desktop, 200-400ms on low-end mobile
-- This is ON TOP OF existing Three.js/GSAP initialization
-
-The Dockerfile Analyzer page will be the heaviest page on the site by far. If it loads eagerly alongside the global animation scripts, it will be the first page to break the Lighthouse 90+ threshold.
+DB-Engines faces exactly this criticism: "scores based on proxies rather than actual capabilities get dismissed as popularity contests, not technical assessments." This tool will face the same challenge unless every score is defensible.
 
 **Why it happens:**
-CodeMirror 6's modular architecture is both its strength and its trap. The `basicSetup` convenience package pulls in 15+ extensions including search, autocomplete, bracket matching, and history -- most of which are needed for a good editor experience. Developers import `basicSetup` to get started quickly, not realizing it bundles far more than a minimal Dockerfile editor needs.
+The Beauty Index succeeded partly because it leaned into subjectivity and made it a feature. Database model comparisons live in a different expectations space -- people expect benchmarks, citations, or at least documented reasoning. A 1-10 scale with no rubric definition gives the impression of arbitrary assignment.
 
 **How to avoid:**
-1. **Use `minimalSetup` instead of `basicSetup`** and add only the extensions you actually need. For a Dockerfile linting tool, you need: syntax highlighting, line numbers, lint gutter, fold gutter (maybe), and the lint panel. You do NOT need: search/replace, autocomplete, bracket matching (Dockerfiles barely use brackets), or multi-cursor.
-2. **Dynamically import CodeMirror** via the `client:only` directive (which already defers loading until page render). Combined with the fact that this is a dedicated `/tools/dockerfile-analyzer` page (not the homepage), the JS only loads when users navigate to this specific page.
-3. **Set a page-specific performance budget.** The Dockerfile Analyzer page has a different budget than the homepage. Target: Lighthouse Performance 85+ (not 90+) for this interactive tool page. Document this exception.
-4. **Split the editor initialization** into phases: mount the editor view first (fast), then add linting extension after a 100ms delay using `requestIdleCallback` or `setTimeout`. This prevents the lint engine from adding to the initial TBT.
-5. **Measure with `?lighthouse=true` query parameter** during development to easily toggle Lighthouse-focused testing.
+1. **Define each dimension with a clear rubric.** For each score value, state what the endpoints mean. Example: "Query Flexibility: 1 = single-key lookups only, 5 = secondary indexes with basic filtering, 10 = full SQL with joins, subqueries, window functions, and CTEs"
+2. **Show the rubric on each detail page**, not buried in a methodology document. Users should see the rubric next to the score
+3. **Add a `justification` string field per model-dimension pair in the JSON data.** Even 1-2 sentences: "Scores 3 because graph queries require learning a specialized traversal language (Gremlin/Cypher), limiting adoption"
+4. **Consider using a 1-5 scale instead of 1-10.** The difference between a 6 and a 7 out of 10 is impossible to justify. A 1-5 scale (Very Low / Low / Medium / High / Very High) reduces false precision. The Beauty Index uses 1-10 but those are aesthetic judgments; technical capabilities deserve more defensible gradations
+5. **Anchor at least 2-3 dimensions to verifiable facts.** "Ecosystem Maturity" can reference npm/pip package counts, Stack Overflow question volumes, managed service availability on AWS/GCP/Azure. "Adoption" can reference DB-Engines rankings or developer survey data. Anchored scores resist "arbitrary" criticism
 
 **Warning signs:**
-- `import { basicSetup } from 'codemirror'` in any file (should be `minimalSetup` with selective additions)
-- Lighthouse Performance score below 85 on the Dockerfile Analyzer page
-- TBT exceeds 300ms on the Dockerfile Analyzer page
-- The editor page loads noticeably slower than other pages on 4G throttle
+- Dimension names exist without definitions anywhere in the codebase or data
+- Scores assigned without justification text in JSON
+- Two similar models have scores that differ by 1 point with no explanation for why
+- The blog post does not explain the scoring methodology
 
 **Phase to address:**
-Phase 1: Editor integration. Bundle size decisions are architectural -- wrong choices here require rearchitecting later.
+Data authoring phase. Dimension definitions and score rubrics must be written BEFORE any scores are assigned. This is a content prerequisite, not a UI task.
 
 ---
 
-### Pitfall 3: View Transitions (ClientRouter) Destroy and Fail to Recreate the CodeMirror Instance
+### Pitfall 3: 8-Axis Radar Charts Become Unreadable and Misleading
 
 **What goes wrong:**
-The site uses Astro's `<ClientRouter />` for smooth page-to-page navigation. When navigating away from and back to the Dockerfile Analyzer page, the ClientRouter replaces the page DOM. This destroys the CodeMirror editor's DOM elements, but the JavaScript EditorView instance -- with its MutationObserver, event listeners, and internal state -- may survive in memory as a zombie reference. When the user navigates back, Astro creates fresh DOM but the orphaned EditorView still references the old (now removed) DOM nodes. Result: the editor is blank, broken, or throws errors.
+Eight axes is at the upper edge of what visualization experts recommend (5-7 is the comfortable range). At 8 axes, three compounding problems emerge:
 
-Specific failure scenarios:
-1. **Navigate away, navigate back:** Editor is blank. The `client:only` component remounts, but if the framework (React/Preact) tries to reuse the old component tree, the EditorView's DOM root is gone.
-2. **Browser back button:** View Transitions replay the cached page, but the editor island does not re-execute its initialization script because Astro considers it already loaded.
-3. **Unsaved user content is lost:** The user types a Dockerfile, navigates away, presses back -- their content is gone. This is expected for a stateless tool, but feels like a bug to users.
+1. **Label crowding:** The existing `generateRadarSvgString()` positions labels at `maxRadius + size * 0.08` offset. With 8 axes (45-degree spacing instead of 60-degree), adjacent labels overlap, especially at small sizes and on mobile
+2. **Shape perception failure:** Research confirms that radar chart shapes "don't leverage pre-attentive quantitative attributes" -- users cannot attribute genuine meaning to the polygon shape. At 8 axes, the polygon becomes so complex that meaningful pattern recognition breaks down entirely
+3. **Axis ordering bias:** "Radar charts' effectiveness heavily depends on arbitrary design choices (specifically axis sequence) rather than the underlying data alone." With 8 axes, there are 40,320 possible orderings, each producing a different visual impression of the same data
 
-The site's existing `astro:before-swap` cleanup (in `Layout.astro`) calls `gsap.killTweensOf('*')` and destroys Lenis. It does NOT know about CodeMirror instances.
+The Beauty Index used 6 axes successfully. Going to 8 is not a 33% increase -- it crosses a readability threshold.
 
 **Why it happens:**
-Astro's ClientRouter performs a soft DOM swap, not a full page reload. For static content this works perfectly. For stateful client-side components like code editors, the gap between "DOM was replaced" and "component was properly unmounted" creates zombie state. The `astro:page-load` event fires after the swap, but `client:only` components may or may not re-initialize depending on framework behavior and caching.
+The radar-math.ts utility handles any number of axes mathematically, so there is no technical barrier. The instinct is "more dimensions = more comprehensive." But comprehensiveness in the data model does not equal comprehensiveness in the visualization.
 
 **How to avoid:**
-1. **Explicitly destroy the EditorView on `astro:before-swap`.** In the editor component, listen for this event and call `view.destroy()` to release all resources:
-   ```javascript
-   document.addEventListener('astro:before-swap', () => {
-     if (editorView) {
-       editorView.destroy();
-       editorView = null;
-     }
-   });
-   ```
-2. **Re-initialize the editor on `astro:page-load`.** After the swap completes, the `client:only` component should remount cleanly. Verify this works by testing the full navigation cycle.
-3. **Consider `transition:persist` with extreme caution.** While Astro's `transition:persist` directive can keep an island alive across navigations, it has known issues with React hooks not triggering re-renders after persist (GitHub issue #13287). For CodeMirror, persistence adds complexity around document state. It is simpler and safer to destroy and recreate.
-4. **Optionally persist the Dockerfile content to `sessionStorage`** before navigation, and restore it on remount. This gives users the UX benefit of content persistence without the complexity of keeping the editor alive across transitions.
-5. **Test the full navigation matrix:** Home -> Analyzer -> Back -> Forward -> Analyzer (direct URL). Each path exercises different ClientRouter code paths.
+1. **Reduce to 6 dimensions if possible.** Question whether all 8 truly earn their place. Can two be merged? "Ops Complexity" and "Learning Curve" might collapse into "Adoption Difficulty." "Data Integrity" and "Consistency Model" might collapse into "Reliability"
+2. If 8 dimensions must stay, **order axes so adjacent dimensions are conceptually related.** Group operational dimensions (Ops Complexity, Scalability, Ecosystem Maturity, Cost Efficiency) on one side and developer-experience dimensions (Query Flexibility, Schema Flexibility, Learning Curve, Data Modeling Power) on the other. This makes the polygon shape semantically meaningful: wide on the left = strong ops, wide on the right = strong DX
+3. **Always pair radar charts with a score breakdown table.** The table is the primary interface; the chart is supplementary visual flavor. The Beauty Index already does this well
+4. **Test label rendering at 8 axes.** The current `generateRadarSvgString()` computes label positioning with angle-based `text-anchor` (start/middle/end). At 45-degree increments, two labels near the 45-degree and 315-degree positions will have similar Y coordinates and may visually collide. Verify at the actual SVG size used on detail pages (likely 300-400px)
+5. Never overlay multiple database models on the same radar chart. Side-by-side is acceptable; overlay is not
+6. On mobile below 480px, consider showing the score table only and hiding the radar chart
 
 **Warning signs:**
-- Editor is blank after pressing the browser Back button
-- Console errors: "Cannot read properties of null" referencing CodeMirror DOM elements
-- Memory leaks: navigating to/from the Analyzer page repeatedly causes increasing memory usage (orphaned EditorView instances)
-- Lint annotations appear on wrong lines after navigation
+- Axis labels overlap or truncate at the SVG render size
+- Two polygon shapes for different models look nearly identical despite having meaningfully different scores
+- Users consistently ignore the radar chart and read the table instead
+- Mobile layout shows a tiny, unreadable radar chart
 
 **Phase to address:**
-Phase 1: Editor integration. The view transition lifecycle hooks must be part of the editor component from day one, not bolted on later.
+Component development phase. The radar chart component must be built with 8-axis readability testing, not just reusing the 6-axis Beauty Index component with 2 more axes added. Test at actual render sizes before proceeding.
 
 ---
 
-### Pitfall 4: dockerfile-ast Depends on VS Code Language Server Types -- Bundle May Balloon or Break
+### Pitfall 4: Static Scores Become Stale Within Months
 
 **What goes wrong:**
-The `dockerfile-ast` npm package has two runtime dependencies:
-- `vscode-languageserver-textdocument` (^1.0.8)
-- `vscode-languageserver-types` (^3.17.3)
+The database landscape changes rapidly. New capabilities ship with every major release. The vector database explosion of 2023-2024 redefined an entire category. PostgreSQL 17 added features that change its scoring on multiple dimensions. Unlike the Beauty Index (programming language aesthetics change slowly), database capabilities change with every major version.
 
-These are pure TypeScript type/interface packages from Microsoft's VS Code ecosystem. While they do NOT use Node.js built-in modules (no `fs`, `path`, `child_process`), they were designed for VS Code extensions, not browser applications. Potential issues:
-
-1. **Unexpected bundle size:** `vscode-languageserver-types` contains the entire Language Server Protocol type definitions (hundreds of interfaces for capabilities like document symbols, code actions, folding ranges, completion items). Most of this is dead code for a Dockerfile parser. If the bundler does not tree-shake effectively, you ship 50-100KB of unused type infrastructure.
-2. **Module format mismatches:** These packages may use CommonJS (`require`), which Vite (Astro's bundler) must transform. While Vite handles CJS-to-ESM conversion, edge cases with re-exports can cause "named export not found" errors.
-3. **The `TextDocument` dependency is structural:** `dockerfile-ast` uses `TextDocument` from `vscode-languageserver-textdocument` to represent file content. You must create a `TextDocument` to use the parser. This means you cannot just import the parser standalone -- you must also import the text document factory.
+Static scores baked into a JSON file at build time will be factually wrong within 6-12 months. The "2026 Edition" framing creates an implicit promise that the content reflects 2026 reality -- if someone reads it in 2027, they expect either updated data or a clear date qualifier.
 
 **Why it happens:**
-`dockerfile-ast` was written by the author of the Docker VS Code extension (Remy Suen) specifically for that extension's language server. It is a mature, well-tested parser, but its API surface assumes VS Code extension contexts where `vscode-languageserver-*` packages are already available.
+Static sites excel at shipping fast but lack update mechanisms. Once deployed, there is no CMS workflow to trigger content reviews. The JSON data file becomes a forgotten artifact. The site already has 152 requirements and a growing maintenance surface -- adding another data file that requires periodic expert review creates ongoing obligation.
 
 **How to avoid:**
-1. **Verify browser bundling works before committing to dockerfile-ast.** Create a minimal test: import `DockerfileParser.parse()` in a Vite project, build it, and check the output bundle size. If it bundles cleanly at <20KB gzip with tree shaking, proceed. If not, evaluate alternatives.
-2. **Alternative: Write a lightweight Dockerfile parser.** Dockerfiles have a simple line-oriented grammar (INSTRUCTION arguments, with continuation lines via `\`). A 200-line parser handling FROM, RUN, COPY, EXPOSE, ENV, ARG, LABEL, WORKDIR, ENTRYPOINT, CMD, HEALTHCHECK, USER, and comments covers 95% of real-world Dockerfiles. This eliminates the VS Code dependency entirely.
-3. **If using dockerfile-ast, verify tree shaking.** After building, inspect the output bundle with `npx vite-bundle-visualizer` or `source-map-explorer`. If `vscode-languageserver-types` contributes >10KB gzip, the tree shaking failed and a custom parser is warranted.
-4. **If using dockerfile-ast, create a thin wrapper** that accepts raw strings (not `TextDocument` objects) and internally creates the `TextDocument`. This isolates the VS Code dependency from the rest of the application.
+1. Add a `lastVerified` date field per database entry in the JSON schema. Display it on each detail page
+2. Add a `dataAsOf` field on the overview-level metadata, rendered prominently: "Data as of February 2026"
+3. Frame the tool as "Database Compass 2026" explicitly in the title, URL, and meta tags. This scopes reader expectations and makes annual refresh natural
+4. Do NOT include specific version numbers for databases in the JSON data -- they go stale fastest. Reference general capability tiers instead ("PostgreSQL supports JSONB document storage" not "PostgreSQL 16.2 added...")
+5. In the companion blog post, explicitly state: "This data represents a point-in-time assessment. Database capabilities evolve rapidly."
+6. Consider adding a GitHub issue template or a "suggest a correction" link on each detail page that links to a new issue
 
 **Warning signs:**
-- Bundle size for the Analyzer page exceeds 200KB gzip
-- Build warnings about "Could not resolve" or "Missing export" from vscode-languageserver-* packages
-- Runtime error: `TextDocument is not a constructor` or similar
-- `vite-bundle-visualizer` shows large chunks of unused LSP type definitions
+- JSON schema has no date/version metadata fields
+- Detail pages show no "last reviewed" indicator
+- Blog post makes claims about "latest" or "current" capabilities without date qualification
+- A database listed scores differently than its current release capabilities justify
 
 **Phase to address:**
-Phase 1: Technology validation. Test the dockerfile-ast import in a minimal Vite build BEFORE integrating it into the Astro site. This is a go/no-go gate.
+Data schema design phase (schema must include date fields) AND content authoring phase (framing must be explicit about temporal scope).
 
 ---
 
-### Pitfall 5: CodeMirror Dark Mode Requires Compartment Reconfiguration -- CSS Classes Alone Will Not Work
+### Pitfall 5: SEO Content Too Thin to Rank in Competitive Database SERP
 
 **What goes wrong:**
-The site toggles dark mode by adding/removing a `.dark` class on `<html>` (via `ThemeToggle.astro`). This works for CSS-variable-based components. But CodeMirror 6 has its own theming system that is orthogonal to CSS classes on ancestor elements. CodeMirror themes are JavaScript extensions that inject scoped CSS via `EditorView.theme()`. Simply adding `.dark` to `<html>` does NOT change CodeMirror's syntax highlighting colors.
+Database comparison pages are a highly competitive SERP. DB-Engines, G2, TrustRadius, AWS/GCP/Azure comparison pages, and established developer content sites (DigitalOcean, Prisma, PlanetScale) dominate. A 12-page set with 200-word descriptions, a radar chart, and a bullet list of databases will not rank -- it will be classified as thin content.
 
-The result: the user toggles dark mode, the page background and text change, but the code editor remains in light mode (or vice versa). The visual mismatch makes the editor look broken -- light editor on dark page, or dark editor on light page.
-
-Worse: the site's current dark mode is partially implemented (the toggle exists, localStorage persistence works, but no CSS custom properties for `.dark` are defined in `global.css`). This means the editor's dark mode implementation must work with a partially complete system.
+Google explicitly rewards sites that "enable users to dive deeper into topics without returning to search." Template-driven pages with minimal unique content per page are exactly what Google's helpful content system targets. The Dockerfile Analyzer avoided this trap by having 39 rule pages each with unique expert explanation, fix suggestions, and code examples.
 
 **Why it happens:**
-CodeMirror's CSS-in-JS theming is intentionally isolated from the page's CSS to prevent style conflicts. This is a good architectural decision for a library, but it means theme switching requires CodeMirror-specific code. Developers assume adding a CSS class to a parent element will cascade into the editor -- it does not.
+The temptation is to keep detail pages short because there are 12 of them and they all follow the same template. Writing 400+ words of unique expert-voice content for each of 12 model categories is 4,800+ words of original technical writing -- a significant content investment. The developer instinct is to minimize content and maximize visual elements. But search engines cannot index radar chart SVGs.
 
 **How to avoid:**
-1. **Use `codemirror-theme-vars` by Anthony Fu** to bridge CodeMirror themes to CSS custom properties. This library defines CodeMirror theme colors as CSS variables (`--cm-background`, `--cm-foreground`, `--cm-keyword`, etc.) that you can override in `:root` and `.dark` selectors. This integrates CodeMirror into the site's existing theming approach.
-2. **Alternative: Use a Compartment for dynamic theme switching.** Create two themes (light and dark), wrap them in a `Compartment`, and dispatch a reconfigure effect when the theme toggle fires:
-   ```javascript
-   import { Compartment } from '@codemirror/state';
-   const themeConfig = new Compartment();
-   // On toggle:
-   view.dispatch({
-     effects: themeConfig.reconfigure(isDark ? darkTheme : lightTheme)
-   });
-   ```
-3. **Listen for the theme toggle event.** The existing `ThemeToggle.astro` dispatches no custom event -- it only toggles the CSS class and writes to localStorage. Add a `MutationObserver` on `document.documentElement` watching for class attribute changes, or dispatch a custom `theme-change` event from the toggle.
-4. **Define the dark editor palette using the site's Tropical Sunset color system.** Map `--color-surface` to `--cm-background`, `--color-text-primary` to `--cm-foreground`, and `--color-accent` to `--cm-keyword`. This keeps visual consistency.
+1. Each detail page needs 400-600 words of unique, expert-voice content -- not generic descriptions copyable from Wikipedia
+2. Include a "When to Use / When to Avoid" section per model with concrete use-case scenarios from real-world architecture
+3. Include "Real-World Examples" -- name actual companies, products, or open-source projects that use this model type (public knowledge only)
+4. Each page must target a unique, specific long-tail keyword (e.g., "graph database use cases 2026" vs "time-series database tradeoffs")
+5. Write unique meta descriptions per page -- not template-generated from the same field with only the model name swapped
+6. Use HTML `<table>` elements for dimension scores -- Google extracts table snippets for comparison queries, which is a direct path to featured snippets
+7. Add internal cross-links between related model pages ("If you need graph relationships but also need strong consistency, consider [relational with graph extensions]")
+8. The companion blog post should link to every detail page, and every detail page should link back to the blog post and to the overview
 
 **Warning signs:**
-- Editor background color does not match the page background after theme toggle
-- Syntax highlighting colors are unreadable against the page background
-- Two distinct visual "zones" on the page -- one themed, one not
-- Users toggle dark mode and the editor flashes or re-renders entirely
+- All 12 detail pages use the same meta description template with only the model name swapped
+- Detail page word count is under 300 words excluding UI chrome
+- No internal cross-links between model pages
+- Pages rank on page 3+ or not at all for their target keywords within 3 months of publish
 
 **Phase to address:**
-Phase 2: Editor theming and styling. Must be completed BEFORE the editor is considered "done" -- theme mismatch is immediately visible to users.
+Content authoring phase for the data, SEO integration phase for meta/structured data. Content quality is the harder problem and should be addressed first.
 
 ---
 
-### Pitfall 6: Scoring Algorithm Becomes Gameable, Opaque, or Meaningless Without Careful Weighting Design
+### Pitfall 6: Build Time Grows Unsustainably with OG Image Multiplication
 
 **What goes wrong:**
-A Dockerfile scoring algorithm with 40 rules must assign weights and calculate a composite score. Common failure modes:
+Current build: 714 pages in 22.17 seconds. Of those, **600 are Beauty Index "vs" comparison OG images** (25 choose 2 = 300 pairs x 2 orderings). Each Satori+Sharp render takes 100-300ms. If the Database Compass follows the vs-comparison pattern (12 choose 2 = 66 comparison pages with OG images), that adds 80+ renders at 100-300ms each -- potentially 8-24 more seconds.
 
-1. **Gaming:** Users discover that adding a single `HEALTHCHECK` instruction jumps their score from 60 to 85, so they add a meaningless `HEALTHCHECK CMD true` to game the score. The tool rewards form over substance.
-2. **Meaningless perfect scores:** If most rules check for things that competent developers already do (like using specific base image tags), the majority of reasonable Dockerfiles score 95-100 and the tool provides no actionable feedback. The score has no discriminating power.
-3. **Inconsistent weighting:** If "pin apt-get package versions" (a minor best practice) and "do not run as root" (a critical security issue) both carry 2 points, the scoring sends wrong signals about relative importance.
-4. **Cliff effects:** A Dockerfile with `RUN apt-get update && apt-get install` (combined) scores 10 points higher than one with separate `RUN apt-get update` and `RUN apt-get install` lines, even though the combined form is only marginally better. The score difference is disproportionate to the actual impact.
-5. **Category blindness:** A Dockerfile could score 95/100 by acing all "efficiency" and "formatting" rules while having critical security vulnerabilities (running as root, using `latest` tag, copying secrets). The aggregate score hides category-level failures.
-
-Hadolint, the industry-standard Dockerfile linter, deliberately avoids numerical scoring -- it reports issues by severity (error/warning/info/style) without aggregating them into a single number. This is intentional: Dockerfile quality is multidimensional and a single score oversimplifies it.
+More critically, the trajectory matters. If v1.6 adds another content pillar with vs-comparisons, the build time becomes a problem. The current 22-second build is healthy, but each new Satori render compounds.
 
 **Why it happens:**
-Scoring algorithms are easy to build and hard to calibrate. The initial implementation feels satisfying (numbers go up/down based on changes), but without extensive testing against real-world Dockerfiles of varying quality, the weights are arbitrary. The developer calibrates against 5-10 test Dockerfiles and ships, then discovers the scoring breaks down for the other 90% of real Dockerfiles.
+The vs-comparison pattern from Beauty Index is powerful for SEO ("Python vs Ruby" is a real search query). The instinct to replicate a successful pattern does not account for whether the same query pattern exists for database models. "Key-Value vs Document Database" is a valid query, but with far lower search volume than programming language comparisons.
 
 **How to avoid:**
-1. **Show category sub-scores, not just the aggregate.** Display: Security: 8/10, Efficiency: 6/10, Maintainability: 9/10, Best Practices: 7/10. This prevents a high aggregate from hiding a critical security failure.
-2. **Weight security rules at 3-5x compared to style rules.** A "do not run as root" violation (security) should drop the score dramatically, while "use LABEL for metadata" (style) should be a minor ding.
-3. **Use severity tiers aligned with Hadolint's model:** Error (blocks deploy) > Warning (should fix) > Info (nice to have) > Style (cosmetic). Map each tier to a scoring impact: Error = -10pts, Warning = -5pts, Info = -2pts, Style = -1pt.
-4. **Test against 50+ real-world Dockerfiles** from GitHub before finalizing weights. Include: minimal Alpine images, multi-stage builds, development containers, CI images, and deliberately bad Dockerfiles. The score distribution should form a meaningful curve, not cluster at 90+.
-5. **Make the scoring formula transparent.** Show users exactly which rules contributed to their score and by how much. Opaque scores breed distrust. Display: "Using latest tag: -5 points (Security)" next to each finding.
-6. **Validate against Hadolint output.** For the same Dockerfile, your tool's "severe" findings should align with Hadolint's errors/warnings. If they diverge, your weighting is likely wrong.
+1. **Do NOT create vs-comparison pages for Database Compass.** "Key-Value vs Document" is a reasonable comparison but does not have the search volume to justify 66 additional pages + OG images. The Beauty Index vs pages work because individual language names are high-volume queries. Database model names are lower-volume
+2. Keep OG images to: 1 overview + 12 detail pages + 1 blog post = 14 images. At 100-300ms each, this adds 1.4-4.2 seconds -- well within budget
+3. If comparison content is desired, create a single "comparison table" on the overview page rather than 66 individual pages
+4. Reuse the existing `renderOgPng()` helper from `og-image.ts` rather than creating a fourth OG generator function. The existing function handles font loading, Satori rendering, and Sharp conversion
+5. Measure build time after integration. Set a threshold: if build time exceeds 30 seconds, investigate which images are slow
 
 **Warning signs:**
-- Most test Dockerfiles score 85-100 (insufficient discrimination)
-- A known-bad Dockerfile (running as root, using latest, no healthcheck) scores above 70
-- Adding a trivial fix changes the score by 20+ points
-- Users report that the score "does not match" their Dockerfile quality
+- Build time exceeds 30 seconds after adding Database Compass
+- GitHub Actions build step shows OG images taking >10 seconds
+- Plans include "database model A vs database model B" comparison pages
+- A new `generateDbCompassVsOgImage()` function appears in the codebase
 
 **Phase to address:**
-Phase 3: Rule engine and scoring design. The weight calibration must happen BEFORE the UI shows scores. Ship the lint results first, add scoring after calibration.
+Architecture/planning phase. The decision about vs-comparison pages must be made explicitly and early -- do not let it emerge organically during development.
 
 ---
 
 ## Moderate Pitfalls
 
-### Pitfall 7: CodeMirror Keyboard Trap Violates WCAG 2.1.2 -- Tab Key Does Not Leave the Editor
+### Pitfall 7: Homepage Becomes a Link Directory with 3 Content Pillar Callouts
 
 **What goes wrong:**
-When users press Tab inside CodeMirror, it inserts an indent character (if `indentWithTab` is enabled) instead of moving focus to the next focusable element. This creates a "keyboard trap" -- users who rely on keyboard navigation cannot leave the editor without knowing the escape hatch (press Escape, then Tab). WCAG 2.1.2 ("No Keyboard Trap") requires that keyboard focus can always be moved away from any component using standard keyboard interactions.
-
-CodeMirror 6 is aware of this and deliberately does NOT bind Tab by default. But most CodeMirror integration tutorials include `indentWithTab` from `@codemirror/commands` because Dockerfile content needs indentation. The moment you add `indentWithTab`, you create the trap.
-
-The existing site has strong accessibility patterns: skip links, ARIA labels, `prefers-reduced-motion` fallbacks, `focus-visible` outlines. Adding a keyboard trap would be a significant regression.
+The homepage currently has two callout sections (Beauty Index + Dockerfile Analyzer) between "What I Build" and "Latest Writing." Adding a third callout for Database Compass pushes the callout section toward visual monotony -- three nearly identical card links stacked vertically. The homepage starts feeling like a table of contents rather than a curated portfolio landing page.
 
 **Why it happens:**
-Developers add `indentWithTab` because Dockerfile editing feels wrong without Tab indentation. They test with a mouse and never discover the keyboard trap because they click out of the editor.
+Each milestone adds its callout following the established pattern. The pattern works for 1-2 callouts but breaks at 3+ because the section becomes the dominant visual element on the page, pushing "Latest Writing" further below the fold.
 
 **How to avoid:**
-1. **Add visible instructions near the editor:** "Press Escape then Tab to leave the editor" or "Ctrl+M to toggle tab focus mode." This is the WCAG-recommended approach for complex widgets that intentionally capture Tab.
-2. **Implement a visual indicator for Tab Focus Mode.** When the user presses Escape or Ctrl+M, show a subtle notification: "Tab key now moves focus. Press Ctrl+M to re-enable indentation." CodeMirror exposes `toggleTabFocusMode` for this.
-3. **Add `aria-label` to the editor.** CodeMirror creates an internal `<div role="textbox" aria-multiline="true">` but does not propagate `aria-label` from the wrapper. Use the `EditorView.contentAttributes` facet to add it:
-   ```javascript
-   EditorView.contentAttributes.of({
-     'aria-label': 'Dockerfile editor. Press Escape then Tab to leave.',
-     'aria-describedby': 'editor-instructions'
-   })
-   ```
-4. **Provide a "Skip editor" link before the editor** in the DOM, similar to the site's existing "Skip to main content" link. This gives keyboard users an immediate escape route.
-5. **Test with keyboard-only navigation.** Tab into the editor, type content, then Tab out. Verify focus moves to the next element (Analyze button or results panel).
+1. Redesign the callout section as a 3-card horizontal grid (`grid-cols-1 sm:grid-cols-3`) instead of stacked vertical cards. This gives each pillar equal weight without tripling the vertical space
+2. Alternatively, create a single "Explore" section with a compact list linking to all three pillars, instead of full-card callouts per pillar
+3. Keep callout copy very concise (title + one-line description) when there are 3+ pillars. The current Dockerfile Analyzer callout is 3 lines -- at 3 cards, this is the maximum before clutter
 
 **Warning signs:**
-- Lighthouse Accessibility audit flags "Keyboard trap" or "No accessible name on textbox"
-- Users cannot Tab out of the editor to reach the "Analyze" button
-- Screen readers announce the editor as "textbox" without a descriptive label
-- `axe DevTools` reports WCAG 2.1.2 violation
+- Scrolling from "What I Build" to "Latest Writing" takes more than 2 thumb-scrolls on mobile
+- Homepage layout review shows the callout section is the tallest section on the page
+- Three visually identical cards provide no differentiation between pillars
 
 **Phase to address:**
-Phase 2: Editor UX and accessibility. The Tab escape mechanism and ARIA labels must be part of the editor component, not an afterthought.
+Site integration phase. Homepage layout adjustment should happen when the callout is added, not after.
 
 ---
 
-### Pitfall 8: Lint Annotations Re-Run on Every Keystroke and Freeze the Editor
+### Pitfall 8: Tools Page Integration Creates Visual Imbalance
 
 **What goes wrong:**
-CodeMirror's `@codemirror/lint` package calls the linter function on document changes. If the linter runs 40 rules against every instruction on every keystroke, the lint computation can take 10-50ms per run. At 60+ WPM typing speed, that is a lint call every 100-200ms. If the lint computation exceeds the typing interval, the editor stutters because the main thread is blocked by lint processing while trying to handle input events.
-
-For a 50-line Dockerfile with 15 instructions and 40 rules, that is 600 rule evaluations per lint run. Each rule may traverse the AST, check string patterns, or evaluate conditions. At 0.05ms per rule evaluation, that is 30ms of blocking time -- enough to cause perceptible input lag.
+The current tools page (`/tools/index.astro`) has two cards in a 2-column grid: Dockerfile Analyzer (full card) and "More tools coming soon" (dashed placeholder). Replacing the placeholder with Database Compass creates a 2-card grid where both items have equal visual weight -- which is correct. But the Database Compass is NOT an interactive tool (unlike the Dockerfile Analyzer). It is a content explorer. Placing it on the "Tools" page alongside an interactive tool creates a category mismatch.
 
 **Why it happens:**
-Developers test with short Dockerfiles (5-10 lines) where lint completes in <5ms. The performance issue only surfaces with longer, realistic Dockerfiles (40-100 lines) or when the user pastes a large Dockerfile from a production project.
+The URL structure `/tools/db-compass/` places it under "Tools" by convention. But a database model explorer with static content pages is closer to the Beauty Index (a content pillar) than to the Dockerfile Analyzer (an interactive tool). This creates a taxonomy question: is Database Compass a "tool" or a "content pillar"?
 
 **How to avoid:**
-1. **Use CodeMirror's built-in lint debouncing.** The `linter()` function accepts a `delay` option (milliseconds to wait after changes before re-running). Set it to 300-500ms:
-   ```javascript
-   linter(dockerfileLinter, { delay: 500 })
-   ```
-   This ensures linting only runs when the user pauses typing, not on every keystroke.
-2. **Parse the Dockerfile once, run rules against the cached AST.** Do not re-parse with `DockerfileParser.parse()` for each rule. Parse once per lint cycle, then pass the parsed result to all 40 rules.
-3. **Cache lint results for unchanged lines.** If lines 1-20 are unchanged and only line 21 was edited, rules that only depend on line 21's instruction do not need to re-evaluate lines 1-20. Implement incremental linting for line-scoped rules.
-4. **Profile with Chrome DevTools Performance tab.** Record a typing session and look for long tasks in the flame chart caused by the linting function. Target: lint computation should never exceed 16ms (one frame at 60fps).
-5. **Consider running the lint in a Web Worker** if it consistently exceeds 16ms. CodeMirror supports async linters that return a Promise. Parse the Dockerfile and run rules in a Worker, then return diagnostics to the main thread.
+1. Decide explicitly: is Database Compass under `/tools/db-compass/` or under `/db-compass/` (top-level like Beauty Index)? The URL determines the information architecture
+2. If under `/tools/`, update the tools page description to reflect that it includes both interactive tools AND reference guides. Change "Free, browser-based developer tools" to "Free developer tools and reference guides"
+3. If under a top-level path, add it to the header nav like Beauty Index (but be cautious -- 8 nav items is the maximum for mobile. Currently at 7)
+4. Match the card design on the tools page to accurately represent what each tool IS. The Dockerfile Analyzer card says "Free Browser Tool." The Database Compass card should say "Reference Guide" or "Interactive Explorer" -- not "Free Browser Tool"
 
 **Warning signs:**
-- Input lag when typing in Dockerfiles longer than 30 lines
-- Chrome DevTools shows "Long Task" entries during typing, attributed to the lint function
-- Users report the editor feels "sluggish" compared to a plain textarea
-- Lint results flicker rapidly during typing (insufficient debounce)
+- Tools page describes all items as "browser-based tools" when Database Compass has no client-side interactivity
+- URL structure creates confusion about where the content "lives" in the site hierarchy
+- Nav highlights "Tools" when on Database Compass pages but the content feels like it belongs alongside Beauty Index
 
 **Phase to address:**
-Phase 3: Rule engine implementation. Set up the debounced linting pipeline architecture BEFORE writing individual rules.
+Architecture/planning phase. URL structure and site hierarchy must be decided before any pages are created.
 
 ---
 
-### Pitfall 9: Mobile Experience Is Terrible Without Explicit Design -- CodeMirror on Touch Is Fragile
+### Pitfall 9: JSON-LD Structured Data Uses Wrong Schema Type
 
 **What goes wrong:**
-CodeMirror 6 has documented issues with mobile browsers:
-
-1. **iOS Safari:** Touch to set cursor position does not always work. Selection drag handles may be missing. The virtual keyboard covers half the screen, making the editor feel cramped.
-2. **Android Chrome:** Aggressive scrolling when the caret reaches the viewport edge (scrolls 5+ lines instead of 1). Keyboard flicker when backspacing near widgets/decorations.
-3. **Small screens:** A Dockerfile editor with line numbers, lint gutter, and a results panel side-by-side simply does not fit on a 375px-wide screen. If forced into a single-column layout, the results panel pushes below the fold, and users cannot see their code and the lint results simultaneously.
-4. **Touch targets:** Lint gutter markers (the icons showing warnings/errors next to line numbers) are typically 16x16px -- far below the 44x44px minimum for touch targets.
-
-The site targets recruiter and developer discovery. Recruiters often browse portfolios on phones. A broken mobile editor creates a worse impression than no editor at all.
+The site uses three different JSON-LD schema types: `Person` (homepage), `BlogPosting` (blog posts), `Dataset`/`ItemList` (Beauty Index), and `SoftwareApplication` (Dockerfile Analyzer). Choosing the wrong schema type for Database Compass reduces its chance of earning rich snippets and being correctly interpreted by AI search engines.
 
 **Why it happens:**
-Code editors are fundamentally desktop tools. The CodeMirror team acknowledges mobile support is a work in progress. Developers test on desktop and assume the responsive layout handles mobile. It does not -- code editing on mobile requires deliberate UX decisions.
+Database Compass is a hybrid: it is structured data (like a Dataset), it is a comparison tool (like a SoftwareApplication), and it is educational content (like an Article). Developers pick whichever schema type they used last or whichever seems close enough.
 
 **How to avoid:**
-1. **Design a mobile-specific experience that is NOT a full editor.** On screens below 768px, show a simplified interface: a `<textarea>` for pasting Dockerfiles (not CodeMirror), with results shown in an expandable panel below. The textarea is lightweight, accessible, and works on all devices.
-2. **Alternatively, make the editor read-only on mobile** with a pre-loaded example Dockerfile. The user sees the lint results and score for the example, with a "Try on desktop for full editing" message.
-3. **If using CodeMirror on mobile, configure it for touch:** Increase gutter marker sizes to 44px tap targets, disable line wrapping (use horizontal scroll), set a minimum editor height of 300px, and add a "Scroll to results" button below the editor.
-4. **Test on real devices.** Simulator testing does not catch touch selection issues, keyboard behavior, or scroll jank. Test on an iPhone (Safari) and an Android device (Chrome) with a 20+ line Dockerfile.
-5. **Use the `@media (pointer: coarse)` query** (already used in the site's global CSS for cursor effects) to detect touch devices and apply mobile-specific overrides.
+1. Use `Dataset` schema for the overview page (it describes a structured collection of scored data about database models) -- this matches the Beauty Index pattern and is most accurate
+2. Use `Article` or `TechArticle` schema for individual detail pages (each is a substantive writeup about a database model category)
+3. Use `BlogPosting` for the companion blog post (consistent with existing blog schema)
+4. Include `BreadcrumbList` on all pages (the site already does this for Beauty Index)
+5. Validate with Google's Rich Results Test after deployment -- do not assume schema is correct without testing
 
 **Warning signs:**
-- Editor is unusable on iPhone (cannot place cursor, cannot select text)
-- Virtual keyboard covers the editor content and there is no scroll
-- Lint gutter markers are too small to tap accurately
-- Results panel is pushed off-screen on mobile and users cannot find it
+- All Database Compass pages use `WebPage` (the default, least informative schema)
+- Schema type does not match the page content (e.g., `SoftwareApplication` for a static reference page)
+- Google Search Console shows no rich results for Database Compass pages after 2 weeks
 
 **Phase to address:**
-Phase 2: Editor layout and responsive design. Make the mobile decision BEFORE building the results panel layout.
+SEO integration phase. Decide schema types during architecture, implement during integration.
 
 ---
 
-### Pitfall 10: Inline Lint Annotations + Results Panel + Gutter Markers Create Information Overload
+### Pitfall 10: LLMs.txt and Sitemap Miss New Pages
 
 **What goes wrong:**
-Showing lint feedback in three places simultaneously -- inline squiggly underlines in the editor, gutter icons next to line numbers, AND a separate results panel below the editor -- overwhelms users and creates visual noise. For a 30-line Dockerfile with 12 lint findings, the editor becomes a sea of red/yellow markers. Users cannot distinguish critical issues from minor style suggestions because everything screams for attention equally.
-
-Additionally, CodeMirror's `lintGutter` shows only an icon per line. If a single line has 3 different lint findings (e.g., `RUN apt-get install -y curl wget` triggers: "pin package versions," "combine with update," and "consider using --no-install-recommends"), only one gutter icon appears. Users click the gutter icon, see one finding, and miss the other two unless they also check the panel.
+The site maintains two LLMs.txt files (`llms.txt.ts` and `llms-full.txt.ts`) that enumerate pages for AI discoverability. Both files currently hardcode sections for blog posts and Beauty Index languages. Database Compass pages will NOT appear in LLMs.txt unless the generation code is explicitly updated. Similarly, while `@astrojs/sitemap` should auto-include new pages, verification is required.
 
 **Why it happens:**
-Developers build each feedback mechanism independently (gutter, inline, panel) because CodeMirror supports all three and they each seem useful. Without a unified information hierarchy, all three fight for attention.
+LLMs.txt generation is a separate endpoint that does not auto-discover pages. It requires manual enumeration. With 14 new pages added in a new content pillar, forgetting to update these endpoints is easy -- especially because the LLMs.txt files are rarely touched (last modified Feb 18).
 
 **How to avoid:**
-1. **Establish a clear information hierarchy:**
-   - **Gutter markers** = quick severity indicator (red/yellow/blue dot). Click to jump to the detail in the panel.
-   - **Inline underlines** = contextual location marker. Hover for a tooltip with the rule message.
-   - **Results panel** = comprehensive list with rule explanations, fix suggestions, and links to best practices.
-2. **Show inline underlines only for error/warning severity.** Do not underline info/style findings -- show them only in the panel. This reduces visual noise.
-3. **Sort the results panel by severity** (errors first, then warnings, then info). Include the line number so users can cross-reference.
-4. **Limit simultaneous inline annotations** to avoid overwhelming the view. If a Dockerfile has 20+ findings, show the top 10 most severe inline and collapse the rest to "and 10 more findings in the results panel."
-5. **Use color coding consistently** across all three mechanisms: red = error, yellow/orange = warning, blue = info, gray = style. Match the site's existing color system (use `--color-accent` for errors, `--color-accent-secondary` for info).
+1. Add a Database Compass section to both `llms.txt.ts` and `llms-full.txt.ts` during site integration
+2. Import the `databases` collection in both files and enumerate model pages
+3. After build, grep `dist/sitemap-index.xml` for all expected Database Compass URLs (14 total)
+4. After build, verify `dist/llms.txt` includes Database Compass pages
 
 **Warning signs:**
-- The editor looks "angry" with red marks everywhere, even for a reasonable Dockerfile
-- Users cannot distinguish critical issues from style suggestions
-- Users click a gutter marker expecting to see all findings for that line, but only see one
-- The results panel shows issues users cannot find in the editor (or vice versa)
+- `llms.txt.ts` has no import for the databases collection
+- `dist/llms.txt` output does not mention "database" or "db-compass"
+- `dist/sitemap-index.xml` is missing any of the 14 expected URLs
 
 **Phase to address:**
-Phase 4: Lint result display and UX. Design the information hierarchy BEFORE implementing the display mechanisms.
-
----
-
-### Pitfall 11: CSP Meta Tag May Block CodeMirror's Internal Style Injection
-
-**What goes wrong:**
-The site has a strict Content Security Policy via meta tag:
-```
-style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
-```
-
-CodeMirror 6 injects styles dynamically via JavaScript (its CSS-in-JS theming system creates `<style>` elements at runtime). While the current CSP allows `'unsafe-inline'` for styles (which covers dynamically injected `<style>` tags), there are edge cases:
-
-1. If the CSP is ever tightened to use nonce-based style policies (removing `'unsafe-inline'`), CodeMirror's style injection will break silently -- the editor renders but with no syntax highlighting colors, no gutter styling, and broken layout.
-2. CodeMirror creates blob URLs for certain operations. The CSP has `worker-src 'self' blob:` and `connect-src 'self' ... blob:`, but if CodeMirror's internal operations hit other CSP restrictions, failures are silent (no visible error, just missing styles).
-
-**Why it happens:**
-CSP violations for styles are not thrown as JavaScript errors -- they only appear as console warnings. The editor appears to "work" but looks visually broken. Developers testing without checking the console miss these failures entirely.
-
-**How to avoid:**
-1. **The current CSP already allows `style-src 'unsafe-inline'`**, so CodeMirror's style injection will work. Document this dependency: "CodeMirror requires `style-src 'unsafe-inline'` -- do not remove this directive."
-2. **After integrating CodeMirror, check the browser console** for any CSP violation warnings. Filter by "Content-Security-Policy" in the console.
-3. **If the CSP is ever tightened, use CodeMirror's static CSS extraction** approach: pre-build the theme CSS at build time and include it as a static `<link>` stylesheet instead of relying on runtime injection.
-4. **Test with a stricter CSP in development** (temporarily remove `'unsafe-inline'` from `style-src`) to see what breaks. This reveals all dynamic style dependencies proactively.
-
-**Warning signs:**
-- Editor renders but has no syntax highlighting (all text is same color)
-- Editor gutter and line numbers are missing or unstyled
-- Console shows "Refused to apply inline style because it violates the following Content Security Policy directive"
-- Editor layout is broken (no proper padding, backgrounds, or borders)
-
-**Phase to address:**
-Phase 1: Editor integration. Verify CSP compatibility as part of the initial "does it work in our site?" check.
+Site integration phase. This is a checklist item, not a design decision -- but easy to miss.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable during the Dockerfile Analyzer build but create long-term problems.
-
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `basicSetup` instead of selective extensions | Quick setup, feature-complete editor | 40-60KB extra gzipped JS for unused features (search, autocomplete, bracket matching) | Never -- use `minimalSetup` + selective imports |
-| Hardcoding Dockerfile rules as string checks instead of AST-based | Faster to write initial rules | Cannot handle multi-line RUN commands, continuation lines, or build arguments; false positives on comments | Only for prototype/proof-of-concept; rewrite against AST before shipping |
-| Using `dockerfile-ast` without testing browser bundle first | Proven parser, skip writing your own | May ship 50-100KB of unused VS Code LSP types; CJS-to-ESM conversion may break | Test bundle first; if bundle is clean (<20KB gzip), use it |
-| Skipping mobile design ("it is a developer tool") | Faster to ship desktop-only | Recruiters browse on phones; broken mobile = negative impression; tool feels unfinished | MVP only -- add mobile experience before announcing |
-| Single aggregate score without category breakdown | Simpler UI, one number to show | Score is gameable, opaque, and meaningless for multidimensional quality; users distrust it | Never -- always show category sub-scores alongside aggregate |
-| No lint debounce (relying on CodeMirror default) | Immediate feedback feels responsive | Input lag on Dockerfiles > 30 lines; 40 rules x 15 instructions = 600 evaluations per keystroke | Never -- set explicit 300-500ms debounce from the start |
-| Inline `<script>` for the editor initialization | Works, avoids module setup | Cannot tree-shake, cannot import CodeMirror modules properly, breaks the Astro build pipeline | Never -- use proper island component |
+| Hardcoding 8 dimension names in components | Faster initial build | Adding/renaming a dimension requires touching every component, OG generator, and JSON schema | Never -- extract to a shared `dimensions.ts` config, mirroring the Beauty Index `DIMENSIONS` pattern |
+| Reusing Beauty Index `radar-math.ts` without testing at 8 axes | No new utility code needed | Label overlap at 8 axes due to tighter angular spacing; 45-degree positioning hits edge cases in text-anchor logic | Never -- verify label rendering at 8 axes before assuming compatibility |
+| Copying `generateLanguageOgImage()` for DB Compass OG | Avoids touching working code | Four near-identical OG generator functions with diverging maintenance | Acceptable for v1.5 if a refactor into a shared parametric generator is planned for v1.6 |
+| Using 1-10 scale because Beauty Index does | Consistent user mental model | Some database dimensions are near-binary (e.g., "ACID Support" is yes/no/partial) and do not map to 10 gradations | Only if every dimension genuinely has at least 5 meaningful gradations |
+| Omitting per-database justifications from JSON | Smaller data file, faster authoring | Scores look arbitrary; no way to show methodology on the page | Never -- even 1-2 sentence justifications per dimension prevent credibility attacks |
+| Using a flat array of databases per model instead of rich objects | Simpler JSON structure | Cannot capture per-database strengths, version info, or managed-service availability | MVP only -- at least add a `description` field per database entry |
 
 ## Integration Gotchas
 
-Common mistakes when connecting the Dockerfile Analyzer to existing site infrastructure.
-
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| CodeMirror + Astro SSR | Using `client:visible` or `client:load` | Use `client:only="react"` to skip SSR entirely |
-| CodeMirror + View Transitions | Not destroying EditorView on navigation | Listen to `astro:before-swap`, call `view.destroy()`, re-init on `astro:page-load` |
-| CodeMirror + Dark Mode Toggle | Assuming CSS class on `<html>` cascades into editor | Use `Compartment` for runtime theme switching OR `codemirror-theme-vars` for CSS variable integration |
-| CodeMirror + Site Fonts (Fira Code) | Assuming CodeMirror uses the page's font-family | Explicitly configure CodeMirror's `fontFamily` via `EditorView.theme()` to use Fira Code |
-| dockerfile-ast + Vite bundler | Importing without testing CJS-to-ESM conversion | Create a minimal Vite test build first; verify tree shaking and bundle size |
-| Lint engine + CodeMirror diagnostics | Running all 40 rules synchronously on every change | Use debounced linting (delay: 300-500ms), parse AST once per cycle, pass to all rules |
-| GSAP animations + CodeMirror page | `cleanupAnimations()` kills tweens but not the editor | Add CodeMirror-specific cleanup to the `astro:before-swap` handler |
-| CSP + CodeMirror CSS-in-JS | Assuming styles will work without checking | Verify `style-src 'unsafe-inline'` is present; check console for CSP violations |
-| Scoring UI + Existing design system | Using colors not from the site's Tropical Sunset palette | Map severity colors to existing CSS custom properties: `--color-accent` for errors, `--color-accent-secondary` for info |
+| Header navigation | Adding "Database Compass" as 8th top-level nav item | Keep at 7 items; DB Compass accessible via Tools page or replace "Contact" with a consolidated approach |
+| Homepage callouts | Adding a third vertically stacked callout card | Redesign as a 3-card horizontal grid or compact "Explore" list |
+| Tools landing page | Replacing "Coming soon" placeholder without updating page description | Update tools page intro text; match card styling to distinguish interactive tool vs reference guide |
+| Content collection | Forgetting to register in `content.config.ts` | Add `databases` collection with `file()` loader and Zod schema, mirroring the `languages` collection pattern |
+| LLMs.txt | Not updating `llms.txt.ts` and `llms-full.txt.ts` | Add databases collection import and Database Compass section to both endpoint files |
+| OG images | Creating a new OG generator from scratch | Extend existing `og-image.ts` with a `generateDbCompassOgImage()` function reusing `renderOgPng()`, `brandingRow()`, `accentBar()` |
+| Radar chart component | Importing Beauty Index `RadarChart.astro` and passing 8 axes | Verify label positioning at 8 axes; may need increased label offset or font size adjustment |
+| View Transitions | New pages not participating in transitions | All new pages use the same Layout component with `<ViewTransitions />` -- should work automatically, but verify |
+| JSON-LD | Using generic `WebPage` schema | Use `Dataset` for overview, `TechArticle` for detail pages, `BlogPosting` for companion post |
+| Internal linking | Only linking overview -> detail, not detail -> detail | Add "Related Models" cross-links on each detail page; add "Compare with" suggestions |
 
 ## Performance Traps
 
-Patterns that work in development but fail on real devices or under Lighthouse audit.
-
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| CodeMirror `basicSetup` import | Editor works perfectly | Use `minimalSetup` + selective extensions; measure bundle with `vite-bundle-visualizer` | Lighthouse audit; bundle analysis shows 120KB+ gzip for editor page |
-| Lint runs on every keystroke without debounce | Fast for 5-line Dockerfiles | Set `linter(fn, { delay: 500 })` explicitly | Dockerfiles > 30 lines; users pasting large files |
-| Eager CodeMirror initialization | Editor appears instantly | Use `client:only` which already defers; split init phases with `requestIdleCallback` | Pages with both 3D head scene AND editor; TBT > 300ms |
-| All lint rules as synchronous main-thread work | Lint completes fast for 10 rules | Profile with 40 rules against 50-line Dockerfile; use Web Worker if >16ms | Production rule set with 40 rules; realistic Dockerfiles |
-| CodeMirror creates DOM on mount, triggers layout thrashing | Invisible in fast desktop dev | Wrap editor mount in `requestAnimationFrame`; set explicit dimensions before mount | Low-end mobile devices; Lighthouse lab environment |
+| OG image multiplication via vs-comparison pages | Build time increases by 10-20+ seconds | Limit to 14 OG images (1 overview + 12 detail + 1 blog); no vs-comparison pages | Adding 66+ comparison OG images |
+| Large JSON data file with embedded justifications | Build time increases proportionally with data size | Use Astro content collection `file()` loader which caches between builds | JSON file exceeds 100KB (unlikely with 12 entries but possible with long justifications) |
+| Radar chart SVG computed twice per page (once for page, once for OG) | Redundant computation during build | Pre-compute SVG string once per model; pass to both page component and OG generator | Noticeable at 50+ pages, not 12 |
+| Sortable table adds client-side JS where none existed | Page weight increases; Lighthouse score drops | Use the same build-time sort approach as Beauty Index, or nanostores atom (286 bytes) | Adding a full sorting library instead of lightweight approach |
 
 ## Security Mistakes
 
-Domain-specific security issues for a Dockerfile analysis tool.
-
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Executing or evaluating user-provided Dockerfile content | Users paste malicious content that could exploit XSS if rendered as HTML | Treat ALL Dockerfile content as plain text; never use `innerHTML` with user content; CodeMirror handles this correctly by default |
-| Displaying lint messages with user-controlled content unsanitized | If a lint rule message includes Dockerfile content (e.g., "Invalid instruction: `<script>alert(1)</script>`"), the message could execute as HTML | Escape all user-derived content in lint messages; use `textContent` not `innerHTML` for the results panel |
-| Sharing analysis results via URL parameters | Dockerfile content in URL could contain sensitive information (API keys, registry credentials); URL may be logged by proxies/analytics | Do NOT put Dockerfile content in URLs; use client-side only processing; add a warning "Never paste Dockerfiles containing secrets" |
-| Storing Dockerfile content in localStorage for persistence | Users may paste Dockerfiles containing credentials; localStorage persists beyond the session | If using sessionStorage/localStorage for content persistence, add a clear warning; prefer sessionStorage over localStorage (session-scoped) |
+| Including database connection strings in example content | Readers copy-paste examples with real-looking credentials | Use obviously fake examples: `mongodb://localhost:27017/example` |
+| Linking to third-party database download pages without verification | Broken or hijacked links | Only link to official documentation domains; verify at authoring time |
+| Accepting user-contributed corrections without review | Spam or malicious content in GitHub issues | GitHub issues require maintainer approval; no auto-merge of data changes |
 
 ## UX Pitfalls
 
-Common user experience mistakes when building browser-based linting tools.
-
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Editor opens empty with no guidance | Users stare at a blank editor, unsure what to do | Pre-load a sample Dockerfile with intentional lint issues; show "Paste your Dockerfile or edit this example" |
-| Results appear only after clicking "Analyze" | Friction; users expect real-time feedback from a modern tool | Use CodeMirror's live linting (debounced) -- results update as users type |
-| Score shown without explanation | Users see "72/100" but do not understand what to fix | Show the score breakdown by category with expandable rule explanations |
-| Lint errors reference line numbers but editor has no line numbers | Users cannot find the issue in their Dockerfile | Enable line numbers in CodeMirror (part of `minimalSetup`); clicking a result should scroll to and highlight the line |
-| "Analyze" button looks like a form submit | Users worry their Dockerfile will be sent to a server | Add prominent "100% client-side - your code never leaves your browser" messaging |
-| Results panel is far below the editor | Users edit, then scroll down to see results, then scroll back up to edit | Use a side-by-side layout on desktop (editor left, results right) or a sticky/pinned results panel |
-| No way to copy improved Dockerfile | Users fix issues but have no easy way to get the fixed content | Add a "Copy to clipboard" button on the editor |
+| Radar chart as primary visual with no fallback | Users who cannot parse radar charts get no value | Always pair with a score breakdown table; table is primary, chart is supplementary |
+| All 12 model cards looking identical on overview | Users cannot quickly find the model they care about | Give each model a distinct icon or color accent; group by complexity spectrum position |
+| "Complexity spectrum" visualization unclear | Newcomers do not understand why Key-Value is "simple" and Graph is "complex" | Add hover/click explanations on the spectrum; include brief paragraph defining the axis |
+| Detail pages with no clear next action | Users read one model page and leave the site | Add "Compare with" suggestions, "If you need X, consider [Model]" cross-links, and link to blog post |
+| Mobile radar chart too small to read | Primary mobile audience gets degraded experience | Hide radar chart below 480px; show score table only; or render chart full-width |
+| Dimension abbreviations without context | "QF" on the chart means nothing without a legend | Always show full dimension names; if space is tight, add a legend below the chart |
+| Overview page lacks entry point for "I don't know what I need" | Beginners bounce because they cannot navigate the taxonomy | Add a "Start Here" section or decision-tree intro before the model grid |
+| Scores displayed without context | "7/10" means nothing without knowing what 1 and 10 represent | Show endpoint definitions: "1 = [meaning], 10 = [meaning]" at least on hover or via tooltip |
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
-
-- [ ] **Editor mounts and works:** But verify it works after a View Transition (navigate away and back). Check that `view.destroy()` fires on `astro:before-swap` and the editor reinitializes on return.
-- [ ] **Dark mode toggles the editor theme:** But verify syntax highlighting colors are readable in BOTH modes. Check that the gutter, active line, and selection colors also switch.
-- [ ] **Lint results appear:** But verify they update live as the user types (not just on button click). Check that the debounce delay (300-500ms) is set and lint does not run on every keystroke.
-- [ ] **Score displays correctly:** But verify the scoring formula is transparent (users can see which rules contributed). Check that category sub-scores are shown. Test against 10+ real Dockerfiles of varying quality.
-- [ ] **Editor has line numbers:** But verify clicking a result in the panel scrolls to and highlights the corresponding line in the editor.
-- [ ] **Editor is keyboard accessible:** But verify Tab focus mode works (Escape then Tab exits the editor). Check `aria-label` on the editor element. Test with VoiceOver.
-- [ ] **Works on desktop Chrome:** But test in Safari (different contenteditable behavior), Firefox, and on an actual iPhone and Android device.
-- [ ] **Lighthouse Performance 85+:** But run Lighthouse on the Analyzer page AFTER navigating to it via View Transition (not direct URL load). View Transition scripts add overhead.
-- [ ] **CSP allows CodeMirror styles:** But check the browser console for ANY CSP warnings, not just visible breakage.
-- [ ] **Example Dockerfile loads correctly:** But verify the example has at least 3-5 intentional issues of different severities so users see how the tool works.
+- [ ] **Content collection:** `databases` collection registered in `content.config.ts` with Zod schema -- build will silently produce no pages if missing
+- [ ] **OG images:** All 14 new pages have working OG image endpoints returning valid PNGs -- test by visiting `/open-graph/tools/db-compass/[slug].png` in dev
+- [ ] **LLMs.txt:** Both `llms.txt.ts` and `llms-full.txt.ts` include Database Compass pages -- easy to forget since these are separate endpoint files
+- [ ] **Sitemap:** All 14 new URLs appear in `sitemap-index.xml` output -- run `astro build` and check dist
+- [ ] **JSON-LD:** Structured data validates in Google's Rich Results Test -- paste each page URL after deploy
+- [ ] **Header nav:** "Tools" link highlights as active when on `/tools/db-compass/*` pages -- verify `startsWith` logic in Header.astro (currently `link.href !== '/' && currentPath.startsWith(link.href)` which should work for `/tools/`)
+- [ ] **Internal cross-links:** Blog post links to overview, overview links to blog post, detail pages link to overview, detail pages cross-link to related models -- check all directions
+- [ ] **Mobile layout:** Radar charts readable at 375px viewport -- test all 12 detail pages on actual device, not just one in simulator
+- [ ] **Accessibility:** Radar chart SVGs have descriptive `aria-label` or `role="img"` with alt text -- the current `generateRadarSvgString()` does not include ARIA attributes
+- [ ] **Score table:** If sortable, works with keyboard (Tab + Enter) -- the Beauty Index table set this precedent
+- [ ] **Multi-model metadata:** Every database that spans categories has cross-links or "also classified as" notes -- verify Redis, PostgreSQL, Cosmos DB, DynamoDB, MongoDB at minimum
+- [ ] **Dimension rubric:** Each of the 8 dimensions has a visible definition accessible from both overview and detail pages -- not just in the blog post
+- [ ] **Date indicators:** Overview shows "Data as of [date]"; each detail page shows per-database `lastVerified` dates
+- [ ] **Word count:** Each detail page has 400+ words of unique expert content -- measure after authoring
 
 ## Recovery Strategies
 
-When pitfalls occur despite prevention, how to recover.
-
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| SSR build crash from CodeMirror (P1) | LOW | Switch from `client:visible` to `client:only` -- one line change in the Astro template |
-| Bundle size tanks Lighthouse (P2) | MEDIUM | Replace `basicSetup` with `minimalSetup` + selective imports; requires auditing all extension imports |
-| View Transitions break editor (P3) | MEDIUM | Add lifecycle event listeners (`astro:before-swap`, `astro:page-load`); requires understanding CodeMirror's destroy/create cycle |
-| dockerfile-ast bundle bloat (P4) | HIGH if discovered late | Replace with custom parser (200-400 lines); requires rewriting the parsing layer |
-| Dark mode mismatch (P5) | LOW-MEDIUM | Add `Compartment`-based theme switching or integrate `codemirror-theme-vars`; 50-100 lines of code |
-| Score gaming/meaninglessness (P6) | HIGH | Requires re-calibrating all 40 rule weights against real-world Dockerfiles; may need scoring formula redesign |
-| Keyboard trap (P7) | LOW | Add `aria-label`, visible escape instructions, and Tab focus mode toggle; 20-30 lines of code |
-| Lint performance on long files (P8) | MEDIUM | Add debounce delay, AST caching, potentially Web Worker; requires pipeline refactoring |
-| Broken mobile experience (P9) | MEDIUM-HIGH | Redesign mobile layout as simplified textarea + results; architectural change |
-| Information overload in lint display (P10) | LOW | Adjust severity thresholds for inline display; sort panel by severity; CSS changes + minor logic |
-| CSP blocks CodeMirror styles (P11) | LOW | Verify `style-src 'unsafe-inline'` is present (it is); document the dependency |
+| Scores challenged as arbitrary (P2) | MEDIUM | Add justification text per score in JSON; publish methodology addendum in blog post; add "suggest correction" link per page |
+| Multi-model databases miscategorized (P1) | LOW | Add `crossCategory` field to JSON schema; update detail page template to render secondary categories with cross-links |
+| Radar chart unreadable at 8 axes (P3) | MEDIUM | Reduce to 6 axes (requires rethinking dimensions and rescoring all models); or switch to horizontal bar chart |
+| Build time exceeds 40 seconds (P6) | LOW | Remove vs-comparison pages if added; implement OG image caching; verify no redundant SVG generation |
+| SEO thin content penalty (P5) | HIGH | Rewrite all 12 detail pages with substantial unique content (400+ words each); requires 6-8 hours of expert writing |
+| Homepage cluttered with 3 callouts (P7) | LOW | Redesign callout section as 3-card grid (CSS change) or compact list |
+| Stale data after 12 months (P4) | LOW | Update JSON data file, rebuild, redeploy. Architecture supports this -- the risk is remembering to do it |
+| LLMs.txt/sitemap missing pages (P10) | LOW | Add collection import and section to endpoint files; rebuild; takes 15 minutes |
+| Wrong JSON-LD schema type (P9) | LOW | Change schema type in page template; rebuild; takes 30 minutes |
 
 ## Pitfall-to-Phase Mapping
 
-How roadmap phases should address these pitfalls.
-
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| SSR crash -- `client:only` required (P1) | Phase 1: Editor scaffolding | `astro build` completes without errors; editor mounts on page load |
-| Bundle size impact (P2) | Phase 1: Editor scaffolding | `vite-bundle-visualizer` shows editor page <200KB gzip; Lighthouse Performance 85+ |
-| View Transitions break editor (P3) | Phase 1: Editor scaffolding | Navigate Home -> Analyzer -> Home -> Analyzer; editor works each time; no console errors |
-| dockerfile-ast browser compatibility (P4) | Phase 1: Technology validation | Minimal Vite test build confirms bundle <20KB gzip for parser; no CJS conversion errors |
-| Dark mode theme mismatch (P5) | Phase 2: Editor styling | Toggle dark mode with editor visible; syntax highlighting colors change; no visual mismatch |
-| Scoring algorithm design (P6) | Phase 3: Rule engine | Test 50+ real Dockerfiles; score distribution has meaningful range (30-95); security issues visibly drop score |
-| Keyboard trap accessibility (P7) | Phase 2: Editor accessibility | Escape+Tab exits editor; `aria-label` present; Lighthouse Accessibility 90+ |
-| Lint performance (P8) | Phase 3: Rule engine | Type in a 50-line Dockerfile; no input lag; Chrome DevTools shows no long tasks during typing |
-| Mobile experience (P9) | Phase 2: Responsive design | Open Analyzer on iPhone Safari; editor or fallback loads; results are visible and scrollable |
-| Information overload (P10) | Phase 4: Results display | Show editor to 3 people; ask "what is the most important issue?" -- they identify it within 5 seconds |
-| CSP compatibility (P11) | Phase 1: Editor scaffolding | Zero CSP warnings in browser console on the Analyzer page |
+| Multi-model categorization (P1) | Data schema design | JSON schema has `crossCategory` field; detail page template renders overlap notes |
+| Score arbitrariness (P2) | Data schema + content authoring | Each dimension has a rubric definition; each score has justification text in JSON |
+| 8-axis radar readability (P3) | Component development | Chart tested at 375px, 768px, 1024px widths; labels do not overlap; score table always visible alongside |
+| Stale data framing (P4) | Data schema + content authoring | `lastVerified` field in JSON; visible "Data as of February 2026" on overview page |
+| SEO thin content (P5) | Content authoring | Each detail page word count > 400; unique meta descriptions; unique target keywords per page |
+| Build time (P6) | Architecture/planning | Decision documented: no vs-comparison pages; OG images limited to 14; build time measured < 30s after integration |
+| Homepage callout design (P7) | Site integration | 3-callout layout tested on mobile and desktop; vertical scroll distance acceptable |
+| Tools page taxonomy (P8) | Architecture/planning | URL structure decided; tools page description updated; card labels accurate |
+| JSON-LD schema type (P9) | SEO integration | Schema validates in Rich Results Test; appropriate type per page type |
+| LLMs.txt coverage (P10) | Site integration | `dist/llms.txt` includes Database Compass section; sitemap includes all 14 URLs |
 
 ## Sources
 
-- [CodeMirror 6 System Guide -- Destroy/Cleanup](https://codemirror.net/docs/guide/) (HIGH confidence -- official docs)
-- [CodeMirror 6 Tab Handling and Accessibility](https://codemirror.net/examples/tab/) (HIGH confidence -- official docs)
-- [CodeMirror 6 Lint Example](https://codemirror.net/examples/lint/) (HIGH confidence -- official docs)
-- [CodeMirror 6 Bundling Example](https://codemirror.net/examples/bundle/) (HIGH confidence -- official docs)
-- [CodeMirror 6 Styling and Theming](https://codemirror.net/examples/styling/) (HIGH confidence -- official docs)
-- [CodeMirror 6 Dynamic Dark/Light Mode Discussion](https://discuss.codemirror.net/t/dynamic-light-mode-dark-mode-how/4709) (HIGH confidence -- official forum)
-- [CodeMirror 6 Minimal Setup Discussion](https://discuss.codemirror.net/t/minimal-setup-because-by-default-v6-is-50kb-compared-to-v5/4514) (HIGH confidence -- official forum)
-- [CodeMirror 6 Mobile Touch Issues](https://discuss.codemirror.net/t/touch-on-ios-iphone-not-working-in-codemirror-6/3345) (HIGH confidence -- official forum)
-- [CodeMirror 6 iOS Selection Handles Missing](https://discuss.codemirror.net/t/ios-safari-missing-selection-drag-handles/9679) (HIGH confidence -- official forum)
-- [CodeMirror 6 Mobile Scrolling Issues](https://discuss.codemirror.net/t/mobile-keyboard-scrolling-too-aggressive-scrolls-5-lines-instead-of-1-when-caret-reaches-viewport-edge/9492) (HIGH confidence -- official forum)
-- [CodeMirror 6 Accessibility -- Screen Reader Survey](https://discuss.codemirror.net/t/code-editor-screen-reader-accessiblity-survey/1790) (MEDIUM confidence -- community)
-- [CodeMirror 6 ARIA Label Propagation Issue](https://discuss.codemirror.net/t/aria-label-from-our-textarea-not-propagating-to-cm-textarea/4344) (HIGH confidence -- official forum)
-- [CodeMirror 6 Accessibility Textbox Label Violation](https://discuss.codemirror.net/t/accessibility-violation-form-control-with-textbox-role-has-no-associated-label/7378) (HIGH confidence -- official forum)
-- [CodeMirror 6 Bundle Size Issue #760](https://github.com/codemirror/dev/issues/760) (HIGH confidence -- official GitHub)
-- [codemirror-theme-vars -- CSS Variable Theming](https://github.com/antfu/codemirror-theme-vars) (HIGH confidence -- well-maintained library)
-- [dockerfile-ast GitHub Repository](https://github.com/rcjsuen/dockerfile-ast) (HIGH confidence -- source code inspection)
-- [dockerfile-ast package.json Dependencies](https://github.com/rcjsuen/dockerfile-ast/blob/master/package.json) (HIGH confidence -- direct source)
-- [vscode-languageserver-textdocument npm](https://www.npmjs.com/package/vscode-languageserver-textdocument) (HIGH confidence -- official package)
-- [Hadolint -- Dockerfile Linter](https://github.com/hadolint/hadolint) (HIGH confidence -- industry standard)
-- [Astro View Transitions Documentation](https://docs.astro.build/en/guides/view-transitions/) (HIGH confidence -- official docs)
-- [Astro Template Directives -- client:only](https://docs.astro.build/en/reference/directives-reference/) (HIGH confidence -- official docs)
-- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) (HIGH confidence -- official docs)
-- [Astro transition:persist for React State](https://astropatterns.dev/p/react-love/view-transitions-and-react-state) (MEDIUM confidence -- community patterns)
-- [Astro transition:persist React Re-render Bug #13287](https://github.com/withastro/astro/issues/13287) (HIGH confidence -- official issue tracker)
-- [Sourcegraph Monaco to CodeMirror Migration -- Bundle Savings](https://sourcegraph.com/blog/migrating-monaco-codemirror) (HIGH confidence -- engineering blog)
-- [Chrome Lighthouse -- Total Blocking Time](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time) (HIGH confidence -- official docs)
-- [Chrome Lighthouse -- Reduce JavaScript Execution Time](https://developer.chrome.com/docs/lighthouse/performance/bootup-time) (HIGH confidence -- official docs)
-- Codebase analysis: `astro.config.mjs`, `Layout.astro`, `global.css`, `ThemeToggle.astro`, `animation-lifecycle.ts`, `tabStore.ts`, CSP meta tag (HIGH confidence -- direct code inspection)
+- [Highcharts: Radar Chart Explained](https://www.highcharts.com/blog/tutorials/radar-chart-explained-when-they-work-when-they-fail-and-how-to-use-them-right/) -- axis count limits (5-8 recommended), when to use/avoid (HIGH confidence)
+- [Data-to-Viz: Spider Chart Caveats](https://www.data-to-viz.com/caveat/spider.html) -- axis ordering effects on perception, shape distortion (HIGH confidence)
+- [Scott Logic: A Critique of Radar Charts](https://blog.scottlogic.com/2011/09/23/a-critique-of-radar-charts.html) -- shape perception does not leverage pre-attentive attributes (HIGH confidence)
+- [ChartExpo: Radar Chart Misleading Geometry](https://chartexpo.com/blog/radar-chart) -- polygon area distortion, alternatives (MEDIUM confidence)
+- [Nightingale: The Stellar Chart Alternative](https://nightingaledvs.com/the-stellar-chart-an-elegant-alternative-to-radar-charts/) -- radial bar chart alternative (MEDIUM confidence)
+- [Redis Multi-Model Database](https://redis.io/technology/multi-model/) -- Redis as multi-model, not just key-value (HIGH confidence)
+- [Redis Data Types](https://redis.io/docs/latest/develop/data-types/) -- Redis supports strings, hashes, lists, sets, JSON, streams (HIGH confidence)
+- [DB-Engines Ranking Method](https://db-engines.com/en/ranking_definition) -- methodology criticism, proxy-based scoring limitations (HIGH confidence)
+- [Andy Pavlo: Databases in 2025 Retrospective](https://www.cs.cmu.edu/~pavlo/blog/2026/01/2025-databases-retrospective.html) -- rapid landscape changes (HIGH confidence)
+- [Ainoya.dev: Cache Satori OGP Images in Astro](https://ainoya.dev/posts/astro-ogp-build-cache/) -- OG image build time optimization, 100-300ms per image (MEDIUM confidence)
+- [Astro Content Layer Deep Dive](https://astro.build/blog/content-layer-deep-dive/) -- file() loader caching, 5x faster builds, 25-50% less memory (HIGH confidence)
+- [Backlinko: Featured Snippets](https://backlinko.com/hub/seo/featured-snippets) -- table snippets for comparison queries (HIGH confidence)
+- [Google: Structured Data Introduction](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) -- JSON-LD recommended format (HIGH confidence)
+- [Backlinko: Schema Markup Guide](https://backlinko.com/schema-markup-guide) -- schema critical for SERP visibility and AI search (HIGH confidence)
+- Codebase analysis: `astro.config.mjs`, `content.config.ts`, `og-image.ts`, `radar-math.ts`, `Header.astro`, `index.astro`, `tools/index.astro`, `llms.txt.ts`, build output (714 pages, 22.17s) (HIGH confidence -- direct code inspection)
 
 ---
-*Pitfalls research for: Dockerfile Analyzer Tool -- adding CodeMirror 6 + dockerfile-ast linting tool to existing Astro 5 static portfolio site*
-*Researched: 2026-02-20*
+*Pitfalls research for: Database Compass -- database model explorer (v1.5 milestone)*
+*Researched: 2026-02-21*

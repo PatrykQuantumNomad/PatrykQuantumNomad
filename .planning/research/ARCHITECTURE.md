@@ -1,924 +1,849 @@
-# Architecture: Dockerfile Analyzer Tool Integration
+# Architecture: Database Compass Integration
 
-**Domain:** Interactive browser-based Dockerfile linting and scoring tool
-**Researched:** 2026-02-20
-**Overall confidence:** HIGH -- based on direct codebase analysis, verified CodeMirror 6 and Astro 5 documentation, and confirmed dockerfile-ast API
-
----
-
-## Recommended Architecture
-
-The Dockerfile Analyzer is a **single-page client-side tool** at `/tools/dockerfile-analyzer/` that integrates into the existing Astro 5 static site as a React island. The page is a static Astro shell wrapping one large interactive island that contains the CodeMirror editor, rule engine, scorer, and results panel. All processing happens in the browser -- no server, no API calls.
-
-### Why a Single React Island (Not Multiple Islands)
-
-The editor, lint results, and score panel are tightly coupled: every keystroke triggers parse -> lint -> score -> display. Splitting these into separate islands would require cross-island communication via Nanostores for every update, adding latency and complexity to what is fundamentally a single interactive widget. The Beauty Index used multiple small islands because each was independent (filter bar, compare picker, code tabs). The Dockerfile Analyzer is one cohesive tool.
-
-**Use React** because:
-1. React 19 + `@astrojs/react` are already installed and configured
-2. `@nanostores/react` is already a dependency
-3. The site already ships 4 React islands (`HeadScene.tsx`, `LanguageFilter.tsx`, `CodeComparisonTabs.tsx`, `VsComparePicker.tsx`)
-4. CodeMirror 6 has well-documented React integration patterns via refs and `useEffect`
-5. No additional framework installation needed -- zero new dependencies in `astro.config.mjs`
-
-**Rejected alternative: Vanilla JS island.** CodeMirror 6 is vanilla JS at its core, so a vanilla approach is technically feasible. However, managing the results panel's reactive state (40 diagnostics updating on every keystroke, expandable rule details, severity filtering, score animation) without a framework leads to imperative DOM spaghetti. React's declarative rendering is the right tool here. The existing codebase already pays the React cost -- the marginal bundle addition for this page is near zero since React is already in the shared chunk.
-
-**Rejected alternative: Preact/Svelte/Solid.** Would require installing a new integration (`@astrojs/preact`, etc.) and adding a new framework to the build pipeline. The marginal size savings (Preact ~3kb vs React already loaded) do not justify the maintenance cost of a second UI framework in the codebase.
+**Domain:** Interactive database model explorer integrated into existing Astro 5 portfolio site
+**Researched:** 2026-02-21
+**Confidence:** HIGH -- based on direct codebase analysis of existing Beauty Index and Dockerfile Analyzer patterns, verified Astro 5 content collections API, and existing radar-math.ts source code
 
 ---
 
-## High-Level Data Flow
+## System Overview
 
 ```
-User pastes/types Dockerfile
-        |
-        v
-CodeMirror EditorView (input)
-        |
-        | EditorView.updateListener (docChanged)
-        v
-Parse: dockerfile-ast DockerfileParser.parse(text)
-        |
-        | Returns: Dockerfile AST (instructions, comments, args)
-        v
-Lint: RuleEngine.run(ast, rawText)
-        |
-        | 40 rules, each returns LintResult[]
-        v
-Score: Scorer.compute(lintResults)
-        |
-        | Returns: { overall, categories: { security, efficiency, ... } }
-        v
-Display (two outputs):
-  1. CodeMirror Diagnostics (inline markers in editor via setDiagnostics)
-  2. React State (results panel: score gauge, rule violations list, suggestions)
+Existing Site Layer (unchanged)
+  ├── Layout.astro, Header.astro, Footer.astro, SEOHead.astro
+  ├── Content Collections: blog (glob), languages (file)
+  └── OG Image Pipeline: Satori + Sharp in src/lib/og-image.ts
+
+NEW: Database Compass Layer
+  ├── Content Collection: dbModels (file loader, single JSON)
+  ├── Zod Schema: src/lib/db-compass/schema.ts
+  ├── Visualization Lib: src/lib/db-compass/
+  │   ├── spectrum-math.ts        (NEW: complexity spectrum SVG math)
+  │   └── compass-dimensions.ts   (NEW: 8 dimension metadata)
+  ├── Components: src/components/db-compass/
+  │   ├── ComplexitySpectrum.astro (NEW: horizontal spectrum SVG)
+  │   ├── ModelGrid.astro         (NEW: category card grid)
+  │   ├── CompassRadarChart.astro (NEW: 8-axis radar, reuses radar-math.ts)
+  │   ├── CompassScoringTable.astro (NEW: 12-model scoring table)
+  │   ├── TradeoffPanel.astro     (NEW: strengths/weaknesses per model)
+  │   ├── TopDatabases.astro      (NEW: database examples per model)
+  │   └── ModelNav.astro          (NEW: prev/next navigation)
+  ├── Pages: src/pages/db-compass/
+  │   ├── index.astro             (overview: spectrum + grid + table)
+  │   └── [slug].astro            (12 detail pages via getStaticPaths)
+  ├── JSON-LD: src/components/DbCompassJsonLd.astro
+  ├── OG Images: src/pages/open-graph/db-compass/
+  │   ├── index.png.ts            (overview OG)
+  │   └── [slug].png.ts           (per-model OG)
+  └── Integration Points:
+      ├── src/content.config.ts   (MODIFY: add dbModels collection)
+      ├── src/pages/index.astro   (MODIFY: add callout card)
+      └── src/pages/tools/index.astro (NO CHANGE -- Compass is content, not a tool)
 ```
-
-### Key Design Decision: `linter()` Extension vs `setDiagnostics`
-
-**Use the `linter()` extension from `@codemirror/lint`**, not manual `setDiagnostics` dispatches.
-
-The `linter()` function accepts a callback `(view: EditorView) => Diagnostic[]` that CodeMirror calls automatically on document changes with built-in debouncing. This is simpler and more correct than manually wiring `updateListener` -> debounce -> `setDiagnostics`. The linter callback is the natural place to run the parse -> lint pipeline and return CodeMirror `Diagnostic` objects. The results panel updates are triggered by a parallel Nanostore subscription to the same lint results.
-
-**Confidence:** HIGH -- the `linter()` function and `Diagnostic` interface are documented at [codemirror.net/examples/lint/](https://codemirror.net/examples/lint/) and verified in the `@codemirror/lint` 6.9.4 package.
 
 ---
 
-## Component Boundaries
+## Question 1: Data Structure -- Single JSON vs Separate Files
 
-### Page Shell: `src/pages/tools/dockerfile-analyzer.astro`
+**Recommendation: Single JSON file at `src/data/db-compass/models.json`**
 
-An Astro page that imports the Layout and renders the React island. Minimal static content: page title, SEO metadata, introductory text, and the island mount.
+**Confidence:** HIGH
+
+### Rationale
+
+The Beauty Index uses exactly this pattern -- a single `languages.json` containing 25 entries, loaded via Astro's `file()` loader in `content.config.ts`. The Database Compass has 12 model categories, each smaller and simpler than a language entry. A single file is the clear choice.
+
+**Why single JSON, not separate files per category:**
+
+1. **Established precedent.** `src/data/beauty-index/languages.json` holds 25 entries (352 lines) in a single file. 12 database model entries with nested database lists will be roughly similar size (~500-600 lines). Manageable.
+
+2. **Content collection integration.** Astro's `file()` loader is designed for single-file collections. It returns each top-level array element as a collection entry with `entry.data` containing the validated Zod object and `entry.id` generated from the `id` field. Using `glob()` with individual JSON files per category would require wrapping each in `{ "id": "...", ...data }` separately and loses the benefit of a unified file where you can see all 12 models' relative scores at a glance.
+
+3. **Authoring ergonomics.** When scoring 12 models across 8 dimensions, you need to see adjacent entries to ensure scoring consistency. A single file lets you scroll and compare. Separate files would require opening 12 tabs.
+
+4. **Build performance.** One file read vs 12. Negligible either way at this scale, but single file is simpler.
+
+**When separate files WOULD be correct:** If each model category had its own MDX content (long-form prose, embedded components). But the milestone scope specifies pure JSON data with structured fields -- no MDX needed. Rich SEO content comes from the structured JSON fields rendered through Astro template components, exactly like the Beauty Index `[slug].astro` page builds a full article from `language.characterSketch` + `justifications[dim.key]` + code snippets.
+
+### Recommended JSON Structure
+
+```json
+[
+  {
+    "id": "key-value",
+    "name": "Key-Value Store",
+    "slug": "key-value",
+    "icon": "key",
+    "complexityPosition": 0.08,
+    "summary": "The simplest database model...",
+    "scores": {
+      "readLatency": 10,
+      "writeLatency": 10,
+      "queryFlexibility": 2,
+      "scalability": 9,
+      "consistency": 7,
+      "schemaFlexibility": 3,
+      "operationalComplexity": 2,
+      "analyticsCapability": 1
+    },
+    "strengths": [
+      "Sub-millisecond read/write latency",
+      "Horizontal scaling is trivial"
+    ],
+    "weaknesses": [
+      "No relationships between data",
+      "Limited query patterns beyond key lookup"
+    ],
+    "bestFor": [
+      "Session storage",
+      "Caching layers",
+      "Feature flags"
+    ],
+    "avoidWhen": [
+      "Data has relationships",
+      "Complex queries needed"
+    ],
+    "topDatabases": [
+      {
+        "name": "Redis",
+        "description": "In-memory data structure store...",
+        "url": "https://redis.io"
+      },
+      {
+        "name": "Amazon DynamoDB",
+        "description": "Fully managed NoSQL...",
+        "url": "https://aws.amazon.com/dynamodb/"
+      }
+    ],
+    "characterSketch": "The speed demon who memorized..."
+  }
+]
+```
+
+### Key Design Decisions in the Schema
+
+- **`complexityPosition`**: A float 0.0-1.0 representing where this model sits on the complexity spectrum. This is hand-authored, not computed. Key-value might be 0.08 (simple end), graph might be 0.92 (complex end). This drives placement on the horizontal spectrum SVG.
+
+- **`scores` object with named keys** (not an array): Unlike the Beauty Index which uses flat top-level fields (`phi`, `omega`, etc.), the Database Compass uses a nested `scores` object. The reason: 8 dimensions is enough that spreading them as top-level fields becomes unwieldy. A nested object groups them logically and makes the Zod schema cleaner.
+
+- **`topDatabases` as nested array**: 3-6 database entries per model, each with name, one-liner description, and URL. This provides the "rich enough content for SEO" without MDX. Each detail page renders these as a structured list with external links.
+
+- **`strengths`/`weaknesses`/`bestFor`/`avoidWhen`**: String arrays that render as bullet-point sections on detail pages. These produce semantic HTML content that search engines can index. Combined with `characterSketch` and `summary`, each detail page gets 200-400 words of unique content without any MDX.
+
+### Zod Schema
+
+```typescript
+// src/lib/db-compass/schema.ts
+import { z } from 'astro/zod';
+
+export const dimensionScoreSchema = z.number().int().min(1).max(10);
+
+export const topDatabaseSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  url: z.string().url(),
+});
+
+export const dbModelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  icon: z.string(),
+  complexityPosition: z.number().min(0).max(1),
+  summary: z.string(),
+  scores: z.object({
+    readLatency: dimensionScoreSchema,
+    writeLatency: dimensionScoreSchema,
+    queryFlexibility: dimensionScoreSchema,
+    scalability: dimensionScoreSchema,
+    consistency: dimensionScoreSchema,
+    schemaFlexibility: dimensionScoreSchema,
+    operationalComplexity: dimensionScoreSchema,
+    analyticsCapability: dimensionScoreSchema,
+  }),
+  strengths: z.array(z.string()).min(2).max(5),
+  weaknesses: z.array(z.string()).min(2).max(5),
+  bestFor: z.array(z.string()).min(2).max(6),
+  avoidWhen: z.array(z.string()).min(1).max(4),
+  topDatabases: z.array(topDatabaseSchema).min(3).max(6),
+  characterSketch: z.string(),
+});
+
+export type DbModel = z.infer<typeof dbModelSchema>;
+
+export function totalScore(model: DbModel): number {
+  return Object.values(model.scores).reduce((sum, s) => sum + s, 0);
+}
+
+export function dimensionScores(model: DbModel): number[] {
+  return [
+    model.scores.readLatency,
+    model.scores.writeLatency,
+    model.scores.queryFlexibility,
+    model.scores.scalability,
+    model.scores.consistency,
+    model.scores.schemaFlexibility,
+    model.scores.operationalComplexity,
+    model.scores.analyticsCapability,
+  ];
+}
+```
+
+### Content Collection Registration
+
+```typescript
+// Addition to src/content.config.ts
+import { dbModelSchema } from './lib/db-compass/schema';
+
+const dbModels = defineCollection({
+  loader: file('src/data/db-compass/models.json'),
+  schema: dbModelSchema,
+});
+
+export const collections = { blog, languages, dbModels };
+```
+
+---
+
+## Question 2: Complexity Spectrum SVG
+
+**Recommendation: Build-time SVG with a horizontal axis, labeled endpoints, and plotted model points with vertical stem markers.**
+
+**Confidence:** HIGH
+
+### Visualization Design
+
+The complexity spectrum is a horizontal 1D visualization (not a chart with two axes). It shows all 12 database models positioned left-to-right from "Simple" to "Complex" based on their `complexityPosition` value.
+
+```
+Simple ─────────────────────────────────── Complex
+  ●           ●    ●   ● ●      ●  ●    ●     ●
+ KV         Doc  Col  WC TS    Rel  Sp  Vec   Graph
+```
+
+### SVG Structure
+
+```
+┌──────────────────────────────────────────────────────┐
+│                    Complexity Spectrum                 │
+│                                                       │
+│  Simple ──────────────────────────────────── Complex  │
+│     │                                           │     │
+│     ●         ●     ●  ● ●      ●   ●    ●     ●    │
+│    ╱│╲       ╱│╲                                      │
+│   label     label    (labels below points)            │
+│                                                       │
+└──────────────────────────────────────────────────────┘
+```
+
+### Implementation: `src/lib/db-compass/spectrum-math.ts`
+
+This is a new pure-TS file following the same pattern as `radar-math.ts`: zero framework dependencies, usable in both Astro components and Satori OG image contexts.
+
+```typescript
+// src/lib/db-compass/spectrum-math.ts
+
+export interface SpectrumPoint {
+  x: number;
+  y: number;
+  label: string;
+  id: string;
+}
+
+/**
+ * Computes pixel positions for models on the complexity spectrum.
+ *
+ * @param width - Total SVG width
+ * @param models - Array of { id, name, complexityPosition (0-1) }
+ * @param padding - Horizontal padding from edges
+ * @param baselineY - Y coordinate for the axis line
+ */
+export function computeSpectrumPositions(
+  width: number,
+  models: { id: string; name: string; complexityPosition: number }[],
+  padding: number = 60,
+  baselineY: number = 80,
+): SpectrumPoint[] {
+  const usableWidth = width - 2 * padding;
+  return models.map((m) => ({
+    x: padding + m.complexityPosition * usableWidth,
+    y: baselineY,
+    label: m.name,
+    id: m.id,
+  }));
+}
+
+/**
+ * Generates a complete standalone SVG string for the complexity spectrum.
+ * Designed for both Astro component embedding and Satori OG image use.
+ */
+export function generateSpectrumSvgString(
+  width: number,
+  height: number,
+  models: { id: string; name: string; complexityPosition: number }[],
+  dotColor: string = '#c44b20',
+): string {
+  const padding = 60;
+  const baselineY = height * 0.4;
+  const points = computeSpectrumPositions(width, models, padding, baselineY);
+  const lineY = baselineY;
+
+  // Axis line
+  const axisLine = `<line x1="${padding}" y1="${lineY}" x2="${width - padding}" y2="${lineY}" stroke="#ccc" stroke-width="2"/>`;
+
+  // Endpoint labels
+  const simpleLabel = `<text x="${padding}" y="${lineY - 20}" text-anchor="start" font-size="14" fill="#888" font-weight="600">Simple</text>`;
+  const complexLabel = `<text x="${width - padding}" y="${lineY - 20}" text-anchor="end" font-size="14" fill="#888" font-weight="600">Complex</text>`;
+
+  // Model dots and labels
+  const dots = points.map((p) => {
+    // Stagger labels to avoid overlap: alternate above and below
+    const labelY = p.y + 28;
+    return [
+      `<circle cx="${p.x.toFixed(1)}" cy="${p.y}" r="6" fill="${dotColor}"/>`,
+      `<line x1="${p.x.toFixed(1)}" y1="${p.y + 6}" x2="${p.x.toFixed(1)}" y2="${p.y + 14}" stroke="${dotColor}" stroke-width="1.5"/>`,
+      `<text x="${p.x.toFixed(1)}" y="${labelY}" text-anchor="middle" font-size="11" fill="#666">${p.label}</text>`,
+    ].join('\n    ');
+  }).join('\n    ');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    ${axisLine}
+    ${simpleLabel}
+    ${complexLabel}
+    ${dots}
+  </svg>`;
+}
+```
+
+### SVG Patterns That Work Well for This Visualization
+
+**Label collision avoidance.** With 12 models, labels will overlap if all placed on the same baseline. Two strategies:
+
+1. **Alternating vertical offset.** Odd-indexed labels appear below the line, even-indexed above. This is the simplest and works because the spectrum has enough horizontal spread.
+
+2. **Diagonal labels.** Rotate labels 45 degrees at their anchor point. More compact but harder to read on mobile.
+
+**Recommendation: Use alternating vertical offset.** Simpler to implement, works in Satori for OG images, and matches the clean aesthetic of the existing site.
+
+**Interactive enhancement (optional, no React required).** The Astro component can include `<a>` elements wrapping each dot/label group with `href="/db-compass/{slug}/"`. SVG `<a>` elements are valid and create clickable regions. This provides navigation without any JavaScript.
+
+### Astro Component: `src/components/db-compass/ComplexitySpectrum.astro`
+
+Follows the same build-time SVG pattern as `RadarChart.astro` -- all math computed in the frontmatter, SVG rendered as static HTML.
 
 ```astro
 ---
-import Layout from '../../layouts/Layout.astro';
-import DockerfileAnalyzer from '../../components/tools/DockerfileAnalyzer';
-import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import { computeSpectrumPositions } from '../../lib/db-compass/spectrum-math';
+import type { DbModel } from '../../lib/db-compass/schema';
+
+interface Props {
+  models: DbModel[];
+  width?: number;
+  height?: number;
+}
+
+const { models, width = 900, height = 160 } = Astro.props;
+const points = computeSpectrumPositions(
+  width,
+  models.map(m => ({ id: m.id, name: m.name, complexityPosition: m.complexityPosition })),
+);
 ---
 
-<Layout
-  title="Dockerfile Analyzer -- Best Practice Linter & Scorer | Patryk Golabek"
-  description="Paste your Dockerfile and get instant feedback on security, efficiency, and maintainability. 40+ lint rules with inline annotations and an overall score."
->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2">
-      Dockerfile Analyzer
-    </h1>
-    <p class="text-[var(--color-text-secondary)] mb-8 max-w-2xl">
-      Paste your Dockerfile below for instant best-practice analysis.
-      40 rules covering security, efficiency, maintainability, and more.
-    </p>
-
-    <DockerfileAnalyzer client:load />
-  </section>
-
-  <BreadcrumbJsonLd crumbs={[
-    { name: "Home", url: Astro.site?.toString() ?? "/" },
-    { name: "Tools", url: new URL("/tools/", Astro.site).toString() },
-    { name: "Dockerfile Analyzer", url: new URL("/tools/dockerfile-analyzer/", Astro.site).toString() },
-  ]} />
-</Layout>
+<svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Complexity spectrum showing 12 database model categories from simple to complex">
+  <!-- axis, dots, labels rendered here -->
+</svg>
 ```
-
-**Why `client:load` not `client:visible`:** The editor IS the page content. Users navigate here specifically to use the tool. Deferring hydration until scroll would make the editor appear broken (empty textarea with no syntax highlighting) until it enters the viewport. For tool pages, immediate hydration is correct.
-
-### React Island: `src/components/tools/DockerfileAnalyzer.tsx`
-
-The root island component. Manages the overall layout (editor panel + results panel), initializes CodeMirror, and coordinates state flow.
-
-```
-DockerfileAnalyzer.tsx
-  |
-  +-- useCodeMirror hook (creates EditorView, attaches extensions)
-  |     |
-  |     +-- Dockerfile syntax highlighting (StreamLanguage from legacy-modes)
-  |     +-- Custom linter extension (parse -> lint -> Diagnostic[])
-  |     +-- Theme extension (matches site's CSS custom properties)
-  |     +-- Basic editor extensions (line numbers, bracket matching, etc.)
-  |
-  +-- <EditorPanel />  (mounts CodeMirror into a div ref)
-  |
-  +-- <ResultsPanel /> (reads from analysisStore, renders score + violations)
-       |
-       +-- <ScoreGauge />     (overall score 0-100, circular or bar visual)
-       +-- <CategoryScores /> (security, efficiency, maintainability, etc.)
-       +-- <ViolationList />  (grouped by severity, expandable details)
-```
-
-### Component Breakdown
-
-| Component | Responsibility | State Source | JS Weight (est.) |
-|-----------|---------------|-------------|-----------------|
-| `DockerfileAnalyzer.tsx` | Root island, layout, CodeMirror init | Local + store | ~2kb own code |
-| `useCodeMirror.ts` | Hook: creates EditorView, manages extensions | EditorView ref | ~1kb |
-| `EditorPanel.tsx` | Mounts CodeMirror, sample Dockerfile button, clear button | EditorView ref | ~0.5kb |
-| `ResultsPanel.tsx` | Reads analysis store, renders score + violations | `analysisStore` | ~2kb |
-| `ScoreGauge.tsx` | SVG circular gauge for overall score (0-100) | Props from parent | ~1kb |
-| `CategoryScores.tsx` | Bar charts per category (security, efficiency, etc.) | Props from parent | ~1kb |
-| `ViolationList.tsx` | Sorted violation cards with severity badges | Props from parent | ~1.5kb |
-| CodeMirror packages | Editor, state, lint, language, legacy-modes | N/A | ~75kb gzipped |
-| dockerfile-ast | Dockerfile parser | N/A | ~15kb gzipped |
-
-**Total estimated JS for the page:** ~100kb gzipped (dominated by CodeMirror). This is acceptable for a tool page -- users expect tool pages to load heavier than content pages.
 
 ---
 
-## State Management Architecture
+## Question 3: Radar Chart -- Reuse radar-math.ts for 8-Axis Charts
 
-### Two State Domains
+**Recommendation: Reuse `radar-math.ts` directly. No modifications needed.**
 
-**1. Editor State (owned by CodeMirror)**
-CodeMirror manages its own document state, cursor position, selections, undo history, and inline diagnostics. React does NOT control the editor content -- CodeMirror is the source of truth for the document. The React component holds a `ref` to the `EditorView` instance.
+**Confidence:** HIGH -- verified by reading the source code.
 
-**2. Analysis State (owned by Nanostore)**
-The parsed analysis results (score, violations, categories) live in a Nanostore atom. This is the bridge between the CodeMirror linter callback and the React results panel.
+### Why It Works Without Changes
 
-```typescript
-// src/stores/dockerfileAnalyzerStore.ts
-import { atom } from 'nanostores';
+The existing `radar-math.ts` was deliberately designed to be axis-count agnostic. Every function uses `values.length` or `numSides` as a parameter, not a hardcoded 6:
 
-export interface LintViolation {
-  ruleId: string;
-  severity: 'error' | 'warning' | 'info';
-  message: string;
-  line: number;
-  column: number;
-  endLine?: number;
-  endColumn?: number;
-  fix?: string;        // suggested fix text
-  docUrl?: string;     // link to docs
-  category: RuleCategory;
+- **`radarPolygonPoints(cx, cy, maxRadius, values, maxValue)`**: Uses `const numAxes = values.length` and `const angleStep = (2 * Math.PI) / numAxes`. Pass an 8-element array, get an octagonal polygon.
+
+- **`hexagonRingPoints(cx, cy, radius, numSides)`**: Despite the name containing "hexagon", it generates a regular polygon with `numSides` sides. Pass `8` and you get an octagonal grid ring. The function name is misleading but the implementation is correct.
+
+- **`generateRadarSvgString(size, values, fillColor, fillOpacity, labels, labelColors)`**: Uses `values.length` for everything. Pass 8 values and 8 labels, get an 8-axis radar chart with octagonal grid rings.
+
+### What the CompassRadarChart.astro Component Looks Like
+
+```astro
+---
+import { polarToCartesian, radarPolygonPoints, hexagonRingPoints } from '../../lib/beauty-index/radar-math';
+import { COMPASS_DIMENSIONS } from '../../lib/db-compass/compass-dimensions';
+import type { DbModel } from '../../lib/db-compass/schema';
+import { dimensionScores } from '../../lib/db-compass/schema';
+
+interface Props {
+  model: DbModel;
+  size?: number;
 }
 
-export type RuleCategory =
-  | 'security'
-  | 'efficiency'
-  | 'maintainability'
-  | 'correctness'
-  | 'style';
+const { model, size = 300 } = Astro.props;
+const pad = 28; // Slightly more padding for 8 labels
+const vbSize = size + pad * 2;
+const cx = vbSize / 2;
+const cy = vbSize / 2;
+const maxRadius = size * 0.42;
+const scores = dimensionScores(model);
 
-export interface AnalysisResult {
-  violations: LintViolation[];
-  score: number;          // 0-100
-  categoryScores: Record<RuleCategory, number>;  // 0-100 each
-  instructionCount: number;
-  stageCount: number;     // multi-stage build stages
-  baseImage: string;      // first FROM image
-}
-
-export const analysisResult = atom<AnalysisResult | null>(null);
-export const isAnalyzing = atom<boolean>(false);
-
-export function setAnalysis(result: AnalysisResult) {
-  analysisResult.set(result);
-  isAnalyzing.set(false);
-}
-
-export function clearAnalysis() {
-  analysisResult.set(null);
-}
-```
-
-### Data Flow Between CodeMirror and React
-
-The linter callback is the integration point. When CodeMirror's built-in linter runs (on document change, debounced):
-
-```typescript
-// Inside the linter extension factory
-import { linter, type Diagnostic } from '@codemirror/lint';
-import { setAnalysis } from '../../stores/dockerfileAnalyzerStore';
-
-export function dockerfileLinter() {
-  return linter((view) => {
-    const text = view.state.doc.toString();
-    if (!text.trim()) {
-      clearAnalysis();
-      return [];
-    }
-
-    // 1. Parse
-    const dockerfile = DockerfileParser.parse(text);
-
-    // 2. Lint (all rules)
-    const violations = runAllRules(dockerfile, text);
-
-    // 3. Score
-    const score = computeScore(violations);
-
-    // 4. Update Nanostore (triggers React re-render of results panel)
-    setAnalysis({
-      violations,
-      score: score.overall,
-      categoryScores: score.categories,
-      instructionCount: dockerfile.getInstructions().length,
-      stageCount: countStages(dockerfile),
-      baseImage: getBaseImage(dockerfile),
-    });
-
-    // 5. Return CodeMirror Diagnostics (inline markers in editor)
-    return violations.map((v): Diagnostic => ({
-      from: view.state.doc.line(v.line).from + (v.column - 1),
-      to: v.endLine
-        ? view.state.doc.line(v.endLine).from + (v.endColumn ?? v.column) - 1
-        : view.state.doc.line(v.line).to,
-      severity: v.severity === 'info' ? 'info' : v.severity,
-      message: `[${v.ruleId}] ${v.message}`,
-      source: 'dockerfile-analyzer',
-    }));
-  });
-}
-```
-
-This dual-output pattern is key: one lint run produces BOTH CodeMirror diagnostics (for inline annotations) AND Nanostore updates (for the results panel). No double-parsing, no sync issues.
-
-**Confidence:** HIGH -- this pattern is documented in the CodeMirror lint example. The `linter()` function signature `(view: EditorView) => Diagnostic[]` is stable API. Nanostore `.set()` inside the callback is synchronous and safe.
-
+const numAxes = 8; // KEY DIFFERENCE from Beauty Index's 6
+const angleStep = (2 * Math.PI) / numAxes;
+const gridLevels = [2, 4, 6, 8, 10];
 ---
 
-## CodeMirror Integration Details
+<svg width={size} height={size} viewBox={`0 0 ${vbSize} ${vbSize}`} ...>
+  {/* Grid rings -- octagonal instead of hexagonal */}
+  {gridLevels.map((level) => {
+    const ringRadius = (level / 10) * maxRadius;
+    const points = hexagonRingPoints(cx, cy, ringRadius, numAxes);
+    return <polygon points={points} fill="none" stroke="#e5ddd5" stroke-width="1" />;
+  })}
 
-### Hook: `useCodeMirror.ts`
+  {/* 8 axis lines */}
+  {/* Data polygon from 8 scores */}
+  {/* 8 dimension labels */}
+</svg>
+```
+
+### OG Image Radar Charts
+
+The `generateRadarSvgString()` function in `radar-math.ts` is already used by `og-image.ts` to embed radar charts in OG images as base64 data URIs. The same function works with 8 values for Database Compass OG images:
 
 ```typescript
-// src/lib/tools/useCodeMirror.ts
-import { useRef, useEffect } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
-import { EditorState } from '@codemirror/state';
-import { StreamLanguage } from '@codemirror/language';
-import { dockerFile } from '@codemirror/legacy-modes/mode/dockerfile';
-import { lintGutter } from '@codemirror/lint';
-import { dockerfileLinter } from './dockerfile-linter';
-import { analyzerTheme } from './editor-theme';
-
-export function useCodeMirror(initialDoc: string = '') {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const state = EditorState.create({
-      doc: initialDoc,
-      extensions: [
-        basicSetup,
-        StreamLanguage.define(dockerFile),
-        dockerfileLinter(),
-        lintGutter(),
-        analyzerTheme,
-        EditorView.lineWrapping,
-      ],
-    });
-
-    const view = new EditorView({
-      state,
-      parent: containerRef.current,
-    });
-
-    viewRef.current = view;
-
-    return () => {
-      view.destroy();
-      viewRef.current = null;
-    };
-  }, []);  // Mount once, CodeMirror manages its own state
-
-  return { containerRef, viewRef };
-}
+const radarSvg = generateRadarSvgString(
+  300,
+  dimensionScores(model),    // 8-element array
+  accentColor,
+  0.35,
+  COMPASS_DIMENSIONS.map(d => d.shortName),  // 8 labels
+);
 ```
 
-### Dockerfile Syntax Highlighting
+### Dimension Metadata: `src/lib/db-compass/compass-dimensions.ts`
 
-**Use `@codemirror/legacy-modes/mode/dockerfile`** via `StreamLanguage.define()`.
-
-The `@codemirror/legacy-modes` package (v6.5.2) includes a ported Dockerfile mode at `mode/dockerfile.js`. This provides keyword highlighting for `FROM`, `RUN`, `COPY`, `ADD`, `ENV`, `ARG`, `EXPOSE`, `CMD`, `ENTRYPOINT`, `WORKDIR`, `USER`, `VOLUME`, `LABEL`, `STANZA`, `HEALTHCHECK`, `SHELL`, and `ONBUILD`. It also highlights comments (`#`), strings, and heredocs.
-
-**Confidence:** HIGH -- verified via `npm pack --dry-run @codemirror/legacy-modes` which confirms the file `mode/dockerfile.cjs` (8.2kb) and `mode/dockerfile.js` (3.8kb) exist in the package.
-
-### Editor Theme
-
-Create a custom theme that matches the site's CSS custom properties:
+Follows the same pattern as `src/lib/beauty-index/dimensions.ts`:
 
 ```typescript
-// src/lib/tools/editor-theme.ts
-import { EditorView } from '@codemirror/view';
-
-export const analyzerTheme = EditorView.theme({
-  '&': {
-    fontSize: '14px',
-    fontFamily: '"Fira Code", monospace',
-    border: '1px solid var(--color-border)',
-    borderRadius: '0.5rem',
-    backgroundColor: 'var(--color-surface-alt)',
-  },
-  '.cm-content': {
-    caretColor: 'var(--color-accent)',
-    padding: '0.75rem 0',
-  },
-  '.cm-gutters': {
-    backgroundColor: 'var(--color-surface)',
-    borderRight: '1px solid var(--color-border)',
-    color: 'var(--color-text-secondary)',
-  },
-  '.cm-activeLine': {
-    backgroundColor: 'var(--color-accent)08',
-  },
-  '.cm-selectionBackground': {
-    backgroundColor: 'var(--color-accent)20 !important',
-  },
-  '&.cm-focused .cm-cursor': {
-    borderLeftColor: 'var(--color-accent)',
-  },
-  // Lint marker styles
-  '.cm-lintRange-error': {
-    backgroundImage: 'none',
-    textDecoration: 'wavy underline var(--color-error, #e53e3e)',
-  },
-  '.cm-lintRange-warning': {
-    backgroundImage: 'none',
-    textDecoration: 'wavy underline var(--color-warning, #dd6b20)',
-  },
-  '.cm-lintRange-info': {
-    backgroundImage: 'none',
-    textDecoration: 'wavy underline var(--color-info, #3182ce)',
-  },
-});
-```
-
-**Important:** The site already loads Fira Code from Google Fonts (confirmed in `Layout.astro` line 116). The editor inherits the font without additional loading.
-
----
-
-## Rule Engine Architecture
-
-### Design: Modular Rules with a Registry Pattern
-
-Each rule is a standalone function in its own file. A registry indexes all rules and the engine iterates them. This keeps rules independently testable and easy to add/remove.
-
-### File Structure
-
-```
-src/lib/tools/dockerfile-analyzer/
-  |
-  +-- index.ts                    # Re-exports for clean imports
-  +-- parser.ts                   # Wraps dockerfile-ast, normalizes output
-  +-- scorer.ts                   # Computes overall + category scores
-  +-- engine.ts                   # RuleEngine: runs all rules, collects results
-  +-- types.ts                    # Shared types (LintViolation, Rule, RuleCategory, etc.)
-  +-- editor-theme.ts             # CodeMirror theme
-  +-- dockerfile-linter.ts        # CodeMirror linter() extension factory
-  |
-  +-- rules/
-       +-- index.ts               # Rule registry (imports + exports all rules)
-       +-- _template.ts           # Template for creating new rules
-       |
-       +-- security/
-       |    +-- no-root-user.ts
-       |    +-- no-add-url.ts
-       |    +-- pin-package-versions.ts
-       |    +-- no-secrets-in-env.ts
-       |    +-- use-copy-not-add.ts
-       |    +-- ...
-       |
-       +-- efficiency/
-       |    +-- minimize-layers.ts
-       |    +-- use-multi-stage.ts
-       |    +-- order-commands-for-cache.ts
-       |    +-- combine-run-commands.ts
-       |    +-- no-apt-cache.ts
-       |    +-- ...
-       |
-       +-- maintainability/
-       |    +-- require-labels.ts
-       |    +-- use-specific-base-tag.ts
-       |    +-- use-workdir.ts
-       |    +-- no-latest-tag.ts
-       |    +-- ...
-       |
-       +-- correctness/
-       |    +-- valid-instruction.ts
-       |    +-- expose-port-range.ts
-       |    +-- cmd-exec-form.ts
-       |    +-- entrypoint-exec-form.ts
-       |    +-- ...
-       |
-       +-- style/
-            +-- uppercase-instructions.ts
-            +-- consistent-line-endings.ts
-            +-- sort-packages.ts
-            +-- ...
-```
-
-### Rule Interface
-
-```typescript
-// src/lib/tools/dockerfile-analyzer/types.ts
-import type { Dockerfile } from 'dockerfile-ast';
-
-export type RuleSeverity = 'error' | 'warning' | 'info';
-export type RuleCategory = 'security' | 'efficiency' | 'maintainability' | 'correctness' | 'style';
-
-export interface RuleMeta {
-  id: string;            // e.g., "SEC001"
-  name: string;          // e.g., "no-root-user"
-  title: string;         // e.g., "Avoid running as root"
-  description: string;   // Full explanation
-  severity: RuleSeverity;
-  category: RuleCategory;
-  docUrl?: string;       // Link to external docs/best practices
-  fix?: string;          // Suggested fix description
+export interface CompassDimension {
+  key: keyof DbModel['scores'];
+  shortName: string;
+  name: string;
+  description: string;
+  color: string;
 }
 
-export interface LintResult {
-  rule: RuleMeta;
-  line: number;
-  column: number;
-  endLine?: number;
-  endColumn?: number;
-  message: string;       // Instance-specific message
-  fix?: string;          // Instance-specific suggested fix
-}
-
-export interface Rule {
-  meta: RuleMeta;
-  check(dockerfile: Dockerfile, rawText: string): LintResult[];
-}
-```
-
-### Rule Registry
-
-```typescript
-// src/lib/tools/dockerfile-analyzer/rules/index.ts
-import type { Rule } from '../types';
-
-// Security rules
-import { noRootUser } from './security/no-root-user';
-import { noAddUrl } from './security/no-add-url';
-// ... 40 imports total
-
-export const allRules: Rule[] = [
-  noRootUser,
-  noAddUrl,
-  // ... all 40 rules
+export const COMPASS_DIMENSIONS: CompassDimension[] = [
+  { key: 'readLatency', shortName: 'Read', name: 'Read Latency', description: 'Speed of data retrieval operations', color: '#4A90D9' },
+  { key: 'writeLatency', shortName: 'Write', name: 'Write Latency', description: 'Speed of data insertion and update operations', color: '#7B68EE' },
+  { key: 'queryFlexibility', shortName: 'Query', name: 'Query Flexibility', description: 'Range and complexity of supported query patterns', color: '#2AAA8A' },
+  { key: 'scalability', shortName: 'Scale', name: 'Scalability', description: 'Ability to handle growing data volume and traffic', color: '#E8734A' },
+  { key: 'consistency', shortName: 'Consist.', name: 'Consistency', description: 'Strength of data consistency guarantees', color: '#8FBC5A' },
+  { key: 'schemaFlexibility', shortName: 'Schema', name: 'Schema Flexibility', description: 'Ability to evolve data structure over time', color: '#D4A843' },
+  { key: 'operationalComplexity', shortName: 'Ops', name: 'Operational Complexity', description: 'Effort required to deploy, monitor, and maintain', color: '#C44B20' },
+  { key: 'analyticsCapability', shortName: 'Analytics', name: 'Analytics Capability', description: 'Suitability for analytical queries and aggregations', color: '#9B59B6' },
 ];
-
-export const rulesByCategory = {
-  security: allRules.filter(r => r.meta.category === 'security'),
-  efficiency: allRules.filter(r => r.meta.category === 'efficiency'),
-  maintainability: allRules.filter(r => r.meta.category === 'maintainability'),
-  correctness: allRules.filter(r => r.meta.category === 'correctness'),
-  style: allRules.filter(r => r.meta.category === 'style'),
-};
 ```
 
-### Example Rule Implementation
+---
 
+## Question 4: SEO-Rich Content from Pure JSON
+
+**Recommendation: Use structured JSON fields rendered through Astro template sections. No MDX required.**
+
+**Confidence:** HIGH -- this is exactly how the Beauty Index detail pages work.
+
+### How the Beauty Index Achieves SEO Without MDX
+
+The `[slug].astro` page for the Beauty Index builds a ~400-word article from structured data:
+
+1. **`characterSketch`** (string) -- rendered as a paragraph in the "Character" section
+2. **`justifications[dim.key]`** (HTML string per dimension) -- rendered in the "Dimension Analysis" section
+3. **Code snippet** (from `snippets.ts`) -- rendered with Astro Expressive Code
+4. **Computed metadata** -- rank, total score, tier label, prev/next navigation
+
+The result is a unique, crawlable page with multiple heading-delimited sections, semantic HTML, and keyword-rich content. Google treats it as high-quality content because it IS high-quality content -- just assembled from data, not written in prose format.
+
+### Database Compass Detail Page Content Sections
+
+Each `/db-compass/[slug]/` page renders these sections from JSON fields:
+
+| Section | JSON Source | Estimated Words | SEO Value |
+|---------|------------|-----------------|-----------|
+| Summary | `summary` (string) | 40-80 | Core page description |
+| Character Sketch | `characterSketch` (string) | 30-60 | Unique voice, sharable |
+| Radar Chart | `scores` (8 ints) | 0 (visual) | Engagement, time-on-page |
+| Score Breakdown | `scores` + dimension metadata | 8 x ~5 = 40 | Dimension names are keywords |
+| Strengths | `strengths` (string array) | 2-5 x ~10 = 30 | "Benefits of key-value stores" |
+| Weaknesses | `weaknesses` (string array) | 2-5 x ~10 = 30 | "Limitations of key-value stores" |
+| Best For | `bestFor` (string array) | 2-6 x ~8 = 30 | Use case keywords |
+| Avoid When | `avoidWhen` (string array) | 1-4 x ~10 = 25 | Counter-positioning |
+| Top Databases | `topDatabases` (object array) | 3-6 x ~20 = 80 | Named products (high search volume) |
+| Navigation | computed links | ~10 | Internal linking |
+| **Total** | | **~300-400** | |
+
+This produces unique, keyword-rich pages competitive with dedicated database comparison sites, all from structured JSON.
+
+### SEO Content Patterns
+
+**Meta description** (computed):
 ```typescript
-// src/lib/tools/dockerfile-analyzer/rules/security/no-root-user.ts
-import type { Rule, LintResult } from '../../types';
-import type { Dockerfile } from 'dockerfile-ast';
+const metaDescription = `${model.name} database model scores ${totalScore(model)}/80 in the Database Compass. ${model.summary.slice(0, 100)}...`;
+```
 
-export const noRootUser: Rule = {
-  meta: {
-    id: 'SEC001',
-    name: 'no-root-user',
-    title: 'Avoid running as root',
-    description: 'Containers should not run as root. Use the USER instruction to switch to a non-root user.',
-    severity: 'warning',
-    category: 'security',
-    fix: 'Add USER nonroot before CMD/ENTRYPOINT',
+**Heading hierarchy** on each detail page:
+```
+h1: Key-Value Store -- Database Compass
+  h2: Character
+  h2: Capability Profile (radar chart + score breakdown)
+  h2: Strengths
+  h2: Weaknesses
+  h2: Best For / Use Cases
+  h2: When to Avoid
+  h2: Top Databases
+  h2: Explore Other Models (prev/next nav)
+```
+
+**Screen-reader accessible score data** (same pattern as Beauty Index):
+```html
+<div class="sr-only">
+  <dl>
+    <dt>Read Latency</dt><dd>10 out of 10</dd>
+    <dt>Write Latency</dt><dd>10 out of 10</dd>
+    ...
+  </dl>
+</div>
+```
+
+---
+
+## Question 5: Build Order
+
+**Recommended build order, based on dependency analysis:**
+
+### Phase 1: Data Foundation
+*No dependencies on other new code*
+
+1. **`src/lib/db-compass/schema.ts`** -- Zod schema, TypeScript types, `totalScore()`, `dimensionScores()`
+2. **`src/lib/db-compass/compass-dimensions.ts`** -- 8 dimension metadata (names, colors, descriptions)
+3. **`src/data/db-compass/models.json`** -- All 12 model entries with scores, descriptions, databases
+4. **`src/content.config.ts`** -- Add `dbModels` collection (3-line modification)
+
+**Verification gate:** `npm run build` succeeds, `getCollection('dbModels')` returns 12 validated entries.
+
+### Phase 2: Visualizations
+*Depends on: Phase 1 (schema types, dimension metadata)*
+
+5. **`src/lib/db-compass/spectrum-math.ts`** -- Pure-TS complexity spectrum SVG math
+6. **`src/components/db-compass/ComplexitySpectrum.astro`** -- Horizontal spectrum component
+7. **`src/components/db-compass/CompassRadarChart.astro`** -- 8-axis radar chart (reuses radar-math.ts)
+8. **`src/components/db-compass/CompassScoringTable.astro`** -- Sortable scoring table (follows ScoringTable.astro pattern)
+
+**Verification gate:** Components render correctly in isolation. Radar chart has 8 axes. Spectrum shows 12 points.
+
+### Phase 3: Detail Pages
+*Depends on: Phase 1 (data), Phase 2 (radar chart)*
+
+9. **`src/components/db-compass/TradeoffPanel.astro`** -- Strengths/weaknesses/bestFor/avoidWhen
+10. **`src/components/db-compass/TopDatabases.astro`** -- Database list with external links
+11. **`src/components/db-compass/ModelNav.astro`** -- Prev/next navigation
+12. **`src/pages/db-compass/[slug].astro`** -- 12 detail pages via getStaticPaths
+
+**Verification gate:** All 12 detail pages render with full content. Internal links work.
+
+### Phase 4: Overview Page
+*Depends on: Phase 2 (spectrum, grid, table), Phase 3 (detail pages exist for linking)*
+
+13. **`src/components/db-compass/ModelGrid.astro`** -- Category card grid linking to detail pages
+14. **`src/pages/db-compass/index.astro`** -- Overview page assembling spectrum + grid + table
+
+**Verification gate:** Overview page renders. All grid cards link to valid detail pages.
+
+### Phase 5: SEO and OG Images
+*Depends on: Phase 1 (schema), Phase 4 (pages exist)*
+
+15. **`src/components/DbCompassJsonLd.astro`** -- Dataset + ItemList structured data
+16. **`src/lib/og-image.ts`** -- Add `generateDbCompassOverviewOgImage()` and `generateDbModelOgImage()`
+17. **`src/pages/open-graph/db-compass.png.ts`** -- Overview OG endpoint
+18. **`src/pages/open-graph/db-compass/[slug].png.ts`** -- Per-model OG endpoint
+
+**Verification gate:** OG images generate. JSON-LD validates at schema.org validator.
+
+### Phase 6: Site Integration
+*Depends on: Phase 4 (overview page exists)*
+
+19. **`src/pages/index.astro`** -- Add Database Compass callout card (follows existing pattern)
+20. **Breadcrumb JSON-LD** on all pages (uses existing `BreadcrumbJsonLd.astro`)
+21. **Companion blog post** -- `src/data/blog/database-compass.mdx`
+
+**Verification gate:** Full build succeeds. All pages accessible. Sitemap includes new pages.
+
+### Dependency Graph
+
+```
+Phase 1: Schema + Data
+    │
+    ├─── Phase 2: Visualizations (spectrum, radar, table)
+    │        │
+    │        ├─── Phase 3: Detail Pages (assemble components)
+    │        │        │
+    │        │        └─── Phase 4: Overview Page
+    │        │                 │
+    │        │                 ├─── Phase 5: SEO + OG Images
+    │        │                 │
+    │        │                 └─── Phase 6: Site Integration
+    │        │
+    │        └─── Phase 4: Overview Page (also uses spectrum + table)
+    │
+    └─── Phase 5: SEO (needs schema types for JSON-LD)
+```
+
+---
+
+## Question 6: DbCompassJsonLd vs BeautyIndexJsonLd
+
+**Recommendation: Use `Dataset` + `ItemList` as the primary type, same as `BeautyIndexJsonLd.astro`, but with database-specific vocabulary.**
+
+**Confidence:** HIGH
+
+### Structural Comparison
+
+| Aspect | BeautyIndexJsonLd | DbCompassJsonLd |
+|--------|-------------------|-----------------|
+| `@type` | `Dataset` | `Dataset` |
+| `mainEntity.@type` | `ItemList` | `ItemList` |
+| `itemListOrder` | `ItemListOrderDescending` (by score) | `ItemListOrderAscending` (by complexity) |
+| `variableMeasured` | 6 dimension names | 8 dimension names |
+| `keywords` | `"programming languages", "code aesthetics"` | `"database models", "database comparison", "NoSQL vs SQL"` |
+| `measurementTechnique` | Editorial scoring 1-10 | Editorial scoring 1-10 |
+| `about` (per item) | `ComputerLanguage` | Not applicable -- no schema.org type for "database model" |
+
+### Key Differences
+
+1. **Item ordering.** The Beauty Index ranks by total score (descending). The Database Compass should order items by complexity position (ascending, simple to complex) because that is the natural taxonomy -- it is a spectrum, not a competition. Alternatively, alphabetical order works since models are categories, not ranked entries.
+
+2. **No `aggregateRating` on detail pages.** The Beauty Index uses `aggregateRating` because scores represent quality judgment. Database model scores represent capability profiles -- a key-value store scoring 2/10 on query flexibility is not "worse" than a relational database scoring 9/10. The scores are dimensional comparisons, not quality ratings. Using `aggregateRating` would mislead search engines.
+
+3. **Detail page `@type`.** Instead of `CreativeWork` with `aggregateRating`, use `Article` with `about` referencing the database model concept:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "Key-Value Store -- Database Compass",
+  "description": "...",
+  "url": "https://patrykgolabek.dev/db-compass/key-value/",
+  "datePublished": "2026-02-XX",
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person"
   },
+  "isPartOf": {
+    "@type": "Dataset",
+    "name": "Database Compass",
+    "url": "https://patrykgolabek.dev/db-compass/"
+  },
+  "about": {
+    "@type": "Thing",
+    "name": "Key-Value Store Database Model",
+    "description": "A database architecture pattern optimized for simple key-based data retrieval"
+  },
+  "mentions": [
+    { "@type": "SoftwareApplication", "name": "Redis", "url": "https://redis.io" },
+    { "@type": "SoftwareApplication", "name": "Amazon DynamoDB", "url": "https://aws.amazon.com/dynamodb/" }
+  ]
+}
+```
 
-  check(dockerfile: Dockerfile, _rawText: string): LintResult[] {
-    const instructions = dockerfile.getInstructions();
-    const hasUser = instructions.some(
-      (inst) => inst.getKeyword() === 'USER'
-    );
+4. **`mentions` for top databases.** The `topDatabases` array maps naturally to `mentions` with `@type: SoftwareApplication`. This tells search engines that the page discusses Redis, DynamoDB, etc., improving discoverability for searches like "Redis vs DynamoDB" or "best key-value database".
 
-    if (!hasUser && instructions.length > 0) {
-      // Flag the last instruction (where USER should appear before)
-      const lastInst = instructions[instructions.length - 1];
-      const range = lastInst.getRange();
-      return [{
-        rule: this.meta,
-        line: range.end.line + 1,
-        column: 1,
-        message: 'No USER instruction found. Container will run as root.',
-        fix: 'Add "USER nonroot" before the final CMD or ENTRYPOINT.',
-      }];
-    }
+### Overview Page JSON-LD
 
-    return [];
+```typescript
+// src/components/DbCompassJsonLd.astro
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Database Compass",
+  "alternateName": "Database Model Comparison Guide 2026",
+  "description": "An interactive guide to 12 database model categories, scored across 8 capability dimensions. From key-value stores to graph databases.",
+  "url": "https://patrykgolabek.dev/db-compass/",
+  "datePublished": "2026-XX-XX",
+  "version": "2026 Edition",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "creator": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "keywords": [
+    "database models",
+    "database comparison",
+    "NoSQL vs SQL",
+    "database architecture",
+    "key-value store",
+    "document database",
+    "graph database",
+    "time-series database",
+    "database selection guide",
+  ],
+  "variableMeasured": COMPASS_DIMENSIONS.map(d => d.name),
+  "measurementTechnique": "Editorial scoring: each dimension rated 1-10 by expert judgment based on 17+ years of production database experience",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListOrder": "https://schema.org/ItemListUnordered",
+    "numberOfItems": models.length,
+    "itemListElement": models.map((model, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": model.name,
+      "url": `https://patrykgolabek.dev/db-compass/${model.slug}/`,
+    })),
   },
 };
 ```
 
-### Why Modular Files (Not a Single Rules File)
-
-1. **Testability:** Each rule file can be unit-tested in isolation with a mock Dockerfile AST
-2. **Discoverability:** New contributors find rules by browsing `rules/security/` etc.
-3. **Tree-shaking:** If rules are ever made optional (user-configurable), bundler can eliminate unused rules
-4. **Separation of concerns:** Rule metadata, check logic, and fix suggestions are co-located per rule
-5. **Scalability:** Adding rule #41 is "create a file, add to registry" -- not "edit a 2000-line file"
-
-The registry pattern (`rules/index.ts` imports all, exports `allRules[]`) means the engine code never changes when rules are added.
-
 ---
 
-## Parser Layer
+## Component Boundaries Summary
 
-### `dockerfile-ast` Browser Compatibility
-
-`dockerfile-ast` v0.7.1 depends on:
-- `vscode-languageserver-textdocument` v1.0.12 (zero dependencies, pure JS text document model)
-- `vscode-languageserver-types` v3.17.5 (zero dependencies, pure TypeScript type definitions)
-
-Neither dependency uses Node.js APIs (no `fs`, `path`, `child_process`, etc.). The library is pure TypeScript that compiles to standard ES modules. It will bundle for the browser via Vite (Astro's bundler) without polyfills.
-
-**Confidence:** MEDIUM -- both dependencies have zero npm dependencies and appear to be pure JS/TS from their package metadata. However, I was unable to directly verify the source code for Node API usage. This should be validated during the first build by confirming `astro build` succeeds without Node polyfill errors.
-
-### Parser Wrapper
-
-```typescript
-// src/lib/tools/dockerfile-analyzer/parser.ts
-import { DockerfileParser } from 'dockerfile-ast';
-import type { Dockerfile } from 'dockerfile-ast';
-
-export interface ParseResult {
-  dockerfile: Dockerfile;
-  instructionCount: number;
-  stageCount: number;
-  baseImage: string;
-}
-
-export function parseDockerfile(text: string): ParseResult {
-  const dockerfile = DockerfileParser.parse(text);
-  const instructions = dockerfile.getInstructions();
-
-  const fromInstructions = instructions.filter(
-    (i) => i.getKeyword() === 'FROM'
-  );
-
-  return {
-    dockerfile,
-    instructionCount: instructions.length,
-    stageCount: Math.max(1, fromInstructions.length),
-    baseImage: fromInstructions[0]
-      ? fromInstructions[0].getArguments().map(a => a.getValue()).join(' ')
-      : 'unknown',
-  };
-}
-```
-
----
-
-## Scoring Engine
-
-### Scoring Model
-
-The scorer computes a 0-100 overall score from the lint violations. Each rule category has a weight, and violations deduct points based on severity.
-
-```typescript
-// src/lib/tools/dockerfile-analyzer/scorer.ts
-import type { LintResult, RuleCategory } from './types';
-
-const CATEGORY_WEIGHTS: Record<RuleCategory, number> = {
-  security: 30,
-  efficiency: 25,
-  maintainability: 20,
-  correctness: 15,
-  style: 10,
-};
-
-const SEVERITY_DEDUCTIONS = {
-  error: 10,
-  warning: 5,
-  info: 2,
-};
-
-export interface ScoreResult {
-  overall: number;
-  categories: Record<RuleCategory, number>;
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
-}
-
-export function computeScore(violations: LintResult[]): ScoreResult {
-  const categories: Record<RuleCategory, number> = {
-    security: 100,
-    efficiency: 100,
-    maintainability: 100,
-    correctness: 100,
-    style: 100,
-  };
-
-  for (const v of violations) {
-    const deduction = SEVERITY_DEDUCTIONS[v.rule.severity];
-    categories[v.rule.category] = Math.max(
-      0,
-      categories[v.rule.category] - deduction
-    );
-  }
-
-  // Weighted average
-  const overall = Object.entries(categories).reduce(
-    (sum, [cat, score]) =>
-      sum + score * (CATEGORY_WEIGHTS[cat as RuleCategory] / 100),
-    0
-  );
-
-  const grade =
-    overall >= 90 ? 'A' :
-    overall >= 80 ? 'B' :
-    overall >= 60 ? 'C' :
-    overall >= 40 ? 'D' : 'F';
-
-  return {
-    overall: Math.round(overall),
-    categories,
-    grade,
-  };
-}
-```
-
----
-
-## Results Panel <-> Editor Communication
-
-### Pattern: Nanostore as Message Bus
-
-The linter callback writes to `analysisStore`. The React `ResultsPanel` subscribes via `useStore()`. When a user clicks a violation in the results panel, the panel dispatches a cursor movement to the CodeMirror `EditorView` via the shared ref.
-
-```
-Linter callback ---setAnalysis()---> analysisStore ---useStore()---> ResultsPanel
-                                                                         |
-                                                                    (click violation)
-                                                                         |
-ResultsPanel ---viewRef.current.dispatch()---> CodeMirror EditorView (scroll to line)
-```
-
-### Click-to-Navigate Implementation
-
-```typescript
-// Inside ResultsPanel.tsx
-function handleViolationClick(violation: LintViolation) {
-  const view = viewRef.current;
-  if (!view) return;
-
-  const line = view.state.doc.line(violation.line);
-  view.dispatch({
-    selection: { anchor: line.from + violation.column - 1 },
-    effects: EditorView.scrollIntoView(line.from, { y: 'center' }),
-  });
-  view.focus();
-}
-```
-
-This is the ONLY place React directly touches the CodeMirror instance. All other communication flows through the Nanostore.
-
----
-
-## Complete File Manifest
-
-### New Files (create)
+### New Files (21 files)
 
 | File | Type | Purpose |
 |------|------|---------|
-| `src/pages/tools/dockerfile-analyzer.astro` | Page | Astro shell with Layout, SEO, breadcrumbs |
-| `src/components/tools/DockerfileAnalyzer.tsx` | Component | Root React island |
-| `src/components/tools/EditorPanel.tsx` | Component | CodeMirror mount + toolbar |
-| `src/components/tools/ResultsPanel.tsx` | Component | Score gauge + violations list |
-| `src/components/tools/ScoreGauge.tsx` | Component | SVG circular score gauge |
-| `src/components/tools/CategoryScores.tsx` | Component | Per-category score bars |
-| `src/components/tools/ViolationList.tsx` | Component | Violations grouped by severity |
-| `src/stores/dockerfileAnalyzerStore.ts` | Store | Nanostore for analysis results |
-| `src/lib/tools/dockerfile-analyzer/index.ts` | Lib | Re-exports |
-| `src/lib/tools/dockerfile-analyzer/types.ts` | Lib | Shared types |
-| `src/lib/tools/dockerfile-analyzer/parser.ts` | Lib | dockerfile-ast wrapper |
-| `src/lib/tools/dockerfile-analyzer/engine.ts` | Lib | Rule engine (runs all rules) |
-| `src/lib/tools/dockerfile-analyzer/scorer.ts` | Lib | Score computation |
-| `src/lib/tools/dockerfile-analyzer/dockerfile-linter.ts` | Lib | CodeMirror linter extension |
-| `src/lib/tools/dockerfile-analyzer/editor-theme.ts` | Lib | CodeMirror theme |
-| `src/lib/tools/dockerfile-analyzer/rules/index.ts` | Lib | Rule registry |
-| `src/lib/tools/dockerfile-analyzer/rules/_template.ts` | Lib | Rule template |
-| `src/lib/tools/dockerfile-analyzer/rules/security/*.ts` | Lib | ~8 security rules |
-| `src/lib/tools/dockerfile-analyzer/rules/efficiency/*.ts` | Lib | ~10 efficiency rules |
-| `src/lib/tools/dockerfile-analyzer/rules/maintainability/*.ts` | Lib | ~8 maintainability rules |
-| `src/lib/tools/dockerfile-analyzer/rules/correctness/*.ts` | Lib | ~7 correctness rules |
-| `src/lib/tools/dockerfile-analyzer/rules/style/*.ts` | Lib | ~7 style rules |
-| `src/lib/tools/useCodeMirror.ts` | Hook | React hook for CodeMirror lifecycle |
+| `src/lib/db-compass/schema.ts` | TypeScript | Zod schema, types, score helpers |
+| `src/lib/db-compass/compass-dimensions.ts` | TypeScript | 8 dimension metadata |
+| `src/lib/db-compass/spectrum-math.ts` | TypeScript | Complexity spectrum SVG math |
+| `src/data/db-compass/models.json` | JSON Data | 12 model entries |
+| `src/components/db-compass/ComplexitySpectrum.astro` | Astro Component | Horizontal spectrum SVG |
+| `src/components/db-compass/ModelGrid.astro` | Astro Component | Category card grid |
+| `src/components/db-compass/CompassRadarChart.astro` | Astro Component | 8-axis radar chart |
+| `src/components/db-compass/CompassScoringTable.astro` | Astro Component | Sortable scoring table |
+| `src/components/db-compass/TradeoffPanel.astro` | Astro Component | Strengths/weaknesses |
+| `src/components/db-compass/TopDatabases.astro` | Astro Component | Database list with links |
+| `src/components/db-compass/ModelNav.astro` | Astro Component | Prev/next navigation |
+| `src/components/DbCompassJsonLd.astro` | Astro Component | Overview JSON-LD |
+| `src/pages/db-compass/index.astro` | Astro Page | Overview page |
+| `src/pages/db-compass/[slug].astro` | Astro Page | 12 detail pages |
+| `src/pages/open-graph/db-compass.png.ts` | API Route | Overview OG image |
+| `src/pages/open-graph/db-compass/[slug].png.ts` | API Route | Per-model OG images |
 
-### Modified Files (edit)
+### Modified Files (3 files)
 
 | File | Change | Scope |
 |------|--------|-------|
-| `src/components/Header.astro` | Add `{ href: '/tools/', label: 'Tools' }` or a dropdown | 1 line (or small refactor if dropdown) |
-| `package.json` | Add CodeMirror packages + dockerfile-ast | dependencies section |
+| `src/content.config.ts` | Add `dbModels` collection | ~5 lines added |
+| `src/lib/og-image.ts` | Add `generateDbCompassOverviewOgImage()` and `generateDbModelOgImage()` | ~150 lines added |
+| `src/pages/index.astro` | Add Database Compass callout card | ~15 lines added (follows existing Dockerfile Analyzer callout pattern) |
 
-### Files NOT Modified
+### Unchanged Existing Files
 
-| File | Reason |
-|------|--------|
-| `astro.config.mjs` | React already configured. No new integrations needed. |
-| `src/layouts/Layout.astro` | Already supports all needed SEO props. CSP already allows `'unsafe-inline'` for scripts/styles. |
-| `tailwind.config.mjs` | No new theme extensions needed. |
-| `src/styles/global.css` | CodeMirror theme is scoped to the editor. |
-
-### New npm Dependencies
-
-```bash
-npm install codemirror @codemirror/view @codemirror/state @codemirror/lint \
-  @codemirror/language @codemirror/legacy-modes dockerfile-ast
-```
-
-| Package | Version | Size (gzipped) | Purpose |
-|---------|---------|----------------|---------|
-| `codemirror` | 6.0.2 | ~2kb (re-exports) | Meta-package, exports basicSetup |
-| `@codemirror/view` | 6.39.15 | ~45kb | EditorView, DOM rendering |
-| `@codemirror/state` | 6.5.4 | ~15kb | EditorState, transactions |
-| `@codemirror/lint` | 6.9.4 | ~5kb | linter(), Diagnostic, lintGutter |
-| `@codemirror/language` | 6.12.1 | ~8kb | StreamLanguage, indentation |
-| `@codemirror/legacy-modes` | 6.5.2 | ~3.8kb (dockerfile only) | Dockerfile syntax mode |
-| `dockerfile-ast` | 0.7.1 | ~15kb | Dockerfile parser |
-
-**Note:** `@codemirror/view` and `@codemirror/state` are transitive dependencies of `codemirror`, but it is best practice to install them explicitly for direct imports.
-
----
-
-## Patterns to Follow
-
-### Pattern 1: Astro Shell + React Island (Established)
-
-**What:** Static Astro page wraps a `client:load` React component.
-**When:** The page's primary content is interactive.
-**Existing precedent:** `HeadSceneWrapper.astro` wraps `HeadScene.tsx` with `client:visible`.
-
-### Pattern 2: Nanostore for Cross-Concern State (Established)
-
-**What:** Nanostore atom defined in `src/stores/`, imported by both lib code and React components.
-**When:** State needs to flow between non-React code (linter callback) and React UI (results panel).
-**Existing precedent:** `languageFilterStore.ts` bridges `LanguageFilter.tsx` with DOM manipulation.
-
-### Pattern 3: CodeMirror via Ref (Standard CM6 Pattern)
-
-**What:** `useRef<HTMLDivElement>` for mount target, `useRef<EditorView>` for instance. `useEffect` creates and destroys the view.
-**When:** Wrapping an imperative DOM library in React.
-**Why not `@uiw/react-codemirror`:** Third-party wrapper adds a dependency, limits extension control, and abstracts away the EditorView which we need direct access to for `setDiagnostics` and programmatic cursor control. Direct CodeMirror usage via refs is the recommended pattern for complex integrations.
-
-### Pattern 4: `astro:page-load` Lifecycle (Established)
-
-**What:** Event-based initialization for components using the Astro ClientRouter.
-**When:** Any client-side code that needs to re-initialize after navigation.
-**Note:** This does NOT apply to React islands -- Astro manages React component lifecycle automatically. The `astro:page-load` pattern is only for vanilla JS in `<script>` tags. The React island re-mounts via Astro's hydration system when navigating to/from the page.
+| File | Why Unchanged |
+|------|---------------|
+| `src/lib/beauty-index/radar-math.ts` | Already axis-count agnostic -- used as-is |
+| `src/pages/tools/index.astro` | Database Compass is content/reference, not a tool |
+| `src/lib/beauty-index/schema.ts` | Beauty Index schema stays separate |
+| `src/lib/beauty-index/dimensions.ts` | Beauty Index dimensions stay separate |
+| `src/lib/beauty-index/tiers.ts` | Not used by Database Compass (no tier system) |
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Controlled Editor (React Owns Document State)
+### Anti-Pattern 1: Shared Schema Abstractions
 
-**What:** Using React state to hold the editor content and syncing it bidirectionally with CodeMirror.
-**Why bad:** CodeMirror's architecture is specifically designed for uncontrolled use. Bidirectional sync causes cursor jumping, undo stack corruption, and performance degradation. Every keystroke would trigger: CM change -> React setState -> React re-render -> CM update -> CM change (loop).
-**Instead:** Let CodeMirror own document state. React only reads analysis results from the Nanostore. The only React -> CM communication is programmatic cursor movement on violation click.
+**What people do:** Create a generic `ScoredEntity` base schema that both Beauty Index languages and Database Compass models extend.
 
-### Anti-Pattern 2: Running Rules in a Web Worker
+**Why it is wrong:** The two domains have different dimension counts (6 vs 8), different score semantics (aesthetic quality vs capability profile), different tier systems (4 tiers vs none), and different total score ranges (6-60 vs 8-80). A shared abstraction would require so many conditionals and generics that it becomes harder to maintain than two independent schemas.
 
-**What:** Moving the parse/lint/score pipeline to a Web Worker for "performance."
-**Why bad:** Premature optimization. The `dockerfile-ast` parser is fast (sub-millisecond for typical Dockerfiles). 40 rules iterating over ~10-50 instructions is trivial. Worker communication overhead (serialization + postMessage) would likely exceed the rule execution time. Workers add complexity (serialization boundaries, error handling, build config).
-**Instead:** Run everything synchronously in the linter callback. If profiling shows a problem (it won't for Dockerfiles under 500 lines), add `requestIdleCallback` or worker then.
+**Do this instead:** Keep schemas completely independent. The only shared code is `radar-math.ts`, which is a pure math utility with no domain knowledge.
 
-### Anti-Pattern 3: Global CodeMirror Instance
+### Anti-Pattern 2: Putting Database Compass Under /tools/
 
-**What:** Storing the EditorView in a Nanostore or global variable.
-**Why bad:** EditorView holds DOM references. Storing it in a Nanostore means it persists across Astro page navigations (ClientRouter), causing memory leaks and stale DOM references.
-**Instead:** EditorView lives in a React `useRef`, created in `useEffect`, destroyed in cleanup.
+**What people do:** Since it is an "explorer", treat it as a tool and put it at `/tools/db-compass/`.
 
-### Anti-Pattern 4: Separate Linter + Listener for Results
+**Why it is wrong:** The Database Compass is static, informational content -- like the Beauty Index. It has no interactive input (no editor, no user-supplied data). Tools like the Dockerfile Analyzer take user input and produce output. The Compass is a reference guide. Putting reference content under `/tools/` confuses the site's information architecture.
 
-**What:** Using `linter()` for CodeMirror diagnostics AND `EditorView.updateListener` for the results panel, each independently parsing the Dockerfile.
-**Why bad:** Double-parsing on every keystroke. Results panel and inline diagnostics could get out of sync if debounce timings differ.
-**Instead:** Single `linter()` callback does parse -> lint -> score. It returns `Diagnostic[]` to CodeMirror AND writes to the Nanostore in one pass.
+**Do this instead:** Use `/db-compass/` as a top-level content pillar, same as `/beauty-index/`. Add a callout on the homepage, same as the Beauty Index and Dockerfile Analyzer callouts.
 
-### Anti-Pattern 5: All Rules in One File
+### Anti-Pattern 3: Inverting Operational Complexity Scores
 
-**What:** A single `rules.ts` with 40 rule functions.
-**Why bad:** Untestable in isolation (must import everything to test one rule). Difficult to navigate. Merge conflicts when multiple rules are edited. No category organization.
-**Instead:** One file per rule, grouped by category in subdirectories, with a registry index.
+**What people do:** Score "operational complexity" where 10 means "most complex" (most is worst). This inverts the radar chart's visual language where bigger polygons = better.
+
+**Why it is wrong:** On the Beauty Index, a score of 10 means "best in this dimension." If operational complexity 10 means "hardest to operate," then a fully-filled radar polygon means the database is terrible to operate. The visual language breaks.
+
+**Do this instead:** Score operational complexity as "operational simplicity" -- 10 means easiest to operate, 1 means hardest. Alternatively, rename it to "Ease of Operations." This keeps the radar chart's visual language consistent: bigger polygon = better across all dimensions.
 
 ---
 
-## Build Order (Dependency Graph)
+## Data Flow
+
+### Build-Time Data Flow (getStaticPaths)
 
 ```
-Phase 1: Foundation (no dependencies)
-  1.1  Install npm packages (codemirror, dockerfile-ast)
-  1.2  Create src/lib/tools/dockerfile-analyzer/types.ts (shared types)
-  1.3  Create src/stores/dockerfileAnalyzerStore.ts (Nanostore)
-  1.4  Create src/lib/tools/dockerfile-analyzer/parser.ts (dockerfile-ast wrapper)
-       Verify: `astro build` succeeds, dockerfile-ast bundles for browser
-
-Phase 2: Rule Engine (depends on 1.2, 1.4)
-  2.1  Create rules/_template.ts and rules/index.ts (empty registry)
-  2.2  Create engine.ts (iterates rules, collects results)
-  2.3  Create scorer.ts (computes scores from results)
-  2.4  Implement first 5 rules (1 per category) as proof of concept
-       Verify: unit-testable -- import rules, pass mock Dockerfile, check results
-
-Phase 3: CodeMirror Integration (depends on Phase 1)
-  3.1  Create editor-theme.ts (site-matching theme)
-  3.2  Create dockerfile-linter.ts (linter extension factory)
-  3.3  Create src/lib/tools/useCodeMirror.ts (React hook)
-       Verify: editor renders with syntax highlighting and lint markers
-
-Phase 4: React Components (depends on Phases 2, 3)
-  4.1  EditorPanel.tsx (mounts CodeMirror, sample button, clear button)
-  4.2  ScoreGauge.tsx (SVG gauge)
-  4.3  CategoryScores.tsx (bar charts)
-  4.4  ViolationList.tsx (violation cards with click-to-navigate)
-  4.5  ResultsPanel.tsx (composes ScoreGauge, CategoryScores, ViolationList)
-  4.6  DockerfileAnalyzer.tsx (root island, composes EditorPanel + ResultsPanel)
-       Verify: paste Dockerfile -> see inline markers + score + violations
-
-Phase 5: Page Integration (depends on Phase 4)
-  5.1  Create src/pages/tools/dockerfile-analyzer.astro (page shell)
-  5.2  Add navigation link in Header.astro
-  5.3  Add breadcrumb structured data
-       Verify: page loads at /tools/dockerfile-analyzer/, full flow works
-
-Phase 6: Complete Rules (depends on Phase 2 proof-of-concept)
-  6.1  Implement remaining ~35 rules across all categories
-  6.2  Tune scoring weights based on rule coverage
-  6.3  Add sample Dockerfiles (good, mediocre, bad) for demo
-       Verify: all rules fire correctly, scoring feels right
-
-Phase 7: Polish (depends on all above)
-  7.1  Mobile responsive layout (stacked panels on small screens)
-  7.2  URL state (encode Dockerfile in URL hash for sharing?)
-  7.3  Sample Dockerfile presets (dropdown of common scenarios)
-  7.4  Empty state (nice illustration/prompt when no Dockerfile entered)
-  7.5  Performance verification on large Dockerfiles (200+ lines)
-       Verify: full build passes, Lighthouse audit, mobile testing
+models.json
+    │
+    │ Astro file() loader + Zod validation
+    v
+getCollection('dbModels')
+    │
+    │ .map(entry => entry.data) -- extract validated DbModel objects
+    v
+getStaticPaths() -- generates 12 { params: { slug }, props: { model, prev, next, rank } }
+    │
+    │ For each model:
+    v
+[slug].astro renders:
+  ├── CompassRadarChart (radar-math.ts with 8 values)
+  ├── TradeoffPanel (strengths, weaknesses, bestFor, avoidWhen)
+  ├── TopDatabases (external links)
+  ├── ModelNav (prev/next)
+  ├── JSON-LD (Article + mentions)
+  └── BreadcrumbJsonLd (Home > DB Compass > [Model Name])
 ```
 
-**Phase ordering rationale:**
-- **Types and parser first** because every rule and the linter depend on them.
-- **Rule engine before components** because the linter callback (Phase 3.2) needs to call `runAllRules` (Phase 2.2). Building the engine with 5 sample rules proves the architecture before investing in 40 rules.
-- **CodeMirror integration in parallel with rule engine** -- the hook and theme don't depend on rules, only on the linter extension which can be stubbed initially.
-- **React components after both engine and CM** because they compose both.
-- **Complete rules AFTER the proof-of-concept works** -- the most time-consuming phase (writing 40 rules) should not block architecture validation.
+### OG Image Generation Flow
 
----
-
-## Scalability Considerations
-
-| Concern | At 40 rules | At 100 rules | At 200+ rules |
-|---------|-------------|-------------|---------------|
-| Lint time per keystroke | <5ms | ~10ms | Consider lazy evaluation or chunking |
-| Bundle size (rules) | ~30kb | ~75kb | Code-split by category, lazy-load |
-| Results panel DOM | 0-40 violations | 0-100 violations | Virtualize the list |
-| Rule registry | Flat array | Flat array still fine | Category-based lazy loading |
-
-For the initial 40 rules targeting Dockerfiles (typically 10-100 lines), performance will not be a concern.
+```
+[slug].png.ts (API route)
+    │
+    │ getStaticPaths() from dbModels collection
+    v
+generateDbModelOgImage(model: DbModel)
+    │
+    ├── generateRadarSvgString(300, scores, color, 0.35, labels)
+    │   └── returns SVG string (8-axis octagonal chart)
+    │
+    ├── Convert SVG to base64 data URI
+    │
+    ├── Build Satori layout (two-column: text + radar)
+    │   └── Uses existing renderOgPng(), brandingRow(), accentBar()
+    │
+    └── sharp(svg).png().toBuffer() -- returns PNG
+```
 
 ---
 
 ## Sources
 
-- [CodeMirror 6 Lint Example](https://codemirror.net/examples/lint/) -- `linter()` function, `Diagnostic` interface, `lintGutter()` (HIGH confidence)
-- [CodeMirror 6 Language Package Example](https://codemirror.net/examples/lang-package/) -- StreamLanguage vs Lezer, custom language support (HIGH confidence)
-- [CodeMirror 6 Reference Manual](https://codemirror.net/docs/ref/) -- EditorView, EditorState, Decoration API (HIGH confidence)
-- [@codemirror/legacy-modes npm](https://www.npmjs.com/package/@codemirror/legacy-modes) -- Dockerfile mode confirmed v6.5.2 (HIGH confidence)
-- [@codemirror/lint npm](https://www.npmjs.com/package/@codemirror/lint) -- v6.9.4, Diagnostic types (HIGH confidence)
-- [dockerfile-ast GitHub](https://github.com/rcjsuen/dockerfile-ast) -- DockerfileParser.parse(), getInstructions(), getKeyword() API (HIGH confidence)
-- [dockerfile-ast npm](https://www.npmjs.com/package/dockerfile-ast) -- v0.7.1, dependencies confirmed (HIGH confidence)
-- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) -- client:load, client:visible directives (HIGH confidence)
-- [Nanostores GitHub](https://github.com/nanostores/nanostores) -- atom, subscribe, framework-agnostic state (HIGH confidence)
-- [Astro Share State Between Islands](https://docs.astro.build/en/recipes/sharing-state-islands/) -- Nanostore pattern for cross-island communication (HIGH confidence)
-- [CodeMirror 6 Document Change Listener](https://discuss.codemirror.net/t/codemirror-6-proper-way-to-listen-for-changes/2395) -- EditorView.updateListener, docChanged (MEDIUM confidence)
-- [CodeMirror and React](https://thetrevorharmon.com/blog/codemirror-and-react/) -- ref-based mounting pattern (MEDIUM confidence)
-- [CodeMirror 6 Bundle Size Discussion](https://discuss.codemirror.net/t/minimal-setup-because-by-default-v6-is-50kb-compared-to-v5/4514) -- ~75kb gzipped with basicSetup (MEDIUM confidence)
-- Existing codebase files examined: `package.json`, `astro.config.mjs`, `src/layouts/Layout.astro`, `src/components/Header.astro`, `src/components/HeadSceneWrapper.astro`, `src/components/HeadScene.tsx`, `src/components/beauty-index/LanguageFilter.tsx`, `src/components/beauty-index/CodeComparisonTabs.tsx`, `src/components/beauty-index/ShareControls.astro`, `src/components/beauty-index/RadarChart.astro`, `src/stores/languageFilterStore.ts`, `src/stores/tabStore.ts`, `src/lib/beauty-index/schema.ts`
+- Astro Content Collections file() loader: verified in `src/content.config.ts` (existing `languages` collection)
+- radar-math.ts: verified axis-count agnostic by reading source (`values.length`, `numSides` parameters)
+- OG image pipeline: verified in `src/lib/og-image.ts` (Satori + Sharp, reusable helpers)
+- Beauty Index [slug].astro: verified SEO content generation pattern from structured JSON data
+- BeautyIndexJsonLd.astro: verified Dataset + ItemList schema.org pattern
+- DockerfileAnalyzerJsonLd.astro: verified SoftwareApplication pattern (not used for Compass)
+- Schema.org Dataset type: https://schema.org/Dataset
+- Schema.org ItemList type: https://schema.org/ItemList
 
 ---
-
-*Architecture research for: Dockerfile Analyzer Tool Integration*
-*Researched: 2026-02-20*
+*Architecture research for: Database Compass integration into existing Astro 5 portfolio site*
+*Researched: 2026-02-21*
