@@ -58,12 +58,12 @@ Requirements for the Dockerfile Analyzer milestone. Each maps to roadmap phases.
 
 ### SEO & Navigation
 
-- [ ] **NAV-01**: Header navigation link for Dockerfile Analyzer
-- [ ] **NAV-02**: Breadcrumb navigation on tool page and rule documentation pages
-- [ ] **SEO-01**: JSON-LD structured data (SoftwareApplication schema) on tool page
+- [x] **NAV-01**: Header navigation link for Dockerfile Analyzer
+- [x] **NAV-02**: Breadcrumb navigation on tool page and rule documentation pages
+- [x] **SEO-01**: JSON-LD structured data (SoftwareApplication schema) on tool page
 - [x] **SEO-02**: Homepage callout linking to the Dockerfile Analyzer
-- [ ] **SEO-03**: All tool and rule pages in sitemap
-- [ ] **SEO-04**: SEO-optimized meta descriptions for tool page and all 40 rule pages
+- [x] **SEO-03**: All tool and rule pages in sitemap
+- [x] **SEO-04**: SEO-optimized meta descriptions for tool page and all 40 rule pages
 - [ ] **SEO-05**: Lighthouse 90+ audit on tool page
 - [ ] **SEO-06**: Accessibility audit (keyboard navigation, screen reader, WCAG 2.1 AA)
 
@@ -123,12 +123,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BLOG-02 | Phase 25 | Complete |
 | DOCS-01 | Phase 25 | Complete |
 | DOCS-02 | Phase 25 | Complete |
-| NAV-01 | Phase 26 | Pending |
-| NAV-02 | Phase 26 | Pending |
-| SEO-01 | Phase 26 | Pending |
+| NAV-01 | Phase 26 | Complete |
+| NAV-02 | Phase 26 | Complete |
+| SEO-01 | Phase 26 | Complete |
 | SEO-02 | Phase 26 | Complete |
-| SEO-03 | Phase 26 | Pending |
-| SEO-04 | Phase 26 | Pending |
+| SEO-03 | Phase 26 | Complete |
+| SEO-04 | Phase 26 | Complete |
 | SEO-05 | Phase 26 | Pending |
 | SEO-06 | Phase 26 | Pending |
 | SHARE-01 | Phase 27 | Pending |
