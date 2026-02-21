@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio and blog site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering, mouse-tracking glow effects, and responsive design — demonstrating frontend craft alongside backend expertise.
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes two content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions) and a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring).
 
 ## Core Value
 
@@ -108,22 +108,44 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Accessibility audit (keyboard navigation, screen reader, WCAG 2.1 AA) — v1.3
 - ✓ Nanostores atom for tab state management (286 bytes) — v1.3
 - ✓ Responsive layout across mobile, tablet, and desktop for all Beauty Index pages — v1.3
+- ✓ CodeMirror 6 editor with Dockerfile syntax highlighting — v1.4
+- ✓ Analyze button triggers lint cycle (on-demand, not real-time) — v1.4
+- ✓ Pre-loaded sample Dockerfile with deliberate issues across all rule categories — v1.4
+- ✓ Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis — v1.4
+- ✓ Dark-only editor theme matching site aesthetic — v1.4
+- ✓ Responsive layout — stacked on mobile, side-by-side on desktop — v1.4
+- ✓ React island with `client:only="react"` directive — v1.4
+- ✓ View Transitions lifecycle — destroy/recreate EditorView on navigation — v1.4
+- ✓ 39 lint rules across 3 tiers (15 critical, 15 high-value, 9 nice-to-have) — v1.4
+- ✓ Modular rule architecture — LintRule interface, one file per rule, category subdirectories — v1.4
+- ✓ Expert-voice explanation per rule with production consequences — v1.4
+- ✓ Actionable fix suggestion per rule with before/after code examples — v1.4
+- ✓ DL-prefixed (Hadolint-compatible) and PG-prefixed (custom) rule codes — v1.4
+- ✓ Category-weighted scoring (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%) — v1.4
+- ✓ Overall 0-100 score with letter grade (A+ through F) — v1.4
+- ✓ Per-category sub-scores alongside aggregate — v1.4
+- ✓ Inline CodeMirror annotations (squiggly underlines + gutter severity markers) — v1.4
+- ✓ Score gauge component (SVG circular gauge with letter grade) — v1.4
+- ✓ Category breakdown panel with sub-scores per dimension — v1.4
+- ✓ Violation list grouped by severity with expandable details — v1.4
+- ✓ Click-to-navigate from results panel to corresponding editor line — v1.4
+- ✓ Clean Dockerfile empty state ("No issues found" with congratulatory message) — v1.4
+- ✓ Score badge download as PNG image for social media sharing — v1.4
+- ✓ URL state encoding — Dockerfile content in URL hash for shareable analysis links — v1.4
+- ✓ Companion blog post covering Dockerfile best practices and tool architecture deep-dive — v1.4
+- ✓ Cross-links between blog post and tool page (bidirectional) — v1.4
+- ✓ 39 rule documentation pages at /tools/dockerfile-analyzer/rules/[code] — v1.4
+- ✓ Each rule page includes: explanation, fix suggestion, before/after code, related rules — v1.4
+- ✓ Header navigation link for Dockerfile Analyzer — v1.4
+- ✓ Breadcrumb navigation on tool page and rule documentation pages — v1.4
+- ✓ JSON-LD structured data (SoftwareApplication schema) on tool page — v1.4
+- ✓ Homepage callout linking to the Dockerfile Analyzer — v1.4
+- ✓ All tool and rule pages in sitemap — v1.4
+- ✓ SEO-optimized meta descriptions for tool page and all rule pages — v1.4
 
 ### Active
 
-## Current Milestone: v1.4 Dockerfile Analyzer
-
-**Goal:** Add an interactive browser-based Dockerfile analysis tool at /tools/dockerfile-analyzer — users paste a Dockerfile, click Analyze, and get an overall quality score plus inline annotations and a categorized findings panel. 40 lint rules based on Hadolint DL codes and professional Kubernetes/cloud-native experience. Companion blog post covering Dockerfile best practices and tool architecture.
-
-**Target features:**
-- Interactive Dockerfile editor (CodeMirror 6) with syntax highlighting
-- 40 TypeScript lint rules across 3 tiers (critical, high-value, nice-to-have)
-- Overall quality score (numeric) based on rule results
-- Inline editor annotations (gutter markers, highlighted lines)
-- Summary results panel grouped by severity and category with explanations
-- Browser-only analysis via dockerfile-ast (no server, ~350KB total)
-- Companion blog post: Dockerfile best practices + tool architecture deep-dive
-- Shareable results (screenshot-friendly score display)
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -142,19 +164,22 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - Project screenshots — requires creating/hosting 16 images; consider for v2
 - GitHub API runtime calls — static site, would need build-time fetch
 - Sort options on projects — no date/popularity data; consider after GitHub API integration
+- AI-powered Dockerfile analysis — contradicts the human-expertise positioning
+- Auto-fix / auto-correct for Dockerfiles — too many edge cases
+- Real-time as-you-type linting — on-demand is better UX
 
 ## Context
 
-Shipped v1.3 The Beauty Index on top of v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state.
+Shipped v1.4 Dockerfile Analyzer on top of v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for parsing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 requirements delivered (114 total). Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 requirements delivered (152 total). Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 12 posts (2 local + 10 external from Kubert AI and Translucent Computing).
+Blog shows 14 posts (4 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
-Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay. Build-time SVG charts, zero client-side charting libraries.
+Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
+Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state. Differentiator: expert feedback from a Kubernetes architect.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
-v1.4 adds a Dockerfile Analyzer — the site's first interactive tool. Browser-based Dockerfile linting via dockerfile-ast parser + CodeMirror 6 editor in an Astro island. 40 TypeScript lint rules (Hadolint DL codes + professional experience). Differentiator: expert feedback from a Kubernetes architect, not an AI chatbot. Includes quality scoring and a companion blog post.
 
 ## Key Decisions
 
@@ -185,6 +210,16 @@ v1.4 adds a Dockerfile Analyzer — the site's first interactive tool. Browser-b
 | vanilla-tilt lifecycle in Flip transitions | Destroy before getState, reinit in onComplete | ✓ Good — no stale tilt on filtered cards |
 | grid-flow-dense for bento grids | Auto-fills gaps from 2-col spanning cards | ✓ Good — no empty cells in grid |
 | ProjectCard conditional div/anchor | Full card clickable only when no liveUrl buttons | ✓ Good — proper button-in-link avoidance |
+| client:only="react" for CodeMirror island | CodeMirror cannot be SSR'd; avoids hydration mismatch | ✓ Good — clean client-side rendering |
+| Destroy/recreate EditorView on View Transitions | Avoids stale editor state after navigation | ✓ Good — reliable editor lifecycle |
+| dockerfile-ast for Dockerfile parsing | Browser-safe, source-audited, 21 KB gzipped | ✓ Good — well under 50 KB budget |
+| Nanostore bridge for CodeMirror-React state | Decouples editor linter callback from React results panel | ✓ Good — clean cross-framework communication |
+| Diminishing returns scoring formula | Prevents extreme scores; each additional violation matters less | ✓ Good — meaningful score differentiation |
+| Category-weighted scoring algorithm | Security weighted highest (30%), reflects real-world priority | ✓ Good — calibrated and transparent |
+| SVG data URL gutter markers | Explicit fill/stroke colors for cross-browser reliability | ✓ Good — consistent rendering |
+| lz-string for URL state compression | ~1KB dependency, URL-safe encoding for shareable links | ✓ Good — compact shareable URLs |
+| Programmatic SVG badge generator | No DOM capture, no external fonts; portable rendering | ✓ Good — reliable PNG export |
+| Buffer polyfill for dockerfile-ast | feross/buffer package for browser compatibility | ✓ Good — resolved isUTF8BOM runtime error |
 
 ## Constraints
 
@@ -199,4 +234,4 @@ v1.4 adds a Dockerfile Analyzer — the site's first interactive tool. Browser-b
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-20 after v1.4 milestone start*
+*Last updated: 2026-02-21 after v1.4 milestone completion*

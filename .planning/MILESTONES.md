@@ -1,5 +1,54 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.4 Dockerfile Analyzer (Shipped: 2026-02-20)
+
+**Delivered:** Interactive browser-based Dockerfile analysis tool with 39 expert lint rules, category-weighted scoring, CodeMirror 6 editor, inline annotations, 39 rule documentation pages, companion blog post, and shareable results
+
+**Phases completed:** 22-27 (13 plans total)
+
+**Key accomplishments:**
+- Browser-based Dockerfile analysis tool with CodeMirror 6 editor and dockerfile-ast parser (21 KB gzipped)
+- 39 expert lint rules across 5 categories with category-weighted scoring algorithm (Security 30%, Efficiency 25%, Maintainability 20%, Reliability 15%, Best Practice 10%)
+- Rich interactive results — SVG score gauge, category breakdown, severity-grouped violations with click-to-navigate editor annotations
+- 39 SEO-optimized rule documentation pages + companion blog post with bidirectional cross-linking (40+ new indexable URLs)
+- Full site integration — header navigation, JSON-LD structured data, homepage callout, breadcrumbs, Lighthouse/accessibility audit compliance
+- Shareability — PNG score badge download and lz-string compressed URL state for shareable analysis links
+
+**Stats:**
+- 113 files created/modified (+14,101 / -115 lines)
+- 6 phases, 13 plans, 53 commits
+- 1 day from start to ship (2026-02-20)
+
+**Git range:** `feat(22-01)` → `docs(phase-27)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
+## v1.3 The Beauty Index (Shipped: 2026-02-17)
+
+**Delivered:** Programming language aesthetic ranking system with 25 languages scored across 6 dimensions — overview page, 25 detail pages, code comparison explorer, OG images, and companion blog essay
+
+**Phases completed:** 16-21 (15 plans total)
+
+**Key accomplishments:**
+- Language data schema with Zod validation for 25 languages across 6 aesthetic dimensions
+- Build-time SVG radar and ranking bar charts (zero client-side charting JS)
+- Overview page with sortable scoring table and 4-tier visual grouping
+- 25 per-language detail pages with character sketches and signature code snippets
+- Code comparison page with 10 feature tabs and 240 syntax-highlighted code blocks
+- Build-time OG images with radar chart visuals for all pages
+
+**Stats:**
+- 6 phases, 15 plans
+- Shipped 2026-02-17
+
+**Git range:** `feat(16-01)` → `docs(phase-21)`
+
+**What's next:** TBD
+
+---
+
 ## v1.2 Projects Page Redesign (Shipped: 2026-02-13)
 
 **Delivered:** Transformed the projects page into a visually striking, interactive bento-grid showcase with GSAP Flip category filtering, mouse-tracking glow, floating orbs, magnetic buttons, and full accessibility fallbacks
