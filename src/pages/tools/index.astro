@@ -44,24 +44,33 @@ import Layout from '../../layouts/Layout.astro';
         </ul>
       </a>
 
-      <!-- Placeholder: Coming Soon -->
-      <div
-        class="p-6 rounded-lg border border-dashed border-[var(--color-border)] opacity-50"
+      <!-- Database Compass -->
+      <a
+        href="/tools/db-compass/"
+        class="block card-hover p-6 rounded-lg border border-[var(--color-border)] no-underline group"
         data-reveal
+        data-tilt
       >
-        <div class="mb-4 text-[var(--color-text-secondary)]">
+        <div class="mb-4 text-[var(--color-accent)]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.03a1.5 1.5 0 01-.55-2.05l3.03-5.1a1.5 1.5 0 012.05-.55l5.1 3.03a1.5 1.5 0 01.55 2.05l-3.03 5.1a1.5 1.5 0 01-2.05.55z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
           </svg>
         </div>
-        <h2 class="text-lg font-heading font-bold text-[var(--color-text-secondary)]">
-          More tools coming soon
+        <h2 class="text-lg font-heading font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
+          Database Compass
         </h2>
+        <p class="meta-mono mt-1">2026 Edition</p>
         <p class="text-sm text-[var(--color-text-secondary)] mt-3">
-          New developer tools are in the works. Check back or follow along on the blog.
+          Compare 12 database models across 8 dimensions -- scalability, performance, reliability, query flexibility,
+          and more. Radar charts, scoring tables, and interactive filtering.
         </p>
-      </div>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">12 models</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">8 dimensions</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Radar charts</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Interactive filter</li>
+        </ul>
+      </a>
 
     </div>
   </section>
