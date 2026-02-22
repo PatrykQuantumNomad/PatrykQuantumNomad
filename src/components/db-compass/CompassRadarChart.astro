@@ -1,0 +1,115 @@
+---
+/**
+ * CompassRadarChart.astro -- Build-time SVG 8-axis octagonal radar chart.
+ * Renders concentric octagonal grid rings, axis lines, a filled data polygon,
+ * and colored Unicode symbol labels on each axis. Ships ZERO client-side JavaScript.
+ */
+import { polarToCartesian, radarPolygonPoints, hexagonRingPoints } from '../../lib/beauty-index/radar-math';
+import { DIMENSIONS, DIMENSION_COLORS } from '../../lib/db-compass/dimensions';
+import { type DbModel, dimensionScores } from '../../lib/db-compass/schema';
+
+interface Props {
+  model: DbModel;
+  size?: number;
+}
+
+const { model, size = 300 } = Astro.props;
+
+// Padding for labels -- extra room for 8 axes with Unicode symbols
+const pad = 28;
+const vbSize = size + pad * 2;
+const cx = vbSize / 2;
+const cy = vbSize / 2;
+const maxRadius = size * 0.42;
+const scores = dimensionScores(model);
+
+// Grid ring levels: scores 2, 4, 6, 8, 10
+const gridLevels = [2, 4, 6, 8, 10];
+
+// Derive axis count from DIMENSIONS (not hardcoded)
+const numAxes = DIMENSIONS.length;
+const angleStep = (2 * Math.PI) / numAxes;
+
+// Compute axis endpoints for lines from center to outer ring
+const axisEndpoints = Array.from({ length: numAxes }, (_, i) => {
+  const angle = i * angleStep;
+  return polarToCartesian(cx, cy, angle, maxRadius);
+});
+
+// Compute label positions outside the chart
+const labelRadius = maxRadius + 22;
+const labelPositions = DIMENSIONS.map((dim, i) => {
+  const angle = i * angleStep;
+  const pos = polarToCartesian(cx, cy, angle, labelRadius);
+  const color = DIMENSION_COLORS[dim.key];
+  return { ...pos, dim, color };
+});
+
+// Data polygon points
+const polygonPoints = radarPolygonPoints(cx, cy, maxRadius, scores, 10);
+
+// Fixed accent color for all models (no tier system in Database Compass)
+const accentColor = '#c44b20';
+---
+
+<div class="w-full max-w-[300px]">
+  <svg
+    width={size}
+    height={size}
+    viewBox={`0 0 ${vbSize} ${vbSize}`}
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label={`Radar chart for ${model.name} showing scores across ${numAxes} dimensions`}
+  >
+    {/* Concentric octagonal grid rings */}
+    {gridLevels.map((level) => {
+      const ringRadius = (level / 10) * maxRadius;
+      const points = hexagonRingPoints(cx, cy, ringRadius, numAxes);
+      return (
+        <polygon
+          points={points}
+          fill="none"
+          stroke="#e5ddd5"
+          stroke-width="1"
+        />
+      );
+    })}
+
+    {/* Axis lines from center to outer vertices */}
+    {axisEndpoints.map((endpoint) => (
+      <line
+        x1={cx}
+        y1={cy}
+        x2={endpoint.x.toFixed(2)}
+        y2={endpoint.y.toFixed(2)}
+        stroke="#e5ddd5"
+        stroke-width="1"
+      />
+    ))}
+
+    {/* Data polygon */}
+    <polygon
+      points={polygonPoints}
+      fill={accentColor}
+      fill-opacity="0.3"
+      stroke={accentColor}
+      stroke-width="2"
+    />
+
+    {/* Axis labels: colored Unicode symbol per dimension */}
+    {labelPositions.map((lp) => (
+      <text
+        x={lp.x.toFixed(2)}
+        y={lp.y.toFixed(2)}
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="14"
+        font-weight="bold"
+        fill={lp.color}
+        font-family="'DM Sans', 'Noto Sans', sans-serif"
+      >
+        {lp.dim.symbol}
+      </text>
+    ))}
+  </svg>
+</div>

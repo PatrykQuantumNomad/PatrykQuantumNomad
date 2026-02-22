@@ -1,0 +1,143 @@
+---
+/**
+ * ComplexitySpectrum.astro -- Build-time SVG horizontal complexity spectrum.
+ * Renders all 12 database models positioned from simple (left) to complex (right)
+ * with abbreviated labels and stagger-based collision avoidance.
+ * Ships ZERO client-side JavaScript.
+ */
+import { computeSpectrumPositions, detectClusters } from '../../lib/db-compass/spectrum-math';
+import type { DbModel } from '../../lib/db-compass/schema';
+
+interface Props {
+  models: DbModel[];
+  width?: number;
+  height?: number;
+}
+
+const { models, width = 800, height = 160 } = Astro.props;
+
+// Layout constants
+const padding = 60;
+const baselineY = height / 2;
+const dotRadius = 6;
+const labelFontSize = 11;
+const labelOffsetAbove = -18;
+const labelOffsetBelow = 24;
+const connectorThreshold = 20;
+
+// Sort models by complexity position before computing positions
+const sorted = [...models].sort((a, b) => a.complexityPosition - b.complexityPosition);
+
+// Compute pixel positions for each model
+const points = computeSpectrumPositions(width, sorted, padding, baselineY);
+
+// Detect clusters to apply vertical staggering
+const clusters = detectClusters(points);
+
+// Build stagger map: for each point index, determine label y-offset
+// Within a cluster, alternate labels above and below the baseline
+const staggerMap = new Map<number, number>();
+for (const group of clusters) {
+  if (group.length === 1) {
+    // Single point: label above baseline
+    staggerMap.set(group[0], labelOffsetAbove);
+  } else {
+    // Cluster: alternate above/below
+    group.forEach((idx, i) => {
+      staggerMap.set(idx, i % 2 === 0 ? labelOffsetAbove : labelOffsetBelow);
+    });
+  }
+}
+---
+
+<div class="w-full">
+  <svg
+    width={width}
+    height={height}
+    viewBox={`0 0 ${width} ${height}`}
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label={`Complexity spectrum showing ${sorted.length} database models positioned from simple to complex`}
+    class="w-full h-auto"
+  >
+    {/* Horizontal axis line */}
+    <line
+      x1={padding}
+      y1={baselineY}
+      x2={width - padding}
+      y2={baselineY}
+      stroke="#e5ddd5"
+      stroke-width="2"
+    />
+
+    {/* Endpoint labels */}
+    <text
+      x={padding}
+      y={baselineY + 40}
+      text-anchor="middle"
+      font-size="12"
+      font-weight="600"
+      fill="#5a5a5a"
+      font-family="'DM Sans', sans-serif"
+    >
+      Simple
+    </text>
+    <text
+      x={width - padding}
+      y={baselineY + 40}
+      text-anchor="middle"
+      font-size="12"
+      font-weight="600"
+      fill="#5a5a5a"
+      font-family="'DM Sans', sans-serif"
+    >
+      Complex
+    </text>
+
+    {/* Model dots, labels, and optional connectors */}
+    {points.map((point, i) => {
+      const labelYOffset = staggerMap.get(i) ?? labelOffsetAbove;
+      const labelY = baselineY + labelYOffset;
+      const needsConnector = Math.abs(labelYOffset) > connectorThreshold;
+
+      return (
+        <a href={`/tools/db-compass/${point.slug}/`}>
+          {/* Connecting line from dot to staggered label */}
+          {needsConnector && (
+            <line
+              x1={point.x.toFixed(2)}
+              y1={baselineY + (labelYOffset < 0 ? -dotRadius : dotRadius)}
+              x2={point.x.toFixed(2)}
+              y2={labelY + (labelYOffset < 0 ? 10 : -6)}
+              stroke="#d5cdc5"
+              stroke-width="1"
+              stroke-dasharray="2,2"
+            />
+          )}
+
+          {/* Dot on the baseline */}
+          <circle
+            cx={point.x.toFixed(2)}
+            cy={baselineY}
+            r={dotRadius}
+            fill="#c44b20"
+          />
+
+          {/* Abbreviated label */}
+          <text
+            x={point.x.toFixed(2)}
+            y={labelY}
+            text-anchor="middle"
+            dominant-baseline={labelYOffset < 0 ? 'auto' : 'hanging'}
+            font-size={labelFontSize}
+            fill="#5a5a5a"
+            font-family="'DM Sans', sans-serif"
+            font-weight="500"
+          >
+            {point.shortLabel}
+          </text>
+        </a>
+      );
+    })}
+  </svg>
+</div>
