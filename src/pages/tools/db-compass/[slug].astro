@@ -1,0 +1,207 @@
+---
+/**
+ * [slug].astro — Database model detail page for the Database Compass.
+ * Generates 12 static pages at /tools/db-compass/{slug}/ using getStaticPaths.
+ * Each page shows a radar chart, score breakdown, CAP badge, character sketch,
+ * when-to-use/avoid lists, dimension analysis, top databases, and prev/next navigation.
+ * Includes JSON-LD CreativeWork and BreadcrumbList structured data.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import CompassRadarChart from '../../../components/db-compass/CompassRadarChart.astro';
+import CompassScoreBreakdown from '../../../components/db-compass/CompassScoreBreakdown.astro';
+import CapBadge from '../../../components/db-compass/CapBadge.astro';
+import ModelNav from '../../../components/db-compass/ModelNav.astro';
+import { DIMENSIONS, DIMENSION_COLORS } from '../../../lib/db-compass/dimensions';
+import { totalScore } from '../../../lib/db-compass/schema';
+
+export async function getStaticPaths() {
+  const dbModels = await getCollection('dbModels');
+  const sorted = [...dbModels]
+    .map((entry) => entry.data)
+    .sort((a, b) => a.complexityPosition - b.complexityPosition);
+
+  return sorted.map((model, index) => ({
+    params: { slug: model.slug },
+    props: {
+      model,
+      prev: index > 0
+        ? { slug: sorted[index - 1].slug, name: sorted[index - 1].name }
+        : null,
+      next: index < sorted.length - 1
+        ? { slug: sorted[index + 1].slug, name: sorted[index + 1].name }
+        : null,
+    },
+  }));
+}
+
+const { model, prev, next } = Astro.props;
+const total = totalScore(model);
+const capLabel = model.capTheorem.classification;
+
+// SEO meta description (under 155 characters)
+const fullDesc = `${model.name} scores ${total}/80 in the Database Compass. ${capLabel} classification. ${model.summary}`;
+const metaDescription = fullDesc.length <= 155
+  ? fullDesc
+  : fullDesc.slice(0, 155).replace(/\s+\S*$/, '') + '...';
+
+// JSON-LD CreativeWork (SEO-02)
+const modelSchema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": `${model.name} -- Database Compass Score`,
+  "description": metaDescription,
+  "url": `https://patrykgolabek.dev/tools/db-compass/${model.slug}/`,
+  "datePublished": "2026-02-22",
+  "dateModified": "2026-02-22",
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "isPartOf": {
+    "@type": "Dataset",
+    "name": "Database Compass",
+    "url": "https://patrykgolabek.dev/tools/db-compass/",
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": total,
+    "bestRating": 80,
+    "worstRating": 8,
+    "ratingCount": 1,
+    "author": {
+      "@type": "Person",
+      "@id": "https://patrykgolabek.dev/#person",
+    },
+  },
+};
+---
+
+<Layout
+  title={`${model.name} -- Database Compass | Patryk Golabek`}
+  description={metaDescription}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(modelSchema)} />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'Database Compass', url: 'https://patrykgolabek.dev/tools/db-compass/' },
+    { name: model.name, url: `https://patrykgolabek.dev/tools/db-compass/${model.slug}/` },
+  ]} />
+
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <a href="/tools/db-compass/" class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6">
+      <span aria-hidden="true">&larr;</span> Back to Database Compass
+    </a>
+
+    {/* Header area */}
+    <header>
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold">
+        {model.name}
+      </h1>
+      <div class="flex items-center gap-3 mt-2">
+        <CapBadge classification={model.capTheorem.classification} size="lg" />
+        <span class="text-[var(--color-text-secondary)]">
+          {total}/80 points
+        </span>
+      </div>
+      <p class="text-lg text-[var(--color-text-secondary)] mt-4 leading-relaxed">
+        {model.summary}
+      </p>
+    </header>
+
+    {/* Radar chart */}
+    <div class="mt-10 flex flex-col items-center gap-2" id="radar-chart">
+      <CompassRadarChart model={model} size={300} />
+    </div>
+
+    {/* Score breakdown */}
+    <div class="mt-10 flex justify-center">
+      <CompassScoreBreakdown model={model} />
+    </div>
+
+    <!-- CompassShareControls will be added in Plan 02 -->
+
+    {/* Character sketch */}
+    <section class="mt-12">
+      <h2 class="text-xl font-heading font-bold mb-3">Character</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed text-lg">
+        {model.characterSketch}
+      </p>
+    </section>
+
+    {/* When to use */}
+    <section class="mt-12" id="when-to-use">
+      <h2 class="text-xl font-heading font-bold mb-4">When to Use</h2>
+      <ul class="space-y-2">
+        {model.bestFor.map((item) => (
+          <li class="flex items-start gap-2 text-[var(--color-text-secondary)]">
+            <span class="text-[var(--color-accent)] mt-0.5" aria-hidden="true">&#10003;</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {/* Avoid when */}
+    <section class="mt-8" id="avoid-when">
+      <h2 class="text-xl font-heading font-bold mb-4">Avoid When</h2>
+      <ul class="space-y-2">
+        {model.avoidWhen.map((item) => (
+          <li class="flex items-start gap-2 text-[var(--color-text-secondary)]">
+            <span class="text-red-500 mt-0.5" aria-hidden="true">&#10007;</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {/* Dimension analysis */}
+    <section class="mt-12" id="dimension-analysis">
+      <h2 class="text-xl font-heading font-bold mb-6">Dimension Analysis</h2>
+      <div class="space-y-6">
+        {DIMENSIONS.map((dim) => (
+          <div>
+            <h3 class="font-heading font-bold text-base flex items-center gap-2">
+              <span style={`color: ${DIMENSION_COLORS[dim.key]};`}>{dim.symbol}</span>
+              {dim.name}
+              <span class="meta-mono text-sm text-[var(--color-text-secondary)]">
+                {model.scores[dim.key]}/10
+              </span>
+            </h3>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mt-1">
+              {model.justifications[dim.key]}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* Top databases */}
+    <section class="mt-12" id="top-databases">
+      <h2 class="text-xl font-heading font-bold mb-4">Top Databases</h2>
+      <div class="space-y-4">
+        {model.topDatabases.map((db) => (
+          <div class="border border-[var(--color-border)] rounded-lg p-4">
+            <div class="flex items-center justify-between">
+              <a
+                href={db.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-heading font-bold text-[var(--color-accent)] hover:underline"
+              >
+                {db.name}
+              </a>
+              <span class="text-xs text-[var(--color-text-secondary)]">{db.license}</span>
+            </div>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-1">{db.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* Prev/next navigation */}
+    <ModelNav prev={prev} next={next} />
+  </article>
+</Layout>
