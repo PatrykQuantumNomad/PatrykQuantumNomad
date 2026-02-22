@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 33: YAML Parsing & Schema Validation Foundation** - YAML parser with line mapping, variable interpolation normalizer, and Ajv schema validation with 8 schema rules
 - [x] **Phase 34: Rule Engine, Rules & Scoring** - 44 analysis rules (semantic, security, best practice, style), rule engine, graph builder, cycle detector, and category-weighted scoring (completed 2026-02-22)
 - [x] **Phase 35: CodeMirror YAML Editor & Nanostores** - CodeMirror 6 editor with YAML highlighting, analyze trigger, sample file, and nanostore state management (completed 2026-02-22)
-- [ ] **Phase 36: Results Panel & Dependency Graph** - Score gauge, category breakdown, violation list, tabbed results panel, and React Flow dependency graph with dagre layout
+- [x] **Phase 36: Results Panel & Dependency Graph** - Score gauge, category breakdown, violation list, tabbed results panel, and React Flow dependency graph with dagre layout (completed 2026-02-22)
 - [ ] **Phase 37: Shareability & Badge Export** - Score badge PNG download, lz-string URL state encoding, and Web Share / Clipboard API sharing
 - [ ] **Phase 38: Rule Documentation Pages** - 52 per-rule documentation pages with explanations, fix suggestions, before/after code, and SEO metadata
 - [ ] **Phase 39: Tool Page & Site Integration** - Astro tool page, header navigation, homepage callout, tools page card, JSON-LD structured data, breadcrumbs, and sitemap
@@ -88,8 +88,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 36-01-PLAN.md — Tabbed results panel with ScoreGauge, ComposeCategoryBreakdown, ComposeViolationList, ComposeEmptyState, and click-to-navigate
-- [ ] 36-02-PLAN.md — React Flow dependency graph with dagre layout, custom service nodes, condition-labeled edges, cycle highlighting, and lazy loading
+- [x] 36-01-PLAN.md — Tabbed results panel with ScoreGauge, ComposeCategoryBreakdown, ComposeViolationList, ComposeEmptyState, and click-to-navigate
+- [x] 36-02-PLAN.md — React Flow dependency graph with dagre layout, custom service nodes, condition-labeled edges, cycle highlighting, and lazy loading
 
 ### Phase 37: Shareability & Badge Export
 **Goal**: Users can download their score as a PNG badge for social sharing, share a URL that preserves their compose file content, and use native share/clipboard APIs
@@ -155,7 +155,7 @@ Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 | 33. YAML Parsing & Schema Validation Foundation | 2/2 | Complete | 2026-02-22 |
 | 34. Rule Engine, Rules & Scoring | 3/3 | Complete   | 2026-02-22 |
 | 35. CodeMirror YAML Editor & Nanostores | 2/2 | Complete | 2026-02-22 |
-| 36. Results Panel & Dependency Graph | 1/2 | In Progress|  |
+| 36. Results Panel & Dependency Graph | 2/2 | Complete | 2026-02-22 |
 | 37. Shareability & Badge Export | 0/1 | Not started | - |
 | 38. Rule Documentation Pages | 0/1 | Not started | - |
 | 39. Tool Page & Site Integration | 0/1 | Not started | - |

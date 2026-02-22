@@ -113,13 +113,13 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Dependency Graph
 
-- [ ] **GRAPH-01**: Interactive service dependency graph using React Flow with dagre layout
-- [ ] **GRAPH-02**: Service nodes with name, image, and port summary
-- [ ] **GRAPH-03**: Directed edges for depends_on relationships with condition labels
-- [ ] **GRAPH-04**: Cycle detection with red-highlighted cycle edges
-- [ ] **GRAPH-05**: Network membership color-coding on nodes
-- [ ] **GRAPH-06**: Zoom, pan, and drag interaction controls
-- [ ] **GRAPH-07**: React Flow lazy-loaded to maintain Lighthouse 90+ performance
+- [x] **GRAPH-01**: Interactive service dependency graph using React Flow with dagre layout
+- [x] **GRAPH-02**: Service nodes with name, image, and port summary
+- [x] **GRAPH-03**: Directed edges for depends_on relationships with condition labels
+- [x] **GRAPH-04**: Cycle detection with red-highlighted cycle edges
+- [x] **GRAPH-05**: Network membership color-coding on nodes
+- [x] **GRAPH-06**: Zoom, pan, and drag interaction controls
+- [x] **GRAPH-07**: React Flow lazy-loaded to maintain Lighthouse 90+ performance
 
 ### Shareability
 
@@ -264,13 +264,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESULT-05 | Phase 36 | Complete |
 | RESULT-06 | Phase 36 | Complete |
 | RESULT-07 | Phase 36 | Complete |
-| GRAPH-01 | Phase 36 | Pending |
-| GRAPH-02 | Phase 36 | Pending |
-| GRAPH-03 | Phase 36 | Pending |
-| GRAPH-04 | Phase 36 | Pending |
-| GRAPH-05 | Phase 36 | Pending |
-| GRAPH-06 | Phase 36 | Pending |
-| GRAPH-07 | Phase 36 | Pending |
+| GRAPH-01 | Phase 36 | Complete |
+| GRAPH-02 | Phase 36 | Complete |
+| GRAPH-03 | Phase 36 | Complete |
+| GRAPH-04 | Phase 36 | Complete |
+| GRAPH-05 | Phase 36 | Complete |
+| GRAPH-06 | Phase 36 | Complete |
+| GRAPH-07 | Phase 36 | Complete |
 | SHARE-01 | Phase 37 | Pending |
 | SHARE-02 | Phase 37 | Pending |
 | SHARE-03 | Phase 37 | Pending |
