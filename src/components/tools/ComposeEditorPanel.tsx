@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { setDiagnostics } from '@codemirror/lint';
 import type { Diagnostic } from '@codemirror/lint';
@@ -9,6 +9,7 @@ import { computeComposeScore } from '../../lib/tools/compose-validator/scorer';
 import { getComposeRuleById } from '../../lib/tools/compose-validator/rules';
 import { getSchemaRuleById } from '../../lib/tools/compose-validator/rules/schema';
 import { SAMPLE_COMPOSE } from '../../lib/tools/compose-validator/sample-compose';
+import { decodeFromHash } from '../../lib/tools/compose-validator/url-state';
 import {
   composeResult,
   composeAnalyzing,
@@ -22,6 +23,7 @@ import type {
 } from '../../lib/tools/compose-validator/types';
 
 export default function ComposeEditorPanel() {
+  const hashContentRef = useRef<string | null>(typeof window !== 'undefined' ? decodeFromHash() : null);
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
 
   analyzeRef.current = (view: EditorView) => {
@@ -120,11 +122,18 @@ export default function ComposeEditorPanel() {
   };
 
   const { containerRef, viewRef } = useCodeMirrorYaml({
-    initialDoc: SAMPLE_COMPOSE,
+    initialDoc: hashContentRef.current || SAMPLE_COMPOSE,
     onAnalyze: () => {
       if (viewRef.current) analyzeRef.current(viewRef.current);
     },
   });
+
+  // Auto-analyze when loading from a shared URL hash
+  useEffect(() => {
+    if (hashContentRef.current && viewRef.current) {
+      analyzeRef.current(viewRef.current);
+    }
+  }, []);
 
   const handleButtonClick = useCallback(() => {
     if (viewRef.current) {

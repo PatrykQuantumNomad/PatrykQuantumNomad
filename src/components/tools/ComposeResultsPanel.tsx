@@ -11,6 +11,7 @@ import { ComposeCategoryBreakdown } from './compose-results/ComposeCategoryBreak
 import { ComposeViolationList } from './compose-results/ComposeViolationList';
 import { ComposeEmptyState } from './compose-results/ComposeEmptyState';
 import { GraphSkeleton } from './compose-results/GraphSkeleton';
+import { ComposeShareActions } from './compose-results/ComposeShareActions';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
 
 const LazyDependencyGraph = lazy(() => import('./compose-results/DependencyGraph'));
@@ -99,6 +100,7 @@ export default function ComposeResultsPanel() {
                 </div>
               )}
               <ComposeEmptyState score={result.score.overall} grade={result.score.grade} />
+              <ComposeShareActions />
             </div>
           ) : (
             <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
@@ -126,6 +128,7 @@ export default function ComposeResultsPanel() {
 
               {/* Violation list */}
               <ComposeViolationList violations={result.violations} onNavigate={handleNavigate} />
+              <ComposeShareActions />
             </div>
           )
         ) : (
