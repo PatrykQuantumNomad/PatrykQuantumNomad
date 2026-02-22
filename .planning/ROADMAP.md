@@ -66,8 +66,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 30-01-PLAN.md — Foundation utilities (use-case categories, filter store) and sub-components (ModelCardGrid, DimensionLegend, CompassJsonLd)
-- [ ] 30-02-PLAN.md — UseCaseFilter React island and overview page assembly at /tools/db-compass/
+- [x] 30-01-PLAN.md — Foundation utilities (use-case categories, filter store) and sub-components (ModelCardGrid, DimensionLegend, CompassJsonLd)
+- [x] 30-02-PLAN.md — UseCaseFilter React island and overview page assembly at /tools/db-compass/
 
 ### Phase 31: Detail Pages
 **Goal**: Users can navigate to any of 12 model detail pages, understand that model's strengths, tradeoffs, and top databases, share the page, and move between models
