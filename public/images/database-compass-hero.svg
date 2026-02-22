@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="90 25 600 500" width="600" height="500">
+  <defs>
+    <linearGradient id="accentGradH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0" stop-color="#c44b20"/>
+      <stop offset="1" stop-color="#006d6d"/>
+    </linearGradient>
+    <linearGradient id="sideGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9cbbe"/>
+      <stop offset="1" stop-color="#c4b0a0"/>
+    </linearGradient>
+    <radialGradient id="faceGrad" cx="45%" cy="40%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.6" stop-color="#fdf8f3"/>
+      <stop offset="1" stop-color="#f3ebe2"/>
+    </radialGradient>
+    <filter id="shadowSm" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#2c2c2c" flood-opacity="0.1"/>
+    </filter>
+    <filter id="shadowXl" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#2c2c2c" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Dashed connection lines from icons to compass -->
+  <g opacity="0.4" stroke-width="1.5" stroke-dasharray="6,5" fill="none" stroke-linecap="round">
+    <line x1="160" y1="168" x2="310" y2="280" stroke="#c44b20"/>
+    <line x1="305" y1="108" x2="365" y2="268" stroke="#E8734A"/>
+    <line x1="490" y1="98" x2="440" y2="268" stroke="#2AAA8A"/>
+    <line x1="630" y1="155" x2="530" y2="290" stroke="#7B68EE"/>
+    <line x1="165" y1="448" x2="300" y2="395" stroke="#9B59B6"/>
+    <line x1="625" y1="448" x2="510" y2="395" stroke="#D4A843"/>
+  </g>
+
+  <!-- Connection dots at compass end -->
+  <g opacity="0.45">
+    <circle cx="310" cy="280" r="3" fill="#c44b20"/>
+    <circle cx="365" cy="268" r="3" fill="#E8734A"/>
+    <circle cx="440" cy="268" r="3" fill="#2AAA8A"/>
+    <circle cx="530" cy="290" r="3" fill="#7B68EE"/>
+    <circle cx="300" cy="395" r="3" fill="#9B59B6"/>
+    <circle cx="510" cy="395" r="3" fill="#D4A843"/>
+  </g>
+
+  <!-- Compass body -->
+  <g filter="url(#shadowXl)">
+    <!-- Shadow ellipse -->
+    <ellipse cx="402" cy="435" rx="150" ry="32" fill="#2c2c2c" opacity="0.05"/>
+    <!-- Side rim -->
+    <path d=" M 228,338 A 178,92 0 0,0 572,338 L 572,380 A 178,92 0 0,1 228,380 Z" fill="url(#sideGrad)" stroke="#b8a898" stroke-width="0.5"/>
+    <!-- Accent band -->
+    <path d=" M 230,372 A 176,90 0 0,0 570,372 L 570,382 A 176,90 0 0,1 230,382 Z" fill="url(#accentGradH)" opacity="0.7"/>
+    <!-- Highlight -->
+    <path d=" M 232,380 A 174,89 0 0,0 568,380 L 568,383 A 174,89 0 0,1 232,383 Z" fill="white" opacity="0.15"/>
+    <!-- Outer bezel -->
+    <ellipse cx="400" cy="338" rx="178" ry="92" fill="#d8ccbe" stroke="#c5b8a8" stroke-width="1.2"/>
+    <ellipse cx="400" cy="338" rx="172" ry="88" fill="none" stroke="#cbbfb2" stroke-width="0.5"/>
+    <!-- Face -->
+    <ellipse cx="400" cy="338" rx="162" ry="83" fill="url(#faceGrad)" stroke="#e0d6cc" stroke-width="0.75"/>
+    <!-- Concentric rings -->
+    <ellipse cx="400" cy="338" rx="135" ry="69" fill="none" stroke="#d5cbc0" stroke-width="0.6" stroke-dasharray="3,2"/>
+    <ellipse cx="400" cy="338" rx="105" ry="54" fill="none" stroke="#d5cbc0" stroke-width="0.5" opacity="0.7"/>
+    <ellipse cx="400" cy="338" rx="75" ry="38" fill="none" stroke="#d5cbc0" stroke-width="0.45" opacity="0.5"/>
+    <ellipse cx="400" cy="338" rx="45" ry="23" fill="none" stroke="#d5cbc0" stroke-width="0.35" opacity="0.35"/>
+    <!-- Cross-hair lines -->
+    <line x1="238" y1="338" x2="562" y2="338" stroke="#ddd5cc" stroke-width="0.4"/>
+    <line x1="400" y1="255" x2="400" y2="421" stroke="#ddd5cc" stroke-width="0.4"/>
+    <line x1="515" y1="279" x2="285" y2="397" stroke="#ddd5cc" stroke-width="0.35"/>
+    <line x1="285" y1="279" x2="515" y2="397" stroke="#ddd5cc" stroke-width="0.35"/>
+    <!-- Radar polygons -->
+    <polygon points="400,297 479,297 546,338 479,379 400,421 343,367 238,338 308,291" fill="#c44b20" fill-opacity="0.12" stroke="#c44b20" stroke-width="1.5" stroke-opacity="0.5" stroke-linejoin="round"/>
+    <polygon points="400,263 503,285 497,338 492,385 400,355 366,355 286,338 296,285" fill="#006d6d" fill-opacity="0.12" stroke="#006d6d" stroke-width="1.5" stroke-opacity="0.5" stroke-linejoin="round"/>
+    <!-- Rust/warm polygon dots -->
+    <g fill="#c44b20" opacity="0.6">
+      <circle cx="400" cy="297" r="2.5"/>
+      <circle cx="479" cy="297" r="2.5"/>
+      <circle cx="546" cy="338" r="2.5"/>
+      <circle cx="479" cy="379" r="2.5"/>
+      <circle cx="400" cy="421" r="2.5"/>
+      <circle cx="343" cy="367" r="2.5"/>
+      <circle cx="238" cy="338" r="2.5"/>
+      <circle cx="308" cy="291" r="2.5"/>
+    </g>
+    <!-- Teal polygon dots -->
+    <g fill="#006d6d" opacity="0.6">
+      <circle cx="400" cy="263" r="2.5"/>
+      <circle cx="503" cy="285" r="2.5"/>
+      <circle cx="497" cy="338" r="2.5"/>
+      <circle cx="492" cy="385" r="2.5"/>
+      <circle cx="400" cy="355" r="2.5"/>
+      <circle cx="366" cy="355" r="2.5"/>
+      <circle cx="286" cy="338" r="2.5"/>
+      <circle cx="296" cy="285" r="2.5"/>
+    </g>
+    <!-- Cardinal direction ticks -->
+    <line x1="556" y1="338" x2="570" y2="338" stroke="#2AAA8A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="511" y1="280" x2="521" y2="273" stroke="#E8734A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="400" y1="253" x2="400" y2="243" stroke="#4A90D9" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="286" y1="280" x2="276" y2="273" stroke="#9B59B6" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="244" y1="338" x2="230" y2="338" stroke="#C44B20" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="286" y1="396" x2="276" y2="403" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="400" y1="423" x2="400" y2="433" stroke="#7B68EE" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="511" y1="396" x2="521" y2="403" stroke="#8FBC5A" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Minor ticks -->
+    <g stroke="#ddd5cc" stroke-width="0.8" stroke-linecap="round" opacity="0.4">
+      <line x1="540" y1="306" x2="545" y2="303"/>
+      <line x1="460" y1="262" x2="462" y2="256"/>
+      <line x1="336" y1="262" x2="334" y2="256"/>
+      <line x1="260" y1="306" x2="255" y2="303"/>
+      <line x1="260" y1="370" x2="255" y2="373"/>
+      <line x1="336" y1="414" x2="334" y2="420"/>
+      <line x1="460" y1="414" x2="462" y2="420"/>
+      <line x1="540" y1="370" x2="545" y2="373"/>
+    </g>
+    <!-- Needle -->
+    <polygon points="400,265 393,330 400,320 407,330" fill="#c44b20" opacity="0.85"/>
+    <polygon points="400,411 393,346 400,356 407,346" fill="#006d6d" opacity="0.85"/>
+    <!-- Center hub -->
+    <ellipse cx="400" cy="338" rx="7" ry="3.5" fill="#2c2c2c"/>
+    <ellipse cx="400" cy="338" rx="4.5" ry="2.2" fill="#c44b20"/>
+    <!-- N / S labels -->
+    <text x="400" y="240" text-anchor="middle" fill="#c44b20" font-size="9" font-family="ui-monospace, 'SF Mono', monospace" font-weight="600" opacity="0.5">N</text>
+    <text x="400" y="446" text-anchor="middle" fill="#006d6d" font-size="9" font-family="ui-monospace, 'SF Mono', monospace" font-weight="600" opacity="0.5">S</text>
+  </g>
+
+  <!-- SQL icon card -->
+  <g transform="translate(160, 145)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <ellipse cx="0" cy="-10" rx="14" ry="5" fill="#4A90D9" fill-opacity="0.12" stroke="#4A90D9" stroke-width="1.4"/>
+    <path d="M -14,-10 L -14,4 A 14,5 0 0,0 14,4 L 14,-10" fill="none" stroke="#4A90D9" stroke-width="1.4"/>
+    <ellipse cx="0" cy="4" rx="14" ry="5" fill="none" stroke="#4A90D9" stroke-width="1.4"/>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">SQL</text>
+  </g>
+
+  <!-- K/V icon card -->
+  <g transform="translate(305, 85)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <circle cx="-6" cy="-6" r="7" fill="#E8734A" fill-opacity="0.1" stroke="#E8734A" stroke-width="1.4"/>
+    <line x1="1" y1="-6" x2="16" y2="-6" stroke="#E8734A" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="11" y1="-6" x2="11" y2="0" stroke="#E8734A" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="16" y1="-6" x2="16" y2="0" stroke="#E8734A" stroke-width="1.4" stroke-linecap="round"/>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">K/V</text>
+  </g>
+
+  <!-- DOC icon card -->
+  <g transform="translate(490, 75)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <path d="M -11,-15 L 5,-15 L 13,-7 L 13,9 L -11,9 Z" fill="#2AAA8A" fill-opacity="0.08" stroke="#2AAA8A" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M 5,-15 L 5,-7 L 13,-7" fill="none" stroke="#2AAA8A" stroke-width="1.1"/>
+    <line x1="-6" y1="-5" x2="8" y2="-5" stroke="#2AAA8A" stroke-width="0.9" opacity="0.5"/>
+    <line x1="-6" y1="0" x2="8" y2="0" stroke="#2AAA8A" stroke-width="0.9" opacity="0.5"/>
+    <line x1="-6" y1="5" x2="4" y2="5" stroke="#2AAA8A" stroke-width="0.9" opacity="0.5"/>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">DOC</text>
+  </g>
+
+  <!-- GRAPH icon card -->
+  <g transform="translate(630, 135)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <line x1="-8" y1="-10" x2="10" y2="-4" stroke="#7B68EE" stroke-width="1"/>
+    <line x1="-8" y1="-10" x2="-3" y2="6" stroke="#7B68EE" stroke-width="1"/>
+    <line x1="10" y1="-4" x2="12" y2="8" stroke="#7B68EE" stroke-width="1"/>
+    <line x1="-3" y1="6" x2="12" y2="8" stroke="#7B68EE" stroke-width="1"/>
+    <line x1="10" y1="-4" x2="-3" y2="6" stroke="#7B68EE" stroke-width="0.8" opacity="0.4"/>
+    <circle cx="-8" cy="-10" r="4" fill="#7B68EE" fill-opacity="0.15" stroke="#7B68EE" stroke-width="1.3"/>
+    <circle cx="10" cy="-4" r="4" fill="#7B68EE" fill-opacity="0.15" stroke="#7B68EE" stroke-width="1.3"/>
+    <circle cx="-3" cy="6" r="4" fill="#7B68EE" fill-opacity="0.15" stroke="#7B68EE" stroke-width="1.3"/>
+    <circle cx="12" cy="8" r="4" fill="#7B68EE" fill-opacity="0.15" stroke="#7B68EE" stroke-width="1.3"/>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">GRAPH</text>
+  </g>
+
+  <!-- VECTOR icon card -->
+  <g transform="translate(165, 455)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <circle cx="-10" cy="4" r="2.5" fill="#9B59B6"/>
+    <line x1="-10" y1="4" x2="6" y2="-12" stroke="#9B59B6" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="-10" y1="4" x2="14" y2="-2" stroke="#9B59B6" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+    <line x1="-10" y1="4" x2="10" y2="6" stroke="#9B59B6" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+    <circle cx="6" cy="-12" r="2" fill="#9B59B6"/>
+    <circle cx="14" cy="-2" r="1.8" fill="#9B59B6" opacity="0.6"/>
+    <circle cx="10" cy="6" r="1.5" fill="#9B59B6" opacity="0.4"/>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">VECTOR</text>
+  </g>
+
+  <!-- T-SERIES icon card -->
+  <g transform="translate(625, 455)" filter="url(#shadowSm)">
+    <rect x="-34" y="-30" width="68" height="60" rx="10" fill="white" stroke="#e5ddd5" stroke-width="0.75"/>
+    <polyline points="-18,6 -10,-2 -4,4 2,-10 8,-4 14,-12 20,-6" fill="none" stroke="#D4A843" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="-18" y1="9" x2="20" y2="9" stroke="#D4A843" stroke-width="0.7" opacity="0.3"/>
+    <g stroke="#D4A843" stroke-width="0.5" opacity="0.3">
+      <line x1="-10" y1="9" x2="-10" y2="11"/>
+      <line x1="2" y1="9" x2="2" y2="11"/>
+      <line x1="14" y1="9" x2="14" y2="11"/>
+    </g>
+    <text y="24" text-anchor="middle" fill="#5a5a5a" font-size="8" font-family="system-ui, -apple-system, sans-serif" font-weight="600" letter-spacing="0.05em">T-SERIES</text>
+  </g>
+</svg>

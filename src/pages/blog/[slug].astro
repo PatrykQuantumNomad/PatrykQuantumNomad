@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 
 const { post, allPosts } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
-const { title, description, publishedDate, tags } = post.data;
+const { title, description, publishedDate, tags, coverImage } = post.data;
 
 // Compute related posts by tag overlap
 const relatedPosts = allPosts
@@ -97,6 +97,18 @@ const titleTag = (title.length + suffix.length > 65)
         </div>
       )}
     </header>
+    {coverImage && (
+      <figure class="mb-8 -mx-4 sm:mx-0" data-reveal="up">
+        <img
+          src={coverImage}
+          alt=""
+          width="1200"
+          height="630"
+          class="w-full rounded-lg border border-[var(--color-border)]"
+          loading="eager"
+        />
+      </figure>
+    )}
     <div class="mb-8">
       <TableOfContents headings={headings} />
     </div>
@@ -170,6 +182,31 @@ const titleTag = (title.length + suffix.length > 65)
     </a>
   </div>
 
+  <!-- Image Lightbox -->
+  <div
+    id="lightbox"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"
+    role="dialog"
+    aria-label="Image preview"
+    aria-hidden="true"
+  >
+    <button
+      id="lightbox-close"
+      aria-label="Close image preview"
+      class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+      </svg>
+    </button>
+    <img
+      id="lightbox-img"
+      src=""
+      alt=""
+      class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl scale-95 transition-transform duration-300"
+    />
+  </div>
+
   <!-- Back to Top Button -->
   <button
     id="back-to-top"
@@ -237,6 +274,50 @@ const titleTag = (title.length + suffix.length > 65)
         { rootMargin: '-80px 0px -60% 0px' },
       );
       targets.forEach((t) => observer.observe(t));
+    }
+
+    // Image lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const lightboxClose = document.getElementById('lightbox-close');
+
+    if (lightbox && lightboxImg && lightboxClose) {
+      const articleImages = document.querySelectorAll<HTMLImageElement>(
+        'article figure img, article .prose img'
+      );
+
+      function openLightbox(src: string, alt: string) {
+        lightboxImg!.src = src;
+        lightboxImg!.alt = alt;
+        lightbox!.classList.remove('opacity-0', 'pointer-events-none');
+        lightboxImg!.classList.remove('scale-95');
+        lightbox!.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox!.classList.add('opacity-0', 'pointer-events-none');
+        lightboxImg!.classList.add('scale-95');
+        lightbox!.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      articleImages.forEach((img) => {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', () => {
+          openLightbox(img.src, img.alt);
+        });
+      });
+
+      lightboxClose.addEventListener('click', closeLightbox);
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !lightbox.classList.contains('opacity-0')) {
+          closeLightbox();
+        }
+      });
     }
 
     // GSAP heading and figure animations

@@ -1,10 +1,12 @@
 import type { APIContext } from 'astro';
 import { getCollection } from 'astro:content';
 import { totalScore } from '../lib/beauty-index/schema';
+import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   const languages = await getCollection('languages');
+  const dbModels = await getCollection('dbModels');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -92,6 +94,20 @@ export async function GET(context: APIContext) {
     '- Haskell vs Rust: https://patrykgolabek.dev/beauty-index/vs/haskell-vs-rust/',
     '- Go vs Java: https://patrykgolabek.dev/beauty-index/vs/go-vs-java/',
     '',
+    '## Database Compass',
+    '',
+    'The Database Compass compares 12 database models across 8 architectural dimensions (each scored 1-10, max 80):',
+    '- Scalability, Performance, Reliability, Operational Simplicity',
+    '- Query Flexibility, Schema Flexibility, Ecosystem Maturity, Learning Curve',
+    '',
+    '- [Database Compass Overview](https://patrykgolabek.dev/db-compass/): Full rankings, scoring table, and complexity spectrum',
+    '- [Methodology](https://patrykgolabek.dev/blog/database-compass/): How to choose a database in 2026',
+    '',
+    ...dbModels
+      .map((entry) => entry.data)
+      .sort((a, b) => compassTotalScore(b) - compassTotalScore(a))
+      .map((model, i) => `- #${i + 1} ${model.name}: ${compassTotalScore(model)}/80 — https://patrykgolabek.dev/db-compass/${model.slug}/`),
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
@@ -114,7 +130,8 @@ export async function GET(context: APIContext) {
     'When citing content from this site, please reference:',
     'Patryk Golabek, patrykgolabek.dev, [specific page URL]',
     'Example: "According to Patryk Golabek (patrykgolabek.dev/beauty-index/), Python scores 52/60 in the Beauty Index."',
-    'All Beauty Index data is licensed under CC-BY 4.0.',
+    'Example: "The Database Compass by Patryk Golabek (patrykgolabek.dev/db-compass/) scores Relational databases at 62/80."',
+    'All Beauty Index and Database Compass data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {

@@ -21,7 +21,7 @@ const { prev, next } = Astro.props;
 >
   {prev ? (
     <a
-      href={`/tools/db-compass/${prev.slug}/`}
+      href={`/db-compass/${prev.slug}/`}
       class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
     >
       <span aria-hidden="true">&larr;</span>
@@ -32,7 +32,7 @@ const { prev, next } = Astro.props;
   )}
 
   <a
-    href="/tools/db-compass/"
+    href="/db-compass/"
     class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
   >
     Overview
@@ -40,7 +40,7 @@ const { prev, next } = Astro.props;
 
   {next ? (
     <a
-      href={`/tools/db-compass/${next.slug}/`}
+      href={`/db-compass/${next.slug}/`}
       class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
     >
       <span>{next.name}</span>

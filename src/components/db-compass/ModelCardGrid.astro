@@ -18,7 +18,7 @@ const { models } = Astro.props;
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
   {models.map((model) => (
     <a
-      href={`/tools/db-compass/${model.slug}/`}
+      href={`/db-compass/${model.slug}/`}
       class="rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors bg-[var(--color-surface)] p-3 flex flex-col items-center"
       data-model-id={model.id}
       data-use-cases={model.useCases.join(',')}

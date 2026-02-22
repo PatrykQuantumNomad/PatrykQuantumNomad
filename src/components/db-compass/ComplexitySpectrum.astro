@@ -101,7 +101,7 @@ for (const group of clusters) {
       const needsConnector = Math.abs(labelYOffset) > connectorThreshold;
 
       return (
-        <a href={`/tools/db-compass/${point.slug}/`}>
+        <a href={`/db-compass/${point.slug}/`}>
           {/* Connecting line from dot to staggered label */}
           {needsConnector && (
             <line

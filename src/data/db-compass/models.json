@@ -6,7 +6,7 @@
     "icon": "key",
     "complexityPosition": 0.08,
     "summary": "The simplest database model: every record is a unique key mapped to a blob of data. Optimized for blazing-fast lookups, caching, and session storage where access patterns are predictable.",
-    "characterSketch": "The sprinter of the database world -- blindingly fast in a straight line but don't ask it to run hurdles. It thrives when you know exactly what you want, fetches it in microseconds, and never asks why. Simple, reliable, and unapologetically single-minded.",
+    "characterSketch": "The sprinter of the database world. Blindingly fast in a straight line, but don't ask it to run hurdles. It thrives when you know exactly what you want, fetches it in microseconds, and never asks why. Simple, reliable, and unapologetically single-minded.",
     "scores": {
       "scalability": 9,
       "performance": 9,
@@ -18,24 +18,24 @@
       "learningCurve": 9
     },
     "justifications": {
-      "scalability": "Horizontal scaling is trivial -- consistent hashing distributes keys with near-linear throughput gains. Redis Cluster and DynamoDB partition automatically across nodes.",
+      "scalability": "Horizontal scaling is trivial. Consistent hashing distributes keys with near-linear throughput gains, and both Redis Cluster and DynamoDB partition automatically across nodes.",
       "performance": "Sub-millisecond reads and writes are the norm. O(1) key lookups eliminate query planning overhead entirely, making KV stores among the fastest database operations possible.",
-      "reliability": "Durability depends heavily on configuration -- in-memory-only setups risk data loss on crash. With AOF or snapshot persistence and replication, reliability improves significantly but isn't ACID-grade by default.",
-      "operationalSimplicity": "Minimal configuration required to run. No schema migrations, no query optimizer tuning. Managed offerings like DynamoDB and ElastiCache reduce ops burden to near-zero.",
+      "reliability": "Durability depends heavily on configuration. In-memory-only setups risk data loss on crash, but with AOF or snapshot persistence and replication, reliability improves significantly. Still, it isn't ACID-grade by default.",
+      "operationalSimplicity": "Minimal configuration required to run. No schema migrations, no query optimizer tuning. Managed offerings like DynamoDB and ElastiCache reduce the ops burden to near-zero.",
       "queryFlexibility": "Limited to GET/SET/DELETE by key. No joins, no aggregations, no filtering by value. If your access pattern doesn't fit a key lookup, you're out of luck.",
-      "schemaFlexibility": "Values are opaque blobs -- store JSON, binary, strings, or anything. No schema enforcement means total freedom to change data shape without migrations.",
-      "ecosystemMaturity": "Redis alone has decades of production use, massive community, and rich client libraries across every major language. DynamoDB and Memcached add further enterprise credibility.",
-      "learningCurve": "GET key, SET key value -- the API is intuitive enough for a first-year CS student. Complexity only appears at scale with partitioning strategies and consistency tuning."
+      "schemaFlexibility": "Values are opaque blobs. Store JSON, binary, strings, or anything else you like. No schema enforcement means total freedom to change data shape without migrations.",
+      "ecosystemMaturity": "Redis alone has decades of production use, a massive community, and rich client libraries across every major language. DynamoDB and Memcached add further enterprise credibility.",
+      "learningCurve": "GET key, SET key value. The API is intuitive enough for a first-year CS student. Complexity only appears at scale with partitioning strategies and consistency tuning."
     },
     "capTheorem": {
       "classification": "Tunable",
-      "notes": "Most KV stores let you trade consistency for availability. DynamoDB offers eventual or strong consistency per-read. Redis Cluster defaults to AP but can be configured for stronger guarantees."
+      "notes": "Most KV stores let you trade consistency for availability. DynamoDB offers eventual or strong consistency per-read, while Redis Cluster defaults to AP but can be configured for stronger guarantees."
     },
     "crossCategory": [],
     "strengths": [
       "Sub-millisecond latency for read and write operations",
       "Near-linear horizontal scaling through consistent hashing",
-      "Minimal operational overhead with simple data model",
+      "Minimal operational overhead with a simple data model",
       "Ideal for caching, session storage, and real-time leaderboards"
     ],
     "weaknesses": [
@@ -97,7 +97,7 @@
     "icon": "file-text",
     "complexityPosition": 0.22,
     "summary": "Stores data as self-contained JSON/BSON documents with flexible schemas. Optimized for applications where data naturally maps to objects and access patterns favor reading entire records.",
-    "characterSketch": "The adaptable generalist -- happy to store whatever shape of data you throw at it and flexible enough to evolve without breaking a sweat. It's the developer's best friend for rapid prototyping, but sometimes its easygoing nature lets messy schemas slip through unchecked.",
+    "characterSketch": "The adaptable generalist, happy to store whatever shape of data you throw at it and flexible enough to evolve without breaking a sweat. It's the developer's best friend for rapid prototyping, but sometimes its easygoing nature lets messy schemas slip through unchecked.",
     "scores": {
       "scalability": 8,
       "performance": 7,
@@ -111,12 +111,12 @@
     "justifications": {
       "scalability": "MongoDB and Couchbase support automatic sharding with horizontal scaling across commodity hardware. Document locality reduces cross-shard queries for well-modeled data.",
       "performance": "Reads are fast when accessing full documents by ID or indexed fields. Performance degrades for cross-document joins or deep nested queries compared to purpose-built engines.",
-      "reliability": "MongoDB offers replica sets with automatic failover and tunable write concerns. WiredTiger storage engine provides crash-safe journaling. Not quite ACID across multi-document transactions until recent versions.",
-      "operationalSimplicity": "Schema-free setup means no migration scripts for early development. Managed services (Atlas, DocumentDB) simplify operations, though sharding topology management adds complexity at scale.",
-      "queryFlexibility": "Rich query language supports filtering, projection, aggregation pipelines, and geospatial queries. However, lacks full SQL expressiveness -- no native joins across collections without $lookup.",
+      "reliability": "MongoDB offers replica sets with automatic failover and tunable write concerns. The WiredTiger storage engine provides crash-safe journaling. Multi-document ACID transactions only arrived in recent versions, so older deployments may lack full transactional integrity.",
+      "operationalSimplicity": "Schema-free setup means no migration scripts for early development. Managed services like Atlas and DocumentDB simplify operations, though sharding topology management adds complexity at scale.",
+      "queryFlexibility": "The query language supports filtering, projection, aggregation pipelines, and geospatial queries. However, it lacks the full expressiveness of SQL, with no native joins across collections without $lookup.",
       "schemaFlexibility": "Documents can have completely different structures within the same collection. Schema validation is optional and additive. Adding new fields requires zero downtime migrations.",
       "ecosystemMaturity": "MongoDB is the most popular NoSQL database globally with 15+ years of production use, extensive drivers for every language, and a massive community of contributors and learning resources.",
-      "learningCurve": "JSON-based data model is intuitive for developers already working with JavaScript/TypeScript. Query syntax is more approachable than SQL for simple operations but has its own learning curve for aggregations."
+      "learningCurve": "The JSON-based data model is intuitive for developers already working with JavaScript or TypeScript. Query syntax is more approachable than SQL for simple operations, but aggregation pipelines have their own learning curve."
     },
     "capTheorem": {
       "classification": "Tunable",
@@ -131,9 +131,9 @@
       "Strong ecosystem with extensive tooling and managed services"
     ],
     "weaknesses": [
-      "Cross-document joins are expensive and limited compared to relational DBs",
+      "Cross-document joins are expensive and limited compared to relational databases",
       "Schema-free nature can lead to inconsistent data quality without discipline",
-      "Storage overhead from duplicated/denormalized data",
+      "Storage overhead from duplicated or denormalized data",
       "Multi-document ACID transactions add latency and complexity"
     ],
     "bestFor": [
@@ -157,7 +157,7 @@
       },
       {
         "name": "Couchbase",
-        "description": "Distributed document database combining the flexibility of JSON with SQL++ query language, built-in caching, and mobile sync capabilities.",
+        "description": "Distributed document database combining the flexibility of JSON with the SQL++ query language, built-in caching, and mobile sync capabilities.",
         "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
         "url": "https://db-engines.com/en/system/Couchbase"
       },
@@ -190,7 +190,7 @@
     "icon": "zap",
     "complexityPosition": 0.30,
     "summary": "Keeps all data in RAM for microsecond-level access times. Optimized for real-time analytics, caching layers, and applications where latency is the primary concern and data fits in memory.",
-    "characterSketch": "The adrenaline junkie who lives life at full speed -- everything happens in microseconds and waiting is simply not in the vocabulary. Incredibly powerful for the right moment, but it needs a safety net (persistence) because if the power goes out, so does the memory.",
+    "characterSketch": "The adrenaline junkie who lives life at full speed. Everything happens in microseconds and waiting is simply not in the vocabulary. Incredibly powerful for the right moment, but it needs a safety net (persistence) because if the power goes out, so does the memory.",
     "scores": {
       "scalability": 7,
       "performance": 10,
@@ -202,13 +202,13 @@
       "learningCurve": 7
     },
     "justifications": {
-      "scalability": "Scaling is bounded by available RAM per node. Horizontal scaling is possible (Redis Cluster, Apache Ignite) but requires careful memory capacity planning and data partitioning strategies.",
-      "performance": "Microsecond read/write latency by eliminating disk I/O entirely. In-memory data structures (hash tables, skip lists) provide the fastest possible data access for any database category.",
-      "reliability": "Volatile by default -- a process crash or power failure loses all data unless persistence (AOF, snapshots, replication) is configured. Persistence adds latency and complexity, partially defeating the purpose.",
-      "operationalSimplicity": "Simple to run for caching use cases but memory management becomes complex at scale. Monitoring memory pressure, eviction policies, and persistence configurations requires operational expertise.",
-      "queryFlexibility": "Most in-memory DBs focus on key-based access. VoltDB and SAP HANA offer SQL, but pure in-memory stores like Memcached are limited to GET/SET. Flexibility varies widely by implementation.",
-      "schemaFlexibility": "Data stored as serialized objects, binary blobs, or structured values. Schema flexibility depends on the specific engine -- Redis supports multiple data structures, while VoltDB enforces relational schemas.",
-      "ecosystemMaturity": "Redis has a massive ecosystem and decades of production use. Memcached is battle-tested. However, newer entries (Dragonfly, KeyDB) and specialized IMDB products have smaller communities.",
+      "scalability": "Scaling is bounded by available RAM per node. Horizontal scaling is possible through Redis Cluster and Apache Ignite, but it requires careful memory capacity planning and data partitioning strategies.",
+      "performance": "Microsecond read/write latency by eliminating disk I/O entirely. In-memory data structures like hash tables and skip lists provide the fastest possible data access for any database category.",
+      "reliability": "Volatile by default. A process crash or power failure loses all data unless persistence (AOF, snapshots, replication) is configured. Adding persistence introduces latency and complexity, which partially defeats the purpose.",
+      "operationalSimplicity": "Simple to run for caching use cases, but memory management becomes complex at scale. Monitoring memory pressure, eviction policies, and persistence configurations requires operational expertise.",
+      "queryFlexibility": "Most in-memory databases focus on key-based access. VoltDB and SAP HANA offer SQL, but pure in-memory stores like Memcached are limited to GET/SET. Flexibility varies widely by implementation.",
+      "schemaFlexibility": "Data is stored as serialized objects, binary blobs, or structured values. Schema flexibility depends on the specific engine: Redis supports multiple data structures, while VoltDB enforces relational schemas.",
+      "ecosystemMaturity": "Redis has a massive ecosystem and decades of production use. Memcached is battle-tested. However, newer entries like Dragonfly and KeyDB, along with specialized in-memory database products, have smaller communities.",
       "learningCurve": "Basic caching operations are straightforward. Complexity increases when configuring persistence, replication, cluster topology, and memory management for production-grade deployments."
     },
     "capTheorem": {
@@ -219,7 +219,7 @@
     "strengths": [
       "Microsecond latency for reads and writes",
       "Ideal for caching, real-time analytics, and session management",
-      "Eliminates disk I/O bottleneck entirely",
+      "Eliminates the disk I/O bottleneck entirely",
       "Rich data structure support in Redis (lists, sets, sorted sets, streams)"
     ],
     "weaknesses": [
@@ -244,13 +244,13 @@
     "topDatabases": [
       {
         "name": "Redis",
-        "description": "The dominant in-memory data store supporting strings, hashes, lists, sets, sorted sets, streams, and more -- used as cache, message broker, and primary database.",
+        "description": "The dominant in-memory data store supporting strings, hashes, lists, sets, sorted sets, streams, and more. Used as a cache, message broker, and primary database.",
         "license": "RSALv2 / SSPLv1 (source-available since 2024)",
         "url": "https://db-engines.com/en/system/Redis"
       },
       {
         "name": "Memcached",
-        "description": "Distributed memory caching system focused purely on simplicity and speed. No persistence, no data structures -- just blazing-fast key-value caching.",
+        "description": "Distributed memory caching system focused purely on simplicity and speed. No persistence, no data structures, just blazing-fast key-value caching.",
         "license": "BSD 3-Clause",
         "url": "https://db-engines.com/en/system/Memcached"
       },
@@ -288,7 +288,7 @@
     "icon": "clock",
     "complexityPosition": 0.35,
     "summary": "Purpose-built for time-stamped data with append-heavy write patterns and time-windowed queries. Optimized for IoT telemetry, monitoring metrics, financial tick data, and any domain where data flows as a continuous stream over time.",
-    "characterSketch": "The meticulous historian who logs every heartbeat, sensor reading, and market tick with obsessive precision. It remembers everything in perfect chronological order and can summarize decades of data into a trend line in milliseconds -- but ask it to update yesterday's entry and it gives you a puzzled look.",
+    "characterSketch": "The meticulous historian who logs every heartbeat, sensor reading, and market tick with obsessive precision. It remembers everything in perfect chronological order and can summarize decades of data into a trend line in milliseconds. Ask it to update yesterday's entry, though, and it gives you a puzzled look.",
     "scores": {
       "scalability": 8,
       "performance": 8,
@@ -300,14 +300,14 @@
       "learningCurve": 6
     },
     "justifications": {
-      "scalability": "Purpose-built for high-throughput ingestion -- InfluxDB and TimescaleDB handle millions of data points per second. Time-based partitioning enables efficient horizontal scaling and automatic data lifecycle management.",
+      "scalability": "Purpose-built for high-throughput ingestion. InfluxDB and TimescaleDB handle millions of data points per second. Time-based partitioning enables efficient horizontal scaling and automatic data lifecycle management.",
       "performance": "Columnar storage and time-based indexing deliver exceptional read performance for time-range queries and downsampling. Write throughput is optimized for append-only patterns with minimal index overhead.",
-      "reliability": "Replication and WAL provide good durability. TimescaleDB inherits PostgreSQL's proven reliability. However, aggressive retention policies and downsampling mean raw data may be intentionally discarded.",
+      "reliability": "Replication and WAL provide good durability, and TimescaleDB inherits PostgreSQL's proven reliability. However, aggressive retention policies and downsampling mean raw data may be intentionally discarded.",
       "operationalSimplicity": "Retention policies, continuous aggregations, and downsampling rules add operational configuration beyond basic setup. Capacity planning requires understanding ingestion rates, cardinality, and storage projections.",
-      "queryFlexibility": "Excellent for time-windowed aggregations, downsampling, and trend analysis. Limited for general-purpose queries -- no joins across unrelated datasets, and ad-hoc queries outside time dimensions are slow.",
-      "schemaFlexibility": "Tags (indexed metadata) and fields (values) provide some flexibility, but the fundamental time-series data model is rigid: every point needs a timestamp. Adding new measurements is easy; changing the structure is not.",
-      "ecosystemMaturity": "Rapidly growing category with InfluxDB, TimescaleDB, and cloud offerings (Amazon Timestream). Younger than relational databases but well-established for monitoring and IoT with strong integration ecosystems.",
-      "learningCurve": "Concepts like retention policies, continuous queries, downsampling, and high-cardinality management are domain-specific. Developers familiar with SQL find TimescaleDB approachable; InfluxQL/Flux require dedicated learning."
+      "queryFlexibility": "Excellent for time-windowed aggregations, downsampling, and trend analysis. Limited for general-purpose queries, with no joins across unrelated datasets, and ad-hoc queries outside time dimensions tend to be slow.",
+      "schemaFlexibility": "Tags (indexed metadata) and fields (values) provide some flexibility, but the fundamental time-series data model is rigid: every point needs a timestamp. Adding new measurements is easy, but changing the structure is not.",
+      "ecosystemMaturity": "A rapidly growing category with InfluxDB, TimescaleDB, and cloud offerings like Amazon Timestream. Younger than relational databases but well-established for monitoring and IoT, with strong integration ecosystems.",
+      "learningCurve": "Concepts like retention policies, continuous queries, downsampling, and high-cardinality management are domain-specific. Developers familiar with SQL find TimescaleDB approachable, while InfluxQL and Flux require dedicated learning."
     },
     "capTheorem": {
       "classification": "Tunable",
@@ -390,18 +390,18 @@
       "learningCurve": 6
     },
     "justifications": {
-      "scalability": "Vertical scaling is straightforward but horizontal scaling requires sharding, read replicas, or distributed SQL (NewSQL). Traditional RDBMS architectures hit scaling ceilings due to cross-shard join complexity.",
-      "performance": "Excellent for complex queries through mature query optimizers. However, strict ACID compliance adds overhead per transaction. Bulk writes and schema migrations can lock tables, causing latency spikes.",
-      "reliability": "ACID transactions, WAL, point-in-time recovery, and decades of battle-hardening make relational databases the gold standard for data integrity. PostgreSQL and Oracle have proven durability across every industry.",
-      "operationalSimplicity": "Rich ecosystem of management tools (pgAdmin, DBeaver, DataGrip) helps, but schema migrations, index tuning, vacuum operations, and backup strategies require experienced DBAs at scale.",
+      "scalability": "Vertical scaling is straightforward, but horizontal scaling requires sharding, read replicas, or distributed SQL (NewSQL). Traditional RDBMS architectures hit scaling ceilings due to cross-shard join complexity.",
+      "performance": "Excellent for complex queries through mature query optimizers. However, strict ACID compliance adds overhead per transaction, and bulk writes or schema migrations can lock tables, causing latency spikes.",
+      "reliability": "ACID transactions, WAL, point-in-time recovery, and decades of battle-hardening make relational databases the gold standard for data integrity. PostgreSQL and Oracle have proven their durability across every industry.",
+      "operationalSimplicity": "A rich ecosystem of management tools (pgAdmin, DBeaver, DataGrip) helps, but schema migrations, index tuning, vacuum operations, and backup strategies require experienced DBAs at scale.",
       "queryFlexibility": "SQL is the most expressive query language: joins across tables, window functions, CTEs, subqueries, aggregations, and full-text search. No other model matches the breadth of analytical capabilities.",
-      "schemaFlexibility": "Schema changes require ALTER TABLE statements and often downtime or careful migration strategies. Adding columns is easy; restructuring tables with foreign key dependencies is expensive.",
+      "schemaFlexibility": "Schema changes require ALTER TABLE statements and often downtime or careful migration strategies. Adding columns is easy, but restructuring tables with foreign key dependencies is expensive.",
       "ecosystemMaturity": "The most mature database category by far. PostgreSQL, MySQL, and Oracle have decades of production use, thousands of tools, extensive documentation, and the largest talent pool in the industry.",
       "learningCurve": "SQL is a lingua franca that most developers learn early, but mastering query optimization, indexing strategies, normalization theory, and transaction isolation levels requires significant investment."
     },
     "capTheorem": {
       "classification": "CA",
-      "notes": "Traditional single-node RDBMS provides consistency and availability but cannot survive network partitions. Distributed SQL variants (CockroachDB, Spanner) sacrifice some availability for partition tolerance, effectively becoming CP."
+      "notes": "Traditional single-node RDBMS provides consistency and availability but cannot survive network partitions. Distributed SQL variants like CockroachDB and Spanner sacrifice some availability for partition tolerance, effectively becoming CP."
     },
     "crossCategory": ["document"],
     "strengths": [
@@ -425,7 +425,7 @@
       "Applications requiring strong data consistency guarantees"
     ],
     "avoidWhen": [
-      "Data is highly unstructured or schema changes constantly",
+      "Data is highly unstructured or the schema changes constantly",
       "Write throughput at massive scale is the primary requirement",
       "Simple key-based access patterns don't need SQL overhead",
       "Horizontal scaling must be transparent without architectural changes"
@@ -445,7 +445,7 @@
       },
       {
         "name": "Microsoft SQL Server",
-        "description": "Enterprise relational database with deep Windows/Azure integration, powerful BI tooling (SSRS, SSAS, SSIS), and advanced features like columnstore indexes and in-memory OLTP.",
+        "description": "Enterprise relational database with deep Windows and Azure integration, powerful BI tooling (SSRS, SSAS, SSIS), and advanced features like columnstore indexes and in-memory OLTP.",
         "license": "Proprietary (Microsoft)",
         "url": "https://db-engines.com/en/system/Microsoft+SQL+Server"
       },
@@ -477,8 +477,8 @@
     "slug": "search",
     "icon": "search",
     "complexityPosition": 0.45,
-    "summary": "Database engine built around inverted indexes for full-text search, relevance scoring, and faceted navigation. Optimized for finding needles in haystacks across unstructured or semi-structured text data.",
-    "characterSketch": "The librarian with a photographic memory -- it has indexed every word in every document and can find exactly what you're looking for before you finish typing. Brilliant at search and discovery, but don't trust it as your only copy of the data -- it's a finding aid, not a vault.",
+    "summary": "A database engine built around inverted indexes for full-text search, relevance scoring, and faceted navigation. Optimized for finding needles in haystacks across unstructured or semi-structured text data.",
+    "characterSketch": "The librarian with a photographic memory. It has indexed every word in every document and can find exactly what you're looking for before you finish typing. Brilliant at search and discovery, but don't trust it as your only copy of the data. It's a finding aid, not a vault.",
     "scores": {
       "scalability": 8,
       "performance": 8,
@@ -494,8 +494,8 @@
       "performance": "Inverted indexes enable sub-second full-text search across billions of documents. Relevance scoring (BM25, TF-IDF) and aggregations execute efficiently thanks to columnar segment storage.",
       "reliability": "Search engines are typically used as secondary indexes, not primary data stores. Replica shards provide redundancy, but reindexing from a primary source is the standard recovery pattern.",
       "operationalSimplicity": "Cluster management (shard allocation, index lifecycle, JVM tuning) requires expertise. Elasticsearch clusters are notoriously resource-hungry and need careful capacity planning to avoid split-brain scenarios.",
-      "queryFlexibility": "Rich query DSL supports full-text search, fuzzy matching, geospatial queries, aggregations, and complex boolean logic. However, it lacks relational joins and strict transactional semantics.",
-      "schemaFlexibility": "Dynamic mapping automatically detects and indexes new fields. Schema evolution is straightforward for adding fields but changing field types requires reindexing the entire dataset.",
+      "queryFlexibility": "The query DSL supports full-text search, fuzzy matching, geospatial queries, aggregations, and complex boolean logic. However, it lacks relational joins and strict transactional semantics.",
+      "schemaFlexibility": "Dynamic mapping automatically detects and indexes new fields. Schema evolution is straightforward for adding fields, but changing field types requires reindexing the entire dataset.",
       "ecosystemMaturity": "Elasticsearch powers search for Wikipedia, GitHub, and thousands of enterprises. The ELK stack (Elasticsearch, Logstash, Kibana) is the de facto standard for log analytics and observability.",
       "learningCurve": "The query DSL, mapping configuration, analyzer chains, and cluster topology concepts create a significant learning curve. Effective relevance tuning requires understanding information retrieval theory."
     },
@@ -511,7 +511,7 @@
       "Horizontally scalable with automatic shard distribution"
     ],
     "weaknesses": [
-      "Not designed as a primary data store -- data loss risk without source of truth",
+      "Not designed as a primary data store, with data loss risk if there is no separate source of truth",
       "High memory and CPU requirements for cluster operation",
       "Complex cluster management with JVM tuning and shard balancing",
       "Eventual consistency means writes aren't immediately searchable"
@@ -525,7 +525,7 @@
     "avoidWhen": [
       "Used as the sole primary data store without a separate source of truth",
       "Strict transactional consistency is required for writes",
-      "Simple key-value lookups don't justify cluster overhead",
+      "Simple key-value lookups don't justify the cluster overhead",
       "Budget constraints cannot support resource-intensive clusters"
     ],
     "topDatabases": [
@@ -569,7 +569,7 @@
     "icon": "columns",
     "complexityPosition": 0.58,
     "summary": "Organizes data into column families rather than traditional rows, enabling massive write throughput and efficient columnar reads across distributed clusters. Optimized for IoT telemetry, event logging, and workloads requiring high availability at planetary scale.",
-    "characterSketch": "The industrial workhorse built for relentless throughput -- it swallows millions of writes per second without flinching and never complains about downtime. Not the most eloquent conversationalist (queries are limited), but when you need to store everything and never lose a beat, it's the one you call.",
+    "characterSketch": "The industrial workhorse built for relentless throughput. It swallows millions of writes per second without flinching and never complains about downtime. Not the most eloquent conversationalist (queries are limited), but when you need to store everything and never lose a beat, it's the one you call.",
     "scores": {
       "scalability": 9,
       "performance": 8,
@@ -581,13 +581,13 @@
       "learningCurve": 5
     },
     "justifications": {
-      "scalability": "Designed from the ground up for horizontal scaling. Cassandra uses consistent hashing across commodity nodes with linear throughput gains -- Netflix runs clusters spanning hundreds of nodes across regions.",
+      "scalability": "Designed from the ground up for horizontal scaling. Cassandra uses consistent hashing across commodity nodes with linear throughput gains. Netflix, for example, runs clusters spanning hundreds of nodes across regions.",
       "performance": "Exceptional write throughput through append-only log-structured merge trees (LSM). Reads by partition key are fast, but cross-partition queries and secondary index scans can be expensive.",
       "reliability": "Tunable replication factor across data centers provides strong durability. Cassandra's masterless architecture eliminates single points of failure. However, eventual consistency by default means stale reads are possible.",
       "operationalSimplicity": "Compaction strategies, tombstone management, repair operations, and data modeling around partition keys require deep expertise. Misconfigured wide-column stores lead to hot partitions and cascading failures.",
-      "queryFlexibility": "CQL (Cassandra Query Language) looks like SQL but forbids joins, subqueries, and most aggregations. Queries must follow the primary key access pattern -- ad-hoc queries require denormalized tables.",
+      "queryFlexibility": "CQL (Cassandra Query Language) looks like SQL but forbids joins, subqueries, and most aggregations. Queries must follow the primary key access pattern, and ad-hoc queries require denormalized tables.",
       "schemaFlexibility": "Column families allow dynamic columns within a row, providing some flexibility. However, changing partition keys requires data migration, and the data model is tightly coupled to access patterns.",
-      "ecosystemMaturity": "Apache Cassandra powers Apple (400,000+ nodes), Netflix, and Discord. Google Bigtable pioneered the model. ScyllaDB offers drop-in compatibility with C++ performance. Mature but smaller community than relational.",
+      "ecosystemMaturity": "Apache Cassandra powers Apple (400,000+ nodes), Netflix, and Discord. Google Bigtable pioneered the model. ScyllaDB offers drop-in compatibility with C++ performance. Mature but with a smaller community than relational databases.",
       "learningCurve": "Data modeling for wide-column stores is counterintuitive for developers with relational backgrounds. Understanding partition keys, clustering columns, and denormalization patterns requires a paradigm shift."
     },
     "capTheorem": {
@@ -617,7 +617,7 @@
       "Queries require joins or complex aggregations",
       "Access patterns are unpredictable or ad-hoc",
       "Strong consistency is required for every operation",
-      "Team lacks expertise in wide-column data modeling"
+      "The team lacks expertise in wide-column data modeling"
     ],
     "topDatabases": [
       {
@@ -660,7 +660,7 @@
     "icon": "compass",
     "complexityPosition": 0.65,
     "summary": "Stores and indexes high-dimensional vector embeddings for similarity search using approximate nearest neighbor (ANN) algorithms. Optimized for AI/ML applications including semantic search, recommendation systems, and retrieval-augmented generation (RAG).",
-    "characterSketch": "The AI whisperer -- it understands meaning, not just words. While others match exact strings, it finds things that are similar, related, or semantically close. Born in the age of LLMs and embeddings, it's the youngest database model but growing faster than any before it.",
+    "characterSketch": "The AI whisperer that understands meaning, not just words. While others match exact strings, it finds things that are similar, related, or semantically close. Born in the age of LLMs and embeddings, it's the youngest database model but growing faster than any before it.",
     "scores": {
       "scalability": 7,
       "performance": 7,
@@ -673,17 +673,17 @@
     },
     "justifications": {
       "scalability": "Most vector databases support sharding and distributed indexing. Milvus and Pinecone scale to billions of vectors. However, high-dimensional index structures (HNSW, IVF) have higher memory overhead per node than simple key-value data.",
-      "performance": "ANN algorithms (HNSW, IVF-PQ) deliver sub-millisecond similarity search across millions of vectors. Exact nearest-neighbor search is O(n) and impractical at scale -- approximate methods trade marginal accuracy for dramatic speed.",
-      "reliability": "Most vector databases are young products still maturing their durability guarantees. Pinecone is fully managed; Milvus and Weaviate offer replication but lack the decades of battle-testing that relational databases have.",
-      "operationalSimplicity": "Managed offerings (Pinecone) simplify operations significantly. Self-hosted options (Milvus, Qdrant) require understanding index types, distance metrics, and memory-vs-accuracy tradeoffs for production tuning.",
+      "performance": "ANN algorithms (HNSW, IVF-PQ) deliver sub-millisecond similarity search across millions of vectors. Exact nearest-neighbor search is O(n) and impractical at scale, so approximate methods trade marginal accuracy for dramatic speed.",
+      "reliability": "Most vector databases are young products still maturing their durability guarantees. Pinecone is fully managed, while Milvus and Weaviate offer replication but lack the decades of battle-testing that relational databases have.",
+      "operationalSimplicity": "Managed offerings like Pinecone simplify operations significantly. Self-hosted options such as Milvus and Qdrant require understanding index types, distance metrics, and memory-vs-accuracy tradeoffs for production tuning.",
       "queryFlexibility": "Queries are primarily similarity searches: find K nearest vectors, optionally filtered by metadata. No support for joins, aggregations, or complex relational queries. Hybrid search (vector + keyword) is an emerging feature.",
       "schemaFlexibility": "Vectors have fixed dimensionality per collection. Metadata fields offer some schema flexibility, but changing embedding models (and thus vector dimensions) requires reindexing the entire dataset.",
       "ecosystemMaturity": "The youngest database category, with most products launched after 2020. Rapidly growing but lacking the mature tooling, monitoring solutions, and established best practices of older database models.",
-      "learningCurve": "Requires understanding of embedding models, distance metrics (cosine, Euclidean, dot product), ANN algorithms, and the ML pipeline that generates vectors. The database itself is simple once you grasp the concepts."
+      "learningCurve": "Requires understanding of embedding models, distance metrics (cosine, Euclidean, dot product), ANN algorithms, and the ML pipeline that generates vectors. The database itself is simple once you grasp these concepts."
     },
     "capTheorem": {
       "classification": "AP",
-      "notes": "Vector databases typically prioritize availability for serving ML inference workloads. Approximate results are inherently tolerance-friendly -- slightly stale indexes still return useful similarity results."
+      "notes": "Vector databases typically prioritize availability for serving ML inference workloads. Approximate results are inherently tolerance-friendly, since slightly stale indexes still return useful similarity results."
     },
     "crossCategory": [],
     "strengths": [
@@ -693,7 +693,7 @@
       "Metadata filtering enables hybrid vector + attribute search"
     ],
     "weaknesses": [
-      "Youngest database category with immature ecosystem and tooling",
+      "Youngest database category with an immature ecosystem and tooling",
       "Limited query capabilities beyond similarity search",
       "Index rebuilds required when changing embedding models or dimensions",
       "High memory requirements for HNSW indexes at scale"
@@ -720,7 +720,7 @@
       },
       {
         "name": "Weaviate",
-        "description": "Open-source vector database with built-in vectorization modules, hybrid search (vector + BM25), and GraphQL API. Supports automatic embedding generation from raw data.",
+        "description": "Open-source vector database with built-in vectorization modules, hybrid search (vector + BM25), and a GraphQL API. Supports automatic embedding generation from raw data.",
         "license": "BSD 3-Clause",
         "url": "https://db-engines.com/en/system/Weaviate"
       },
@@ -758,7 +758,7 @@
     "icon": "git-merge",
     "complexityPosition": 0.72,
     "summary": "Combines the horizontal scalability of NoSQL with the ACID guarantees and SQL interface of traditional relational databases. Optimized for globally distributed applications that refuse to compromise between consistency and scale.",
-    "characterSketch": "The overachiever who insists on having it all -- the scalability of NoSQL and the consistency of SQL, no compromises accepted. It's the answer to the question 'Why can't we just scale our PostgreSQL globally?' Born from the frustration of choosing between consistency and scale.",
+    "characterSketch": "The overachiever who insists on having it all: the scalability of NoSQL and the consistency of SQL, no compromises accepted. It's the answer to the question 'Why can't we just scale our PostgreSQL globally?' Born from the frustration of choosing between consistency and scale.",
     "scores": {
       "scalability": 8,
       "performance": 6,
@@ -770,18 +770,18 @@
       "learningCurve": 6
     },
     "justifications": {
-      "scalability": "Designed for horizontal scaling with automatic sharding and rebalancing. CockroachDB and Spanner distribute data globally while maintaining strong consistency. Near-linear write scaling across regions.",
-      "performance": "Distributed consensus (Raft/Paxos) adds latency compared to single-node RDBMS -- cross-region transactions can take 100-300ms. Local reads are fast, but globally consistent writes have inherent network overhead.",
-      "reliability": "Serializable isolation and distributed ACID transactions are the defining feature. Google Spanner achieves 99.999% availability. CockroachDB survives entire region failures without data loss through Raft-based replication.",
+      "scalability": "Designed for horizontal scaling with automatic sharding and rebalancing. CockroachDB and Spanner distribute data globally while maintaining strong consistency, with near-linear write scaling across regions.",
+      "performance": "Distributed consensus (Raft/Paxos) adds latency compared to single-node RDBMS. Cross-region transactions can take 100 to 300ms. Local reads are fast, but globally consistent writes have inherent network overhead.",
+      "reliability": "Serializable isolation and distributed ACID transactions are the defining feature. Google Spanner achieves 99.999% availability, and CockroachDB survives entire region failures without data loss through Raft-based replication.",
       "operationalSimplicity": "Cluster topology, range rebalancing, and multi-region configuration add significant operational complexity. While easier than manual sharding of PostgreSQL, it still requires understanding distributed systems concepts.",
       "queryFlexibility": "Full SQL support including joins, indexes, transactions, and foreign keys. CockroachDB is wire-compatible with PostgreSQL. Some limitations exist on distributed joins and certain advanced SQL features.",
-      "schemaFlexibility": "Inherits relational schema rigidity -- ALTER TABLE, migrations, and foreign key constraints. Schema changes on large distributed datasets require careful online DDL strategies to avoid downtime.",
-      "ecosystemMaturity": "Younger than traditional RDBMS (CockroachDB: 2015, TiDB: 2015). Growing adoption in cloud-native enterprises, but the tooling ecosystem and community are smaller than PostgreSQL or MySQL.",
+      "schemaFlexibility": "Inherits relational schema rigidity with ALTER TABLE, migrations, and foreign key constraints. Schema changes on large distributed datasets require careful online DDL strategies to avoid downtime.",
+      "ecosystemMaturity": "Younger than traditional RDBMS (CockroachDB launched in 2015, TiDB in 2015). Growing adoption in cloud-native enterprises, but the tooling ecosystem and community are smaller than PostgreSQL or MySQL.",
       "learningCurve": "SQL familiarity makes the transition approachable, but understanding distributed transaction semantics, data placement policies, and multi-region topology requires dedicated learning beyond standard RDBMS knowledge."
     },
     "capTheorem": {
       "classification": "CP",
-      "notes": "NewSQL databases choose consistency and partition tolerance, sacrificing some availability during network partitions. Spanner uses TrueTime for globally synchronized timestamps. CockroachDB uses Raft consensus with serializable isolation."
+      "notes": "NewSQL databases choose consistency and partition tolerance, sacrificing some availability during network partitions. Spanner uses TrueTime for globally synchronized timestamps, and CockroachDB uses Raft consensus with serializable isolation."
     },
     "crossCategory": ["relational"],
     "strengths": [
@@ -798,12 +798,12 @@
     ],
     "bestFor": [
       "Global applications requiring strong consistency across regions",
-      "Migrating from PostgreSQL/MySQL that has outgrown single-node scaling",
+      "Migrating from PostgreSQL or MySQL that has outgrown single-node scaling",
       "Financial systems needing distributed ACID transactions",
       "Multi-region SaaS platforms with regulatory data residency requirements"
     ],
     "avoidWhen": [
-      "Single-region deployment where traditional RDBMS suffices",
+      "Single-region deployment where a traditional RDBMS suffices",
       "Latency-sensitive workloads that cannot tolerate consensus overhead",
       "Budget constraints make managed distributed databases impractical"
     ],
@@ -859,24 +859,24 @@
       "learningCurve": 4
     },
     "justifications": {
-      "scalability": "Graph traversals are inherently difficult to partition -- splitting connected graphs across nodes creates expensive cross-partition hops. Neo4j scales reads via replicas but writes are limited by leader node capacity.",
-      "performance": "Index-free adjacency enables constant-time traversals regardless of graph size -- following a relationship is O(1). However, graph-wide analytics and pathfinding on large datasets can be computationally expensive.",
+      "scalability": "Graph traversals are inherently difficult to partition. Splitting connected graphs across nodes creates expensive cross-partition hops. Neo4j scales reads via replicas, but writes are limited by leader node capacity.",
+      "performance": "Index-free adjacency enables constant-time traversals regardless of graph size, so following a relationship is O(1). However, graph-wide analytics and pathfinding on large datasets can be computationally expensive.",
       "reliability": "Neo4j offers ACID transactions, clustering, and causal consistency. Amazon Neptune provides multi-AZ replication. Graph databases are generally reliable but lack the decades of hardening that relational databases have.",
-      "operationalSimplicity": "Graph modeling is powerful but requires careful design. Operations like data imports, backups, and cluster management differ significantly from relational workflows, and tooling is less mature.",
-      "queryFlexibility": "Cypher (Neo4j) and Gremlin (TinkerPop) enable expressive pattern matching, path finding, and relationship traversals that would require complex recursive CTEs in SQL. Powerful for connected data but limited for tabular analytics.",
-      "schemaFlexibility": "Property graphs allow dynamic properties on nodes and edges. No rigid schema required -- new node types and relationship types can be added without migrations. However, query performance depends on consistent graph structure.",
+      "operationalSimplicity": "Graph modeling is powerful but requires careful design. Operations like data imports, backups, and cluster management differ significantly from relational workflows, and the tooling is less mature.",
+      "queryFlexibility": "Cypher (Neo4j) and Gremlin (TinkerPop) enable expressive pattern matching, path finding, and relationship traversals that would require complex recursive CTEs in SQL. Powerful for connected data, but limited for tabular analytics.",
+      "schemaFlexibility": "Property graphs allow dynamic properties on nodes and edges. No rigid schema is required, and new node types and relationship types can be added without migrations. However, query performance depends on consistent graph structure.",
       "ecosystemMaturity": "Neo4j dominates with 15+ years of development and a strong community. The broader graph database ecosystem is smaller than relational or document databases, with fewer tools and integrations available.",
       "learningCurve": "Graph thinking requires a paradigm shift from tabular data. Learning Cypher or Gremlin, understanding traversal strategies, and designing effective graph models takes significant investment for developers from relational backgrounds."
     },
     "capTheorem": {
       "classification": "CP",
-      "notes": "Neo4j uses leader-based replication with causal consistency, prioritizing consistency over availability during partitions. Amazon Neptune offers strong consistency within a region. Some graph databases (ArangoDB) offer tunable consistency."
+      "notes": "Neo4j uses leader-based replication with causal consistency, prioritizing consistency over availability during partitions. Amazon Neptune offers strong consistency within a region. Some graph databases like ArangoDB offer tunable consistency."
     },
     "crossCategory": [],
     "strengths": [
       "Constant-time relationship traversals through index-free adjacency",
       "Intuitive modeling of connected data (social graphs, hierarchies, networks)",
-      "Expressive pattern matching with Cypher/Gremlin query languages",
+      "Expressive pattern matching with Cypher and Gremlin query languages",
       "Excellent for pathfinding, recommendations, and fraud detection"
     ],
     "weaknesses": [
@@ -894,14 +894,14 @@
     ],
     "avoidWhen": [
       "Data is primarily tabular with few relationships",
-      "Workload is dominated by bulk aggregations or analytics",
+      "The workload is dominated by bulk aggregations or analytics",
       "Horizontal write scaling is a primary requirement",
-      "Team lacks graph modeling expertise"
+      "The team lacks graph modeling expertise"
     ],
     "topDatabases": [
       {
         "name": "Neo4j",
-        "description": "The most popular graph database with native graph storage, the Cypher query language, and a rich ecosystem of visualization tools, algorithms library, and integrations.",
+        "description": "The most popular graph database with native graph storage, the Cypher query language, and a rich ecosystem of visualization tools, an algorithms library, and integrations.",
         "license": "GPL v3 (Community) / Proprietary (Enterprise)",
         "url": "https://db-engines.com/en/system/Neo4j"
       },
@@ -919,7 +919,7 @@
       },
       {
         "name": "TigerGraph",
-        "description": "High-performance graph analytics platform designed for deep-link analysis across massive datasets. Supports real-time graph analytics with parallel processing and GSQL query language.",
+        "description": "High-performance graph analytics platform designed for deep-link analysis across massive datasets. Supports real-time graph analytics with parallel processing and the GSQL query language.",
         "license": "Proprietary (Community / Enterprise)",
         "url": "https://db-engines.com/en/system/TigerGraph"
       }
@@ -939,7 +939,7 @@
     "icon": "box",
     "complexityPosition": 0.82,
     "summary": "Persists application objects directly to storage without object-relational mapping, preserving complex object hierarchies, inheritance, and polymorphism natively. Optimized for applications with deeply nested object graphs where ORM impedance mismatch is the primary pain point.",
-    "characterSketch": "The purist who refuses to translate -- it stores your objects exactly as they are in code, no flattening, no mapping, no compromises. Once revolutionary in its vision of seamless persistence, it now lives in a quiet niche, overshadowed by more popular models but still loyal to its philosophy.",
+    "characterSketch": "The purist who refuses to translate. It stores your objects exactly as they are in code: no flattening, no mapping, no compromises. Once revolutionary in its vision of seamless persistence, it now lives in a quiet niche, overshadowed by more popular models but still loyal to its philosophy.",
     "scores": {
       "scalability": 2,
       "performance": 5,
@@ -952,13 +952,13 @@
     },
     "justifications": {
       "scalability": "Most OODBs are designed for single-server or small-cluster deployments. Horizontal scaling is limited by the complexity of distributing interconnected object graphs. No major cloud-managed OODB offerings exist.",
-      "performance": "Navigational access through object references is fast -- pointer chasing eliminates join overhead. However, collection-wide queries and aggregations are slow due to lack of optimized query planners.",
-      "reliability": "Commercial OODBs (InterSystems Cache, Versant) offer ACID transactions and proven enterprise reliability. Open-source options (db4o) had limited durability features and are no longer actively maintained.",
-      "operationalSimplicity": "Tight coupling to programming language (Java, C#) means schema changes propagate through application code. No universal SQL-like tooling for ad-hoc queries, monitoring, or administration.",
-      "queryFlexibility": "Object query languages (OQL, JDOQL) support traversal and filtering but lack the breadth of SQL. No standard query language across implementations -- each OODB has its own API and query syntax.",
+      "performance": "Navigational access through object references is fast because pointer chasing eliminates join overhead. However, collection-wide queries and aggregations are slow due to the lack of optimized query planners.",
+      "reliability": "Commercial OODBs like InterSystems Cache and Versant offer ACID transactions and proven enterprise reliability. Open-source options such as db4o had limited durability features and are no longer actively maintained.",
+      "operationalSimplicity": "Tight coupling to a specific programming language (Java, C#) means schema changes propagate through application code. There is no universal SQL-like tooling for ad-hoc queries, monitoring, or administration.",
+      "queryFlexibility": "Object query languages (OQL, JDOQL) support traversal and filtering, but they lack the breadth of SQL. There is no standard query language across implementations; each OODB has its own API and query syntax.",
       "schemaFlexibility": "Object inheritance and polymorphism provide natural schema evolution through class hierarchies. Adding attributes is simple through class extension, but refactoring deep hierarchies can cascade breaking changes.",
-      "ecosystemMaturity": "The smallest active ecosystem among database models. db4o is discontinued, ObjectDB serves a niche Java community, and Versant was acquired. InterSystems Cache is the most commercially viable but highly proprietary.",
-      "learningCurve": "Requires deep understanding of object-oriented design patterns, persistence by reachability, object identity vs equality, and OQL/JDOQL query syntax. Few modern learning resources or community support available."
+      "ecosystemMaturity": "The smallest active ecosystem among database models. db4o is discontinued, ObjectDB serves a niche Java community, and Versant was acquired by Actian. InterSystems Cache is the most commercially viable but is highly proprietary.",
+      "learningCurve": "Requires deep understanding of object-oriented design patterns, persistence by reachability, object identity vs equality, and OQL/JDOQL query syntax. Few modern learning resources or community support are available."
     },
     "capTheorem": {
       "classification": "CA",
@@ -966,7 +966,7 @@
     },
     "crossCategory": [],
     "strengths": [
-      "Zero impedance mismatch -- objects stored exactly as they exist in code",
+      "Zero impedance mismatch: objects are stored exactly as they exist in code",
       "Efficient navigational access through direct object references",
       "Native support for inheritance, polymorphism, and complex object graphs",
       "No ORM layer needed, reducing boilerplate and mapping bugs"
@@ -984,7 +984,7 @@
       "Scientific computing with deeply nested data structures"
     ],
     "avoidWhen": [
-      "Application needs to scale horizontally across many nodes",
+      "The application needs to scale horizontally across many nodes",
       "Multi-language access to the same data is required",
       "Ad-hoc querying and reporting are important use cases",
       "Long-term vendor support and community viability are priorities"
@@ -1023,7 +1023,7 @@
     "icon": "layers",
     "complexityPosition": 0.88,
     "summary": "Supports multiple data models (document, graph, key-value, search) within a single database engine, reducing the need for polyglot persistence. Optimized for applications that span multiple data access patterns without operating separate database systems.",
-    "characterSketch": "The Swiss Army knife that promises to do everything in one package -- documents, graphs, key-value, and more, all under one roof. Incredibly convenient for reducing operational complexity, but the jack-of-all-trades occasionally compromises depth for breadth.",
+    "characterSketch": "The Swiss Army knife that promises to do everything in one package: documents, graphs, key-value, and more, all under one roof. Incredibly convenient for reducing operational complexity, but the jack-of-all-trades occasionally compromises depth for breadth.",
     "scores": {
       "scalability": 7,
       "performance": 6,
@@ -1035,14 +1035,14 @@
       "learningCurve": 3
     },
     "justifications": {
-      "scalability": "Most multi-model databases support horizontal scaling through sharding. Cosmos DB offers global distribution with five consistency levels. ArangoDB distributes across clusters. However, cross-model queries can create scaling bottlenecks.",
-      "performance": "Performance is competent across models but rarely best-in-class for any single one. A dedicated graph database will outperform multi-model graph queries; a dedicated search engine will outperform multi-model text search.",
-      "reliability": "Cosmos DB offers 99.999% SLA with multi-region writes. ArangoDB and SurrealDB provide replication and failover. However, the complexity of supporting multiple data models increases the surface area for potential consistency issues.",
-      "operationalSimplicity": "While reducing the number of systems to manage (polyglot persistence elimination), multi-model databases introduce their own complexity: multiple query languages, indexing strategies per model, and model-specific tuning parameters.",
-      "queryFlexibility": "Unified query languages (AQL in ArangoDB, SQL-like in Cosmos DB) span multiple models. Can perform document queries, graph traversals, and key-value lookups from a single interface -- more flexible than single-model databases.",
+      "scalability": "Most multi-model databases support horizontal scaling through sharding. Cosmos DB offers global distribution with five consistency levels, and ArangoDB distributes across clusters. However, cross-model queries can create scaling bottlenecks.",
+      "performance": "Performance is competent across models but rarely best-in-class for any single one. A dedicated graph database will outperform multi-model graph queries, and a dedicated search engine will outperform multi-model text search.",
+      "reliability": "Cosmos DB offers a 99.999% SLA with multi-region writes. ArangoDB and SurrealDB provide replication and failover. However, the complexity of supporting multiple data models increases the surface area for potential consistency issues.",
+      "operationalSimplicity": "While reducing the number of systems to manage (eliminating polyglot persistence), multi-model databases introduce their own complexity: multiple query languages, indexing strategies per model, and model-specific tuning parameters.",
+      "queryFlexibility": "Unified query languages (AQL in ArangoDB, SQL-like in Cosmos DB) span multiple models. You can perform document queries, graph traversals, and key-value lookups from a single interface, which is more flexible than single-model databases.",
       "schemaFlexibility": "Inherits document-model schema flexibility as the base, with graph nodes, key-value pairs, and search indexes added on top. Mixing models in one system provides exceptional flexibility for evolving data requirements.",
-      "ecosystemMaturity": "A younger category with fewer production deployments than established single-model databases. Cosmos DB benefits from Azure ecosystem backing, but open-source options (ArangoDB, SurrealDB) have smaller communities.",
-      "learningCurve": "Must learn multiple data models, their query languages, and when to use each. Understanding the tradeoffs between models, cross-model query performance, and indexing strategies requires broad database expertise."
+      "ecosystemMaturity": "A younger category with fewer production deployments than established single-model databases. Cosmos DB benefits from Azure ecosystem backing, but open-source options like ArangoDB and SurrealDB have smaller communities.",
+      "learningCurve": "You must learn multiple data models, their query languages, and when to use each. Understanding the tradeoffs between models, cross-model query performance, and indexing strategies requires broad database expertise."
     },
     "capTheorem": {
       "classification": "Tunable",
@@ -1050,7 +1050,7 @@
     },
     "crossCategory": ["document", "graph", "key-value", "search"],
     "strengths": [
-      "Single system handles documents, graphs, key-value, and search workloads",
+      "A single system handles documents, graphs, key-value, and search workloads",
       "Reduces operational complexity of managing multiple database systems",
       "Unified query interface spans multiple data models",
       "Cosmos DB offers five tunable consistency levels with global distribution"
@@ -1070,7 +1070,7 @@
     "avoidWhen": [
       "A single data model clearly dominates the workload",
       "Best-in-class performance for a specific model is critical",
-      "Team lacks broad database expertise across multiple paradigms"
+      "The team lacks broad database expertise across multiple paradigms"
     ],
     "topDatabases": [
       {
@@ -1081,7 +1081,7 @@
       },
       {
         "name": "Azure Cosmos DB",
-        "description": "Microsoft's globally distributed multi-model database offering document, graph, key-value, column-family, and table APIs with five tunable consistency levels and 99.999% SLA.",
+        "description": "Microsoft's globally distributed multi-model database offering document, graph, key-value, column-family, and table APIs with five tunable consistency levels and a 99.999% SLA.",
         "license": "Proprietary (Azure managed service)",
         "url": "https://db-engines.com/en/system/Microsoft+Azure+Cosmos+DB"
       },
@@ -1099,7 +1099,7 @@
       },
       {
         "name": "OrientDB",
-        "description": "Multi-model database combining document and graph models with SQL-like query language. Supports ACID transactions, distributed clustering, and schema-full/mixed/schemaless modes.",
+        "description": "Multi-model database combining document and graph models with a SQL-like query language. Supports ACID transactions, distributed clustering, and schema-full/mixed/schemaless modes.",
         "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
         "url": "https://db-engines.com/en/system/OrientDB"
       }

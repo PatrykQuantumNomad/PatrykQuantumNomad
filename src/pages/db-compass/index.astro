@@ -1,20 +1,20 @@
 ---
 /**
- * Database Compass Overview Page — /tools/db-compass/
+ * Database Compass Overview Page — /db-compass/
  * Main entry point for the Database Compass. Assembles the complexity spectrum,
  * use-case filter, model card grid, sortable scoring table, and dimension legend
  * into a single cohesive page with full SEO metadata and JSON-LD structured data.
  */
 import { getCollection } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
-import CompassJsonLd from '../../../components/db-compass/CompassJsonLd.astro';
-import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
-import ComplexitySpectrum from '../../../components/db-compass/ComplexitySpectrum.astro';
-import ModelCardGrid from '../../../components/db-compass/ModelCardGrid.astro';
-import CompassScoringTable from '../../../components/db-compass/CompassScoringTable.astro';
-import DimensionLegend from '../../../components/db-compass/DimensionLegend.astro';
-import UseCaseFilter from '../../../components/db-compass/UseCaseFilter.tsx';
-import { totalScore } from '../../../lib/db-compass/schema';
+import Layout from '../../layouts/Layout.astro';
+import CompassJsonLd from '../../components/db-compass/CompassJsonLd.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import ComplexitySpectrum from '../../components/db-compass/ComplexitySpectrum.astro';
+import ModelCardGrid from '../../components/db-compass/ModelCardGrid.astro';
+import CompassScoringTable from '../../components/db-compass/CompassScoringTable.astro';
+import DimensionLegend from '../../components/db-compass/DimensionLegend.astro';
+import UseCaseFilter from '../../components/db-compass/UseCaseFilter.tsx';
+import { totalScore } from '../../lib/db-compass/schema';
 
 const dbModels = await getCollection('dbModels');
 const allModels = dbModels.map((entry) => entry.data);
@@ -24,7 +24,7 @@ const sorted = [...allModels].sort((a, b) => totalScore(b) - totalScore(a));
 const top5 = sorted.slice(0, 5).map((m, i) => `${i + 1}. ${m.name} (${totalScore(m)}/80)`);
 
 // OG image URL for social sharing
-const ogImageURL = new URL('/open-graph/tools/db-compass.png', Astro.site).toString();
+const ogImageURL = new URL('/open-graph/db-compass.png', Astro.site).toString();
 ---
 
 <Layout
@@ -36,8 +36,7 @@ const ogImageURL = new URL('/open-graph/tools/db-compass.png', Astro.site).toStr
   <CompassJsonLd models={sorted} />
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
-    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
-    { name: 'Database Compass', url: 'https://patrykgolabek.dev/tools/db-compass/' },
+    { name: 'Database Compass', url: 'https://patrykgolabek.dev/db-compass/' },
   ]} />
 
   {/* Hero Section */}
@@ -52,23 +51,20 @@ const ogImageURL = new URL('/open-graph/tools/db-compass.png', Astro.site).toStr
     <p class="text-lg font-medium text-[var(--color-accent-secondary)] mt-2 max-w-2xl mx-auto text-center">
       An opinionated guide by a cloud-native architect.
     </p>
-    <p class="text-sm text-[var(--color-text-secondary)] mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+    <img
+      src="/images/database-compass-hero.svg"
+      alt="Compass rose with radar overlays surrounded by six database model icons: SQL, Key-Value, Document, Graph, Vector, and Time-Series"
+      width="480"
+      height="400"
+      class="mx-auto mt-8 mb-4"
+      loading="eager"
+    />
+    <p class="text-sm text-[var(--color-text-secondary)] mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
       <a href="/blog/database-compass/" class="text-[var(--color-accent)] hover:underline">
         Read the methodology &rarr;
       </a>
     </p>
   </section>
-
-  {/* Visual Breadcrumb */}
-  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
-      <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
-      <li aria-hidden="true">&gt;</li>
-      <li><a href="/tools/" class="hover:text-[var(--color-accent)] transition-colors">Tools</a></li>
-      <li aria-hidden="true">&gt;</li>
-      <li class="text-[var(--color-text-primary)] font-medium" aria-current="page">Database Compass</li>
-    </ol>
-  </nav>
 
   {/* Complexity Spectrum Section */}
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

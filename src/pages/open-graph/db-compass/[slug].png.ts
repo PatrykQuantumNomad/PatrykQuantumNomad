@@ -1,6 +1,6 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { generateCompassModelOgImage } from '../../../../lib/og-image';
+import { generateCompassModelOgImage } from '../../../lib/og-image';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const dbModels = await getCollection('dbModels');

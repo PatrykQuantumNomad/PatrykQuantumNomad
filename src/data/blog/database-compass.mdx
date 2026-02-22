@@ -1,8 +1,9 @@
 ---
 title: "How to Choose a Database in 2026"
-description: "A practical framework for choosing the right database model. 12 categories scored across 8 dimensions -- scalability, performance, reliability, and more."
+description: "A practical framework for choosing the right database model. 12 categories scored across 8 dimensions, from scalability and performance to reliability and beyond."
 publishedDate: 2026-02-22
 tags: ["databases", "database-compass", "cloud-native", "architecture"]
+coverImage: "/images/database-compass-blog-cover.svg"
 draft: false
 ---
 
@@ -14,9 +15,9 @@ In 2026, there are at least 12 distinct database model categories in active prod
 
 Each category has its own strengths, tradeoffs, and failure modes. Each has a handful of production-grade implementations competing for your attention. And each vendor will happily tell you that their database is the right choice for your workload.
 
-After 17 years building cloud-native systems -- adopting Kubernetes before it hit version 1.0, running production databases across every major cloud provider, and debugging more data-layer incidents than I care to count -- I wanted a structured way to evaluate these options. Not a vendor comparison. Not a benchmark shootout. A framework for thinking about database selection that accounts for the dimensions that actually matter in production.
+After 17 years of building cloud-native systems (running production databases across almost every major cloud provider, and debugging more data-layer incidents than I care to count), I wanted a structured way to evaluate these options. Not a vendor comparison. Not a benchmark shootout. A framework for thinking about database selection that accounts for the dimensions that actually matter in production.
 
-That framework is the [Database Compass](/tools/db-compass/). It scores 12 database model categories across 8 dimensions, placing each on a complexity spectrum from the simplest (key-value stores) to the most versatile (multi-model databases). This post walks through the thinking behind it.
+That framework is the [Database Compass](/db-compass/). It scores 12 database model categories across 8 dimensions, placing each on a complexity spectrum from the simplest (key-value stores) to the most versatile (multi-model databases). This post walks through the thinking behind it.
 
 ## The 8 Dimensions That Matter
 
@@ -26,45 +27,49 @@ The Database Compass evaluates each model across 8 dimensions, split into two gr
 
 **Operational dimensions** measure what happens after you deploy:
 
-- **Scalability** -- How well does it handle growth? Can you add capacity horizontally, or are you stuck scaling vertically until you hit a ceiling? A key-value store like Redis scales almost linearly with consistent hashing. A relational database requires careful sharding or a move to distributed SQL.
+- **Scalability:** How well does it handle growth? Can you add capacity horizontally, or are you stuck scaling vertically until you hit a ceiling? A key-value store like Redis scales almost linearly with consistent hashing. A relational database requires careful sharding or a move to distributed SQL.
 
-- **Performance** -- Raw speed under your expected access patterns. Sub-millisecond reads from an in-memory store are meaningless if your workload is complex joins across normalized tables. Performance is always relative to the query shape.
+- **Performance:** Raw speed under your expected access patterns. Sub-millisecond reads from an in-memory store are meaningless if your workload is complex joins across normalized tables. Performance is always relative to the query shape.
 
-- **Reliability** -- ACID transactions, durability guarantees, replication, and recovery. A financial system needs serializable isolation. A caching layer can tolerate data loss on restart. The score reflects how much you can trust the database with data you cannot afford to lose.
+- **Reliability:** ACID transactions, durability guarantees, replication, and recovery. A financial system needs serializable isolation. A caching layer can tolerate data loss on restart. The score reflects how much you can trust the database with data you cannot afford to lose.
 
-- **Operational Simplicity** -- How much expertise does it take to keep running? Some databases are deploy-and-forget. Others require a dedicated team to manage compaction, tombstones, shard rebalancing, and JVM tuning. This dimension measures the ongoing operational tax.
+- **Operational Simplicity:** How much expertise does it take to keep things running? Some databases are deploy-and-forget. Others require a dedicated team to manage compaction, tombstones, shard rebalancing, and JVM tuning. This dimension measures the ongoing operational tax.
 
 **Developer dimensions** measure the experience of building against the database:
 
-- **Query Flexibility** -- What questions can you ask your data? SQL databases score highest here because joins, window functions, CTEs, and subqueries let you express almost anything. Key-value stores score lowest because the only question you can ask is "give me the value for this key."
+- **Query Flexibility:** What questions can you ask your data? SQL databases score highest here because joins, window functions, CTEs, and subqueries let you express almost anything. Key-value stores score lowest because the only question you can ask is "give me the value for this key."
 
-- **Schema Flexibility** -- How easily can your data model evolve? Document databases let you change the shape of your data without migrations. Relational databases require `ALTER TABLE` and careful migration strategies. This matters most in early development when your schema is still finding its shape.
+- **Schema Flexibility:** How easily can your data model evolve? Document databases let you change the shape of your data without migrations. Relational databases require `ALTER TABLE` and careful migration strategies. This matters most in early development when your schema is still finding its shape.
 
-- **Ecosystem Maturity** -- Drivers, tools, community, documentation, managed service offerings, and the size of the talent pool. PostgreSQL has decades of ecosystem behind it. Vector databases launched after 2020 and are still building theirs.
+- **Ecosystem Maturity:** Drivers, tools, community, documentation, managed service offerings, and the size of the talent pool. PostgreSQL has decades of ecosystem behind it. Vector databases launched after 2020 and are still building theirs.
 
-- **Learning Curve** -- How quickly can a competent developer become productive? `GET key` / `SET key value` takes five minutes to learn. Graph traversal queries in Cypher require a paradigm shift from tabular thinking that takes weeks.
+- **Learning Curve:** How quickly can a competent developer become productive? `GET key` / `SET key value` takes five minutes to learn. Graph traversal queries in Cypher require a paradigm shift from tabular thinking that takes weeks.
 
-Each dimension is scored from 1 to 10. The total possible score is 80. No database model scores perfectly across all eight -- that is the point. Every database is a set of tradeoffs, and the framework makes those tradeoffs visible.
+Each dimension is scored from 1 to 10. The total possible score is 80. No database model scores perfectly across all eight, and that is exactly the point. Every database is a set of tradeoffs, and the framework makes those tradeoffs visible.
 
 ## The Complexity Spectrum
 
-One of the most useful mental models in the [Database Compass](/tools/db-compass/) is the complexity spectrum. It arranges all 12 categories from simplest to most complex based on their operational and conceptual footprint.
+One of the most useful mental models in the [Database Compass](/db-compass/) is the complexity spectrum. It arranges all 12 categories from simplest to most complex based on their operational and conceptual footprint.
 
-At the simple end sit [key-value stores](/tools/db-compass/key-value/). The data model is a hash map: keys map to values, and the API is `GET`, `SET`, `DELETE`. There is nothing to misunderstand. The tradeoff is that you cannot ask any question that does not start with "give me the value for this exact key." If your access pattern fits, nothing is faster. If it does not fit, no amount of optimization will help.
+<figure>
+  <img src="/images/database-complexity-spectrum.svg" alt="Database model complexity spectrum showing 12 categories from simple (Key-Value) to complex (Multi-Model), each with example databases" width="1200" height="320" />
+</figure>
 
-At the complex end sit [multi-model databases](/tools/db-compass/multi-model/) like ArangoDB, Azure Cosmos DB, and SurrealDB. These combine document, graph, key-value, and search capabilities in a single engine. They promise to eliminate polyglot persistence -- the operational overhead of running multiple database systems. The tradeoff is that you need to understand multiple data models, their query languages, and when to use each. They are competent across models but rarely best-in-class for any single one.
+At the simple end sit [key-value stores](/db-compass/key-value/). The data model is a hash map: keys map to values, and the API is `GET`, `SET`, `DELETE`. There is nothing to misunderstand. The tradeoff is that you cannot ask any question that does not start with "give me the value for this exact key." If your access pattern fits, nothing is faster. If it does not, no amount of optimization will help.
+
+At the complex end sit [multi-model databases](/db-compass/multi-model/) like ArangoDB, Azure Cosmos DB, and SurrealDB. These combine document, graph, key-value, and search capabilities in a single engine. They promise to eliminate polyglot persistence (the operational overhead of running multiple database systems). The tradeoff is that you need to understand multiple data models, their query languages, and when to use each. They are competent across models but rarely best-in-class for any single one.
 
 The spectrum is not a quality ranking. Simple is not better or worse than complex. A key-value store is the right choice for session caching. A multi-model database is the right choice for an application with genuinely diverse access patterns.
 
-Between these extremes sit 10 other categories, each occupying its own niche: [document databases](/tools/db-compass/document/), [in-memory databases](/tools/db-compass/in-memory/), [time-series databases](/tools/db-compass/time-series/), [relational databases](/tools/db-compass/relational/), [search engines](/tools/db-compass/search/), [wide-column stores](/tools/db-compass/columnar/), [vector databases](/tools/db-compass/vector/), [NewSQL databases](/tools/db-compass/newsql/), [graph databases](/tools/db-compass/graph/), and [object-oriented databases](/tools/db-compass/object/). The spectrum helps you understand the operational commitment each category requires and where your use case lands.
+Between these extremes sit 10 other categories, each occupying its own niche: [document databases](/db-compass/document/), [in-memory databases](/db-compass/in-memory/), [time-series databases](/db-compass/time-series/), [relational databases](/db-compass/relational/), [search engines](/db-compass/search/), [wide-column stores](/db-compass/columnar/), [vector databases](/db-compass/vector/), [NewSQL databases](/db-compass/newsql/), [graph databases](/db-compass/graph/), and [object-oriented databases](/db-compass/object/). The spectrum helps you understand the operational commitment each category requires and where your use case lands.
 
 ## Five Database Models Every Architect Should Know
 
-The 12 categories in the Database Compass span a wide range, but five of them cover the most common production scenarios. If you are building a new system, at least one of these will be in your architecture.
+The 12 categories in the Database Compass span a wide range, but five of them cover the most common production scenarios. If you are building a new system, at least one of these will end up in your architecture.
 
 ### Key-Value Stores: The Speed Champions
 
-[Key-value stores](/tools/db-compass/key-value/) like `Redis`, `Memcached`, and `DynamoDB` are the simplest and fastest database model. Sub-millisecond reads are the norm, not the exception. `Redis` achieves this by keeping everything in memory with O(1) hash lookups that eliminate query planning entirely.
+[Key-value stores](/db-compass/key-value/) like `Redis`, `Memcached`, and `DynamoDB` are the simplest and fastest database model. Sub-millisecond reads are the norm, not the exception. `Redis` achieves this by keeping everything in memory with O(1) hash lookups that eliminate query planning entirely.
 
 The ideal use case is anything where you know the key at query time: session storage, application caching, feature flags, rate limiting, real-time leaderboards.
 
@@ -74,45 +79,45 @@ Key-value stores score 9/10 on performance and learning curve, but just 2/10 on 
 
 ### Relational (SQL) Databases: The Proven Workhorse
 
-[Relational databases](/tools/db-compass/relational/) like `PostgreSQL`, `MySQL`, and `SQL Server` have been the backbone of application development for decades, and for good reason. SQL is the most expressive query language in the database world: joins across tables, window functions, CTEs, aggregations, and full-text search. The query optimizer has had 40 years of engineering investment.
+[Relational databases](/db-compass/relational/) like `PostgreSQL`, `MySQL`, and `SQL Server` have been the backbone of application development for decades, and for good reason. SQL is the most expressive query language in the database world: joins across tables, window functions, CTEs, aggregations, and full-text search. The query optimizer has had 40 years of engineering investment.
 
 The reliability story is equally strong. ACID transactions, write-ahead logging, point-in-time recovery, and decades of battle-hardening make relational databases the gold standard for data integrity. When a financial system needs to guarantee that a debit and credit either both happen or neither does, there is no substitute.
 
-The tradeoff is horizontal scaling. Traditional relational databases scale vertically (bigger machine) rather than horizontally (more machines). PostgreSQL with read replicas handles enormous read loads, but write-heavy workloads at massive scale require distributed SQL solutions like CockroachDB or Google Spanner -- which is an entirely different category ([NewSQL](/tools/db-compass/newsql/)).
+Where relational databases struggle is horizontal scaling. Traditional SQL databases scale vertically (bigger machine) rather than horizontally (more machines). PostgreSQL with read replicas handles enormous read loads, but write-heavy workloads at massive scale require distributed SQL solutions like CockroachDB or Google Spanner, which is an entirely different category ([NewSQL](/db-compass/newsql/)).
 
 Relational databases score 10/10 on both query flexibility and ecosystem maturity. No other model comes close on either dimension. PostgreSQL in particular has become the Swiss Army knife of the relational world, with extensions for JSON documents (`jsonb`), geospatial queries (PostGIS), full-text search, and even time-series data (TimescaleDB).
 
 ### Document Databases: Schema Flexibility for Modern Apps
 
-[Document databases](/tools/db-compass/document/) like `MongoDB`, `Couchbase`, and `Firestore` store data as self-contained JSON documents. The key advantage is schema flexibility: documents in the same collection can have completely different structures, and adding new fields requires zero downtime migrations.
+[Document databases](/db-compass/document/) like `MongoDB`, `Couchbase`, and `Firestore` store data as self-contained JSON documents. The key advantage is schema flexibility: documents in the same collection can have completely different structures, and adding new fields requires zero downtime migrations.
 
 This makes document databases the natural choice for rapid prototyping, content management systems, product catalogs with varying attributes, and any domain where the data shape evolves frequently. The natural mapping between JSON documents and application-layer objects eliminates the object-relational impedance mismatch that has plagued SQL-based development for decades.
 
-The tradeoff is cross-document operations. Joins across collections are expensive -- MongoDB's `$lookup` is essentially a client-side join. Multi-document ACID transactions are supported in recent MongoDB versions but add latency and complexity.
+The tradeoff is cross-document operations. Joins across collections are expensive. MongoDB's `$lookup` performs a server-side left outer join, but it is noticeably slower and less flexible than a native SQL join. Multi-document ACID transactions are supported in recent MongoDB versions but add latency and complexity.
 
 If your data has deep relational dependencies requiring frequent joins across entities, a document database will fight you at every turn.
 
 ### Graph Databases: When Relationships Are the Data
 
-[Graph databases](/tools/db-compass/graph/) like `Neo4j`, `Amazon Neptune`, and `ArangoDB` model data as nodes and edges with properties on both. The killer feature is index-free adjacency: traversing a relationship is O(1) regardless of graph size. In a social network with 100 million users, finding a user's friends-of-friends takes the same time as in a network with 100 users.
+[Graph databases](/db-compass/graph/) like `Neo4j`, `Amazon Neptune`, and `ArangoDB` model data as nodes and edges with properties on both. The killer feature is index-free adjacency: traversing a relationship is O(1) regardless of graph size. In a social network with 100 million users, finding a user's friends-of-friends takes the same time as in a network with 100 users.
 
 The use cases where graph databases shine are the ones where relational databases struggle: social networks, fraud detection, knowledge graphs, network topology analysis, and recommendation engines.
 
 A query like "find all accounts that share a phone number with an account that was flagged for fraud in the last 30 days" requires recursive CTEs in SQL but is a simple two-hop traversal in Cypher.
 
-The tradeoff is scalability. Graphs are inherently difficult to partition -- splitting a highly connected graph across machines creates expensive cross-partition hops. `Neo4j` scales reads via replicas but writes are bottlenecked by the leader node.
+The tradeoff is scalability. Graphs are inherently difficult to partition because splitting a highly connected graph across machines creates expensive cross-partition hops. `Neo4j` scales reads via replicas, but writes are bottlenecked by the leader node.
 
 If your workload is primarily tabular analytics or bulk aggregations, a graph database is the wrong tool.
 
 ### Vector Databases: The AI Era's Newcomer
 
-[Vector databases](/tools/db-compass/vector/) like `Pinecone`, `Milvus`, `Weaviate`, and `Qdrant` are the newest category in the compass and the fastest growing. They store high-dimensional vector embeddings and use approximate nearest neighbor (ANN) algorithms to find similar items in sub-millisecond time.
+[Vector databases](/db-compass/vector/) like `Pinecone`, `Milvus`, `Weaviate`, and `Qdrant` are the newest category in the compass and the fastest growing. They store high-dimensional vector embeddings and use approximate nearest neighbor (ANN) algorithms to find similar items in sub-millisecond time.
 
-If you are building anything with large language models -- retrieval-augmented generation (RAG), semantic search, image similarity, or recommendation systems based on embeddings -- a vector database is the retrieval layer. The workflow is straightforward: convert your data into embeddings using a model like OpenAI's `text-embedding-3-large`, index them in a vector database, and query by similarity rather than exact match.
+If you are building anything with large language models (retrieval-augmented generation, semantic search, image similarity, or recommendation systems based on embeddings), a vector database is the retrieval layer. The workflow is straightforward: convert your data into embeddings using a model like OpenAI's `text-embedding-3-large`, index them in a vector database, and query by similarity rather than exact match.
 
-The tradeoff is maturity. Most vector databases launched after 2020. The ecosystem is young, the best practices are still forming, and the reliability story is less proven than relational databases with decades of production hardening.
+The tradeoff is maturity. Most vector databases launched after 2020. The ecosystem is young, best practices are still forming, and the reliability story is less proven than relational databases with decades of production hardening.
 
-Vector databases score 3/10 on ecosystem maturity -- the lowest of any category. They also score 3/10 on query flexibility, because the only question you can really ask is "what is similar to this vector?"
+Vector databases score 3/10 on ecosystem maturity, the lowest of any category. They also score 3/10 on query flexibility, because the only question you can really ask is "what is similar to this vector?"
 
 If that is the right question, nothing else comes close. If it is not, look elsewhere.
 
@@ -120,15 +125,19 @@ If that is the right question, nothing else comes close. If it is not, look else
 
 No discussion of database selection is complete without addressing the CAP theorem. Eric Brewer formalized what distributed systems engineers already knew from experience: in any distributed system, you can have at most two of three guarantees:
 
-- **Consistency** -- every read returns the most recent write
-- **Availability** -- every request receives a response
-- **Partition tolerance** -- the system continues operating during network splits
+- **Consistency:** every read returns the most recent write
+- **Availability:** every request receives a response
+- **Partition tolerance:** the system continues operating during network splits
 
-In practice, partition tolerance is non-negotiable for any distributed database -- network splits happen. Cloud providers experience them. Cross-region links drop. The question is not whether partitions will occur, but how your database behaves when they do. So the real choice is between consistency and availability during a partition:
+<figure>
+  <img src="/images/cap-theorem-in-practice.svg" alt="CAP theorem triangle showing how 12 database model categories distribute across CP, AP, and Tunable classifications" width="1200" height="480" />
+</figure>
 
-- **CP systems** (consistency + partition tolerance) like relational databases and [NewSQL databases](/tools/db-compass/newsql/) will reject writes or become unavailable rather than serve stale data. CockroachDB and Google Spanner choose this path. Your application gets errors during a partition, but it never gets wrong answers.
+In practice, partition tolerance is non-negotiable for any distributed database. Network splits happen. Cloud providers experience them. Cross-region links drop. The question is not whether partitions will occur, but how your database behaves when they do. So the real choice is between consistency and availability during a partition:
 
-- **AP systems** (availability + partition tolerance) like [wide-column stores](/tools/db-compass/columnar/) and [search engines](/tools/db-compass/search/) will continue serving requests during a partition, even if some reads return stale data. Cassandra and Elasticsearch choose this path. Your application stays up, but it might serve yesterday's data.
+- **CP systems** (consistency + partition tolerance) like relational databases and [NewSQL databases](/db-compass/newsql/) will reject writes or become unavailable rather than serve stale data. CockroachDB and Google Spanner choose this path. Your application gets errors during a partition, but it never gets wrong answers.
+
+- **AP systems** (availability + partition tolerance) like [wide-column stores](/db-compass/columnar/) and [search engines](/db-compass/search/) will continue serving requests during a partition, even if some reads return stale data. Cassandra and Elasticsearch choose this path. Your application stays up, but it might serve yesterday's data.
 
 - **Tunable systems** like key-value stores, document databases, and multi-model databases let you configure the consistency-availability tradeoff per operation. DynamoDB lets you choose eventual or strong consistency on each read. Cosmos DB offers five consistency levels from strong to eventual.
 
@@ -136,7 +145,7 @@ The Database Compass shows the CAP classification for each model category. It is
 
 ## How to Use the Database Compass
 
-The [Database Compass](/tools/db-compass/) is designed to be explored, not just read. Here is how I recommend navigating it.
+The [Database Compass](/db-compass/) is designed to be explored, not just read. Here is how I recommend using it.
 
 **Start with the complexity spectrum** at the top of the overview page. It positions all 12 categories on a horizontal axis from simple to complex. This gives you an immediate sense of the operational commitment each category requires. If you are a small team without a dedicated DBA, you probably want to stay on the left side of the spectrum.
 
@@ -148,4 +157,4 @@ The [Database Compass](/tools/db-compass/) is designed to be explored, not just 
 
 Every score is my editorial judgment, informed by 17 years of building production systems on these databases. You will disagree with some of them. That is the point. A framework for productive disagreement is more useful than a framework everyone agrees with.
 
-Explore the [Database Compass](/tools/db-compass/) to compare all 12 models across 8 dimensions.
+Explore the [Database Compass](/db-compass/) to compare all 12 models across 8 dimensions.

@@ -4,6 +4,8 @@ import { projects, categories } from '../data/projects';
 import { totalScore } from '../lib/beauty-index/schema';
 import { DIMENSIONS } from '../lib/beauty-index/dimensions';
 import { JUSTIFICATIONS } from '../data/beauty-index/justifications';
+import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
+import { DIMENSIONS as COMPASS_DIMENSIONS } from '../lib/db-compass/dimensions';
 
 const techStack = [
   {
@@ -35,6 +37,7 @@ const techStack = [
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   const langEntries = await getCollection('languages');
+  const dbModels = await getCollection('dbModels');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -173,6 +176,38 @@ export async function GET(context: APIContext) {
   }
   lines.push('');
 
+  // Database Compass section
+  lines.push('## Database Compass');
+  lines.push('');
+  lines.push('The Database Compass is an opinionated comparison of 12 database models across 8 architectural dimensions.');
+  lines.push('Each dimension is scored 1-10 (max total: 80). An interactive tool for choosing the right database for your project.');
+  lines.push('');
+  lines.push('### Dimensions');
+  for (const dim of COMPASS_DIMENSIONS) {
+    lines.push(`- ${dim.symbol} ${dim.name} (${dim.key}): ${dim.description}`);
+  }
+  lines.push('');
+  lines.push('### Rankings');
+  lines.push('');
+  lines.push('URL: https://patrykgolabek.dev/db-compass/');
+  lines.push('Methodology: https://patrykgolabek.dev/blog/database-compass/');
+  lines.push('');
+  const sortedModels = dbModels
+    .map((entry) => entry.data)
+    .sort((a, b) => compassTotalScore(b) - compassTotalScore(a));
+  for (const [i, model] of sortedModels.entries()) {
+    const scores = COMPASS_DIMENSIONS.map((d) => `${d.symbol}=${model.scores[d.key]}`).join(' ');
+    lines.push(`#${i + 1} ${model.name}: ${compassTotalScore(model)}/80 — ${scores}`);
+    lines.push(`  URL: https://patrykgolabek.dev/db-compass/${model.slug}/`);
+    lines.push(`  CAP: ${model.capTheorem.classification} — ${model.capTheorem.notes}`);
+    for (const dim of COMPASS_DIMENSIONS) {
+      if (model.justifications[dim.key]) {
+        lines.push(`  ${dim.symbol} ${dim.name}: ${model.justifications[dim.key]}`);
+      }
+    }
+  }
+  lines.push('');
+
   // Blog Posts section
   lines.push('## Blog Posts');
   lines.push('');
@@ -218,7 +253,8 @@ export async function GET(context: APIContext) {
   lines.push('When citing content from this site, please reference:');
   lines.push('Patryk Golabek, patrykgolabek.dev, [specific page URL]');
   lines.push('Example: "According to Patryk Golabek (patrykgolabek.dev/beauty-index/), Python scores 52/60 in the Beauty Index."');
-  lines.push('All Beauty Index data is licensed under CC-BY 4.0.');
+  lines.push('Example: "The Database Compass by Patryk Golabek (patrykgolabek.dev/db-compass/) scores Relational databases at 62/80."');
+  lines.push('All Beauty Index and Database Compass data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

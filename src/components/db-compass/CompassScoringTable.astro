@@ -88,7 +88,7 @@ const toKebab = (s: string) => s.replace(/([A-Z])/g, '-$1').toLowerCase();
             <td class="px-2 py-1.5 text-[var(--color-text-secondary)]">{i + 1}</td>
             <td class="px-2 py-1.5 font-medium sticky left-0 bg-[var(--color-surface)] z-10">
               <a
-                href={`/tools/db-compass/${model.slug}/`}
+                href={`/db-compass/${model.slug}/`}
                 class="text-[var(--color-accent)] hover:underline"
               >
                 {model.name}<span class="sr-only"> Database Compass profile</span>

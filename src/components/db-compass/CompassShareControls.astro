@@ -5,19 +5,31 @@
  * - Social share links: X, LinkedIn, Reddit, Bluesky
  * - Copy link via Clipboard API
  * - Web Share API "More" button (shown on capable devices)
- * - SVG-to-PNG download of the radar chart via XMLSerializer + Canvas
+ * - SVG-to-PNG download of the radar chart + score breakdown via Canvas
  * - Toast notification for user feedback
  * - astro:page-load lifecycle for View Transitions compatibility
  */
+import { DIMENSIONS, DIMENSION_COLORS } from '../../lib/db-compass/dimensions';
+import type { Scores } from '../../lib/db-compass/schema';
+
 interface Props {
   slug: string;
   name: string;
   total: number;
+  scores: Scores;
 }
 
-const { slug, name, total } = Astro.props;
-const pageUrl = `https://patrykgolabek.dev/tools/db-compass/${slug}/`;
+const { slug, name, total, scores } = Astro.props;
+const pageUrl = `https://patrykgolabek.dev/db-compass/${slug}/`;
 const shareText = `${name} scores ${total}/80 in the Database Compass!`;
+
+// Serialize dimension data for the download handler
+const dimensionData = DIMENSIONS.map((dim) => ({
+  name: dim.shortName,
+  symbol: dim.symbol,
+  score: scores[dim.key],
+  color: DIMENSION_COLORS[dim.key],
+}));
 
 // Share intent URLs
 const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
@@ -33,6 +45,7 @@ const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(sh
   data-name={name}
   data-total={total}
   data-page-url={pageUrl}
+  data-dimensions={JSON.stringify(dimensionData)}
 >
   {/* Download radar chart as PNG */}
   <div class="flex items-center gap-3">
@@ -194,7 +207,7 @@ const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(sh
       }
     });
 
-    // --- Download radar chart as PNG ---
+    // --- Download radar chart + score breakdown as PNG ---
     const downloadBtn = container.querySelector<HTMLButtonElement>('[data-action="download-png"]');
     downloadBtn?.addEventListener('click', async () => {
       try {
@@ -204,45 +217,116 @@ const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(sh
           return;
         }
 
-        // Wait for fonts to be ready
+        // Parse dimension data from the container
+        const dims: { name: string; symbol: string; score: number; color: string }[] =
+          JSON.parse(container.dataset.dimensions || '[]');
+
         await document.fonts.ready;
 
-        // Serialize the SVG
         const svgData = new XMLSerializer().serializeToString(svgEl);
-
-        // Get dimensions from viewBox (not width/height attributes -- they differ per research pitfall 2)
         const viewBox = svgEl.viewBox.baseVal;
-        const W = viewBox.width || svgEl.width.baseVal.value;
-        const H = viewBox.height || svgEl.height.baseVal.value;
+        const chartW = viewBox.width || svgEl.width.baseVal.value;
+        const chartH = viewBox.height || svgEl.height.baseVal.value;
 
-        // Create DPR-scaled canvas
+        // Layout constants
+        const scoreW = 200;
+        const gap = 16;
+        const pad = 24;
+        const totalW = pad + chartW + gap + scoreW + pad;
+        const totalH = chartH + pad * 2;
+
         const dpr = Math.min(window.devicePixelRatio || 1, 3);
         const canvas = document.createElement('canvas');
-        canvas.width = W * dpr;
-        canvas.height = H * dpr;
+        canvas.width = totalW * dpr;
+        canvas.height = totalH * dpr;
         const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          showToast('Download failed');
-          return;
-        }
+        if (!ctx) { showToast('Download failed'); return; }
         ctx.scale(dpr, dpr);
 
-        // Create blob from SVG string
+        // Background
+        ctx.fillStyle = '#faf6f1';
+        ctx.fillRect(0, 0, totalW, totalH);
+
+        // Draw radar chart (left side)
         const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const img = new Image();
 
         img.onload = () => {
-          ctx.drawImage(img, 0, 0, W, H);
+          ctx.drawImage(img, pad, pad, chartW, chartH);
           URL.revokeObjectURL(url);
+
+          // Draw score breakdown (right side)
+          const scoreX = pad + chartW + gap;
+          const rowH = 26;
+          const barMaxW = 80;
+          const barH = 8;
+          const startY = pad + 20;
+
+          // Title
+          ctx.fillStyle = '#2d2017';
+          ctx.font = 'bold 14px "DM Sans", sans-serif';
+          ctx.fillText(name, scoreX, startY);
+
+          // Dimension rows
+          dims.forEach((dim, i) => {
+            const y = startY + 24 + i * rowH;
+
+            // Symbol
+            ctx.fillStyle = dim.color;
+            ctx.font = 'bold 13px "DM Sans", "Noto Sans", sans-serif';
+            ctx.fillText(dim.symbol, scoreX, y);
+
+            // Name
+            ctx.fillStyle = '#6b5e52';
+            ctx.font = '12px "DM Sans", sans-serif';
+            ctx.fillText(dim.name, scoreX + 20, y);
+
+            // Score
+            ctx.fillStyle = '#2d2017';
+            ctx.font = '600 12px "DM Sans", sans-serif';
+            ctx.fillText(String(dim.score), scoreX + 72, y);
+
+            // Bar background
+            const barX = scoreX + 90;
+            const barY = y - barH + 2;
+            ctx.fillStyle = '#e8e0d8';
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, barMaxW, barH, 4);
+            ctx.fill();
+
+            // Bar fill
+            const fillW = (dim.score / 10) * barMaxW;
+            ctx.fillStyle = dim.color;
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, fillW, barH, 4);
+            ctx.fill();
+          });
+
+          // Total row
+          const totalY = startY + 24 + dims.length * rowH + 8;
+          ctx.strokeStyle = '#e8e0d8';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(scoreX, totalY - 12);
+          ctx.lineTo(scoreX + scoreW, totalY - 12);
+          ctx.stroke();
+
+          ctx.fillStyle = '#2d2017';
+          ctx.font = 'bold 13px "DM Sans", sans-serif';
+          ctx.fillText('\u03A3', scoreX, totalY);
+          ctx.fillStyle = '#6b5e52';
+          ctx.font = '12px "DM Sans", sans-serif';
+          ctx.fillText('Total', scoreX + 20, totalY);
+          ctx.fillStyle = '#2d2017';
+          ctx.font = 'bold 13px "DM Sans", sans-serif';
+          ctx.fillText(`${total}/80`, scoreX + 72, totalY);
+
           canvas.toBlob((pngBlob) => {
-            if (!pngBlob) {
-              showToast('Download failed');
-              return;
-            }
+            if (!pngBlob) { showToast('Download failed'); return; }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(pngBlob);
-            a.download = `${slug}-radar-chart.png`;
+            a.download = `${slug}-database-compass.png`;
             document.body.appendChild(a);
             a.click();
             a.remove();

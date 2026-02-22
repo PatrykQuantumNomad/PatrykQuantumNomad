@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+  <defs>
+    <linearGradient id="axisGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#006d6d" stop-opacity="0.12"/>
+      <stop offset="0.5" stop-color="#D4A843" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#c44b20" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#006d6d"/>
+      <stop offset="1" stop-color="#c44b20"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" fill="#fffaf7" rx="8"/>
+  <rect x="36" y="272" width="1161.07" height="32" rx="16" fill="url(#axisGrad)" style=""/>
+  <line x1="90" y1="288" x2="1100" y2="288" stroke="url(#arrowGrad)" stroke-width="1.5" opacity="0.35"/>
+  <polygon points="46,288 56,283 56,293" fill="#006d6d" opacity="0.5"/>
+  <polygon points="1182.25 288.459 1172.25 283.459 1172.25 293.459" fill="#c44b20" opacity="0.5"/>
+  <text x="68" y="292" fill="#006d6d" font-size="11" font-family="system-ui, -apple-system, sans-serif" font-weight="700" opacity="0.8" style="white-space: pre;">Simple</text>
+  <text x="1161.83" y="292" text-anchor="end" fill="#c44b20" font-size="11" font-family="system-ui, -apple-system, sans-serif" font-weight="700" opacity="0.8" style="white-space: pre; font-size: 11px;">Complex</text>
+  <g transform="translate(44, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#006d6d"/>
+    <rect y="3" width="88" height="2" fill="#006d6d"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Key-Value</text>
+    <g transform="translate(14, 36)" opacity="0.7">
+      <rect width="28" height="14" rx="2" fill="#006d6d" opacity="0.15" stroke="#006d6d" stroke-width="0.5"/>
+      <rect x="32" width="40" height="14" rx="2" fill="#006d6d" opacity="0.08" stroke="#006d6d" stroke-width="0.5"/>
+      <text x="14" y="10.5" text-anchor="middle" fill="#006d6d" font-size="7" font-family="ui-monospace, monospace" font-weight="600" style="white-space: pre;">K</text>
+      <text x="52" y="10.5" text-anchor="middle" fill="#006d6d" font-size="7" font-family="ui-monospace, monospace" font-weight="500" style="white-space: pre;">V</text>
+      <rect y="18" width="28" height="12" rx="1.5" fill="#006d6d" opacity="0.1"/>
+      <rect x="32" y="18" width="40" height="12" rx="1.5" fill="#006d6d" opacity="0.06"/>
+      <rect y="33" width="28" height="12" rx="1.5" fill="#006d6d" opacity="0.1"/>
+      <rect x="32" y="33" width="40" height="12" rx="1.5" fill="#006d6d" opacity="0.06"/>
+      <rect y="48" width="28" height="12" rx="1.5" fill="#006d6d" opacity="0.1"/>
+      <rect x="32" y="48" width="40" height="12" rx="1.5" fill="#006d6d" opacity="0.06"/>
+      <rect y="63" width="28" height="12" rx="1.5" fill="#006d6d" opacity="0.1"/>
+      <rect x="32" y="63" width="40" height="12" rx="1.5" fill="#006d6d" opacity="0.06"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Redis</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">DynamoDB</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Memcached</text>
+  </g>
+  <g transform="translate(140, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#2AAA8A"/>
+    <rect y="3" width="88" height="2" fill="#2AAA8A"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Document</text>
+    <g transform="translate(14, 38)" opacity="0.7">
+      <text x="0" y="12" fill="#2AAA8A" font-size="22" font-family="ui-monospace, monospace" font-weight="300" style="white-space: pre;">{</text>
+      <rect x="18" y="4" width="30" height="5" rx="2" fill="#2AAA8A" opacity="0.2"/>
+      <rect x="18" y="14" width="22" height="5" rx="2" fill="#2AAA8A" opacity="0.15"/>
+      <text x="14" y="36" fill="#2AAA8A" font-size="14" font-family="ui-monospace, monospace" font-weight="300" style="white-space: pre;">{</text>
+      <rect x="28" y="28" width="24" height="4" rx="2" fill="#2AAA8A" opacity="0.12"/>
+      <rect x="28" y="36" width="18" height="4" rx="2" fill="#2AAA8A" opacity="0.1"/>
+      <text x="14" y="54" fill="#2AAA8A" font-size="14" font-family="ui-monospace, monospace" font-weight="300" style="white-space: pre;">}</text>
+      <rect x="18" y="56" width="26" height="5" rx="2" fill="#2AAA8A" opacity="0.15"/>
+      <text x="0" y="76" fill="#2AAA8A" font-size="22" font-family="ui-monospace, monospace" font-weight="300" style="white-space: pre;">}</text>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">MongoDB</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Couchbase</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Firestore</text>
+  </g>
+  <g transform="translate(236, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#E8734A"/>
+    <rect y="3" width="88" height="2" fill="#E8734A"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">In-Memory</text>
+    <g transform="translate(18, 40)" opacity="0.7">
+      <polygon points="28,0 14,32 24,32 18,64 42,26 30,26 38,0" fill="#E8734A" opacity="0.2" stroke="#E8734A" stroke-width="0.75" stroke-linejoin="round"/>
+      <rect x="0" y="70" width="52" height="8" rx="2" fill="#E8734A" opacity="0.1" stroke="#E8734A" stroke-width="0.5"/>
+      <line x1="13" y1="70" x2="13" y2="78" stroke="#E8734A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="26" y1="70" x2="26" y2="78" stroke="#E8734A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="39" y1="70" x2="39" y2="78" stroke="#E8734A" stroke-width="0.5" opacity="0.3"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Redis</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">VoltDB</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Apache Ignite</text>
+  </g>
+  <g transform="translate(332, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#D4A843"/>
+    <rect y="3" width="88" height="2" fill="#D4A843"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Time-Series</text>
+    <g transform="translate(10, 42)" opacity="0.7">
+      <line x1="4" y1="2" x2="4" y2="72" stroke="#D4A843" stroke-width="0.75" opacity="0.4"/>
+      <line x1="4" y1="72" x2="64" y2="72" stroke="#D4A843" stroke-width="0.75" opacity="0.4"/>
+      <polyline points="8,58 16,42 22,50 30,28 38,35 44,18 50,30 56,14 62,22" fill="none" stroke="#D4A843" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="8,58 16,42 22,50 30,28 38,35 44,18 50,30 56,14 62,22 62,72 8,72" fill="#D4A843" opacity="0.08"/>
+      <line x1="8" y1="72" x2="8" y2="75" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
+      <line x1="22" y1="72" x2="22" y2="75" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
+      <line x1="38" y1="72" x2="38" y2="75" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
+      <line x1="54" y1="72" x2="54" y2="75" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">InfluxDB</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">TimescaleDB</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">QuestDB</text>
+  </g>
+  <g transform="translate(428, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#c44b20"/>
+    <rect y="3" width="88" height="2" fill="#c44b20"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Relational</text>
+    <g transform="translate(10, 38)" opacity="0.7">
+      <rect width="66" height="14" rx="2" fill="#c44b20" opacity="0.15" stroke="#c44b20" stroke-width="0.5"/>
+      <rect y="16" width="66" height="12" rx="0" fill="#c44b20" opacity="0.06" stroke="#c44b20" stroke-width="0.3"/>
+      <rect y="30" width="66" height="12" rx="0" fill="#c44b20" opacity="0.04" stroke="#c44b20" stroke-width="0.3"/>
+      <rect y="44" width="66" height="12" rx="0" fill="#c44b20" opacity="0.06" stroke="#c44b20" stroke-width="0.3"/>
+      <rect y="58" width="66" height="12" rx="0" fill="#c44b20" opacity="0.04" stroke="#c44b20" stroke-width="0.3"/>
+      <line x1="22" y1="0" x2="22" y2="70" stroke="#c44b20" stroke-width="0.3" opacity="0.3"/>
+      <line x1="44" y1="0" x2="44" y2="70" stroke="#c44b20" stroke-width="0.3" opacity="0.3"/>
+      <path d="M 66,26 Q 74,26 74,42 Q 74,52 66,52" fill="none" stroke="#c44b20" stroke-width="0.75" opacity="0.4"/>
+      <circle cx="66" cy="26" r="1.5" fill="#c44b20" opacity="0.4"/>
+      <polygon points="66,52 68,49 64,49" fill="#c44b20" opacity="0.4"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">PostgreSQL</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">MySQL</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">SQL Server</text>
+  </g>
+  <g transform="translate(524, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#4A90D9"/>
+    <rect y="3" width="88" height="2" fill="#4A90D9"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Search</text>
+    <g transform="translate(14, 40)" opacity="0.7">
+      <rect x="0" y="0" width="58" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="8" width="50" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="16" width="54" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="24" width="24" height="4" rx="1.5" fill="#4A90D9" opacity="0.25" stroke="#4A90D9" stroke-width="0.5"/>
+      <rect x="0" y="32" width="58" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="40" width="42" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="48" width="58" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <rect x="0" y="56" width="32" height="4" rx="1.5" fill="#4A90D9" opacity="0.25" stroke="#4A90D9" stroke-width="0.5"/>
+      <rect x="0" y="64" width="48" height="4" rx="1.5" fill="#4A90D9" opacity="0.1"/>
+      <circle cx="48" cy="46" r="14" fill="none" stroke="#4A90D9" stroke-width="1.5" opacity="0.35"/>
+      <line x1="58" y1="56" x2="66" y2="66" stroke="#4A90D9" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Elasticsearch</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Solr</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Meilisearch</text>
+  </g>
+  <g transform="translate(620, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#8FBC5A"/>
+    <rect y="3" width="88" height="2" fill="#8FBC5A"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Wide-Column</text>
+    <g transform="translate(8, 40)" opacity="0.7">
+      <rect x="0" y="0" width="18" height="72" rx="2" fill="#8FBC5A" opacity="0.12" stroke="#8FBC5A" stroke-width="0.5"/>
+      <rect x="2" y="2" width="14" height="8" rx="1" fill="#8FBC5A" opacity="0.15"/>
+      <rect x="22" y="0" width="18" height="72" rx="2" fill="#8FBC5A" opacity="0.12" stroke="#8FBC5A" stroke-width="0.5"/>
+      <rect x="24" y="2" width="14" height="8" rx="1" fill="#8FBC5A" opacity="0.15"/>
+      <rect x="44" y="0" width="26" height="72" rx="2" fill="#8FBC5A" opacity="0.12" stroke="#8FBC5A" stroke-width="0.5"/>
+      <rect x="46" y="2" width="22" height="8" rx="1" fill="#8FBC5A" opacity="0.15"/>
+      <line x1="0" y1="14" x2="70" y2="14" stroke="#8FBC5A" stroke-width="0.3" opacity="0.3"/>
+      <line x1="0" y1="28" x2="70" y2="28" stroke="#8FBC5A" stroke-width="0.3" opacity="0.2"/>
+      <line x1="0" y1="42" x2="70" y2="42" stroke="#8FBC5A" stroke-width="0.3" opacity="0.2"/>
+      <line x1="0" y1="56" x2="70" y2="56" stroke="#8FBC5A" stroke-width="0.3" opacity="0.2"/>
+      <rect x="2" y="16" width="14" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+      <rect x="24" y="16" width="14" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+      <rect x="2" y="30" width="14" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+      <rect x="46" y="30" width="22" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+      <rect x="24" y="44" width="14" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+      <rect x="46" y="44" width="22" height="10" rx="1" fill="#8FBC5A" opacity="0.06"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Cassandra</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">HBase</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">ScyllaDB</text>
+  </g>
+  <g transform="translate(716, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#9B59B6"/>
+    <rect y="3" width="88" height="2" fill="#9B59B6"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Vector</text>
+    <g transform="translate(10, 38)" opacity="0.7">
+      <circle cx="12" cy="16" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="42" cy="8" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="56" cy="28" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="24" cy="40" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="50" cy="52" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="8" cy="58" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="62" cy="68" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="34" cy="65" r="3" fill="#9B59B6" opacity="0.25"/>
+      <circle cx="34" cy="32" r="4" fill="#9B59B6" opacity="0.5" stroke="#9B59B6" stroke-width="1"/>
+      <line x1="34" y1="32" x2="12" y2="16" stroke="#9B59B6" stroke-width="0.75" stroke-dasharray="2,2" opacity="0.3"/>
+      <line x1="34" y1="32" x2="42" y2="8" stroke="#9B59B6" stroke-width="0.75" stroke-dasharray="2,2" opacity="0.3"/>
+      <line x1="34" y1="32" x2="24" y2="40" stroke="#9B59B6" stroke-width="0.75" stroke-dasharray="2,2" opacity="0.3"/>
+      <circle cx="34" cy="32" r="24" fill="none" stroke="#9B59B6" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.2"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Pinecone</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Milvus</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Weaviate</text>
+  </g>
+  <g transform="translate(812, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#2E86C1"/>
+    <rect y="3" width="88" height="2" fill="#2E86C1"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">NewSQL</text>
+    <g transform="translate(10, 38)" opacity="0.7">
+      <rect x="16" y="22" width="34" height="26" rx="3" fill="#2E86C1" opacity="0.12" stroke="#2E86C1" stroke-width="0.5"/>
+      <line x1="16" y1="30" x2="50" y2="30" stroke="#2E86C1" stroke-width="0.3" opacity="0.3"/>
+      <line x1="33" y1="22" x2="33" y2="48" stroke="#2E86C1" stroke-width="0.3" opacity="0.3"/>
+      <circle cx="10" cy="8" r="7" fill="#2E86C1" opacity="0.1" stroke="#2E86C1" stroke-width="0.5"/>
+      <circle cx="56" cy="8" r="7" fill="#2E86C1" opacity="0.1" stroke="#2E86C1" stroke-width="0.5"/>
+      <circle cx="10" cy="64" r="7" fill="#2E86C1" opacity="0.1" stroke="#2E86C1" stroke-width="0.5"/>
+      <circle cx="56" cy="64" r="7" fill="#2E86C1" opacity="0.1" stroke="#2E86C1" stroke-width="0.5"/>
+      <line x1="16" y1="14" x2="22" y2="22" stroke="#2E86C1" stroke-width="0.75" opacity="0.25"/>
+      <line x1="50" y1="14" x2="44" y2="22" stroke="#2E86C1" stroke-width="0.75" opacity="0.25"/>
+      <line x1="16" y1="58" x2="22" y2="48" stroke="#2E86C1" stroke-width="0.75" opacity="0.25"/>
+      <line x1="50" y1="58" x2="44" y2="48" stroke="#2E86C1" stroke-width="0.75" opacity="0.25"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">CockroachDB</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Spanner</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">TiDB</text>
+  </g>
+  <g transform="translate(908, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#7B68EE"/>
+    <rect y="3" width="88" height="2" fill="#7B68EE"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Graph</text>
+    <g transform="translate(10, 38)" opacity="0.7">
+      <line x1="18" y1="14" x2="48" y2="14" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="18" y1="14" x2="10" y2="44" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="48" y1="14" x2="56" y2="44" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="10" y1="44" x2="34" y2="66" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="56" y1="44" x2="34" y2="66" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="10" y1="44" x2="56" y2="44" stroke="#7B68EE" stroke-width="1" opacity="0.3"/>
+      <line x1="48" y1="14" x2="34" y2="66" stroke="#7B68EE" stroke-width="0.75" opacity="0.2"/>
+      <circle cx="18" cy="14" r="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="1"/>
+      <circle cx="48" cy="14" r="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="1"/>
+      <circle cx="10" cy="44" r="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="1"/>
+      <circle cx="56" cy="44" r="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="1"/>
+      <circle cx="34" cy="66" r="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="1"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Neo4j</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Neptune</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">ArangoDB</text>
+  </g>
+  <g transform="translate(1004, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#B07D4B"/>
+    <rect y="3" width="88" height="2" fill="#B07D4B"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Object</text>
+    <g transform="translate(8, 38)" opacity="0.7">
+      <rect x="10" y="0" width="50" height="20" rx="3" fill="#B07D4B" opacity="0.12" stroke="#B07D4B" stroke-width="0.5"/>
+      <line x1="10" y1="8" x2="60" y2="8" stroke="#B07D4B" stroke-width="0.3" opacity="0.3"/>
+      <line x1="25" y1="20" x2="18" y2="30" stroke="#B07D4B" stroke-width="0.75" opacity="0.3"/>
+      <line x1="45" y1="20" x2="52" y2="30" stroke="#B07D4B" stroke-width="0.75" opacity="0.3"/>
+      <rect x="0" y="30" width="38" height="18" rx="3" fill="#B07D4B" opacity="0.1" stroke="#B07D4B" stroke-width="0.5"/>
+      <line x1="0" y1="38" x2="38" y2="38" stroke="#B07D4B" stroke-width="0.3" opacity="0.3"/>
+      <rect x="32" y="30" width="38" height="18" rx="3" fill="#B07D4B" opacity="0.1" stroke="#B07D4B" stroke-width="0.5"/>
+      <line x1="32" y1="38" x2="70" y2="38" stroke="#B07D4B" stroke-width="0.3" opacity="0.3"/>
+      <line x1="19" y1="48" x2="19" y2="56" stroke="#B07D4B" stroke-width="0.75" opacity="0.3"/>
+      <rect x="4" y="56" width="32" height="16" rx="3" fill="#B07D4B" opacity="0.08" stroke="#B07D4B" stroke-width="0.5"/>
+      <line x1="4" y1="64" x2="36" y2="64" stroke="#B07D4B" stroke-width="0.3" opacity="0.2"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">InterSystems</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">ObjectDB</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Versant</text>
+  </g>
+  <g transform="translate(1100, 12)">
+    <rect width="88" height="250" rx="6" fill="#ffffff" stroke="#e2dbd4" stroke-width="0.75"/>
+    <rect width="88" height="5" rx="6" fill="#2C3E50"/>
+    <rect y="3" width="88" height="2" fill="#2C3E50"/>
+    <text x="44" y="24" text-anchor="middle" fill="#2c2c2c" font-size="10.5" font-family="system-ui, -apple-system, sans-serif" font-weight="700" style="white-space: pre;">Multi-Model</text>
+    <g transform="translate(10, 38)" opacity="0.7">
+      <rect x="0" y="10" width="30" height="36" rx="3" fill="#2AAA8A" opacity="0.12" stroke="#2AAA8A" stroke-width="0.5"/>
+      <rect x="4" y="14" width="18" height="2.5" rx="1" fill="#2AAA8A" opacity="0.15"/>
+      <rect x="4" y="20" width="14" height="2.5" rx="1" fill="#2AAA8A" opacity="0.12"/>
+      <rect x="4" y="26" width="20" height="2.5" rx="1" fill="#2AAA8A" opacity="0.12"/>
+      <circle cx="48" cy="18" r="4" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="0.5"/>
+      <circle cx="62" cy="12" r="4" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="0.5"/>
+      <circle cx="56" cy="32" r="4" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="0.5"/>
+      <line x1="48" y1="18" x2="62" y2="12" stroke="#7B68EE" stroke-width="0.5" opacity="0.3"/>
+      <line x1="48" y1="18" x2="56" y2="32" stroke="#7B68EE" stroke-width="0.5" opacity="0.3"/>
+      <line x1="62" y1="12" x2="56" y2="32" stroke="#7B68EE" stroke-width="0.5" opacity="0.3"/>
+      <rect x="14" y="50" width="20" height="10" rx="2" fill="#006d6d" opacity="0.1" stroke="#006d6d" stroke-width="0.5"/>
+      <rect x="36" y="50" width="28" height="10" rx="2" fill="#006d6d" opacity="0.06" stroke="#006d6d" stroke-width="0.5"/>
+      <rect x="14" y="62" width="20" height="10" rx="2" fill="#006d6d" opacity="0.1" stroke="#006d6d" stroke-width="0.5"/>
+      <rect x="36" y="62" width="28" height="10" rx="2" fill="#006d6d" opacity="0.06" stroke="#006d6d" stroke-width="0.5"/>
+    </g>
+    <line x1="10" y1="142" x2="78" y2="142" stroke="#e2dbd4" stroke-width="0.5"/>
+    <text x="44" y="158" text-anchor="middle" fill="#9a8e82" font-size="7.5" font-family="system-ui, sans-serif" font-weight="600" letter-spacing="0.03em" style="white-space: pre;">EXAMPLES</text>
+    <text x="44" y="174" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">ArangoDB</text>
+    <text x="44" y="188" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">Cosmos DB</text>
+    <text x="44" y="202" text-anchor="middle" fill="#4a4440" font-size="8.5" font-family="system-ui, sans-serif" style="white-space: pre;">SurrealDB</text>
+  </g>
+</svg>
