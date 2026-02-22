@@ -1,1 +1,565 @@
-[]
+[
+  {
+    "id": "key-value",
+    "name": "Key-Value Store",
+    "slug": "key-value",
+    "icon": "key",
+    "complexityPosition": 0.08,
+    "summary": "The simplest database model: every record is a unique key mapped to a blob of data. Optimized for blazing-fast lookups, caching, and session storage where access patterns are predictable.",
+    "characterSketch": "The sprinter of the database world -- blindingly fast in a straight line but don't ask it to run hurdles. It thrives when you know exactly what you want, fetches it in microseconds, and never asks why. Simple, reliable, and unapologetically single-minded.",
+    "scores": {
+      "scalability": 9,
+      "performance": 9,
+      "reliability": 6,
+      "operationalSimplicity": 8,
+      "queryFlexibility": 2,
+      "schemaFlexibility": 8,
+      "ecosystemMaturity": 8,
+      "learningCurve": 9
+    },
+    "justifications": {
+      "scalability": "Horizontal scaling is trivial -- consistent hashing distributes keys with near-linear throughput gains. Redis Cluster and DynamoDB partition automatically across nodes.",
+      "performance": "Sub-millisecond reads and writes are the norm. O(1) key lookups eliminate query planning overhead entirely, making KV stores among the fastest database operations possible.",
+      "reliability": "Durability depends heavily on configuration -- in-memory-only setups risk data loss on crash. With AOF or snapshot persistence and replication, reliability improves significantly but isn't ACID-grade by default.",
+      "operationalSimplicity": "Minimal configuration required to run. No schema migrations, no query optimizer tuning. Managed offerings like DynamoDB and ElastiCache reduce ops burden to near-zero.",
+      "queryFlexibility": "Limited to GET/SET/DELETE by key. No joins, no aggregations, no filtering by value. If your access pattern doesn't fit a key lookup, you're out of luck.",
+      "schemaFlexibility": "Values are opaque blobs -- store JSON, binary, strings, or anything. No schema enforcement means total freedom to change data shape without migrations.",
+      "ecosystemMaturity": "Redis alone has decades of production use, massive community, and rich client libraries across every major language. DynamoDB and Memcached add further enterprise credibility.",
+      "learningCurve": "GET key, SET key value -- the API is intuitive enough for a first-year CS student. Complexity only appears at scale with partitioning strategies and consistency tuning."
+    },
+    "capTheorem": {
+      "classification": "Tunable",
+      "notes": "Most KV stores let you trade consistency for availability. DynamoDB offers eventual or strong consistency per-read. Redis Cluster defaults to AP but can be configured for stronger guarantees."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Sub-millisecond latency for read and write operations",
+      "Near-linear horizontal scaling through consistent hashing",
+      "Minimal operational overhead with simple data model",
+      "Ideal for caching, session storage, and real-time leaderboards"
+    ],
+    "weaknesses": [
+      "No support for complex queries, joins, or aggregations",
+      "Data relationships must be managed entirely in application code",
+      "Value inspection and filtering require full scans or secondary indexes"
+    ],
+    "bestFor": [
+      "Session management and user state caching",
+      "Application-level caching (CDN, API response cache)",
+      "Real-time leaderboards and counters",
+      "Feature flags and configuration storage",
+      "Shopping cart and ephemeral data"
+    ],
+    "avoidWhen": [
+      "Queries require joining or filtering across multiple attributes",
+      "Data has complex relationships that need traversal",
+      "Ad-hoc reporting or analytics on stored values is required"
+    ],
+    "topDatabases": [
+      {
+        "name": "Redis",
+        "description": "The most popular in-memory key-value store, supporting rich data structures like lists, sets, sorted sets, and streams beyond simple key-value pairs.",
+        "license": "RSALv2 / SSPLv1 (source-available since 2024)",
+        "url": "https://db-engines.com/en/system/Redis"
+      },
+      {
+        "name": "Amazon DynamoDB",
+        "description": "Fully managed, serverless NoSQL database by AWS offering single-digit millisecond performance at any scale with built-in security and in-memory caching.",
+        "license": "Proprietary (AWS managed service)",
+        "url": "https://db-engines.com/en/system/Amazon+DynamoDB"
+      },
+      {
+        "name": "Memcached",
+        "description": "High-performance, distributed memory caching system designed for simplicity. Widely used to speed up dynamic web applications by reducing database load.",
+        "license": "BSD 3-Clause",
+        "url": "https://db-engines.com/en/system/Memcached"
+      },
+      {
+        "name": "etcd",
+        "description": "Distributed, reliable key-value store used as the backing store for Kubernetes cluster state. Built on Raft consensus for strong consistency.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/etcd"
+      }
+    ],
+    "useCases": [
+      "Caching",
+      "Session storage",
+      "Real-time counters",
+      "Feature flags",
+      "Rate limiting",
+      "Configuration management"
+    ]
+  },
+  {
+    "id": "document",
+    "name": "Document Database",
+    "slug": "document",
+    "icon": "file-text",
+    "complexityPosition": 0.22,
+    "summary": "Stores data as self-contained JSON/BSON documents with flexible schemas. Optimized for applications where data naturally maps to objects and access patterns favor reading entire records.",
+    "characterSketch": "The adaptable generalist -- happy to store whatever shape of data you throw at it and flexible enough to evolve without breaking a sweat. It's the developer's best friend for rapid prototyping, but sometimes its easygoing nature lets messy schemas slip through unchecked.",
+    "scores": {
+      "scalability": 8,
+      "performance": 7,
+      "reliability": 7,
+      "operationalSimplicity": 7,
+      "queryFlexibility": 6,
+      "schemaFlexibility": 9,
+      "ecosystemMaturity": 9,
+      "learningCurve": 8
+    },
+    "justifications": {
+      "scalability": "MongoDB and Couchbase support automatic sharding with horizontal scaling across commodity hardware. Document locality reduces cross-shard queries for well-modeled data.",
+      "performance": "Reads are fast when accessing full documents by ID or indexed fields. Performance degrades for cross-document joins or deep nested queries compared to purpose-built engines.",
+      "reliability": "MongoDB offers replica sets with automatic failover and tunable write concerns. WiredTiger storage engine provides crash-safe journaling. Not quite ACID across multi-document transactions until recent versions.",
+      "operationalSimplicity": "Schema-free setup means no migration scripts for early development. Managed services (Atlas, DocumentDB) simplify operations, though sharding topology management adds complexity at scale.",
+      "queryFlexibility": "Rich query language supports filtering, projection, aggregation pipelines, and geospatial queries. However, lacks full SQL expressiveness -- no native joins across collections without $lookup.",
+      "schemaFlexibility": "Documents can have completely different structures within the same collection. Schema validation is optional and additive. Adding new fields requires zero downtime migrations.",
+      "ecosystemMaturity": "MongoDB is the most popular NoSQL database globally with 15+ years of production use, extensive drivers for every language, and a massive community of contributors and learning resources.",
+      "learningCurve": "JSON-based data model is intuitive for developers already working with JavaScript/TypeScript. Query syntax is more approachable than SQL for simple operations but has its own learning curve for aggregations."
+    },
+    "capTheorem": {
+      "classification": "Tunable",
+      "notes": "MongoDB defaults to strong consistency for reads from the primary but supports configurable read preferences (nearest, secondary) for eventual consistency. Write concerns can be tuned from unacknowledged to majority."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Schema flexibility enables rapid iteration without migrations",
+      "Natural mapping to application-layer objects reduces impedance mismatch",
+      "Rich query and aggregation pipeline for complex analytics",
+      "Horizontal scaling through automatic sharding",
+      "Strong ecosystem with extensive tooling and managed services"
+    ],
+    "weaknesses": [
+      "Cross-document joins are expensive and limited compared to relational DBs",
+      "Schema-free nature can lead to inconsistent data quality without discipline",
+      "Storage overhead from duplicated/denormalized data",
+      "Multi-document ACID transactions add latency and complexity"
+    ],
+    "bestFor": [
+      "Content management systems and product catalogs",
+      "User profiles with varying attributes",
+      "Mobile and web application backends",
+      "Event logging and activity feeds",
+      "Rapid prototyping with evolving schemas"
+    ],
+    "avoidWhen": [
+      "Data has deep relational dependencies requiring frequent joins",
+      "Strict transactional integrity across multiple entities is critical",
+      "Highly normalized data models are required for storage efficiency"
+    ],
+    "topDatabases": [
+      {
+        "name": "MongoDB",
+        "description": "The most widely adopted document database, storing data as flexible BSON documents with a powerful aggregation framework and native horizontal scaling.",
+        "license": "SSPL v1 (source-available)",
+        "url": "https://db-engines.com/en/system/MongoDB"
+      },
+      {
+        "name": "Couchbase",
+        "description": "Distributed document database combining the flexibility of JSON with SQL++ query language, built-in caching, and mobile sync capabilities.",
+        "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/Couchbase"
+      },
+      {
+        "name": "Amazon DocumentDB",
+        "description": "AWS-managed document database service with MongoDB API compatibility, designed for operational workloads requiring scalability and high availability.",
+        "license": "Proprietary (AWS managed service)",
+        "url": "https://db-engines.com/en/system/Amazon+DocumentDB"
+      },
+      {
+        "name": "Firestore",
+        "description": "Google Cloud's serverless document database with real-time synchronization, offline support, and deep integration with Firebase for mobile and web apps.",
+        "license": "Proprietary (Google Cloud managed service)",
+        "url": "https://firebase.google.com/docs/firestore"
+      }
+    ],
+    "useCases": [
+      "Content management",
+      "Product catalogs",
+      "User profiles",
+      "Mobile app backends",
+      "Event logging",
+      "Real-time collaboration"
+    ]
+  },
+  {
+    "id": "in-memory",
+    "name": "In-Memory Database",
+    "slug": "in-memory",
+    "icon": "zap",
+    "complexityPosition": 0.30,
+    "summary": "Keeps all data in RAM for microsecond-level access times. Optimized for real-time analytics, caching layers, and applications where latency is the primary concern and data fits in memory.",
+    "characterSketch": "The adrenaline junkie who lives life at full speed -- everything happens in microseconds and waiting is simply not in the vocabulary. Incredibly powerful for the right moment, but it needs a safety net (persistence) because if the power goes out, so does the memory.",
+    "scores": {
+      "scalability": 7,
+      "performance": 10,
+      "reliability": 4,
+      "operationalSimplicity": 6,
+      "queryFlexibility": 4,
+      "schemaFlexibility": 7,
+      "ecosystemMaturity": 7,
+      "learningCurve": 7
+    },
+    "justifications": {
+      "scalability": "Scaling is bounded by available RAM per node. Horizontal scaling is possible (Redis Cluster, Apache Ignite) but requires careful memory capacity planning and data partitioning strategies.",
+      "performance": "Microsecond read/write latency by eliminating disk I/O entirely. In-memory data structures (hash tables, skip lists) provide the fastest possible data access for any database category.",
+      "reliability": "Volatile by default -- a process crash or power failure loses all data unless persistence (AOF, snapshots, replication) is configured. Persistence adds latency and complexity, partially defeating the purpose.",
+      "operationalSimplicity": "Simple to run for caching use cases but memory management becomes complex at scale. Monitoring memory pressure, eviction policies, and persistence configurations requires operational expertise.",
+      "queryFlexibility": "Most in-memory DBs focus on key-based access. VoltDB and SAP HANA offer SQL, but pure in-memory stores like Memcached are limited to GET/SET. Flexibility varies widely by implementation.",
+      "schemaFlexibility": "Data stored as serialized objects, binary blobs, or structured values. Schema flexibility depends on the specific engine -- Redis supports multiple data structures, while VoltDB enforces relational schemas.",
+      "ecosystemMaturity": "Redis has a massive ecosystem and decades of production use. Memcached is battle-tested. However, newer entries (Dragonfly, KeyDB) and specialized IMDB products have smaller communities.",
+      "learningCurve": "Basic caching operations are straightforward. Complexity increases when configuring persistence, replication, cluster topology, and memory management for production-grade deployments."
+    },
+    "capTheorem": {
+      "classification": "Tunable",
+      "notes": "Most in-memory databases prioritize availability and partition tolerance for caching workloads. Redis Cluster uses asynchronous replication (AP by default) but supports WAIT for synchronous acknowledgment."
+    },
+    "crossCategory": ["key-value"],
+    "strengths": [
+      "Microsecond latency for reads and writes",
+      "Ideal for caching, real-time analytics, and session management",
+      "Eliminates disk I/O bottleneck entirely",
+      "Rich data structure support in Redis (lists, sets, sorted sets, streams)"
+    ],
+    "weaknesses": [
+      "Data loss risk without persistence configuration",
+      "Cost scales linearly with data size due to RAM pricing",
+      "Memory capacity limits maximum dataset size",
+      "Persistence options add latency and operational complexity"
+    ],
+    "bestFor": [
+      "Application caching and CDN acceleration",
+      "Real-time analytics dashboards",
+      "Session storage with sub-millisecond reads",
+      "Message queues and pub/sub messaging",
+      "Gaming leaderboards and counters"
+    ],
+    "avoidWhen": [
+      "Dataset exceeds available RAM budget",
+      "Durable storage is the primary requirement",
+      "Complex querying across large datasets is needed",
+      "Cost optimization is prioritized over raw speed"
+    ],
+    "topDatabases": [
+      {
+        "name": "Redis",
+        "description": "The dominant in-memory data store supporting strings, hashes, lists, sets, sorted sets, streams, and more -- used as cache, message broker, and primary database.",
+        "license": "RSALv2 / SSPLv1 (source-available since 2024)",
+        "url": "https://db-engines.com/en/system/Redis"
+      },
+      {
+        "name": "Memcached",
+        "description": "Distributed memory caching system focused purely on simplicity and speed. No persistence, no data structures -- just blazing-fast key-value caching.",
+        "license": "BSD 3-Clause",
+        "url": "https://db-engines.com/en/system/Memcached"
+      },
+      {
+        "name": "VoltDB",
+        "description": "In-memory relational database designed for high-velocity OLTP workloads. Combines ACID transactions with in-memory speed using a shared-nothing architecture.",
+        "license": "AGPL v3 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/VoltDB"
+      },
+      {
+        "name": "Apache Ignite",
+        "description": "Distributed in-memory computing platform that serves as a database, caching layer, and processing engine with ANSI SQL support and ACID transactions.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Apache+Ignite"
+      },
+      {
+        "name": "SAP HANA",
+        "description": "Enterprise in-memory database combining OLTP and OLAP in a single system. Powers SAP's enterprise applications with columnar and row-based storage options.",
+        "license": "Proprietary (SAP)",
+        "url": "https://db-engines.com/en/system/SAP+HANA"
+      }
+    ],
+    "useCases": [
+      "Application caching",
+      "Real-time analytics",
+      "Session management",
+      "Message brokering",
+      "Low-latency trading systems"
+    ]
+  },
+  {
+    "id": "time-series",
+    "name": "Time-Series Database",
+    "slug": "time-series",
+    "icon": "clock",
+    "complexityPosition": 0.35,
+    "summary": "Purpose-built for time-stamped data with append-heavy write patterns and time-windowed queries. Optimized for IoT telemetry, monitoring metrics, financial tick data, and any domain where data flows as a continuous stream over time.",
+    "characterSketch": "The meticulous historian who logs every heartbeat, sensor reading, and market tick with obsessive precision. It remembers everything in perfect chronological order and can summarize decades of data into a trend line in milliseconds -- but ask it to update yesterday's entry and it gives you a puzzled look.",
+    "scores": {
+      "scalability": 8,
+      "performance": 8,
+      "reliability": 7,
+      "operationalSimplicity": 6,
+      "queryFlexibility": 5,
+      "schemaFlexibility": 4,
+      "ecosystemMaturity": 6,
+      "learningCurve": 6
+    },
+    "justifications": {
+      "scalability": "Purpose-built for high-throughput ingestion -- InfluxDB and TimescaleDB handle millions of data points per second. Time-based partitioning enables efficient horizontal scaling and automatic data lifecycle management.",
+      "performance": "Columnar storage and time-based indexing deliver exceptional read performance for time-range queries and downsampling. Write throughput is optimized for append-only patterns with minimal index overhead.",
+      "reliability": "Replication and WAL provide good durability. TimescaleDB inherits PostgreSQL's proven reliability. However, aggressive retention policies and downsampling mean raw data may be intentionally discarded.",
+      "operationalSimplicity": "Retention policies, continuous aggregations, and downsampling rules add operational configuration beyond basic setup. Capacity planning requires understanding ingestion rates, cardinality, and storage projections.",
+      "queryFlexibility": "Excellent for time-windowed aggregations, downsampling, and trend analysis. Limited for general-purpose queries -- no joins across unrelated datasets, and ad-hoc queries outside time dimensions are slow.",
+      "schemaFlexibility": "Tags (indexed metadata) and fields (values) provide some flexibility, but the fundamental time-series data model is rigid: every point needs a timestamp. Adding new measurements is easy; changing the structure is not.",
+      "ecosystemMaturity": "Rapidly growing category with InfluxDB, TimescaleDB, and cloud offerings (Amazon Timestream). Younger than relational databases but well-established for monitoring and IoT with strong integration ecosystems.",
+      "learningCurve": "Concepts like retention policies, continuous queries, downsampling, and high-cardinality management are domain-specific. Developers familiar with SQL find TimescaleDB approachable; InfluxQL/Flux require dedicated learning."
+    },
+    "capTheorem": {
+      "classification": "Tunable",
+      "notes": "Most TSDBs prioritize availability for continuous ingestion. TimescaleDB inherits PostgreSQL's strong consistency. InfluxDB Enterprise offers tunable consistency per-write. Eventual consistency is common in distributed setups."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Exceptional write throughput for append-heavy workloads",
+      "Built-in time-windowed queries, downsampling, and retention policies",
+      "Optimized storage compression for time-series data (up to 90% reduction)",
+      "Native support for continuous aggregations and real-time alerts"
+    ],
+    "weaknesses": [
+      "Poor performance for non-time-based queries and random access patterns",
+      "High cardinality in tags can severely degrade performance",
+      "Updates and deletes are expensive or unsupported operations",
+      "Limited general-purpose query capabilities compared to SQL databases"
+    ],
+    "bestFor": [
+      "Infrastructure monitoring and observability (Prometheus, Grafana)",
+      "IoT sensor data collection and analysis",
+      "Financial market data and tick-level analytics",
+      "Application performance monitoring (APM)"
+    ],
+    "avoidWhen": [
+      "Data requires frequent updates or random access patterns",
+      "Queries span non-temporal dimensions primarily",
+      "General-purpose CRUD operations are the dominant pattern"
+    ],
+    "topDatabases": [
+      {
+        "name": "InfluxDB",
+        "description": "Purpose-built time-series database with a custom storage engine optimized for high write throughput and fast time-range queries. Offers both OSS and cloud-managed versions.",
+        "license": "MIT (v2 OSS) / Proprietary (Cloud)",
+        "url": "https://db-engines.com/en/system/InfluxDB"
+      },
+      {
+        "name": "TimescaleDB",
+        "description": "PostgreSQL extension for time-series data, combining full SQL support with automatic partitioning (hypertables), continuous aggregates, and compression.",
+        "license": "Apache 2.0 (Community) / Timescale License (Enterprise)",
+        "url": "https://db-engines.com/en/system/TimescaleDB"
+      },
+      {
+        "name": "QuestDB",
+        "description": "High-performance time-series database written in Java and C++ with SQL support, achieving millions of rows per second ingestion on a single node.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/QuestDB"
+      },
+      {
+        "name": "Amazon Timestream",
+        "description": "Serverless time-series database from AWS with automatic scaling, built-in analytics functions, and tiered storage that moves data from memory to magnetic storage based on age.",
+        "license": "Proprietary (AWS managed service)",
+        "url": "https://db-engines.com/en/system/Amazon+Timestream"
+      }
+    ],
+    "useCases": [
+      "Infrastructure monitoring",
+      "IoT telemetry",
+      "Financial analytics",
+      "Application metrics",
+      "Energy grid monitoring"
+    ]
+  },
+  {
+    "id": "relational",
+    "name": "Relational (SQL) Database",
+    "slug": "relational",
+    "icon": "database",
+    "complexityPosition": 0.42,
+    "summary": "The foundational database model organizing data into tables with rows, columns, and relationships enforced through foreign keys. Optimized for structured data, complex queries, and transactional integrity with the universal SQL language.",
+    "characterSketch": "The seasoned professional who has seen it all and can handle anything thrown its way with methodical precision. It insists on structure, keeps its data pristine, and can answer the most complex questions with a single query. Not the fastest runner, but the most reliable teammate you'll ever have.",
+    "scores": {
+      "scalability": 5,
+      "performance": 6,
+      "reliability": 9,
+      "operationalSimplicity": 6,
+      "queryFlexibility": 10,
+      "schemaFlexibility": 3,
+      "ecosystemMaturity": 10,
+      "learningCurve": 6
+    },
+    "justifications": {
+      "scalability": "Vertical scaling is straightforward but horizontal scaling requires sharding, read replicas, or distributed SQL (NewSQL). Traditional RDBMS architectures hit scaling ceilings due to cross-shard join complexity.",
+      "performance": "Excellent for complex queries through mature query optimizers. However, strict ACID compliance adds overhead per transaction. Bulk writes and schema migrations can lock tables, causing latency spikes.",
+      "reliability": "ACID transactions, WAL, point-in-time recovery, and decades of battle-hardening make relational databases the gold standard for data integrity. PostgreSQL and Oracle have proven durability across every industry.",
+      "operationalSimplicity": "Rich ecosystem of management tools (pgAdmin, DBeaver, DataGrip) helps, but schema migrations, index tuning, vacuum operations, and backup strategies require experienced DBAs at scale.",
+      "queryFlexibility": "SQL is the most expressive query language: joins across tables, window functions, CTEs, subqueries, aggregations, and full-text search. No other model matches the breadth of analytical capabilities.",
+      "schemaFlexibility": "Schema changes require ALTER TABLE statements and often downtime or careful migration strategies. Adding columns is easy; restructuring tables with foreign key dependencies is expensive.",
+      "ecosystemMaturity": "The most mature database category by far. PostgreSQL, MySQL, and Oracle have decades of production use, thousands of tools, extensive documentation, and the largest talent pool in the industry.",
+      "learningCurve": "SQL is a lingua franca that most developers learn early, but mastering query optimization, indexing strategies, normalization theory, and transaction isolation levels requires significant investment."
+    },
+    "capTheorem": {
+      "classification": "CA",
+      "notes": "Traditional single-node RDBMS provides consistency and availability but cannot survive network partitions. Distributed SQL variants (CockroachDB, Spanner) sacrifice some availability for partition tolerance, effectively becoming CP."
+    },
+    "crossCategory": ["document"],
+    "strengths": [
+      "ACID transactions guarantee data integrity across complex operations",
+      "SQL provides unmatched query expressiveness with joins, aggregations, and window functions",
+      "Decades of battle-tested reliability across every industry",
+      "Largest ecosystem of tools, drivers, and skilled professionals",
+      "PostgreSQL JSONB support bridges relational and document paradigms"
+    ],
+    "weaknesses": [
+      "Horizontal scaling requires complex sharding or distributed SQL solutions",
+      "Rigid schemas make rapid iteration during early development slower",
+      "Schema migrations on large tables can cause downtime or degraded performance",
+      "Object-relational impedance mismatch adds complexity in ORM-heavy applications"
+    ],
+    "bestFor": [
+      "Financial systems requiring strict transactional integrity",
+      "Enterprise applications with complex data relationships",
+      "Reporting and business intelligence workloads",
+      "Multi-table joins and ad-hoc analytical queries",
+      "Applications requiring strong data consistency guarantees"
+    ],
+    "avoidWhen": [
+      "Data is highly unstructured or schema changes constantly",
+      "Write throughput at massive scale is the primary requirement",
+      "Simple key-based access patterns don't need SQL overhead",
+      "Horizontal scaling must be transparent without architectural changes"
+    ],
+    "topDatabases": [
+      {
+        "name": "PostgreSQL",
+        "description": "The world's most advanced open-source relational database with extensibility (JSONB, PostGIS, full-text search), MVCC concurrency, and proven reliability powering mission-critical applications.",
+        "license": "PostgreSQL License (permissive, similar to MIT/BSD)",
+        "url": "https://db-engines.com/en/system/PostgreSQL"
+      },
+      {
+        "name": "MySQL",
+        "description": "The most widely deployed open-source database, powering the majority of web applications. Known for read-heavy performance, replication simplicity, and broad hosting support.",
+        "license": "GPL v2 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/MySQL"
+      },
+      {
+        "name": "Microsoft SQL Server",
+        "description": "Enterprise relational database with deep Windows/Azure integration, powerful BI tooling (SSRS, SSAS, SSIS), and advanced features like columnstore indexes and in-memory OLTP.",
+        "license": "Proprietary (Microsoft)",
+        "url": "https://db-engines.com/en/system/Microsoft+SQL+Server"
+      },
+      {
+        "name": "Oracle Database",
+        "description": "Industry-leading enterprise RDBMS with unmatched features for high-availability (RAC), partitioning, and advanced analytics. The benchmark for mission-critical financial and enterprise systems.",
+        "license": "Proprietary (Oracle)",
+        "url": "https://db-engines.com/en/system/Oracle"
+      },
+      {
+        "name": "SQLite",
+        "description": "Embedded relational database requiring zero configuration. The most deployed database engine in the world, built into every smartphone, browser, and countless applications.",
+        "license": "Public Domain",
+        "url": "https://db-engines.com/en/system/SQLite"
+      }
+    ],
+    "useCases": [
+      "Enterprise applications",
+      "Financial systems",
+      "E-commerce platforms",
+      "Business intelligence",
+      "Content management systems",
+      "SaaS applications"
+    ]
+  },
+  {
+    "id": "search",
+    "name": "Search Engine",
+    "slug": "search",
+    "icon": "search",
+    "complexityPosition": 0.45,
+    "summary": "Database engine built around inverted indexes for full-text search, relevance scoring, and faceted navigation. Optimized for finding needles in haystacks across unstructured or semi-structured text data.",
+    "characterSketch": "The librarian with a photographic memory -- it has indexed every word in every document and can find exactly what you're looking for before you finish typing. Brilliant at search and discovery, but don't trust it as your only copy of the data -- it's a finding aid, not a vault.",
+    "scores": {
+      "scalability": 8,
+      "performance": 8,
+      "reliability": 5,
+      "operationalSimplicity": 5,
+      "queryFlexibility": 7,
+      "schemaFlexibility": 7,
+      "ecosystemMaturity": 8,
+      "learningCurve": 5
+    },
+    "justifications": {
+      "scalability": "Elasticsearch and Solr distribute indexes across shards and nodes with near-linear search throughput scaling. Adding nodes improves both query capacity and index size limits.",
+      "performance": "Inverted indexes enable sub-second full-text search across billions of documents. Relevance scoring (BM25, TF-IDF) and aggregations execute efficiently thanks to columnar segment storage.",
+      "reliability": "Search engines are typically used as secondary indexes, not primary data stores. Replica shards provide redundancy, but reindexing from a primary source is the standard recovery pattern.",
+      "operationalSimplicity": "Cluster management (shard allocation, index lifecycle, JVM tuning) requires expertise. Elasticsearch clusters are notoriously resource-hungry and need careful capacity planning to avoid split-brain scenarios.",
+      "queryFlexibility": "Rich query DSL supports full-text search, fuzzy matching, geospatial queries, aggregations, and complex boolean logic. However, it lacks relational joins and strict transactional semantics.",
+      "schemaFlexibility": "Dynamic mapping automatically detects and indexes new fields. Schema evolution is straightforward for adding fields but changing field types requires reindexing the entire dataset.",
+      "ecosystemMaturity": "Elasticsearch powers search for Wikipedia, GitHub, and thousands of enterprises. The ELK stack (Elasticsearch, Logstash, Kibana) is the de facto standard for log analytics and observability.",
+      "learningCurve": "The query DSL, mapping configuration, analyzer chains, and cluster topology concepts create a significant learning curve. Effective relevance tuning requires understanding information retrieval theory."
+    },
+    "capTheorem": {
+      "classification": "AP",
+      "notes": "Search engines prioritize availability and partition tolerance. Elasticsearch uses eventual consistency with configurable refresh intervals. Writes become searchable after a refresh period (default 1 second), not immediately."
+    },
+    "crossCategory": ["document"],
+    "strengths": [
+      "Unmatched full-text search with relevance scoring and fuzzy matching",
+      "Real-time aggregations across billions of documents for analytics",
+      "Powerful faceted navigation for e-commerce and content discovery",
+      "Horizontally scalable with automatic shard distribution"
+    ],
+    "weaknesses": [
+      "Not designed as a primary data store -- data loss risk without source of truth",
+      "High memory and CPU requirements for cluster operation",
+      "Complex cluster management with JVM tuning and shard balancing",
+      "Eventual consistency means writes aren't immediately searchable"
+    ],
+    "bestFor": [
+      "Full-text search across product catalogs or content libraries",
+      "Log aggregation and observability (ELK/OpenSearch stack)",
+      "E-commerce faceted navigation and typeahead suggestions",
+      "Security analytics and threat detection (SIEM)"
+    ],
+    "avoidWhen": [
+      "Used as the sole primary data store without a separate source of truth",
+      "Strict transactional consistency is required for writes",
+      "Simple key-value lookups don't justify cluster overhead",
+      "Budget constraints cannot support resource-intensive clusters"
+    ],
+    "topDatabases": [
+      {
+        "name": "Elasticsearch",
+        "description": "The most popular search and analytics engine, built on Apache Lucene. Powers search, logging, and security analytics for thousands of organizations with a rich query DSL and visualization stack.",
+        "license": "Elastic License 2.0 / SSPL (source-available since 2021)",
+        "url": "https://db-engines.com/en/system/Elasticsearch"
+      },
+      {
+        "name": "Apache Solr",
+        "description": "Enterprise search platform built on Apache Lucene with advanced features like faceted search, distributed indexing, and rich document handling. Preferred in traditional enterprise environments.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Apache+Solr"
+      },
+      {
+        "name": "Meilisearch",
+        "description": "Lightning-fast, typo-tolerant search engine designed for end-user-facing search. Prioritizes developer experience with simple APIs and instant out-of-the-box relevance.",
+        "license": "MIT",
+        "url": "https://db-engines.com/en/system/Meilisearch"
+      },
+      {
+        "name": "Typesense",
+        "description": "Open-source search engine focused on developer productivity and ease of use. Features typo tolerance, faceting, and geo-search with a simple RESTful API and low operational overhead.",
+        "license": "GPL v3",
+        "url": "https://typesense.org/"
+      }
+    ],
+    "useCases": [
+      "Full-text search",
+      "Log analytics",
+      "E-commerce search",
+      "Security analytics",
+      "Content discovery"
+    ]
+  }
+]
