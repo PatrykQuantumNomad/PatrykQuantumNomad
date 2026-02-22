@@ -1,5 +1,17 @@
 import type { Scores } from './schema';
 
+/** Color palette for each dimension — consistent across radar charts, score bars, and tables */
+export const DIMENSION_COLORS: Record<keyof Scores, string> = {
+  scalability: '#4A90D9',           // Blue — growth/upward
+  performance: '#E8734A',           // Coral — speed/energy
+  reliability: '#2AAA8A',           // Teal — stability
+  operationalSimplicity: '#8FBC5A', // Green — ease
+  queryFlexibility: '#7B68EE',      // Purple — flexibility
+  schemaFlexibility: '#D4A843',     // Gold — adaptability
+  ecosystemMaturity: '#C44B20',     // Burnt orange — maturity
+  learningCurve: '#9B59B6',        // Violet — education
+};
+
 /** Metadata for a single Database Compass dimension */
 export interface Dimension {
   /** Machine key matching the scores schema field name */
