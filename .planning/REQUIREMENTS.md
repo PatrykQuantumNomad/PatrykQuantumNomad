@@ -53,8 +53,8 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 ### Share & Download
 
-- [ ] **SHARE-01**: Share controls on detail pages — Web Share API on mobile, Clipboard API on desktop
-- [ ] **SHARE-02**: Radar chart download-as-PNG via client-side SVG-to-PNG
+- [x] **SHARE-01**: Share controls on detail pages — Web Share API on mobile, Clipboard API on desktop
+- [x] **SHARE-02**: Radar chart download-as-PNG via client-side SVG-to-PNG
 
 ## Future Requirements
 
@@ -114,8 +114,8 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | INTEG-02 | Phase 32 | Pending |
 | INTEG-03 | Phase 32 | Pending |
 | INTEG-04 | Phase 32 | Pending |
-| SHARE-01 | Phase 31 | Pending |
-| SHARE-02 | Phase 31 | Pending |
+| SHARE-01 | Phase 31 | Complete |
+| SHARE-02 | Phase 31 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 28 total
@@ -124,4 +124,4 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-22 after Phase 28 completion*
+*Last updated: 2026-02-22 after Phase 31 completion*

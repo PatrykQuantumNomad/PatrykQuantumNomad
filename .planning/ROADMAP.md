@@ -17,7 +17,7 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
 - [x] **Phase 28: Data Foundation** - Schema, dimension definitions, 12 model entries with scores and content, content collection registration
 - [x] **Phase 29: Visualization Components** - Complexity spectrum, 8-axis radar charts, score breakdown, sortable table, CAP badge, responsive testing
 - [x] **Phase 30: Overview Page** - Landing page at /tools/db-compass/ with spectrum, model grid, scoring table, interactive filter, and overview-level SEO (completed 2026-02-22)
-- [ ] **Phase 31: Detail Pages** - 12 model detail pages with radar charts, tradeoffs, top databases, prev/next nav, share controls, and per-page SEO
+- [x] **Phase 31: Detail Pages** - 12 model detail pages with radar charts, tradeoffs, top databases, prev/next nav, share controls, and per-page SEO (completed 2026-02-22)
 - [ ] **Phase 32: OG Images & Site Integration** - Build-time OG images, sitemap inclusion, homepage callout, tools page card, companion blog post
 
 ## Phase Details
@@ -82,8 +82,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 31-01-PLAN.md — ModelNav component and [slug].astro detail page with all content sections, prev/next navigation, and SEO
-- [ ] 31-02-PLAN.md — CompassShareControls with social share links, copy-link, Web Share API, and SVG-to-PNG radar chart download
+- [x] 31-01-PLAN.md — ModelNav component and [slug].astro detail page with all content sections, prev/next navigation, and SEO
+- [x] 31-02-PLAN.md — CompassShareControls with social share links, copy-link, Web Share API, and SVG-to-PNG radar chart download
 
 ### Phase 32: OG Images & Site Integration
 **Goal**: Database Compass is fully discoverable — OG images render on social shares, all pages appear in the sitemap, the homepage and tools page link to it, and a companion blog post provides context
@@ -111,7 +111,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 2/2 | Complete   | 2026-02-22 |
-| 31. Detail Pages | 1/2 | In Progress|  |
+| 31. Detail Pages | 2/2 | Complete | 2026-02-22 |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |
 
 ---

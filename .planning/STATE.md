@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.5 Database Compass — Phase 31: Detail Pages
+**Current focus:** v1.5 Database Compass — Phase 32: OG Images & Site Integration
 
 ## Current Position
 
-Phase: 31 (4 of 5 in v1.5) — Detail Pages
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-02-22 — Completed 31-01 (Detail Pages)
+Phase: 32 (5 of 5 in v1.5) — OG Images & Site Integration
+Plan: 0 of TBD complete
+Status: Not Started
+Last activity: 2026-02-22 — Completed 31-02 (CompassShareControls)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 63 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 6 v1.5)
+- Total plans completed: 64 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 7 v1.5)
 
 **Cumulative Stats:**
 
@@ -39,6 +39,7 @@ Progress: [███████░░░] 70%
 | Phase 30 P01 | 3min | 2 tasks | 5 files |
 | Phase 30 P02 | 4min | 2 tasks | 2 files |
 | Phase 31 P01 | 4min | 2 tasks | 2 files |
+| Phase 31 P02 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [31-01]: Complexity order for nav: key-value (0.08) to multi-model (0.88)
 - [31-01]: Character heading reused from Beauty Index for consistency
 - [31-01]: Section ids added for future deep linking without visible anchor icons
+- [31-02]: SVG-to-PNG via XMLSerializer + Canvas with viewBox dimensions (not width/height)
+- [31-02]: Download filename uses slug to avoid parentheses in model names
+- [31-02]: Simpler SVG-to-PNG approach over Beauty Index Canvas 2D composite
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 31-01 (Detail Pages — 2 files, 2 tasks)
+Stopped at: Completed 31-02 (CompassShareControls — 2 files, 2 tasks)
 Resume file: None
-Next: Phase 31 Plan 02 (CompassShareControls)
+Next: Phase 32 Plan 01 (OG Images & Site Integration)
