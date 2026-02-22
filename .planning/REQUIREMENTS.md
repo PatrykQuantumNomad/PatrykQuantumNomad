@@ -58,35 +58,35 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Security Rules
 
-- [ ] **SEC-01**: CV-C001 — Privileged mode enabled (CWE-250)
-- [ ] **SEC-02**: CV-C002 — Docker socket mounted in volumes (CWE-250)
-- [ ] **SEC-03**: CV-C003 — Host network mode bypassing isolation
-- [ ] **SEC-04**: CV-C004 — Host PID mode exposing host processes
-- [ ] **SEC-05**: CV-C005 — Host IPC mode sharing memory
-- [ ] **SEC-06**: CV-C006 — Dangerous capabilities added (SYS_ADMIN, NET_ADMIN, ALL)
-- [ ] **SEC-07**: CV-C007 — Default capabilities not dropped (missing cap_drop: [ALL])
-- [ ] **SEC-08**: CV-C008 — Secrets in environment variables (PASSWORD, API_KEY, TOKEN patterns)
-- [ ] **SEC-09**: CV-C009 — Unbound port interface (missing explicit host IP binding)
-- [ ] **SEC-10**: CV-C010 — Missing no-new-privileges security option
-- [ ] **SEC-11**: CV-C011 — Writable filesystem (read_only not set)
-- [ ] **SEC-12**: CV-C012 — Seccomp disabled (seccomp:unconfined)
-- [ ] **SEC-13**: CV-C013 — SELinux disabled (label:disable)
-- [ ] **SEC-14**: CV-C014 — Image uses latest or no tag (supply chain risk)
+- [x] **SEC-01**: CV-C001 — Privileged mode enabled (CWE-250)
+- [x] **SEC-02**: CV-C002 — Docker socket mounted in volumes (CWE-250)
+- [x] **SEC-03**: CV-C003 — Host network mode bypassing isolation
+- [x] **SEC-04**: CV-C004 — Host PID mode exposing host processes
+- [x] **SEC-05**: CV-C005 — Host IPC mode sharing memory
+- [x] **SEC-06**: CV-C006 — Dangerous capabilities added (SYS_ADMIN, NET_ADMIN, ALL)
+- [x] **SEC-07**: CV-C007 — Default capabilities not dropped (missing cap_drop: [ALL])
+- [x] **SEC-08**: CV-C008 — Secrets in environment variables (PASSWORD, API_KEY, TOKEN patterns)
+- [x] **SEC-09**: CV-C009 — Unbound port interface (missing explicit host IP binding)
+- [x] **SEC-10**: CV-C010 — Missing no-new-privileges security option
+- [x] **SEC-11**: CV-C011 — Writable filesystem (read_only not set)
+- [x] **SEC-12**: CV-C012 — Seccomp disabled (seccomp:unconfined)
+- [x] **SEC-13**: CV-C013 — SELinux disabled (label:disable)
+- [x] **SEC-14**: CV-C014 — Image uses latest or no tag (supply chain risk)
 
 ### Best Practice Rules
 
-- [ ] **BP-01**: CV-B001 — Missing healthcheck definition
-- [ ] **BP-02**: CV-B002 — No restart policy set
-- [ ] **BP-03**: CV-B003 — No resource limits (deploy.resources.limits)
-- [ ] **BP-04**: CV-B004 — Image tag not pinned (mutable tags like latest, stable, lts)
-- [ ] **BP-05**: CV-B005 — No logging configuration (risk of disk fill)
-- [ ] **BP-06**: CV-B006 — Deprecated version field present
-- [ ] **BP-07**: CV-B007 — Missing top-level project name field
-- [ ] **BP-08**: CV-B008 — Both build and image specified (ambiguous)
-- [ ] **BP-09**: CV-B009 — Anonymous volume usage
-- [ ] **BP-10**: CV-B010 — No memory reservation alongside limits
-- [ ] **BP-11**: CV-B011 — Healthcheck timeout exceeds interval
-- [ ] **BP-12**: CV-B012 — Default network only (no custom network isolation)
+- [x] **BP-01**: CV-B001 — Missing healthcheck definition
+- [x] **BP-02**: CV-B002 — No restart policy set
+- [x] **BP-03**: CV-B003 — No resource limits (deploy.resources.limits)
+- [x] **BP-04**: CV-B004 — Image tag not pinned (mutable tags like latest, stable, lts)
+- [x] **BP-05**: CV-B005 — No logging configuration (risk of disk fill)
+- [x] **BP-06**: CV-B006 — Deprecated version field present
+- [x] **BP-07**: CV-B007 — Missing top-level project name field
+- [x] **BP-08**: CV-B008 — Both build and image specified (ambiguous)
+- [x] **BP-09**: CV-B009 — Anonymous volume usage
+- [x] **BP-10**: CV-B010 — No memory reservation alongside limits
+- [x] **BP-11**: CV-B011 — Healthcheck timeout exceeds interval
+- [x] **BP-12**: CV-B012 — Default network only (no custom network isolation)
 
 ### Style Rules
 
@@ -216,32 +216,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEM-13 | Phase 34 | Complete |
 | SEM-14 | Phase 34 | Complete |
 | SEM-15 | Phase 34 | Complete |
-| SEC-01 | Phase 34 | Pending |
-| SEC-02 | Phase 34 | Pending |
-| SEC-03 | Phase 34 | Pending |
-| SEC-04 | Phase 34 | Pending |
-| SEC-05 | Phase 34 | Pending |
-| SEC-06 | Phase 34 | Pending |
-| SEC-07 | Phase 34 | Pending |
-| SEC-08 | Phase 34 | Pending |
-| SEC-09 | Phase 34 | Pending |
-| SEC-10 | Phase 34 | Pending |
-| SEC-11 | Phase 34 | Pending |
-| SEC-12 | Phase 34 | Pending |
-| SEC-13 | Phase 34 | Pending |
-| SEC-14 | Phase 34 | Pending |
-| BP-01 | Phase 34 | Pending |
-| BP-02 | Phase 34 | Pending |
-| BP-03 | Phase 34 | Pending |
-| BP-04 | Phase 34 | Pending |
-| BP-05 | Phase 34 | Pending |
-| BP-06 | Phase 34 | Pending |
-| BP-07 | Phase 34 | Pending |
-| BP-08 | Phase 34 | Pending |
-| BP-09 | Phase 34 | Pending |
-| BP-10 | Phase 34 | Pending |
-| BP-11 | Phase 34 | Pending |
-| BP-12 | Phase 34 | Pending |
+| SEC-01 | Phase 34 | Complete |
+| SEC-02 | Phase 34 | Complete |
+| SEC-03 | Phase 34 | Complete |
+| SEC-04 | Phase 34 | Complete |
+| SEC-05 | Phase 34 | Complete |
+| SEC-06 | Phase 34 | Complete |
+| SEC-07 | Phase 34 | Complete |
+| SEC-08 | Phase 34 | Complete |
+| SEC-09 | Phase 34 | Complete |
+| SEC-10 | Phase 34 | Complete |
+| SEC-11 | Phase 34 | Complete |
+| SEC-12 | Phase 34 | Complete |
+| SEC-13 | Phase 34 | Complete |
+| SEC-14 | Phase 34 | Complete |
+| BP-01 | Phase 34 | Complete |
+| BP-02 | Phase 34 | Complete |
+| BP-03 | Phase 34 | Complete |
+| BP-04 | Phase 34 | Complete |
+| BP-05 | Phase 34 | Complete |
+| BP-06 | Phase 34 | Complete |
+| BP-07 | Phase 34 | Complete |
+| BP-08 | Phase 34 | Complete |
+| BP-09 | Phase 34 | Complete |
+| BP-10 | Phase 34 | Complete |
+| BP-11 | Phase 34 | Complete |
+| BP-12 | Phase 34 | Complete |
 | STYLE-01 | Phase 34 | Pending |
 | STYLE-02 | Phase 34 | Pending |
 | STYLE-03 | Phase 34 | Pending |

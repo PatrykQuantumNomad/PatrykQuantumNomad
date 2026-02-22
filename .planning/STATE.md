@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 34 of 40 (Rule Engine, Rules & Scoring)
-Plan: 1 of 3 complete in current phase
-Status: Plan 34-01 complete (shared utilities + 15 semantic rules), ready for 34-02
-Last activity: 2026-02-22 -- Plan 34-01 complete (port parser, graph builder, 15 semantic rules)
+Plan: 2 of 3 complete in current phase
+Status: Plan 34-02 complete (14 security rules + 12 best practice rules), ready for 34-03
+Last activity: 2026-02-22 -- Plan 34-02 complete (26 rules: security + best practice)
 
-Progress: [███-------] 33% (Phase 34)
+Progress: [██████----] 66% (Phase 34)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 69 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 3 v1.6)
+- Total plans completed: 70 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 4 v1.6)
 
 **Cumulative Stats:**
 
@@ -34,6 +34,7 @@ Progress: [███-------] 33% (Phase 34)
 | v1.6 Compose Validator | 33-40 | TBD | 100 | In progress |
 | **Total** | **40** | **66+** | **280** | |
 | Phase 34 P01 | 5min | 2 tasks | 18 files |
+| Phase 34 P02 | 7min | 2 tasks | 28 files |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - CV-M001 handles single-port duplicates while CV-M014 handles range overlaps to avoid duplicate violations
 - extractDependsOn helper centralized in graph-builder.ts for reuse across 4 semantic rules
 - Bind mount detection uses prefix check (., /, ~, $) to prevent false positives on named volume references
+- CV-C014 handles registry URLs with port numbers by checking if text after last colon contains slash
+- CV-B004 skips 'latest' tag since CV-C014 already covers it, avoiding duplicate violations
+- CV-C008 uses suffix-anchored regex to avoid false positives on names like PASSWORD_MIN_LENGTH
 
 ### Pending Todos
 
@@ -77,6 +81,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 34-01-PLAN.md
+Stopped at: Completed 34-02-PLAN.md
 Resume file: None
-Next: Plan 34-02 -- 14 security rules (CV-C001 through CV-C014) and 12 best practice rules (CV-B001 through CV-B012)
+Next: Plan 34-03 -- Style rules, rule engine, scoring engine, master registry
