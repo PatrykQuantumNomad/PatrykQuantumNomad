@@ -56,9 +56,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 34-01-PLAN.md — Shared utilities (port parser, graph builder with cycle detection) and 15 semantic rules (CV-M001 through CV-M015)
-- [ ] 34-02-PLAN.md — 14 security rules (CV-C001 through CV-C014) and 12 best practice rules (CV-B001 through CV-B012)
-- [ ] 34-03-PLAN.md — 3 style rules (CV-F001 through CV-F003), master rule registry, rule engine orchestrator, and category-weighted scoring engine
+- [x] 34-01-PLAN.md — Shared utilities (port parser, graph builder with cycle detection) and 15 semantic rules (CV-M001 through CV-M015)
+- [x] 34-02-PLAN.md — 14 security rules (CV-C001 through CV-C014) and 12 best practice rules (CV-B001 through CV-B012)
+- [x] 34-03-PLAN.md — 3 style rules (CV-F001 through CV-F003), master rule registry, rule engine orchestrator, and category-weighted scoring engine
 
 ### Phase 35: CodeMirror YAML Editor & Nanostores
 **Goal**: Users see a CodeMirror 6 editor with YAML syntax highlighting, a pre-loaded sample compose file, and can trigger analysis via button or keyboard shortcut -- with results flowing through nanostores to the results panel
@@ -69,11 +69,11 @@ Plans:
   2. A pre-loaded sample docker-compose.yml contains deliberate issues across all 5 rule categories so users see meaningful results immediately
   3. Clicking the Analyze button or pressing Cmd/Ctrl+Enter triggers the full validation pipeline and writes results to nanostores
   4. The editor survives View Transitions navigation (destroy/recreate lifecycle) without stale state
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 35-01: TBD
-- [ ] 35-02: TBD
+- [ ] 35-01-PLAN.md — Install @codemirror/lang-yaml, create nanostore atoms, sample compose file, and useCodeMirrorYaml hook with YAML lang + Mod-Enter shortcut
+- [ ] 35-02-PLAN.md — Create ComposeEditorPanel, ComposeResultsPanel, ComposeValidator React components and Astro page at /tools/compose-validator/
 
 ### Phase 36: Results Panel & Dependency Graph
 **Goal**: Users see their validation results as inline editor annotations, a score gauge, category breakdown, severity-grouped violation list, and an interactive service dependency graph with cycle highlighting -- all in a tabbed results panel
