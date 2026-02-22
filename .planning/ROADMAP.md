@@ -99,10 +99,10 @@ Plans:
   1. The score badge downloads as a branded PNG image suitable for social media
   2. The compose YAML content is encoded in the URL hash via lz-string so the link restores the exact file and analysis results
   3. On mobile Web Share API is available, on desktop Clipboard API copies the URL, with text URL fallback on unsupported browsers
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 37-01: TBD
+- [ ] 37-01-PLAN.md — Badge generator, URL state encoding, ComposeShareActions with Web Share API, and editor URL decode on mount
 
 ### Phase 38: Rule Documentation Pages
 **Goal**: Every rule has its own SEO-indexed documentation page at /tools/compose-validator/rules/[code] with expert explanation, fix suggestion, and before/after code examples
