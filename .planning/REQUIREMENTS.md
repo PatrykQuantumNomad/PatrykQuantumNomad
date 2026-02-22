@@ -39,15 +39,15 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 - [x] **SEO-01**: JSON-LD Dataset + ItemList on overview page
 - [x] **SEO-02**: JSON-LD CreativeWork on each detail page
 - [x] **SEO-03**: BreadcrumbList JSON-LD on overview and all detail pages
-- [ ] **SEO-04**: Build-time OG image for overview page (spectrum miniature)
-- [ ] **SEO-05**: Build-time OG images for each of 12 detail pages (radar chart)
+- [x] **SEO-04**: Build-time OG image for overview page (spectrum miniature)
+- [x] **SEO-05**: Build-time OG images for each of 12 detail pages (radar chart)
 - [x] **SEO-06**: SEO-optimized meta descriptions for overview and all detail pages
-- [ ] **SEO-07**: All pages included in sitemap
+- [x] **SEO-07**: All pages included in sitemap
 
 ### Site Integration
 
-- [ ] **INTEG-01**: Homepage callout card linking to /tools/db-compass/
-- [ ] **INTEG-02**: Tools listing page card replacing "Coming Soon" placeholder
+- [x] **INTEG-01**: Homepage callout card linking to /tools/db-compass/
+- [x] **INTEG-02**: Tools listing page card replacing "Coming Soon" placeholder
 - [ ] **INTEG-03**: Companion blog post — "How to Choose a Database in 2026" with bidirectional cross-links
 - [ ] **INTEG-04**: Blog post cross-links to overview and selected detail pages
 
@@ -106,12 +106,12 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | SEO-01 | Phase 30 | Complete |
 | SEO-02 | Phase 31 | Complete |
 | SEO-03 | Phase 30 | Complete |
-| SEO-04 | Phase 32 | Pending |
-| SEO-05 | Phase 32 | Pending |
+| SEO-04 | Phase 32 | Complete |
+| SEO-05 | Phase 32 | Complete |
 | SEO-06 | Phase 30 | Complete |
-| SEO-07 | Phase 32 | Pending |
-| INTEG-01 | Phase 32 | Pending |
-| INTEG-02 | Phase 32 | Pending |
+| SEO-07 | Phase 32 | Complete |
+| INTEG-01 | Phase 32 | Complete |
+| INTEG-02 | Phase 32 | Complete |
 | INTEG-03 | Phase 32 | Pending |
 | INTEG-04 | Phase 32 | Pending |
 | SHARE-01 | Phase 31 | Complete |

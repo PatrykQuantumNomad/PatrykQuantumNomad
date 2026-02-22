@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 32 (5 of 5 in v1.5) — OG Images & Site Integration
-Plan: 0 of TBD complete
-Status: Not Started
-Last activity: 2026-02-22 — Completed 31-02 (CompassShareControls)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-22 — Completed 32-01 (OG Images & Site Integration)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 7 v1.5)
+- Total plans completed: 65 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 8 v1.5)
 
 **Cumulative Stats:**
 
@@ -40,6 +40,7 @@ Progress: [████████░░] 80%
 | Phase 30 P02 | 4min | 2 tasks | 2 files |
 | Phase 31 P01 | 4min | 2 tasks | 2 files |
 | Phase 31 P02 | 4min | 2 tasks | 2 files |
+| Phase 32 P01 | 7min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Recent decisions affecting current work:
 - [31-02]: SVG-to-PNG via XMLSerializer + Canvas with viewBox dimensions (not width/height)
 - [31-02]: Download filename uses slug to avoid parentheses in model names
 - [31-02]: Simpler SVG-to-PNG approach over Beauty Index Canvas 2D composite
+- [32-01]: Aliased DB Compass imports (COMPASS_DIMENSIONS, compassDimensionScores) to avoid Beauty Index name collisions
+- [32-01]: Spectrum miniature 600x100 SVG with 40px padding and 5px dots for OG image readability
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 31-02 (CompassShareControls — 2 files, 2 tasks)
+Stopped at: Completed 32-01 (OG Images & Site Integration — 7 files, 3 tasks)
 Resume file: None
-Next: Phase 32 Plan 01 (OG Images & Site Integration)
+Next: Phase 32 Plan 02 (Companion blog post)
