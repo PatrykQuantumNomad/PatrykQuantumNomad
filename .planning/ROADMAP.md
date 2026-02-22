@@ -63,11 +63,11 @@ Plans:
   2. Users can filter models by use case (caching, analytics, OLTP, search, etc.) via the React island interactive filter
   3. JSON-LD Dataset + ItemList and BreadcrumbList structured data are present in the page source
   4. The page has an SEO-optimized meta description and title tag
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 30-01: TBD
-- [ ] 30-02: TBD
+- [ ] 30-01-PLAN.md — Foundation utilities (use-case categories, filter store) and sub-components (ModelCardGrid, DimensionLegend, CompassJsonLd)
+- [ ] 30-02-PLAN.md — UseCaseFilter React island and overview page assembly at /tools/db-compass/
 
 ### Phase 31: Detail Pages
 **Goal**: Users can navigate to any of 12 model detail pages, understand that model's strengths, tradeoffs, and top databases, share the page, and move between models
@@ -110,7 +110,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 |-------|----------------|--------|-----------|
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
-| 30. Overview Page | 0/TBD | Not started | - |
+| 30. Overview Page | 0/2 | Not started | - |
 | 31. Detail Pages | 0/TBD | Not started | - |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |
 
