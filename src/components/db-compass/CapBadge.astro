@@ -1,0 +1,42 @@
+---
+/**
+ * CapBadge.astro — CAP theorem classification badge for Database Compass.
+ * Displays CP, AP, CA, or Tunable designation with color coding and
+ * accessible hover description. Follows TierBadge pattern.
+ * Ships ZERO client-side JavaScript.
+ */
+
+interface Props {
+  classification: 'CP' | 'AP' | 'CA' | 'Tunable';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { classification, size = 'md' } = Astro.props;
+
+const CAP_CONFIG: Record<string, { label: string; color: string; textColor: string; description: string }> = {
+  CP: { label: 'CP', color: '#4A90D9', textColor: '#2c6fad', description: 'Consistency + Partition Tolerance' },
+  AP: { label: 'AP', color: '#2AAA8A', textColor: '#1f8068', description: 'Availability + Partition Tolerance' },
+  CA: { label: 'CA', color: '#E8734A', textColor: '#c45a34', description: 'Consistency + Availability' },
+  Tunable: { label: 'Tunable', color: '#D4A843', textColor: '#a88335', description: 'Configurable consistency/availability trade-off' },
+};
+
+const config = CAP_CONFIG[classification] ?? CAP_CONFIG.CP;
+
+// Size variant classes (same pattern as TierBadge)
+const sizeClasses: Record<string, string> = {
+  sm: 'text-xs px-2 py-0.5',
+  md: 'text-sm px-3 py-1',
+  lg: 'text-base px-4 py-1.5',
+};
+
+const classes = `inline-block rounded-md font-semibold ${sizeClasses[size]}`;
+---
+
+<span
+  class={classes}
+  style={`background-color: ${config.color}20; color: ${config.textColor};`}
+  title={config.description}
+  aria-label={`CAP Theorem: ${config.label} \u2014 ${config.description}`}
+>
+  {config.label}
+</span>

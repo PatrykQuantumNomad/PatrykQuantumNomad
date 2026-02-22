@@ -1,0 +1,65 @@
+---
+/**
+ * CompassScoreBreakdown.astro — Individual dimension scores display for Database Compass.
+ * Shows all 8 dimension scores with Unicode symbols, names, numeric values,
+ * and proportional visual bar indicators. Includes a total score row showing /80.
+ * Iterates over DIMENSIONS array in canonical order for consistency with radar charts.
+ * Ships ZERO client-side JavaScript.
+ */
+import { DIMENSIONS, DIMENSION_COLORS } from '../../lib/db-compass/dimensions';
+import { type DbModel, totalScore } from '../../lib/db-compass/schema';
+
+interface Props {
+  model: DbModel;
+}
+
+const { model } = Astro.props;
+
+const total = totalScore(model);
+
+// Build dimension rows using DIMENSIONS canonical order (NOT Object.keys)
+const dimensionRows = DIMENSIONS.map((dim) => {
+  const score = model.scores[dim.key];
+  const color = DIMENSION_COLORS[dim.key];
+  const widthPercent = (score / 10) * 100;
+  return { dim, score, color, widthPercent };
+});
+---
+
+<div class="space-y-2 w-full max-w-xs">
+  {dimensionRows.map((row) => (
+    <div class="flex items-center gap-2">
+      <span
+        class="w-5 text-center font-semibold text-sm"
+        style={`color: ${row.color};`}
+      >
+        {row.dim.symbol}
+      </span>
+      <span class="text-xs text-[var(--color-text-secondary)] w-20 truncate">
+        {row.dim.shortName}
+      </span>
+      <span class="text-xs font-medium w-5 text-right text-[var(--color-text-primary)]">
+        {row.score}
+      </span>
+      <div class="flex-1 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
+        <div
+          class="h-full rounded-full"
+          style={`width: ${row.widthPercent}%; background-color: ${row.color};`}
+        />
+      </div>
+    </div>
+  ))}
+
+  {/* Total score row */}
+  <div class="flex items-center gap-2 pt-2 border-t border-[var(--color-border)]">
+    <span class="w-5 text-center font-bold text-sm text-[var(--color-text-primary)]">
+      {'\u03A3'}
+    </span>
+    <span class="text-xs text-[var(--color-text-secondary)] w-20">
+      Total
+    </span>
+    <span class="text-sm font-bold text-[var(--color-text-primary)]">
+      {total}/80
+    </span>
+  </div>
+</div>
