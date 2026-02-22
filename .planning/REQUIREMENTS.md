@@ -40,21 +40,21 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Semantic Rules
 
-- [ ] **SEM-01**: CV-M001 — Duplicate exported host ports between services
-- [ ] **SEM-02**: CV-M002 — Circular depends_on detection via topological sort
-- [ ] **SEM-03**: CV-M003 — Undefined network reference (service uses network not in top-level networks)
-- [ ] **SEM-04**: CV-M004 — Undefined volume reference (service uses volume not in top-level volumes)
-- [ ] **SEM-05**: CV-M005 — Undefined secret reference
-- [ ] **SEM-06**: CV-M006 — Undefined config reference
-- [ ] **SEM-07**: CV-M007 — Orphan network definition (defined but never referenced)
-- [ ] **SEM-08**: CV-M008 — Orphan volume definition (defined but never referenced)
-- [ ] **SEM-09**: CV-M009 — Orphan secret definition (defined but never referenced)
-- [ ] **SEM-10**: CV-M010 — depends_on service_healthy without healthcheck on target
-- [ ] **SEM-11**: CV-M011 — Self-referencing dependency
-- [ ] **SEM-12**: CV-M012 — Dependency on undefined service
-- [ ] **SEM-13**: CV-M013 — Duplicate container names across services
-- [ ] **SEM-14**: CV-M014 — Port range overlap between services
-- [ ] **SEM-15**: CV-M015 — Invalid image reference format
+- [x] **SEM-01**: CV-M001 — Duplicate exported host ports between services
+- [x] **SEM-02**: CV-M002 — Circular depends_on detection via topological sort
+- [x] **SEM-03**: CV-M003 — Undefined network reference (service uses network not in top-level networks)
+- [x] **SEM-04**: CV-M004 — Undefined volume reference (service uses volume not in top-level volumes)
+- [x] **SEM-05**: CV-M005 — Undefined secret reference
+- [x] **SEM-06**: CV-M006 — Undefined config reference
+- [x] **SEM-07**: CV-M007 — Orphan network definition (defined but never referenced)
+- [x] **SEM-08**: CV-M008 — Orphan volume definition (defined but never referenced)
+- [x] **SEM-09**: CV-M009 — Orphan secret definition (defined but never referenced)
+- [x] **SEM-10**: CV-M010 — depends_on service_healthy without healthcheck on target
+- [x] **SEM-11**: CV-M011 — Self-referencing dependency
+- [x] **SEM-12**: CV-M012 — Dependency on undefined service
+- [x] **SEM-13**: CV-M013 — Duplicate container names across services
+- [x] **SEM-14**: CV-M014 — Port range overlap between services
+- [x] **SEM-15**: CV-M015 — Invalid image reference format
 
 ### Security Rules
 
@@ -201,21 +201,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCHEMA-06 | Phase 33 | Complete |
 | SCHEMA-07 | Phase 33 | Complete |
 | SCHEMA-08 | Phase 33 | Complete |
-| SEM-01 | Phase 34 | Pending |
-| SEM-02 | Phase 34 | Pending |
-| SEM-03 | Phase 34 | Pending |
-| SEM-04 | Phase 34 | Pending |
-| SEM-05 | Phase 34 | Pending |
-| SEM-06 | Phase 34 | Pending |
-| SEM-07 | Phase 34 | Pending |
-| SEM-08 | Phase 34 | Pending |
-| SEM-09 | Phase 34 | Pending |
-| SEM-10 | Phase 34 | Pending |
-| SEM-11 | Phase 34 | Pending |
-| SEM-12 | Phase 34 | Pending |
-| SEM-13 | Phase 34 | Pending |
-| SEM-14 | Phase 34 | Pending |
-| SEM-15 | Phase 34 | Pending |
+| SEM-01 | Phase 34 | Complete |
+| SEM-02 | Phase 34 | Complete |
+| SEM-03 | Phase 34 | Complete |
+| SEM-04 | Phase 34 | Complete |
+| SEM-05 | Phase 34 | Complete |
+| SEM-06 | Phase 34 | Complete |
+| SEM-07 | Phase 34 | Complete |
+| SEM-08 | Phase 34 | Complete |
+| SEM-09 | Phase 34 | Complete |
+| SEM-10 | Phase 34 | Complete |
+| SEM-11 | Phase 34 | Complete |
+| SEM-12 | Phase 34 | Complete |
+| SEM-13 | Phase 34 | Complete |
+| SEM-14 | Phase 34 | Complete |
+| SEM-15 | Phase 34 | Complete |
 | SEC-01 | Phase 34 | Pending |
 | SEC-02 | Phase 34 | Pending |
 | SEC-03 | Phase 34 | Pending |
