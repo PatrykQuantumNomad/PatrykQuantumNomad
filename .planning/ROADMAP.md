@@ -48,11 +48,11 @@ Plans:
   3. The sortable scoring table displays all 12 models across 8 dimensions and sorts correctly when column headers are clicked
   4. The CAP theorem badge correctly shows CP, AP, CA, or Tunable designation per model
   5. Score breakdown component displays 8 dimension scores with visual bars for any given model
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 29-01: TBD
-- [ ] 29-02: TBD
+- [ ] 29-01-PLAN.md — Foundation utilities (DIMENSION_COLORS, spectrum-math.ts) and SVG charts (ComplexitySpectrum, CompassRadarChart)
+- [ ] 29-02-PLAN.md — Score display components (CompassScoreBreakdown, CapBadge) and interactive sortable scoring table
 
 ### Phase 30: Overview Page
 **Goal**: Users can visit /tools/db-compass/ and explore all 12 database models through the spectrum, grid, scoring table, and interactive filters — with proper SEO metadata
