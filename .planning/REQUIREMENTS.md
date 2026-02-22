@@ -28,7 +28,7 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 ### Pages
 
-- [ ] **PAGE-01**: Overview page at /tools/db-compass/ with spectrum, model grid, scoring table, and dimension legend
+- [x] **PAGE-01**: Overview page at /tools/db-compass/ with spectrum, model grid, scoring table, and dimension legend
 - [ ] **PAGE-02**: 12 model detail pages at /tools/db-compass/[slug]/ via getStaticPaths
 - [ ] **PAGE-03**: Detail pages include radar chart, score breakdown, CAP badge, when-to-use/avoid lists, tradeoffs prose, and top databases
 - [ ] **PAGE-04**: Prev/next navigation between detail pages by complexity position
@@ -36,9 +36,9 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 ### SEO & Structured Data
 
-- [ ] **SEO-01**: JSON-LD Dataset + ItemList on overview page
+- [x] **SEO-01**: JSON-LD Dataset + ItemList on overview page
 - [ ] **SEO-02**: JSON-LD CreativeWork on each detail page
-- [ ] **SEO-03**: BreadcrumbList JSON-LD on overview and all detail pages
+- [x] **SEO-03**: BreadcrumbList JSON-LD on overview and all detail pages
 - [ ] **SEO-04**: Build-time OG image for overview page (spectrum miniature)
 - [ ] **SEO-05**: Build-time OG images for each of 12 detail pages (radar chart)
 - [ ] **SEO-06**: SEO-optimized meta descriptions for overview and all detail pages
@@ -98,14 +98,14 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | VIZ-04 | Phase 29 | Complete |
 | VIZ-05 | Phase 29 | Complete |
 | VIZ-06 | Phase 29 | Complete |
-| PAGE-01 | Phase 30 | Pending |
+| PAGE-01 | Phase 30 | Complete |
 | PAGE-02 | Phase 31 | Pending |
 | PAGE-03 | Phase 31 | Pending |
 | PAGE-04 | Phase 31 | Pending |
 | PAGE-05 | Phase 30 | Pending |
-| SEO-01 | Phase 30 | Pending |
+| SEO-01 | Phase 30 | Complete |
 | SEO-02 | Phase 31 | Pending |
-| SEO-03 | Phase 30 | Pending |
+| SEO-03 | Phase 30 | Complete |
 | SEO-04 | Phase 32 | Pending |
 | SEO-05 | Phase 32 | Pending |
 | SEO-06 | Phase 30 | Pending |
