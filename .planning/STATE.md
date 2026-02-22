@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 33 (YAML Parsing & Schema Validation Foundation)
+**Current focus:** v1.6 Docker Compose Validator - Phase 33 complete, ready for Phase 34
 
 ## Current Position
 
-Phase: 33 of 40 (YAML Parsing & Schema Validation Foundation)
-Plan: 1 of 2 in current phase
-Status: In progress (plan 33-01 complete, plan 33-02 remaining)
-Last activity: 2026-02-22 -- Plan 33-01 complete (YAML parser, types, interpolation, schema)
+Phase: 33 of 40 (YAML Parsing & Schema Validation Foundation) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 33 complete, ready for transition to Phase 34
+Last activity: 2026-02-22 -- Plan 33-02 complete (schema validator, error categorization, 8 schema rules)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100% (Phase 33)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 67 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 1 v1.6)
+- Total plans completed: 68 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 2 v1.6)
 
 **Cumulative Stats:**
 
@@ -46,6 +46,10 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - Interpolation normalizer operates on JSON output (post-toJSON) not raw YAML to preserve AST line offsets
 - compose-spec schema bundled as static JSON file with $comment attribution rather than runtime fetch
 - getNodeLine includes try/catch and range-undefined guard per yaml issue #573
+- ajv singleton compiled at module level with strict:false (compose-spec uses patternProperties), allErrors:true, verbose:true
+- Schema rules use SchemaRuleMetadata interface (no check method) because ajv drives validation, not per-rule check() calls
+- Error categorization uses keyword+instancePath regex matching to map ajv errors to specific CV-S rules
+- CV-S006 (invalid duration) set to warning severity since durations may work at runtime even if schema-invalid
 
 ### Pending Todos
 
@@ -68,6 +72,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 33-01-PLAN.md
+Stopped at: Completed 33-02-PLAN.md (Phase 33 complete)
 Resume file: None
-Next: Execute 33-02-PLAN.md
+Next: Phase 34 -- Rule Engine, Rules & Scoring (plan and execute)

@@ -23,20 +23,20 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 - [x] **PARSE-01**: YAML parsing via `yaml` package (eemeli) with YAML 1.1 mode for merge key support
 - [x] **PARSE-02**: LineCounter integration for mapping validation errors to source line numbers
 - [x] **PARSE-03**: Variable interpolation normalizer — handle ${VAR:-default} patterns gracefully
-- [ ] **PARSE-04**: compose-spec JSON Schema validation via ajv v8 with Draft-07 support
-- [ ] **PARSE-05**: Human-readable error messages from ajv oneOf/anyOf validation failures
+- [x] **PARSE-04**: compose-spec JSON Schema validation via ajv v8 with Draft-07 support
+- [x] **PARSE-05**: Human-readable error messages from ajv oneOf/anyOf validation failures
 - [x] **PARSE-06**: compose-spec schema bundled statically at build time (not fetched at runtime)
 
 ### Schema Rules
 
 - [x] **SCHEMA-01**: CV-S001 — Invalid YAML syntax detection with line-level error reporting
-- [ ] **SCHEMA-02**: CV-S002 — Unknown top-level property detection (typos in services, networks, volumes)
-- [ ] **SCHEMA-03**: CV-S003 — Unknown service property detection (typos within service definitions)
-- [ ] **SCHEMA-04**: CV-S004 — Invalid port format validation
-- [ ] **SCHEMA-05**: CV-S005 — Invalid volume format validation
-- [ ] **SCHEMA-06**: CV-S006 — Invalid duration format in healthcheck intervals and timeouts
-- [ ] **SCHEMA-07**: CV-S007 — Invalid restart policy values
-- [ ] **SCHEMA-08**: CV-S008 — Invalid depends_on condition values
+- [x] **SCHEMA-02**: CV-S002 — Unknown top-level property detection (typos in services, networks, volumes)
+- [x] **SCHEMA-03**: CV-S003 — Unknown service property detection (typos within service definitions)
+- [x] **SCHEMA-04**: CV-S004 — Invalid port format validation
+- [x] **SCHEMA-05**: CV-S005 — Invalid volume format validation
+- [x] **SCHEMA-06**: CV-S006 — Invalid duration format in healthcheck intervals and timeouts
+- [x] **SCHEMA-07**: CV-S007 — Invalid restart policy values
+- [x] **SCHEMA-08**: CV-S008 — Invalid depends_on condition values
 
 ### Semantic Rules
 
@@ -190,17 +190,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PARSE-01 | Phase 33 | Complete |
 | PARSE-02 | Phase 33 | Complete |
 | PARSE-03 | Phase 33 | Complete |
-| PARSE-04 | Phase 33 | Pending |
-| PARSE-05 | Phase 33 | Pending |
+| PARSE-04 | Phase 33 | Complete |
+| PARSE-05 | Phase 33 | Complete |
 | PARSE-06 | Phase 33 | Complete |
 | SCHEMA-01 | Phase 33 | Complete |
-| SCHEMA-02 | Phase 33 | Pending |
-| SCHEMA-03 | Phase 33 | Pending |
-| SCHEMA-04 | Phase 33 | Pending |
-| SCHEMA-05 | Phase 33 | Pending |
-| SCHEMA-06 | Phase 33 | Pending |
-| SCHEMA-07 | Phase 33 | Pending |
-| SCHEMA-08 | Phase 33 | Pending |
+| SCHEMA-02 | Phase 33 | Complete |
+| SCHEMA-03 | Phase 33 | Complete |
+| SCHEMA-04 | Phase 33 | Complete |
+| SCHEMA-05 | Phase 33 | Complete |
+| SCHEMA-06 | Phase 33 | Complete |
+| SCHEMA-07 | Phase 33 | Complete |
+| SCHEMA-08 | Phase 33 | Complete |
 | SEM-01 | Phase 34 | Pending |
 | SEM-02 | Phase 34 | Pending |
 | SEM-03 | Phase 34 | Pending |
