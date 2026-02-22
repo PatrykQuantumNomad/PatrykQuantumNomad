@@ -155,7 +155,7 @@ Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 | 33. YAML Parsing & Schema Validation Foundation | 2/2 | Complete | 2026-02-22 |
 | 34. Rule Engine, Rules & Scoring | 3/3 | Complete   | 2026-02-22 |
 | 35. CodeMirror YAML Editor & Nanostores | 2/2 | Complete | 2026-02-22 |
-| 36. Results Panel & Dependency Graph | 0/2 | Not started | - |
+| 36. Results Panel & Dependency Graph | 1/2 | In Progress|  |
 | 37. Shareability & Badge Export | 0/1 | Not started | - |
 | 38. Rule Documentation Pages | 0/1 | Not started | - |
 | 39. Tool Page & Site Integration | 0/1 | Not started | - |

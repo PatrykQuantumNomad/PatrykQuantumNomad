@@ -103,13 +103,13 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Results Display
 
-- [ ] **RESULT-01**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
-- [ ] **RESULT-02**: Score gauge component (SVG circular gauge with letter grade)
-- [ ] **RESULT-03**: Category breakdown panel with sub-scores per dimension
-- [ ] **RESULT-04**: Violation list grouped by severity with expandable details
-- [ ] **RESULT-05**: Click-to-navigate from results panel to corresponding editor line
-- [ ] **RESULT-06**: Clean compose file empty state ("No issues found" with congratulatory message)
-- [ ] **RESULT-07**: Tabbed results panel — Violations tab and Dependency Graph tab
+- [x] **RESULT-01**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
+- [x] **RESULT-02**: Score gauge component (SVG circular gauge with letter grade)
+- [x] **RESULT-03**: Category breakdown panel with sub-scores per dimension
+- [x] **RESULT-04**: Violation list grouped by severity with expandable details
+- [x] **RESULT-05**: Click-to-navigate from results panel to corresponding editor line
+- [x] **RESULT-06**: Clean compose file empty state ("No issues found" with congratulatory message)
+- [x] **RESULT-07**: Tabbed results panel — Violations tab and Dependency Graph tab
 
 ### Dependency Graph
 
@@ -257,13 +257,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-06 | Phase 35 | Complete |
 | EDIT-07 | Phase 35 | Complete |
 | EDIT-08 | Phase 35 | Complete |
-| RESULT-01 | Phase 36 | Pending |
-| RESULT-02 | Phase 36 | Pending |
-| RESULT-03 | Phase 36 | Pending |
-| RESULT-04 | Phase 36 | Pending |
-| RESULT-05 | Phase 36 | Pending |
-| RESULT-06 | Phase 36 | Pending |
-| RESULT-07 | Phase 36 | Pending |
+| RESULT-01 | Phase 36 | Complete |
+| RESULT-02 | Phase 36 | Complete |
+| RESULT-03 | Phase 36 | Complete |
+| RESULT-04 | Phase 36 | Complete |
+| RESULT-05 | Phase 36 | Complete |
+| RESULT-06 | Phase 36 | Complete |
+| RESULT-07 | Phase 36 | Complete |
 | GRAPH-01 | Phase 36 | Pending |
 | GRAPH-02 | Phase 36 | Pending |
 | GRAPH-03 | Phase 36 | Pending |

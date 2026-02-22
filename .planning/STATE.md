@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 35 complete, Phase 36 next (Results Panel & Dependency Graph)
+**Current focus:** v1.6 Docker Compose Validator - Phase 36 in progress (Results Panel & Dependency Graph)
 
 ## Current Position
 
 Phase: 36 of 40 (Results Panel & Dependency Graph)
-Plan: 0 of 2 complete in current phase
-Status: Phase 35 complete (CodeMirror YAML Editor + Nanostores) -- ready for Phase 36
-Last activity: 2026-02-22 -- Plan 35-02 complete (React components, Astro page at /tools/compose-validator/)
+Plan: 1 of 2 complete in current phase
+Status: Plan 36-01 complete (Tabbed results panel with violations view)
+Last activity: 2026-02-22 -- Plan 36-01 complete (ComposeResultsPanel, compose-results wrappers)
 
-Progress: [██████████] 100% (Phase 35 complete)
+Progress: [█████-----] 50% (Phase 36 plan 1/2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 73 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 7 v1.6)
+- Total plans completed: 74 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 8 v1.6)
 
 **Cumulative Stats:**
 
@@ -38,6 +38,7 @@ Progress: [██████████] 100% (Phase 35 complete)
 | Phase 34 P03 | 3min | 2 tasks | 7 files |
 | Phase 35 P01 | 4min | 2 tasks | 5 files |
 | Phase 35 P02 | 3min | 2 tasks | 4 files |
+| Phase 36 P01 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -70,7 +71,10 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - analyzeRef pattern (useRef + update outside useEffect) for stale-closure-safe Mod-Enter callback in CodeMirror keymap
 - Dual registry lookup (getComposeRuleById ?? getSchemaRuleById) covers all 52 rules in diagnostic mapping and enrichment
 - Line number clamping (Math.min(v.line, view.state.doc.lines)) prevents CodeMirror Position out of range crash
-- ComposeResultsPanel is intentionally a stub -- Phase 36 adds ScoreGauge, CategoryBreakdown, ViolationList
+- ComposeResultsPanel refactored from stub to tabbed panel with Violations and Dependency Graph tabs
+- Compose-specific wrapper components (ComposeCategoryBreakdown, ComposeViolationList, ComposeEmptyState) instead of extending shared Dockerfile components
+- Rule IDs rendered as plain span (no anchor) in ComposeViolationList -- compose rule pages created in Phase 38
+- Tab state via useState (UI-local) not nanostore since tab selection is component-local
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 35-02-PLAN.md (React components, Astro page -- Phase 35 complete)
+Stopped at: Completed 36-01-PLAN.md (Tabbed results panel with violations view)
 Resume file: None
-Next: Phase 36 -- Results Panel & Dependency Graph
+Next: Plan 36-02 -- React Flow dependency graph with dagre layout
