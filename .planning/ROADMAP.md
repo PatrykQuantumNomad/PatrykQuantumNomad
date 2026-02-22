@@ -14,7 +14,7 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
 - Integer phases (28, 29, 30, 31, 32): Planned milestone work
 - Decimal phases (28.1, 28.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 28: Data Foundation** - Schema, dimension definitions, 12 model entries with scores and content, content collection registration
+- [x] **Phase 28: Data Foundation** - Schema, dimension definitions, 12 model entries with scores and content, content collection registration
 - [ ] **Phase 29: Visualization Components** - Complexity spectrum, 8-axis radar charts, score breakdown, sortable table, CAP badge, responsive testing
 - [ ] **Phase 30: Overview Page** - Landing page at /tools/db-compass/ with spectrum, model grid, scoring table, interactive filter, and overview-level SEO
 - [ ] **Phase 31: Detail Pages** - 12 model detail pages with radar charts, tradeoffs, top databases, prev/next nav, share controls, and per-page SEO
@@ -35,8 +35,8 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
 **Plans**: 2 plans
 
 Plans:
-- [ ] 28-01-PLAN.md — Zod schema, dimension definitions, and content collection registration
-- [ ] 28-02-PLAN.md — 12 database model entries with scores, justifications, and metadata
+- [x] 28-01-PLAN.md — Zod schema, dimension definitions, and content collection registration
+- [x] 28-02-PLAN.md — 12 database model entries with scores, justifications, and metadata
 
 ### Phase 29: Visualization Components
 **Goal**: All visualization primitives render correctly from real data at mobile, tablet, and desktop breakpoints — ready to be assembled into pages
@@ -108,7 +108,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 28. Data Foundation | 1/2 | In Progress|  |
+| 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
 | 29. Visualization Components | 0/TBD | Not started | - |
 | 30. Overview Page | 0/TBD | Not started | - |
 | 31. Detail Pages | 0/TBD | Not started | - |

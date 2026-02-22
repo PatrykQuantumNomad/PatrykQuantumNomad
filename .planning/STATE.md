@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 28 (1 of 5 in v1.5) — Data Foundation
-Plan: 1 of 2 complete
-Status: Executing
-Last activity: 2026-02-21 — Completed 28-01 (Schema & Dimensions)
+Plan: 2 of 2 complete
+Status: Phase 28 Complete
+Last activity: 2026-02-22 — Completed 28-02 (Data Population)
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 57 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4)
+- Total plans completed: 59 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 2 v1.5)
 
 **Cumulative Stats:**
 
@@ -33,6 +33,7 @@ Progress: [█░░░░░░░░░] 10%
 | v1.5 Database Compass | 28-32 | TBD | 28 | In progress |
 | **Total** | **32** | **57+** | **180** | |
 | Phase 28 P01 | 3min | 2 tasks | 4 files |
+| Phase 28 P02 | 9min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -50,6 +51,9 @@ Recent decisions affecting current work:
 - [28-01]: Used keyof Scores for Dimension key type to enforce compile-time sync
 - [28-01]: BMP-safe Unicode symbols chosen over emoji-range codepoints
 - [28-01]: justifications required (not optional) to enforce score accountability
+- [28-02]: Scored all models one dimension at a time to prevent calibration drift
+- [28-02]: Full 1-10 range used in every dimension (no clustering at 5-7)
+- [28-02]: DB-Engines URLs as primary links; official sites for unlisted databases
 
 ### Pending Todos
 
@@ -66,11 +70,11 @@ None.
 - [v1.3 Gap]: Dark mode strategy deferred — charts use light mode CSS custom properties only
 - [v1.4 Tech Debt]: Category colors/grade colors duplicated in badge-generator.ts
 - [v1.5 Risk]: 8-axis radar label crowding needs careful testing at 375px/768px/1024px
-- [v1.5 Risk]: Content authoring for 12 models is highest-effort task (400+ words each)
+- [v1.5 Resolved]: Content authoring for 12 models completed (1115 lines, 96 scored dimensions)
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: Completed 28-01-PLAN.md (Schema & Dimensions)
+Last session: 2026-02-22
+Stopped at: Completed 28-02-PLAN.md (Data Population) -- Phase 28 complete
 Resume file: None
-Next: `/gsd:execute-phase 28` (plan 02)
+Next: `/gsd:execute-phase 29` (Visualization Components)
