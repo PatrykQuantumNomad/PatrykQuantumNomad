@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.5 Database Compass — Phase 30: Overview Page
+**Current focus:** v1.5 Database Compass — Phase 31: Detail Pages
 
 ## Current Position
 
-Phase: 30 (3 of 5 in v1.5) — Overview Page
-Plan: 2 of 2 complete
-Status: Phase Complete
-Last activity: 2026-02-22 — Completed 30-02 (Overview Page Assembly)
+Phase: 31 (4 of 5 in v1.5) — Detail Pages
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-22 — Completed 31-01 (Detail Pages)
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 62 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 5 v1.5)
+- Total plans completed: 63 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 6 v1.5)
 
 **Cumulative Stats:**
 
@@ -38,6 +38,7 @@ Progress: [██████░░░░] 60%
 | Phase 29 P02 | 3min | 2 tasks | 3 files |
 | Phase 30 P01 | 3min | 2 tasks | 5 files |
 | Phase 30 P02 | 4min | 2 tasks | 2 files |
+| Phase 31 P01 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - [30-02]: UseCaseFilter follows LanguageFilter.tsx pattern exactly with nanostores subscribe and DOM manipulation
 - [30-02]: Scoring table remains unfiltered -- always shows all 12 models regardless of filter state
 - [30-02]: Meta description at 148 chars with database keywords under 160-char limit
+- [31-01]: Complexity order for nav: key-value (0.08) to multi-model (0.88)
+- [31-01]: Character heading reused from Beauty Index for consistency
+- [31-01]: Section ids added for future deep linking without visible anchor icons
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 30-02 (Overview Page Assembly — 2 files, 2 tasks)
+Stopped at: Completed 31-01 (Detail Pages — 2 files, 2 tasks)
 Resume file: None
-Next: Phase 31 (Detail Pages)
+Next: Phase 31 Plan 02 (CompassShareControls)

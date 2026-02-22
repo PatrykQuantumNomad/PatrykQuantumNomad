@@ -111,7 +111,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 2/2 | Complete   | 2026-02-22 |
-| 31. Detail Pages | 0/2 | Not started | - |
+| 31. Detail Pages | 1/2 | In Progress|  |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |
 
 ---
