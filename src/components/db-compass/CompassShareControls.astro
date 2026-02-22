@@ -1,0 +1,266 @@
+---
+/**
+ * CompassShareControls.astro -- Share controls and radar chart PNG download
+ * for Database Compass detail pages.
+ * - Social share links: X, LinkedIn, Reddit, Bluesky
+ * - Copy link via Clipboard API
+ * - Web Share API "More" button (shown on capable devices)
+ * - SVG-to-PNG download of the radar chart via XMLSerializer + Canvas
+ * - Toast notification for user feedback
+ * - astro:page-load lifecycle for View Transitions compatibility
+ */
+interface Props {
+  slug: string;
+  name: string;
+  total: number;
+}
+
+const { slug, name, total } = Astro.props;
+const pageUrl = `https://patrykgolabek.dev/tools/db-compass/${slug}/`;
+const shareText = `${name} scores ${total}/80 in the Database Compass!`;
+
+// Share intent URLs
+const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
+const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+const redditUrl = `https://reddit.com/submit?url=${encodeURIComponent(pageUrl)}&title=${encodeURIComponent(shareText)}`;
+const blueskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(shareText + ' ' + pageUrl)}`;
+---
+
+<div
+  class="flex flex-col gap-3 mt-8"
+  data-compass-share
+  data-slug={slug}
+  data-name={name}
+  data-total={total}
+  data-page-url={pageUrl}
+>
+  {/* Download radar chart as PNG */}
+  <div class="flex items-center gap-3">
+    <button
+      type="button"
+      data-action="download-png"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+      aria-label={`Download ${name} radar chart as PNG`}
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" />
+      </svg>
+      Download
+    </button>
+  </div>
+
+  {/* Share buttons */}
+  <nav aria-label="Share this page" class="flex items-center gap-2 flex-wrap">
+
+    {/* X (Twitter) */}
+    <a
+      href={xUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
+      aria-label={`Share ${name} Database Compass score on X (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    </a>
+
+    {/* LinkedIn */}
+    <a
+      href={linkedInUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#0A66C2] hover:text-[#0A66C2] transition-colors"
+      aria-label={`Share ${name} Database Compass score on LinkedIn (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+      </svg>
+    </a>
+
+    {/* Reddit */}
+    <a
+      href={redditUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#FF4500] hover:text-[#FF4500] transition-colors"
+      aria-label={`Share ${name} Database Compass score on Reddit (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+      </svg>
+    </a>
+
+    {/* Bluesky */}
+    <a
+      href={blueskyUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[#0085FF] hover:text-[#0085FF] transition-colors"
+      aria-label={`Share ${name} Database Compass score on Bluesky (opens in new tab)`}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.785 2.627 3.59 3.513 6.182 3.258-4.34.422-8.143 1.878-3.146 6.544 5.347 4.617 7.695-1.222 8.34-3.31C12.295 18.078 12.397 18 12 18c-.397 0-.295.078 0 .738.645 2.089 2.993 7.928 8.34 3.311 4.997-4.666 1.194-6.122-3.146-6.544 2.592.255 5.397-.631 6.182-3.258C23.622 11.418 24 6.458 24 5.768c0-.69-.139-1.861-.902-2.203-.659-.3-1.664-.62-4.3 1.24C16.046 6.747 13.087 10.686 12 12.8z" />
+      </svg>
+    </a>
+
+    {/* Copy Link */}
+    <button
+      type="button"
+      data-action="copy-link"
+      class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+      aria-label="Copy link to clipboard"
+    >
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6.5 8.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" />
+        <path d="M9.5 7.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" />
+      </svg>
+    </button>
+
+    {/* More (Web Share API -- hidden by default, shown via JS on capable devices) */}
+    <button
+      type="button"
+      data-action="web-share"
+      class="hidden items-center justify-center w-8 h-8 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+      aria-label={`More sharing options for ${name}`}
+    >
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <circle cx="3" cy="8" r="1.5" />
+        <circle cx="8" cy="8" r="1.5" />
+        <circle cx="13" cy="8" r="1.5" />
+      </svg>
+    </button>
+  </nav>
+
+  {/* Toast notification */}
+  <div
+    data-toast
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-[var(--color-text-primary)] text-[var(--color-surface)] text-sm opacity-0 pointer-events-none transition-opacity z-50"
+    role="status"
+    aria-live="polite"
+  ></div>
+</div>
+
+<script>
+  function initCompassShareControls() {
+    const container = document.querySelector<HTMLDivElement>('[data-compass-share]');
+    if (!container) return;
+
+    const slug = container.dataset.slug || '';
+    const name = container.dataset.name || 'Database';
+    const total = container.dataset.total || '0';
+    const pageUrl = container.dataset.pageUrl || window.location.href;
+    const shareText = `${name} scores ${total}/80 in the Database Compass!`;
+
+    // Show "More" button on devices that support Web Share API
+    const webShareBtn = container.querySelector<HTMLButtonElement>('[data-action="web-share"]');
+    if (webShareBtn && 'share' in navigator) {
+      webShareBtn.classList.remove('hidden');
+      webShareBtn.classList.add('inline-flex');
+    }
+
+    function showToast(message: string) {
+      const toast = container!.querySelector<HTMLDivElement>('[data-toast]');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2000);
+    }
+
+    // --- Copy link handler ---
+    const copyLinkBtn = container.querySelector<HTMLButtonElement>('[data-action="copy-link"]');
+    copyLinkBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pageUrl);
+        showToast('Link copied!');
+      } catch {
+        showToast('Copy failed');
+      }
+    });
+
+    // --- Web Share API handler ---
+    webShareBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: `${name} -- Database Compass`,
+          text: shareText,
+          url: pageUrl,
+        });
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        showToast('Share failed');
+      }
+    });
+
+    // --- Download radar chart as PNG ---
+    const downloadBtn = container.querySelector<HTMLButtonElement>('[data-action="download-png"]');
+    downloadBtn?.addEventListener('click', async () => {
+      try {
+        const svgEl = document.querySelector<SVGSVGElement>('#radar-chart svg');
+        if (!svgEl) {
+          showToast('Chart not found');
+          return;
+        }
+
+        // Wait for fonts to be ready
+        await document.fonts.ready;
+
+        // Serialize the SVG
+        const svgData = new XMLSerializer().serializeToString(svgEl);
+
+        // Get dimensions from viewBox (not width/height attributes -- they differ per research pitfall 2)
+        const viewBox = svgEl.viewBox.baseVal;
+        const W = viewBox.width || svgEl.width.baseVal.value;
+        const H = viewBox.height || svgEl.height.baseVal.value;
+
+        // Create DPR-scaled canvas
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        const canvas = document.createElement('canvas');
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          showToast('Download failed');
+          return;
+        }
+        ctx.scale(dpr, dpr);
+
+        // Create blob from SVG string
+        const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, W, H);
+          URL.revokeObjectURL(url);
+          canvas.toBlob((pngBlob) => {
+            if (!pngBlob) {
+              showToast('Download failed');
+              return;
+            }
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(pngBlob);
+            a.download = `${slug}-radar-chart.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(a.href);
+          }, 'image/png');
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          showToast('Download failed');
+        };
+
+        img.src = url;
+      } catch {
+        showToast('Download failed');
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCompassShareControls);
+</script>
