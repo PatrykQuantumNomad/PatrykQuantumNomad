@@ -85,11 +85,11 @@ Plans:
   3. The dependency graph tab renders service nodes with names, images, and port info, connected by directed edges for depends_on relationships with condition labels
   4. Circular dependencies are highlighted with red edges in the graph, and the graph supports zoom, pan, and drag interactions
   5. React Flow is lazy-loaded so Lighthouse Performance stays at 90+ (graph bundle deferred until user activates the Graph tab)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 36-01: TBD
-- [ ] 36-02: TBD
+- [ ] 36-01-PLAN.md — Tabbed results panel with ScoreGauge, ComposeCategoryBreakdown, ComposeViolationList, ComposeEmptyState, and click-to-navigate
+- [ ] 36-02-PLAN.md — React Flow dependency graph with dagre layout, custom service nodes, condition-labeled edges, cycle highlighting, and lazy loading
 
 ### Phase 37: Shareability & Badge Export
 **Goal**: Users can download their score as a PNG badge for social sharing, share a URL that preserves their compose file content, and use native share/clipboard APIs
