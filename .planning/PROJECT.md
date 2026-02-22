@@ -155,7 +155,21 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — define next milestone via `/gsd:new-milestone`)
+## Current Milestone: v1.6 Docker Compose Validator
+
+**Goal:** Build a deep, interactive browser-based Docker Compose validation tool with schema validation, semantic analysis, security rules, category-weighted scoring, per-rule documentation, and an interactive service dependency graph — the fourth content pillar for the portfolio.
+
+**Target features:**
+- CodeMirror 6 editor with YAML syntax highlighting and pre-loaded sample compose file
+- Compose-spec JSON Schema validation via ajv (structural correctness)
+- Semantic analysis rules (port conflicts, circular depends_on, orphan networks/volumes, invalid image refs)
+- Security rules (privileged mode, host networking, secrets in env vars, dangerous capabilities)
+- Best practice rules (image tag pinning, health checks, resource limits, restart policies, read-only root)
+- Category-weighted 0-100 scoring with letter grades (proven Dockerfile Analyzer pattern)
+- Per-rule documentation pages at /tools/compose-validator/rules/[code]
+- Interactive dependency graph (React Flow + layout engine) with cycle detection
+- Score badge download, shareable URL state (lz-string compressed)
+- Companion blog post, OG images, homepage callout, header navigation, JSON-LD structured data
 
 ### Out of Scope
 
@@ -191,6 +205,7 @@ Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, 
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
+v1.6 adds React Flow + layout engine for interactive dependency graphs, ajv + ajv-formats for JSON Schema validation, and the yaml npm package for AST-aware YAML parsing with line numbers.
 
 ## Key Decisions
 
@@ -254,4 +269,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-22 after v1.5 milestone*
+*Last updated: 2026-02-22 after v1.6 milestone started*
