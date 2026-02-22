@@ -94,3 +94,13 @@ export interface ComposeAnalysisResult {
   parseSuccess: boolean;
   timestamp: number;
 }
+
+// Schema rule metadata (no check method -- ajv drives validation, not per-rule check() calls)
+export interface SchemaRuleMetadata {
+  id: string;
+  title: string;
+  severity: ComposeSeverity;
+  category: 'schema';
+  explanation: string;
+  fix: ComposeRuleFix;
+}
