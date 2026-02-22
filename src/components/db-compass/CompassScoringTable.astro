@@ -1,0 +1,222 @@
+---
+/**
+ * CompassScoringTable.astro — Sortable HTML table of all Database Compass models.
+ * Displays rank, name, 8 dimension scores, and total score with interactive column sorting.
+ * Includes inline client-side JavaScript for sort interactions with keyboard accessibility.
+ * Model name column is sticky on mobile for horizontal scroll usability.
+ * Sort headers use button elements for WCAG 2.1 AA keyboard accessibility.
+ */
+import { DIMENSIONS } from '../../lib/db-compass/dimensions';
+import { type DbModel, totalScore } from '../../lib/db-compass/schema';
+
+interface Props {
+  models: DbModel[];
+}
+
+const { models } = Astro.props;
+
+// Sort by total score descending (default display order)
+const sorted = [...models].sort((a, b) => totalScore(b) - totalScore(a));
+
+/** Convert camelCase dimension key to kebab-case for HTML data attributes */
+const toKebab = (s: string) => s.replace(/([A-Z])/g, '-$1').toLowerCase();
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full text-sm" data-sortable>
+    <thead>
+      <tr class="border-b-2 border-[var(--color-border)]">
+        <th scope="col" class="px-2 py-0 sort-desc" aria-sort="descending">
+          <button
+            type="button"
+            class="sort-btn inline-flex items-center gap-0.5 px-2 py-2 w-full text-left cursor-pointer select-none bg-transparent border-none font-inherit text-inherit"
+            data-sort="rank"
+            data-type="number"
+          >
+            Rank<span class="sort-indicator" aria-hidden="true"></span>
+          </button>
+        </th>
+        <th scope="col" class="px-2 py-0 sticky left-0 bg-[var(--color-surface)] z-10">
+          <button
+            type="button"
+            class="sort-btn inline-flex items-center gap-0.5 px-2 py-2 w-full text-left cursor-pointer select-none bg-transparent border-none font-inherit text-inherit"
+            data-sort="name"
+          >
+            Model<span class="sort-indicator" aria-hidden="true"></span>
+          </button>
+        </th>
+        {DIMENSIONS.map((dim) => (
+          <th scope="col" class="px-2 py-0">
+            <button
+              type="button"
+              class="sort-btn inline-flex items-center justify-center gap-0.5 px-2 py-2 w-full cursor-pointer select-none bg-transparent border-none font-inherit text-inherit"
+              data-sort={toKebab(dim.key)}
+              data-type="number"
+              title={dim.name}
+            >
+              {dim.symbol}<span class="sort-indicator" aria-hidden="true"></span>
+            </button>
+          </th>
+        ))}
+        <th scope="col" class="px-2 py-0">
+          <button
+            type="button"
+            class="sort-btn inline-flex items-center justify-center gap-0.5 px-2 py-2 w-full cursor-pointer select-none bg-transparent border-none font-inherit text-inherit"
+            data-sort="total"
+            data-type="number"
+          >
+            Total<span class="sort-indicator" aria-hidden="true"></span>
+          </button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {sorted.map((model, i) => {
+        const total = totalScore(model);
+        // Build data attributes object with kebab-case dimension keys
+        const dimAttrs = Object.fromEntries(
+          DIMENSIONS.map((dim) => [`data-${toKebab(dim.key)}`, model.scores[dim.key]])
+        );
+        return (
+          <tr
+            class="border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-alt)] transition-colors"
+            data-rank={i + 1}
+            data-name={model.name.toLowerCase()}
+            data-total={total}
+            {...dimAttrs}
+          >
+            <td class="px-2 py-1.5 text-[var(--color-text-secondary)]">{i + 1}</td>
+            <td class="px-2 py-1.5 font-medium sticky left-0 bg-[var(--color-surface)] z-10">
+              <a
+                href={`/tools/db-compass/${model.slug}/`}
+                class="text-[var(--color-accent)] hover:underline"
+              >
+                {model.name}<span class="sr-only"> Database Compass profile</span>
+              </a>
+            </td>
+            {DIMENSIONS.map((dim) => (
+              <td class="px-2 py-1.5 text-center">{model.scores[dim.key]}</td>
+            ))}
+            <td class="px-2 py-1.5 text-center font-bold">{total}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+  <div id="sort-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<style>
+  /* Sort indicator arrows */
+  .sort-btn .sort-indicator::after {
+    content: '';
+    display: inline-block;
+    margin-left: 4px;
+    opacity: 0.3;
+  }
+  th.sort-asc .sort-btn .sort-indicator::after {
+    content: '\25B2';
+    opacity: 1;
+  }
+  th.sort-desc .sort-btn .sort-indicator::after {
+    content: '\25BC';
+    opacity: 1;
+  }
+  .sort-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+
+  /* Sticky first column shadow for horizontal scroll hint */
+  td:nth-child(2)::after,
+  th:nth-child(2)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0,0,0,0.04), transparent);
+  }
+
+  td:nth-child(2),
+  th:nth-child(2) {
+    position: relative;
+  }
+
+  /* Scrollbar styling for horizontal overflow */
+  .overflow-x-auto {
+    scrollbar-width: thin;
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const table = document.querySelector<HTMLTableElement>('[data-sortable]');
+    if (!table) return;
+    const buttons = table.querySelectorAll<HTMLButtonElement>('button[data-sort]');
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    /** Convert kebab-case to camelCase for dataset API access */
+    const toCamel = (s: string) => s.replace(/-([a-z])/g, (_: string, c: string) => c.toUpperCase());
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const th = button.closest('th');
+        if (!th) return;
+
+        const key = button.dataset.sort!;
+        const camelKey = toCamel(key);
+        const isNumeric = button.dataset.type === 'number';
+        const isAsc = th.classList.contains('sort-asc');
+        const newDir = isAsc ? 'desc' : 'asc';
+
+        // Clear all sort classes and aria-sort attributes
+        const allThs = table.querySelectorAll<HTMLTableCellElement>('thead th');
+        allThs.forEach((h) => {
+          h.classList.remove('sort-asc', 'sort-desc');
+          h.removeAttribute('aria-sort');
+        });
+
+        // Set active sort state
+        th.classList.add(newDir === 'asc' ? 'sort-asc' : 'sort-desc');
+        th.setAttribute('aria-sort', newDir === 'asc' ? 'ascending' : 'descending');
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+          const aVal = a.dataset[camelKey] ?? '';
+          const bVal = b.dataset[camelKey] ?? '';
+          let cmp: number;
+          if (isNumeric) {
+            cmp = parseFloat(aVal) - parseFloat(bVal);
+          } else {
+            cmp = aVal.localeCompare(bVal);
+          }
+          return newDir === 'asc' ? cmp : -cmp;
+        });
+
+        rows.forEach((row, idx) => {
+          row.querySelector('td')!.textContent = String(idx + 1);
+          tbody.appendChild(row);
+        });
+
+        // Announce sort change to screen readers
+        const liveRegion = document.getElementById('sort-status');
+        if (liveRegion) {
+          const label = button.getAttribute('title') || button.textContent?.trim() || key;
+          liveRegion.textContent = `Table sorted by ${label}, ${newDir === 'asc' ? 'ascending' : 'descending'}`;
+        }
+      });
+    });
+  });
+</script>
