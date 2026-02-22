@@ -95,11 +95,11 @@ Plans:
   3. All 14 new URLs (1 overview + 12 detail + 1 blog post) appear in the sitemap
   4. The homepage has a Database Compass callout card and the tools listing page shows a real card replacing the "Coming Soon" placeholder
   5. The companion blog post "How to Choose a Database in 2026" is published with bidirectional cross-links to the overview and selected detail pages
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 32-01: TBD
-- [ ] 32-02: TBD
+- [ ] 32-01-PLAN.md — OG image generators, API routes, ogImage prop wiring, homepage callout, and tools page card
+- [ ] 32-02-PLAN.md — Companion blog post "How to Choose a Database in 2026" with bidirectional cross-links
 
 ## Progress
 
@@ -112,7 +112,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 2/2 | Complete   | 2026-02-22 |
 | 31. Detail Pages | 2/2 | Complete | 2026-02-22 |
-| 32. OG Images & Site Integration | 0/TBD | Not started | - |
+| 32. OG Images & Site Integration | 0/2 | Not started | - |
 
 ---
 
