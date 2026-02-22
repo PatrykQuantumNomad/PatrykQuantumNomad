@@ -12,6 +12,7 @@ import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import CompassRadarChart from '../../../components/db-compass/CompassRadarChart.astro';
 import CompassScoreBreakdown from '../../../components/db-compass/CompassScoreBreakdown.astro';
 import CapBadge from '../../../components/db-compass/CapBadge.astro';
+import CompassShareControls from '../../../components/db-compass/CompassShareControls.astro';
 import ModelNav from '../../../components/db-compass/ModelNav.astro';
 import { DIMENSIONS, DIMENSION_COLORS } from '../../../lib/db-compass/dimensions';
 import { totalScore } from '../../../lib/db-compass/schema';
@@ -121,7 +122,8 @@ const modelSchema = {
       <CompassScoreBreakdown model={model} />
     </div>
 
-    <!-- CompassShareControls will be added in Plan 02 -->
+    {/* Share controls and radar chart download */}
+    <CompassShareControls slug={model.slug} name={model.name} total={total} />
 
     {/* Character sketch */}
     <section class="mt-12">
