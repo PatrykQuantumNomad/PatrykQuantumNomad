@@ -18,7 +18,7 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
 - [x] **Phase 29: Visualization Components** - Complexity spectrum, 8-axis radar charts, score breakdown, sortable table, CAP badge, responsive testing
 - [x] **Phase 30: Overview Page** - Landing page at /tools/db-compass/ with spectrum, model grid, scoring table, interactive filter, and overview-level SEO (completed 2026-02-22)
 - [x] **Phase 31: Detail Pages** - 12 model detail pages with radar charts, tradeoffs, top databases, prev/next nav, share controls, and per-page SEO (completed 2026-02-22)
-- [ ] **Phase 32: OG Images & Site Integration** - Build-time OG images, sitemap inclusion, homepage callout, tools page card, companion blog post
+- [x] **Phase 32: OG Images & Site Integration** - Build-time OG images, sitemap inclusion, homepage callout, tools page card, companion blog post (completed 2026-02-22)
 
 ## Phase Details
 
@@ -112,7 +112,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 2/2 | Complete   | 2026-02-22 |
 | 31. Detail Pages | 2/2 | Complete | 2026-02-22 |
-| 32. OG Images & Site Integration | 1/2 | In Progress|  |
+| 32. OG Images & Site Integration | 2/2 | Complete   | 2026-02-22 |
 
 ---
 

@@ -48,8 +48,8 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 - [x] **INTEG-01**: Homepage callout card linking to /tools/db-compass/
 - [x] **INTEG-02**: Tools listing page card replacing "Coming Soon" placeholder
-- [ ] **INTEG-03**: Companion blog post — "How to Choose a Database in 2026" with bidirectional cross-links
-- [ ] **INTEG-04**: Blog post cross-links to overview and selected detail pages
+- [x] **INTEG-03**: Companion blog post — "How to Choose a Database in 2026" with bidirectional cross-links
+- [x] **INTEG-04**: Blog post cross-links to overview and selected detail pages
 
 ### Share & Download
 
@@ -112,8 +112,8 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | SEO-07 | Phase 32 | Complete |
 | INTEG-01 | Phase 32 | Complete |
 | INTEG-02 | Phase 32 | Complete |
-| INTEG-03 | Phase 32 | Pending |
-| INTEG-04 | Phase 32 | Pending |
+| INTEG-03 | Phase 32 | Complete |
+| INTEG-04 | Phase 32 | Complete |
 | SHARE-01 | Phase 31 | Complete |
 | SHARE-02 | Phase 31 | Complete |
 
