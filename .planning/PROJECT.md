@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes two content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions) and a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes three content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), and Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions).
 
 ## Core Value
 
@@ -143,19 +143,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ All tool and rule pages in sitemap — v1.4
 - ✓ SEO-optimized meta descriptions for tool page and all rule pages — v1.4
 
+- ✓ Database model categories defined in JSON with Zod schema validation for 12 models across 8 dimensions — v1.5
+- ✓ 8-dimension scoring with per-dimension justifications, CAP theorem profiles, and cross-category linking — v1.5
+- ✓ Build-time SVG complexity spectrum and 8-axis octagonal radar charts (zero client-side JS) — v1.5
+- ✓ Sortable scoring table, score breakdowns, and CAP badges — v1.5
+- ✓ Overview page at /tools/db-compass/ with interactive use-case filtering (10 categories, 58 use cases) — v1.5
+- ✓ 12 model detail pages with radar charts, share controls, and SVG-to-PNG download — v1.5
+- ✓ 13 build-time OG images for Database Compass (overview + 12 detail) — v1.5
+- ✓ Homepage callout and tools page card for Database Compass — v1.5
+- ✓ Companion blog post "How to Choose a Database in 2026" with 15 cross-links — v1.5
+
 ### Active
 
-## Current Milestone: v1.5 Database Compass
-
-**Goal:** Build an interactive database model explorer that helps developers understand and select the right database model for their use case.
-
-**Target features:**
-- Complexity spectrum visualization (key-value → graph)
-- 12 database model categories scored across 8 dimensions (ops + dev)
-- Overview page with spectrum, model grid, scoring table
-- 12 detail pages with radar charts, tradeoffs, top databases
-- Companion blog post: "How to Choose a Database in 2026"
-- Full site integration (homepage callout, tools page, JSON-LD, OG images)
+(None — define next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -180,15 +180,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.4 Dockerfile Analyzer on top of v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Shipped v1.5 Database Compass on top of v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for parsing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 requirements delivered (152 total). Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 requirements delivered (180 total). Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 14 posts (4 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 15 posts (5 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
-Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state. Differentiator: expert feedback from a Kubernetes architect.
+Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
+Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -230,6 +231,15 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | lz-string for URL state compression | ~1KB dependency, URL-safe encoding for shareable links | ✓ Good — compact shareable URLs |
 | Programmatic SVG badge generator | No DOM capture, no external fonts; portable rendering | ✓ Good — reliable PNG export |
 | Buffer polyfill for dockerfile-ast | feross/buffer package for browser compatibility | ✓ Good — resolved isUTF8BOM runtime error |
+| Zero new npm dependencies for DB Compass | Existing stack (Astro, Satori, Sharp, Nanostores) fully sufficient | ✓ Good — no bundle growth |
+| radar-math.ts reused for 8-axis octagon | Axis-count parameter makes it feature-agnostic | ✓ Good — clean cross-feature reuse |
+| No VS comparison pages | Avoids 66+ page OG image explosion | ✓ Good — scope control |
+| Dimension-at-a-time score calibration | Prevents calibration drift across 12 models | ✓ Good — consistent relative rankings |
+| BMP-safe Unicode symbols for dimensions | Avoids emoji cross-platform rendering issues | ✓ Good — consistent rendering everywhere |
+| Fixed accent color for all radar charts | DB Compass has no tier system unlike Beauty Index | ✓ Good — simpler, unified look |
+| UseCaseFilter follows LanguageFilter pattern | Proven nanostores + DOM manipulation pattern | ✓ Good — consistent React island architecture |
+| SVG-to-PNG via XMLSerializer + Canvas | Simpler than Beauty Index Canvas 2D composite | ✓ Good — reliable chart download |
+| Aliased DB Compass imports in og-image.ts | Avoids name collisions with Beauty Index exports | ✓ Good — clean multi-feature OG generation |
 
 ## Constraints
 
@@ -244,4 +254,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-21 after v1.4 milestone completion*
+*Last updated: 2026-02-22 after v1.5 milestone*

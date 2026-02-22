@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.5 Database Compass (Shipped: 2026-02-22)
+
+**Delivered:** Interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum visualization, octagonal radar charts, sortable scoring table, use-case filtering, share controls, build-time OG images, and companion blog post
+
+**Phases completed:** 28-32 (10 plans total)
+
+**Key accomplishments:**
+- 12 database model categories with Zod-validated JSON data, 8-dimension scoring, CAP theorem profiles, and 50+ top databases
+- Build-time SVG visualizations: complexity spectrum, 8-axis octagonal radar charts, sortable scoring table, score breakdowns, and CAP badges
+- Overview page at /tools/db-compass/ with interactive use-case filtering (10 categories, 58 use cases), model grid, and scoring table
+- 12 model detail pages with radar charts, score breakdowns, prev/next navigation, share controls, and SVG-to-PNG download
+- 13 build-time OG images (overview spectrum miniature + 12 detail radar charts), homepage callout, and tools page card
+- Companion blog post "How to Choose a Database in 2026" with 15 bidirectional cross-links to tool pages
+
+**Stats:**
+- 64 files created/modified (+12,621 / -2,034 lines)
+- 5 phases, 10 plans, 21 tasks, 49 commits
+- 2 days from start to ship (2026-02-21 → 2026-02-22)
+
+**Git range:** `feat(28-01)` → `docs(phase-32)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.4 Dockerfile Analyzer (Shipped: 2026-02-20)
 
 **Delivered:** Interactive browser-based Dockerfile analysis tool with 39 expert lint rules, category-weighted scoring, CodeMirror 6 editor, inline annotations, 39 rule documentation pages, companion blog post, and shareable results
