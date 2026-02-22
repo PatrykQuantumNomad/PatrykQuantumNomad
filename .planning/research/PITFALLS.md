@@ -1,287 +1,579 @@
-# Pitfalls Research: Database Compass
+# Pitfalls Research: Docker Compose Validator
 
-**Domain:** Adding an interactive database model explorer (Database Compass) to an existing Astro 5 portfolio site
-**Researched:** 2026-02-21
-**Confidence:** HIGH (verified against codebase analysis, Astro build output, visualization research, SEO best practices, existing content pillar patterns)
+**Domain:** Adding a browser-based Docker Compose validation tool with interactive graph visualization to an existing Astro 5 portfolio site
+**Researched:** 2026-02-22
+**Confidence:** HIGH (verified against codebase analysis, yaml npm package docs, compose-spec JSON Schema source, React Flow/xyflow documentation, ajv documentation, existing Dockerfile Analyzer patterns)
 
-**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.5. The site (patrykgolabek.dev) already has 152 requirements across 5 milestones, 714 pages building in 22.17 seconds, and two content pillars: The Beauty Index (25 languages, 6 dimensions, 600+ vs-comparison OG images) and the Dockerfile Analyzer (39 rule pages, interactive CodeMirror editor). Database Compass adds 12 static model category pages + 1 overview + 1 blog post with a new JSON data file scored across 8 dimensions. This is a content-heavy addition, NOT an interactive tool -- zero client-side JS required beyond existing sort tables.
+**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.6. The site (patrykgolabek.dev) already has 180 requirements across 6 milestones, including a Dockerfile Analyzer (v1.4) that solved CodeMirror lifecycle with View Transitions, React island hydration via `client:only="react"`, and Buffer polyfill for browser. The Compose Validator introduces three new classes of complexity: (1) YAML AST parsing with line number tracking, (2) JSON Schema validation via ajv against the compose-spec schema, and (3) interactive graph visualization with React Flow for service dependency graphs. Each of these intersects with each other and with the existing Astro architecture in non-obvious ways.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Multi-Model Database Categorization Creates Credibility Attacks
+### Pitfall 1: YAML Version Mismatch Silently Breaks Merge Key and Anchor Resolution
 
 **What goes wrong:**
-Putting Redis under "Key-Value" invites immediate criticism: "Redis is also a document store, a time-series database, a pub/sub broker, and a vector database." The same problem applies to PostgreSQL (relational + document + time-series via extensions), Cosmos DB (multi-model by design), DynamoDB (key-value + document), and MongoDB (document + time-series + search). Any rigid single-category placement looks naive to database professionals -- exactly the audience this tool targets.
+The `yaml` npm package defaults to YAML 1.2, but Docker Compose files rely heavily on YAML 1.1 features -- specifically the `<<` merge key for DRY configuration. In YAML 1.2, `<<` is not a special key; it is treated as a literal string key in a mapping. This means a Compose file using anchors and merge keys like this:
 
-The industry has moved decisively toward multi-model convergence. Redis describes itself as a "multi-model database" on its own website. PostgreSQL's JSONB support makes it a credible document store. Placing these databases in a single category box contradicts how their own vendors market them.
+```yaml
+x-common: &common
+  restart: always
+  networks:
+    - backend
+
+services:
+  api:
+    <<: *common
+    image: api:latest
+```
+
+...will parse without error in YAML 1.2 mode, but the merged keys (`restart`, `networks`) will NOT be present on the `api` service object. Instead, `api` will have a key literally named `<<` with the alias value. When this parsed object is then validated against the compose-spec JSON Schema, ajv will report `api` as missing required fields or having unknown properties -- producing misleading validation errors that point to the wrong problem.
 
 **Why it happens:**
-A "12 categories, one database per slot" model imposes false mutual exclusivity on a reality where the lines are blurry. The visual design (12 cards, each with 3-6 databases) encourages clean taxonomy. But database models are not mutually exclusive -- they are capabilities that overlap across engines.
+The `yaml` npm package explicitly documents: "The `merge` option enables `<<` merge keys (a YAML 1.1 feature). Default is `true` for version 1.1, `false` for 1.2." Since the package defaults to YAML 1.2, merge key resolution is off by default. Developers who test with simple Compose files (no anchors) will never encounter this. It surfaces only when users paste real-world production Compose files that use `x-` extension fields with anchors.
 
 **How to avoid:**
-1. Categorize by **primary data model** (the native model the engine was designed around), not by all capabilities
-2. Add a `crossCategory` array field in the JSON schema for each database entry (e.g., Redis: `crossCategory: ["document", "time-series", "vector"]`)
-3. On the overview page, add a visible methodology note: "Databases are categorized by their primary data model. Many modern databases support multiple models -- see detail pages for overlap."
-4. On each detail page, render an "Also supports" section that cross-links to the other model categories the listed databases participate in
-5. In the companion blog post, dedicate a paragraph to explaining why rigid categorization is an approximation, not a truth
+Configure `parseDocument` explicitly for Docker Compose's YAML dialect:
+
+```typescript
+import { parseDocument, LineCounter } from 'yaml';
+
+const lineCounter = new LineCounter();
+const doc = parseDocument(yamlText, {
+  version: '1.1',        // Docker Compose uses YAML 1.1 semantics
+  merge: true,            // Enable << merge key resolution
+  lineCounter,            // Track line positions for error mapping
+  prettyErrors: true,     // Include line/col in parse errors
+  uniqueKeys: false,      // Compose allows duplicate keys in some contexts
+});
+```
+
+Do NOT use `yaml.parse()` (the convenience function) -- it discards the AST document node and line position data needed for CodeMirror annotations.
 
 **Warning signs:**
-- JSON schema has no field for secondary/overlapping model capabilities
-- Detail page copy states "Redis is a key-value database" without qualification
-- No methodology explanation for how "primary model" was determined
-- A database professional could make a factual counter-argument to any placement
+- Compose files with `x-` extension anchors produce unexpected ajv validation errors
+- Tests use only simple Compose files without anchors or merge keys
+- The `yaml` import does not pass `version: '1.1'` or `merge: true`
+- Users report "missing required property" errors on services that clearly use `<<: *anchor`
 
 **Phase to address:**
-Data schema design phase. The JSON schema must include `crossCategory` metadata from the start. Retrofitting it later means rewriting every detail page's "databases in this category" section.
+YAML parsing infrastructure phase (Phase 1). This is a configuration decision that must be correct from the first line of parsing code. Retrofitting it later means re-testing every validation rule against anchor-heavy files.
 
 ---
 
-### Pitfall 2: Dimension Scores Look Arbitrary Without Transparent Methodology
+### Pitfall 2: YAML-to-JSON Lossy Conversion Destroys Line Number Mapping for CodeMirror Annotations
 
 **What goes wrong:**
-Scoring 12 database models across 8 dimensions with integer values (1-10) invites "who decided this?" challenges. Unlike the Beauty Index where aesthetic subjectivity is part of the concept ("one architect's aesthetic ranking"), database capability scoring carries an expectation of technical objectivity. If a DBA sees Graph Databases scored 4/10 on "Ecosystem Maturity" with no justification, the entire tool loses credibility.
+The validation pipeline has three steps: (1) parse YAML to AST, (2) convert to plain JS object for ajv validation, (3) map ajv errors back to YAML source lines for CodeMirror annotations. Step 2 loses all positional information. The `yaml` package's `doc.toJSON()` produces a plain object with no line numbers. When ajv reports an error at JSON path `/services/api/ports/0`, there is no built-in way to map that back to the line in the YAML source where `ports:` appears.
 
-DB-Engines faces exactly this criticism: "scores based on proxies rather than actual capabilities get dismissed as popularity contests, not technical assessments." This tool will face the same challenge unless every score is defensible.
+The Dockerfile Analyzer did not face this problem because `dockerfile-ast` nodes retain line/column properties directly. YAML-to-JSON-Schema validation introduces a fundamentally different error mapping architecture.
 
 **Why it happens:**
-The Beauty Index succeeded partly because it leaned into subjectivity and made it a feature. Database model comparisons live in a different expectations space -- people expect benchmarks, citations, or at least documented reasoning. A 1-10 scale with no rubric definition gives the impression of arbitrary assignment.
+JSON Schema validation (ajv) operates on plain JavaScript objects, not YAML AST nodes. The conversion to JSON is necessary but destructive -- it strips comments, anchors, merge key resolution metadata, and most importantly, source positions. Rebuilding the path-to-line mapping requires walking the YAML AST document in parallel with the JSON path from each ajv error.
 
 **How to avoid:**
-1. **Define each dimension with a clear rubric.** For each score value, state what the endpoints mean. Example: "Query Flexibility: 1 = single-key lookups only, 5 = secondary indexes with basic filtering, 10 = full SQL with joins, subqueries, window functions, and CTEs"
-2. **Show the rubric on each detail page**, not buried in a methodology document. Users should see the rubric next to the score
-3. **Add a `justification` string field per model-dimension pair in the JSON data.** Even 1-2 sentences: "Scores 3 because graph queries require learning a specialized traversal language (Gremlin/Cypher), limiting adoption"
-4. **Consider using a 1-5 scale instead of 1-10.** The difference between a 6 and a 7 out of 10 is impossible to justify. A 1-5 scale (Very Low / Low / Medium / High / Very High) reduces false precision. The Beauty Index uses 1-10 but those are aesthetic judgments; technical capabilities deserve more defensible gradations
-5. **Anchor at least 2-3 dimensions to verifiable facts.** "Ecosystem Maturity" can reference npm/pip package counts, Stack Overflow question volumes, managed service availability on AWS/GCP/Azure. "Adoption" can reference DB-Engines rankings or developer survey data. Anchored scores resist "arbitrary" criticism
+Build an explicit JSON-path-to-YAML-line resolver that walks the parsed YAML Document AST:
+
+```typescript
+import { Document, isMap, isSeq, isPair, isScalar } from 'yaml';
+
+function resolveJsonPathToLine(
+  doc: Document,
+  jsonPath: string,
+  lineCounter: LineCounter
+): { line: number; col: number } | null {
+  // Split "/services/api/ports/0" into ["services", "api", "ports", "0"]
+  const segments = jsonPath.replace(/^\//, '').split('/');
+  let node = doc.contents;
+
+  for (const segment of segments) {
+    if (isMap(node)) {
+      const pair = node.items.find(
+        (item) => isPair(item) && isScalar(item.key) && String(item.key.value) === segment
+      );
+      if (!pair || !isPair(pair)) return null;
+      node = pair.value;
+    } else if (isSeq(node)) {
+      const index = parseInt(segment, 10);
+      if (isNaN(index) || index >= node.items.length) return null;
+      node = node.items[index];
+    } else {
+      return null;
+    }
+  }
+
+  if (node && node.range) {
+    return lineCounter.linePos(node.range[0]);
+  }
+  return null; // Fallback: node has no range (known yaml package edge case)
+}
+```
+
+Store the `LineCounter` instance from parsing and pass it through the entire validation pipeline. Every ajv error must be mapped through this resolver before being converted to a CodeMirror `Diagnostic`.
 
 **Warning signs:**
-- Dimension names exist without definitions anywhere in the codebase or data
-- Scores assigned without justification text in JSON
-- Two similar models have scores that differ by 1 point with no explanation for why
-- The blog post does not explain the scoring methodology
+- All ajv validation errors highlight line 1 in the editor (the fallback position)
+- `doc.toJSON()` is called but no reference to the original Document AST is retained
+- The `LineCounter` is created in parsing code but not passed to the validation or annotation layer
+- Clicking an error in the results panel does not scroll to the correct line
 
 **Phase to address:**
-Data authoring phase. Dimension definitions and score rubrics must be written BEFORE any scores are assigned. This is a content prerequisite, not a UI task.
+YAML parsing infrastructure phase (Phase 1) for the resolver function. Annotation integration phase (Phase 2-3) for CodeMirror diagnostics. These are tightly coupled -- the resolver API must be designed before annotation code consumes it.
 
 ---
 
-### Pitfall 3: 8-Axis Radar Charts Become Unreadable and Misleading
+### Pitfall 3: Compose-Spec JSON Schema Has Structural Quirks That Break Default ajv Configuration
 
 **What goes wrong:**
-Eight axes is at the upper edge of what visualization experts recommend (5-7 is the comfortable range). At 8 axes, three compounding problems emerge:
+The official compose-spec JSON Schema (`compose-spec.json` from `compose-spec/compose-spec`) uses JSON Schema Draft-07, which ajv supports. However, the schema has several structural patterns that cause problems with ajv's default configuration:
 
-1. **Label crowding:** The existing `generateRadarSvgString()` positions labels at `maxRadius + size * 0.08` offset. With 8 axes (45-degree spacing instead of 60-degree), adjacent labels overlap, especially at small sizes and on mobile
-2. **Shape perception failure:** Research confirms that radar chart shapes "don't leverage pre-attentive quantitative attributes" -- users cannot attribute genuine meaning to the polygon shape. At 8 axes, the polygon becomes so complex that meaningful pattern recognition breaks down entirely
-3. **Axis ordering bias:** "Radar charts' effectiveness heavily depends on arbitrary design choices (specifically axis sequence) rather than the underlying data alone." With 8 axes, there are 40,320 possible orderings, each producing a different visual impression of the same data
+1. **`patternProperties` with `^x-`**: Every Compose object allows extension fields prefixed with `x-`. The schema uses `patternProperties: {"^x-": {}}` to permit these. With ajv's strict mode enabled (the default), this triggers warnings or errors because `patternProperties` interacts with `additionalProperties: false` in ways that strict mode flags.
 
-The Beauty Index used 6 axes successfully. Going to 8 is not a 33% increase -- it crosses a readability threshold.
+2. **Complex `oneOf`/`anyOf` unions**: The `depends_on` property supports both a simple string array (`["db", "redis"]`) and an object form (`{db: {condition: "service_healthy"}}`). The schema uses `oneOf` to express this, but ajv's error messages for `oneOf` failures are notoriously unhelpful -- they list every branch that failed without indicating which branch the user likely intended.
+
+3. **`$ref` chains**: The schema uses internal `$ref` extensively (e.g., service definitions reference shared definitions for volumes, networks, etc.). ajv resolves these at compile time, but the resulting error paths include the resolved definition paths, not the original document paths.
+
+4. **Mixed type fields**: Many Compose properties accept `["string", "number"]` or `["string", "boolean"]` -- for example, `ports` can be strings ("8080:80") or objects. This produces confusing validation errors when the user's value does not match either type.
+
+5. **Format validators**: The schema uses `format: "duration"` for healthcheck intervals, which requires `ajv-formats` to be installed and configured. Without it, format validation is silently skipped.
 
 **Why it happens:**
-The radar-math.ts utility handles any number of axes mathematically, so there is no technical barrier. The instinct is "more dimensions = more comprehensive." But comprehensiveness in the data model does not equal comprehensiveness in the visualization.
+The compose-spec schema was designed for specification compliance validation, not for user-friendly error reporting. It is maximally correct but minimally helpful. ajv faithfully validates against it but produces error messages that require expert interpretation.
 
 **How to avoid:**
-1. **Reduce to 6 dimensions if possible.** Question whether all 8 truly earn their place. Can two be merged? "Ops Complexity" and "Learning Curve" might collapse into "Adoption Difficulty." "Data Integrity" and "Consistency Model" might collapse into "Reliability"
-2. If 8 dimensions must stay, **order axes so adjacent dimensions are conceptually related.** Group operational dimensions (Ops Complexity, Scalability, Ecosystem Maturity, Cost Efficiency) on one side and developer-experience dimensions (Query Flexibility, Schema Flexibility, Learning Curve, Data Modeling Power) on the other. This makes the polygon shape semantically meaningful: wide on the left = strong ops, wide on the right = strong DX
-3. **Always pair radar charts with a score breakdown table.** The table is the primary interface; the chart is supplementary visual flavor. The Beauty Index already does this well
-4. **Test label rendering at 8 axes.** The current `generateRadarSvgString()` computes label positioning with angle-based `text-anchor` (start/middle/end). At 45-degree increments, two labels near the 45-degree and 315-degree positions will have similar Y coordinates and may visually collide. Verify at the actual SVG size used on detail pages (likely 300-400px)
-5. Never overlay multiple database models on the same radar chart. Side-by-side is acceptable; overlay is not
-6. On mobile below 480px, consider showing the score table only and hiding the radar chart
+1. Disable strict mode for the compose-spec schema specifically:
+
+```typescript
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({
+  strict: false,              // Compose schema uses patterns strict mode dislikes
+  allErrors: true,            // Collect ALL errors, not just the first
+  verbose: true,              // Include schema and data in error objects
+  discriminator: true,        // Better oneOf matching
+});
+addFormats(ajv);
+```
+
+2. Post-process ajv errors to produce human-readable messages. Do NOT show raw ajv error messages to users. Map each `instancePath` + `keyword` combination to a domain-specific message:
+
+```typescript
+// Raw ajv: { instancePath: '/services/api/ports/0', keyword: 'oneOf', message: 'must match exactly one schema in oneOf' }
+// Mapped: "Port '8080' is ambiguous. Use format '8080:80' (host:container) or an object with 'target' and 'published' fields."
+```
+
+3. Use ajv's `validateSchema: false` option if the compose-spec schema itself triggers validation warnings (it should not, but some draft-07 constructs are edge cases).
+
+4. Pre-compile the schema at build time or on first use, cache the compiled validator function. Schema compilation is expensive (~50-100ms) and should not happen on every analysis click.
 
 **Warning signs:**
-- Axis labels overlap or truncate at the SVG render size
-- Two polygon shapes for different models look nearly identical despite having meaningfully different scores
-- Users consistently ignore the radar chart and read the table instead
-- Mobile layout shows a tiny, unreadable radar chart
+- Raw ajv error messages like "must match exactly one schema in oneOf" appear in the UI
+- Strict mode errors appear in the browser console during schema compilation
+- Format validation for durations or URIs silently passes invalid values
+- Schema compilation runs on every analysis button click (visible lag)
 
 **Phase to address:**
-Component development phase. The radar chart component must be built with 8-axis readability testing, not just reusing the 6-axis Beauty Index component with 2 more axes added. Test at actual render sizes before proceeding.
+Schema validation infrastructure phase (Phase 2). ajv configuration must be finalized before any validation rules are written that depend on schema error output format.
 
 ---
 
-### Pitfall 4: Static Scores Become Stale Within Months
+### Pitfall 4: React Flow SSR Crash and Bundle Size Explosion in Astro Island
 
 **What goes wrong:**
-The database landscape changes rapidly. New capabilities ship with every major release. The vector database explosion of 2023-2024 redefined an entire category. PostgreSQL 17 added features that change its scoring on multiple dimensions. Unlike the Beauty Index (programming language aesthetics change slowly), database capabilities change with every major version.
+React Flow (`@xyflow/react`) requires DOM APIs (window, document, ResizeObserver) that do not exist during server-side rendering. In Astro, even `client:load` attempts to SSR the component first, which crashes React Flow. The existing Dockerfile Analyzer already solved a similar problem by using `client:only="react"`, but React Flow introduces a new concern: bundle size.
 
-Static scores baked into a JSON file at build time will be factually wrong within 6-12 months. The "2026 Edition" framing creates an implicit promise that the content reflects 2026 reality -- if someone reads it in 2027, they expect either updated data or a clear date qualifier.
+React Flow v12 (`@xyflow/react`) is approximately 200-250KB minified (before gzip). Combined with the existing Dockerfile Analyzer's CodeMirror bundle (~192KB client-side as noted in the v1.5 architecture research), the Compose Validator page will ship a significantly larger client bundle than any other page on the site. If dagre is added for layout, that adds another ~30KB. The total client-side JavaScript for this page could reach 400-500KB, far exceeding the Lighthouse performance thresholds that the site maintains at 90+.
+
+Additionally, React Flow requires its CSS stylesheet to be imported. In Astro's `client:only` islands, CSS imports from npm packages can behave unexpectedly -- they may not be extracted and optimized by Vite's CSS pipeline the same way they would in a full SPA.
 
 **Why it happens:**
-Static sites excel at shipping fast but lack update mechanisms. Once deployed, there is no CMS workflow to trigger content reviews. The JSON data file becomes a forgotten artifact. The site already has 152 requirements and a growing maintenance surface -- adding another data file that requires periodic expert review creates ongoing obligation.
+The Dockerfile Analyzer's client bundle is dominated by CodeMirror (~100KB) and React (~40KB). React Flow adds a second heavy library to the same island. Since both the editor and the graph live in the same React island (they share state -- clicking a service in the graph should highlight it in the editor), they cannot be separate islands without a cross-island state synchronization mechanism.
 
 **How to avoid:**
-1. Add a `lastVerified` date field per database entry in the JSON schema. Display it on each detail page
-2. Add a `dataAsOf` field on the overview-level metadata, rendered prominently: "Data as of February 2026"
-3. Frame the tool as "Database Compass 2026" explicitly in the title, URL, and meta tags. This scopes reader expectations and makes annual refresh natural
-4. Do NOT include specific version numbers for databases in the JSON data -- they go stale fastest. Reference general capability tiers instead ("PostgreSQL supports JSONB document storage" not "PostgreSQL 16.2 added...")
-5. In the companion blog post, explicitly state: "This data represents a point-in-time assessment. Database capabilities evolve rapidly."
-6. Consider adding a GitHub issue template or a "suggest a correction" link on each detail page that links to a new issue
+1. Use `client:only="react"` (proven pattern from Dockerfile Analyzer). Do NOT use `client:load` or `client:visible` -- both attempt SSR.
+
+2. Lazy-load React Flow. The graph is not visible until the user analyzes a Compose file. Use `React.lazy()` with dynamic import:
+
+```typescript
+const DependencyGraph = React.lazy(() => import('./DependencyGraph'));
+
+// In the component:
+{showGraph && (
+  <Suspense fallback={<GraphSkeleton />}>
+    <DependencyGraph nodes={nodes} edges={edges} />
+  </Suspense>
+)}
+```
+
+This splits React Flow into a separate chunk that only loads when the graph tab is activated, keeping the initial page load fast.
+
+3. Import React Flow CSS in the lazy-loaded component, not at the top level:
+
+```typescript
+// Inside DependencyGraph.tsx
+import '@xyflow/react/dist/style.css';
+```
+
+4. Consider `@xyflow/react`'s tree-shaking capabilities. Import only the components you need:
+
+```typescript
+import { ReactFlow, Background, Controls } from '@xyflow/react';
+// NOT: import ReactFlow from '@xyflow/react'; (pulls everything)
+```
+
+5. Measure the final bundle with `npx vite-bundle-visualizer` after integration. Set a budget: the Compose Validator page's total JS should not exceed 350KB gzipped.
 
 **Warning signs:**
-- JSON schema has no date/version metadata fields
-- Detail pages show no "last reviewed" indicator
-- Blog post makes claims about "latest" or "current" capabilities without date qualification
-- A database listed scores differently than its current release capabilities justify
+- Lighthouse Performance score drops below 90 on the Compose Validator page
+- Browser console shows "window is not defined" or "document is not defined" errors
+- React Flow CSS does not render (nodes appear as unstyled divs)
+- Initial page load transfers >500KB of JavaScript before user interaction
 
 **Phase to address:**
-Data schema design phase (schema must include date fields) AND content authoring phase (framing must be explicit about temporal scope).
+React island architecture phase (Phase 1-2). The `client:only` directive and lazy loading strategy must be decided before any React Flow code is written. Bundle size measurement is a verification gate at the end of the graph visualization phase.
 
 ---
 
-### Pitfall 5: SEO Content Too Thin to Rank in Competitive Database SERP
+### Pitfall 5: Variable Interpolation Syntax `${VAR:-default}` Treated as YAML Content Instead of Docker Compose Tokens
 
 **What goes wrong:**
-Database comparison pages are a highly competitive SERP. DB-Engines, G2, TrustRadius, AWS/GCP/Azure comparison pages, and established developer content sites (DigitalOcean, Prisma, PlanetScale) dominate. A 12-page set with 200-word descriptions, a radar chart, and a bullet list of databases will not rank -- it will be classified as thin content.
+Docker Compose supports Bash-like variable interpolation (`${VAR}`, `${VAR:-default}`, `${VAR:?error}`, `${VAR:+replacement}`, and `$$` for literal dollar signs). The `yaml` npm package correctly parses these as string values (they are just strings in YAML). However, the validator must understand that these are NOT literal values -- they are templates that will be resolved at runtime by Docker Compose.
 
-Google explicitly rewards sites that "enable users to dive deeper into topics without returning to search." Template-driven pages with minimal unique content per page are exactly what Google's helpful content system targets. The Dockerfile Analyzer avoided this trap by having 39 rule pages each with unique expert explanation, fix suggestions, and code examples.
+This creates three specific problems:
+
+1. **Schema validation false positives**: A port mapping `"${HOST_PORT:-8080}:80"` is a valid Compose port, but if the validator tries to parse port numbers from the literal string, it will fail. Similarly, `"${POSTGRES_VERSION:-16}"` as an image tag is valid but un-parseable as a version number.
+
+2. **Semantic rule false positives**: A security rule checking for hardcoded secrets will flag `DB_PASSWORD: ${DB_PASSWORD}` as "variable references environment variable" but cannot determine if the actual value is hardcoded in a `.env` file. Meanwhile, `DB_PASSWORD: supersecret123` IS a hardcoded secret, but both look like string scalars to the YAML parser.
+
+3. **Nested interpolation**: Docker Compose supports `${VARIABLE:-${FOO:-default}}`. The validator must not attempt to parse the inner `${...}` as a separate expression when the outer one is already being handled.
 
 **Why it happens:**
-The temptation is to keep detail pages short because there are 12 of them and they all follow the same template. Writing 400+ words of unique expert-voice content for each of 12 model categories is 4,800+ words of original technical writing -- a significant content investment. The developer instinct is to minimize content and maximize visual elements. But search engines cannot index radar chart SVGs.
+The Dockerfile Analyzer did not face this problem because Dockerfiles have no variable interpolation syntax at the YAML level (ARG/ENV variables are Dockerfile instructions, not YAML constructs). The Compose Validator operates at a higher abstraction level where the raw YAML content includes runtime template syntax.
 
 **How to avoid:**
-1. Each detail page needs 400-600 words of unique, expert-voice content -- not generic descriptions copyable from Wikipedia
-2. Include a "When to Use / When to Avoid" section per model with concrete use-case scenarios from real-world architecture
-3. Include "Real-World Examples" -- name actual companies, products, or open-source projects that use this model type (public knowledge only)
-4. Each page must target a unique, specific long-tail keyword (e.g., "graph database use cases 2026" vs "time-series database tradeoffs")
-5. Write unique meta descriptions per page -- not template-generated from the same field with only the model name swapped
-6. Use HTML `<table>` elements for dimension scores -- Google extracts table snippets for comparison queries, which is a direct path to featured snippets
-7. Add internal cross-links between related model pages ("If you need graph relationships but also need strong consistency, consider [relational with graph extensions]")
-8. The companion blog post should link to every detail page, and every detail page should link back to the blog post and to the overview
+1. Build an interpolation-aware value normalizer that runs BEFORE schema validation and semantic analysis:
+
+```typescript
+const INTERPOLATION_REGEX = /\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
+
+function containsInterpolation(value: string): boolean {
+  return INTERPOLATION_REGEX.test(value);
+}
+
+function resolveInterpolationForValidation(value: string): string {
+  // Replace ${VAR:-default} with just "default" for validation purposes
+  // Replace ${VAR} with a placeholder that passes schema validation
+  return value.replace(/\$\{([^:}]+):-([^}]+)\}/g, '$2')
+              .replace(/\$\{([^:}]+):?\?[^}]*\}/g, 'placeholder')
+              .replace(/\$\{([^}]+)\}/g, 'placeholder')
+              .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, 'placeholder');
+}
+```
+
+2. Tag interpolated values in semantic analysis so rules can distinguish between "definitely hardcoded" and "might be a variable reference."
+
+3. Do NOT attempt to validate the interpolated value itself -- only validate the structure around it. For example, `"${PORT}:80"` has valid port mapping structure even if `${PORT}` is unknown.
 
 **Warning signs:**
-- All 12 detail pages use the same meta description template with only the model name swapped
-- Detail page word count is under 300 words excluding UI chrome
-- No internal cross-links between model pages
-- Pages rank on page 3+ or not at all for their target keywords within 3 months of publish
+- Valid Compose files with `${}` variables produce dozens of spurious validation errors
+- Port mapping rules fail on `"${PORT}:80"` with "invalid port number"
+- Security rules cannot distinguish `password: ${SECRET}` from `password: hardcoded123`
+- Tests use only literal values, never interpolated variables
 
 **Phase to address:**
-Content authoring phase for the data, SEO integration phase for meta/structured data. Content quality is the harder problem and should be addressed first.
+YAML parsing and normalization phase (Phase 1). The interpolation handler must exist before schema validation or semantic rules are written, because it affects what data both systems receive.
 
 ---
 
-### Pitfall 6: Build Time Grows Unsustainably with OG Image Multiplication
+### Pitfall 6: YAML AST Nodes Can Have Undefined `range` Property, Crashing the Line Number Resolver
 
 **What goes wrong:**
-Current build: 714 pages in 22.17 seconds. Of those, **600 are Beauty Index "vs" comparison OG images** (25 choose 2 = 300 pairs x 2 orderings). Each Satori+Sharp render takes 100-300ms. If the Database Compass follows the vs-comparison pattern (12 choose 2 = 66 comparison pages with OG images), that adds 80+ renders at 100-300ms each -- potentially 8-24 more seconds.
+The `yaml` npm package has a documented bug (GitHub issue #573) where certain YAML constructs produce parsed nodes without a `range` property, even when the document parses successfully. The specific case documented is `[a:]` (a flow mapping inside a sequence), but similar edge cases exist for:
 
-More critically, the trajectory matters. If v1.6 adds another content pillar with vs-comparisons, the build time becomes a problem. The current 22-second build is healthy, but each new Satori render compounds.
+- Empty mapping values (bare keys with no value)
+- Flow sequences with complex nested structures
+- Documents with only comments and no content nodes
+- Alias nodes (`*anchor`) when the anchor definition is malformed
+
+When the line number resolver (from Pitfall 2) calls `node.range[0]` on such a node, it throws `TypeError: Cannot read properties of undefined (reading '0')`. This crashes the entire validation pipeline for that Compose file.
 
 **Why it happens:**
-The vs-comparison pattern from Beauty Index is powerful for SEO ("Python vs Ruby" is a real search query). The instinct to replicate a successful pattern does not account for whether the same query pattern exists for database models. "Key-Value vs Document Database" is a valid query, but with far lower search volume than programming language comparisons.
+The `yaml` package's TypeScript types declare `range` as `[number, number, number]` on Node, but the runtime implementation can return `undefined` in edge cases. The types do not reflect this, so TypeScript will not catch the error at compile time.
 
 **How to avoid:**
-1. **Do NOT create vs-comparison pages for Database Compass.** "Key-Value vs Document" is a reasonable comparison but does not have the search volume to justify 66 additional pages + OG images. The Beauty Index vs pages work because individual language names are high-volume queries. Database model names are lower-volume
-2. Keep OG images to: 1 overview + 12 detail pages + 1 blog post = 14 images. At 100-300ms each, this adds 1.4-4.2 seconds -- well within budget
-3. If comparison content is desired, create a single "comparison table" on the overview page rather than 66 individual pages
-4. Reuse the existing `renderOgPng()` helper from `og-image.ts` rather than creating a fourth OG generator function. The existing function handles font loading, Satori rendering, and Sharp conversion
-5. Measure build time after integration. Set a threshold: if build time exceeds 30 seconds, investigate which images are slow
+1. Always guard `range` access with a null check:
+
+```typescript
+function getNodeLine(node: any, lineCounter: LineCounter): number {
+  if (node?.range && Array.isArray(node.range) && node.range.length >= 1) {
+    const pos = lineCounter.linePos(node.range[0]);
+    return pos.line;
+  }
+  return 1; // Fallback to line 1 if range unavailable
+}
+```
+
+2. Add a unit test specifically for the `[a:]` edge case and other known range-less nodes.
+
+3. Wrap the entire JSON-path-to-line resolver in a try/catch that falls back to line 1 rather than crashing the analysis.
+
+4. Log a console warning (dev-only) when a node lacks a range so edge cases can be identified and reported upstream.
 
 **Warning signs:**
-- Build time exceeds 30 seconds after adding Database Compass
-- GitHub Actions build step shows OG images taking >10 seconds
-- Plans include "database model A vs database model B" comparison pages
-- A new `generateDbCompassVsOgImage()` function appears in the codebase
+- Pasting unusual YAML constructs crashes the analyzer with no error message in the UI
+- TypeScript compiles without error but runtime throws on `node.range[0]`
+- The error is intermittent -- only certain Compose files trigger it
+- The crash prevents ALL validation results from appearing, not just the affected line
 
 **Phase to address:**
-Architecture/planning phase. The decision about vs-comparison pages must be made explicitly and early -- do not let it emerge organically during development.
+YAML parsing infrastructure phase (Phase 1). The `getNodeLine` helper with defensive checks must be the ONLY way any code accesses node positions. No direct `node.range[0]` access anywhere.
+
+---
+
+### Pitfall 7: Compose-Spec `version` Field Produces Confusing Validator Behavior
+
+**What goes wrong:**
+The `version` field in Docker Compose files is officially deprecated and obsolete. Docker Compose v2+ ignores it entirely and validates against the current Compose Specification regardless of what `version` says. However, the vast majority of existing Compose files in the wild still include `version: "3.8"` or similar. This creates a UX trap:
+
+1. If the validator warns about the deprecated `version` field, users who do not know it is deprecated will be confused -- "but all my Compose files have this!"
+2. If the validator does NOT warn about `version`, it misses an opportunity to educate users about modern Compose practices.
+3. If the validator uses the `version` field to determine which schema to validate against (v2 schema vs v3 schema vs unified spec), it replicates the very complexity Docker Compose abandoned.
+
+Additionally, files with `version: "2"` or `version: "2.1"` may use features that exist in v2 but are structured differently in the unified spec (e.g., `depends_on` with conditions was added differently in v2 vs v3 vs unified). Validating a v2 file against the unified spec may produce false positives.
+
+**Why it happens:**
+The compose-spec schema marks `version` as a deprecated string property. The schema validates any Compose file against the unified specification regardless of the version field. But user expectations are shaped by years of Docker Compose documentation that treated version as a critical field.
+
+**How to avoid:**
+1. Always validate against the unified Compose Specification schema, regardless of the `version` field value. This matches what Docker Compose itself does.
+
+2. Add a specific informational rule (not a warning, not an error) that detects `version` and explains:
+   - "The `version` field is obsolete and ignored by Docker Compose v2+. You can safely remove it."
+   - Link to Docker's official documentation on this topic.
+
+3. If the `version` field contains a v2.x value AND the file uses v2-only syntax (e.g., `links`, `volume_driver`, `extends` with `file`), surface a specific warning: "This file appears to use Docker Compose v2 syntax which may not be fully compatible with the current Compose Specification."
+
+4. Do NOT build separate validation paths for v2 vs v3 vs unified. This is scope explosion that Docker themselves abandoned.
+
+**Warning signs:**
+- The validator has a `switch(version)` statement in validation logic
+- Users paste files with `version: "3.8"` and get warnings that confuse rather than help
+- The validator rejects valid Compose files because they use v2 syntax
+- No test files include the `version` field
+
+**Phase to address:**
+Semantic rules phase (Phase 3). The `version` deprecation rule is a specific semantic rule, not a schema validation concern. It should be authored as a named rule with documentation page, consistent with the Dockerfile Analyzer's rule architecture.
 
 ---
 
 ## Moderate Pitfalls
 
-### Pitfall 7: Homepage Becomes a Link Directory with 3 Content Pillar Callouts
+### Pitfall 8: Dagre Layout Engine Cannot Handle Cycles in `depends_on`
 
 **What goes wrong:**
-The homepage currently has two callout sections (Beauty Index + Dockerfile Analyzer) between "What I Build" and "Latest Writing." Adding a third callout for Database Compass pushes the callout section toward visual monotony -- three nearly identical card links stacked vertically. The homepage starts feeling like a table of contents rather than a curated portfolio landing page.
+Docker Compose's `depends_on` can create dependency cycles (A depends on B, B depends on C, C depends on A). Docker Compose itself detects and rejects these. However, dagre (the most common layout engine for React Flow) is designed for DAGs (Directed Acyclic Graphs) and produces unpredictable or infinite-loop behavior when given cyclic edges. The layout computation may hang the browser tab.
+
+Elkjs handles cycles slightly better but is significantly larger (~100KB) and slower than dagre (~30KB).
 
 **Why it happens:**
-Each milestone adds its callout following the established pattern. The pattern works for 1-2 callouts but breaks at 3+ because the section becomes the dominant visual element on the page, pushing "Latest Writing" further below the fold.
+Dagre's algorithm assumes acyclic input. It does not validate this assumption -- it simply produces wrong output or runs forever. Since the Compose Validator's job is to DETECT cycle issues (as a semantic rule), the graph visualization must render them visually without relying on the layout engine to handle them correctly.
 
 **How to avoid:**
-1. Redesign the callout section as a 3-card horizontal grid (`grid-cols-1 sm:grid-cols-3`) instead of stacked vertical cards. This gives each pillar equal weight without tripling the vertical space
-2. Alternatively, create a single "Explore" section with a compact list linking to all three pillars, instead of full-card callouts per pillar
-3. Keep callout copy very concise (title + one-line description) when there are 3+ pillars. The current Dockerfile Analyzer callout is 3 lines -- at 3 cards, this is the maximum before clutter
+1. Run cycle detection BEFORE layout computation. Use Tarjan's algorithm or simple DFS-based cycle detection on the dependency graph. This is a semantic analysis rule, not a layout concern.
+
+2. If cycles are detected, break them for layout purposes by removing one edge per cycle (visually mark the removed edge as a cycle indicator with a distinct color/style -- red dashed line with a cycle icon).
+
+3. Alternatively, use a force-directed layout (d3-force) instead of dagre for graphs with cycles. Force-directed layouts handle cycles gracefully because they do not assume DAG structure. However, they produce less visually organized results for tree-like graphs.
+
+4. Set a timeout on the layout computation. If dagre does not return within 500ms, abort and fall back to a simple grid layout.
 
 **Warning signs:**
-- Scrolling from "What I Build" to "Latest Writing" takes more than 2 thumb-scrolls on mobile
-- Homepage layout review shows the callout section is the tallest section on the page
-- Three visually identical cards provide no differentiation between pillars
+- The browser tab freezes when analyzing a Compose file with circular `depends_on`
+- The graph renders but edges cross chaotically because dagre's cycle-breaking heuristic is insufficient
+- No test Compose files include circular dependencies
+- The cycle detection semantic rule and the graph visualization are developed independently
 
 **Phase to address:**
-Site integration phase. Homepage layout adjustment should happen when the callout is added, not after.
+Graph visualization phase (Phase 4). Cycle detection must be a shared utility used by both the semantic analysis rules (to report the error) and the graph layout code (to break cycles for rendering).
 
 ---
 
-### Pitfall 8: Tools Page Integration Creates Visual Imbalance
+### Pitfall 9: CodeMirror YAML Language Support Uses Lezer Parser, Not `yaml` npm Package
 
 **What goes wrong:**
-The current tools page (`/tools/index.astro`) has two cards in a 2-column grid: Dockerfile Analyzer (full card) and "More tools coming soon" (dashed placeholder). Replacing the placeholder with Database Compass creates a 2-card grid where both items have equal visual weight -- which is correct. But the Database Compass is NOT an interactive tool (unlike the Dockerfile Analyzer). It is a content explorer. Placing it on the "Tools" page alongside an interactive tool creates a category mismatch.
+CodeMirror 6's YAML support (`@codemirror/lang-yaml`) uses the Lezer YAML grammar for syntax highlighting and folding. The `yaml` npm package uses its own parser. These are two completely different parsers with different behaviors. Key mismatches:
+
+1. **Line numbering**: CodeMirror uses 0-based internal positions but 1-based line numbers via `state.doc.line(n)`. The `yaml` package's `LineCounter` produces 1-based `{line, col}`. But the offset systems are different -- CodeMirror counts characters from the start of the document, while `yaml`'s `range` values are byte offsets in the original string.
+
+2. **Error positions**: When the `yaml` parser reports an error at offset 142, converting that to a CodeMirror position requires mapping through `state.doc.line()` -- but only if the document has not been edited since parsing. If the user edits the document and re-analyzes, the offsets shift.
+
+3. **Syntax highlighting vs. semantic errors**: The Lezer parser may highlight syntactically valid YAML differently than the `yaml` package parses it. For example, Lezer may treat `<<:` as a plain key, while the `yaml` package with `merge: true` treats it as a merge key.
 
 **Why it happens:**
-The URL structure `/tools/db-compass/` places it under "Tools" by convention. But a database model explorer with static content pages is closer to the Beauty Index (a content pillar) than to the Dockerfile Analyzer (an interactive tool). This creates a taxonomy question: is Database Compass a "tool" or a "content pillar"?
+The Dockerfile Analyzer avoided this by using a single parser (`dockerfile-ast`) for both analysis and annotation mapping. The Compose Validator uses three parsers: Lezer (CodeMirror highlighting), `yaml` (AST analysis), and ajv (schema validation). Their offset systems do not naturally align.
 
 **How to avoid:**
-1. Decide explicitly: is Database Compass under `/tools/db-compass/` or under `/db-compass/` (top-level like Beauty Index)? The URL determines the information architecture
-2. If under `/tools/`, update the tools page description to reflect that it includes both interactive tools AND reference guides. Change "Free, browser-based developer tools" to "Free developer tools and reference guides"
-3. If under a top-level path, add it to the header nav like Beauty Index (but be cautious -- 8 nav items is the maximum for mobile. Currently at 7)
-4. Match the card design on the tools page to accurately represent what each tool IS. The Dockerfile Analyzer card says "Free Browser Tool." The Database Compass card should say "Reference Guide" or "Interactive Explorer" -- not "Free Browser Tool"
+1. Always re-parse the YAML from `view.state.doc.toString()` on each analysis. Do NOT cache the parsed document across edits.
+
+2. Use character offsets consistently. The `yaml` package's `range` values are character offsets into the original string, which aligns with CodeMirror's `from`/`to` positions in `Diagnostic`. This alignment is correct as long as both operate on the same string.
+
+3. Wrap the offset-to-diagnostic conversion in a validation step:
+
+```typescript
+function yamlOffsetToDiagnostic(
+  view: EditorView,
+  offset: number,
+  endOffset: number,
+  severity: 'error' | 'warning' | 'info',
+  message: string,
+): Diagnostic | null {
+  const docLength = view.state.doc.length;
+  const from = Math.max(0, Math.min(offset, docLength));
+  const to = Math.max(from, Math.min(endOffset, docLength));
+  if (from === to && from === docLength) return null; // Offset beyond document
+  return { from, to, severity, message, source: 'compose-validator' };
+}
+```
+
+4. Do NOT assume the `yaml` package's character offsets match byte offsets. For documents containing multi-byte UTF-8 characters (common in comments), character offset !== byte offset. JavaScript strings use UTF-16, and `yaml`'s offsets are character-based (matching JavaScript string indexing), which aligns with CodeMirror's character-based positions.
 
 **Warning signs:**
-- Tools page describes all items as "browser-based tools" when Database Compass has no client-side interactivity
-- URL structure creates confusion about where the content "lives" in the site hierarchy
-- Nav highlights "Tools" when on Database Compass pages but the content feels like it belongs alongside Beauty Index
+- Squiggly underlines appear on the wrong line or shifted by a few characters
+- Annotations work on ASCII-only files but are misaligned on files with emoji or CJK characters in comments
+- The same analysis produces different annotation positions on successive runs without document changes
 
 **Phase to address:**
-Architecture/planning phase. URL structure and site hierarchy must be decided before any pages are created.
+CodeMirror integration phase (Phase 2). The offset-to-diagnostic conversion helper must be tested with multi-byte character documents and re-analysis after edits.
 
 ---
 
-### Pitfall 9: JSON-LD Structured Data Uses Wrong Schema Type
+### Pitfall 10: Large Compose Files Cause Visible UI Lag from Synchronous Validation Pipeline
 
 **What goes wrong:**
-The site uses three different JSON-LD schema types: `Person` (homepage), `BlogPosting` (blog posts), `Dataset`/`ItemList` (Beauty Index), and `SoftwareApplication` (Dockerfile Analyzer). Choosing the wrong schema type for Database Compass reduces its chance of earning rich snippets and being correctly interpreted by AI search engines.
+The Dockerfile Analyzer runs analysis synchronously on the main thread. This works because Dockerfiles are small (typically <100 lines) and `dockerfile-ast` parsing is fast (<5ms). Docker Compose files can be significantly larger -- production files with 20+ services, complex network configurations, and extensive environment variables can exceed 500+ lines. The validation pipeline (YAML parse + merge key resolution + JSON conversion + ajv schema validation + semantic analysis + graph layout computation) on a 500-line Compose file can take 100-500ms, causing visible UI jank (dropped frames, unresponsive button).
 
 **Why it happens:**
-Database Compass is a hybrid: it is structured data (like a Dataset), it is a comparison tool (like a SoftwareApplication), and it is educational content (like an Article). Developers pick whichever schema type they used last or whichever seems close enough.
+The Dockerfile Analyzer set the precedent of synchronous, main-thread analysis. The Compose Validator inherits this pattern but adds significantly more computation: YAML parsing is more complex than Dockerfile parsing, ajv schema compilation is expensive (~50-100ms on first run), and graph layout with dagre adds another 50-100ms for 20+ nodes.
 
 **How to avoid:**
-1. Use `Dataset` schema for the overview page (it describes a structured collection of scored data about database models) -- this matches the Beauty Index pattern and is most accurate
-2. Use `Article` or `TechArticle` schema for individual detail pages (each is a substantive writeup about a database model category)
-3. Use `BlogPosting` for the companion blog post (consistent with existing blog schema)
-4. Include `BreadcrumbList` on all pages (the site already does this for Beauty Index)
-5. Validate with Google's Rich Results Test after deployment -- do not assume schema is correct without testing
+1. Cache the compiled ajv validator. Compile the schema once on module load (or on first analysis), not on every click:
+
+```typescript
+let compiledValidator: ValidateFunction | null = null;
+
+function getValidator(): ValidateFunction {
+  if (!compiledValidator) {
+    const ajv = new Ajv({ strict: false, allErrors: true });
+    addFormats(ajv);
+    compiledValidator = ajv.compile(composeSchema);
+  }
+  return compiledValidator;
+}
+```
+
+2. If total analysis time exceeds 100ms on a representative large Compose file, move the analysis pipeline to a Web Worker. The existing `analysisResult` nanostore can receive results via `postMessage`:
+
+```typescript
+// Main thread:
+worker.postMessage({ type: 'analyze', content: yamlText });
+worker.onmessage = (e) => {
+  analysisResult.set(e.data.result);
+};
+```
+
+3. Profile the pipeline on a 500-line Compose file during development. Measure each step: YAML parse, JSON conversion, ajv validation, semantic rules, graph layout. Optimize the slowest step first.
+
+4. Add a loading indicator (spinner or skeleton) during analysis, even if analysis is fast. This prevents the perception of jank if analysis occasionally takes longer than expected.
 
 **Warning signs:**
-- All Database Compass pages use `WebPage` (the default, least informative schema)
-- Schema type does not match the page content (e.g., `SoftwareApplication` for a static reference page)
-- Google Search Console shows no rich results for Database Compass pages after 2 weeks
+- Clicking "Analyze" produces a visible freeze before results appear
+- Users report the page "hangs" when pasting large Compose files
+- Lighthouse Time to Interactive (TTI) degrades
+- The "Analyze" button does not show a loading state
 
 **Phase to address:**
-SEO integration phase. Decide schema types during architecture, implement during integration.
+Core validation engine phase (Phase 2) for caching the ajv validator. Performance optimization phase (late phase) for Web Worker extraction if needed. The loading indicator should be in the React island architecture from the start (copy the `isAnalyzing` nanostore pattern from the Dockerfile Analyzer).
 
 ---
 
-### Pitfall 10: LLMs.txt and Sitemap Miss New Pages
+### Pitfall 11: React Flow CSS Conflicts with Site's Quantum Explorer Theme
 
 **What goes wrong:**
-The site maintains two LLMs.txt files (`llms.txt.ts` and `llms-full.txt.ts`) that enumerate pages for AI discoverability. Both files currently hardcode sections for blog posts and Beauty Index languages. Database Compass pages will NOT appear in LLMs.txt unless the generation code is explicitly updated. Similarly, while `@astrojs/sitemap` should auto-include new pages, verification is required.
+React Flow ships its own CSS (`@xyflow/react/dist/style.css`) that includes styles for nodes, edges, handles, controls, and the canvas background. These styles use class names like `.react-flow`, `.react-flow__node`, `.react-flow__edge` and set properties like `background`, `color`, `font-family`, `border`, and `z-index`. Several of these conflict with the site's "Quantum Explorer" theme:
+
+1. React Flow's default light background clashes with the dark theme
+2. React Flow's font-family overrides do not match Space Grotesk / Inter / JetBrains Mono
+3. React Flow's z-index values may conflict with the particle canvas, floating orbs, or modal overlays
+4. React Flow's selection rectangle uses colors that do not match the site's accent color system
 
 **Why it happens:**
-LLMs.txt generation is a separate endpoint that does not auto-discover pages. It requires manual enumeration. With 14 new pages added in a new content pillar, forgetting to update these endpoints is easy -- especially because the LLMs.txt files are rarely touched (last modified Feb 18).
+React Flow is designed as a standalone component library with its own design system. It does not inherit CSS custom properties from the host page. The site's theme is implemented via CSS custom properties (`--color-accent`, `--color-surface`, etc.), which React Flow does not use.
 
 **How to avoid:**
-1. Add a Database Compass section to both `llms.txt.ts` and `llms-full.txt.ts` during site integration
-2. Import the `databases` collection in both files and enumerate model pages
-3. After build, grep `dist/sitemap-index.xml` for all expected Database Compass URLs (14 total)
-4. After build, verify `dist/llms.txt` includes Database Compass pages
+1. Override React Flow's default styles with a custom theme CSS file specific to the Compose Validator:
+
+```css
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-node-background-color: var(--color-surface, #1a1a2e);
+  --xy-node-border-color: var(--color-border, #2a2a4a);
+  --xy-node-color: var(--color-text-primary, #e0e0e0);
+  --xy-edge-stroke: var(--color-accent, #c44b20);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+```
+
+2. React Flow v12 supports CSS custom properties for theming. Use these instead of overriding class selectors directly.
+
+3. Set `proOptions={{ hideAttribution: false }}` only if using the pro version. For open source, the attribution watermark appears -- plan for this in the layout.
+
+4. Test the graph in both dark and light mode. The site supports both, and React Flow's defaults look different in each.
 
 **Warning signs:**
-- `llms.txt.ts` has no import for the databases collection
-- `dist/llms.txt` output does not mention "database" or "db-compass"
-- `dist/sitemap-index.xml` is missing any of the 14 expected URLs
+- The graph area has a white background while the rest of the page is dark
+- Node text uses a serif font or a font that does not match the site
+- The graph's minimap or controls appear with different styling than the rest of the UI
+- z-index issues cause the particle canvas to render over or under the graph
 
 **Phase to address:**
-Site integration phase. This is a checklist item, not a design decision -- but easy to miss.
+Graph visualization phase (Phase 4). Theme integration is a styling task that should be done alongside the first graph rendering, not deferred to a polish phase.
+
+---
+
+### Pitfall 12: Compose-Spec Schema Evolution Creates a Maintenance Burden
+
+**What goes wrong:**
+The Compose Specification is a living document. New features are added periodically (e.g., `models` for AI/ML services was added recently, `include` for sub-projects, `develop` for development-time configuration). The JSON Schema at `compose-spec/compose-spec` on GitHub is updated accordingly. If the validator bundles a static copy of the schema, it will become outdated.
+
+Unlike the Dockerfile Analyzer's rules (which are authored custom content), the compose-spec schema is an external dependency. When Docker adds new Compose features, the validator will incorrectly reject valid files using those features.
+
+**Why it happens:**
+Static sites cannot fetch the latest schema at runtime. The schema must be bundled at build time. There is no webhook or notification system for compose-spec schema updates. The maintainer must manually check for updates.
+
+**How to avoid:**
+1. Pin a specific commit SHA of the compose-spec schema in the codebase, not just "latest." Document the commit SHA and date in a comment:
+
+```typescript
+// compose-spec schema from: https://github.com/compose-spec/compose-spec
+// Commit: abc123def (2026-02-15)
+// Check for updates: https://github.com/compose-spec/compose-spec/commits/main/schema/compose-spec.json
+import composeSchema from '../data/compose-spec.json';
+```
+
+2. Add a "Schema version" indicator on the tool page: "Validates against Compose Specification as of February 2026."
+
+3. Consider making schema validation lenient by default: unknown properties produce info-level notices rather than errors. This prevents the validator from rejecting files that use newer Compose features.
+
+4. Add a `"Schema last updated: [date]"` note in the tool's footer.
+
+**Warning signs:**
+- The bundled schema has no version indicator or date comment
+- The validator rejects Compose files that work with `docker compose config` because they use new features
+- No process exists for updating the schema
+
+**Phase to address:**
+Data and schema authoring phase (Phase 1) for initial schema bundling with version tracking. Site integration phase for the "last updated" indicator.
 
 ---
 
@@ -289,122 +581,138 @@ Site integration phase. This is a checklist item, not a design decision -- but e
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Hardcoding 8 dimension names in components | Faster initial build | Adding/renaming a dimension requires touching every component, OG generator, and JSON schema | Never -- extract to a shared `dimensions.ts` config, mirroring the Beauty Index `DIMENSIONS` pattern |
-| Reusing Beauty Index `radar-math.ts` without testing at 8 axes | No new utility code needed | Label overlap at 8 axes due to tighter angular spacing; 45-degree positioning hits edge cases in text-anchor logic | Never -- verify label rendering at 8 axes before assuming compatibility |
-| Copying `generateLanguageOgImage()` for DB Compass OG | Avoids touching working code | Four near-identical OG generator functions with diverging maintenance | Acceptable for v1.5 if a refactor into a shared parametric generator is planned for v1.6 |
-| Using 1-10 scale because Beauty Index does | Consistent user mental model | Some database dimensions are near-binary (e.g., "ACID Support" is yes/no/partial) and do not map to 10 gradations | Only if every dimension genuinely has at least 5 meaningful gradations |
-| Omitting per-database justifications from JSON | Smaller data file, faster authoring | Scores look arbitrary; no way to show methodology on the page | Never -- even 1-2 sentence justifications per dimension prevent credibility attacks |
-| Using a flat array of databases per model instead of rich objects | Simpler JSON structure | Cannot capture per-database strengths, version info, or managed-service availability | MVP only -- at least add a `description` field per database entry |
+| Synchronous analysis on main thread | Simpler code, matches Dockerfile Analyzer pattern | UI jank on large Compose files (500+ lines); blocks user interaction during analysis | MVP only -- extract to Web Worker if profiling shows >100ms analysis time |
+| Bundling entire compose-spec schema as JSON | No build-time fetch, no network dependency | Schema becomes stale when compose-spec adds features; 200KB+ of JSON in the bundle | Always acceptable for a static site, but must include version tracking and date indicator |
+| Copying `useCodeMirror` hook from Dockerfile Analyzer | Immediate working editor | Two parallel hooks with identical lifecycle management, diverging maintenance | MVP only -- extract a shared `useCodeMirror` hook that accepts a language extension parameter |
+| Skipping Web Worker for graph layout | Simpler architecture, less IPC complexity | Browser jank on graphs with 30+ nodes; layout computation blocks main thread | Acceptable until 20+ nodes are common in test files |
+| Using dagre over elkjs | 30KB vs 100KB bundle, simpler API | Dagre is unmaintained (last release 2018); no subgraph support; cycle handling is fragile | Acceptable for v1.6 MVP -- dagre is sufficient for typical Compose file dependency graphs (5-15 nodes) |
+| Inline compose-spec schema rather than importing from npm | No npm dependency on `compose-spec/compose-spec` (not published as npm package) | Manual update process when schema changes | Always -- the schema is not available as an npm package |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Header navigation | Adding "Database Compass" as 8th top-level nav item | Keep at 7 items; DB Compass accessible via Tools page or replace "Contact" with a consolidated approach |
-| Homepage callouts | Adding a third vertically stacked callout card | Redesign as a 3-card horizontal grid or compact "Explore" list |
-| Tools landing page | Replacing "Coming soon" placeholder without updating page description | Update tools page intro text; match card styling to distinguish interactive tool vs reference guide |
-| Content collection | Forgetting to register in `content.config.ts` | Add `databases` collection with `file()` loader and Zod schema, mirroring the `languages` collection pattern |
-| LLMs.txt | Not updating `llms.txt.ts` and `llms-full.txt.ts` | Add databases collection import and Database Compass section to both endpoint files |
-| OG images | Creating a new OG generator from scratch | Extend existing `og-image.ts` with a `generateDbCompassOgImage()` function reusing `renderOgPng()`, `brandingRow()`, `accentBar()` |
-| Radar chart component | Importing Beauty Index `RadarChart.astro` and passing 8 axes | Verify label positioning at 8 axes; may need increased label offset or font size adjustment |
-| View Transitions | New pages not participating in transitions | All new pages use the same Layout component with `<ViewTransitions />` -- should work automatically, but verify |
-| JSON-LD | Using generic `WebPage` schema | Use `Dataset` for overview, `TechArticle` for detail pages, `BlogPosting` for companion post |
-| Internal linking | Only linking overview -> detail, not detail -> detail | Add "Related Models" cross-links on each detail page; add "Compare with" suggestions |
+| yaml + ajv pipeline | Calling `yaml.parse()` instead of `yaml.parseDocument()` | Always use `parseDocument()` to retain AST nodes with range data for line mapping |
+| yaml + CodeMirror | Assuming yaml package's character offsets differ from CodeMirror's | Both use JavaScript string character indexing; offsets are compatible as long as both read the same string from `view.state.doc.toString()` |
+| ajv error paths + yaml AST | Passing ajv's `instancePath` directly to CodeMirror as a line number | Build a JSON-path-to-YAML-line resolver that walks the Document AST; ajv paths are JSON pointer format (`/services/api/ports/0`) |
+| React Flow + Astro | Using `client:load` or `client:visible` instead of `client:only="react"` | Only `client:only` avoids SSR entirely; React Flow crashes during SSR |
+| React Flow CSS + site theme | Importing React Flow CSS globally | Import CSS inside the lazy-loaded graph component; override with Quantum Explorer theme custom properties |
+| CodeMirror YAML mode + yaml parser | Expecting Lezer YAML grammar and yaml npm package to produce identical parse trees | They are separate parsers; Lezer handles highlighting, yaml handles analysis; accept the duplication |
+| Nanostore bridge | Creating new stores instead of reusing Dockerfile Analyzer pattern | Create `composeValidatorStore.ts` mirroring `dockerfileAnalyzerStore.ts` -- separate stores, same architecture |
+| View Transitions cleanup | Forgetting to destroy React Flow instance on navigation | Add `astro:before-swap` listener in the `useCodeMirror` hook (already proven) and extend it to destroy the React Flow instance |
+| URL state encoding | Using the same URL hash namespace as the Dockerfile Analyzer | Use a different hash prefix or parameter name; both tools should support deep links simultaneously |
+| Header navigation | Adding a 9th nav item | Do NOT add a separate "Compose Validator" nav link; it lives under "Tools" alongside the Dockerfile Analyzer |
+| Sample compose file | Using a trivially simple example | Include a sample with anchors, merge keys, depends_on, networks, volumes, ports, env vars, and health checks -- exercise ALL rule categories |
+| LLMs.txt endpoints | Forgetting to add Compose Validator rule pages | Update both `llms.txt.ts` and `llms-full.txt.ts` with Compose Validator tool page and all rule documentation pages |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| OG image multiplication via vs-comparison pages | Build time increases by 10-20+ seconds | Limit to 14 OG images (1 overview + 12 detail + 1 blog); no vs-comparison pages | Adding 66+ comparison OG images |
-| Large JSON data file with embedded justifications | Build time increases proportionally with data size | Use Astro content collection `file()` loader which caches between builds | JSON file exceeds 100KB (unlikely with 12 entries but possible with long justifications) |
-| Radar chart SVG computed twice per page (once for page, once for OG) | Redundant computation during build | Pre-compute SVG string once per model; pass to both page component and OG generator | Noticeable at 50+ pages, not 12 |
-| Sortable table adds client-side JS where none existed | Page weight increases; Lighthouse score drops | Use the same build-time sort approach as Beauty Index, or nanostores atom (286 bytes) | Adding a full sorting library instead of lightweight approach |
+| Re-compiling ajv schema on every analysis | 50-100ms delay before validation starts; visible on every click | Compile once, cache the validator function; use module-level `let` | Every analysis click |
+| Synchronous YAML parse + ajv validate + dagre layout | UI freezes for 200-500ms on large files | Profile early; extract to Web Worker if >100ms; add loading indicator | Compose files with 20+ services |
+| React Flow rendering all nodes on mount | Initial render stutter; graph appears then jumps as layout computes | Use `fitView` after layout completes; show skeleton during layout | Always -- layout is async |
+| dagre layout with cycles | Infinite loop or browser tab crash | Run cycle detection before dagre; break cycles for layout | Any Compose file with circular depends_on |
+| Importing React Flow at top level of island | 200KB+ loaded on page load before user clicks anything | Lazy-load React Flow with React.lazy() and dynamic import | Always -- graph is below the fold and optional |
+| Full compose-spec schema bundled as ES module import | 200KB+ of JSON parsed at module load time | Use dynamic import or lazy loading for the schema JSON | Impacts First Contentful Paint |
+| Re-running YAML parse on every keystroke | Parsing 500-line YAML on every character typed | On-demand analysis (button click), NOT real-time -- matches Dockerfile Analyzer pattern | Any attempt at as-you-type validation |
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Including database connection strings in example content | Readers copy-paste examples with real-looking credentials | Use obviously fake examples: `mongodb://localhost:27017/example` |
-| Linking to third-party database download pages without verification | Broken or hijacked links | Only link to official documentation domains; verify at authoring time |
-| Accepting user-contributed corrections without review | Spam or malicious content in GitHub issues | GitHub issues require maintainer approval; no auto-merge of data changes |
+| Displaying user-pasted secrets in the graph visualization | Service nodes show environment variables including `DB_PASSWORD=actual_secret` | Only show service names, ports, and dependency edges in the graph; never render env var values |
+| eval()-based YAML tag resolution | Custom YAML tags can trigger constructor calls; `yaml` package has safe defaults | Use `yaml` package with default settings (safe by default); never enable `customTags` with executable constructors |
+| Transmitting Compose file content to a server | Privacy violation; user expectation is client-side only | All parsing, validation, and visualization runs in the browser; no fetch() calls; clearly state "100% client-side" |
+| URL state encoding exposes Compose file content | Shared URLs contain the full Compose file, potentially including secrets | Add a warning when users share URLs: "The shared URL contains your Compose file content. Remove sensitive values before sharing." |
+| Hardcoded example credentials in sample Compose file | Users copy the sample and deploy with example credentials | Use obviously fake values: `password: change-me-before-deploying`, `POSTGRES_PASSWORD: example-only` |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Radar chart as primary visual with no fallback | Users who cannot parse radar charts get no value | Always pair with a score breakdown table; table is primary, chart is supplementary |
-| All 12 model cards looking identical on overview | Users cannot quickly find the model they care about | Give each model a distinct icon or color accent; group by complexity spectrum position |
-| "Complexity spectrum" visualization unclear | Newcomers do not understand why Key-Value is "simple" and Graph is "complex" | Add hover/click explanations on the spectrum; include brief paragraph defining the axis |
-| Detail pages with no clear next action | Users read one model page and leave the site | Add "Compare with" suggestions, "If you need X, consider [Model]" cross-links, and link to blog post |
-| Mobile radar chart too small to read | Primary mobile audience gets degraded experience | Hide radar chart below 480px; show score table only; or render chart full-width |
-| Dimension abbreviations without context | "QF" on the chart means nothing without a legend | Always show full dimension names; if space is tight, add a legend below the chart |
-| Overview page lacks entry point for "I don't know what I need" | Beginners bounce because they cannot navigate the taxonomy | Add a "Start Here" section or decision-tree intro before the model grid |
-| Scores displayed without context | "7/10" means nothing without knowing what 1 and 10 represent | Show endpoint definitions: "1 = [meaning], 10 = [meaning]" at least on hover or via tooltip |
+| Showing raw ajv error messages | "must match exactly one schema in oneOf" is meaningless to users | Map every ajv error to a human-readable message with context-specific fix suggestions |
+| Graph appears empty before first analysis | Users think the graph feature is broken | Show a placeholder message: "Analyze a Compose file to see the service dependency graph" |
+| Graph and editor are disconnected | Clicking a service in the graph does nothing in the editor | Implement bidirectional navigation: click a graph node to scroll editor to that service; click a service in editor to highlight the graph node |
+| No visual distinction between schema errors and semantic warnings | Users cannot prioritize which issues to fix first | Use the same severity + category system as the Dockerfile Analyzer: error/warning/info with color-coded indicators |
+| Graph layout jumps after analysis | Nodes appear then rearrange as dagre computes positions | Compute layout before rendering; show a skeleton/spinner during computation; animate nodes to final positions |
+| Variable interpolation errors overwhelm real issues | Files with many `${VAR}` references produce dozens of false-positive warnings | Recognize and skip interpolated values during validation; group interpolation notices separately |
+| Version deprecation warning feels like an attack on users' existing files | Users feel judged for using `version: "3.8"` | Frame as informational, not warning: "Good to know: The `version` field is optional in modern Docker Compose. Your file works fine with or without it." |
+| Tab switching between editor and graph loses context | User analyzes, switches to graph, switches back, loses scroll position in editor | Preserve editor scroll position across tab switches; do not recreate EditorView when toggling visibility |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Content collection:** `databases` collection registered in `content.config.ts` with Zod schema -- build will silently produce no pages if missing
-- [ ] **OG images:** All 14 new pages have working OG image endpoints returning valid PNGs -- test by visiting `/open-graph/tools/db-compass/[slug].png` in dev
-- [ ] **LLMs.txt:** Both `llms.txt.ts` and `llms-full.txt.ts` include Database Compass pages -- easy to forget since these are separate endpoint files
-- [ ] **Sitemap:** All 14 new URLs appear in `sitemap-index.xml` output -- run `astro build` and check dist
-- [ ] **JSON-LD:** Structured data validates in Google's Rich Results Test -- paste each page URL after deploy
-- [ ] **Header nav:** "Tools" link highlights as active when on `/tools/db-compass/*` pages -- verify `startsWith` logic in Header.astro (currently `link.href !== '/' && currentPath.startsWith(link.href)` which should work for `/tools/`)
-- [ ] **Internal cross-links:** Blog post links to overview, overview links to blog post, detail pages link to overview, detail pages cross-link to related models -- check all directions
-- [ ] **Mobile layout:** Radar charts readable at 375px viewport -- test all 12 detail pages on actual device, not just one in simulator
-- [ ] **Accessibility:** Radar chart SVGs have descriptive `aria-label` or `role="img"` with alt text -- the current `generateRadarSvgString()` does not include ARIA attributes
-- [ ] **Score table:** If sortable, works with keyboard (Tab + Enter) -- the Beauty Index table set this precedent
-- [ ] **Multi-model metadata:** Every database that spans categories has cross-links or "also classified as" notes -- verify Redis, PostgreSQL, Cosmos DB, DynamoDB, MongoDB at minimum
-- [ ] **Dimension rubric:** Each of the 8 dimensions has a visible definition accessible from both overview and detail pages -- not just in the blog post
-- [ ] **Date indicators:** Overview shows "Data as of [date]"; each detail page shows per-database `lastVerified` dates
-- [ ] **Word count:** Each detail page has 400+ words of unique expert content -- measure after authoring
+- [ ] **YAML parsing**: `version: '1.1'` and `merge: true` passed to `parseDocument()` -- without this, anchors and merge keys silently fail
+- [ ] **Line number mapping**: Every ajv error and semantic violation maps to a specific YAML source line -- not defaulting to line 1
+- [ ] **ajv schema caching**: Schema compiled once and cached, not recompiled on every analysis click -- verify with `console.time()`
+- [ ] **Variable interpolation**: Compose files with `${VAR:-default}` syntax do not produce false validation errors -- test with a heavily-interpolated file
+- [ ] **Cycle detection**: Compose files with circular `depends_on` produce a clear error message AND the graph renders without hanging -- test with A->B->C->A cycle
+- [ ] **React Flow lazy loading**: React Flow JS chunk is NOT in the initial page load -- verify with browser DevTools Network tab
+- [ ] **React Flow theme**: Graph renders correctly in both dark and light mode -- test both explicitly
+- [ ] **View Transitions**: Navigating away from the Compose Validator and back does not leave orphaned EditorView or React Flow instances -- test with browser DevTools memory snapshot
+- [ ] **URL state**: Shared URL reproduces the exact Compose file and analysis results -- test with a file containing special characters, anchors, and multi-byte characters
+- [ ] **Sample Compose file**: Exercises ALL rule categories (schema, security, best practice, semantic) and includes anchors, merge keys, depends_on, and interpolated variables
+- [ ] **Rule documentation pages**: Every rule has a page at `/tools/compose-validator/rules/[code]` -- count pages in build output
+- [ ] **LLMs.txt**: Both `llms.txt.ts` and `llms-full.txt.ts` include Compose Validator tool page and all rule documentation pages
+- [ ] **Sitemap**: All new pages appear in `sitemap-index.xml` -- grep build output
+- [ ] **CodeMirror annotation accuracy**: Squiggly underlines appear on the correct token, not the entire line -- test with multi-service file where errors are on specific nested keys
+- [ ] **Graph node dimensions**: React Flow nodes have measured dimensions before dagre layout runs -- verify nodes are not all 0x0 pixels
+- [ ] **Bundle size**: Total JS for the Compose Validator page < 350KB gzipped -- measure with `npx vite-bundle-visualizer`
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Scores challenged as arbitrary (P2) | MEDIUM | Add justification text per score in JSON; publish methodology addendum in blog post; add "suggest correction" link per page |
-| Multi-model databases miscategorized (P1) | LOW | Add `crossCategory` field to JSON schema; update detail page template to render secondary categories with cross-links |
-| Radar chart unreadable at 8 axes (P3) | MEDIUM | Reduce to 6 axes (requires rethinking dimensions and rescoring all models); or switch to horizontal bar chart |
-| Build time exceeds 40 seconds (P6) | LOW | Remove vs-comparison pages if added; implement OG image caching; verify no redundant SVG generation |
-| SEO thin content penalty (P5) | HIGH | Rewrite all 12 detail pages with substantial unique content (400+ words each); requires 6-8 hours of expert writing |
-| Homepage cluttered with 3 callouts (P7) | LOW | Redesign callout section as 3-card grid (CSS change) or compact list |
-| Stale data after 12 months (P4) | LOW | Update JSON data file, rebuild, redeploy. Architecture supports this -- the risk is remembering to do it |
-| LLMs.txt/sitemap missing pages (P10) | LOW | Add collection import and section to endpoint files; rebuild; takes 15 minutes |
-| Wrong JSON-LD schema type (P9) | LOW | Change schema type in page template; rebuild; takes 30 minutes |
+| YAML 1.2 default breaks merge keys (P1) | LOW | Add `version: '1.1', merge: true` to parseDocument options; re-test all anchor-using files |
+| Line mapping broken (P2) | MEDIUM | Build JSON-path-to-line resolver; requires touching every place that creates CodeMirror Diagnostics |
+| ajv configuration wrong (P3) | LOW | Fix ajv constructor options; recompile schema; rebuild error message mapper |
+| React Flow SSR crash (P4) | LOW | Switch to `client:only="react"` (proven fix from Dockerfile Analyzer) |
+| Variable interpolation false positives (P5) | MEDIUM | Build interpolation normalizer; retrofit into parsing pipeline; re-test all semantic rules |
+| Node range undefined crash (P6) | LOW | Add null guard to every `node.range` access; wrap resolver in try/catch |
+| Version field confusion (P7) | LOW | Add informational rule with friendly copy; adjust severity from warning to info |
+| Dagre cycle hang (P8) | MEDIUM | Add cycle detection before layout; implement cycle-breaking logic; add timeout |
+| CodeMirror offset mismatch (P9) | MEDIUM | Audit all offset conversion code; add multi-byte character test cases |
+| Performance jank (P10) | HIGH | Extract validation pipeline to Web Worker; requires IPC bridge, message serialization |
+| React Flow CSS conflicts (P11) | LOW | Add CSS override file; map React Flow variables to site custom properties |
+| Schema staleness (P12) | LOW | Update bundled JSON; rebuild; deploy -- but requires knowing updates exist |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Multi-model categorization (P1) | Data schema design | JSON schema has `crossCategory` field; detail page template renders overlap notes |
-| Score arbitrariness (P2) | Data schema + content authoring | Each dimension has a rubric definition; each score has justification text in JSON |
-| 8-axis radar readability (P3) | Component development | Chart tested at 375px, 768px, 1024px widths; labels do not overlap; score table always visible alongside |
-| Stale data framing (P4) | Data schema + content authoring | `lastVerified` field in JSON; visible "Data as of February 2026" on overview page |
-| SEO thin content (P5) | Content authoring | Each detail page word count > 400; unique meta descriptions; unique target keywords per page |
-| Build time (P6) | Architecture/planning | Decision documented: no vs-comparison pages; OG images limited to 14; build time measured < 30s after integration |
-| Homepage callout design (P7) | Site integration | 3-callout layout tested on mobile and desktop; vertical scroll distance acceptable |
-| Tools page taxonomy (P8) | Architecture/planning | URL structure decided; tools page description updated; card labels accurate |
-| JSON-LD schema type (P9) | SEO integration | Schema validates in Rich Results Test; appropriate type per page type |
-| LLMs.txt coverage (P10) | Site integration | `dist/llms.txt` includes Database Compass section; sitemap includes all 14 URLs |
+| YAML 1.1 / merge key config (P1) | Phase 1: YAML parsing infrastructure | Unit test with anchor+merge-key Compose file; merged values appear on service objects |
+| Line number mapping (P2) | Phase 1-2: YAML parsing + CodeMirror integration | Click-to-navigate from results panel jumps to correct line for every error type |
+| ajv configuration (P3) | Phase 2: Schema validation infrastructure | Compose files with `x-` extensions, complex ports, and depends_on variants validate correctly |
+| React Flow SSR + bundle (P4) | Phase 1: React island architecture | `client:only="react"` in Astro page; React Flow in separate lazy chunk; Lighthouse 90+ |
+| Variable interpolation (P5) | Phase 1: YAML parsing and normalization | Compose file with 10+ `${VAR:-default}` expressions produces zero false positives |
+| Node range undefined (P6) | Phase 1: YAML parsing infrastructure | Edge case `[a:]` and empty-value YAML constructs do not crash analysis |
+| Version field UX (P7) | Phase 3: Semantic rules | `version: "3.8"` produces info-level notice, not warning/error; copy is friendly |
+| Dagre cycle handling (P8) | Phase 4: Graph visualization | Circular depends_on file renders graph without hang; cycle edges visually distinct |
+| CodeMirror offset alignment (P9) | Phase 2: CodeMirror integration | Annotations on file with emoji in comments appear at correct positions |
+| Performance (P10) | Phase 2: Core validation engine | Analysis of 500-line file completes in <200ms; loading indicator visible |
+| React Flow theme (P11) | Phase 4: Graph visualization | Graph matches site theme in both dark and light mode |
+| Schema maintenance (P12) | Phase 1: Data authoring | Schema JSON has version comment; tool page shows "validates against [date] spec" |
 
 ## Sources
 
-- [Highcharts: Radar Chart Explained](https://www.highcharts.com/blog/tutorials/radar-chart-explained-when-they-work-when-they-fail-and-how-to-use-them-right/) -- axis count limits (5-8 recommended), when to use/avoid (HIGH confidence)
-- [Data-to-Viz: Spider Chart Caveats](https://www.data-to-viz.com/caveat/spider.html) -- axis ordering effects on perception, shape distortion (HIGH confidence)
-- [Scott Logic: A Critique of Radar Charts](https://blog.scottlogic.com/2011/09/23/a-critique-of-radar-charts.html) -- shape perception does not leverage pre-attentive attributes (HIGH confidence)
-- [ChartExpo: Radar Chart Misleading Geometry](https://chartexpo.com/blog/radar-chart) -- polygon area distortion, alternatives (MEDIUM confidence)
-- [Nightingale: The Stellar Chart Alternative](https://nightingaledvs.com/the-stellar-chart-an-elegant-alternative-to-radar-charts/) -- radial bar chart alternative (MEDIUM confidence)
-- [Redis Multi-Model Database](https://redis.io/technology/multi-model/) -- Redis as multi-model, not just key-value (HIGH confidence)
-- [Redis Data Types](https://redis.io/docs/latest/develop/data-types/) -- Redis supports strings, hashes, lists, sets, JSON, streams (HIGH confidence)
-- [DB-Engines Ranking Method](https://db-engines.com/en/ranking_definition) -- methodology criticism, proxy-based scoring limitations (HIGH confidence)
-- [Andy Pavlo: Databases in 2025 Retrospective](https://www.cs.cmu.edu/~pavlo/blog/2026/01/2025-databases-retrospective.html) -- rapid landscape changes (HIGH confidence)
-- [Ainoya.dev: Cache Satori OGP Images in Astro](https://ainoya.dev/posts/astro-ogp-build-cache/) -- OG image build time optimization, 100-300ms per image (MEDIUM confidence)
-- [Astro Content Layer Deep Dive](https://astro.build/blog/content-layer-deep-dive/) -- file() loader caching, 5x faster builds, 25-50% less memory (HIGH confidence)
-- [Backlinko: Featured Snippets](https://backlinko.com/hub/seo/featured-snippets) -- table snippets for comparison queries (HIGH confidence)
-- [Google: Structured Data Introduction](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) -- JSON-LD recommended format (HIGH confidence)
-- [Backlinko: Schema Markup Guide](https://backlinko.com/schema-markup-guide) -- schema critical for SERP visibility and AI search (HIGH confidence)
-- Codebase analysis: `astro.config.mjs`, `content.config.ts`, `og-image.ts`, `radar-math.ts`, `Header.astro`, `index.astro`, `tools/index.astro`, `llms.txt.ts`, build output (714 pages, 22.17s) (HIGH confidence -- direct code inspection)
+- [yaml npm package documentation](https://eemeli.org/yaml/) -- parseDocument options, LineCounter, merge key behavior, YAML 1.1 vs 1.2 defaults (HIGH confidence)
+- [yaml GitHub Issue #573: Node without range](https://github.com/eemeli/yaml/issues/573) -- confirmed edge case where parsed nodes lack range property (HIGH confidence)
+- [The YAML Document from Hell - JavaScript Edition](https://philna.sh/blog/2023/02/02/yaml-document-from-hell-javascript-edition/) -- YAML parsing edge cases: Norway problem, sexagesimal numbers, accidental types (HIGH confidence)
+- [Docker Compose Interpolation Docs](https://docs.docker.com/reference/compose-file/interpolation/) -- variable substitution syntax: `${VAR:-default}`, `${VAR:?error}`, nesting, `$$` escaping (HIGH confidence)
+- [Docker Compose Fragments Docs](https://docs.docker.com/reference/compose-file/fragments/) -- anchors, aliases, merge keys in Compose context; anchor resolution before interpolation (HIGH confidence)
+- [Docker Compose Version and Name Docs](https://docs.docker.com/reference/compose-file/version-and-name/) -- version field is obsolete, Compose Specification is rolling (HIGH confidence)
+- [compose-spec/compose-spec schema](https://github.com/compose-spec/compose-spec/blob/main/schema/compose-spec.json) -- Draft-07, patternProperties for x- extensions, oneOf for depends_on variants (HIGH confidence)
+- [Ajv JSON Schema Validator](https://ajv.js.org/) -- strict mode, allErrors, format validation, standalone code generation, browser support (HIGH confidence)
+- [Ajv Formats](https://ajv.js.org/packages/ajv-formats.html) -- duration format required by compose-spec healthcheck intervals (HIGH confidence)
+- [Ajv Strict Mode](https://ajv.js.org/strict-mode.html) -- patternProperties interaction with additionalProperties, strict mode defaults (HIGH confidence)
+- [React Flow / xyflow SSR Issue #3384](https://github.com/xyflow/xyflow/issues/3384) -- SSR crash in Vite/Astro, fixed in v11.9.0, `client:only` workaround (HIGH confidence)
+- [React Flow Astro Example](https://github.com/xyflow/react-flow-example-apps/tree/main/reactflow-astro) -- official Astro integration example (HIGH confidence)
+- [React Flow Layouting Guide](https://reactflow.dev/learn/layouting/layouting) -- dagre vs elkjs vs d3-force comparison (HIGH confidence)
+- [dagre GitHub](https://github.com/dagrejs/dagre) -- unmaintained since 2018; DAG-only, no cycle handling (HIGH confidence)
+- [CodeMirror lang-yaml](https://github.com/codemirror/lang-yaml) -- Lezer-based YAML grammar, separate from yaml npm package (HIGH confidence)
+- [Docker Compose History](https://docs.docker.com/compose/intro/history/) -- v1/v2/v3 history, unified Compose Specification (HIGH confidence)
+- Codebase analysis: `use-codemirror.ts` (View Transitions cleanup pattern), `buffer-polyfill.ts` (browser polyfill pattern), `EditorPanel.tsx` (analysis pipeline), `dockerfileAnalyzerStore.ts` (nanostore bridge), `types.ts` (rule/violation/score architecture), `package.json` (existing dependencies) (HIGH confidence -- direct code inspection)
 
 ---
-*Pitfalls research for: Database Compass -- database model explorer (v1.5 milestone)*
-*Researched: 2026-02-21*
+*Pitfalls research for: Docker Compose Validator -- browser-based Compose validation tool with graph visualization (v1.6 milestone)*
+*Researched: 2026-02-22*
