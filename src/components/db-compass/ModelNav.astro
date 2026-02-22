@@ -1,0 +1,52 @@
+---
+/**
+ * ModelNav.astro — Previous/next model navigation for Database Compass.
+ * Renders prev/next links between model detail pages
+ * with a central "Overview" link back to the index.
+ * Sorted by complexityPosition (key-value first, multi-model last).
+ * Ships ZERO client-side JavaScript.
+ */
+
+interface Props {
+  prev: { slug: string; name: string } | null;
+  next: { slug: string; name: string } | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav
+  aria-label="Model navigation"
+  class="flex items-center justify-between mt-12 pt-6 border-t border-[var(--color-border)]"
+>
+  {prev ? (
+    <a
+      href={`/tools/db-compass/${prev.slug}/`}
+      class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
+    >
+      <span aria-hidden="true">&larr;</span>
+      <span>{prev.name}</span>
+    </a>
+  ) : (
+    <span />
+  )}
+
+  <a
+    href="/tools/db-compass/"
+    class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+  >
+    Overview
+  </a>
+
+  {next ? (
+    <a
+      href={`/tools/db-compass/${next.slug}/`}
+      class="text-[var(--color-accent)] hover:underline flex items-center gap-1"
+    >
+      <span>{next.name}</span>
+      <span aria-hidden="true">&rarr;</span>
+    </a>
+  ) : (
+    <span />
+  )}
+</nav>
