@@ -79,11 +79,11 @@ Plans:
   3. Users can share a detail page via Web Share API on mobile or Clipboard API on desktop
   4. Users can download any model's radar chart as a PNG image
   5. JSON-LD CreativeWork and BreadcrumbList structured data are present on each detail page
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 31-01: TBD
-- [ ] 31-02: TBD
+- [ ] 31-01-PLAN.md — ModelNav component and [slug].astro detail page with all content sections, prev/next navigation, and SEO
+- [ ] 31-02-PLAN.md — CompassShareControls with social share links, copy-link, Web Share API, and SVG-to-PNG radar chart download
 
 ### Phase 32: OG Images & Site Integration
 **Goal**: Database Compass is fully discoverable — OG images render on social shares, all pages appear in the sitemap, the homepage and tools page link to it, and a companion blog post provides context
@@ -111,7 +111,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
 | 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 2/2 | Complete   | 2026-02-22 |
-| 31. Detail Pages | 0/TBD | Not started | - |
+| 31. Detail Pages | 0/2 | Not started | - |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |
 
 ---
