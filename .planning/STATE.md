@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 34 COMPLETE (Rule Engine, Rules & Scoring), ready for Phase 35
+**Current focus:** v1.6 Docker Compose Validator - Phase 35 in progress (CodeMirror YAML Editor + Nanostores)
 
 ## Current Position
 
-Phase: 34 of 40 (Rule Engine, Rules & Scoring) -- COMPLETE
-Plan: 3 of 3 complete in current phase
-Status: Phase 34 complete (52 rules: 8 schema + 15 semantic + 14 security + 12 best-practice + 3 style + engine + scorer)
-Last activity: 2026-02-22 -- Plan 34-03 complete (style rules, engine, scorer)
+Phase: 35 of 40 (CodeMirror YAML Editor + Nanostores)
+Plan: 1 of 2 complete in current phase
+Status: Plan 35-01 complete (nanostore atoms, CodeMirror YAML hook, sample compose)
+Last activity: 2026-02-22 -- Plan 35-01 complete (nanostore atoms, YAML hook, sample compose)
 
-Progress: [██████████] 100% (Phase 34)
+Progress: [█████-----] 50% (Phase 35)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 5 v1.6)
+- Total plans completed: 72 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 6 v1.6)
 
 **Cumulative Stats:**
 
@@ -36,6 +36,7 @@ Progress: [██████████] 100% (Phase 34)
 | Phase 34 P01 | 5min | 2 tasks | 18 files |
 | Phase 34 P02 | 7min | 2 tasks | 28 files |
 | Phase 34 P03 | 3min | 2 tasks | 7 files |
+| Phase 35 P01 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - Master registry separates 44 custom rules (with check methods) from 8 schema rules (metadata only)
 - Engine counts 52 total rules run (44 custom + 8 schema) for accurate reporting
 - Scorer builds lookup from both allComposeRules and schemaRules for complete coverage
+- Reuse editor-theme.ts and highlight-line.ts from dockerfile-analyzer for compose editor (no duplication)
+- analyzeRef pattern (useRef + update outside useEffect) for stale-closure-safe Mod-Enter callback in CodeMirror keymap
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 34-03-PLAN.md (Phase 34 complete)
+Stopped at: Completed 35-01-PLAN.md (nanostore atoms, YAML hook, sample compose)
 Resume file: None
-Next: Phase 35 -- React Flow visualization or Phase 36 -- UI integration
+Next: Plan 35-02 -- ComposeEditorPanel and ComposeResultsPanel UI components
