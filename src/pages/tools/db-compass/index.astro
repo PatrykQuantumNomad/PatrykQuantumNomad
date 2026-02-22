@@ -1,0 +1,106 @@
+---
+/**
+ * Database Compass Overview Page — /tools/db-compass/
+ * Main entry point for the Database Compass. Assembles the complexity spectrum,
+ * use-case filter, model card grid, sortable scoring table, and dimension legend
+ * into a single cohesive page with full SEO metadata and JSON-LD structured data.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import CompassJsonLd from '../../../components/db-compass/CompassJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import ComplexitySpectrum from '../../../components/db-compass/ComplexitySpectrum.astro';
+import ModelCardGrid from '../../../components/db-compass/ModelCardGrid.astro';
+import CompassScoringTable from '../../../components/db-compass/CompassScoringTable.astro';
+import DimensionLegend from '../../../components/db-compass/DimensionLegend.astro';
+import UseCaseFilter from '../../../components/db-compass/UseCaseFilter.tsx';
+import { totalScore } from '../../../lib/db-compass/schema';
+
+const dbModels = await getCollection('dbModels');
+const allModels = dbModels.map((entry) => entry.data);
+const sorted = [...allModels].sort((a, b) => totalScore(b) - totalScore(a));
+
+// Build top-5 summary for AI-extractable paragraph
+const top5 = sorted.slice(0, 5).map((m, i) => `${i + 1}. ${m.name} (${totalScore(m)}/80)`);
+---
+
+<Layout
+  title="Database Compass: Compare 12 Database Models Across 8 Dimensions | Patryk Golabek"
+  description="Compare 12 database models across 8 dimensions -- scalability, performance, reliability, and more. Interactive scoring, filtering, and radar charts."
+>
+  <CompassJsonLd models={sorted} />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'Database Compass', url: 'https://patrykgolabek.dev/tools/db-compass/' },
+  ]} />
+
+  {/* Hero Section */}
+  <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <span class="inline-block text-xs font-mono text-[var(--color-accent)] border border-[var(--color-accent)]/30 rounded-full px-3 py-1 mb-4">2026 Edition</span>
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      Database Compass
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
+      Compare 12 database models across 8 dimensions.
+    </p>
+    <p class="text-lg font-medium text-[var(--color-accent-secondary)] mt-2 max-w-2xl mx-auto text-center">
+      An opinionated guide by a cloud-native architect.
+    </p>
+    <p class="text-sm text-[var(--color-text-secondary)] mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+      <a href="/blog/database-compass/" class="text-[var(--color-accent)] hover:underline">
+        Read the methodology &rarr;
+      </a>
+    </p>
+  </section>
+
+  {/* Visual Breadcrumb */}
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
+      <li><a href="/" class="hover:text-[var(--color-accent)] transition-colors">Home</a></li>
+      <li aria-hidden="true">&gt;</li>
+      <li><a href="/tools/" class="hover:text-[var(--color-accent)] transition-colors">Tools</a></li>
+      <li aria-hidden="true">&gt;</li>
+      <li class="text-[var(--color-text-primary)] font-medium" aria-current="page">Database Compass</li>
+    </ol>
+  </nav>
+
+  {/* Complexity Spectrum Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-heading font-bold mb-6">Complexity Spectrum</h2>
+    <div class="overflow-x-auto" role="img" aria-label={`Complexity spectrum positioning ${sorted.length} database models from simple to complex`}>
+      <ComplexitySpectrum models={allModels} />
+    </div>
+  </section>
+
+  {/* Use-Case Filter + Model Card Grid Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <h2 class="text-2xl font-heading font-bold mb-6">Database Models</h2>
+    <UseCaseFilter
+      client:load
+      models={allModels.map((m) => ({ id: m.id, name: m.name, useCases: m.useCases }))}
+    />
+    <ModelCardGrid models={sorted} />
+  </section>
+
+  {/* Scoring Table Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <h2 class="text-2xl font-heading font-bold mb-2">Score Breakdown</h2>
+    <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+      Click any column header to sort
+    </p>
+    <CompassScoringTable models={sorted} />
+  </section>
+
+  {/* Dimension Legend Section */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-16">
+    <DimensionLegend />
+  </section>
+
+  {/* AI-extractable paragraph (hidden) */}
+  <p class="sr-only">
+    Database Compass top 5 by total score: {top5.join(', ')}.
+    Scored across Scalability, Performance, Reliability, Operational Simplicity,
+    Query Flexibility, Schema Flexibility, Ecosystem Maturity, and Learning Curve.
+  </p>
+</Layout>
