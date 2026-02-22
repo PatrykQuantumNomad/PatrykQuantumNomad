@@ -22,11 +22,16 @@ const sorted = [...allModels].sort((a, b) => totalScore(b) - totalScore(a));
 
 // Build top-5 summary for AI-extractable paragraph
 const top5 = sorted.slice(0, 5).map((m, i) => `${i + 1}. ${m.name} (${totalScore(m)}/80)`);
+
+// OG image URL for social sharing
+const ogImageURL = new URL('/open-graph/tools/db-compass.png', Astro.site).toString();
 ---
 
 <Layout
   title="Database Compass: Compare 12 Database Models Across 8 Dimensions | Patryk Golabek"
   description="Compare 12 database models across 8 dimensions -- scalability, performance, reliability, and more. Interactive scoring, filtering, and radar charts."
+  ogImage={ogImageURL}
+  ogImageAlt="Database Compass -- Compare 12 database models across 8 dimensions"
 >
   <CompassJsonLd models={sorted} />
   <BreadcrumbJsonLd crumbs={[

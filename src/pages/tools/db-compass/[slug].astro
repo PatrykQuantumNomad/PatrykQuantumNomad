@@ -41,6 +41,9 @@ const { model, prev, next } = Astro.props;
 const total = totalScore(model);
 const capLabel = model.capTheorem.classification;
 
+// OG image URL for social sharing
+const ogImageURL = new URL(`/open-graph/tools/db-compass/${model.slug}.png`, Astro.site).toString();
+
 // SEO meta description (under 155 characters)
 const fullDesc = `${model.name} scores ${total}/80 in the Database Compass. ${capLabel} classification. ${model.summary}`;
 const metaDescription = fullDesc.length <= 155
@@ -82,6 +85,8 @@ const modelSchema = {
 <Layout
   title={`${model.name} -- Database Compass | Patryk Golabek`}
   description={metaDescription}
+  ogImage={ogImageURL}
+  ogImageAlt={`${model.name} -- Database Compass radar chart`}
 >
   <script type="application/ld+json" set:html={JSON.stringify(modelSchema)} />
   <BreadcrumbJsonLd crumbs={[
