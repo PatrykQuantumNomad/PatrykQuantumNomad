@@ -1,0 +1,39 @@
+---
+/**
+ * ModelCardGrid.astro -- Responsive grid of clickable model cards with
+ * radar chart thumbnails, CAP badges, and data attributes for filter integration.
+ * Ships ZERO client-side JavaScript.
+ */
+import CompassRadarChart from './CompassRadarChart.astro';
+import CapBadge from './CapBadge.astro';
+import { type DbModel, totalScore } from '../../lib/db-compass/schema';
+
+interface Props {
+  models: DbModel[];
+}
+
+const { models } = Astro.props;
+---
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+  {models.map((model) => (
+    <a
+      href={`/tools/db-compass/${model.slug}/`}
+      class="rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors bg-[var(--color-surface)] p-3 flex flex-col items-center"
+      data-model-id={model.id}
+      data-use-cases={model.useCases.join(',')}
+      aria-label={`${model.name} Database Compass profile \u2014 ${totalScore(model)}/80`}
+    >
+      <CompassRadarChart model={model} size={160} />
+      <span class="text-sm font-medium mt-1 text-[var(--color-text-primary)]">
+        {model.name}
+      </span>
+      <span class="text-xs text-[var(--color-text-secondary)]">
+        {totalScore(model)}/80
+      </span>
+      <div class="mt-1">
+        <CapBadge classification={model.capTheorem.classification} size="sm" />
+      </div>
+    </a>
+  ))}
+</div>

@@ -1,0 +1,42 @@
+---
+/**
+ * DimensionLegend.astro -- Reference section displaying all 8 Database Compass
+ * scoring dimensions with colored symbols, names, and descriptions.
+ * Ships ZERO client-side JavaScript.
+ */
+import { DIMENSIONS, DIMENSION_COLORS } from '../../lib/db-compass/dimensions';
+---
+
+<section>
+  <h2 class="text-xl font-bold text-[var(--color-text-primary)] mb-2">
+    Scoring Dimensions
+  </h2>
+  <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+    Each database model is scored from 1 to 10 across 8 dimensions. Higher is better.
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {DIMENSIONS.map((dim) => {
+      const color = DIMENSION_COLORS[dim.key];
+      return (
+        <div class="flex items-start gap-3 p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <span
+            class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-base font-bold"
+            style={`background-color: ${color}20; color: ${color};`}
+            aria-hidden="true"
+          >
+            {dim.symbol}
+          </span>
+          <div>
+            <span class="font-semibold text-sm text-[var(--color-text-primary)]">
+              {dim.name}
+            </span>
+            <p class="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              {dim.description}
+            </p>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>

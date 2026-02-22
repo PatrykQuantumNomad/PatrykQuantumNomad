@@ -1,0 +1,57 @@
+---
+/**
+ * CompassJsonLd.astro -- Dataset + ItemList JSON-LD structured data
+ * for the Database Compass overview page. Helps search engines understand
+ * the comparison dataset and list all 12 database models with URLs and scores.
+ */
+import { type DbModel, totalScore } from '../../lib/db-compass/schema';
+import { DIMENSIONS } from '../../lib/db-compass/dimensions';
+
+interface Props {
+  models: DbModel[];
+}
+
+const { models } = Astro.props;
+
+const sorted = [...models].sort((a, b) => totalScore(b) - totalScore(a));
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Database Compass",
+  "alternateName": "Database Model Comparison Tool 2026",
+  "description": "Interactive comparison of 12 database model categories scored across 8 dimensions: Scalability, Performance, Reliability, Operational Simplicity, Query Flexibility, Schema Flexibility, Ecosystem Maturity, and Learning Curve.",
+  "url": "https://patrykgolabek.dev/tools/db-compass/",
+  "datePublished": "2026-02-22",
+  "dateModified": "2026-02-22",
+  "version": "1.0",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "creator": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "keywords": [
+    "database comparison",
+    "database selection guide",
+    "NoSQL vs SQL",
+    "database model types",
+    "database compass",
+    "choose a database",
+  ],
+  "variableMeasured": DIMENSIONS.map((dim) => dim.name),
+  "measurementTechnique": "Editorial scoring: each dimension rated 1-10 by expert judgment",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListOrder": "https://schema.org/ItemListOrderDescending",
+    "numberOfItems": sorted.length,
+    "itemListElement": sorted.map((model, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": `${model.name} (${totalScore(model)}/80)`,
+      "url": `https://patrykgolabek.dev/tools/db-compass/${model.slug}/`,
+    })),
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
