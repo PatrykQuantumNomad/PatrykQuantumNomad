@@ -1,0 +1,37 @@
+/* Dark theme overrides for React Flow dependency graph */
+.compose-graph .react-flow {
+  --xy-background-color: transparent;
+  --xy-node-color: var(--color-text-primary, #e0e0e0);
+  --xy-edge-stroke: rgba(255, 255, 255, 0.2);
+  --xy-edge-stroke-selected: var(--color-accent, #c44b20);
+  --xy-connectionline-stroke: var(--color-accent, #c44b20);
+  --xy-attribution-background-color: transparent;
+}
+
+.compose-graph .react-flow__controls button {
+  background-color: var(--color-surface, #1a1a2e);
+  border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+  color: var(--color-text-primary, #e0e0e0);
+  fill: var(--color-text-primary, #e0e0e0);
+}
+
+.compose-graph .react-flow__controls button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.compose-graph .react-flow__attribution {
+  display: none;
+}
+
+/* Make minimap match dark theme */
+.compose-graph .react-flow__minimap {
+  background-color: var(--color-surface, #1a1a2e);
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+  border-radius: 0.5rem;
+}
+
+/* Arrow marker color override */
+.compose-graph .react-flow__arrowhead polyline {
+  stroke: rgba(255, 255, 255, 0.3);
+  fill: rgba(255, 255, 255, 0.3);
+}

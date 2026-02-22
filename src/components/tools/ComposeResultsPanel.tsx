@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   composeResult,
@@ -12,6 +12,8 @@ import { ComposeViolationList } from './compose-results/ComposeViolationList';
 import { ComposeEmptyState } from './compose-results/ComposeEmptyState';
 import { GraphSkeleton } from './compose-results/GraphSkeleton';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
+
+const LazyDependencyGraph = lazy(() => import('./compose-results/DependencyGraph'));
 
 type ResultTab = 'violations' | 'graph';
 
@@ -131,11 +133,16 @@ export default function ComposeResultsPanel() {
           result === null ? (
             <div className="flex items-center justify-center h-full text-center">
               <p className="text-[var(--color-text-secondary)]">
-                Dependency graph will be available after analysis
+                Run analysis first to see the dependency graph
               </p>
             </div>
           ) : (
-            <GraphSkeleton />
+            <Suspense fallback={<GraphSkeleton />}>
+              <LazyDependencyGraph
+                result={result}
+                yamlContent={composeEditorViewRef.get()?.state.doc.toString() ?? ''}
+              />
+            </Suspense>
           )
         )}
       </div>
