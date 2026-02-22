@@ -53,12 +53,12 @@ Plans:
   3. Best practice rules detect missing healthchecks, restart policies, resource limits, logging config, and deprecated/ambiguous configurations
   4. The scoring engine produces a 0-100 score with letter grade (A+ through F) using diminishing returns formula and category weights (Security 30%, Semantic 25%, Best Practice 20%, Schema 15%, Style 10%)
   5. A graph builder extracts service dependency relationships and a cycle detector identifies circular depends_on chains (shared between semantic rules and graph visualization)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 34-01: TBD
-- [ ] 34-02: TBD
-- [ ] 34-03: TBD
+- [ ] 34-01-PLAN.md — Shared utilities (port parser, graph builder with cycle detection) and 15 semantic rules (CV-M001 through CV-M015)
+- [ ] 34-02-PLAN.md — 14 security rules (CV-C001 through CV-C014) and 12 best practice rules (CV-B001 through CV-B012)
+- [ ] 34-03-PLAN.md — 3 style rules (CV-F001 through CV-F003), master rule registry, rule engine orchestrator, and category-weighted scoring engine
 
 ### Phase 35: CodeMirror YAML Editor & Nanostores
 **Goal**: Users see a CodeMirror 6 editor with YAML syntax highlighting, a pre-loaded sample compose file, and can trigger analysis via button or keyboard shortcut -- with results flowing through nanostores to the results panel
