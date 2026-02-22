@@ -15,7 +15,7 @@ Database Compass is an interactive database model explorer at /tools/db-compass/
 - Decimal phases (28.1, 28.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 28: Data Foundation** - Schema, dimension definitions, 12 model entries with scores and content, content collection registration
-- [ ] **Phase 29: Visualization Components** - Complexity spectrum, 8-axis radar charts, score breakdown, sortable table, CAP badge, responsive testing
+- [x] **Phase 29: Visualization Components** - Complexity spectrum, 8-axis radar charts, score breakdown, sortable table, CAP badge, responsive testing
 - [ ] **Phase 30: Overview Page** - Landing page at /tools/db-compass/ with spectrum, model grid, scoring table, interactive filter, and overview-level SEO
 - [ ] **Phase 31: Detail Pages** - 12 model detail pages with radar charts, tradeoffs, top databases, prev/next nav, share controls, and per-page SEO
 - [ ] **Phase 32: OG Images & Site Integration** - Build-time OG images, sitemap inclusion, homepage callout, tools page card, companion blog post
@@ -52,7 +52,7 @@ Plans:
 
 Plans:
 - [x] 29-01-PLAN.md — Foundation utilities (DIMENSION_COLORS, spectrum-math.ts) and SVG charts (ComplexitySpectrum, CompassRadarChart)
-- [ ] 29-02-PLAN.md — Score display components (CompassScoreBreakdown, CapBadge) and interactive sortable scoring table
+- [x] 29-02-PLAN.md — Score display components (CompassScoreBreakdown, CapBadge) and interactive sortable scoring table
 
 ### Phase 30: Overview Page
 **Goal**: Users can visit /tools/db-compass/ and explore all 12 database models through the spectrum, grid, scoring table, and interactive filters — with proper SEO metadata
@@ -109,7 +109,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
-| 29. Visualization Components | 1/2 | In progress | - |
+| 29. Visualization Components | 2/2 | Complete | 2026-02-22 |
 | 30. Overview Page | 0/TBD | Not started | - |
 | 31. Detail Pages | 0/TBD | Not started | - |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |

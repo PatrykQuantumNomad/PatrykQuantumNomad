@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.5 Database Compass — Phase 29: Visualization Components
+**Current focus:** v1.5 Database Compass — Phase 30: Overview Page
 
 ## Current Position
 
-Phase: 29 (2 of 5 in v1.5) — Visualization Components
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-02-22 — Completed 29-01 (Foundation Utilities and SVG Charts)
+Phase: 30 (3 of 5 in v1.5) — Overview Page
+Plan: 0 of TBD complete
+Status: Not Started
+Last activity: 2026-02-22 — Completed Phase 29 (Visualization Components)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 60 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 3 v1.5)
+- Total plans completed: 61 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 4 v1.5)
 
 **Cumulative Stats:**
 
@@ -35,6 +35,7 @@ Progress: [███░░░░░░░] 30%
 | Phase 28 P01 | 3min | 2 tasks | 4 files |
 | Phase 28 P02 | 9min | 2 tasks | 1 file |
 | Phase 29 P01 | 4min | 2 tasks | 4 files |
+| Phase 29 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,9 @@ Recent decisions affecting current work:
 - [29-01]: spectrum-math.ts zero imports -- pure TypeScript for Astro + Satori dual-use
 - [29-01]: Fixed accent color #c44b20 for all radar charts (no tier-based coloring)
 - [29-01]: DM Sans + Noto Sans font stack for Unicode symbol coverage
+- [29-02]: Kebab-case data attributes with toCamel() JS helper for multi-word dimension sort keys
+- [29-02]: Removed role="text" from CapBadge — not valid ARIA role; aria-label suffices
+- [29-02]: Spread operator with Object.fromEntries for dimension data attributes auto-synced with DIMENSIONS array
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 29-01-PLAN.md (Foundation Utilities and SVG Charts)
+Stopped at: Completed Phase 29 (Visualization Components — both plans done)
 Resume file: None
-Next: 29-02-PLAN.md (Score display components and sortable table)
+Next: /gsd:execute-phase 30 (Overview Page)

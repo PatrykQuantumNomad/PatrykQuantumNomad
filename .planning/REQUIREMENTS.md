@@ -21,10 +21,10 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 
 - [x] **VIZ-01**: Complexity spectrum — horizontal build-time SVG showing 12 models positioned from simple to complex
 - [x] **VIZ-02**: 8-axis octagonal radar chart per model — build-time SVG reusing existing radar-math.ts
-- [ ] **VIZ-03**: Score breakdown component showing 8 dimension scores with visual bars
-- [ ] **VIZ-04**: Sortable scoring table — all 12 models across 8 dimensions with column sort
-- [ ] **VIZ-05**: CAP theorem badge component (CP/AP/CA/Tunable indicator)
-- [ ] **VIZ-06**: All visualizations render correctly at mobile (375px), tablet (768px), and desktop (1024px+)
+- [x] **VIZ-03**: Score breakdown component showing 8 dimension scores with visual bars
+- [x] **VIZ-04**: Sortable scoring table — all 12 models across 8 dimensions with column sort
+- [x] **VIZ-05**: CAP theorem badge component (CP/AP/CA/Tunable indicator)
+- [x] **VIZ-06**: All visualizations render correctly at mobile (375px), tablet (768px), and desktop (1024px+)
 
 ### Pages
 
@@ -94,10 +94,10 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | DATA-07 | Phase 28 | Complete |
 | VIZ-01 | Phase 29 | Complete |
 | VIZ-02 | Phase 29 | Complete |
-| VIZ-03 | Phase 29 | Pending |
-| VIZ-04 | Phase 29 | Pending |
-| VIZ-05 | Phase 29 | Pending |
-| VIZ-06 | Phase 29 | Pending |
+| VIZ-03 | Phase 29 | Complete |
+| VIZ-04 | Phase 29 | Complete |
+| VIZ-05 | Phase 29 | Complete |
+| VIZ-06 | Phase 29 | Complete |
 | PAGE-01 | Phase 30 | Pending |
 | PAGE-02 | Phase 31 | Pending |
 | PAGE-03 | Phase 31 | Pending |
