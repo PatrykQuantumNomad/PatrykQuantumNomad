@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 35 in progress (CodeMirror YAML Editor + Nanostores)
+**Current focus:** v1.6 Docker Compose Validator - Phase 35 complete, Phase 36 next (Results Panel & Dependency Graph)
 
 ## Current Position
 
-Phase: 35 of 40 (CodeMirror YAML Editor + Nanostores)
-Plan: 1 of 2 complete in current phase
-Status: Plan 35-01 complete (nanostore atoms, CodeMirror YAML hook, sample compose)
-Last activity: 2026-02-22 -- Plan 35-01 complete (nanostore atoms, YAML hook, sample compose)
+Phase: 36 of 40 (Results Panel & Dependency Graph)
+Plan: 0 of 2 complete in current phase
+Status: Phase 35 complete (CodeMirror YAML Editor + Nanostores) -- ready for Phase 36
+Last activity: 2026-02-22 -- Plan 35-02 complete (React components, Astro page at /tools/compose-validator/)
 
-Progress: [█████-----] 50% (Phase 35)
+Progress: [██████████] 100% (Phase 35 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 72 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 6 v1.6)
+- Total plans completed: 73 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 7 v1.6)
 
 **Cumulative Stats:**
 
@@ -37,6 +37,7 @@ Progress: [█████-----] 50% (Phase 35)
 | Phase 34 P02 | 7min | 2 tasks | 28 files |
 | Phase 34 P03 | 3min | 2 tasks | 7 files |
 | Phase 35 P01 | 4min | 2 tasks | 5 files |
+| Phase 35 P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - Scorer builds lookup from both allComposeRules and schemaRules for complete coverage
 - Reuse editor-theme.ts and highlight-line.ts from dockerfile-analyzer for compose editor (no duplication)
 - analyzeRef pattern (useRef + update outside useEffect) for stale-closure-safe Mod-Enter callback in CodeMirror keymap
+- Dual registry lookup (getComposeRuleById ?? getSchemaRuleById) covers all 52 rules in diagnostic mapping and enrichment
+- Line number clamping (Math.min(v.line, view.state.doc.lines)) prevents CodeMirror Position out of range crash
+- ComposeResultsPanel is intentionally a stub -- Phase 36 adds ScoreGauge, CategoryBreakdown, ViolationList
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 35-01-PLAN.md (nanostore atoms, YAML hook, sample compose)
+Stopped at: Completed 35-02-PLAN.md (React components, Astro page -- Phase 35 complete)
 Resume file: None
-Next: Plan 35-02 -- ComposeEditorPanel and ComposeResultsPanel UI components
+Next: Phase 36 -- Results Panel & Dependency Graph

@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 33: YAML Parsing & Schema Validation Foundation** - YAML parser with line mapping, variable interpolation normalizer, and Ajv schema validation with 8 schema rules
 - [x] **Phase 34: Rule Engine, Rules & Scoring** - 44 analysis rules (semantic, security, best practice, style), rule engine, graph builder, cycle detector, and category-weighted scoring (completed 2026-02-22)
-- [ ] **Phase 35: CodeMirror YAML Editor & Nanostores** - CodeMirror 6 editor with YAML highlighting, analyze trigger, sample file, and nanostore state management
+- [x] **Phase 35: CodeMirror YAML Editor & Nanostores** - CodeMirror 6 editor with YAML highlighting, analyze trigger, sample file, and nanostore state management (completed 2026-02-22)
 - [ ] **Phase 36: Results Panel & Dependency Graph** - Score gauge, category breakdown, violation list, tabbed results panel, and React Flow dependency graph with dagre layout
 - [ ] **Phase 37: Shareability & Badge Export** - Score badge PNG download, lz-string URL state encoding, and Web Share / Clipboard API sharing
 - [ ] **Phase 38: Rule Documentation Pages** - 52 per-rule documentation pages with explanations, fix suggestions, before/after code, and SEO metadata
@@ -72,8 +72,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 35-01-PLAN.md — Install @codemirror/lang-yaml, create nanostore atoms, sample compose file, and useCodeMirrorYaml hook with YAML lang + Mod-Enter shortcut
-- [ ] 35-02-PLAN.md — Create ComposeEditorPanel, ComposeResultsPanel, ComposeValidator React components and Astro page at /tools/compose-validator/
+- [x] 35-01-PLAN.md — Install @codemirror/lang-yaml, create nanostore atoms, sample compose file, and useCodeMirrorYaml hook with YAML lang + Mod-Enter shortcut
+- [x] 35-02-PLAN.md — Create ComposeEditorPanel, ComposeResultsPanel, ComposeValidator React components and Astro page at /tools/compose-validator/
 
 ### Phase 36: Results Panel & Dependency Graph
 **Goal**: Users see their validation results as inline editor annotations, a score gauge, category breakdown, severity-grouped violation list, and an interactive service dependency graph with cycle highlighting -- all in a tabbed results panel
@@ -154,7 +154,7 @@ Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 |-------|----------------|--------|-----------|
 | 33. YAML Parsing & Schema Validation Foundation | 2/2 | Complete | 2026-02-22 |
 | 34. Rule Engine, Rules & Scoring | 3/3 | Complete   | 2026-02-22 |
-| 35. CodeMirror YAML Editor & Nanostores | 1/2 | In Progress|  |
+| 35. CodeMirror YAML Editor & Nanostores | 2/2 | Complete | 2026-02-22 |
 | 36. Results Panel & Dependency Graph | 0/2 | Not started | - |
 | 37. Shareability & Badge Export | 0/1 | Not started | - |
 | 38. Rule Documentation Pages | 0/1 | Not started | - |

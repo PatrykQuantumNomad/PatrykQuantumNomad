@@ -10,12 +10,12 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 ### Editor Foundation
 
 - [x] **EDIT-01**: CodeMirror 6 editor with YAML syntax highlighting via @codemirror/lang-yaml
-- [ ] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
+- [x] **EDIT-02**: Analyze button triggers lint cycle (not real-time as-you-type)
 - [x] **EDIT-03**: Pre-loaded sample docker-compose.yml with deliberate issues across all 5 rule categories
 - [x] **EDIT-04**: Keyboard shortcut (Cmd/Ctrl+Enter) to trigger analysis
 - [x] **EDIT-05**: Dark-only editor theme matching site aesthetic (reuse existing editor-theme.ts pattern)
-- [ ] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
-- [ ] **EDIT-07**: React island with `client:only="react"` directive
+- [x] **EDIT-06**: Responsive layout — stacked on mobile, side-by-side on desktop
+- [x] **EDIT-07**: React island with `client:only="react"` directive
 - [x] **EDIT-08**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 
 ### YAML Parsing & Schema Validation
@@ -250,12 +250,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCORE-03 | Phase 34 | Complete |
 | SCORE-04 | Phase 34 | Complete |
 | EDIT-01 | Phase 35 | Complete |
-| EDIT-02 | Phase 35 | Pending |
+| EDIT-02 | Phase 35 | Complete |
 | EDIT-03 | Phase 35 | Complete |
 | EDIT-04 | Phase 35 | Complete |
 | EDIT-05 | Phase 35 | Complete |
-| EDIT-06 | Phase 35 | Pending |
-| EDIT-07 | Phase 35 | Pending |
+| EDIT-06 | Phase 35 | Complete |
+| EDIT-07 | Phase 35 | Complete |
 | EDIT-08 | Phase 35 | Complete |
 | RESULT-01 | Phase 36 | Pending |
 | RESULT-02 | Phase 36 | Pending |
