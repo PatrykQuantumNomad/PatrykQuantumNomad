@@ -1,0 +1,21 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ComposeValidator from '../../../components/tools/ComposeValidator';
+---
+
+<Layout
+  title="Docker Compose Validator | Patryk Golabek"
+  description="Free Docker Compose validator and best-practice analyzer by a Kubernetes architect. 52 rules across schema, semantic, security, best-practice, and style categories. 100% browser-based -- your code never leaves your device."
+>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]">
+      Docker Compose Validator
+    </h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">
+      Paste your docker-compose.yml below and click <strong>Analyze</strong>.
+      100% client-side, your code never leaves your browser.
+    </p>
+
+    <ComposeValidator client:only="react" />
+  </section>
+</Layout>
