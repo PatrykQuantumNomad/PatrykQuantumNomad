@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 33-01-PLAN.md — Install yaml/ajv/ajv-formats, create types, interpolation normalizer, bundled compose-spec schema, and YAML 1.1 parser with LineCounter and AST helpers
+- [x] 33-01-PLAN.md — Install yaml/ajv/ajv-formats, create types, interpolation normalizer, bundled compose-spec schema, and YAML 1.1 parser with LineCounter and AST helpers
 - [ ] 33-02-PLAN.md — Create ajv schema validator with error categorization, human-readable messages, and 8 schema rule metadata files (CV-S001 through CV-S008)
 
 ### Phase 34: Rule Engine, Rules & Scoring
@@ -152,7 +152,7 @@ Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 33. YAML Parsing & Schema Validation Foundation | 0/2 | Not started | - |
+| 33. YAML Parsing & Schema Validation Foundation | 1/2 | In progress | - |
 | 34. Rule Engine, Rules & Scoring | 0/3 | Not started | - |
 | 35. CodeMirror YAML Editor & Nanostores | 0/2 | Not started | - |
 | 36. Results Panel & Dependency Graph | 0/2 | Not started | - |

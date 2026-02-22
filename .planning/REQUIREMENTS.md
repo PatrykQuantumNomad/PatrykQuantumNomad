@@ -20,16 +20,16 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### YAML Parsing & Schema Validation
 
-- [ ] **PARSE-01**: YAML parsing via `yaml` package (eemeli) with YAML 1.1 mode for merge key support
-- [ ] **PARSE-02**: LineCounter integration for mapping validation errors to source line numbers
-- [ ] **PARSE-03**: Variable interpolation normalizer — handle ${VAR:-default} patterns gracefully
+- [x] **PARSE-01**: YAML parsing via `yaml` package (eemeli) with YAML 1.1 mode for merge key support
+- [x] **PARSE-02**: LineCounter integration for mapping validation errors to source line numbers
+- [x] **PARSE-03**: Variable interpolation normalizer — handle ${VAR:-default} patterns gracefully
 - [ ] **PARSE-04**: compose-spec JSON Schema validation via ajv v8 with Draft-07 support
 - [ ] **PARSE-05**: Human-readable error messages from ajv oneOf/anyOf validation failures
-- [ ] **PARSE-06**: compose-spec schema bundled statically at build time (not fetched at runtime)
+- [x] **PARSE-06**: compose-spec schema bundled statically at build time (not fetched at runtime)
 
 ### Schema Rules
 
-- [ ] **SCHEMA-01**: CV-S001 — Invalid YAML syntax detection with line-level error reporting
+- [x] **SCHEMA-01**: CV-S001 — Invalid YAML syntax detection with line-level error reporting
 - [ ] **SCHEMA-02**: CV-S002 — Unknown top-level property detection (typos in services, networks, volumes)
 - [ ] **SCHEMA-03**: CV-S003 — Unknown service property detection (typos within service definitions)
 - [ ] **SCHEMA-04**: CV-S004 — Invalid port format validation
@@ -187,13 +187,112 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| PARSE-01 | Phase 33 | Complete |
+| PARSE-02 | Phase 33 | Complete |
+| PARSE-03 | Phase 33 | Complete |
+| PARSE-04 | Phase 33 | Pending |
+| PARSE-05 | Phase 33 | Pending |
+| PARSE-06 | Phase 33 | Complete |
+| SCHEMA-01 | Phase 33 | Complete |
+| SCHEMA-02 | Phase 33 | Pending |
+| SCHEMA-03 | Phase 33 | Pending |
+| SCHEMA-04 | Phase 33 | Pending |
+| SCHEMA-05 | Phase 33 | Pending |
+| SCHEMA-06 | Phase 33 | Pending |
+| SCHEMA-07 | Phase 33 | Pending |
+| SCHEMA-08 | Phase 33 | Pending |
+| SEM-01 | Phase 34 | Pending |
+| SEM-02 | Phase 34 | Pending |
+| SEM-03 | Phase 34 | Pending |
+| SEM-04 | Phase 34 | Pending |
+| SEM-05 | Phase 34 | Pending |
+| SEM-06 | Phase 34 | Pending |
+| SEM-07 | Phase 34 | Pending |
+| SEM-08 | Phase 34 | Pending |
+| SEM-09 | Phase 34 | Pending |
+| SEM-10 | Phase 34 | Pending |
+| SEM-11 | Phase 34 | Pending |
+| SEM-12 | Phase 34 | Pending |
+| SEM-13 | Phase 34 | Pending |
+| SEM-14 | Phase 34 | Pending |
+| SEM-15 | Phase 34 | Pending |
+| SEC-01 | Phase 34 | Pending |
+| SEC-02 | Phase 34 | Pending |
+| SEC-03 | Phase 34 | Pending |
+| SEC-04 | Phase 34 | Pending |
+| SEC-05 | Phase 34 | Pending |
+| SEC-06 | Phase 34 | Pending |
+| SEC-07 | Phase 34 | Pending |
+| SEC-08 | Phase 34 | Pending |
+| SEC-09 | Phase 34 | Pending |
+| SEC-10 | Phase 34 | Pending |
+| SEC-11 | Phase 34 | Pending |
+| SEC-12 | Phase 34 | Pending |
+| SEC-13 | Phase 34 | Pending |
+| SEC-14 | Phase 34 | Pending |
+| BP-01 | Phase 34 | Pending |
+| BP-02 | Phase 34 | Pending |
+| BP-03 | Phase 34 | Pending |
+| BP-04 | Phase 34 | Pending |
+| BP-05 | Phase 34 | Pending |
+| BP-06 | Phase 34 | Pending |
+| BP-07 | Phase 34 | Pending |
+| BP-08 | Phase 34 | Pending |
+| BP-09 | Phase 34 | Pending |
+| BP-10 | Phase 34 | Pending |
+| BP-11 | Phase 34 | Pending |
+| BP-12 | Phase 34 | Pending |
+| STYLE-01 | Phase 34 | Pending |
+| STYLE-02 | Phase 34 | Pending |
+| STYLE-03 | Phase 34 | Pending |
+| SCORE-01 | Phase 34 | Pending |
+| SCORE-02 | Phase 34 | Pending |
+| SCORE-03 | Phase 34 | Pending |
+| SCORE-04 | Phase 34 | Pending |
+| EDIT-01 | Phase 35 | Pending |
+| EDIT-02 | Phase 35 | Pending |
+| EDIT-03 | Phase 35 | Pending |
+| EDIT-04 | Phase 35 | Pending |
+| EDIT-05 | Phase 35 | Pending |
+| EDIT-06 | Phase 35 | Pending |
+| EDIT-07 | Phase 35 | Pending |
+| EDIT-08 | Phase 35 | Pending |
+| RESULT-01 | Phase 36 | Pending |
+| RESULT-02 | Phase 36 | Pending |
+| RESULT-03 | Phase 36 | Pending |
+| RESULT-04 | Phase 36 | Pending |
+| RESULT-05 | Phase 36 | Pending |
+| RESULT-06 | Phase 36 | Pending |
+| RESULT-07 | Phase 36 | Pending |
+| GRAPH-01 | Phase 36 | Pending |
+| GRAPH-02 | Phase 36 | Pending |
+| GRAPH-03 | Phase 36 | Pending |
+| GRAPH-04 | Phase 36 | Pending |
+| GRAPH-05 | Phase 36 | Pending |
+| GRAPH-06 | Phase 36 | Pending |
+| GRAPH-07 | Phase 36 | Pending |
+| SHARE-01 | Phase 37 | Pending |
+| SHARE-02 | Phase 37 | Pending |
+| SHARE-03 | Phase 37 | Pending |
+| DOC-01 | Phase 38 | Pending |
+| DOC-02 | Phase 38 | Pending |
+| DOC-03 | Phase 38 | Pending |
+| DOC-04 | Phase 38 | Pending |
+| SITE-01 | Phase 39 | Pending |
+| SITE-02 | Phase 39 | Pending |
+| SITE-03 | Phase 39 | Pending |
+| SITE-04 | Phase 39 | Pending |
+| SITE-05 | Phase 39 | Pending |
+| SITE-06 | Phase 39 | Pending |
+| SITE-07 | Phase 40 | Pending |
+| CONTENT-01 | Phase 40 | Pending |
+| CONTENT-02 | Phase 40 | Pending |
 
 **Coverage:**
-- v1.6 requirements: 82 total
-- Mapped to phases: 0
-- Unmapped: 82
+- v1.6 requirements: 100 total
+- Mapped to phases: 100
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after initial definition*
+*Last updated: 2026-02-22 after roadmap creation (phases 33-40)*
