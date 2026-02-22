@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 34 in progress (Rule Engine, Rules & Scoring)
+**Current focus:** v1.6 Docker Compose Validator - Phase 34 COMPLETE (Rule Engine, Rules & Scoring), ready for Phase 35
 
 ## Current Position
 
-Phase: 34 of 40 (Rule Engine, Rules & Scoring)
-Plan: 2 of 3 complete in current phase
-Status: Plan 34-02 complete (14 security rules + 12 best practice rules), ready for 34-03
-Last activity: 2026-02-22 -- Plan 34-02 complete (26 rules: security + best practice)
+Phase: 34 of 40 (Rule Engine, Rules & Scoring) -- COMPLETE
+Plan: 3 of 3 complete in current phase
+Status: Phase 34 complete (52 rules: 8 schema + 15 semantic + 14 security + 12 best-practice + 3 style + engine + scorer)
+Last activity: 2026-02-22 -- Plan 34-03 complete (style rules, engine, scorer)
 
-Progress: [██████----] 66% (Phase 34)
+Progress: [██████████] 100% (Phase 34)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 70 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 4 v1.6)
+- Total plans completed: 71 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 5 v1.6)
 
 **Cumulative Stats:**
 
@@ -35,6 +35,7 @@ Progress: [██████----] 66% (Phase 34)
 | **Total** | **40** | **66+** | **280** | |
 | Phase 34 P01 | 5min | 2 tasks | 18 files |
 | Phase 34 P02 | 7min | 2 tasks | 28 files |
+| Phase 34 P03 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,10 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - CV-C014 handles registry URLs with port numbers by checking if text after last colon contains slash
 - CV-B004 skips 'latest' tag since CV-C014 already covers it, avoiding duplicate violations
 - CV-C008 uses suffix-anchored regex to avoid false positives on names like PASSWORD_MIN_LENGTH
+- CV-F002 uses yaml Scalar.PLAIN type check to detect unquoted ports at AST level
+- Master registry separates 44 custom rules (with check methods) from 8 schema rules (metadata only)
+- Engine counts 52 total rules run (44 custom + 8 schema) for accurate reporting
+- Scorer builds lookup from both allComposeRules and schemaRules for complete coverage
 
 ### Pending Todos
 
@@ -81,6 +86,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 34-02-PLAN.md
+Stopped at: Completed 34-03-PLAN.md (Phase 34 complete)
 Resume file: None
-Next: Plan 34-03 -- Style rules, rule engine, scoring engine, master registry
+Next: Phase 35 -- React Flow visualization or Phase 36 -- UI integration

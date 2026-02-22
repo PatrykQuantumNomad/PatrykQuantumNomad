@@ -90,16 +90,16 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Style Rules
 
-- [ ] **STYLE-01**: CV-F001 — Services not alphabetically ordered
-- [ ] **STYLE-02**: CV-F002 — Ports not quoted (YAML base-60 risk)
-- [ ] **STYLE-03**: CV-F003 — Inconsistent quoting in port values
+- [x] **STYLE-01**: CV-F001 — Services not alphabetically ordered
+- [x] **STYLE-02**: CV-F002 — Ports not quoted (YAML base-60 risk)
+- [x] **STYLE-03**: CV-F003 — Inconsistent quoting in port values
 
 ### Scoring
 
-- [ ] **SCORE-01**: Category-weighted scoring (Security 30%, Semantic 25%, Best Practice 20%, Schema 15%, Style 10%)
-- [ ] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F)
-- [ ] **SCORE-03**: Per-category sub-scores displayed alongside aggregate
-- [ ] **SCORE-04**: Diminishing returns formula (same pattern as Dockerfile Analyzer)
+- [x] **SCORE-01**: Category-weighted scoring (Security 30%, Semantic 25%, Best Practice 20%, Schema 15%, Style 10%)
+- [x] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F)
+- [x] **SCORE-03**: Per-category sub-scores displayed alongside aggregate
+- [x] **SCORE-04**: Diminishing returns formula (same pattern as Dockerfile Analyzer)
 
 ### Results Display
 
@@ -242,13 +242,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BP-10 | Phase 34 | Complete |
 | BP-11 | Phase 34 | Complete |
 | BP-12 | Phase 34 | Complete |
-| STYLE-01 | Phase 34 | Pending |
-| STYLE-02 | Phase 34 | Pending |
-| STYLE-03 | Phase 34 | Pending |
-| SCORE-01 | Phase 34 | Pending |
-| SCORE-02 | Phase 34 | Pending |
-| SCORE-03 | Phase 34 | Pending |
-| SCORE-04 | Phase 34 | Pending |
+| STYLE-01 | Phase 34 | Complete |
+| STYLE-02 | Phase 34 | Complete |
+| STYLE-03 | Phase 34 | Complete |
+| SCORE-01 | Phase 34 | Complete |
+| SCORE-02 | Phase 34 | Complete |
+| SCORE-03 | Phase 34 | Complete |
+| SCORE-04 | Phase 34 | Complete |
 | EDIT-01 | Phase 35 | Pending |
 | EDIT-02 | Phase 35 | Pending |
 | EDIT-03 | Phase 35 | Pending |
