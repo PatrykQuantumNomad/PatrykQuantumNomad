@@ -123,9 +123,9 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Shareability
 
-- [ ] **SHARE-01**: Score badge download as PNG image for social media sharing
-- [ ] **SHARE-02**: URL state encoding — compose YAML content in URL hash via lz-string
-- [ ] **SHARE-03**: Web Share API on mobile, Clipboard API on desktop, text URL fallback
+- [x] **SHARE-01**: Score badge download as PNG image for social media sharing
+- [x] **SHARE-02**: URL state encoding — compose YAML content in URL hash via lz-string
+- [x] **SHARE-03**: Web Share API on mobile, Clipboard API on desktop, text URL fallback
 
 ### Rule Documentation
 
@@ -271,9 +271,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GRAPH-05 | Phase 36 | Complete |
 | GRAPH-06 | Phase 36 | Complete |
 | GRAPH-07 | Phase 36 | Complete |
-| SHARE-01 | Phase 37 | Pending |
-| SHARE-02 | Phase 37 | Pending |
-| SHARE-03 | Phase 37 | Pending |
+| SHARE-01 | Phase 37 | Complete |
+| SHARE-02 | Phase 37 | Complete |
+| SHARE-03 | Phase 37 | Complete |
 | DOC-01 | Phase 38 | Pending |
 | DOC-02 | Phase 38 | Pending |
 | DOC-03 | Phase 38 | Pending |

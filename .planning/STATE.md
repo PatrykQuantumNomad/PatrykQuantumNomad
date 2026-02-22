@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 36 complete (Results Panel & Dependency Graph)
+**Current focus:** v1.6 Docker Compose Validator - Phase 37 complete (Shareability & Badge Export)
 
 ## Current Position
 
-Phase: 36 of 40 (Results Panel & Dependency Graph) -- COMPLETE
-Plan: 2 of 2 complete in current phase
-Status: Phase 36 complete (all 14 requirements: RESULT-01 through RESULT-07, GRAPH-01 through GRAPH-07)
-Last activity: 2026-02-22 -- Plan 36-02 complete (React Flow dependency graph with dagre layout)
+Phase: 37 of 40 (Shareability & Badge Export) -- COMPLETE
+Plan: 1 of 1 complete in current phase
+Status: Phase 37 complete (all 3 requirements: SHARE-01, SHARE-02, SHARE-03)
+Last activity: 2026-02-22 -- Plan 37-01 complete (badge export, URL sharing, share actions)
 
-Progress: [██████████] 100% (Phase 36 plan 2/2)
+Progress: [██████████] 100% (Phase 37 plan 1/1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 75 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 9 v1.6)
+- Total plans completed: 76 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 10 v1.6)
 
 **Cumulative Stats:**
 
@@ -40,6 +40,7 @@ Progress: [██████████] 100% (Phase 36 plan 2/2)
 | Phase 35 P02 | 3min | 2 tasks | 4 files |
 | Phase 36 P01 | 4min | 2 tasks | 5 files |
 | Phase 36 P02 | 4min | 2 tasks | 8 files |
+| Phase 37 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - React Flow CSS imported inside lazy-loaded DependencyGraph.tsx (not globally) to keep initial bundle clean
 - nodeTypes/edgeTypes defined at module level to prevent React Flow re-registration flicker
 - Graph data memoized with useMemo keyed on yamlContent to avoid recomputation on tab switches
+- 3-tier share fallback: Web Share API (mobile) > Clipboard API (desktop) > prompt() (fallback) -- enhanced over Dockerfile pattern
+- #compose= hash prefix distinct from #dockerfile= to prevent cross-tool URL collision
+- No PromptGenerator in ComposeShareActions -- compose rules differ from Dockerfile rules, deferred to future phase
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 36-02-PLAN.md (React Flow dependency graph with dagre layout) -- Phase 36 complete
+Stopped at: Completed 37-01-PLAN.md (badge export, URL sharing, share actions) -- Phase 37 complete
 Resume file: None
-Next: Phase 37 -- Shareability & Badge Export
+Next: Phase 38 -- Rule Pages
