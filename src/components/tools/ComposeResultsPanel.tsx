@@ -1,100 +1,142 @@
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   composeResult,
   composeAnalyzing,
   composeResultsStale,
+  composeEditorViewRef,
 } from '../../stores/composeValidatorStore';
+import { ScoreGauge } from './results/ScoreGauge';
+import { ComposeCategoryBreakdown } from './compose-results/ComposeCategoryBreakdown';
+import { ComposeViolationList } from './compose-results/ComposeViolationList';
+import { ComposeEmptyState } from './compose-results/ComposeEmptyState';
+import { GraphSkeleton } from './compose-results/GraphSkeleton';
+import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
 
-/**
- * Stub results panel for the Docker Compose Validator.
- * Reads analysis state from nanostores and renders a summary.
- *
- * Phase 36 will add the full ScoreGauge, CategoryBreakdown,
- * ViolationList, and dependency graph tabs.
- */
+type ResultTab = 'violations' | 'graph';
+
+function severitySummary(
+  violations: { severity: string }[],
+): string {
+  const counts: Record<string, number> = {};
+  for (const v of violations) {
+    counts[v.severity] = (counts[v.severity] ?? 0) + 1;
+  }
+  const parts: string[] = [];
+  if (counts.error) parts.push(`${counts.error} error${counts.error !== 1 ? 's' : ''}`);
+  if (counts.warning) parts.push(`${counts.warning} warning${counts.warning !== 1 ? 's' : ''}`);
+  if (counts.info) parts.push(`${counts.info} info`);
+  return parts.join(', ');
+}
+
 export default function ComposeResultsPanel() {
+  const [activeTab, setActiveTab] = useState<ResultTab>('violations');
   const result = useStore(composeResult);
   const analyzing = useStore(composeAnalyzing);
   const stale = useStore(composeResultsStale);
 
+  const handleNavigate = (line: number) => {
+    const view = composeEditorViewRef.get();
+    if (!view) return;
+    highlightAndScroll(view, line);
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center mb-3 min-h-[40px]">
-        <h2 className="text-lg font-heading font-semibold">Results</h2>
+      {/* Tab bar */}
+      <div className="flex border-b border-[var(--color-border)] mb-3 min-h-[40px]">
+        <button
+          onClick={() => setActiveTab('violations')}
+          className={`px-4 py-2 text-sm font-semibold transition-colors ${
+            activeTab === 'violations'
+              ? 'border-b-2 border-[var(--color-accent)] text-[var(--color-text-primary)]'
+              : 'border-b-2 border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+          }`}
+        >
+          Violations
+        </button>
+        <button
+          onClick={() => setActiveTab('graph')}
+          className={`px-4 py-2 text-sm font-semibold transition-colors ${
+            activeTab === 'graph'
+              ? 'border-b-2 border-[var(--color-accent)] text-[var(--color-text-primary)]'
+              : 'border-b-2 border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+          }`}
+        >
+          Dependency Graph
+        </button>
       </div>
+
+      {/* Tab content */}
       <div className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4 overflow-y-auto">
-        {analyzing ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-[var(--color-text-secondary)] animate-pulse">
-              Analyzing...
-            </p>
-          </div>
-        ) : result === null ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-[var(--color-text-secondary)]">
-              Click <strong>Analyze</strong> to validate your Docker Compose file
-            </p>
-          </div>
+        {activeTab === 'violations' ? (
+          /* Violations tab content */
+          analyzing ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-[var(--color-text-secondary)] animate-pulse">
+                Analyzing...
+              </p>
+            </div>
+          ) : result === null ? (
+            <div className="flex items-center justify-center h-full text-center">
+              <p className="text-[var(--color-text-secondary)]">
+                Click <strong>Analyze</strong> to validate your Docker Compose file
+              </p>
+            </div>
+          ) : !result.parseSuccess ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-red-500 font-medium">
+                YAML parse error -- check your syntax
+              </p>
+            </div>
+          ) : result.violations.length === 0 ? (
+            <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+              {stale && (
+                <div className="text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2 text-xs mb-3">
+                  Results may be outdated. Re-analyze to refresh.
+                </div>
+              )}
+              <ComposeEmptyState score={result.score.overall} grade={result.score.grade} />
+            </div>
+          ) : (
+            <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+              {stale && (
+                <div className="text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2 text-xs mb-3">
+                  Results may be outdated. Re-analyze to refresh.
+                </div>
+              )}
+
+              {/* Score + Category breakdown */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4">
+                <ScoreGauge score={result.score.overall} grade={result.score.grade} size={100} />
+                <div className="flex-1 w-full">
+                  <ComposeCategoryBreakdown categories={result.score.categories} />
+                </div>
+              </div>
+
+              {/* Violation count summary */}
+              <p className="text-sm text-[var(--color-text-secondary)] mb-3">
+                {result.violations.length} issue{result.violations.length !== 1 ? 's' : ''} found
+                <span className="ml-1 text-xs">
+                  ({severitySummary(result.violations)})
+                </span>
+              </p>
+
+              {/* Violation list */}
+              <ComposeViolationList violations={result.violations} onNavigate={handleNavigate} />
+            </div>
+          )
         ) : (
-          <div className="space-y-4">
-            {stale && (
-              <div className="px-3 py-2 rounded-md bg-yellow-900/30 border border-yellow-700/40 text-yellow-200 text-sm">
-                Results may be stale &mdash; click Analyze to refresh
-              </div>
-            )}
-
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-[var(--color-text-primary)]">
-                  {result.score.overall}
-                </div>
-                <div className="text-sm text-[var(--color-text-secondary)]">
-                  Score
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-[var(--color-accent)]">
-                  {result.score.grade}
-                </div>
-                <div className="text-sm text-[var(--color-text-secondary)]">
-                  Grade
-                </div>
-              </div>
+          /* Graph tab content */
+          result === null ? (
+            <div className="flex items-center justify-center h-full text-center">
+              <p className="text-[var(--color-text-secondary)]">
+                Dependency graph will be available after analysis
+              </p>
             </div>
-
-            <div className="flex items-center gap-4 text-sm text-[var(--color-text-secondary)]">
-              <span>
-                {result.violations.length}{' '}
-                {result.violations.length === 1 ? 'violation' : 'violations'}
-              </span>
-              <span>
-                {result.parseSuccess ? (
-                  <span className="text-green-400">YAML parsed OK</span>
-                ) : (
-                  <span className="text-red-400">YAML parse errors</span>
-                )}
-              </span>
-            </div>
-
-            {result.score.categories.length > 0 && (
-              <div className="space-y-1 text-sm">
-                {result.score.categories.map((cat) => (
-                  <div
-                    key={cat.category}
-                    className="flex items-center justify-between text-[var(--color-text-secondary)]"
-                  >
-                    <span className="capitalize">{cat.category}</span>
-                    <span>
-                      {cat.score}/100{' '}
-                      <span className="text-xs opacity-60">
-                        ({cat.weight}%)
-                      </span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          ) : (
+            <GraphSkeleton />
+          )
         )}
       </div>
     </div>
