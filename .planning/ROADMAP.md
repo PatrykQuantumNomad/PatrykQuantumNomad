@@ -51,7 +51,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 29-01-PLAN.md — Foundation utilities (DIMENSION_COLORS, spectrum-math.ts) and SVG charts (ComplexitySpectrum, CompassRadarChart)
+- [x] 29-01-PLAN.md — Foundation utilities (DIMENSION_COLORS, spectrum-math.ts) and SVG charts (ComplexitySpectrum, CompassRadarChart)
 - [ ] 29-02-PLAN.md — Score display components (CompassScoreBreakdown, CapBadge) and interactive sortable scoring table
 
 ### Phase 30: Overview Page
@@ -109,7 +109,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 28. Data Foundation | 2/2 | Complete | 2026-02-22 |
-| 29. Visualization Components | 0/TBD | Not started | - |
+| 29. Visualization Components | 1/2 | In progress | - |
 | 30. Overview Page | 0/TBD | Not started | - |
 | 31. Detail Pages | 0/TBD | Not started | - |
 | 32. OG Images & Site Integration | 0/TBD | Not started | - |

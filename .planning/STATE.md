@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.5 Database Compass — Phase 28: Data Foundation
+**Current focus:** v1.5 Database Compass — Phase 29: Visualization Components
 
 ## Current Position
 
-Phase: 28 (1 of 5 in v1.5) — Data Foundation
-Plan: 2 of 2 complete
-Status: Phase 28 Complete
-Last activity: 2026-02-22 — Completed 28-02 (Data Population)
+Phase: 29 (2 of 5 in v1.5) — Visualization Components
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-22 — Completed 29-01 (Foundation Utilities and SVG Charts)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 59 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 2 v1.5)
+- Total plans completed: 60 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 3 v1.5)
 
 **Cumulative Stats:**
 
@@ -34,6 +34,7 @@ Progress: [██░░░░░░░░] 20%
 | **Total** | **32** | **57+** | **180** | |
 | Phase 28 P01 | 3min | 2 tasks | 4 files |
 | Phase 28 P02 | 9min | 2 tasks | 1 file |
+| Phase 29 P01 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -54,6 +55,10 @@ Recent decisions affecting current work:
 - [28-02]: Scored all models one dimension at a time to prevent calibration drift
 - [28-02]: Full 1-10 range used in every dimension (no clustering at 5-7)
 - [28-02]: DB-Engines URLs as primary links; official sites for unlisted databases
+- [29-01]: DIMENSION_COLORS in dimensions.ts (no separate tiers.ts -- DB Compass has no tier system)
+- [29-01]: spectrum-math.ts zero imports -- pure TypeScript for Astro + Satori dual-use
+- [29-01]: Fixed accent color #c44b20 for all radar charts (no tier-based coloring)
+- [29-01]: DM Sans + Noto Sans font stack for Unicode symbol coverage
 
 ### Pending Todos
 
@@ -75,6 +80,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 28-02-PLAN.md (Data Population) -- Phase 28 complete
+Stopped at: Completed 29-01-PLAN.md (Foundation Utilities and SVG Charts)
 Resume file: None
-Next: `/gsd:execute-phase 29` (Visualization Components)
+Next: 29-02-PLAN.md (Score display components and sortable table)
