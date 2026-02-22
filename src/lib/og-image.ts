@@ -6,6 +6,9 @@ import { generateRadarSvgString } from './beauty-index/radar-math';
 import { getTierColor, DIMENSION_COLORS } from './beauty-index/tiers';
 import { DIMENSIONS } from './beauty-index/dimensions';
 import { totalScore, dimensionScores, type Language } from './beauty-index/schema';
+import { computeSpectrumPositions, MODEL_SHORT_LABELS } from './db-compass/spectrum-math';
+import { DIMENSIONS as COMPASS_DIMENSIONS, DIMENSION_COLORS as COMPASS_DIMENSION_COLORS } from './db-compass/dimensions';
+import { dimensionScores as compassDimensionScores, totalScore as compassTotalScore, type DbModel } from './db-compass/schema';
 
 let interFont: Buffer | undefined;
 let spaceGroteskFont: Buffer | undefined;
@@ -1312,6 +1315,358 @@ export async function generateVsOgImage(langA: Language, langB: Language): Promi
               },
               ...brandingRow().props.children,
             ],
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/**
+ * Generates a simplified complexity spectrum SVG string for OG image embedding.
+ * Uses computeSpectrumPositions() for positioning and MODEL_SHORT_LABELS for labels.
+ * Compact 600x100 viewport suitable for embedding as base64 data URI in Satori layout.
+ */
+function generateSpectrumMiniatureSvg(
+  width: number,
+  height: number,
+  models: { id: string; name: string; slug: string; complexityPosition: number }[],
+): string {
+  const sorted = [...models].sort((a, b) => a.complexityPosition - b.complexityPosition);
+  const padding = 40;
+  const baselineY = height / 2;
+  const points = computeSpectrumPositions(width, sorted, padding, baselineY);
+
+  const dots = points
+    .map((p) => `<circle cx="${p.x.toFixed(1)}" cy="${baselineY}" r="5" fill="#c44b20"/>`)
+    .join('\n  ');
+
+  const labels = points
+    .map((p) => {
+      const label = MODEL_SHORT_LABELS[p.id] ?? p.id.slice(0, 3);
+      return `<text x="${p.x.toFixed(1)}" y="${baselineY - 14}" text-anchor="middle" font-size="9" fill="#5a5a5a" font-family="sans-serif" font-weight="500">${label}</text>`;
+    })
+    .join('\n  ');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <line x1="${padding}" y1="${baselineY}" x2="${width - padding}" y2="${baselineY}" stroke="#e5ddd5" stroke-width="2"/>
+  <text x="${padding}" y="${baselineY + 20}" text-anchor="middle" font-size="10" fill="#5a5a5a" font-family="sans-serif" font-weight="600">Simple</text>
+  <text x="${width - padding}" y="${baselineY + 20}" text-anchor="middle" font-size="10" fill="#5a5a5a" font-family="sans-serif" font-weight="600">Complex</text>
+  ${dots}
+  ${labels}
+</svg>`;
+}
+
+/**
+ * Generates a branded OG image for the Database Compass overview page.
+ * Two-column layout with title + dimension pills on the left and spectrum miniature on the right.
+ */
+export async function generateCompassOverviewOgImage(
+  models: { id: string; name: string; slug: string; complexityPosition: number }[],
+): Promise<Buffer> {
+  const spectrumSvg = generateSpectrumMiniatureSvg(600, 100, models);
+  const spectrumDataUri = `data:image/svg+xml;base64,${Buffer.from(spectrumSvg).toString('base64')}`;
+
+  const dimensionNames = [
+    'Scalability',
+    'Performance',
+    'Reliability',
+    'Ops Complexity',
+    'Query Flexibility',
+    'Schema Flexibility',
+    'Ecosystem',
+    'Learning Curve',
+  ];
+
+  const dimensionPills = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap' as const,
+        gap: '8px',
+      },
+      children: dimensionNames.map((name) => ({
+        type: 'div',
+        props: {
+          style: {
+            fontSize: '14px',
+            color: '#c44b20',
+            backgroundColor: 'rgba(196,75,32,0.1)',
+            borderRadius: '20px',
+            padding: '4px 14px',
+          },
+          children: name,
+        },
+      })),
+    },
+  };
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column: text
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '620px',
+              padding: '40px 0px 60px 56px',
+              gap: '20px',
+            },
+            children: [
+              // Title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '52px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: 'Database Compass',
+                },
+              },
+              // Subtitle
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '22px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: 'Compare 12 database models across 8 dimensions',
+                },
+              },
+              // Dimension pills
+              dimensionPills,
+            ],
+          },
+        },
+        // Right column: spectrum miniature
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '580px',
+              height: '630px',
+            },
+            children: [
+              {
+                type: 'img',
+                props: {
+                  src: spectrumDataUri,
+                  width: 540,
+                  height: 100,
+                },
+              },
+            ],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/**
+ * Generates a branded OG image for a single Database Compass model detail page.
+ * Two-column layout with model details on the left and radar chart on the right.
+ */
+export async function generateCompassModelOgImage(model: DbModel): Promise<Buffer> {
+  const scores = compassDimensionScores(model);
+  const total = compassTotalScore(model);
+  const labels = COMPASS_DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
+  const labelColors = COMPASS_DIMENSIONS.map((d) => COMPASS_DIMENSION_COLORS[d.key] ?? '#666');
+  const accentColor = '#c44b20';
+  const radarSvg = generateRadarSvgString(300, scores, accentColor, 0.35, labels, labelColors);
+  const radarDataUri = `data:image/svg+xml;base64,${Buffer.from(radarSvg).toString('base64')}`;
+  const capLabel = model.capTheorem.classification;
+  const sketch = truncate(model.characterSketch, 120);
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column (text)
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '700px',
+              padding: '40px 0px 60px 56px',
+              gap: '16px',
+            },
+            children: [
+              // "Database Compass" label
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#c44b20',
+                    fontWeight: 600,
+                  },
+                  children: 'Database Compass',
+                },
+              },
+              // Model name
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '52px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: model.name,
+                },
+              },
+              // Score + CAP row
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                  },
+                  children: [
+                    // Score
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '32px',
+                          color: accentColor,
+                        },
+                        children: `${total}/80`,
+                      },
+                    },
+                    // CAP classification pill
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '16px',
+                          color: '#ffffff',
+                          backgroundColor: accentColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: capLabel,
+                      },
+                    },
+                  ],
+                },
+              },
+              // Character sketch
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: sketch,
+                },
+              },
+            ],
+          },
+        },
+        // Right column (radar chart)
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '500px',
+              height: '630px',
+            },
+            children: [
+              {
+                type: 'img',
+                props: {
+                  src: radarDataUri,
+                  width: 360,
+                  height: 360,
+                },
+              },
+            ],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
           },
         },
       ],
