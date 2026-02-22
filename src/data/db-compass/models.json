@@ -561,5 +561,555 @@
       "Security analytics",
       "Content discovery"
     ]
+  },
+  {
+    "id": "columnar",
+    "name": "Wide-Column Store",
+    "slug": "columnar",
+    "icon": "columns",
+    "complexityPosition": 0.58,
+    "summary": "Organizes data into column families rather than traditional rows, enabling massive write throughput and efficient columnar reads across distributed clusters. Optimized for IoT telemetry, event logging, and workloads requiring high availability at planetary scale.",
+    "characterSketch": "The industrial workhorse built for relentless throughput -- it swallows millions of writes per second without flinching and never complains about downtime. Not the most eloquent conversationalist (queries are limited), but when you need to store everything and never lose a beat, it's the one you call.",
+    "scores": {
+      "scalability": 9,
+      "performance": 8,
+      "reliability": 7,
+      "operationalSimplicity": 4,
+      "queryFlexibility": 4,
+      "schemaFlexibility": 6,
+      "ecosystemMaturity": 7,
+      "learningCurve": 5
+    },
+    "justifications": {
+      "scalability": "Designed from the ground up for horizontal scaling. Cassandra uses consistent hashing across commodity nodes with linear throughput gains -- Netflix runs clusters spanning hundreds of nodes across regions.",
+      "performance": "Exceptional write throughput through append-only log-structured merge trees (LSM). Reads by partition key are fast, but cross-partition queries and secondary index scans can be expensive.",
+      "reliability": "Tunable replication factor across data centers provides strong durability. Cassandra's masterless architecture eliminates single points of failure. However, eventual consistency by default means stale reads are possible.",
+      "operationalSimplicity": "Compaction strategies, tombstone management, repair operations, and data modeling around partition keys require deep expertise. Misconfigured wide-column stores lead to hot partitions and cascading failures.",
+      "queryFlexibility": "CQL (Cassandra Query Language) looks like SQL but forbids joins, subqueries, and most aggregations. Queries must follow the primary key access pattern -- ad-hoc queries require denormalized tables.",
+      "schemaFlexibility": "Column families allow dynamic columns within a row, providing some flexibility. However, changing partition keys requires data migration, and the data model is tightly coupled to access patterns.",
+      "ecosystemMaturity": "Apache Cassandra powers Apple (400,000+ nodes), Netflix, and Discord. Google Bigtable pioneered the model. ScyllaDB offers drop-in compatibility with C++ performance. Mature but smaller community than relational.",
+      "learningCurve": "Data modeling for wide-column stores is counterintuitive for developers with relational backgrounds. Understanding partition keys, clustering columns, and denormalization patterns requires a paradigm shift."
+    },
+    "capTheorem": {
+      "classification": "AP",
+      "notes": "Cassandra and ScyllaDB prioritize availability and partition tolerance with tunable consistency levels per query. Strong consistency is achievable (QUORUM reads/writes) but at the cost of availability during partitions."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Massive write throughput with linear horizontal scaling",
+      "Masterless architecture eliminates single points of failure",
+      "Multi-datacenter replication for global deployments",
+      "Proven at extreme scale (Apple, Netflix, Discord)"
+    ],
+    "weaknesses": [
+      "Complex data modeling tightly coupled to access patterns",
+      "No support for joins, subqueries, or ad-hoc queries",
+      "Operational complexity with compaction, repairs, and tombstones",
+      "Eventual consistency by default can lead to stale reads"
+    ],
+    "bestFor": [
+      "IoT sensor data and telemetry at massive scale",
+      "Time-series event logging with high write throughput",
+      "Messaging platforms and activity feeds (Discord, Instagram)",
+      "Multi-region deployments requiring always-on availability"
+    ],
+    "avoidWhen": [
+      "Queries require joins or complex aggregations",
+      "Access patterns are unpredictable or ad-hoc",
+      "Strong consistency is required for every operation",
+      "Team lacks expertise in wide-column data modeling"
+    ],
+    "topDatabases": [
+      {
+        "name": "Apache Cassandra",
+        "description": "The most widely deployed wide-column database, offering masterless architecture, tunable consistency, and linear scalability. Battle-tested at Apple, Netflix, and hundreds of enterprises.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Apache+Cassandra"
+      },
+      {
+        "name": "Apache HBase",
+        "description": "Hadoop-native wide-column store modeled after Google Bigtable. Provides strong consistency, automatic sharding, and tight integration with the Hadoop ecosystem for batch analytics.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Apache+HBase"
+      },
+      {
+        "name": "Google Cloud Bigtable",
+        "description": "Fully managed wide-column database by Google, handling petabyte-scale workloads with single-digit millisecond latency. The original inspiration for the wide-column model.",
+        "license": "Proprietary (Google Cloud managed service)",
+        "url": "https://db-engines.com/en/system/Google+Cloud+Bigtable"
+      },
+      {
+        "name": "ScyllaDB",
+        "description": "Cassandra-compatible wide-column database rewritten in C++ for dramatically lower latency and higher throughput. Achieves 10x the performance of Cassandra on the same hardware.",
+        "license": "AGPL v3 (Open Source) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/ScyllaDB"
+      }
+    ],
+    "useCases": [
+      "IoT telemetry",
+      "Event logging",
+      "Messaging platforms",
+      "Recommendation engines",
+      "Time-series at scale"
+    ]
+  },
+  {
+    "id": "vector",
+    "name": "Vector Database",
+    "slug": "vector",
+    "icon": "compass",
+    "complexityPosition": 0.65,
+    "summary": "Stores and indexes high-dimensional vector embeddings for similarity search using approximate nearest neighbor (ANN) algorithms. Optimized for AI/ML applications including semantic search, recommendation systems, and retrieval-augmented generation (RAG).",
+    "characterSketch": "The AI whisperer -- it understands meaning, not just words. While others match exact strings, it finds things that are similar, related, or semantically close. Born in the age of LLMs and embeddings, it's the youngest database model but growing faster than any before it.",
+    "scores": {
+      "scalability": 7,
+      "performance": 7,
+      "reliability": 4,
+      "operationalSimplicity": 6,
+      "queryFlexibility": 3,
+      "schemaFlexibility": 5,
+      "ecosystemMaturity": 3,
+      "learningCurve": 5
+    },
+    "justifications": {
+      "scalability": "Most vector databases support sharding and distributed indexing. Milvus and Pinecone scale to billions of vectors. However, high-dimensional index structures (HNSW, IVF) have higher memory overhead per node than simple key-value data.",
+      "performance": "ANN algorithms (HNSW, IVF-PQ) deliver sub-millisecond similarity search across millions of vectors. Exact nearest-neighbor search is O(n) and impractical at scale -- approximate methods trade marginal accuracy for dramatic speed.",
+      "reliability": "Most vector databases are young products still maturing their durability guarantees. Pinecone is fully managed; Milvus and Weaviate offer replication but lack the decades of battle-testing that relational databases have.",
+      "operationalSimplicity": "Managed offerings (Pinecone) simplify operations significantly. Self-hosted options (Milvus, Qdrant) require understanding index types, distance metrics, and memory-vs-accuracy tradeoffs for production tuning.",
+      "queryFlexibility": "Queries are primarily similarity searches: find K nearest vectors, optionally filtered by metadata. No support for joins, aggregations, or complex relational queries. Hybrid search (vector + keyword) is an emerging feature.",
+      "schemaFlexibility": "Vectors have fixed dimensionality per collection. Metadata fields offer some schema flexibility, but changing embedding models (and thus vector dimensions) requires reindexing the entire dataset.",
+      "ecosystemMaturity": "The youngest database category, with most products launched after 2020. Rapidly growing but lacking the mature tooling, monitoring solutions, and established best practices of older database models.",
+      "learningCurve": "Requires understanding of embedding models, distance metrics (cosine, Euclidean, dot product), ANN algorithms, and the ML pipeline that generates vectors. The database itself is simple once you grasp the concepts."
+    },
+    "capTheorem": {
+      "classification": "AP",
+      "notes": "Vector databases typically prioritize availability for serving ML inference workloads. Approximate results are inherently tolerance-friendly -- slightly stale indexes still return useful similarity results."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Purpose-built for AI/ML similarity search and RAG pipelines",
+      "Sub-millisecond approximate nearest-neighbor queries across millions of vectors",
+      "Native integration with embedding models (OpenAI, Cohere, Hugging Face)",
+      "Metadata filtering enables hybrid vector + attribute search"
+    ],
+    "weaknesses": [
+      "Youngest database category with immature ecosystem and tooling",
+      "Limited query capabilities beyond similarity search",
+      "Index rebuilds required when changing embedding models or dimensions",
+      "High memory requirements for HNSW indexes at scale"
+    ],
+    "bestFor": [
+      "Semantic search and natural language queries",
+      "Retrieval-augmented generation (RAG) for LLM applications",
+      "Image and audio similarity search",
+      "Recommendation engines based on embedding similarity",
+      "Anomaly detection in high-dimensional data"
+    ],
+    "avoidWhen": [
+      "Exact matching or structured queries are the primary need",
+      "Data doesn't naturally map to vector embeddings",
+      "Long-term data durability is the top priority",
+      "Budget doesn't support ML embedding pipeline infrastructure"
+    ],
+    "topDatabases": [
+      {
+        "name": "Pinecone",
+        "description": "Fully managed vector database designed for production ML applications. Offers serverless and pod-based deployments with automatic scaling and zero operational overhead.",
+        "license": "Proprietary (managed service)",
+        "url": "https://www.pinecone.io/"
+      },
+      {
+        "name": "Weaviate",
+        "description": "Open-source vector database with built-in vectorization modules, hybrid search (vector + BM25), and GraphQL API. Supports automatic embedding generation from raw data.",
+        "license": "BSD 3-Clause",
+        "url": "https://db-engines.com/en/system/Weaviate"
+      },
+      {
+        "name": "Milvus",
+        "description": "Cloud-native open-source vector database supporting billion-scale vector search with GPU acceleration, multiple index types (HNSW, IVF, DiskANN), and hybrid search.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Milvus"
+      },
+      {
+        "name": "Qdrant",
+        "description": "High-performance vector database written in Rust with advanced filtering, payload indexing, and quantization for memory-efficient similarity search at scale.",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/Qdrant"
+      },
+      {
+        "name": "Chroma",
+        "description": "Developer-friendly open-source embedding database designed for LLM applications. Prioritizes simplicity with an in-process Python API and seamless LangChain integration.",
+        "license": "Apache 2.0",
+        "url": "https://www.trychroma.com/"
+      }
+    ],
+    "useCases": [
+      "Semantic search",
+      "RAG pipelines",
+      "Recommendation systems",
+      "Image similarity",
+      "Anomaly detection"
+    ]
+  },
+  {
+    "id": "newsql",
+    "name": "NewSQL Database",
+    "slug": "newsql",
+    "icon": "git-merge",
+    "complexityPosition": 0.72,
+    "summary": "Combines the horizontal scalability of NoSQL with the ACID guarantees and SQL interface of traditional relational databases. Optimized for globally distributed applications that refuse to compromise between consistency and scale.",
+    "characterSketch": "The overachiever who insists on having it all -- the scalability of NoSQL and the consistency of SQL, no compromises accepted. It's the answer to the question 'Why can't we just scale our PostgreSQL globally?' Born from the frustration of choosing between consistency and scale.",
+    "scores": {
+      "scalability": 8,
+      "performance": 6,
+      "reliability": 9,
+      "operationalSimplicity": 4,
+      "queryFlexibility": 9,
+      "schemaFlexibility": 3,
+      "ecosystemMaturity": 5,
+      "learningCurve": 6
+    },
+    "justifications": {
+      "scalability": "Designed for horizontal scaling with automatic sharding and rebalancing. CockroachDB and Spanner distribute data globally while maintaining strong consistency. Near-linear write scaling across regions.",
+      "performance": "Distributed consensus (Raft/Paxos) adds latency compared to single-node RDBMS -- cross-region transactions can take 100-300ms. Local reads are fast, but globally consistent writes have inherent network overhead.",
+      "reliability": "Serializable isolation and distributed ACID transactions are the defining feature. Google Spanner achieves 99.999% availability. CockroachDB survives entire region failures without data loss through Raft-based replication.",
+      "operationalSimplicity": "Cluster topology, range rebalancing, and multi-region configuration add significant operational complexity. While easier than manual sharding of PostgreSQL, it still requires understanding distributed systems concepts.",
+      "queryFlexibility": "Full SQL support including joins, indexes, transactions, and foreign keys. CockroachDB is wire-compatible with PostgreSQL. Some limitations exist on distributed joins and certain advanced SQL features.",
+      "schemaFlexibility": "Inherits relational schema rigidity -- ALTER TABLE, migrations, and foreign key constraints. Schema changes on large distributed datasets require careful online DDL strategies to avoid downtime.",
+      "ecosystemMaturity": "Younger than traditional RDBMS (CockroachDB: 2015, TiDB: 2015). Growing adoption in cloud-native enterprises, but the tooling ecosystem and community are smaller than PostgreSQL or MySQL.",
+      "learningCurve": "SQL familiarity makes the transition approachable, but understanding distributed transaction semantics, data placement policies, and multi-region topology requires dedicated learning beyond standard RDBMS knowledge."
+    },
+    "capTheorem": {
+      "classification": "CP",
+      "notes": "NewSQL databases choose consistency and partition tolerance, sacrificing some availability during network partitions. Spanner uses TrueTime for globally synchronized timestamps. CockroachDB uses Raft consensus with serializable isolation."
+    },
+    "crossCategory": ["relational"],
+    "strengths": [
+      "Distributed ACID transactions with serializable isolation",
+      "Full SQL interface with PostgreSQL wire compatibility",
+      "Automatic sharding and rebalancing without application changes",
+      "Multi-region deployments with strong consistency guarantees"
+    ],
+    "weaknesses": [
+      "Higher latency than single-node RDBMS due to consensus overhead",
+      "Operational complexity of distributed cluster management",
+      "Smaller ecosystem and community compared to traditional RDBMS",
+      "Cost premium for multi-region strong consistency deployments"
+    ],
+    "bestFor": [
+      "Global applications requiring strong consistency across regions",
+      "Migrating from PostgreSQL/MySQL that has outgrown single-node scaling",
+      "Financial systems needing distributed ACID transactions",
+      "Multi-region SaaS platforms with regulatory data residency requirements"
+    ],
+    "avoidWhen": [
+      "Single-region deployment where traditional RDBMS suffices",
+      "Latency-sensitive workloads that cannot tolerate consensus overhead",
+      "Budget constraints make managed distributed databases impractical"
+    ],
+    "topDatabases": [
+      {
+        "name": "CockroachDB",
+        "description": "Distributed SQL database inspired by Google Spanner with PostgreSQL wire compatibility, automatic sharding, and multi-region survivability. Built for cloud-native global applications.",
+        "license": "BSL 1.1 (source-available) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/CockroachDB"
+      },
+      {
+        "name": "Google Cloud Spanner",
+        "description": "Globally distributed relational database with external consistency using TrueTime. The first system to offer both horizontal scalability and strong ACID guarantees at global scale.",
+        "license": "Proprietary (Google Cloud managed service)",
+        "url": "https://db-engines.com/en/system/Google+Cloud+Spanner"
+      },
+      {
+        "name": "TiDB",
+        "description": "Open-source distributed SQL database with MySQL compatibility, supporting HTAP (hybrid transactional/analytical processing) workloads with a columnar storage engine (TiFlash).",
+        "license": "Apache 2.0",
+        "url": "https://db-engines.com/en/system/TiDB"
+      },
+      {
+        "name": "YugabyteDB",
+        "description": "Open-source distributed SQL database compatible with PostgreSQL and Cassandra APIs. Offers tunable reads (strong or timeline consistency) and multi-region deployment with geo-partitioning.",
+        "license": "Apache 2.0 (Core) / Proprietary (Managed)",
+        "url": "https://db-engines.com/en/system/YugabyteDB"
+      }
+    ],
+    "useCases": [
+      "Global SaaS platforms",
+      "Financial transaction processing",
+      "Multi-region e-commerce",
+      "Cloud-native migrations"
+    ]
+  },
+  {
+    "id": "graph",
+    "name": "Graph Database",
+    "slug": "graph",
+    "icon": "share-2",
+    "complexityPosition": 0.78,
+    "summary": "Models data as nodes (entities) and edges (relationships) with properties on both, enabling efficient traversal of deeply connected data. Optimized for relationship-heavy queries like social networks, fraud detection, and knowledge graphs.",
+    "characterSketch": "The social butterfly who sees the world as a web of connections. While others store data in rows or documents, it maps relationships as first-class citizens and can trace six degrees of separation in milliseconds. It thinks in connections, not collections.",
+    "scores": {
+      "scalability": 4,
+      "performance": 6,
+      "reliability": 7,
+      "operationalSimplicity": 5,
+      "queryFlexibility": 8,
+      "schemaFlexibility": 7,
+      "ecosystemMaturity": 6,
+      "learningCurve": 4
+    },
+    "justifications": {
+      "scalability": "Graph traversals are inherently difficult to partition -- splitting connected graphs across nodes creates expensive cross-partition hops. Neo4j scales reads via replicas but writes are limited by leader node capacity.",
+      "performance": "Index-free adjacency enables constant-time traversals regardless of graph size -- following a relationship is O(1). However, graph-wide analytics and pathfinding on large datasets can be computationally expensive.",
+      "reliability": "Neo4j offers ACID transactions, clustering, and causal consistency. Amazon Neptune provides multi-AZ replication. Graph databases are generally reliable but lack the decades of hardening that relational databases have.",
+      "operationalSimplicity": "Graph modeling is powerful but requires careful design. Operations like data imports, backups, and cluster management differ significantly from relational workflows, and tooling is less mature.",
+      "queryFlexibility": "Cypher (Neo4j) and Gremlin (TinkerPop) enable expressive pattern matching, path finding, and relationship traversals that would require complex recursive CTEs in SQL. Powerful for connected data but limited for tabular analytics.",
+      "schemaFlexibility": "Property graphs allow dynamic properties on nodes and edges. No rigid schema required -- new node types and relationship types can be added without migrations. However, query performance depends on consistent graph structure.",
+      "ecosystemMaturity": "Neo4j dominates with 15+ years of development and a strong community. The broader graph database ecosystem is smaller than relational or document databases, with fewer tools and integrations available.",
+      "learningCurve": "Graph thinking requires a paradigm shift from tabular data. Learning Cypher or Gremlin, understanding traversal strategies, and designing effective graph models takes significant investment for developers from relational backgrounds."
+    },
+    "capTheorem": {
+      "classification": "CP",
+      "notes": "Neo4j uses leader-based replication with causal consistency, prioritizing consistency over availability during partitions. Amazon Neptune offers strong consistency within a region. Some graph databases (ArangoDB) offer tunable consistency."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Constant-time relationship traversals through index-free adjacency",
+      "Intuitive modeling of connected data (social graphs, hierarchies, networks)",
+      "Expressive pattern matching with Cypher/Gremlin query languages",
+      "Excellent for pathfinding, recommendations, and fraud detection"
+    ],
+    "weaknesses": [
+      "Difficult to partition and scale horizontally due to traversal patterns",
+      "Not suited for tabular analytics or bulk aggregation workloads",
+      "Smaller ecosystem with fewer tools compared to relational databases",
+      "Steep learning curve for graph modeling and query languages"
+    ],
+    "bestFor": [
+      "Social networks and relationship mapping",
+      "Fraud detection and anti-money laundering",
+      "Knowledge graphs and ontology management",
+      "Network topology and dependency analysis",
+      "Recommendation engines based on connections"
+    ],
+    "avoidWhen": [
+      "Data is primarily tabular with few relationships",
+      "Workload is dominated by bulk aggregations or analytics",
+      "Horizontal write scaling is a primary requirement",
+      "Team lacks graph modeling expertise"
+    ],
+    "topDatabases": [
+      {
+        "name": "Neo4j",
+        "description": "The most popular graph database with native graph storage, the Cypher query language, and a rich ecosystem of visualization tools, algorithms library, and integrations.",
+        "license": "GPL v3 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/Neo4j"
+      },
+      {
+        "name": "Amazon Neptune",
+        "description": "Fully managed graph database supporting both property graph (Gremlin) and RDF (SPARQL) models. Offers multi-AZ high availability with up to 15 read replicas.",
+        "license": "Proprietary (AWS managed service)",
+        "url": "https://db-engines.com/en/system/Amazon+Neptune"
+      },
+      {
+        "name": "ArangoDB",
+        "description": "Multi-model database with native graph, document, and key-value support. Uses AQL (ArangoDB Query Language) for unified querying across all data models.",
+        "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/ArangoDB"
+      },
+      {
+        "name": "TigerGraph",
+        "description": "High-performance graph analytics platform designed for deep-link analysis across massive datasets. Supports real-time graph analytics with parallel processing and GSQL query language.",
+        "license": "Proprietary (Community / Enterprise)",
+        "url": "https://db-engines.com/en/system/TigerGraph"
+      }
+    ],
+    "useCases": [
+      "Social networks",
+      "Fraud detection",
+      "Knowledge graphs",
+      "Recommendation engines",
+      "Network analysis"
+    ]
+  },
+  {
+    "id": "object",
+    "name": "Object-Oriented Database",
+    "slug": "object",
+    "icon": "box",
+    "complexityPosition": 0.82,
+    "summary": "Persists application objects directly to storage without object-relational mapping, preserving complex object hierarchies, inheritance, and polymorphism natively. Optimized for applications with deeply nested object graphs where ORM impedance mismatch is the primary pain point.",
+    "characterSketch": "The purist who refuses to translate -- it stores your objects exactly as they are in code, no flattening, no mapping, no compromises. Once revolutionary in its vision of seamless persistence, it now lives in a quiet niche, overshadowed by more popular models but still loyal to its philosophy.",
+    "scores": {
+      "scalability": 2,
+      "performance": 5,
+      "reliability": 6,
+      "operationalSimplicity": 5,
+      "queryFlexibility": 5,
+      "schemaFlexibility": 7,
+      "ecosystemMaturity": 2,
+      "learningCurve": 4
+    },
+    "justifications": {
+      "scalability": "Most OODBs are designed for single-server or small-cluster deployments. Horizontal scaling is limited by the complexity of distributing interconnected object graphs. No major cloud-managed OODB offerings exist.",
+      "performance": "Navigational access through object references is fast -- pointer chasing eliminates join overhead. However, collection-wide queries and aggregations are slow due to lack of optimized query planners.",
+      "reliability": "Commercial OODBs (InterSystems Cache, Versant) offer ACID transactions and proven enterprise reliability. Open-source options (db4o) had limited durability features and are no longer actively maintained.",
+      "operationalSimplicity": "Tight coupling to programming language (Java, C#) means schema changes propagate through application code. No universal SQL-like tooling for ad-hoc queries, monitoring, or administration.",
+      "queryFlexibility": "Object query languages (OQL, JDOQL) support traversal and filtering but lack the breadth of SQL. No standard query language across implementations -- each OODB has its own API and query syntax.",
+      "schemaFlexibility": "Object inheritance and polymorphism provide natural schema evolution through class hierarchies. Adding attributes is simple through class extension, but refactoring deep hierarchies can cascade breaking changes.",
+      "ecosystemMaturity": "The smallest active ecosystem among database models. db4o is discontinued, ObjectDB serves a niche Java community, and Versant was acquired. InterSystems Cache is the most commercially viable but highly proprietary.",
+      "learningCurve": "Requires deep understanding of object-oriented design patterns, persistence by reachability, object identity vs equality, and OQL/JDOQL query syntax. Few modern learning resources or community support available."
+    },
+    "capTheorem": {
+      "classification": "CA",
+      "notes": "Most OODBs operate as single-node or master-replica systems providing consistency and availability within a local deployment. Partition tolerance is generally not a design consideration given their single-server heritage."
+    },
+    "crossCategory": [],
+    "strengths": [
+      "Zero impedance mismatch -- objects stored exactly as they exist in code",
+      "Efficient navigational access through direct object references",
+      "Native support for inheritance, polymorphism, and complex object graphs",
+      "No ORM layer needed, reducing boilerplate and mapping bugs"
+    ],
+    "weaknesses": [
+      "Extremely limited ecosystem with few actively maintained products",
+      "Tight coupling to specific programming languages (Java, C#, C++)",
+      "No standardized query language across implementations",
+      "Poor horizontal scalability for distributed deployments",
+      "Minimal community support and declining industry adoption"
+    ],
+    "bestFor": [
+      "CAD/CAM and engineering applications with complex object hierarchies",
+      "Embedded systems requiring tight language-database integration",
+      "Scientific computing with deeply nested data structures"
+    ],
+    "avoidWhen": [
+      "Application needs to scale horizontally across many nodes",
+      "Multi-language access to the same data is required",
+      "Ad-hoc querying and reporting are important use cases",
+      "Long-term vendor support and community viability are priorities"
+    ],
+    "topDatabases": [
+      {
+        "name": "InterSystems Cache",
+        "description": "Enterprise object database powering healthcare (Epic, Cerner) and financial systems. Now evolved into InterSystems IRIS with multi-model capabilities including SQL and document support.",
+        "license": "Proprietary (InterSystems)",
+        "url": "https://db-engines.com/en/system/InterSystems+IRIS"
+      },
+      {
+        "name": "ObjectDB",
+        "description": "Lightweight Java object database implementing JPA and JDO standards. Provides transparent persistence for Java objects with ACID transactions and fast object retrieval.",
+        "license": "Proprietary (free for limited use)",
+        "url": "https://db-engines.com/en/system/ObjectDB"
+      },
+      {
+        "name": "Versant Object Database",
+        "description": "Enterprise object database acquired by Actian, designed for complex data models in telecom, defense, and financial applications requiring real-time object persistence.",
+        "license": "Proprietary (Actian)",
+        "url": "https://db-engines.com/en/system/Versant+Object+Database"
+      }
+    ],
+    "useCases": [
+      "CAD/CAM systems",
+      "Healthcare applications",
+      "Telecom networks",
+      "Scientific modeling"
+    ]
+  },
+  {
+    "id": "multi-model",
+    "name": "Multi-Model Database",
+    "slug": "multi-model",
+    "icon": "layers",
+    "complexityPosition": 0.88,
+    "summary": "Supports multiple data models (document, graph, key-value, search) within a single database engine, reducing the need for polyglot persistence. Optimized for applications that span multiple data access patterns without operating separate database systems.",
+    "characterSketch": "The Swiss Army knife that promises to do everything in one package -- documents, graphs, key-value, and more, all under one roof. Incredibly convenient for reducing operational complexity, but the jack-of-all-trades occasionally compromises depth for breadth.",
+    "scores": {
+      "scalability": 7,
+      "performance": 6,
+      "reliability": 6,
+      "operationalSimplicity": 4,
+      "queryFlexibility": 7,
+      "schemaFlexibility": 8,
+      "ecosystemMaturity": 4,
+      "learningCurve": 3
+    },
+    "justifications": {
+      "scalability": "Most multi-model databases support horizontal scaling through sharding. Cosmos DB offers global distribution with five consistency levels. ArangoDB distributes across clusters. However, cross-model queries can create scaling bottlenecks.",
+      "performance": "Performance is competent across models but rarely best-in-class for any single one. A dedicated graph database will outperform multi-model graph queries; a dedicated search engine will outperform multi-model text search.",
+      "reliability": "Cosmos DB offers 99.999% SLA with multi-region writes. ArangoDB and SurrealDB provide replication and failover. However, the complexity of supporting multiple data models increases the surface area for potential consistency issues.",
+      "operationalSimplicity": "While reducing the number of systems to manage (polyglot persistence elimination), multi-model databases introduce their own complexity: multiple query languages, indexing strategies per model, and model-specific tuning parameters.",
+      "queryFlexibility": "Unified query languages (AQL in ArangoDB, SQL-like in Cosmos DB) span multiple models. Can perform document queries, graph traversals, and key-value lookups from a single interface -- more flexible than single-model databases.",
+      "schemaFlexibility": "Inherits document-model schema flexibility as the base, with graph nodes, key-value pairs, and search indexes added on top. Mixing models in one system provides exceptional flexibility for evolving data requirements.",
+      "ecosystemMaturity": "A younger category with fewer production deployments than established single-model databases. Cosmos DB benefits from Azure ecosystem backing, but open-source options (ArangoDB, SurrealDB) have smaller communities.",
+      "learningCurve": "Must learn multiple data models, their query languages, and when to use each. Understanding the tradeoffs between models, cross-model query performance, and indexing strategies requires broad database expertise."
+    },
+    "capTheorem": {
+      "classification": "Tunable",
+      "notes": "Cosmos DB offers five well-defined consistency levels from strong to eventual. ArangoDB supports tunable replication. The ability to choose consistency per-operation is a strength of the multi-model approach."
+    },
+    "crossCategory": ["document", "graph", "key-value", "search"],
+    "strengths": [
+      "Single system handles documents, graphs, key-value, and search workloads",
+      "Reduces operational complexity of managing multiple database systems",
+      "Unified query interface spans multiple data models",
+      "Cosmos DB offers five tunable consistency levels with global distribution"
+    ],
+    "weaknesses": [
+      "Jack-of-all-trades: rarely best-in-class for any single data model",
+      "Complex to learn and configure across multiple model paradigms",
+      "Smaller ecosystem than established single-model databases",
+      "Cross-model queries may have unpredictable performance characteristics"
+    ],
+    "bestFor": [
+      "Applications requiring mixed data models (documents + graphs + search)",
+      "Reducing polyglot persistence operational overhead",
+      "Prototyping with uncertain data access patterns",
+      "Azure-native applications leveraging Cosmos DB's global distribution"
+    ],
+    "avoidWhen": [
+      "A single data model clearly dominates the workload",
+      "Best-in-class performance for a specific model is critical",
+      "Team lacks broad database expertise across multiple paradigms"
+    ],
+    "topDatabases": [
+      {
+        "name": "ArangoDB",
+        "description": "Open-source multi-model database supporting document, graph, and key-value models with AQL (ArangoDB Query Language) providing unified access across all models.",
+        "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/ArangoDB"
+      },
+      {
+        "name": "Azure Cosmos DB",
+        "description": "Microsoft's globally distributed multi-model database offering document, graph, key-value, column-family, and table APIs with five tunable consistency levels and 99.999% SLA.",
+        "license": "Proprietary (Azure managed service)",
+        "url": "https://db-engines.com/en/system/Microsoft+Azure+Cosmos+DB"
+      },
+      {
+        "name": "FaunaDB",
+        "description": "Serverless multi-model database combining document, relational, and graph capabilities with a globally distributed architecture and ACID transactions at scale.",
+        "license": "Proprietary (managed service)",
+        "url": "https://db-engines.com/en/system/Fauna"
+      },
+      {
+        "name": "SurrealDB",
+        "description": "Next-generation multi-model database supporting document, graph, and relational paradigms with SurrealQL, real-time queries, and built-in authentication. Designed for modern applications.",
+        "license": "BSL 1.1 (source-available)",
+        "url": "https://surrealdb.com/"
+      },
+      {
+        "name": "OrientDB",
+        "description": "Multi-model database combining document and graph models with SQL-like query language. Supports ACID transactions, distributed clustering, and schema-full/mixed/schemaless modes.",
+        "license": "Apache 2.0 (Community) / Proprietary (Enterprise)",
+        "url": "https://db-engines.com/en/system/OrientDB"
+      }
+    ],
+    "useCases": [
+      "Polyglot persistence replacement",
+      "Mixed-model applications",
+      "Global distribution",
+      "Rapid prototyping",
+      "IoT with diverse access patterns"
+    ]
   }
 ]
