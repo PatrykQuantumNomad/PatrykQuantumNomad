@@ -1,8 +1,8 @@
 # Milestone v1.5: Database Compass
 
-**Status:** In progress
+**Status:** Complete
 **Phases:** 28-32
-**Total Plans:** TBD
+**Total Plans:** 10
 
 ## Overview
 
@@ -98,8 +98,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — OG image generators, API routes, ogImage prop wiring, homepage callout, and tools page card
-- [ ] 32-02-PLAN.md — Companion blog post "How to Choose a Database in 2026" with bidirectional cross-links
+- [x] 32-01-PLAN.md — OG image generators, API routes, ogImage prop wiring, homepage callout, and tools page card
+- [x] 32-02-PLAN.md — Companion blog post "How to Choose a Database in 2026" with bidirectional cross-links
 
 ## Progress
 
