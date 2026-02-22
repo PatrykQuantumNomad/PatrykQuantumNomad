@@ -32,7 +32,7 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 - [ ] **PAGE-02**: 12 model detail pages at /tools/db-compass/[slug]/ via getStaticPaths
 - [ ] **PAGE-03**: Detail pages include radar chart, score breakdown, CAP badge, when-to-use/avoid lists, tradeoffs prose, and top databases
 - [ ] **PAGE-04**: Prev/next navigation between detail pages by complexity position
-- [ ] **PAGE-05**: Interactive filter on overview — React island filtering models by use case (caching, analytics, OLTP, search, etc.)
+- [x] **PAGE-05**: Interactive filter on overview — React island filtering models by use case (caching, analytics, OLTP, search, etc.)
 
 ### SEO & Structured Data
 
@@ -41,7 +41,7 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 - [x] **SEO-03**: BreadcrumbList JSON-LD on overview and all detail pages
 - [ ] **SEO-04**: Build-time OG image for overview page (spectrum miniature)
 - [ ] **SEO-05**: Build-time OG images for each of 12 detail pages (radar chart)
-- [ ] **SEO-06**: SEO-optimized meta descriptions for overview and all detail pages
+- [x] **SEO-06**: SEO-optimized meta descriptions for overview and all detail pages
 - [ ] **SEO-07**: All pages included in sitemap
 
 ### Site Integration
@@ -102,13 +102,13 @@ Requirements for Database Compass milestone. Each maps to roadmap phases.
 | PAGE-02 | Phase 31 | Pending |
 | PAGE-03 | Phase 31 | Pending |
 | PAGE-04 | Phase 31 | Pending |
-| PAGE-05 | Phase 30 | Pending |
+| PAGE-05 | Phase 30 | Complete |
 | SEO-01 | Phase 30 | Complete |
 | SEO-02 | Phase 31 | Pending |
 | SEO-03 | Phase 30 | Complete |
 | SEO-04 | Phase 32 | Pending |
 | SEO-05 | Phase 32 | Pending |
-| SEO-06 | Phase 30 | Pending |
+| SEO-06 | Phase 30 | Complete |
 | SEO-07 | Phase 32 | Pending |
 | INTEG-01 | Phase 32 | Pending |
 | INTEG-02 | Phase 32 | Pending |
