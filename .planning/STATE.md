@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 41 Complete, ready for Phase 42
+**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 42 in progress
 
 ## Current Position
 
-Phase: 41 of 47 (Foundation & Schema Infrastructure) -- COMPLETE
-Plan: 4 of 4 complete
-Status: Phase Complete
-Last activity: 2026-02-23 — Completed 41-04 engine orchestrator and sample manifest
+Phase: 42 of 47 (Security Rules)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-23 — Completed 42-01 container helpers and 20 security rules
 
-Progress: ▓▓▓▓░░░░░░ 14%
+Progress: ▓▓▓▓▓░░░░░ 29%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 84 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 4 v1.7)
+- Total plans completed: 85 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 5 v1.7)
 
 **Cumulative Stats:**
 
@@ -57,6 +57,10 @@ v1.7 decisions pending (to be logged during execution):
 - Engine tracks rulesTriggered via Set for accurate rulesPassed count
 - Deprecated GVK takes precedence over unknown GVK (KA-S006 over KA-S004)
 - Case-insensitive key search for "Did you mean?" suggestions on missing apiVersion/kind
+- SEC-03/SEC-05 no-overlap: KA-C005 fires for explicit runAsUser:0, KA-C003 skips
+- KA-C020 fires only for undefined securityContext, not empty {} (strict 'in' check)
+- KA-C018 flags inline value only, not valueFrom.secretKeyRef
+- Pod-level securityContext inheritance checked in C003/C004/C005/C013
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 41-04-PLAN.md (engine orchestrator and sample manifest) -- Phase 41 COMPLETE
+Stopped at: Completed 42-01-PLAN.md (container helpers and 20 security rules)
 Resume file: None
-Next: Plan Phase 42 (Security & Resource Limit Rules)
+Next: Execute 42-02-PLAN.md (sample manifest updates and engine wiring)

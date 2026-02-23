@@ -61,7 +61,7 @@ Plans:
   2. A manifest with host namespace sharing (PID, IPC, network), sensitive host path mounts, or Docker socket mounts produces error-level violations
   3. A manifest with missing security contexts, auto-mounted service account tokens, default service accounts, or secrets in env vars produces warning-level violations
   4. The results panel shows a PSS compliance summary indicating count of Baseline and Restricted violations
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 42-01-PLAN.md -- Container helpers and all 20 security rules (KA-C001 through KA-C020)
 - [ ] 42-02-PLAN.md -- Engine integration, PSS compliance summary, and sample manifest update
@@ -129,7 +129,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 41. Foundation & Schema Infrastructure | 4/4 | Complete   | 2026-02-23 | 2026-02-23 |
-| 42. Security Rules | v1.7 | 0/TBD | Not started | - |
+| 42. Security Rules | 1/2 | In Progress|  | - |
 | 43. Reliability & Best Practice Rules | v1.7 | 0/TBD | Not started | - |
 | 44. Cross-Resource Validation & RBAC | v1.7 | 0/TBD | Not started | - |
 | 45. Editor UI & Scoring | v1.7 | 0/TBD | Not started | - |
