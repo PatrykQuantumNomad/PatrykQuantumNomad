@@ -139,11 +139,11 @@ Plans:
   1. Sharing the tool page URL on social media displays a custom OG image generated at build time via Satori + Sharp
   2. A companion blog post covers Docker Compose best practices and tool architecture, with bidirectional cross-links between the blog post and tool page
   3. All tool and rule pages maintain Lighthouse 90+ scores and pass WCAG 2.1 AA accessibility checks
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 40-01: TBD
-- [ ] 40-02: TBD
+- [ ] 40-01-PLAN.md — OG image generator, API route, and ogImage prop wiring on tool page
+- [ ] 40-02-PLAN.md — Companion blog post and bidirectional cross-links between blog and tool page
 
 ## Progress
 
