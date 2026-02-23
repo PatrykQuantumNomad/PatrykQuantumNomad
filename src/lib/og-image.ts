@@ -1403,6 +1403,291 @@ export async function generateDockerfileAnalyzerOgImage(): Promise<Buffer> {
   return renderOgPng(layout);
 }
 
+/**
+ * Generates a branded OG image for the Kubernetes Manifest Analyzer tool page.
+ * Two-column layout: text + category pills on the left, dark YAML code panel on the right.
+ */
+export async function generateK8sAnalyzerOgImage(): Promise<Buffer> {
+  const categories = ['Schema', 'Security', 'Reliability', 'Best Practice', 'Cross-Resource'];
+
+  const categoryPills = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap' as const,
+        gap: '8px',
+      },
+      children: categories.map((name) => ({
+        type: 'div',
+        props: {
+          style: {
+            fontSize: '14px',
+            color: '#c44b20',
+            backgroundColor: 'rgba(196,75,32,0.1)',
+            borderRadius: '20px',
+            padding: '4px 14px',
+          },
+          children: name,
+        },
+      })),
+    },
+  };
+
+  // Stylized K8s YAML lines for the code panel
+  const codeLines: { keyword: string; rest: string; marker?: 'error' | 'warning' | null }[] = [
+    { keyword: 'apiVersion:', rest: 'apps/v1', marker: null },
+    { keyword: 'kind:', rest: 'Deployment', marker: null },
+    { keyword: '  replicas:', rest: '1', marker: 'warning' },
+    { keyword: '  privileged:', rest: 'true', marker: 'error' },
+    { keyword: '  image:', rest: 'app:latest', marker: 'warning' },
+  ];
+
+  const markerColors = { error: '#ff5f56', warning: '#e8934a' };
+
+  const codePanel = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#1e1e2e',
+        borderRadius: '12px',
+        padding: '24px 20px',
+        width: '420px',
+        gap: '4px',
+        border: '1px solid rgba(255,255,255,0.08)',
+      },
+      children: [
+        // Title bar dots
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              gap: '6px',
+              marginBottom: '16px',
+            },
+            children: ['#ff5f56', '#ffbd2e', '#27c93f'].map((color) => ({
+              type: 'div',
+              props: {
+                style: {
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                },
+              },
+            })),
+          },
+        },
+        // Code lines
+        ...codeLines.map((line, i) => ({
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              height: '28px',
+            },
+            children: [
+              // Line number
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    width: '20px',
+                    fontSize: '13px',
+                    color: '#555570',
+                    textAlign: 'right' as const,
+                  },
+                  children: `${i + 1}`,
+                },
+              },
+              // Marker dot
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: line.marker ? markerColors[line.marker] : 'transparent',
+                    flexShrink: 0,
+                  },
+                },
+              },
+              // Code text
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    gap: '6px',
+                    fontSize: '15px',
+                  },
+                  children: [
+                    {
+                      type: 'span',
+                      props: {
+                        style: { color: '#7aa2f7' },
+                        children: line.keyword,
+                      },
+                    },
+                    ...(line.rest
+                      ? [
+                          {
+                            type: 'span',
+                            props: {
+                              style: { color: '#a9b1d6' },
+                              children: line.rest,
+                            },
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              },
+            ],
+          },
+        })),
+        // Rule count badge at bottom
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              marginTop: '20px',
+              gap: '10px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '13px',
+                    color: '#555570',
+                  },
+                  children: 'Rules',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '28px',
+                    color: '#27c93f',
+                  },
+                  children: '67',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column: text content
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '620px',
+              padding: '40px 0px 60px 56px',
+              gap: '20px',
+            },
+            children: [
+              // Title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '44px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: 'Kubernetes Manifest Analyzer',
+                },
+              },
+              // Description
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '20px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children:
+                    'Free browser-based Kubernetes manifest linter with 67 rules across schema, security, reliability, best-practice, and cross-resource categories.',
+                },
+              },
+              // Category pills
+              categoryPills,
+            ],
+          },
+        },
+        // Right column: code panel
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '580px',
+              height: '630px',
+            },
+            children: [codePanel],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
 /** Helper to build a language column for the vs OG image */
 function vsLanguageColumn(language: Language, radarDataUri: string) {
   const tierColor = getTierColor(language.tier);
