@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.7 Kubernetes Manifest Analyzer
+**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 41: Foundation & Schema Infrastructure
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-23 — Milestone v1.7 started
+Phase: 41 of 47 (Foundation & Schema Infrastructure)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-23 — Roadmap created for v1.7 (7 phases, 123 requirements)
 
 Progress: ░░░░░░░░░░ 0%
 
@@ -32,7 +32,8 @@ Progress: ░░░░░░░░░░ 0%
 | v1.4 Dockerfile Analyzer | 22-27 | 13 | 38 | 2026-02-20 |
 | v1.5 Database Compass | 28-32 | 10 | 28 | 2026-02-22 |
 | v1.6 Compose Validator | 33-40 | 14 | 100 | 2026-02-23 |
-| **Total** | **40** | **80** | **280** | |
+| v1.7 K8s Analyzer | 41-47 | TBD | 123 | In progress |
+| **Total** | **47** | **80+** | **403** | |
 
 ## Accumulated Context
 
@@ -40,6 +41,11 @@ Progress: ░░░░░░░░░░ 0%
 
 Full decision log in PROJECT.md Key Decisions table.
 v1.0-v1.6 decisions archived in respective milestone files.
+
+v1.7 decisions pending (to be logged during execution):
+- Async engine (dynamic schema imports require async unlike compose-validator)
+- Single compiled Ajv module for all 18 K8s schemas (dedup shared definitions)
+- Phase 42/43 can run in parallel (both are per-resource, no cross-deps)
 
 ### Pending Todos
 
@@ -55,10 +61,12 @@ None.
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
 - [v1.3 Gap]: Dark mode strategy deferred -- charts use light mode CSS custom properties only
 - [v1.4 Tech Debt]: Category colors/grade colors duplicated in badge-generator.ts
+- [v1.7 Risk]: Schema bundle size must be validated <200KB gzipped in Phase 41 before proceeding
+- [v1.7 Risk]: Cross-resource false positives for partial manifests (Phase 44)
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: v1.7 milestone started, PROJECT.md and STATE.md updated
+Stopped at: Roadmap created for v1.7 Kubernetes Manifest Analyzer (7 phases, 123 reqs)
 Resume file: None
-Next: Define requirements (REQUIREMENTS.md) then spawn roadmapper
+Next: Plan Phase 41 via /gsd:plan-phase 41
