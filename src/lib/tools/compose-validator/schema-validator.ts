@@ -13,6 +13,7 @@ const ajv = new Ajv({
   allErrors: true, // report ALL errors, not just the first
   strict: false, // compose-spec uses patternProperties that strict mode rejects
   verbose: true, // include schema/parentSchema in errors for better categorization
+  validateSchema: false, // compose-spec uses draft-07 $schema which Ajv 8 doesn't bundle
 });
 
 addFormats(ajv); // required for format: "duration" in compose-spec healthcheck intervals
