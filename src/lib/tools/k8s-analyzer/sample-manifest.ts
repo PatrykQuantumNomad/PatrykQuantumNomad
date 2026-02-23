@@ -5,10 +5,20 @@
  * Includes valid resources alongside deliberate issues that trigger
  * multiple diagnostic rules — educational and realistic.
  *
- * Triggers: KA-S005 (schema), KA-S006 (deprecated), KA-S008 (name),
- * KA-S009 (labels), KA-S010 (empty document), KA-C001 (privileged),
- * KA-C006 (hostPID), KA-C008 (hostNetwork), KA-C015 (docker socket),
- * KA-C018 (secrets in env), KA-C019 (default namespace).
+ * Schema triggers: KA-S005 (schema), KA-S006 (deprecated), KA-S008 (name),
+ * KA-S009 (labels), KA-S010 (empty document).
+ *
+ * Security triggers: KA-C001 (privileged), KA-C006 (hostPID),
+ * KA-C008 (hostNetwork), KA-C015 (docker socket), KA-C018 (secrets in env),
+ * KA-C019 (default namespace).
+ *
+ * Reliability triggers: KA-R001 (no liveness), KA-R002 (no readiness),
+ * KA-R003 (identical probes), KA-R004 (single replica),
+ * KA-R006 (Recreate strategy), KA-R009 (latest/no image tag),
+ * KA-R012 (CronJob missing deadline).
+ *
+ * Best practice triggers: KA-B001-B004 (missing resource requests/limits),
+ * KA-B005 (missing labels), KA-B008 (NodePort service).
  */
 
 export const SAMPLE_K8S_MANIFEST = `# Kubernetes Manifest — Online Store Example
@@ -70,6 +80,18 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
@@ -162,7 +184,7 @@ metadata:
 data:
   KEY: value
 ---
-# Issue: Security violations — privileged container, no capabilities drop
+# Issue: Security + reliability + best-practice violations (R001, R002, R004, R006, B001-B005)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -172,6 +194,8 @@ metadata:
     app: insecure-app
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: insecure-app
@@ -213,5 +237,37 @@ spec:
     - name: docker-sock
       hostPath:
         path: /var/run/docker.sock
+---
+# Issue: CronJob missing deadline and image tag (R009, R012, B001-B005)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-job
+  namespace: online-store
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cleanup
+              image: myapp/cleanup
+---
+# Issue: NodePort service type (triggers KA-B008)
+apiVersion: v1
+kind: Service
+metadata:
+  name: debug-nodeport
+  namespace: online-store
+spec:
+  type: NodePort
+  selector:
+    app: debug
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
 ---
 ` as const;
