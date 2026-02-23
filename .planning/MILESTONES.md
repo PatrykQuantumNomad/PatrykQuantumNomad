@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.6 Docker Compose Validator (Shipped: 2026-02-23)
+
+**Delivered:** Interactive browser-based Docker Compose validation tool with 52 rules across 5 categories, category-weighted scoring, CodeMirror 6 YAML editor, React Flow dependency graph, 52 rule documentation pages, companion blog post, and shareable results
+
+**Phases completed:** 33-40 (14 plans total)
+
+**Key accomplishments:**
+- YAML 1.1 parser with merge key support, variable interpolation normalizer, and Ajv schema validation with 8 schema rules mapped to exact source lines
+- 44 custom lint rules across 4 categories (semantic, security, best practice, style) with port parser, graph builder, cycle detection, and category-weighted scoring engine
+- CodeMirror 6 YAML editor with nanostore state management, inline annotations, score gauge, category breakdown, and tabbed results panel
+- Interactive React Flow dependency graph with dagre layout, custom service nodes, condition-labeled edges, cycle highlighting, and lazy loading (222 KB separate chunk)
+- 52 per-rule SEO documentation pages, PNG badge export, lz-string URL state encoding, and 3-tier platform-adaptive sharing
+- Full site integration (header nav, homepage, tools page, JSON-LD, sitemap), custom OG image, and 2400-word companion blog post with 26 rule links
+
+**Stats:**
+- 177 files created/modified (+25,355 / -2,381 lines)
+- 8 phases, 14 plans, 48 commits
+- 2 days from start to ship (2026-02-22 → 2026-02-23)
+
+**Git range:** `feat(33-01)` → `fix(40-02)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.5 Database Compass (Shipped: 2026-02-22)
 
 **Delivered:** Interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum visualization, octagonal radar charts, sortable scoring table, use-case filtering, share controls, build-time OG images, and companion blog post

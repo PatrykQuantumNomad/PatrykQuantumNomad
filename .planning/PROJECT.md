@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes three content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), and Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes four content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), and Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring).
 
 ## Core Value
 
@@ -153,23 +153,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Homepage callout and tools page card for Database Compass — v1.5
 - ✓ Companion blog post "How to Choose a Database in 2026" with 15 cross-links — v1.5
 
+- ✓ YAML 1.1 parser with merge key support, variable interpolation normalizer, compose-spec JSON Schema validation via ajv — v1.6
+- ✓ 52 lint rules (8 schema, 15 semantic, 14 security, 12 best practice, 3 style) with category-weighted scoring — v1.6
+- ✓ CodeMirror 6 YAML editor with inline annotations, score gauge, category breakdown, tabbed results panel — v1.6
+- ✓ Interactive React Flow dependency graph with dagre layout, cycle highlighting, and lazy loading — v1.6
+- ✓ 52 per-rule SEO documentation pages at /tools/compose-validator/rules/[code] — v1.6
+- ✓ Score badge PNG download, lz-string URL state encoding, and 3-tier share fallback — v1.6
+- ✓ Full site integration (header nav, homepage callout, tools page, JSON-LD, breadcrumbs, sitemap) — v1.6
+- ✓ Build-time OG image via Satori + Sharp for social sharing — v1.6
+- ✓ Companion blog post "Docker Compose Best Practices" with 26 rule links and bidirectional cross-linking — v1.6
+
 ### Active
 
-## Current Milestone: v1.6 Docker Compose Validator
-
-**Goal:** Build a deep, interactive browser-based Docker Compose validation tool with schema validation, semantic analysis, security rules, category-weighted scoring, per-rule documentation, and an interactive service dependency graph — the fourth content pillar for the portfolio.
-
-**Target features:**
-- CodeMirror 6 editor with YAML syntax highlighting and pre-loaded sample compose file
-- Compose-spec JSON Schema validation via ajv (structural correctness)
-- Semantic analysis rules (port conflicts, circular depends_on, orphan networks/volumes, invalid image refs)
-- Security rules (privileged mode, host networking, secrets in env vars, dangerous capabilities)
-- Best practice rules (image tag pinning, health checks, resource limits, restart policies, read-only root)
-- Category-weighted 0-100 scoring with letter grades (proven Dockerfile Analyzer pattern)
-- Per-rule documentation pages at /tools/compose-validator/rules/[code]
-- Interactive dependency graph (React Flow + layout engine) with cycle detection
-- Score badge download, shareable URL state (lz-string compressed)
-- Companion blog post, OG images, homepage callout, header navigation, JSON-LD structured data
+(No active milestone — run `/gsd:new-milestone` to start next)
 
 ### Out of Scope
 
@@ -194,18 +190,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.5 Database Compass on top of v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for parsing.
+Shipped v1.6 Docker Compose Validator on top of v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 requirements delivered (180 total). Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 requirements delivered (280 total). Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 15 posts (5 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 17 posts (7 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
+Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
-v1.6 adds React Flow + layout engine for interactive dependency graphs, ajv + ajv-formats for JSON Schema validation, and the yaml npm package for AST-aware YAML parsing with line numbers.
 
 ## Key Decisions
 
@@ -255,6 +251,15 @@ v1.6 adds React Flow + layout engine for interactive dependency graphs, ajv + aj
 | UseCaseFilter follows LanguageFilter pattern | Proven nanostores + DOM manipulation pattern | ✓ Good — consistent React island architecture |
 | SVG-to-PNG via XMLSerializer + Canvas | Simpler than Beauty Index Canvas 2D composite | ✓ Good — reliable chart download |
 | Aliased DB Compass imports in og-image.ts | Avoids name collisions with Beauty Index exports | ✓ Good — clean multi-feature OG generation |
+| yaml 2.x with YAML 1.1 mode | Docker Compose uses merge keys (<<) requiring YAML 1.1 | ✓ Good — correct merge key support |
+| ajv singleton at module level | Compile schema once, reuse across validations | ✓ Good — efficient validation |
+| SchemaRuleMetadata (no check method) | ajv drives schema validation, rules are metadata only | ✓ Good — clean separation of concerns |
+| @xyflow/react + @dagrejs/dagre | Maintained React Flow + dagre layout for dependency graphs | ✓ Good — professional graph visualization |
+| Cycle-safe dagre layout | Remove cycle edges before layout, recombine after | ✓ Good — prevents infinite loop in layout |
+| React Flow lazy-loaded via React.lazy | 222 KB separate chunk loads only on Graph tab click | ✓ Good — Lighthouse 90+ maintained |
+| #compose= hash prefix | Distinct from #dockerfile= to prevent cross-tool collision | ✓ Good — clean URL namespace |
+| DocumentedRule interface | Unifies ComposeLintRule and SchemaRuleMetadata for page generation | ✓ Good — 52 rule pages from single source |
+| 3-tier share fallback | Web Share API > Clipboard API > prompt() | ✓ Good — platform-adaptive sharing |
 
 ## Constraints
 
@@ -269,4 +274,4 @@ v1.6 adds React Flow + layout engine for interactive dependency graphs, ajv + aj
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-22 after v1.6 milestone started*
+*Last updated: 2026-02-23 after v1.6 milestone complete*
