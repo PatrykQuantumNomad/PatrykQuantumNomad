@@ -209,7 +209,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   {/* Tools Section */}
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Tools</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <a href="/tools/dockerfile-analyzer/" class="block card-hover p-6 rounded-lg border border-[var(--color-border)] no-underline" data-reveal data-tilt>
         <article>
           <p class="meta-mono text-[var(--color-accent)]">Free Browser Tool</p>
@@ -227,6 +227,17 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
           <p class="text-sm text-[var(--color-text-secondary)] mt-2">
             Validate docker-compose.yml files against 52 rules across security, semantic,
             and best-practice categories. Dependency graph, scoring, and shareable results. 100% client-side.
+          </p>
+          <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Try it &rarr;</span>
+        </article>
+      </a>
+      <a href="/tools/k8s-analyzer/" class="block card-hover p-6 rounded-lg border border-[var(--color-border)] no-underline" data-reveal data-tilt>
+        <article>
+          <p class="meta-mono text-[var(--color-accent)]">Free Browser Tool</p>
+          <h3 class="text-lg font-heading font-bold text-[var(--color-text-primary)] mt-2">Kubernetes Manifest Analyzer</h3>
+          <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+            Analyze Kubernetes manifests against 67 rules covering schema, security, reliability,
+            and cross-resource validation. PSS compliance, RBAC analysis, and resource graph. 100% client-side.
           </p>
           <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Try it &rarr;</span>
         </article>
