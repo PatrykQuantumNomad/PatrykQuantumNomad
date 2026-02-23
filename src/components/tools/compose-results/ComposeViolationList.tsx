@@ -63,10 +63,13 @@ function ComposeViolationItem({
           &#9654;
         </span>
         <SeverityIcon severity={violation.severity} />
-        {/* Rule ID as plain text -- compose rule pages do not exist yet (Phase 38) */}
-        <span className="font-mono text-xs text-[var(--color-accent)]">
+        <a
+          href={`/tools/compose-validator/rules/${violation.ruleId.toLowerCase()}/`}
+          className="font-mono text-xs text-[var(--color-accent)] hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
           {violation.ruleId}
-        </span>
+        </a>
         <span className="flex-1 text-sm truncate">{violation.message}</span>
         <button
           onClick={(e) => {
