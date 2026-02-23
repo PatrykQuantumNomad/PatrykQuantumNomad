@@ -28,7 +28,7 @@ See previous milestone archives for details.
 - [x] **Phase 41: Foundation & Schema Infrastructure** - Multi-document YAML parser, GVK registry, resource registry, and pre-compiled K8s schema validators for 19 resource types (completed 2026-02-23)
 - [x] **Phase 42: Security Rules** - 20 pod security and container security rules covering PSS Baseline/Restricted profiles and CIS Benchmarks (completed 2026-02-23)
 - [x] **Phase 43: Reliability & Best Practice Rules** - 12 reliability rules (probes, replicas, image tags) and 12 best practice rules (resource limits, labels, namespace) (completed 2026-02-23)
-- [ ] **Phase 44: Cross-Resource Validation & RBAC** - 8 cross-resource reference checks (selector matching, ConfigMap/Secret/PVC/SA references) and 5 RBAC analysis rules
+- [x] **Phase 44: Cross-Resource Validation & RBAC** - 8 cross-resource reference checks (selector matching, ConfigMap/Secret/PVC/SA references) and 5 RBAC analysis rules (completed 2026-02-23)
 - [ ] **Phase 45: Editor UI & Scoring** - CodeMirror 6 YAML editor, score gauge, category breakdown, violation list, resource summary, share controls, and category-weighted scoring engine
 - [ ] **Phase 46: Resource Relationship Graph** - Interactive React Flow dependency graph with dagre layout, color-coded node types, and dangling reference visualization
 - [ ] **Phase 47: SEO, Documentation & Site Integration** - 67 rule documentation pages, companion blog post, OG images, homepage callout, header navigation, JSON-LD, and quality validation
@@ -90,7 +90,7 @@ Plans:
   2. References to ConfigMaps, Secrets, PVCs, and ServiceAccounts that do not exist in the manifest produce informational diagnostics (not false positives for well-known system resources like default ServiceAccount or kube-root-ca.crt ConfigMap)
   3. Roles or ClusterRoles with wildcard permissions, cluster-admin RoleBindings, or permissions granting pod exec/attach/create or secret access produce RBAC violations with CIS Benchmark references
   4. RBAC violations are scored under the Security category weight (35%)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 44-01-PLAN.md -- 8 cross-resource validation rules (KA-X001 through KA-X008) with well-known resources whitelist
 - [ ] 44-02-PLAN.md -- 5 RBAC analysis rules (KA-A001 through KA-A005) with category index
@@ -139,7 +139,7 @@ Plans:
 | 41. Foundation & Schema Infrastructure | 4/4 | Complete   | 2026-02-23 | 2026-02-23 |
 | 42. Security Rules | 2/2 | Complete | 2026-02-23 | 2026-02-23 |
 | 43. Reliability & Best Practice Rules | v1.7 | 3/3 | Complete | 2026-02-23 |
-| 44. Cross-Resource Validation & RBAC | 2/3 | In Progress|  | - |
+| 44. Cross-Resource Validation & RBAC | 3/3 | Complete   | 2026-02-23 | - |
 | 45. Editor UI & Scoring | v1.7 | 0/TBD | Not started | - |
 | 46. Resource Relationship Graph | v1.7 | 0/TBD | Not started | - |
 | 47. SEO, Documentation & Site Integration | v1.7 | 0/TBD | Not started | - |
