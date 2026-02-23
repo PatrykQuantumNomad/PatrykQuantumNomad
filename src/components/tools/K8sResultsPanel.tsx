@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   k8sResult,
@@ -14,6 +14,9 @@ import { K8sShareActions } from './k8s-results/K8sShareActions';
 import { K8sResourceSummary } from './k8s-results/K8sResourceSummary';
 import { K8sPssCompliance } from './k8s-results/K8sPssCompliance';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
+import { K8sGraphSkeleton } from './k8s-results/K8sGraphSkeleton';
+
+const LazyK8sResourceGraph = lazy(() => import('./k8s-results/K8sResourceGraph'));
 
 type ResultTab = 'results' | 'graph';
 
@@ -150,12 +153,16 @@ export default function K8sResultsPanel() {
                 Run analysis first to see the resource graph
               </p>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-full text-center py-12">
+          ) : !result.parseSuccess ? (
+            <div className="flex items-center justify-center h-full text-center">
               <p className="text-[var(--color-text-secondary)]">
-                Resource relationship graph coming in Phase 46
+                Fix YAML parse errors to see the resource graph
               </p>
             </div>
+          ) : (
+            <Suspense fallback={<K8sGraphSkeleton />}>
+              <LazyK8sResourceGraph result={result} />
+            </Suspense>
           )
         )}
       </div>
