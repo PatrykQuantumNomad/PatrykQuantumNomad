@@ -165,7 +165,22 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start next)
+<!-- Current scope. Building toward these. -->
+
+See `.planning/REQUIREMENTS.md` for full v1.7 requirements.
+
+## Current Milestone: v1.7 Kubernetes Manifest Analyzer
+
+**Goal:** Build an interactive browser-based K8s manifest linter with multi-resource validation, security analysis, and resource dependency graph.
+
+**Target features:**
+- Multi-document YAML parsing with per-resource-type schema validation (K8s 1.31, 18 resource types)
+- Full security suite: Polaris-style pod security, CIS Benchmark 5.2, RBAC analysis, NetworkPolicy checks, image validation
+- Cross-resource validation: selector matching, ConfigMap/Secret/PVC/ServiceAccount/Ingress references
+- Interactive resource relationship graph (React Flow + dagre)
+- Category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%)
+- ~67 rules with per-rule SEO documentation pages
+- Companion blog post, homepage callout, full site integration
 
 ### Out of Scope
 
@@ -274,4 +289,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-23 after v1.6 milestone complete*
+*Last updated: 2026-02-23 after v1.7 milestone started*
