@@ -91,6 +91,7 @@ export interface K8sAnalysisResult {
   score: K8sScoreResult;
   resources: ParsedResource[];
   resourceSummary: Map<string, number>;
+  pssCompliance?: PssComplianceSummary;
   parseSuccess: boolean;
   timestamp: number;
 }
