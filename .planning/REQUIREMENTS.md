@@ -64,18 +64,18 @@
 
 ## Best Practice Rules (12 rules)
 
-- [ ] **BP-01**: KA-B001 — Missing CPU requests (warning)
-- [ ] **BP-02**: KA-B002 — Missing CPU limits (warning)
-- [ ] **BP-03**: KA-B003 — Missing memory requests (warning)
-- [ ] **BP-04**: KA-B004 — Missing memory limits (warning)
-- [ ] **BP-05**: KA-B005 — Missing required labels app, version (info)
-- [ ] **BP-06**: KA-B006 — Missing namespace (info)
-- [ ] **BP-07**: KA-B007 — SSH port exposed (info)
-- [ ] **BP-08**: KA-B008 — NodePort service type used (info)
-- [ ] **BP-09**: KA-B009 — Liveness probe port not in container ports (warning)
-- [ ] **BP-10**: KA-B010 — Readiness probe port not in container ports (warning)
-- [ ] **BP-11**: KA-B011 — Missing priorityClassName (info)
-- [ ] **BP-12**: KA-B012 — Duplicate environment variable keys (warning)
+- [x] **BP-01**: KA-B001 — Missing CPU requests (warning)
+- [x] **BP-02**: KA-B002 — Missing CPU limits (warning)
+- [x] **BP-03**: KA-B003 — Missing memory requests (warning)
+- [x] **BP-04**: KA-B004 — Missing memory limits (warning)
+- [x] **BP-05**: KA-B005 — Missing required labels app, version (info)
+- [x] **BP-06**: KA-B006 — Missing namespace (info)
+- [x] **BP-07**: KA-B007 — SSH port exposed (info)
+- [x] **BP-08**: KA-B008 — NodePort service type used (info)
+- [x] **BP-09**: KA-B009 — Liveness probe port not in container ports (warning)
+- [x] **BP-10**: KA-B010 — Readiness probe port not in container ports (warning)
+- [x] **BP-11**: KA-B011 — Missing priorityClassName (info)
+- [x] **BP-12**: KA-B012 — Duplicate environment variable keys (warning)
 
 ## Cross-Resource Validation (8 rules)
 
@@ -223,18 +223,18 @@
 | REL-10 | Phase 43 | Complete |
 | REL-11 | Phase 43 | Complete |
 | REL-12 | Phase 43 | Complete |
-| BP-01 | Phase 43 | Pending |
-| BP-02 | Phase 43 | Pending |
-| BP-03 | Phase 43 | Pending |
-| BP-04 | Phase 43 | Pending |
-| BP-05 | Phase 43 | Pending |
-| BP-06 | Phase 43 | Pending |
-| BP-07 | Phase 43 | Pending |
-| BP-08 | Phase 43 | Pending |
-| BP-09 | Phase 43 | Pending |
-| BP-10 | Phase 43 | Pending |
-| BP-11 | Phase 43 | Pending |
-| BP-12 | Phase 43 | Pending |
+| BP-01 | Phase 43 | Complete |
+| BP-02 | Phase 43 | Complete |
+| BP-03 | Phase 43 | Complete |
+| BP-04 | Phase 43 | Complete |
+| BP-05 | Phase 43 | Complete |
+| BP-06 | Phase 43 | Complete |
+| BP-07 | Phase 43 | Complete |
+| BP-08 | Phase 43 | Complete |
+| BP-09 | Phase 43 | Complete |
+| BP-10 | Phase 43 | Complete |
+| BP-11 | Phase 43 | Complete |
+| BP-12 | Phase 43 | Complete |
 | XREF-01 | Phase 44 | Pending |
 | XREF-02 | Phase 44 | Pending |
 | XREF-03 | Phase 44 | Pending |

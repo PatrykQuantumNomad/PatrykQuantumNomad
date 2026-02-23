@@ -27,7 +27,7 @@ See previous milestone archives for details.
 
 - [x] **Phase 41: Foundation & Schema Infrastructure** - Multi-document YAML parser, GVK registry, resource registry, and pre-compiled K8s schema validators for 19 resource types (completed 2026-02-23)
 - [x] **Phase 42: Security Rules** - 20 pod security and container security rules covering PSS Baseline/Restricted profiles and CIS Benchmarks (completed 2026-02-23)
-- [ ] **Phase 43: Reliability & Best Practice Rules** - 12 reliability rules (probes, replicas, image tags) and 12 best practice rules (resource limits, labels, namespace)
+- [x] **Phase 43: Reliability & Best Practice Rules** - 12 reliability rules (probes, replicas, image tags) and 12 best practice rules (resource limits, labels, namespace) (completed 2026-02-23)
 - [ ] **Phase 44: Cross-Resource Validation & RBAC** - 8 cross-resource reference checks (selector matching, ConfigMap/Secret/PVC/SA references) and 5 RBAC analysis rules
 - [ ] **Phase 45: Editor UI & Scoring** - CodeMirror 6 YAML editor, score gauge, category breakdown, violation list, resource summary, share controls, and category-weighted scoring engine
 - [ ] **Phase 46: Resource Relationship Graph** - Interactive React Flow dependency graph with dagre layout, color-coded node types, and dangling reference visualization
@@ -75,11 +75,11 @@ Plans:
   2. Containers with latest/no image tag, missing resource requests/limits, or duplicate environment variable keys produce appropriate warnings
   3. Resources missing recommended labels (app, version), namespace, or priorityClassName produce informational diagnostics
   4. A CronJob without startingDeadlineSeconds, or a container with probe ports not matching container ports, produces specific warnings
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 43-01-PLAN.md -- 12 reliability rules (KA-R001 through KA-R012) with category index
 - [x] 43-02-PLAN.md -- 12 best practice rules (KA-B001 through KA-B012) with category index
-- [ ] 43-03-PLAN.md -- Master index integration and sample manifest update
+- [x] 43-03-PLAN.md -- Master index integration and sample manifest update
 
 ### Phase 44: Cross-Resource Validation & RBAC
 **Goal**: Users see validation of references between resources (Service->Deployment selectors, ConfigMap/Secret mounts, RBAC bindings) and get warnings for dangling references and overly permissive RBAC
@@ -134,7 +134,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 41. Foundation & Schema Infrastructure | 4/4 | Complete   | 2026-02-23 | 2026-02-23 |
 | 42. Security Rules | 2/2 | Complete | 2026-02-23 | 2026-02-23 |
-| 43. Reliability & Best Practice Rules | v1.7 | 2/3 | In progress | - |
+| 43. Reliability & Best Practice Rules | v1.7 | 3/3 | Complete | 2026-02-23 |
 | 44. Cross-Resource Validation & RBAC | v1.7 | 0/TBD | Not started | - |
 | 45. Editor UI & Scoring | v1.7 | 0/TBD | Not started | - |
 | 46. Resource Relationship Graph | v1.7 | 0/TBD | Not started | - |
