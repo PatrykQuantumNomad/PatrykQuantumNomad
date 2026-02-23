@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 
 <Layout
   title="Tools | Patryk Golabek"
-  description="Free browser-based developer tools by a Kubernetes architect. Dockerfile linting, security analysis, and more. 100% client-side — your code never leaves your device."
+  description="Free browser-based developer tools by a Kubernetes architect. Dockerfile analysis, Docker Compose validation, security analysis, and more. 100% client-side -- your code never leaves your device."
 >
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]" data-word-reveal>
@@ -40,6 +40,34 @@ import Layout from '../../layouts/Layout.astro';
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">40-rule engine</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Scoring &amp; grades</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Claude Skill</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Share links</li>
+        </ul>
+      </a>
+
+      <!-- Docker Compose Validator -->
+      <a
+        href="/tools/compose-validator/"
+        class="block card-hover p-6 rounded-lg border border-[var(--color-border)] no-underline group"
+        data-reveal
+        data-tilt
+      >
+        <div class="mb-4 text-[var(--color-accent)]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-heading font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
+          Docker Compose Validator
+        </h2>
+        <p class="meta-mono mt-1">Free Browser Tool</p>
+        <p class="text-sm text-[var(--color-text-secondary)] mt-3">
+          Validate your docker-compose.yml against 52 rules across schema, security, semantic,
+          best-practice, and style categories. Interactive dependency graph with cycle detection.
+        </p>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">52-rule engine</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Scoring &amp; grades</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Dependency graph</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Share links</li>
         </ul>
       </a>
