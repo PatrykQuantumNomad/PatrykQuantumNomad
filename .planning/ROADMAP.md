@@ -90,7 +90,11 @@ Plans:
   2. References to ConfigMaps, Secrets, PVCs, and ServiceAccounts that do not exist in the manifest produce informational diagnostics (not false positives for well-known system resources like default ServiceAccount or kube-root-ca.crt ConfigMap)
   3. Roles or ClusterRoles with wildcard permissions, cluster-admin RoleBindings, or permissions granting pod exec/attach/create or secret access produce RBAC violations with CIS Benchmark references
   4. RBAC violations are scored under the Security category weight (35%)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 44-01-PLAN.md -- 8 cross-resource validation rules (KA-X001 through KA-X008) with well-known resources whitelist
+- [ ] 44-02-PLAN.md -- 5 RBAC analysis rules (KA-A001 through KA-A005) with category index
+- [ ] 44-03-PLAN.md -- Master index integration and sample manifest update
 
 ### Phase 45: Editor UI & Scoring
 **Goal**: Users interact with a polished browser-based tool: paste or edit K8s manifests in a code editor, trigger analysis, and see scored results with inline annotations and share controls
