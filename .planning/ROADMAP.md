@@ -30,7 +30,7 @@ See previous milestone archives for details.
 - [x] **Phase 43: Reliability & Best Practice Rules** - 12 reliability rules (probes, replicas, image tags) and 12 best practice rules (resource limits, labels, namespace) (completed 2026-02-23)
 - [x] **Phase 44: Cross-Resource Validation & RBAC** - 8 cross-resource reference checks (selector matching, ConfigMap/Secret/PVC/SA references) and 5 RBAC analysis rules (completed 2026-02-23)
 - [x] **Phase 45: Editor UI & Scoring** - CodeMirror 6 YAML editor, score gauge, category breakdown, violation list, resource summary, share controls, and category-weighted scoring engine (completed 2026-02-23)
-- [ ] **Phase 46: Resource Relationship Graph** - Interactive React Flow dependency graph with dagre layout, color-coded node types, and dangling reference visualization
+- [x] **Phase 46: Resource Relationship Graph** - Interactive React Flow dependency graph with dagre layout, color-coded node types, and dangling reference visualization (completed 2026-02-23)
 - [ ] **Phase 47: SEO, Documentation & Site Integration** - 67 rule documentation pages, companion blog post, OG images, homepage callout, header navigation, JSON-LD, and quality validation
 
 ## Phase Details
@@ -120,7 +120,7 @@ Plans:
   1. Switching to the Graph tab in the results panel renders an interactive React Flow graph where each resource is a node and edges represent relationships (selector match, volume mount, envFrom, Ingress backend, HPA target, RBAC binding)
   2. Nodes are color-coded by resource kind category (workloads, services, config, storage, RBAC, scaling) and dangling references appear as red dashed edges
   3. The graph component is lazy-loaded via React.lazy() so it does not impact initial page load or Lighthouse scores
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 46-01-PLAN.md -- Graph data extractor + custom React Flow node/edge/skeleton/CSS components
 - [ ] 46-02-PLAN.md -- K8sResourceGraph assembly + K8sResultsPanel integration
@@ -148,5 +148,5 @@ Plans:
 | 43. Reliability & Best Practice Rules | v1.7 | 3/3 | Complete | 2026-02-23 |
 | 44. Cross-Resource Validation & RBAC | 3/3 | Complete   | 2026-02-23 | - |
 | 45. Editor UI & Scoring | 3/3 | Complete   | 2026-02-23 | - |
-| 46. Resource Relationship Graph | v1.7 | 1/2 | In progress | - |
+| 46. Resource Relationship Graph | 2/2 | Complete   | 2026-02-23 | - |
 | 47. SEO, Documentation & Site Integration | v1.7 | 0/TBD | Not started | - |

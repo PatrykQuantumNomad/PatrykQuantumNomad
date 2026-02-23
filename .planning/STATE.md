@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: 46 of 47 (Resource Relationship Graph)
-Plan: 1 of 2
-Status: In Progress
-Last activity: 2026-02-23 — Completed 46-01 graph data extractor + React Flow components
+Phase: 46 of 47 (Resource Relationship Graph) -- COMPLETE
+Plan: 2 of 2
+Status: Phase Complete
+Last activity: 2026-02-23 — Completed 46-02 K8sResourceGraph assembly + panel integration
 
-Progress: ▓▓▓▓▓▓░░░░ 49%
+Progress: ▓▓▓▓▓▓░░░░ 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 97 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 17 v1.7)
+- Total plans completed: 98 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 18 v1.7)
 
 **Cumulative Stats:**
 
@@ -41,6 +41,7 @@ Progress: ▓▓▓▓▓▓░░░░ 49%
 | Phase 45 P02 | 3min | 2 tasks | 8 files |
 | Phase 45 P03 | 3min | 2 tasks | 4 files |
 | Phase 46 P01 | 3min | 2 tasks | 5 files |
+| Phase 46 P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ v1.7 decisions pending (to be logged during execution):
 - [Phase 46]: Dangling Service selectors do NOT create phantom edges (no specific target)
 - [Phase 46]: ClusterRole targets use 'default' namespace in target ID for registry consistency
 - [Phase 46]: CATEGORY_COLORS exported from K8sResourceNode for reuse in graph layout
+- [Phase 46]: Include all edges (including dangling) in dagre layout so phantom nodes get positioned
+- [Phase 46]: Rebuild ResourceRegistry from result.resources inside useMemo (no stale registry)
 
 ### Pending Todos
 
@@ -120,6 +123,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 46-01-PLAN.md (graph data extractor + React Flow components)
+Stopped at: Completed 46-02-PLAN.md (K8sResourceGraph assembly + K8sResultsPanel integration)
 Resume file: None
-Next: 46-02-PLAN.md (K8sResourceGraph assembly + K8sResultsPanel integration)
+Next: Phase 47 (final phase)
