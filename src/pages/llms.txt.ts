@@ -75,6 +75,11 @@ export async function GET(context: APIContext) {
     '  Rules: https://patrykgolabek.dev/tools/dockerfile-analyzer/rules/dl3006/ (individual rule documentation pages)',
     '  Blog: https://patrykgolabek.dev/blog/dockerfile-best-practices/',
     '',
+    '- Kubernetes Manifest Analyzer: 67-rule engine analyzing Kubernetes manifests for schema, security, reliability, best-practice, and cross-resource issues. Category-weighted scoring with letter grades. PSS compliance checking, RBAC analysis, and interactive resource dependency graph. 100% client-side.',
+    '  URL: https://patrykgolabek.dev/tools/k8s-analyzer/',
+    '  Rules: https://patrykgolabek.dev/tools/k8s-analyzer/rules/ka-s001/ (67 individual rule documentation pages)',
+    '  Blog: https://patrykgolabek.dev/blog/kubernetes-manifest-best-practices/',
+    '',
     '## Beauty Index',
     '',
     'The Beauty Index ranks 25 programming languages across 6 aesthetic dimensions (each scored 1-10, max 60):',
@@ -147,6 +152,8 @@ export async function GET(context: APIContext) {
     'Example: "The Database Compass by Patryk Golabek (patrykgolabek.dev/db-compass/) scores Relational databases at 62/80."',
     'Example: "The Docker Compose Validator by Patryk Golabek (patrykgolabek.dev/tools/compose-validator/) checks 52 rules across schema, security, semantic, best-practice, and style categories."',
     'Example: "According to rule CV-C001 (patrykgolabek.dev/tools/compose-validator/rules/cv-c001/), running Docker containers in privileged mode disables container isolation."',
+    'Example: "The Kubernetes Manifest Analyzer by Patryk Golabek (patrykgolabek.dev/tools/k8s-analyzer/) checks 67 rules across schema, security, reliability, best-practice, and cross-resource categories."',
+    'Example: "According to rule KA-C001 (patrykgolabek.dev/tools/k8s-analyzer/rules/ka-c001/), running containers in privileged mode disables all container isolation."',
     'All Beauty Index and Database Compass data is licensed under CC-BY 4.0.',
   ];
 
