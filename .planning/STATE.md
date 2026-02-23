@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 47 of 47 (SEO, Documentation & Site Integration)
-Plan: 1 of 6
+Plan: 2 of 6
 Status: In Progress
-Last activity: 2026-02-23 — Completed 47-01 rule data foundation
+Last activity: 2026-02-23 — Completed 47-02 OG image and JSON-LD
 
 Progress: ▓▓▓▓▓▓░░░░ 50%
 
@@ -43,6 +43,7 @@ Progress: ▓▓▓▓▓▓░░░░ 50%
 | Phase 46 P01 | 3min | 2 tasks | 5 files |
 | Phase 46 P02 | 3min | 2 tasks | 2 files |
 | Phase 47 P01 | 2min | 2 tasks | 3 files |
+| Phase 47 P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ v1.7 decisions pending (to be logged during execution):
 - [Phase 47]: SCHEMA_RULE_METADATA spread into allDocumentedK8sRules (compatible DocumentedK8sRule shape)
 - [Phase 47]: 21 CIS Benchmark mappings (omit KA-C009/C012/C018 -- no direct CIS section)
 - [Phase 47]: getRelatedK8sRules follows exact compose-validator/rules/related.ts pattern
+- [Phase 47]: Follow exact ComposeValidator pattern for both OG image and JSON-LD
+- [Phase 47]: Use new URL() with Astro.site for ogImage prop (same as compose-validator)
 
 ### Pending Todos
 
@@ -127,6 +130,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 47-01-PLAN.md (rule data foundation)
+Stopped at: Completed 47-02-PLAN.md (OG image, JSON-LD, tool page SEO)
 Resume file: None
-Next: 47-02-PLAN.md (OG image, JSON-LD, tool page SEO)
+Next: 47-03-PLAN.md (rule documentation pages)
