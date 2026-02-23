@@ -146,8 +146,8 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Content
 
-- [ ] **CONTENT-01**: Companion blog post covering Docker Compose best practices and tool architecture
-- [ ] **CONTENT-02**: Bidirectional cross-links between blog post and tool page
+- [x] **CONTENT-01**: Companion blog post covering Docker Compose best practices and tool architecture
+- [x] **CONTENT-02**: Bidirectional cross-links between blog post and tool page
 
 ## Future Requirements
 
@@ -285,8 +285,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SITE-05 | Phase 39 | Complete |
 | SITE-06 | Phase 39 | Complete |
 | SITE-07 | Phase 40 | Complete |
-| CONTENT-01 | Phase 40 | Pending |
-| CONTENT-02 | Phase 40 | Pending |
+| CONTENT-01 | Phase 40 | Complete |
+| CONTENT-02 | Phase 40 | Complete |
 
 **Coverage:**
 - v1.6 requirements: 100 total
