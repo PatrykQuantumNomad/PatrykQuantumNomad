@@ -158,7 +158,6 @@ export default function ComposeEditorPanel() {
       <div className="flex items-center justify-between mb-3 min-h-[40px]">
         <h2 className="text-lg font-heading font-semibold">Editor</h2>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--color-text-secondary)] hidden sm:inline">Cmd/Ctrl+Enter</span>
           <button
             onClick={handleClear}
             className="px-4 py-2 rounded-lg font-semibold text-sm transition-all

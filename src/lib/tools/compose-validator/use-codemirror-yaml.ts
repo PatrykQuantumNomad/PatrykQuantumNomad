@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { EditorView, keymap } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { yaml } from '@codemirror/lang-yaml';
@@ -48,15 +48,6 @@ export function useCodeMirrorYaml({ initialDoc, onAnalyze }: UseCodeMirrorYamlOp
         basicSetup,
         yaml(),
         lintGutter(),
-        keymap.of([
-          {
-            key: 'Mod-Enter',
-            run: () => {
-              analyzeRef.current();
-              return true;
-            },
-          },
-        ]),
         oneDarkTheme,
         a11ySyntaxHighlighting,
         editorTheme,

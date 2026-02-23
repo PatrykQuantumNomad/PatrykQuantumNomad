@@ -179,14 +179,14 @@ function DependencyGraph({ result, yamlContent }: DependencyGraphProps) {
 
   if (!graphData) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-[var(--color-text-secondary)]">
+      <div className="flex items-center justify-center h-[300px] text-[var(--color-text-secondary)]">
         <p className="text-sm">No services found in the compose file.</p>
       </div>
     );
   }
 
   return (
-    <div className="compose-graph flex flex-col min-h-[400px] h-full">
+    <div className="compose-graph flex flex-col">
       {graphData.hasCycle && (
         <div className="text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2 text-xs mb-3 flex items-center gap-2">
           <svg
@@ -205,7 +205,7 @@ function DependencyGraph({ result, yamlContent }: DependencyGraphProps) {
           Circular dependency detected -- cycle edges highlighted in red
         </div>
       )}
-      <div className="flex-1 min-h-[400px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
+      <div className="h-[300px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
         <ReactFlow
           nodes={graphData.nodes}
           edges={graphData.edges}

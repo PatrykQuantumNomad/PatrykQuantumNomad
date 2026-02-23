@@ -1,6 +1,6 @@
 export function GraphSkeleton() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] animate-pulse">
+    <div className="flex flex-col items-center justify-center h-[300px] animate-pulse">
       <svg
         width="80"
         height="80"
