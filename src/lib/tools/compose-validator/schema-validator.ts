@@ -1,24 +1,11 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import type { ErrorObject } from 'ajv';
 import type { Document, LineCounter } from 'yaml';
 
-import composeSchema from './compose-spec-schema.json';
+// Pre-compiled standalone Ajv validator (no `new Function()` at runtime).
+// Regenerate with: node scripts/compile-compose-schema.mjs
+import { validate } from './validate-compose.js';
 import { resolveInstancePath, getNodeLine } from './parser';
 import type { ComposeRuleViolation } from './types';
-
-// ── ajv singleton ──────────────────────────────────────────────────
-// Compiled once at module level (~50-100 ms). Cached for all subsequent calls.
-const ajv = new Ajv({
-  allErrors: true, // report ALL errors, not just the first
-  strict: false, // compose-spec uses patternProperties that strict mode rejects
-  verbose: true, // include schema/parentSchema in errors for better categorization
-  validateSchema: false, // compose-spec uses draft-07 $schema which Ajv 8 doesn't bundle
-});
-
-addFormats(ajv); // required for format: "duration" in compose-spec healthcheck intervals
-
-const validate = ajv.compile(composeSchema);
 
 // ── Public API ─────────────────────────────────────────────────────
 
