@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 39 complete (Tool Page & Site Integration)
+**Current focus:** v1.6 Docker Compose Validator - Phase 40 in progress (OG Images, Blog Post & Polish)
 
 ## Current Position
 
-Phase: 39 of 40 (Tool Page & Site Integration) -- COMPLETE
-Plan: 1 of 1 complete in current phase
-Status: Phase 39 complete (all 6 requirements: SITE-01, SITE-02, SITE-03, SITE-04, SITE-05, SITE-06)
-Last activity: 2026-02-23 -- Plan 39-01 complete (JSON-LD, breadcrumbs, tools page card, homepage callout, sitemap verified)
+Phase: 40 of 40 (OG Images, Blog Post & Polish)
+Plan: 1 of 2 complete in current phase
+Status: Plan 40-01 complete (Compose Validator OG image)
+Last activity: 2026-02-23 -- Plan 40-01 complete (OG image generator, API route, ogImage prop wired)
 
-Progress: [██████████] 100% (Phase 39 plan 1/1)
+Progress: [█████████░] 50% (Phase 40 plan 1/2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 78 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 12 v1.6)
+- Total plans completed: 79 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 13 v1.6)
 
 **Cumulative Stats:**
 
@@ -43,6 +43,7 @@ Progress: [██████████] 100% (Phase 39 plan 1/1)
 | Phase 37 P01 | 3min | 2 tasks | 5 files |
 | Phase 38 P01 | 3min | 2 tasks | 4 files |
 | Phase 39 P01 | 4min | 2 tasks | 4 files |
+| Phase 40 P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - No header nav changes for Compose Validator -- existing /tools/ link with startsWith covers all /tools/* pages
 - Database Compass excluded from tools page per user's prior removal (commit 222e677)
 - Minimal aside linking to rule docs; companion blog post aside deferred to Phase 40
+- Compose Validator OG image uses 44px title font (vs 48px for Dockerfile Analyzer) to fit longer title
+- YAML code panel shows services/web/image/ports/privileged with error/warning markers on security lines
+- Rule count badge (52) replaces grade letter in code panel since compose validator has no grading system
 
 ### Pending Todos
 
@@ -116,6 +120,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 39-01-PLAN.md (JSON-LD, breadcrumbs, tools page card, homepage callout, sitemap verified) -- Phase 39 complete
+Stopped at: Completed 40-01-PLAN.md (OG image generator, API route, ogImage prop wired on compose-validator page)
 Resume file: None
-Next: Phase 40 -- OG Images, Blog Post & Polish
+Next: Plan 40-02 -- Blog post and remaining polish

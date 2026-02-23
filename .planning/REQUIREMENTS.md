@@ -142,7 +142,7 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 - [x] **SITE-04**: JSON-LD SoftwareApplication structured data on tool page
 - [x] **SITE-05**: BreadcrumbList JSON-LD on tool page and rule documentation pages
 - [x] **SITE-06**: All tool and rule pages in sitemap
-- [ ] **SITE-07**: Build-time OG image for tool page via Satori + Sharp
+- [x] **SITE-07**: Build-time OG image for tool page via Satori + Sharp
 
 ### Content
 
@@ -284,7 +284,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SITE-04 | Phase 39 | Complete |
 | SITE-05 | Phase 39 | Complete |
 | SITE-06 | Phase 39 | Complete |
-| SITE-07 | Phase 40 | Pending |
+| SITE-07 | Phase 40 | Complete |
 | CONTENT-01 | Phase 40 | Pending |
 | CONTENT-02 | Phase 40 | Pending |
 
