@@ -6,7 +6,9 @@
  * multiple diagnostic rules — educational and realistic.
  *
  * Triggers: KA-S005 (schema), KA-S006 (deprecated), KA-S008 (name),
- * KA-S009 (labels), KA-S010 (empty document).
+ * KA-S009 (labels), KA-S010 (empty document), KA-C001 (privileged),
+ * KA-C006 (hostPID), KA-C008 (hostNetwork), KA-C015 (docker socket),
+ * KA-C018 (secrets in env), KA-C019 (default namespace).
  */
 
 export const SAMPLE_K8S_MANIFEST = `# Kubernetes Manifest — Online Store Example
@@ -159,5 +161,57 @@ metadata:
   namespace: online-store
 data:
   KEY: value
+---
+# Issue: Security violations — privileged container, no capabilities drop
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insecure-app
+  namespace: online-store
+  labels:
+    app: insecure-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insecure-app
+  template:
+    metadata:
+      labels:
+        app: insecure-app
+    spec:
+      containers:
+        - name: app
+          image: myapp/insecure:1.0
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 8080
+      initContainers:
+        - name: init
+          image: busybox:1.36
+          command: ["sh", "-c", "echo init"]
+---
+# Issue: Host namespace sharing and sensitive volume mount
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+  namespace: default
+spec:
+  hostPID: true
+  hostNetwork: true
+  containers:
+    - name: debug
+      image: alpine:3.19
+      command: ["sleep", "3600"]
+      env:
+        - name: DB_PASSWORD
+          value: "s3cr3t-passw0rd"
+  volumes:
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
 ---
 ` as const;
