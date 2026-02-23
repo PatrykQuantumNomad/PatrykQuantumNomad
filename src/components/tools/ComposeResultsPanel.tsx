@@ -71,7 +71,7 @@ export default function ComposeResultsPanel() {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4 overflow-y-auto">
+      <div className={`rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4 ${activeTab === 'violations' ? 'flex-1 overflow-y-auto' : 'overflow-y-auto'}`}>
         {activeTab === 'violations' ? (
           /* Violations tab content */
           analyzing ? (
