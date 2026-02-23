@@ -13,6 +13,7 @@
 import type {
   K8sEngineResult,
   K8sRuleViolation,
+  K8sRuleContext,
   ParsedDocument,
 } from './types';
 import { parseK8sYaml } from './parser';
@@ -24,6 +25,8 @@ import {
 import { ResourceRegistry } from './resource-registry';
 import { validateResource } from './schema-validator';
 import { checkMetadata } from './diagnostic-rules';
+import { allK8sRules } from './rules';
+import { computePssCompliance } from './pss-compliance';
 
 // ── Public API ──────────────────────────────────────────────────────
 
@@ -168,19 +171,36 @@ export async function runK8sEngine(
   );
   const resourceSummary = registry.getSummary();
 
+  // ── Step 3.5: Run lint rules (security, reliability, best practice) ──
+  const ruleCtx: K8sRuleContext = {
+    resources: registry.getAll(),
+    registry,
+    lineCounter: parseResult.lineCounter,
+    rawText,
+  };
+
+  for (const rule of allK8sRules) {
+    const ruleViolations = rule.check(ruleCtx);
+    violations.push(...ruleViolations);
+    for (const v of ruleViolations) {
+      rulesTriggered.add(v.ruleId);
+    }
+  }
+
   // ── Step 4: Sort and return ─────────────────────────────────────
   violations.sort((a, b) => a.line - b.line || a.column - b.column);
 
-  // Total rules = 10 schema rules (KA-S001 through KA-S010)
-  const totalSchemaRules = 10;
-  const rulesPassed = totalSchemaRules - rulesTriggered.size;
+  // Total rules = 10 schema rules + N lint rules
+  const totalRules = 10 + allK8sRules.length;
+  const rulesPassed = totalRules - rulesTriggered.size;
 
   return {
     violations,
     resources: registry.getAll(),
     resourceSummary,
-    rulesRun: totalSchemaRules,
+    rulesRun: totalRules,
     rulesPassed,
+    pssCompliance: computePssCompliance(violations),
   };
 }
 

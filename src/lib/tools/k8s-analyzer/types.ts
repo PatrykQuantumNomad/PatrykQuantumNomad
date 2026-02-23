@@ -128,6 +128,15 @@ export interface ParsedResource {
   startLine: number;
 }
 
+// PSS (Pod Security Standards) compliance summary
+export interface PssComplianceSummary {
+  baselineViolations: number;
+  restrictedViolations: number;
+  totalPssViolations: number;
+  baselineCompliant: boolean;
+  restrictedCompliant: boolean;
+}
+
 // Engine result from running all rules
 export interface K8sEngineResult {
   violations: K8sRuleViolation[];
@@ -135,6 +144,7 @@ export interface K8sEngineResult {
   resourceSummary: Map<string, number>;
   rulesRun: number;
   rulesPassed: number;
+  pssCompliance: PssComplianceSummary;
 }
 
 // Schema rule metadata (no check method; ajv drives validation, not per-rule check() calls)
