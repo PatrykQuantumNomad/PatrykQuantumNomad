@@ -77,7 +77,7 @@ Plans:
   4. A CronJob without startingDeadlineSeconds, or a container with probe ports not matching container ports, produces specific warnings
 **Plans:** 3 plans
 Plans:
-- [ ] 43-01-PLAN.md -- 12 reliability rules (KA-R001 through KA-R012) with category index
+- [x] 43-01-PLAN.md -- 12 reliability rules (KA-R001 through KA-R012) with category index
 - [ ] 43-02-PLAN.md -- 12 best practice rules (KA-B001 through KA-B012) with category index
 - [ ] 43-03-PLAN.md -- Master index integration and sample manifest update
 
@@ -134,7 +134,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 41. Foundation & Schema Infrastructure | 4/4 | Complete   | 2026-02-23 | 2026-02-23 |
 | 42. Security Rules | 2/2 | Complete | 2026-02-23 | 2026-02-23 |
-| 43. Reliability & Best Practice Rules | v1.7 | 0/3 | Planning complete | - |
+| 43. Reliability & Best Practice Rules | v1.7 | 1/3 | In progress | - |
 | 44. Cross-Resource Validation & RBAC | v1.7 | 0/TBD | Not started | - |
 | 45. Editor UI & Scoring | v1.7 | 0/TBD | Not started | - |
 | 46. Resource Relationship Graph | v1.7 | 0/TBD | Not started | - |

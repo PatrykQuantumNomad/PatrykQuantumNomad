@@ -49,18 +49,18 @@
 
 ## Reliability Rules (12 rules)
 
-- [ ] **REL-01**: KA-R001 — Missing liveness probe (warning)
-- [ ] **REL-02**: KA-R002 — Missing readiness probe (warning)
-- [ ] **REL-03**: KA-R003 — Identical liveness and readiness probes (warning)
-- [ ] **REL-04**: KA-R004 — Single replica Deployment (warning)
-- [ ] **REL-05**: KA-R005 — Missing PodDisruptionBudget (info)
-- [ ] **REL-06**: KA-R006 — No rolling update strategy (warning)
-- [ ] **REL-07**: KA-R007 — Missing pod anti-affinity (info)
-- [ ] **REL-08**: KA-R008 — Missing topology spread constraint (info)
-- [ ] **REL-09**: KA-R009 — Image uses latest or no tag (warning)
-- [ ] **REL-10**: KA-R010 — Image pull policy not Always (info)
-- [ ] **REL-11**: KA-R011 — Selector/template label mismatch (error)
-- [ ] **REL-12**: KA-R012 — CronJob missing deadline (warning)
+- [x] **REL-01**: KA-R001 — Missing liveness probe (warning)
+- [x] **REL-02**: KA-R002 — Missing readiness probe (warning)
+- [x] **REL-03**: KA-R003 — Identical liveness and readiness probes (warning)
+- [x] **REL-04**: KA-R004 — Single replica Deployment (warning)
+- [x] **REL-05**: KA-R005 — Missing PodDisruptionBudget (info)
+- [x] **REL-06**: KA-R006 — No rolling update strategy (warning)
+- [x] **REL-07**: KA-R007 — Missing pod anti-affinity (info)
+- [x] **REL-08**: KA-R008 — Missing topology spread constraint (info)
+- [x] **REL-09**: KA-R009 — Image uses latest or no tag (warning)
+- [x] **REL-10**: KA-R010 — Image pull policy not Always (info)
+- [x] **REL-11**: KA-R011 — Selector/template label mismatch (error)
+- [x] **REL-12**: KA-R012 — CronJob missing deadline (warning)
 
 ## Best Practice Rules (12 rules)
 
@@ -211,18 +211,18 @@
 | SEC-19 | Phase 42 | Pending |
 | SEC-20 | Phase 42 | Pending |
 | SCORE-05 | Phase 42 | Complete |
-| REL-01 | Phase 43 | Pending |
-| REL-02 | Phase 43 | Pending |
-| REL-03 | Phase 43 | Pending |
-| REL-04 | Phase 43 | Pending |
-| REL-05 | Phase 43 | Pending |
-| REL-06 | Phase 43 | Pending |
-| REL-07 | Phase 43 | Pending |
-| REL-08 | Phase 43 | Pending |
-| REL-09 | Phase 43 | Pending |
-| REL-10 | Phase 43 | Pending |
-| REL-11 | Phase 43 | Pending |
-| REL-12 | Phase 43 | Pending |
+| REL-01 | Phase 43 | Complete |
+| REL-02 | Phase 43 | Complete |
+| REL-03 | Phase 43 | Complete |
+| REL-04 | Phase 43 | Complete |
+| REL-05 | Phase 43 | Complete |
+| REL-06 | Phase 43 | Complete |
+| REL-07 | Phase 43 | Complete |
+| REL-08 | Phase 43 | Complete |
+| REL-09 | Phase 43 | Complete |
+| REL-10 | Phase 43 | Complete |
+| REL-11 | Phase 43 | Complete |
+| REL-12 | Phase 43 | Complete |
 | BP-01 | Phase 43 | Pending |
 | BP-02 | Phase 43 | Pending |
 | BP-03 | Phase 43 | Pending |

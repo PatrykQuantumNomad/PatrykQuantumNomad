@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 42 complete, Phase 43 next
+**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 43 in progress (reliability + best practice rules done, integration next)
 
 ## Current Position
 
-Phase: 42 of 47 (Security Rules) -- COMPLETE
-Plan: 2 of 2 complete
-Status: Phase Complete
-Last activity: 2026-02-23 — Completed 42-02 engine integration and PSS compliance
+Phase: 43 of 47 (Reliability & Best Practice Rules)
+Plan: 2 of 3 complete
+Status: In Progress
+Last activity: 2026-02-23 — Completed 43-02 best practice rules (KA-B001 through KA-B012)
 
-Progress: ▓▓▓▓▓░░░░░ 29%
+Progress: ▓▓▓▓▓░░░░░ 32%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 86 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 6 v1.7)
+- Total plans completed: 88 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 8 v1.7)
 
 **Cumulative Stats:**
 
@@ -64,6 +64,11 @@ v1.7 decisions pending (to be logged during execution):
 - PssComplianceSummary in types.ts (not pss-compliance.ts) to avoid circular imports
 - PSS Restricted inherits Baseline: zero Baseline AND zero Restricted violations required
 - totalRules = 10 + allK8sRules.length for Phase 43 extensibility (not hardcoded 30)
+- Probe rules (R001-R003) filter containerType === 'container' (exclude initContainers)
+- R003 uses stableStringify for reliable deep probe comparison regardless of key order
+- R005 emits PDB recommendation without registry.getByKind (PDB not in GVK registry)
+- R009 getImageTag splits on '/' to handle registry:port format correctly
+- R011 subset check (not exact match) for selector vs template labels
 
 ### Pending Todos
 
@@ -85,6 +90,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 42-02-PLAN.md (engine integration and PSS compliance)
+Stopped at: Completed 43-01-PLAN.md (12 reliability rules KA-R001 through KA-R012)
 Resume file: None
-Next: Plan Phase 43 (Reliability & Best Practice Rules)
+Next: Execute 43-02-PLAN.md (12 best practice rules KA-B001 through KA-B012)
