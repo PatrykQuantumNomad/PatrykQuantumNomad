@@ -69,6 +69,10 @@ v1.7 decisions pending (to be logged during execution):
 - R005 emits PDB recommendation without registry.getByKind (PDB not in GVK registry)
 - R009 getImageTag splits on '/' to handle registry:port format correctly
 - R011 subset check (not exact match) for selector vs template labels
+- B005 fires ONE violation per resource listing all missing labels (not one per label)
+- B006 checks literally absent namespace, distinct from KA-C019 default namespace
+- B009/B010 filter containerType=container only, skip containers with no ports array
+- B012 fires per duplicate occurrence using Map-based first-seen tracking
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 43-01-PLAN.md (12 reliability rules KA-R001 through KA-R012)
+Stopped at: Completed 43-02-PLAN.md (12 best practice rules KA-B001 through KA-B012)
 Resume file: None
-Next: Execute 43-02-PLAN.md (12 best practice rules KA-B001 through KA-B012)
+Next: Execute 43-03-PLAN.md (master index integration, sample manifest, engine wiring)
