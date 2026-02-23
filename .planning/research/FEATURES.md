@@ -1,193 +1,233 @@
-# Feature Research: Docker Compose Validator
+# Feature Research: Kubernetes Manifest Analyzer
 
-**Domain:** Interactive browser-based Docker Compose validation tool on an Astro 5 portfolio site
-**Researched:** 2026-02-22
+**Domain:** Interactive browser-based Kubernetes manifest validation/linting tool on an Astro 5 portfolio site
+**Researched:** 2026-02-23
 **Confidence:** HIGH
-**Scope:** Docker Compose Validator at /tools/compose-validator/ with schema validation, semantic analysis, security rules, best practice rules, category-weighted scoring, per-rule documentation, interactive dependency graph, and companion blog post
+**Scope:** Kubernetes Manifest Analyzer at /tools/k8s-analyzer/ with multi-document YAML parsing, per-resource-type K8s OpenAPI schema validation, security checks (Pod Security Standards, CIS-aligned, RBAC analysis), cross-resource validation, interactive resource relationship graph, category-weighted scoring, ~67 rules with per-rule SEO documentation, and companion blog post
 
 ---
 
 ## Existing Infrastructure (Already Built)
 
-These capabilities exist on patrykgolabek.dev and directly inform what the Compose Validator can leverage:
+These capabilities exist on patrykgolabek.dev from v1.4 Dockerfile Analyzer and v1.6 Docker Compose Validator:
 
 | Capability | Where | Reuse Potential |
 |------------|-------|-----------------|
-| **Dockerfile Analyzer pattern** | `src/lib/tools/dockerfile-analyzer/` -- LintRule interface, engine, scorer, types | MIRROR -- Compose Validator follows the same modular rule architecture: one file per rule, category subdirectories, flat registry array |
-| **Category-weighted scoring** | `src/lib/tools/dockerfile-analyzer/scorer.ts` -- diminishing returns formula | ADAPT -- same algorithm with different categories and weights |
-| **CodeMirror 6 editor** | `src/lib/tools/dockerfile-analyzer/use-codemirror.ts`, editor-theme.ts | ADAPT -- swap Dockerfile language for YAML language mode |
-| **Inline annotations** | `src/lib/tools/dockerfile-analyzer/highlight-line.ts` -- squiggly underlines + gutter markers | DIRECT -- same annotation pattern for YAML violations |
-| **Score gauge component** | React component with SVG circular gauge + letter grade | DIRECT -- identical component, different input |
-| **Category breakdown panel** | React component showing sub-scores per dimension | ADAPT -- new category names |
+| **Dockerfile Analyzer pattern** | `src/lib/tools/dockerfile-analyzer/` -- LintRule interface, engine, scorer, types | MIRROR -- K8s Analyzer follows same modular rule architecture |
+| **Docker Compose Validator pattern** | `src/lib/tools/compose-validator/` -- YAML parsing, ajv schema validation, semantic analysis | ADAPT -- YAML parsing reusable, K8s schema validation is structurally different (per-resource-type OpenAPI schemas vs single compose-spec schema) |
+| **Category-weighted scoring** | `scorer.ts` -- diminishing returns formula | ADAPT -- same algorithm with new categories and weights (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%) |
+| **CodeMirror 6 YAML editor** | `use-codemirror.ts` + `@codemirror/lang-yaml` | DIRECT -- same YAML language mode already used in Compose Validator |
+| **Inline annotations** | `highlight-line.ts` -- squiggly underlines + gutter markers | DIRECT -- same annotation pattern |
+| **Score gauge component** | React SVG circular gauge + letter grade | DIRECT -- identical component |
+| **Category breakdown panel** | React component showing sub-scores per dimension | ADAPT -- new category names (6 categories vs 5) |
 | **Violation list component** | Severity-grouped, expandable details, click-to-navigate | DIRECT -- same UX pattern |
-| **Badge generator** | `src/lib/tools/dockerfile-analyzer/badge-generator.ts` -- programmatic SVG-to-PNG | ADAPT -- "Compose Validator" branding |
-| **URL state compression** | `src/lib/tools/dockerfile-analyzer/url-state.ts` -- lz-string | DIRECT -- same pattern for compose YAML |
-| **Rule documentation pages** | `src/pages/tools/dockerfile-analyzer/rules/[code].astro` | MIRROR -- same template at /tools/compose-validator/rules/[code] |
-| **OG image generation** | `src/lib/og-image.ts` using Satori + Sharp | EXTEND -- Compose Validator OG images |
-| **JSON-LD structured data** | SoftwareApplication schema on Dockerfile Analyzer | DIRECT -- same schema for Compose Validator |
+| **Badge generator** | `badge-generator.ts` -- programmatic SVG-to-PNG | ADAPT -- "K8s Manifest Analyzer" branding |
+| **URL state compression** | `url-state.ts` -- lz-string | ADAPT -- need `#k8s=` hash prefix distinct from `#dockerfile=` and `#compose=` |
+| **Rule documentation pages** | `/tools/compose-validator/rules/[code].astro` | MIRROR -- same template at `/tools/k8s-analyzer/rules/[code]` |
+| **OG image generation** | `src/lib/og-image.ts` using Satori + Sharp | EXTEND -- K8s Analyzer OG images |
+| **JSON-LD structured data** | SoftwareApplication schema | DIRECT -- same schema |
 | **Nanostore bridge** | Editor-to-React state communication pattern | DIRECT -- same cross-framework pattern |
 | **React island pattern** | `client:only="react"` with View Transitions lifecycle | DIRECT -- same island approach |
-| **Homepage callout** | Pattern for featuring tools on homepage | DIRECT -- add Compose Validator card |
-| **Tools page** | `src/pages/tools/index.astro` | EXTEND -- add Compose Validator card |
+| **React Flow dependency graph** | Compose Validator service graph with dagre layout, cycle detection | ADAPT -- resource relationship graph instead of service dependency graph |
 
 ---
 
 ## Competitive Landscape Analysis
 
-### Existing Docker Compose Validation Tools
+### Existing Kubernetes Manifest Validation Tools
 
-| Tool | Type | Rules | Strengths | Weaknesses |
-|------|------|-------|-----------|------------|
-| **DCLint** (zavoloklom) | CLI, npm | ~15 rules across 4 categories (Style, Security, Best Practice, Performance) | Auto-fix support, inline comments to disable rules, configurable | No browser UI, no scoring, no dependency visualization, limited rule count |
-| **Code Pathfinder** | CLI, CI/CD | 10 COMPOSE-SEC security rules | Deep CWE-mapped security focus, well-documented | Security-only, no best practice/semantic checks, no browser UI |
-| **Semgrep** (docker-compose ruleset) | CLI, CI/CD | ~8 security rules | Pattern-based, integrates with CI/CD | Not compose-specific, no scoring, no browser UI |
-| **dcvalidator** (ZHAW SPLab) | Web + CLI | ~3 checks (duplicates, structural) | Academic pedigree, web-accessible | Minimal rule set, unmaintained, no scoring |
-| **onewebcare.com** | Web | Schema + basic checks | Browser-based, example templates | Shallow validation (schema + obvious errors), no scoring, no security rules |
-| **multitools.ovh** | Web | 10 validation types claimed | Categorized results | Basic implementation, limited depth, no line numbers |
-| **docker compose config** | Built-in CLI | Schema validation | Official tool, catches structural errors | No security rules, no best practices, no scoring, requires Docker installed |
-| **VS Code YAML extension** | IDE plugin | Schema validation via JSON Schema | Real-time, inline | Schema-only, no semantic/security analysis |
+| Tool | Type | Rule Count | Strengths | Weaknesses |
+|------|------|------------|-----------|------------|
+| **KubeLinter** (StackRox/Red Hat) | CLI, Go | ~60 checks | Comprehensive checks covering security, reliability, RBAC; CIS 5.1 checks; "dangling" cross-resource checks (Service->Deployment, Ingress->Service, NetworkPolicy->Pod, HPA->target); configurable templates for custom checks | CLI only; no scoring; no browser UI; no graph visualization |
+| **Polaris** (Fairwinds) | CLI + Dashboard | ~40 checks across 4 categories (Security, Reliability, Efficiency, Networking) | Category-based check organization; JSON Schema-based custom checks; dashboard UI exists but is cluster-connected; security checks include RBAC exec/attach and NetworkPolicy | Dashboard requires cluster connection (not static file analysis in browser); no weighted scoring; limited cross-resource validation |
+| **kube-score** | CLI, Go | ~43 checks | Good reliability focus (PDB, anti-affinity, topology spread, HPA conflicts); strong probe validation (identical probe detection); stable API version detection | CLI only; no browser UI; no scoring system (uses OK/WARNING/CRITICAL per-check); limited security depth; no RBAC checks |
+| **Checkov** (Bridgecrew/Palo Alto) | CLI, Python | ~139 CKV_K8S checks | Most comprehensive rule set; CIS/NIST mapped; covers API server config, RBAC wildcards, image digest validation; custom rules via Python | CLI/CI only; enterprise-focused; many checks target cluster runtime config (not manifest files); no browser UI; no scoring |
+| **kubeconform** | CLI, Go | Schema-only | Fastest K8s schema validator; supports custom CRD schemas; version-specific validation (K8s 1.x); multi-version JSON Schema registry | Schema validation ONLY -- no security, best practice, or semantic checks; CLI only |
+| **kubeval** (deprecated) | CLI, Go | Schema-only | Was the standard schema validator | DEPRECATED -- replaced by kubeconform; unmaintained since 2022 |
+| **Datree** | CLI | ~100 rules across 9 categories | Broad rule set; NSA hardening guide rules; Argo CD rules | Company CLOSED July 2023; effectively dead project; no browser UI |
+| **Snyk IaC** | CLI + SaaS | Undisclosed (extensive) | CIS/NIST/SOC2 mapping; Helm chart support; context-aware prioritization | Enterprise SaaS; not open-source rule details; no standalone browser tool |
+| **FOSSA K8s Linter** | Web | Basic | Browser-based; paste-and-validate UX | "Basic validation" only -- explicitly recommends other tools for depth; no scoring; no graph |
+| **EaseCloud Validator** | Web | ~15 checks | Browser-based; client-side processing; multi-document support; PSS Baseline/Restricted checks; version 1.19-1.30 support | Limited rule depth; no scoring; no cross-resource validation; no graph; no rule documentation pages |
+| **ValidKube** | Web | Multiple tools | Combines validation + cleaning + security scanning | JavaScript-heavy SPA; unclear which checks are actually run; no scoring |
 
 ### Gap Analysis
 
-**What NO existing tool provides:**
-1. Category-weighted scoring with letter grades
-2. Interactive dependency graph visualization
-3. Combined schema + semantic + security + best practice analysis in one browser tool
-4. Per-rule documentation pages (SEO value)
-5. Exportable score badges
-6. Shareable URL state
-7. Expert-voice rule explanations with production consequences
+**What NO existing browser-based tool provides:**
 
-This is the same gap the Dockerfile Analyzer fills for Dockerfiles -- no browser-based tool combines depth, scoring, and interactivity.
+1. **Category-weighted scoring with letter grades** -- no browser K8s tool scores manifests on a 0-100 scale
+2. **Interactive resource relationship graph** -- no browser tool visualizes how Deployments, Services, ConfigMaps, Secrets, PVCs, and Ingresses reference each other
+3. **Cross-resource validation** -- KubeLinter has "dangling" checks (Service->Deployment, Ingress->Service, NetworkPolicy->Pod, HPA->target) but only as CLI; no browser tool does this
+4. **Combined schema + security + reliability + cross-resource analysis in one browser tool** -- existing browser tools do schema + basic security at most
+5. **Per-rule SEO documentation pages** -- no K8s tool has 67+ individually indexed, expert-written rule pages
+6. **Exportable score badges** -- unique to our tool pattern
+7. **Shareable URL state** -- unique to our tool pattern
+8. **Pod Security Standards mapping** -- KubeLinter/Polaris/Checkov do PSS checks but not in a browser-based tool with clear PSS Baseline/Restricted mapping
+9. **Multi-document YAML with per-resource validation** -- browser tools that exist treat the whole file as one unit; we validate each `---` separated document against its resource-type-specific schema
+
+**The opportunity is massive.** K8s manifest validation is a significantly larger domain than Dockerfile or Docker Compose validation. The existing browser-based tools are shallow. CLI tools are deep but inaccessible for quick checks. A browser tool that matches CLI-tool depth with interactive visualization would be a unique offering.
 
 ---
 
 ## Validation Rule Categories (Research Synthesis)
 
-### Category 1: Schema Validation
+### Category 1: Schema Validation (Target: ~10 rules)
 
-**What it is:** Structural correctness against the compose-spec JSON Schema (Draft 7). This is the foundation -- if the YAML is malformed or uses invalid keys, nothing else matters.
+**What it is:** Structural correctness against Kubernetes OpenAPI schemas. Multi-document YAML is split on `---` separators, each document's `apiVersion` + `kind` is detected, and the appropriate schema is loaded for validation.
 
-**Implementation:** ajv + ajv-formats validating parsed YAML against compose-spec.json. The compose-spec schema is well-maintained, Draft 7 (fully supported by ajv in browser), and has no required top-level fields (but `services` is effectively required for any useful file).
-
-**Key rules:**
-
-| Rule Code | Name | Severity | What It Catches |
-|-----------|------|----------|-----------------|
-| CV-S001 | Invalid YAML syntax | error | Indentation errors, missing colons, tab characters, malformed arrays |
-| CV-S002 | Unknown top-level property | error | Typos in `services`, `networks`, `volumes`, `secrets`, `configs` |
-| CV-S003 | Unknown service property | error | Typos within service definitions (e.g., `port` instead of `ports`) |
-| CV-S004 | Invalid port format | error | Malformed port mappings (not matching `[host:]container[/protocol]`) |
-| CV-S005 | Invalid volume format | error | Malformed volume mounts |
-| CV-S006 | Invalid duration format | error | Healthcheck intervals, timeouts not matching Docker duration format |
-| CV-S007 | Invalid restart policy | error | Values other than `no`, `always`, `unless-stopped`, `on-failure` |
-| CV-S008 | Invalid depends_on condition | error | Conditions other than `service_started`, `service_healthy`, `service_completed_successfully` |
-
-**Confidence:** HIGH -- compose-spec JSON Schema is authoritative and well-documented. ajv is the standard JSON Schema validator for JavaScript, proven in browser.
-
-### Category 2: Semantic Analysis
-
-**What it is:** Logic errors that pass schema validation but will cause runtime failures or unexpected behavior. These require understanding relationships between services, networks, volumes, and ports.
+**Implementation approach:** Use Kubernetes JSON Schemas (from https://github.com/yannh/kubernetes-json-schema -- the same registry kubeconform uses) compiled for K8s 1.31. Bundle schemas for the 18 target resource types as static JSON at build time. Validate each document against its resource-type-specific schema using ajv.
 
 **Key rules:**
 
 | Rule Code | Name | Severity | What It Catches |
 |-----------|------|----------|-----------------|
-| CV-M001 | Duplicate exported ports | error | Two services publishing the same host port (e.g., both mapping to 80:80) -- Docker will fail at runtime |
-| CV-M002 | Circular depends_on | error | Service A depends on B, B depends on C, C depends on A -- Docker Compose detects this but our tool catches it pre-deploy with visualization |
-| CV-M003 | Undefined network reference | error | Service references a network not defined in top-level `networks` |
-| CV-M004 | Undefined volume reference | error | Service references a named volume not defined in top-level `volumes` |
-| CV-M005 | Undefined secret reference | error | Service references a secret not defined in top-level `secrets` |
-| CV-M006 | Undefined config reference | error | Service references a config not defined in top-level `configs` |
-| CV-M007 | Orphan network definition | warning | Network defined at top level but never referenced by any service |
-| CV-M008 | Orphan volume definition | warning | Named volume defined at top level but never referenced by any service |
-| CV-M009 | Orphan secret definition | warning | Secret defined at top level but never referenced by any service |
-| CV-M010 | depends_on with service_healthy but no healthcheck | warning | Service depends on another with `condition: service_healthy` but the dependency has no healthcheck defined |
-| CV-M011 | Self-referencing dependency | error | Service lists itself in depends_on |
-| CV-M012 | Dependency on undefined service | error | depends_on references a service name that does not exist |
-| CV-M013 | Duplicate container names | error | Multiple services with the same `container_name` value |
-| CV-M014 | Port range overlap | warning | Port ranges that overlap between services (e.g., 8080-8090 and 8085-8095) |
-| CV-M015 | Invalid image reference | warning | Image names with obvious format issues (spaces, special characters) |
+| KA-S001 | Invalid YAML syntax | error | Indentation errors, missing colons, tab characters, malformed arrays |
+| KA-S002 | Missing apiVersion field | error | Document lacks required `apiVersion` field |
+| KA-S003 | Missing kind field | error | Document lacks required `kind` field |
+| KA-S004 | Unknown apiVersion/kind combination | error | `apiVersion`/`kind` pair does not match any known K8s resource type |
+| KA-S005 | Schema validation failure | error | Resource fields violate the OpenAPI schema for that resource type (wrong types, invalid enum values, extra properties in strict resources) |
+| KA-S006 | Deprecated API version | warning | Using API versions removed in K8s 1.16+ (extensions/v1beta1, apps/v1beta1, apps/v1beta2, etc.) |
+| KA-S007 | Missing metadata.name | error | Resource lacks required `metadata.name` field |
+| KA-S008 | Invalid metadata.name format | warning | Name doesn't comply with K8s naming rules (RFC 1123 DNS subdomain: lowercase, alphanumeric, hyphens, max 253 chars) |
+| KA-S009 | Invalid label key/value format | warning | Labels violate K8s label syntax (key: prefix/name max 63 chars; value max 63 chars, alphanumeric with hyphens/dots/underscores) |
+| KA-S010 | Empty document in multi-doc YAML | info | `---` separator followed by empty content or comments-only |
 
-**Confidence:** HIGH -- these are well-documented runtime failure modes from Docker Compose issue trackers and Stack Overflow. Port conflicts (docker/compose#6708, #7188), circular deps (docker/compose#7239, #11586), and undefined references are the top categories of "compose file that validates but fails to start."
+**Confidence:** HIGH -- Kubernetes JSON Schema registry (yannh/kubernetes-json-schema) is the authoritative source, used by kubeconform. K8s API deprecation guide is official Kubernetes documentation.
 
-### Category 3: Security
+**Complexity note:** MEDIUM-HIGH. The per-resource-type schema approach is more complex than the Compose Validator's single-schema approach. Bundling 18 schemas at build time requires careful tree-shaking. Schema sizes for K8s resources are substantial (Deployment schema is ~50KB of JSON).
 
-**What it is:** Configuration choices that weaken container isolation, expose the host, or leak secrets. Mapped to OWASP Docker Security Cheat Sheet and CWE standards.
+### Category 2: Security (Target: ~20 rules)
 
-**Key rules:**
+**What it is:** Pod security configuration checks aligned with Kubernetes Pod Security Standards (PSS Baseline + Restricted profiles), CIS Kubernetes Benchmark Section 5, and patterns from KubeLinter, Polaris, and Checkov.
 
-| Rule Code | Name | Severity | What It Catches |
-|-----------|------|----------|-----------------|
-| CV-C001 | Privileged mode enabled | error | `privileged: true` -- disables ALL container isolation, equivalent to root on host (CWE-250) |
-| CV-C002 | Docker socket mounted | error | `/var/run/docker.sock` in volumes -- gives container full control of Docker daemon (CWE-250) |
-| CV-C003 | Host network mode | error | `network_mode: host` -- bypasses network namespace isolation entirely |
-| CV-C004 | Host PID mode | error | `pid: host` -- container can see and signal all host processes |
-| CV-C005 | Host IPC mode | warning | `ipc: host` -- shared memory access between container and host |
-| CV-C006 | Dangerous capabilities added | error | `cap_add` includes SYS_ADMIN, NET_ADMIN, SYS_PTRACE, or ALL -- over-privileged containers |
-| CV-C007 | Capabilities not dropped | warning | No `cap_drop: [ALL]` -- containers retain default Linux capabilities |
-| CV-C008 | Secrets in environment variables | error | `environment` contains keys matching secret patterns (PASSWORD, API_KEY, TOKEN, SECRET) with inline values |
-| CV-C009 | Unbound port interface | warning | Ports without explicit host IP binding (e.g., `8080:80` instead of `127.0.0.1:8080:80`) -- exposes port on all interfaces |
-| CV-C010 | Missing no-new-privileges | info | `security_opt` does not include `no-new-privileges:true` -- allows privilege escalation via setuid/setgid |
-| CV-C011 | Writable filesystem | info | `read_only` not set to `true` -- container can write to root filesystem |
-| CV-C012 | Seccomp disabled | warning | `security_opt` includes `seccomp:unconfined` -- disables syscall filtering |
-| CV-C013 | SELinux disabled | info | `security_opt` includes `label:disable` -- disables SELinux separation |
-| CV-C014 | Image uses latest tag | warning | `image: name:latest` or `image: name` (no tag) -- mutable, non-reproducible, supply chain risk |
-
-**Confidence:** HIGH -- mapped directly from OWASP Docker Security Cheat Sheet, Code Pathfinder COMPOSE-SEC rules, and Semgrep docker-compose ruleset. CWE references validated against source.
-
-### Category 4: Best Practices
-
-**What it is:** Configuration patterns that improve reliability, maintainability, and operability. Not security-critical but important for production readiness.
+This is the deepest category because security is the primary value proposition for a K8s linting tool. Every competing tool leads with security.
 
 **Key rules:**
 
-| Rule Code | Name | Severity | What It Catches |
-|-----------|------|----------|-----------------|
-| CV-B001 | Missing healthcheck | warning | Service has no `healthcheck` defined -- no way to determine if the service is actually ready |
-| CV-B002 | No restart policy | warning | Service has no `restart` field -- container stays stopped after crash |
-| CV-B003 | No resource limits | info | Service has no `deploy.resources.limits` -- can consume unlimited host resources |
-| CV-B004 | Image tag not pinned | warning | Using mutable tags like `latest`, `stable`, `lts` instead of specific version tags |
-| CV-B005 | No logging configuration | info | Service has no `logging` config -- defaults to json-file with no rotation, can fill disk |
-| CV-B006 | Deprecated version field | info | Top-level `version` field present -- deprecated since Docker Compose v1.27.0 (2020), ignored by modern Compose |
-| CV-B007 | Missing project name | info | No top-level `name` field -- Compose generates name from directory, which is non-portable |
-| CV-B008 | Both build and image | warning | Service specifies both `build` and `image` -- ambiguous whether to build or pull |
-| CV-B009 | Anonymous volume usage | info | Short-form volumes without names (e.g., `/data`) -- creates anonymous volumes that are hard to manage |
-| CV-B010 | No memory reservation | info | `deploy.resources.limits` set but no `deploy.resources.reservations` -- no guaranteed minimum resources |
-| CV-B011 | Healthcheck timeout exceeds interval | warning | `timeout` is longer than `interval` -- health check can overlap with itself |
-| CV-B012 | Default network only | info | No custom networks defined -- all services share one network with no isolation |
+| Rule Code | Name | Severity | PSS Profile | Source Tools |
+|-----------|------|----------|-------------|--------------|
+| KA-C001 | Container runs as privileged | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_2/16 |
+| KA-C002 | Privilege escalation allowed | error | Restricted | Polaris, Checkov CKV_K8S_5/20 |
+| KA-C003 | Container runs as root | warning | Restricted | KubeLinter, Polaris, Checkov CKV_K8S_6/23 |
+| KA-C004 | Missing runAsNonRoot | warning | Restricted | Polaris, Checkov CKV_K8S_6 |
+| KA-C005 | Running with UID 0 | error | Restricted | Checkov CKV_K8S_40 |
+| KA-C006 | Host PID namespace shared | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_1/17 |
+| KA-C007 | Host IPC namespace shared | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_3/18 |
+| KA-C008 | Host network enabled | warning | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_4/19 |
+| KA-C009 | Host port specified | info | Baseline | Polaris, Checkov CKV_K8S_26 |
+| KA-C010 | Dangerous capabilities (SYS_ADMIN, NET_RAW, ALL) | error | Baseline/Restricted | KubeLinter, Polaris, Checkov CKV_K8S_25/28/39 |
+| KA-C011 | Capabilities not dropped | warning | Restricted | Polaris (insecureCapabilities), Checkov CKV_K8S_37 |
+| KA-C012 | Filesystem not read-only | warning | -- | KubeLinter, Polaris, Checkov CKV_K8S_22 |
+| KA-C013 | Missing seccomp profile | warning | Baseline | Checkov CKV_K8S_31/32, kube-score |
+| KA-C014 | Sensitive host path mounted | error | Baseline | KubeLinter (sensitive-host-mounts), Checkov CKV_K8S_27 |
+| KA-C015 | Docker socket mounted | error | -- | KubeLinter (docker-sock), Checkov CKV_K8S_27 |
+| KA-C016 | ServiceAccount token auto-mounted | warning | -- | Polaris, Checkov CKV_K8S_38 |
+| KA-C017 | Default ServiceAccount used | warning | -- | KubeLinter, Checkov CKV_K8S_41/42 |
+| KA-C018 | Secrets in environment variables | warning | -- | KubeLinter (env-var-secret), Checkov CKV_K8S_35 |
+| KA-C019 | Default namespace used | info | -- | Checkov CKV_K8S_21 |
+| KA-C020 | Missing security context entirely | warning | -- | Checkov CKV_K8S_29/30 |
 
-**Confidence:** HIGH -- sourced from Docker official documentation, CNCF best practices, HashiCorp guidance, and common Stack Overflow troubleshooting patterns.
+**Confidence:** HIGH -- every rule maps directly to at least 2 competing tools and/or official Kubernetes Pod Security Standards. PSS Baseline/Restricted profiles are official Kubernetes documentation.
 
-### Category 5: Style / Formatting
+### Category 3: Reliability (Target: ~12 rules)
 
-**What it is:** Consistency and readability rules that do not affect correctness or security but improve maintainability.
+**What it is:** Configuration that prevents downtime, ensures recoverability, and validates operational readiness. Sourced primarily from kube-score (strongest reliability focus), Polaris reliability checks, and KubeLinter.
 
 **Key rules:**
 
-| Rule Code | Name | Severity | What It Catches |
-|-----------|------|----------|-----------------|
-| CV-F001 | Services not alphabetically ordered | info | Services defined in non-alphabetical order -- harder to navigate large files |
-| CV-F002 | Ports not quoted | info | Port values not wrapped in quotes -- YAML may parse "80:80" as base-60 integer |
-| CV-F003 | Inconsistent quoting in ports | info | Mix of quoted and unquoted port values in the same file |
+| Rule Code | Name | Severity | Source Tools |
+|-----------|------|----------|--------------|
+| KA-R001 | Missing liveness probe | warning | All tools (KubeLinter, Polaris, kube-score, Checkov CKV_K8S_8) |
+| KA-R002 | Missing readiness probe | warning | All tools (Checkov CKV_K8S_9, kube-score) |
+| KA-R003 | Identical liveness and readiness probes | warning | kube-score (pod-probes-identical) -- unique check |
+| KA-R004 | Single replica Deployment | warning | KubeLinter (minimum-three-replicas), Polaris (deploymentMissingReplicas), kube-score |
+| KA-R005 | Missing PodDisruptionBudget | info | kube-score, Polaris (missingPodDisruptionBudget) |
+| KA-R006 | No rolling update strategy | warning | KubeLinter (no-rolling-update-strategy) |
+| KA-R007 | Missing pod anti-affinity | info | KubeLinter (no-anti-affinity), kube-score |
+| KA-R008 | Missing topology spread constraint | info | Polaris (topologySpreadConstraint) |
+| KA-R009 | Image uses latest or no tag | warning | All tools |
+| KA-R010 | Image pull policy not Always | info | kube-score, Checkov CKV_K8S_15 |
+| KA-R011 | Selector/template label mismatch | error | KubeLinter (mismatching-selector), kube-score |
+| KA-R012 | CronJob missing deadline | warning | kube-score (cronjob-has-deadline) |
 
-**Confidence:** MEDIUM -- style rules are subjective. DCLint implements these with auto-fix. Our tool should include them but weight them minimally in scoring.
+**Confidence:** HIGH -- these are the most agreed-upon checks across all tools. Every major tool checks probes, replicas, and image tags.
+
+### Category 4: Best Practice (Target: ~12 rules)
+
+**What it is:** Resource management, operational hygiene, and configuration patterns that every K8s practitioner expects. Distinct from reliability (which prevents downtime) and security (which prevents attacks).
+
+**Key rules:**
+
+| Rule Code | Name | Severity | Source Tools |
+|-----------|------|----------|--------------|
+| KA-B001 | Missing CPU requests | warning | KubeLinter, Polaris, Checkov CKV_K8S_10 |
+| KA-B002 | Missing CPU limits | warning | KubeLinter, Polaris, Checkov CKV_K8S_11 |
+| KA-B003 | Missing memory requests | warning | KubeLinter, Polaris, Checkov CKV_K8S_12 |
+| KA-B004 | Missing memory limits | warning | KubeLinter, Polaris, Checkov CKV_K8S_13 |
+| KA-B005 | Missing required labels (app, version) | info | KubeLinter (required-label-owner), Polaris (metadataAndInstanceMismatched) |
+| KA-B006 | Missing namespace | info | KubeLinter (use-namespace), Checkov CKV_K8S_21 |
+| KA-B007 | SSH port exposed | info | KubeLinter (ssh-port) |
+| KA-B008 | NodePort service type used | info | kube-score (service-type), KubeLinter (exposed-services) |
+| KA-B009 | Liveness probe port not in container ports | warning | KubeLinter (liveness-port) |
+| KA-B010 | Readiness probe port not in container ports | warning | KubeLinter (readiness-port) |
+| KA-B011 | Missing priorityClassName | info | KubeLinter (priority-class-name), Polaris |
+| KA-B012 | Duplicate environment variable keys | warning | KubeLinter (duplicate-env-var), kube-score |
+
+**Confidence:** HIGH -- resource requests/limits are the single most agreed-upon best practice across every K8s linting tool.
+
+### Category 5: Cross-Resource Validation (Target: ~8 rules)
+
+**What it is:** Validation that spans multiple documents in a multi-document YAML file. This is the analysis that checks if a Service's selector actually matches a Deployment's pod template labels, if a ConfigMap referenced by a Deployment exists in the same file, etc.
+
+This is the HEADLINE DIFFERENTIATOR for the K8s Analyzer. No browser-based tool does this. KubeLinter is the only CLI tool with meaningful cross-resource checks ("dangling-*" checks), and our tool surfaces these visually in the relationship graph.
+
+**Key rules:**
+
+| Rule Code | Name | Severity | Inspired By |
+|-----------|------|----------|-------------|
+| KA-X001 | Service selector matches no Pod template | warning | KubeLinter (dangling-service), kube-score (service-targets-pod) |
+| KA-X002 | Ingress references undefined Service | warning | KubeLinter (dangling-ingress), kube-score (ingress-targets-service) |
+| KA-X003 | ConfigMap reference not found in file | info | KubeLinter (env-value-from) |
+| KA-X004 | Secret reference not found in file | info | KubeLinter (env-value-from) |
+| KA-X005 | PVC reference not found in file | info | Novel check -- no tool does this specifically |
+| KA-X006 | ServiceAccount reference not found in file | warning | KubeLinter (non-existent-service-account) |
+| KA-X007 | NetworkPolicy selector matches no Pod | info | KubeLinter (dangling-networkpolicy) |
+| KA-X008 | HPA targets non-existent resource | warning | KubeLinter (dangling-horizontalpodautoscaler), kube-score (horizontalpodautoscaler-has-target) |
+
+**Confidence:** MEDIUM -- cross-resource validation in a browser-based single-file context is inherently limited. Users may paste only a Deployment without its Service; false positives are likely. MUST be clearly communicated as "checks references within the pasted YAML" not "validates complete cluster state." These should surface as informational or warning, never error.
+
+**Complexity note:** HIGH -- requires building an in-memory resource registry from all parsed documents, then resolving references between them. Label selector matching requires understanding K8s matchLabels/matchExpressions semantics.
+
+### Category 6: RBAC Analysis (Target: ~5 rules)
+
+**What it is:** Analysis of Role, ClusterRole, RoleBinding, and ClusterRoleBinding resources for over-permissive configurations. Aligned with CIS Kubernetes Benchmark Section 5.1.
+
+**Key rules:**
+
+| Rule Code | Name | Severity | Source |
+|-----------|------|----------|--------|
+| KA-A001 | Wildcard permissions in Role/ClusterRole | error | KubeLinter (wildcard-in-rules), Checkov CKV_K8S_49, CIS 5.1.3 |
+| KA-A002 | cluster-admin RoleBinding | error | KubeLinter (cluster-admin-role-binding), Polaris, CIS 5.1.1 |
+| KA-A003 | Pod exec/attach permissions | warning | Polaris (clusterrolePodExecAttach, rolePodExecAttach) |
+| KA-A004 | Secret access permissions | warning | KubeLinter (access-to-secrets), CIS 5.1.2 |
+| KA-A005 | Pod creation permissions | warning | KubeLinter (access-to-create-pods), CIS 5.1.4 |
+
+**Confidence:** MEDIUM-HIGH -- RBAC checks are well-defined in CIS benchmarks and implemented by KubeLinter and Polaris. However, RBAC resources may be less commonly pasted into a browser-based validator (they're often managed by platform teams via GitOps). Worth including because they add credibility and SEO value, but expect lower usage frequency.
 
 ### Recommended Category Weights
 
-Following the Dockerfile Analyzer's proven pattern, weights should reflect real-world impact:
-
 | Category | Weight | Rationale |
 |----------|--------|-----------|
-| Security | 30% | Container escapes, secret leaks, host compromise -- highest real-world impact |
-| Semantic Analysis | 25% | Runtime failures, port conflicts, circular deps -- things that prevent your stack from starting |
-| Best Practices | 20% | Production readiness -- healthchecks, restart policies, resource limits |
-| Schema Validation | 15% | Structural correctness -- caught early, usually obvious |
-| Style / Formatting | 10% | Readability and consistency -- lowest impact on correctness |
+| Security | 35% | Container escapes, privilege escalation, host compromise -- highest real-world impact. K8s security is the #1 reason people lint manifests. |
+| Reliability | 20% | Probes, replicas, update strategies -- prevents downtime in production |
+| Best Practice | 20% | Resource limits, labels, operational hygiene -- expected by every K8s practitioner |
+| Schema Validation | 15% | Structural correctness -- foundational but usually caught early |
+| Cross-Resource | 10% | Reference validation between resources -- valuable but inherently limited in single-file browser context |
 
-**Total rules: ~44** (8 schema + 15 semantic + 14 security + 12 best practice + 3 style + 2 bonus from schema)
+**Total target: ~67 rules** (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC)
 
-This is comparable to the Dockerfile Analyzer's 39 rules, providing similar depth without scope creep.
+RBAC rules are scored within the Security category since they are security-focused checks. The 6 categories above represent 5 weighted scoring dimensions (with RBAC folded into Security).
+
+This is 72% more rules than the Dockerfile Analyzer (39 rules) and 29% more than the Compose Validator (52 rules), reflecting the significantly larger K8s configuration surface area.
 
 ---
 
@@ -197,40 +237,42 @@ This is comparable to the Dockerfile Analyzer's 39 rules, providing similar dept
 
 Features users assume exist. Missing these = product feels incomplete.
 
-| Feature | Why Expected | Complexity | Dependencies on Existing Code |
-|---------|--------------|------------|-------------------------------|
-| CodeMirror 6 editor with YAML syntax highlighting | Dockerfile Analyzer sets the precedent -- users expect the same code editor experience | MEDIUM | Adapt `use-codemirror.ts`, swap Dockerfile lang for `@codemirror/lang-yaml` |
-| Pre-loaded sample compose file with deliberate issues | Dockerfile Analyzer has this; users need something to analyze immediately | LOW | New sample file, same pattern as `sample-dockerfile.ts` |
-| On-demand analysis (Analyze button + Cmd/Ctrl+Enter) | Proven UX from Dockerfile Analyzer -- not real-time, deliberate trigger | LOW | Direct reuse of the same trigger pattern |
-| Schema validation (structural correctness) | Most basic expectation -- compose file must be valid YAML and valid compose-spec | MEDIUM | New: ajv + compose-spec.json schema, yaml package for parsing |
-| Semantic analysis (port conflicts, undefined refs, circular deps) | The main value proposition -- catching logic errors that schema alone misses | HIGH | New rule engine operating on parsed YAML document model |
-| Security rules (privileged, socket, secrets, capabilities) | Core differentiator over basic validators -- OWASP-aligned security checks | MEDIUM | New rules, same LintRule interface pattern |
-| Best practice rules (healthchecks, restart, resource limits, pinned images) | Production readiness guidance is the expert value proposition | MEDIUM | New rules, same LintRule interface pattern |
-| Category-weighted 0-100 scoring with letter grades | Trademark of the Dockerfile Analyzer -- users expect the same scoring system | LOW | Adapt `scorer.ts` with new category weights |
-| Inline editor annotations (squiggly underlines + gutter markers) | Dockerfile Analyzer has this -- users expect violations highlighted in context | LOW | Direct reuse of `highlight-line.ts` pattern |
-| Score gauge with letter grade | Visual centerpiece of results panel | LOW | Direct reuse of existing SVG gauge component |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| CodeMirror 6 editor with YAML syntax highlighting | Two prior tools set this precedent | LOW | Direct reuse of @codemirror/lang-yaml from Compose Validator |
+| Multi-document YAML support (`---` separators) | K8s manifests are almost always multi-document | MEDIUM | Must parse each document independently and report per-resource findings |
+| Pre-loaded sample K8s manifest with deliberate issues | Established pattern from both prior tools | LOW | New sample, same pattern |
+| On-demand analysis (Analyze button + Cmd/Ctrl+Enter) | Proven UX from two prior tools | LOW | Direct reuse |
+| Per-resource-type schema validation (K8s 1.31) | kubeconform and every CLI tool does this; browser tools that lack it feel shallow | HIGH | Bundle K8s JSON Schemas for 18 resource types; per-document apiVersion/kind detection |
+| Security checks (Pod Security Standards aligned) | EVERY K8s linting tool leads with security; users expect it | MEDIUM | 20 rules covering PSS Baseline + Restricted profiles |
+| Reliability checks (probes, replicas, update strategy) | Second most expected category after security | MEDIUM | 12 rules sourced from kube-score, Polaris, KubeLinter consensus |
+| Resource limits/requests validation | Most universally agreed-upon K8s best practice | LOW | 4 rules checking CPU/memory requests and limits |
+| Category-weighted 0-100 scoring with letter grades | Trademark of the tool suite | LOW | Adapt scorer.ts with new 5-category weights |
+| Inline editor annotations | Established pattern | LOW | Direct reuse of highlight-line.ts |
+| Score gauge with letter grade | Visual centerpiece | LOW | Direct reuse |
 | Category breakdown panel | Shows where points are lost | LOW | Adapt with new category names |
-| Violation list (severity-grouped, expandable, click-to-navigate) | Standard results presentation pattern | LOW | Direct reuse of existing component |
-| Per-rule documentation pages at /tools/compose-validator/rules/[code] | SEO powerhouse -- 44+ indexable pages with expert content | MEDIUM | Mirror Dockerfile Analyzer rule page template |
-| Score badge PNG download | Proven sharing feature | LOW | Adapt badge-generator.ts with new branding |
-| Shareable URL state (lz-string compressed) | Users want to share findings | LOW | Direct reuse of url-state.ts pattern |
-| Dark-only editor theme matching site aesthetic | Consistency with existing tool | LOW | Direct reuse of editor-theme.ts |
-| Responsive layout (stacked mobile, side-by-side desktop) | Accessibility requirement | LOW | Same layout pattern as Dockerfile Analyzer |
+| Violation list (severity-grouped, click-to-navigate) | Standard results presentation | LOW | Direct reuse |
+| Per-rule documentation pages at /tools/k8s-analyzer/rules/[code] | SEO powerhouse -- 67+ indexable pages | MEDIUM | Mirror existing rule page template |
+| Score badge PNG download | Proven sharing feature | LOW | Adapt badge-generator.ts |
+| Shareable URL state (lz-string, `#k8s=` prefix) | Users want to share findings | LOW | Adapt url-state.ts with new hash prefix |
+| Deprecated API version detection | Official K8s deprecation guide exists; users expect this flagged | LOW | extensions/v1beta1 -> apps/v1, etc. |
+| Image tag/latest detection | Every single competing tool checks this | LOW | Same pattern as Compose Validator CV-C014 |
 
 ### Differentiators (Competitive Advantage)
 
 Features that set the product apart. Not required, but high value.
 
-| Feature | Value Proposition | Complexity | Dependencies on Existing Code |
-|---------|-------------------|------------|-------------------------------|
-| Interactive service dependency graph | NO competing browser tool visualizes service relationships -- this is the headline differentiator. Shows depends_on chains, network membership, volume sharing, and cycle detection visually | HIGH | New: React Flow + dagre/elkjs layout engine. New React island component. Proven React island pattern. |
-| Cycle detection with visual highlighting | When circular depends_on is found, the graph highlights the cycle in red -- immediately obvious what is wrong | MEDIUM | Part of dependency graph implementation |
-| Network topology overlay on graph | Color-coded network membership showing which services can communicate | MEDIUM | Extension of dependency graph, requires parsing networks config |
-| Multi-tab results (Violations / Dependency Graph / Scoring) | Organize rich output without overwhelming -- users switch between validation results and visual graph | LOW | Nanostores tab state, same pattern as Beauty Index code comparison |
-| Companion blog post ("Docker Compose Best Practices" or "Securing Your Docker Compose Files") | SEO content pillar, bidirectional cross-linking with tool | MEDIUM | Same MDX blog post pattern |
-| OG images for tool page and overview | Social sharing, SEO | LOW | Extend existing og-image.ts |
-| Homepage callout | Drive traffic from homepage to tool | LOW | Same pattern as Dockerfile Analyzer callout |
-| JSON-LD SoftwareApplication schema | SEO structured data | LOW | Direct reuse pattern |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Interactive resource relationship graph | NO browser K8s tool visualizes how Deployments, Services, ConfigMaps, Secrets, PVCs, and Ingresses reference each other. This is THE headline feature. | HIGH | React Flow + dagre layout. Nodes = K8s resources (color-coded by kind). Edges = references (Service->Deployment selector, Deployment->ConfigMap volume/envFrom, Ingress->Service backend, etc.) |
+| Cross-resource validation with graph integration | Dangling references (Service selecting nothing, Ingress pointing to missing Service) are both flagged as violations AND shown as red dashed edges in the graph | HIGH | Requires building resource registry from all parsed documents, resolving selectors and references |
+| Pod Security Standards (PSS) profile mapping | Each security rule explicitly maps to PSS Baseline or Restricted profile. Results panel shows "Baseline: X violations, Restricted: Y violations" so users know their PSS compliance level at a glance | MEDIUM | Metadata on security rules; summary calculation in scorer |
+| RBAC analysis | Validate Role/ClusterRole/RoleBinding for over-permissive configs (wildcards, cluster-admin, exec/attach). No browser tool does this. | MEDIUM | 5 rules targeting RBAC resource types specifically |
+| 18 resource type coverage | Deployment, StatefulSet, DaemonSet, Service, Ingress, ConfigMap, Secret, PVC, PV, Job, CronJob, NetworkPolicy, Role, ClusterRole, RoleBinding, ClusterRoleBinding, HPA, PDB -- broader than any browser competitor | HIGH | Each requires its own schema bundle and resource-type-specific rules |
+| Multi-document resource count and type summary | Before even scoring, show "Found: 3 Deployments, 2 Services, 1 ConfigMap, 1 Secret" -- instant structural overview | LOW | Byproduct of multi-document parsing |
+| CIS Benchmark reference tags | Security rules tagged with CIS Kubernetes Benchmark control numbers (5.1.1, 5.1.2, 5.2.x) where applicable | LOW | Metadata tags on rule definitions; shown in rule documentation pages |
+| Companion blog post ("Kubernetes Manifest Best Practices") | SEO content pillar; bidirectional cross-linking with tool | MEDIUM | Same MDX blog pattern |
+| Homepage callout + JSON-LD + OG images | Standard site integration for discoverability | LOW | Proven pattern |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
@@ -238,124 +280,133 @@ Features that seem good but create problems. Explicitly NOT building these.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Auto-fix / auto-correct | DCLint has auto-fix for style rules | Too many edge cases for security/semantic fixes; modifying user's YAML risks breaking their intent; scope explosion | Show clear fix suggestions with before/after code in rule docs (already proven in Dockerfile Analyzer) |
-| Real-time as-you-type linting | Feels more responsive | YAML parsing on every keystroke is expensive; partial YAML is often invalid; creates noise while user is mid-edit | On-demand analysis (Analyze button + keyboard shortcut) -- proven superior UX |
-| Multi-file compose support (includes, extends, overrides) | Real projects use multiple files | Browser tool receives a single paste -- there is no filesystem to resolve includes/extends from; massively increases parser complexity | Validate single file; document that multi-file merging should use `docker compose config` to produce a single resolved file first |
-| Environment variable resolution | ${VAR} appears in real compose files | Browser has no access to the user's environment; .env file content is unknown; substituting wrong values could mask real issues | Flag unresolved ${VAR} references as informational; suggest the user substitute values before pasting |
-| Version migration tool | Converting between compose v2/v3 formats | The `version` field is deprecated; modern Compose ignores it; migration complexity for minimal value | Flag deprecated version field with rule CV-B006; recommend simply removing it |
-| AI-powered analysis | Trendy, seems powerful | Contradicts human-expertise positioning of the portfolio; requires API calls (not zero-backend); unpredictable suggestions | Expert-written rule explanations with production consequences (the existing approach) |
-| Docker Hub image verification | Check if images exist in registries | Requires network calls to Docker Hub API; rate-limited; can be slow; some images are in private registries | Validate image reference format; flag `latest` and untagged images |
-| Kubernetes manifest generation | Convert compose to K8s | Massive scope; Kompose already exists for this; not a validation concern | Out of scope entirely; link to Kompose in companion blog post |
-| Profile-aware validation | Validate per-profile subsets | Adds significant complexity; profiles are a deployment concern not a validation concern | Validate the full file; profiles do not create invalid configurations |
+| Helm chart rendering | Real projects use Helm | Template rendering requires a Go runtime (tiller/helm template); cannot run in browser; massive scope | Validate rendered manifests -- users should run `helm template` first, then paste output |
+| Kustomize overlay resolution | Real projects use Kustomize | Same problem -- `kustomize build` requires Go runtime and filesystem access | Same approach -- paste rendered output from `kustomize build` |
+| CRD validation | Custom resources are common in real clusters | CRD schemas are infinite and project-specific; cannot bundle all possible CRDs | Validate core K8s resource types only (18 types); skip unknown `kind` values with informational message |
+| Cluster-connected validation | `kubectl --dry-run=server` catches more issues | Requires API server access; authentication; network calls; privacy/security concerns | Pure client-side static analysis; clearly document this is offline validation |
+| Auto-fix / auto-remediation | KubeLinter and Polaris suggest fixes | Modifying K8s YAML has high blast radius (wrong indentation can change semantics); YAML anchor/alias preservation is hard; security fixes may break application logic | Show detailed fix suggestions with before/after code in rule documentation pages |
+| Real-time as-you-type validation | Feels responsive | Multi-document K8s YAML parsing + schema validation per document is expensive; partial YAML is always invalid; creates noise mid-edit | On-demand analysis (proven UX from two prior tools) |
+| AI-powered analysis | Trendy | Contradicts human-expertise positioning; requires API calls (violates zero-backend architecture); unpredictable suggestions | Expert-written rule explanations with production consequences |
+| Container image vulnerability scanning | Snyk/Trivy do this | Requires network calls to vulnerability databases; rate limits; slow; completely different concern from manifest linting | Out of scope -- link to Snyk/Trivy in companion blog post |
+| Policy-as-code (OPA/Rego, Kyverno) | Enterprises use policy engines | Rego/CEL evaluation in browser is possible but massive scope; not a validator concern; these are enforcement mechanisms | Static lint rules with clear mapping to CIS/PSS standards |
+| Multi-cluster version support | Different clusters run different K8s versions | Version matrix (1.25-1.31) multiplies schema bundles; UI complexity for version selection; diminishing returns | Target K8s 1.31 only; flag deprecated APIs from historical removals |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[YAML Parser (yaml npm pkg)]
+[YAML Multi-Document Parser]
     |
-    +--requires--> [Schema Validation (ajv + compose-spec.json)]
-    |
-    +--requires--> [Semantic Analysis Engine]
+    +--requires--> [Per-Document apiVersion/kind Detection]
     |                  |
-    |                  +--requires--> [Dependency Graph Builder]
+    |                  +--requires--> [Resource Type Registry (18 types)]
     |                  |                  |
-    |                  |                  +--enables--> [Interactive Dependency Graph (React Flow)]
-    |                  |                  |
-    |                  |                  +--enables--> [Cycle Detection + Visual Highlighting]
+    |                  |                  +--enables--> [Schema Validation (per-resource-type)]
     |                  |
-    |                  +--enables--> [Port Conflict Detection]
-    |                  +--enables--> [Orphan Resource Detection]
-    |                  +--enables--> [Cross-Reference Validation]
+    |                  +--enables--> [Resource Summary ("Found: 3 Deployments, 2 Services...")]
     |
-    +--requires--> [Security Rules]
-    +--requires--> [Best Practice Rules]
-    +--requires--> [Style Rules]
+    +--requires--> [Resource Registry (in-memory index of all parsed resources)]
+                       |
+                       +--enables--> [Cross-Resource Validation]
+                       |                  |
+                       |                  +--enables--> [Interactive Resource Relationship Graph]
+                       |                  |
+                       |                  +--enables--> [Dangling Reference Detection]
+                       |
+                       +--enables--> [Security Rules (per-container analysis)]
+                       +--enables--> [Reliability Rules (per-workload analysis)]
+                       +--enables--> [Best Practice Rules (per-resource analysis)]
+                       +--enables--> [RBAC Analysis (Role/ClusterRole rules)]
 
-[Scoring Engine (adapted from Dockerfile Analyzer)]
+[Scoring Engine (adapted from existing scorer)]
     |
     +--requires--> [All rule categories producing violations]
     +--enables--> [Score Gauge Component]
     +--enables--> [Category Breakdown Panel]
+    +--enables--> [PSS Profile Summary (Baseline/Restricted compliance)]
     +--enables--> [Badge Generator]
     +--enables--> [URL State (shareable links)]
 
 [CodeMirror 6 Editor]
     |
-    +--requires--> [@codemirror/lang-yaml]
+    +--requires--> [@codemirror/lang-yaml (already installed)]
     +--enables--> [Inline Annotations]
     +--enables--> [Click-to-navigate from violations]
 
 [Rule Documentation Pages]
     |
-    +--requires--> [Rule definitions with explanations and fix suggestions]
-    +--enables--> [SEO indexable pages (44+)]
+    +--requires--> [Rule definitions with explanations, CIS/PSS tags, fix suggestions]
+    +--enables--> [SEO indexable pages (67+)]
 
-[Interactive Dependency Graph]
+[Interactive Resource Relationship Graph]
     |
-    +--requires--> [Dependency Graph Builder (from semantic analysis)]
-    +--requires--> [React Flow + layout engine]
-    +--enables--> [Network topology overlay]
-    +--enables--> [Volume sharing visualization]
+    +--requires--> [Resource Registry (from multi-doc parser)]
+    +--requires--> [Cross-Resource Validation results (edges with validity status)]
+    +--requires--> [React Flow + dagre layout]
+    +--enables--> [Visual dangling reference highlighting]
+    +--enables--> [Resource kind color-coding]
 ```
 
 ### Dependency Notes
 
-- **YAML Parser is foundational:** Everything depends on parsing YAML into a document model with line/column positions. The `yaml` npm package provides this via its Document API and LineCounter class.
-- **Schema validation before semantic analysis:** Schema errors should be caught first; if the YAML is structurally invalid, semantic analysis may produce confusing results.
-- **Dependency graph builder is shared:** Both the semantic rules (cycle detection, undefined service refs) and the visual graph need the same underlying graph data structure.
-- **React Flow depends on graph builder:** The interactive visualization renders data computed by the semantic analysis phase.
-- **Scoring depends on all rules:** The scorer needs violations from all categories to compute weighted scores.
-- **Rule docs are decoupled:** Per-rule documentation pages are build-time Astro pages, independent of runtime analysis logic.
+- **Multi-document parser is foundational:** Everything depends on splitting YAML on `---`, parsing each document, and detecting apiVersion/kind. The `yaml` npm package (already used in Compose Validator) handles multi-document parsing via `parseAllDocuments()`.
+- **Resource registry is the key new concept:** Unlike the Compose Validator (which has a single document model), the K8s Analyzer must build an in-memory index of all resources by kind+name so cross-resource rules and the graph can resolve references.
+- **Schema validation per resource type:** Requires bundling ~18 JSON Schema files at build time. These are substantial files (10-80KB each). Must be tree-shaken or lazy-loaded to maintain bundle size.
+- **Cross-resource validation requires the graph builder:** The same data structure that powers the visual graph (edges between resources) also powers the "dangling reference" checks.
+- **RBAC rules are independent of cross-resource:** They examine Role/ClusterRole resources in isolation for over-permissive patterns.
+- **PSS profile mapping is metadata-only:** Each security rule has a `pssProfile: 'baseline' | 'restricted' | null` tag. The summary calculation is trivial once rules are tagged.
+- **React Flow can be lazy-loaded:** Proven pattern from Compose Validator (222KB separate chunk). Same approach here.
 
 ---
 
 ## MVP Definition
 
-### Launch With (v1)
+### Launch With (v1.7)
 
-Minimum viable product -- what is needed to validate the concept and ship.
+Everything needed to ship a credible K8s manifest analyzer that surpasses every existing browser-based tool.
 
-- [ ] YAML parsing with line numbers (yaml npm package + LineCounter) -- foundational for everything
-- [ ] Schema validation via ajv + compose-spec.json (~8 rules) -- structural correctness baseline
-- [ ] Semantic analysis engine (~15 rules) -- port conflicts, circular deps, undefined references, orphan resources -- the core value
-- [ ] Security rules (~14 rules) -- privileged mode, socket exposure, secrets in env, capabilities -- the expert differentiator
-- [ ] Best practice rules (~12 rules) -- healthchecks, restart policies, resource limits, image pinning -- production readiness
-- [ ] Style rules (~3 rules) -- alphabetical ordering, port quoting -- minimal effort, completeness
-- [ ] Category-weighted scoring with letter grades -- adapted from Dockerfile Analyzer scorer
-- [ ] CodeMirror 6 editor with YAML highlighting -- adapted from Dockerfile Analyzer
-- [ ] Pre-loaded sample compose file with deliberate issues across all categories
+- [ ] Multi-document YAML parsing with per-document apiVersion/kind detection -- foundational
+- [ ] Per-resource-type schema validation for 18 K8s resource types (K8s 1.31 schemas) -- structural correctness baseline
+- [ ] Security rules (~20 rules) with PSS Baseline/Restricted profile mapping -- the primary value proposition
+- [ ] Reliability rules (~12 rules) -- probes, replicas, update strategy, image tags
+- [ ] Best practice rules (~12 rules) -- resource limits, labels, namespace, operational hygiene
+- [ ] RBAC analysis (~5 rules) -- wildcard permissions, cluster-admin binding, exec/attach
+- [ ] Cross-resource validation (~8 rules) -- Service->Deployment selector matching, Ingress->Service, ConfigMap/Secret/PVC/SA references, NetworkPolicy->Pod, HPA->target
+- [ ] Category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%)
+- [ ] CodeMirror 6 YAML editor with dark theme, sample manifest, Cmd/Ctrl+Enter shortcut
 - [ ] Inline annotations (squiggly underlines + gutter markers)
-- [ ] Score gauge, category breakdown, violation list
-- [ ] Per-rule documentation pages (44+ pages at /tools/compose-validator/rules/[code])
+- [ ] Score gauge, category breakdown, violation list (tabbed results panel)
+- [ ] Resource summary panel ("Found: 3 Deployments, 2 Services, 1 ConfigMap")
+- [ ] Interactive resource relationship graph (React Flow + dagre) -- headline differentiator
+- [ ] Dangling references shown as red dashed edges in graph
+- [ ] Per-rule documentation pages (67+ pages at /tools/k8s-analyzer/rules/[code])
+- [ ] PSS profile tags and CIS benchmark references on rule documentation pages
 - [ ] Score badge download (PNG)
-- [ ] Shareable URL state (lz-string)
-- [ ] Interactive dependency graph with React Flow -- the headline differentiator
-- [ ] Cycle detection with red highlighting in the graph
+- [ ] Shareable URL state (lz-string, `#k8s=` prefix)
 - [ ] Companion blog post
-- [ ] OG images, homepage callout, header navigation, JSON-LD, breadcrumbs
-- [ ] Accessibility audit (keyboard nav, screen reader, WCAG 2.1 AA)
-- [ ] Lighthouse 90+ on all new pages
+- [ ] OG images, homepage callout, header navigation, JSON-LD, breadcrumbs, sitemap
 
 ### Add After Validation (v1.x)
 
 Features to add once core is working and user feedback is available.
 
-- [ ] Network topology overlay on dependency graph -- color-coded network membership showing communication paths
-- [ ] Volume sharing visualization on dependency graph -- which services share named volumes
-- [ ] Graph export as PNG/SVG -- download the dependency visualization
-- [ ] Rule severity configuration -- allow users to adjust severity levels (similar to DCLint's configurable rules)
-- [ ] Additional semantic rules based on user feedback
+- [ ] Resource kind color-coding in relationship graph (blue for workloads, green for services, yellow for config, purple for RBAC)
+- [ ] Graph export as PNG/SVG
+- [ ] K8s version selector (1.28, 1.29, 1.30, 1.31) for schema validation
+- [ ] Namespace grouping in graph visualization
+- [ ] Additional resource types (ServiceMonitor, Ingress routes, etc.)
+- [ ] Fix suggestions panel with copy-to-clipboard before/after code
 
 ### Future Consideration (v2+)
 
 Features to defer until the tool has proven its value.
 
-- [ ] YAML formatting / prettification (low value, many tools already do this)
-- [ ] Compose file templates library (curated example files for common stacks)
-- [ ] Side-by-side comparison mode (compare two compose files)
-- [ ] Integration with Dockerfile Analyzer (validate Dockerfiles referenced in `build` sections)
+- [ ] Custom rule configuration (enable/disable individual rules, adjust severity)
+- [ ] Partial CRD support (common CRDs like cert-manager, external-dns)
+- [ ] Import from URL (fetch manifest from raw GitHub URL)
+- [ ] Side-by-side diff comparison of two manifests
+- [ ] Integration with Compose Validator (detect manifests vs compose files automatically)
 
 ---
 
@@ -363,43 +414,75 @@ Features to defer until the tool has proven its value.
 
 | Feature | User Value | Implementation Cost | Priority | Notes |
 |---------|------------|---------------------|----------|-------|
-| Schema validation (ajv) | HIGH | MEDIUM | P1 | Foundation -- catches structural errors before semantic analysis |
-| Semantic analysis (port conflicts, circular deps, refs) | HIGH | HIGH | P1 | Core value proposition -- what no browser tool does well |
-| Security rules (OWASP-aligned) | HIGH | MEDIUM | P1 | Expert differentiator -- maps to real-world security concerns |
-| Best practice rules | HIGH | MEDIUM | P1 | Production readiness guidance |
-| Category-weighted scoring | HIGH | LOW | P1 | Proven pattern from Dockerfile Analyzer |
-| CodeMirror 6 YAML editor | HIGH | LOW | P1 | Adapted from existing implementation |
+| Multi-document YAML parsing + resource detection | HIGH | MEDIUM | P1 | Foundation for everything else |
+| Per-resource-type schema validation (18 types) | HIGH | HIGH | P1 | Credibility baseline -- kubeconform-level schema checking |
+| Security rules (20 rules, PSS mapped) | HIGH | MEDIUM | P1 | #1 reason users lint K8s manifests |
+| Reliability rules (12 rules) | HIGH | MEDIUM | P1 | Probes + replicas are universally expected |
+| Best practice rules (12 rules) | HIGH | LOW | P1 | Resource limits are universally expected |
+| RBAC analysis (5 rules) | MEDIUM | MEDIUM | P1 | Unique for browser tool; CIS-aligned credibility |
+| Cross-resource validation (8 rules) | HIGH | HIGH | P1 | Headline differentiator -- no browser tool does this |
+| Category-weighted scoring | HIGH | LOW | P1 | Proven pattern; adapted from existing scorer |
+| CodeMirror 6 YAML editor | HIGH | LOW | P1 | Direct reuse from Compose Validator |
 | Inline annotations | HIGH | LOW | P1 | Direct reuse |
 | Score gauge + category breakdown + violations | HIGH | LOW | P1 | Direct reuse |
-| Interactive dependency graph (React Flow) | HIGH | HIGH | P1 | Headline differentiator -- no competing tool has this |
-| Per-rule documentation pages | HIGH | MEDIUM | P1 | 44+ SEO pages, proven traffic driver |
-| Score badge + shareable URL | MEDIUM | LOW | P1 | Low cost, proven sharing feature |
+| Interactive resource relationship graph | HIGH | HIGH | P1 | Headline visual differentiator |
+| Per-rule documentation pages (67+ pages) | HIGH | MEDIUM | P1 | SEO powerhouse; expert credibility |
+| Score badge + shareable URL | MEDIUM | LOW | P1 | Low cost, proven feature |
 | Companion blog post | MEDIUM | MEDIUM | P1 | SEO content pillar |
 | OG images + JSON-LD + site integration | MEDIUM | LOW | P1 | Standard site integration |
-| Style rules | LOW | LOW | P1 | Minimal effort for completeness |
-| Network topology overlay | MEDIUM | MEDIUM | P2 | Enhances graph but not essential for launch |
-| Volume sharing visualization | MEDIUM | MEDIUM | P2 | Same -- enhances graph |
-| Graph PNG/SVG export | LOW | LOW | P2 | Nice to have |
-| Rule severity configuration | LOW | MEDIUM | P3 | Power user feature |
+| PSS profile summary in results | MEDIUM | LOW | P1 | Low-cost add-on to security rules |
+| Resource summary panel | MEDIUM | LOW | P1 | Low-cost; immediate user orientation |
+| K8s version selector | LOW | HIGH | P2 | Requires bundling multiple schema versions |
+| Graph export (PNG/SVG) | LOW | LOW | P2 | Nice to have |
+| Resource kind color-coding in graph | MEDIUM | LOW | P2 | Visual polish for the graph |
+| Custom rule configuration | LOW | MEDIUM | P3 | Power user feature |
 
 ---
 
 ## Competitor Feature Analysis
 
-| Feature | DCLint (CLI) | Code Pathfinder | onewebcare.com | multitools.ovh | Our Approach |
-|---------|-------------|-----------------|----------------|----------------|-------------|
-| Schema validation | Yes (built-in pre-check) | No (security only) | Basic | Basic | ajv + compose-spec.json -- full spec compliance |
-| Semantic analysis | Limited (ports, names) | No | Basic deps/refs | Claims 10 types | Deep: 15 rules covering ports, deps, refs, orphans, cycles |
-| Security rules | 5 rules | 10 rules (CWE-mapped) | None | Claims "best practices" | 14 rules, OWASP + CWE mapped |
-| Best practice rules | 4 rules | None | Mentions recommendations | Unclear | 12 rules covering healthchecks, restart, resources, images |
-| Scoring system | None | None | Pass/fail | Pass/fail | Category-weighted 0-100 with letter grades |
-| Dependency graph | None | None | None | None | React Flow interactive graph with cycle detection |
-| Inline annotations | N/A (CLI) | N/A (CLI) | None | None | CodeMirror squiggly underlines + gutter markers |
-| Per-rule docs | Markdown docs | CWE references | None | None | 44+ dedicated pages with expert explanations |
-| Auto-fix | Yes (style rules) | No | No | No | No (anti-feature) -- fix suggestions in docs instead |
-| Browser-based | No | No | Yes | Yes | Yes |
-| Badge/sharing | No | No | No | No | PNG badge + lz-string URL |
-| Expert explanations | Basic descriptions | Good CWE context | Generic tips | Generic tips | Production consequence narratives (proven in Dockerfile Analyzer) |
+| Feature | KubeLinter (CLI) | Polaris (CLI+Dashboard) | kube-score (CLI) | Checkov (CLI) | EaseCloud (Web) | Our Approach |
+|---------|-----------------|------------------------|-----------------|---------------|-----------------|-------------|
+| Schema validation | Yes (basic) | No | No (best practice focus) | No (policy focus) | Yes (K8s 1.19-1.30) | Yes -- per-resource-type for 18 types, K8s 1.31 |
+| Security checks | Yes (14+ checks) | Yes (24 checks) | Yes (5 checks) | Yes (45+ CKV_K8S checks) | Yes (basic PSS) | Yes -- 20 rules, PSS Baseline/Restricted mapped, CIS-tagged |
+| Reliability checks | Yes (probes, replicas) | Yes (12 checks) | Yes (strongest, 15+ checks) | Yes (probes, resources) | Basic | Yes -- 12 rules sourced from kube-score/Polaris consensus |
+| Resource limits | Yes | Yes (4 checks) | Yes | Yes | Yes | Yes -- 4 explicit rules |
+| RBAC analysis | Yes (5 checks) | Yes (8 checks) | No | Yes (wildcards) | No | Yes -- 5 rules, CIS 5.1 mapped |
+| Cross-resource validation | Yes ("dangling-*" checks: Service, Ingress, NetworkPolicy, HPA, ServiceMonitor) | No | Yes (service-targets-pod, ingress-targets-service, networkpolicy-targets-pod) | No | No | Yes -- 8 rules with VISUAL graph integration |
+| Scoring system | None | Category pass/fail | OK/WARNING/CRITICAL per-check | Pass/fail per-check | Error/Warning/Info | Category-weighted 0-100 with letter grades |
+| Visualization | None | Dashboard (cluster-connected) | None | None | None | Interactive resource relationship graph (React Flow) |
+| Browser-based | No | No (dashboard needs cluster) | No | No | Yes | Yes -- fully client-side |
+| Per-rule documentation | Markdown | Docs site | README_CHECKS.md | Policy index | None | 67+ dedicated SEO pages with expert explanations |
+| Deprecated API detection | Yes (no-extensions-v1beta) | No | Yes (stable-version) | No | Yes | Yes -- comprehensive deprecation guide mapping |
+| PSS profile mapping | No | Implicit in checks | No | Implicit | Yes (Baseline/Restricted) | Yes -- explicit per-rule PSS profile tags |
+| Custom rules | Yes (templates) | Yes (JSON Schema) | No | Yes (Python) | No | No (anti-feature for v1; P3 for future) |
+| Badge/sharing | No | No | No | No | No | PNG badge + lz-string URL |
+| Multi-document | Yes | N/A (cluster) | Yes | Yes | Yes | Yes -- per-resource parsing and validation |
+
+---
+
+## Supported Resource Types (18)
+
+| Resource Type | apiVersion | Schema Needed | Rule Categories |
+|---------------|------------|---------------|-----------------|
+| Deployment | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
+| StatefulSet | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
+| DaemonSet | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
+| Job | batch/v1 | Yes | Schema, Security, Best Practice |
+| CronJob | batch/v1 | Yes | Schema, Security, Best Practice, Reliability |
+| Service | v1 | Yes | Schema, Best Practice, Cross-Resource |
+| Ingress | networking.k8s.io/v1 | Yes | Schema, Cross-Resource |
+| ConfigMap | v1 | Yes | Schema, Cross-Resource |
+| Secret | v1 | Yes | Schema, Security (sensitive data patterns), Cross-Resource |
+| PersistentVolumeClaim | v1 | Yes | Schema, Cross-Resource |
+| PersistentVolume | v1 | Yes | Schema |
+| NetworkPolicy | networking.k8s.io/v1 | Yes | Schema, Cross-Resource |
+| Role | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
+| ClusterRole | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
+| RoleBinding | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
+| ClusterRoleBinding | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
+| HorizontalPodAutoscaler | autoscaling/v2 | Yes | Schema, Cross-Resource, Reliability |
+| PodDisruptionBudget | policy/v1 | Yes | Schema, Reliability |
 
 ---
 
@@ -408,116 +491,181 @@ Features to defer until the tool has proven its value.
 Following the established pattern:
 
 - **Dockerfile Analyzer:** DL-prefixed (Hadolint-compatible) and PG-prefixed (custom)
-- **Compose Validator:** CV-prefixed (Compose Validator custom), with sub-prefixes for categories:
-  - `CV-S0xx` -- Schema validation
-  - `CV-M0xx` -- seMantic analysis (M to avoid collision with S)
-  - `CV-C0xx` -- seCurity
-  - `CV-B0xx` -- Best practices
-  - `CV-F0xx` -- Formatting/style
+- **Compose Validator:** CV-prefixed with sub-prefixes (CV-S, CV-M, CV-C, CV-B, CV-F)
+- **K8s Manifest Analyzer:** KA-prefixed (K8s Analyzer custom), with sub-prefixes for categories:
+  - `KA-S0xx` -- Schema validation
+  - `KA-C0xx` -- seCurity (including RBAC analysis rules KA-A0xx for docs, scored under Security)
+  - `KA-R0xx` -- Reliability
+  - `KA-B0xx` -- Best practices
+  - `KA-X0xx` -- cross-Resource (X for cross)
+  - `KA-A0xx` -- RBAC Analysis (scored under Security category)
 
-This gives each rule a unique, predictable code that maps to a documentation URL: `/tools/compose-validator/rules/cv-s001`.
+Each rule maps to a documentation URL: `/tools/k8s-analyzer/rules/ka-s001`.
 
 ---
 
-## Sample Compose File Design
+## Sample K8s Manifest Design
 
-The pre-loaded sample should contain deliberate issues across ALL categories (mirroring the Dockerfile Analyzer's approach):
+The pre-loaded sample should contain deliberate issues across ALL categories:
 
 ```yaml
-# Sample compose file with deliberate issues for demonstration
-version: "3.8"
-
-services:
-  web:
-    image: nginx:latest
-    privileged: true
-    ports:
-      - 80:80
-      - 443:443
-    environment:
-      - DATABASE_PASSWORD=supersecret123
-      - API_KEY=sk-1234567890abcdef
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /data
-    depends_on:
-      - api
-
-  api:
-    image: myapp
-    ports:
-      - 80:3000
-    network_mode: host
-    cap_add:
-      - SYS_ADMIN
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: mysecretpassword
-    volumes:
-      - db-data:/var/lib/postgresql/data
-
-  worker:
-    build: ./worker
-    image: myworker:latest
-    depends_on:
-      - api
-      - worker
-
-  cache:
-    image: redis:latest
-    networks:
-      - backend
-
-volumes:
-  db-data:
-  unused-volume:
-
-networks:
-  frontend:
+# Sample K8s manifest with deliberate issues for demonstration
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web-frontend
+    spec:
+      containers:
+        - name: web
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+          env:
+            - name: DB_PASSWORD
+              value: "supersecret123"
+            - name: API_KEY
+              value: "sk-1234567890abcdef"
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+            - name: app-config
+              mountPath: /etc/config
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: app-config
+          configMap:
+            name: app-settings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  type: NodePort
+  selector:
+    app: web-app
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+spec:
+  rules:
+    - host: example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: missing-service
+                port:
+                  number: 80
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: overpermissive-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-cleanup
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cleanup
+              image: busybox
+              command: ["sh", "-c", "echo cleanup"]
+          restartPolicy: OnFailure
 ```
 
 This sample triggers:
-- **Schema:** deprecated `version` field
-- **Semantic:** duplicate port 80, self-referencing dependency (worker), undefined network ref (backend from cache), orphan volume (unused-volume), orphan network (frontend), healthcheck dependency without healthcheck (api->db), undefined service dependency (worker->worker self-ref)
-- **Security:** privileged mode, Docker socket mount, secrets in env vars, host network mode, SYS_ADMIN capability, unbound ports, latest tags
-- **Best practice:** no healthchecks, no restart policies, no resource limits, both build and image, anonymous volume, latest/untagged images, no logging config
-- **Style:** services not alphabetical
+- **Schema:** selector/template label mismatch (web vs web-frontend)
+- **Security:** privileged container, privilege escalation allowed, no runAsNonRoot, docker socket mounted, secrets in env vars, no security context on CronJob, no capabilities dropped, no read-only root filesystem, no seccomp profile
+- **Reliability:** single replica, no liveness probe, no readiness probe, no rolling update strategy, latest tag, no image pull policy
+- **Best Practice:** no CPU/memory requests or limits, no labels beyond app, NodePort service type, SSH-adjacent port exposure, no namespace, no priorityClassName, missing CronJob deadline
+- **Cross-Resource:** Service selector matches no pod template (web-app vs web-frontend), Ingress references missing-service (not defined), ConfigMap app-settings not defined, dangling Service
+- **RBAC:** wildcard permissions on ClusterRole (all apiGroups, resources, verbs)
+
+---
+
+## Key Implementation Considerations
+
+### Schema Bundle Size
+
+K8s JSON Schemas are large. The Deployment schema alone is ~50-80KB. Bundling 18 types naively would add 500KB-1MB to the build.
+
+**Mitigation:** Lazy-load schemas per resource type. When a document is parsed and its kind is identified, dynamically import only the needed schema. Use Astro/Vite code splitting.
+
+### False Positives in Cross-Resource Validation
+
+Users may paste only a Deployment without its Service, triggering "Service selector matches no Pod template" false positives.
+
+**Mitigation:** Cross-resource rules should default to `info` severity, not `warning` or `error`. The UI should clearly communicate "Checks references within the pasted YAML -- paste complete manifests for best results." The resource summary panel helps users understand what was parsed.
+
+### Multi-Document Line Number Mapping
+
+When YAML is split on `---`, line numbers must be offset correctly so violations point to the right line in the original editor content.
+
+**Mitigation:** The `yaml` package's `parseAllDocuments()` with LineCounter handles this natively. Each document knows its range within the source.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [compose-spec JSON Schema](https://github.com/compose-spec/compose-spec/blob/main/schema/compose-spec.json) -- Draft 7, authoritative schema
-- [Docker Compose Services Reference](https://docs.docker.com/reference/compose-file/services/) -- official service configuration docs
-- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) -- security rule foundation
-- [Code Pathfinder COMPOSE-SEC Rules](https://codepathfinder.dev/blog/announcing-docker-compose-security-rules) -- 10 CWE-mapped security rules
-- [DCLint GitHub](https://github.com/zavoloklom/docker-compose-linter) -- 15 rules across 4 categories, auto-fix patterns
-- [Docker Compose Networking](https://docs.docker.com/compose/how-tos/networking/) -- network isolation patterns
-- [Docker Resource Constraints](https://docs.docker.com/engine/containers/resource_constraints/) -- memory/CPU limits
-- [Docker Secrets in Compose](https://docs.docker.com/compose/how-tos/use-secrets/) -- secrets management
+- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/) -- Official Kubernetes documentation for PSS Baseline/Restricted profiles
+- [Kubernetes API Deprecation Guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) -- Official deprecated API version list
+- [KubeLinter checks.md](https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md) -- Complete list of ~60 KubeLinter checks
+- [Polaris Security Checks](https://polaris.docs.fairwinds.com/checks/security/) -- 24 security checks with severity levels
+- [Polaris Reliability Checks](https://polaris.docs.fairwinds.com/checks/reliability/) -- 12 reliability checks
+- [Polaris Efficiency Checks](https://polaris.docs.fairwinds.com/checks/efficiency/) -- 4 resource limit checks
+- [kube-score README_CHECKS.md](https://github.com/zegl/kube-score/blob/master/README_CHECKS.md) -- Complete list of 43 checks
+- [Checkov Kubernetes Policy Index](https://www.checkov.io/5.Policy%20Index/kubernetes.html) -- 139+ CKV_K8S checks
+- [kubernetes-json-schema registry](https://github.com/yannh/kubernetes-json-schema) -- JSON Schemas used by kubeconform
+- [Kubernetes RBAC Good Practices](https://kubernetes.io/docs/concepts/security/rbac-good-practices/) -- Official RBAC security guidance
 
 ### Secondary (MEDIUM confidence)
-- [Semgrep docker-compose ruleset](https://semgrep.dev/p/docker-compose) -- pattern-based security rules
-- [dcvalidator (ZHAW SPLab)](https://github.com/serviceprototypinglab/dcvalidator) -- academic compose validator
-- [multitools.ovh Compose Validator](https://multitools.ovh/docker-compose-validator/) -- 10-category browser validator
-- [onewebcare.com Compose Validator](https://onewebcare.com/docker-compose-validator/) -- browser-based with templates
-- [Docker Compose port conflict issue #6708](https://github.com/docker/compose/issues/6708) -- static port duplicate detection request
-- [Docker Compose circular dependency issue #7239](https://github.com/docker/compose/issues/7239) -- circular dep discussion
-- [MoldStud: Common Docker Compose Mistakes](https://moldstud.com/articles/p-avoid-these-common-docker-compose-pitfalls-tips-and-best-practices) -- common mistake patterns
+- [EaseCloud K8s Manifest Validator](https://www.easecloud.io/tools/docker/kubernetes-manifest-validator/) -- Browser-based competitor analysis
+- [FOSSA K8s Manifest Linter](https://fossa.com/resources/devops-tools/kubernetes-manifest-linter/) -- Browser-based competitor analysis
+- [ValidKube](https://validkube.com/) -- Browser-based competitor analysis
+- [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes) -- CIS 5.1 RBAC and 5.2 Pod Security controls
+- [Datree GitHub](https://github.com/datreeio/datree) -- 100+ rules (company closed July 2023, project effectively dead)
 
-### Existing Codebase (VERIFIED -- these files exist and work)
+### Existing Codebase (VERIFIED)
 - `src/lib/tools/dockerfile-analyzer/types.ts` -- LintRule interface, RuleViolation, ScoreResult
 - `src/lib/tools/dockerfile-analyzer/engine.ts` -- rule engine loop pattern
 - `src/lib/tools/dockerfile-analyzer/scorer.ts` -- diminishing returns scoring algorithm
 - `src/lib/tools/dockerfile-analyzer/rules/index.ts` -- rule registry pattern
-- `src/lib/tools/dockerfile-analyzer/rules/security/PG001-secrets-in-env.ts` -- rule implementation pattern
+- Compose Validator's YAML parsing (yaml npm package), ajv schema validation, React Flow graph
 
 ---
-*Feature research for: Docker Compose Validator (v1.6 milestone)*
-*Researched: 2026-02-22*
+*Feature research for: Kubernetes Manifest Analyzer (v1.7 milestone)*
+*Researched: 2026-02-23*

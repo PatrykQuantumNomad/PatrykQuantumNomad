@@ -1,267 +1,236 @@
 # Project Research Summary
 
-**Project:** Docker Compose Validator (v1.6 milestone)
-**Domain:** Browser-based Docker Compose validation tool with interactive dependency graph visualization
-**Researched:** 2026-02-22
+**Project:** Kubernetes Manifest Analyzer (v1.7 milestone)
+**Domain:** Browser-based Kubernetes manifest validation, security analysis, and resource relationship visualization
+**Researched:** 2026-02-23
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The Docker Compose Validator is a browser-based developer tool that validates Docker Compose YAML files against the compose-spec JSON Schema and a custom semantic rule engine, displays category-weighted scores with letter grades, annotates violations inline in a CodeMirror 6 editor, and renders an interactive service dependency graph. This is a direct extension of the existing Dockerfile Analyzer (v1.4) architecture — the same patterns govern the rule engine, scoring system, editor, nanostores, and Astro page structure. The primary novel challenges are: (1) YAML AST parsing with source-range preservation using the `yaml` npm package, (2) JSON Schema validation via Ajv against the official compose-spec schema with error-to-line mapping, and (3) interactive graph visualization using React Flow with dagre layout.
+The Kubernetes Manifest Analyzer is a browser-side static analysis tool for Kubernetes YAML manifests, built as the third tool in an existing Astro 5 portfolio site that already has a Dockerfile Analyzer (v1.4) and Docker Compose Validator (v1.6). The existing codebase provides a mature, proven pattern: CodeMirror 6 editor, pre-compiled Ajv standalone validators, a rule engine with diminishing-returns scoring, React Flow graph visualization with dagre layout, nanostore state management, and lz-string URL state. Zero new npm dependencies are needed. The K8s analyzer extends this pattern with three new architectural layers: multi-document YAML parsing (via `parseAllDocuments()`), per-resource-type schema validation (18 K8s resource types, K8s v1.31 schemas from yannh/kubernetes-json-schema), and a Resource Registry that enables cross-resource validation and interactive graph visualization.
 
-The recommended approach is to treat the Compose Validator as a parallel tool, not an extension of the Dockerfile Analyzer. All code lives under a separate `src/lib/tools/compose-validator/` namespace. Patterns are copied and adapted rather than abstracted into shared modules — this keeps tools independently evolvable without coupling. The pipeline has a strict dependency order: YAML parsing must work first, then schema validation, then semantic rules, then the editor integration, then the React Flow graph, then site integration. Deviating from this order creates integration problems that are expensive to untangle.
+The recommended approach is to build on the proven compose-validator architecture, introducing only the minimal new layers required: a GVK (Group-Version-Kind) registry for apiVersion/kind routing, a Resource Registry for cross-resource lookups, and a schema compilation pipeline that produces a single pre-compiled Ajv module for all 18 validators. The tool targets ~67 rules across six categories (Schema, Security, Reliability, Best Practice, Cross-Resource, RBAC), with category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%) and an interactive resource relationship graph as the headline differentiator. No existing browser-based K8s tool combines schema validation, security analysis, cross-resource validation, scoring, and graph visualization in one client-side tool.
 
-The most critical risks are: YAML 1.1 merge key configuration (Docker Compose uses `<<` merge keys that YAML 1.2 ignores by default), the line-number mapping problem (ajv operates on plain JSON objects with no positional data, so a path resolver must walk the YAML AST to recover source lines), and React Flow bundle size (the graph adds ~100-150 KB gzipped, requiring lazy-loading to keep Lighthouse scores at 90+). All three risks have well-defined prevention strategies documented in the research and must be addressed in Phase 1 before any UI code is written.
+The primary risks are bundle size explosion from K8s JSON schemas (each standalone schema is 50-200KB due to fully-inlined definitions) and cross-resource validation correctness (label selector semantics have non-obvious AND/OR behavior, namespace scoping, and well-known system resources that must be whitelisted). Both are well-documented in the research and have clear mitigation strategies. The schema risk must be addressed in Phase 1 before any other work proceeds; it is the critical path for the entire milestone.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The project builds on the existing Astro 5 + React 19 + TypeScript + Tailwind + CodeMirror 6 stack already deployed on the site. Eight new npm dependencies are required. All are MIT-licensed, all ship TypeScript types, none introduce SSR complexity beyond what is already solved by the `client:only="react"` pattern.
+The entire analyzer is buildable with zero new npm packages. The stack is the existing site's dependencies applied to a new domain. The `yaml` package's `parseAllDocuments()` handles multi-document YAML streams with a shared `LineCounter` that produces absolute character offsets across all documents. Ajv 8.x with standalone code generation compiles all 18 K8s JSON schemas (from yannh/kubernetes-json-schema v1.31.0-standalone-strict) into a single ESM module at build time, eliminating both runtime `new Function()` CSP violations and startup latency. React Flow + dagre are already proven in the compose-validator's dependency graph and extend directly to the more complex K8s resource relationship graph.
 
 **Core technologies:**
+- `yaml` (eemeli) v2.8.2: Multi-document YAML parsing — `parseAllDocuments()` with shared `LineCounter` for correct global line offsets across all documents
+- `ajv` v8.18.0 + standalone code generation: Pre-compiled per-resource-type validators — same CSP-safe pattern proven in compose-validator, extended to 18 K8s resource types in one compiled module
+- `@xyflow/react` v12.10.1 + `@dagrejs/dagre` v2.0.4: Resource relationship graph — extend compose service graph to multi-node-type K8s resource graph with LR layout
+- `nanostores` v1.1.0: Cross-component state — same pattern as compose-validator; `k8sAnalyzerStore.ts` mirrors `composeValidatorStore.ts`
+- `lz-string` v1.5.0: URL state compression — adapt with `#k8s=` hash prefix distinct from existing tools
+- yannh/kubernetes-json-schema v1.31.0-standalone-strict: Schema data source — 18 JSON schema files downloaded at build time, compiled to single Ajv standalone module
 
-- `yaml` 2.8.2 — YAML parsing with full AST and source ranges — the only YAML parser that preserves node positions for CodeMirror annotation mapping; `js-yaml` is not viable because it returns plain objects with no line data
-- `@codemirror/lang-yaml` 6.1.2 — CodeMirror YAML syntax highlighting — Lezer-based (not the legacy stream mode used for Dockerfiles), proper indentation support
-- `ajv` 8.18.0 + `ajv-formats` 3.0.1 — JSON Schema validation against compose-spec — fastest JavaScript JSON Schema validator, Draft-07 support required by the compose-spec schema, reducible from ~122 KB to ~20 KB gzip with pre-compiled standalone validation
-- `@xyflow/react` 12.10.1 — interactive dependency graph — standard React graph library with pan/zoom/minimap built in, fits the existing `client:only="react"` island pattern, requires lazy-loading to manage bundle impact
-- `@dagrejs/dagre` 2.0.4 — hierarchical graph layout — 30-40 KB gzip vs. elkjs at 1.4 MB; adequate for Docker Compose graphs which are typically 5-30 nodes in a tree/forest shape
-- `graphology` 0.26.0 + `graphology-dag` 0.4.1 — graph data structures and analysis — `hasCycle()`, `topologicalSort()`, `topologicalGenerations()` for circular dependency detection and startup order computation
-
-Bundle impact: ~170-175 KB gzip eager + ~120-140 KB gzip deferred (lazy-loaded graph). With Ajv pre-compilation: ~70-75 KB eager. Both strategies keep Lighthouse Performance at 90+.
+**What NOT to use:** `js-yaml` (no AST/LineCounter), `@kubernetes/client-node` (500KB Node.js-only), runtime Ajv compilation (CSP violation), non-strict schema flavors (misses misspelled fields), graphology (cycle detection not needed for K8s resource graphs).
 
 ### Expected Features
 
-The tool has 44+ rules across five categories. The rule count is comparable to the Dockerfile Analyzer's 39 rules. No existing browser-based tool combines schema validation, semantic analysis, security rules, best practices, scoring, and interactive graph visualization — this gap is the primary market position.
+The research identifies 67 total rules across six categories. The feature set is well-defined, with the competitive analysis confirming that no existing browser tool matches the planned depth.
 
 **Must have (table stakes):**
-- CodeMirror 6 editor with YAML syntax highlighting — users expect this from the Dockerfile Analyzer precedent
-- On-demand analysis triggered by button and keyboard shortcut — not real-time (as-you-type validation is an anti-feature for YAML)
-- Schema validation (~8 rules via Ajv + compose-spec.json) — structural correctness baseline
-- Semantic analysis (~15 rules) — port conflicts, circular `depends_on`, undefined resource references, orphan definitions
-- Security rules (~14 rules, OWASP-aligned) — privileged mode, Docker socket mount, secrets in env vars, dangerous capabilities
-- Best practice rules (~12 rules) — image pinning, healthchecks, restart policies, resource limits
-- Style rules (~3 rules) — alphabetical ordering, port quoting
-- Category-weighted 0-100 scoring with letter grades and per-category breakdown
-- Inline editor annotations (squiggly underlines + gutter markers)
-- Interactive dependency graph with cycle detection — no competing browser tool has this
-- Per-rule documentation pages at `/tools/compose-validator/rules/[code]` (44+ pages) — SEO value
-- Score badge PNG download and shareable lz-string URL state
-- Pre-loaded sample compose file that exercises all rule categories
+- Multi-document YAML parsing with per-resource apiVersion/kind detection — K8s manifests are almost always multi-document
+- Per-resource-type schema validation for 18 K8s resource types (K8s 1.31) — kubeconform-level structural correctness baseline
+- Security rules (~20 rules, PSS Baseline/Restricted mapped, CIS-tagged) — primary user motivation for K8s linting
+- Reliability rules (~12 rules: probes, replicas, update strategy, image tags) — universally expected
+- Best practice rules (~12 rules: resource limits, labels, namespace) — every K8s practitioner expects resource limits checking
+- RBAC analysis (~5 rules: wildcard permissions, cluster-admin binding) — CIS 5.1 aligned, adds credibility
+- Cross-resource validation (~8 rules: Service->Deployment selector, Ingress->Service, ConfigMap/Secret/PVC/SA references) — headline differentiator
+- Category-weighted 0-100 scoring with letter grades — established tool suite pattern
+- Interactive resource relationship graph (React Flow + dagre) — no browser competitor has this
+- Per-rule documentation pages at `/tools/k8s-analyzer/rules/[code]` — 67+ individually indexed SEO pages
+- CodeMirror 6 editor with YAML highlighting, sample manifest, inline annotations — direct reuse from compose-validator
+- Score badge, shareable URL state, companion blog post, OG images, JSON-LD — standard site integration
 
-**Should have (competitive):**
-- Network topology overlay on graph (color-coded network membership)
-- Volume sharing visualization on graph
+**Should have (competitive advantage):**
+- PSS profile summary in results (Baseline vs Restricted compliance at a glance)
+- Resource summary panel ("Found: 3 Deployments, 2 Services, 1 ConfigMap") — instant structural orientation
+- Dangling references shown as red dashed edges in the graph — cross-resource violations visualized
+- CIS Benchmark reference tags on rule documentation pages
+- Deprecated API version detection with migration path messages
+
+**Defer to v1.x (post-validation):**
+- Resource kind color-coding in graph (visual polish)
 - Graph export as PNG/SVG
-- Rule severity configuration for power users
+- K8s version selector (1.28-1.31) — requires multiple schema bundles
+- Namespace grouping in graph visualization
+- Fix suggestions panel with copy-to-clipboard before/after code
 
-**Defer (v2+):**
-- YAML formatting/prettification — many tools already do this
-- Compose file template library — out of scope for v1
-- Side-by-side comparison mode
-- Integration with Dockerfile Analyzer for build-section Dockerfiles
-
-**Anti-features (explicitly not building):**
-- Auto-fix/auto-correct — too many edge cases; fix suggestions in rule docs instead
-- Real-time as-you-type linting — noisy during mid-edit, expensive on large files
-- Multi-file compose support — browser has no filesystem; scope explosion
-- AI-powered analysis — contradicts expert-positioning; requires backend API calls
-- Docker Hub image verification — requires network calls, rate-limited
+**Anti-features (explicitly excluded):**
+- Helm chart rendering / Kustomize overlay resolution — requires Go runtime
+- CRD validation — infinite and cluster-specific
+- Cluster-connected validation — violates zero-backend architecture
+- Auto-fix / real-time validation — high blast radius, excessive noise
+- AI-powered analysis — contradicts human-expertise positioning
 
 ### Architecture Approach
 
-The architecture is parallel-namespace, pattern-mirrored. Every structural decision mirrors the Dockerfile Analyzer at each layer: core lib, rules directory, components, store, pages. The Compose Validator does not share code with the Dockerfile Analyzer because the rule input types are fundamentally different (`dockerfile-ast` nodes vs. `yaml` Document AST nodes). Scoring, URL state, and badge generator algorithms are copied and customized — not abstracted — to keep the tools independently maintainable.
+The K8s analyzer mirrors the compose-validator's three-layer architecture (parse -> lint rules -> engine -> scorer -> UI) but introduces three new structural layers that did not exist before: a Resource Registry (indexes all parsed resources for O(1) cross-resource lookups), a schema-registry pattern with dynamic import (routes each resource to its type-specific pre-compiled Ajv validator without eager-loading all 18 validators), and a cross-resource validator (uses the registry to resolve selector matches, name references, and RBAC bindings across documents). The engine becomes async (dynamic schema imports vs. the synchronous compose engine) and operates on a `ParsedResource[]` array instead of a single document.
 
 **Major components:**
+1. `parser.ts` — `parseAllDocuments()` with single shared `LineCounter`; returns `K8sParseResult { resources: ParsedResource[], lineCounter, parseErrors }` where each resource carries docIndex, kind, apiVersion, name, namespace, json
+2. `resource-registry.ts` — builds `ResourceRegistry { byKind, byKey (namespace/kind/name), byLabel }` with O(1) lookup methods; consumed by cross-resource rules, graph builder, and RBAC analyzer
+3. `schema-validator.ts` + `schemas/schema-registry.ts` — maps `kind/apiVersion` key to dynamically imported pre-compiled Ajv validator; cache prevents re-importing; single compiled module for all 18 types
+4. `cross-resource-validator.ts` — label selector matching (matchLabels AND semantics, matchExpressions, Service vs Deployment selector distinction), name reference resolution with namespace scoping, well-known resource whitelisting
+5. `engine.ts` — async 4-phase orchestration: parse errors -> schema validation -> per-resource rules -> cross-resource rules; sorts all violations by docIndex then line
+6. `scorer.ts` — adapted diminishing-returns algorithm with 5 category weights (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%)
+7. `graph-builder.ts` — multi-type resource graph with 6 node categories (workload/networking/config/storage/RBAC/scaling) and 12 edge types; dagre LR layout
+8. React components — `K8sAnalyzer.tsx` (root island), `K8sEditorPanel.tsx`, `K8sResultsPanel.tsx`, `ResourceGraph.tsx` (lazy-loaded), nanostore bridge
 
-1. `src/lib/tools/compose-validator/parser.ts` — YAML parsing entry point; creates `LineCounter`, calls `parseDocument()` with YAML 1.1 + merge key options, returns Document AST + LineCounter + plain JSON object for Ajv
-2. `src/lib/tools/compose-validator/schema-validator.ts` — Ajv validation against bundled compose-spec.json; maps `instancePath` JSON Pointer paths back to YAML AST nodes via `resolveInstancePath()` to recover 1-based source line numbers
-3. `src/lib/tools/compose-validator/rules/` — 44+ rule files in schema/security/reliability/best-practice/maintainability subdirectories; each rule receives a `ComposeRuleContext` with Document, LineCounter, and pre-extracted services/networks/volumes maps
-4. `src/lib/tools/compose-validator/graph-builder.ts` — extracts service dependency graph from the YAML AST; shared output consumed by both semantic analysis rules (cycle detection) and React Flow visualization
-5. `src/stores/composeValidatorStore.ts` — six nanostores mirroring the Dockerfile Analyzer store pattern: analysis result, analyzing flag, editor view ref, stale flag, graph data, active tab
-6. `src/components/tools/compose-validator/DependencyGraph.tsx` — React Flow + dagre layout; lazy-loaded via `React.lazy()` to defer the ~120-140 KB graph bundle until user activates the graph tab
-7. `src/pages/tools/compose-validator/` — tool page (Astro with `client:only="react"` island) and rule documentation pages (via `getStaticPaths` from the rule registry)
-
-The analysis pipeline is sequential: parse YAML → validate schema → run semantic rules → build graph → compute score → set CodeMirror diagnostics → set nanostores → UI rerenders.
+**Build order dependencies (strictly enforced):**
+- Layer 0: `types.ts`, `sample-manifest.ts`, `url-state.ts`, `badge-generator.ts` (no dependencies)
+- Layer 1: `parser.ts`, schema compilation scripts, `schema-registry.ts`, `scorer.ts`
+- Layer 2: `resource-registry.ts` (depends on parser output types)
+- Layer 3: `schema-validator.ts`, `cross-resource-validator.ts`, rules, `graph-builder.ts` (all depend on registry)
+- Layer 4: `engine.ts` (depends on all lib)
+- Layer 5: store + UI hook (depends on engine types)
+- Layer 6: React components, Astro pages (depends on everything)
 
 ### Critical Pitfalls
 
-1. **YAML 1.2 default silently breaks merge keys** — Docker Compose uses YAML 1.1 `<<` merge keys extensively; `yaml` package defaults to YAML 1.2 where `<<` is a literal key. Prevention: always pass `{ version: '1.1', merge: true, lineCounter }` to `parseDocument()`. Must be correct from the first line of parsing code.
+1. **Schema size explosion (CRITICAL)** — K8s standalone schemas are 50-200KB each due to fully-inlined definitions; 18 schemas naive bundling = 1-3MB. Mitigation: compile ALL 18 schemas into a SINGLE Ajv instance (shared definitions deduplicated); generate one standalone module (`validate-k8s.js`) exporting all validators as named functions; target <200KB before gzip, <60KB gzipped. Must use dynamic import for the compiled module. Verify with bundle visualizer before any other work proceeds.
 
-2. **ajv errors have no line numbers — AST path resolver required** — ajv validates plain JSON objects and reports errors as JSON Pointer paths (`/services/api/ports/0`). The YAML Document AST must be walked segment by segment to find the source node's range. Prevention: build `resolveInstancePath()` as the single line-mapping entry point; pass `LineCounter` through the entire pipeline.
+2. **Multi-document line number tracking (CRITICAL)** — `parseAllDocuments()` with a SINGLE shared `LineCounter` produces correct absolute offsets across all documents; creating per-document LineCounters produces wrong line numbers for documents 2+. Empty documents (`doc.contents === null`) must be filtered before processing. Every violation must carry document index AND resource identity (kind/name), not just line number.
 
-3. **YAML AST nodes can have undefined `range` property** — documented yaml package edge case (GitHub issue #573); TypeScript types declare range as always present but runtime can return `undefined`. Prevention: always guard with `if (node?.range && Array.isArray(node.range))` before accessing; wrap resolver in try/catch with fallback to line 1.
+3. **apiVersion/kind combinatorial validation (CRITICAL)** — `kind` and `apiVersion` are not independent; a GVK registry must validate combinations before schema selection. A `Deployment` with `apiVersion: v1` must produce a clear error, not a schema-not-found crash. Deprecated apiVersions (extensions/v1beta1, apps/v1beta1, batch/v1beta1, etc.) must produce warnings with migration paths, not silent failures.
 
-4. **React Flow requires DOM APIs — SSR crashes without `client:only`** — `client:load` and `client:visible` both attempt SSR; React Flow crashes. Prevention: use `client:only="react"` (proven from Dockerfile Analyzer). Lazy-load React Flow with `React.lazy()` to keep initial bundle under 175 KB gzip.
+4. **Label selector matching semantics (CRITICAL)** — `matchLabels` is AND (all labels must match); `matchExpressions NotIn` matches resources where the key is ABSENT (counterintuitive); `matchLabels + matchExpressions` are ANDed; Service `.spec.selector` is a flat equality map only (no `matchExpressions`); empty `Service.spec.selector` selects ALL pods. Build a dedicated selector matcher utility with exhaustive tests before any cross-resource rules.
 
-5. **Variable interpolation `${VAR:-default}` produces false validation positives** — Compose files widely use Bash-style variable interpolation; rules that parse port numbers or check for hardcoded secrets cannot distinguish `${DB_PASS}` from `hardcoded-secret`. Prevention: build an interpolation-aware normalizer in Phase 1 before any validation rules run.
+5. **Cross-resource namespace scoping (CRITICAL)** — Resources without `metadata.namespace` are in "default"; cluster-scoped resources (ClusterRole, Namespace, PV) have no namespace; well-known auto-created resources (`ServiceAccount/default`, `ConfigMap/kube-root-ca.crt`) must be whitelisted or every Pod gets false-positive "resource not found" violations. Resource index must be keyed by `namespace/kind/name`.
 
-6. **Dagre layout hangs on cyclic `depends_on`** — dagre is a DAG layout engine and can hang on cyclic graphs. Prevention: run graphology `hasCycle()` before calling dagre; break cycles for layout by removing one edge per cycle and visually marking it (red dashed edge with a cycle icon).
+6. **NetworkPolicy AND/OR selector semantics (HIGH)** — `podSelector` + `namespaceSelector` in the SAME `from` block = AND; in SEPARATE `from` items = OR. The YAML indentation is the only difference. Empty `spec.podSelector: {}` selects ALL pods (valid but often unintentional). Absent `spec.ingress` allows all traffic; `spec.ingress: []` denies all traffic. Build NetworkPolicy analysis as a dedicated rule module, not generic cross-resource logic.
 
 ## Implications for Roadmap
 
-Based on the combined research, the architecture prescribes a strict dependency order. The suggested 8-phase structure maps directly from the architecture's build-order analysis. Phases 1 through 4 are a strict sequential chain; Phases 5 and 6 can proceed in parallel; Phases 7 and 8 finalize integration and polish.
+Based on research, suggested phase structure (matches the architecture's build-order dependencies):
 
-### Phase 1: YAML Parsing and Schema Validation Foundation
+### Phase 1: Foundation and Schema Infrastructure
 
-**Rationale:** Everything in the pipeline depends on being able to parse YAML into an AST with source ranges AND validate it against the compose-spec schema with line-accurate error reporting. This is the only phase with no upstream code dependencies. The line-number mapping problem is the most architecturally novel piece of the project and must be proven correct before any UI code is written.
+**Rationale:** The schema compilation pipeline is the critical path. Everything downstream (schema validation, all 18 resource types, bundle size) depends on getting this right first. Pitfall 1 (schema explosion) and Pitfall 11 (ajv compilation strategy) both occur here and have HIGH recovery cost if skipped. This phase must be validated with a bundle visualizer before Phase 2 begins.
 
-**Delivers:** `types.ts`, `parser.ts` (with YAML 1.1 + merge key config), `compose-spec-schema.json` (bundled with version comment), `schema-validator.ts` with working `resolveInstancePath()`, interpolation normalizer. Unit-testable in isolation.
+**Delivers:** Working multi-document YAML parser with shared LineCounter; GVK registry mapping 18 resource types with deprecated apiVersion mappings; single compiled Ajv module (`validate-k8s.js`) exporting all 18 validators; `resource-registry.ts` for downstream consumption; download and compilation scripts for K8s schemas.
 
-**Addresses:** Schema validation rules (~8 CV-S prefix rules), interpolation handling, YAML syntax error reporting
+**Addresses:** KA-S001 through KA-S010 (schema validation rules); KA-S006 deprecated API detection
 
-**Avoids:** Pitfall 1 (YAML 1.1 config), Pitfall 2 (line mapping), Pitfall 3 (Ajv configuration), Pitfall 5 (interpolation normalizer), Pitfall 6 (range undefined guard), Pitfall 12 (schema version pinning)
+**Avoids:** Pitfalls 1, 2, 3, 11 — all CRITICAL severity; the four most expensive-to-fix mistakes
 
-**Research flag:** Standard patterns — yaml package API verified at eemeli.org/yaml; Ajv verified at ajv.js.org; compose-spec schema verified at GitHub. No additional research phase needed.
+### Phase 2: Per-Resource Lint Rules (Security + Reliability + Best Practice)
 
-### Phase 2: Semantic Rule Engine and Scoring
+**Rationale:** With the parsing and schema infrastructure proven in Phase 1, per-resource rules are straightforward TypeScript functions following the established rule pattern from compose-validator. These rules only need the current resource's context — no cross-resource dependencies. Security rules should be implemented first because they are the primary user motivation and carry the highest scoring weight (35%).
 
-**Rationale:** Rules are the core value proposition. Building the logic layer before the UI ensures correctness is verified independently of visual noise. The rule engine pattern is a direct copy of the Dockerfile Analyzer's engine — low risk, well-understood. Cycle detection must be built here as a shared utility consumed by both semantic rules AND graph visualization (Phase 4) — building it in Phase 2 prevents duplication.
+**Delivers:** ~44 per-resource rules: 20 security (KA-C001-C020) with PSS Baseline/Restricted tags and CIS references; 12 reliability (KA-R001-R012); 12 best practice (KA-B001-B012). Working scorer with 5 category weights. Functional tool that scores a single-document manifest.
 
-**Delivers:** 44+ rule files across schema/security/reliability/best-practice/maintainability, rule registry (`rules/index.ts`), engine (`engine.ts`), scorer (`scorer.ts`), graph-builder (`graph-builder.ts`), cycle-detector (`cycle-detector.ts`).
+**Uses:** Rule engine pattern from `src/lib/tools/dockerfile-analyzer/` and `compose-validator/`; PSS Baseline/Restricted check list from official Kubernetes documentation; kube-score, Polaris, KubeLinter rule sets as reference
 
-**Uses:** `graphology` + `graphology-dag` for cycle detection and topological sort; Ajv errors merged with custom rules in engine.
+**Implements:** `engine.ts` phases 1-3, `scorer.ts`, all per-resource rules
 
-**Implements:** `ComposeLintRule` interface, `ComposeRuleContext`, category weights (schema 20%, security 30%, reliability 25%, best-practice 15%, maintainability 10%)
+### Phase 3: Cross-Resource Validation and RBAC Analysis
 
-**Avoids:** Pitfall 8 (dagre cycle hang — shared cycle detector built here, consumed by graph layout in Phase 4)
+**Rationale:** Cross-resource validation is the headline differentiator and also the highest-complexity feature. It depends on the Resource Registry (built in Phase 1) and the label selector matcher. Pitfalls 4, 5, and 9 (selector semantics, namespace scoping, RBAC relationships) all land here. Building this phase after per-resource rules are stable means bugs in cross-resource logic don't obscure per-resource validation correctness.
 
-**Research flag:** Standard patterns — rule engine is a direct mirror of the Dockerfile Analyzer. Security rule content is sourced from OWASP Docker Security Cheat Sheet and compose-spec docs. No additional research phase needed.
+**Delivers:** 8 cross-resource rules (KA-X001-X008: Service->Deployment selector matching, Ingress->Service, ConfigMap/Secret/PVC/SA references, NetworkPolicy->Pod, HPA->target); 5 RBAC analysis rules (KA-A001-A005: wildcard permissions, cluster-admin binding, exec/attach, secret access); label selector matcher utility with exhaustive test suite; namespace-scoped resource index with well-known resource whitelist; NetworkPolicy AND/OR semantic checks.
 
-### Phase 3: CodeMirror YAML Editor and Nanostores
+**Avoids:** Pitfalls 4, 5, 6, 7, 9 — label selector correctness, namespace identity, NetworkPolicy semantics, selector-template consistency, RBAC cross-references
 
-**Rationale:** The editor is the input surface; it depends on the parser and engine from Phases 1-2 being proven correct. CodeMirror lifecycle management (View Transitions, unmount cleanup) is already solved by the Dockerfile Analyzer — this is adaptation, not new engineering.
+### Phase 4: UI Shell and Core Results Panel
 
-**Delivers:** `use-codemirror-yaml.ts` (adapted from existing hook, swapping `@codemirror/lang-yaml` for legacy Dockerfile mode), `editor-theme.ts`, `sample-compose.ts` (sample with deliberate issues across all categories), `composeValidatorStore.ts`, `ComposeEditorPanel.tsx`.
+**Rationale:** With the analysis engine complete through Phase 3, the UI can be assembled from reused and adapted compose-validator components. The editor, score gauge, category breakdown, and violation list are all direct reuse or minor adaptations. The resource summary panel (showing "Found: 3 Deployments, 2 Services") is a low-cost differentiator built from Phase 1's parsing output.
 
-**Uses:** `@codemirror/lang-yaml` for YAML syntax highlighting and indentation.
+**Delivers:** `K8sAnalyzer.tsx` root island; `K8sEditorPanel.tsx` with CodeMirror 6 YAML editor, sample manifest, Cmd/Ctrl+Enter shortcut, inline annotations; `K8sResultsPanel.tsx` with score gauge, category breakdown, violation list (grouped by resource/document), resource summary panel; `k8sAnalyzerStore.ts` nanostore; score badge download; lz-string URL state with `#k8s=` prefix; Astro page at `/tools/k8s-analyzer/`.
 
-**Implements:** Editor → analyze → write results to nanostore data flow. Stale flag when document changes after last analysis. Tab state atom for Results vs Graph toggle.
+**Addresses:** All table stakes UI features; URL state, badge sharing
 
-**Avoids:** Pitfall 9 (CodeMirror offset alignment — both yaml package and CodeMirror use JavaScript string character indexing; offsets are compatible when both operate on the same string from `view.state.doc.toString()`)
+**Implements:** All UI components except the graph; functional tool deployable without graph
 
-**Research flag:** Standard patterns — direct adaptation of existing `use-codemirror.ts` hook.
+### Phase 5: Resource Relationship Graph
 
-### Phase 4: Results Panel and Dependency Graph
+**Rationale:** The graph is the last feature to implement because it depends on the Resource Registry (Phase 1), cross-resource validation results (Phase 3), and is itself the highest-complexity UI component. Deferring it to Phase 5 means the tool is functional and shippable before the graph is complete. Pitfall 12 (graph complexity) is addressed here with edge type filtering and node limits.
 
-**Rationale:** The UI visualization layer is output-only — it reads from nanostores populated by earlier phases. React Flow's lazy-loading strategy must be in place from the first render to avoid bundle size regression on Lighthouse.
+**Delivers:** `graph-builder.ts` constructing multi-type K8s resource graph with 12 edge types; `ResourceGraph.tsx` (lazy-loaded React Flow component); `ResourceNode.tsx` and `ResourceEdge.tsx` custom components; dagre LR layout; dangling references shown as red dashed edges; node categories color-coded; graph tab in results panel; edge type toggle for managing visual complexity on large manifests.
 
-**Delivers:** `ComposeScoreGauge.tsx`, `ComposeCategoryBreakdown.tsx`, `ComposeViolationList.tsx`, `ComposeEmptyState.tsx`, `ComposeShareActions.tsx`, `ComposeResultsPanel.tsx`, `DependencyGraph.tsx` (lazy-loaded via `React.lazy()`), `ComposeValidator.tsx` (root island with tab toggle).
+**Addresses:** Interactive resource relationship graph — the primary visual differentiator
 
-**Uses:** `@xyflow/react` + `@dagrejs/dagre` for graph rendering and layout; cycle data from graph-builder (Phase 2) breaks cycles before dagre runs.
+**Implements:** Architecture graph data model; 6 node type categories; 12 edge type definitions
 
-**Implements:** Tab-toggle layout (Results | Graph) so both panels share the right-side space — a three-column layout does not work on standard desktops. Cycle edges rendered in red animated dashes. Custom ServiceNode component styled to site theme.
+### Phase 6: SEO, Documentation, and Site Integration
 
-**Avoids:** Pitfall 4 (React Flow SSR — `client:only="react"` + `React.lazy()`); Pitfall 8 (dagre cycles — cycle-breaker from Phase 2 used here); Pitfall 11 (React Flow CSS conflicts — CSS custom properties override mapped to site design tokens)
+**Rationale:** Rule documentation pages, blog post, OG images, and homepage callout are the SEO and discoverability deliverables. These are independent of analysis correctness and can be built in parallel with Phase 5 or after. They have the highest long-term value (67+ indexed pages) but no dependencies on the analysis engine.
 
-**Research flag:** React Flow v12 layout with dagre is documented with official examples. The tab-toggle UX pattern needs no research. No additional research phase needed.
+**Delivers:** 67+ per-rule documentation pages at `/tools/k8s-analyzer/rules/[code]` with PSS profile tags, CIS benchmark references, fix suggestions; companion blog post; OG images for tool and rule pages; homepage callout; header navigation; JSON-LD SoftwareApplication schema; breadcrumbs; sitemap entries.
 
-### Phase 5: Shareability and Badge Export
-
-**Rationale:** These features depend on the full analysis cycle working correctly. They are low-complexity adaptations of existing Dockerfile Analyzer utilities and can proceed in parallel with Phase 6.
-
-**Delivers:** `url-state.ts` (lz-string compress/decompress for shareable URLs, with distinct query parameter to avoid collision with Dockerfile Analyzer URL state), `badge-generator.ts` (SVG badge + PNG download with Compose Validator branding).
-
-**Avoids:** URL hash namespace collision with Dockerfile Analyzer URL state.
-
-**Research flag:** Standard patterns — direct adaptation of existing utilities.
-
-### Phase 6: Rule Documentation Pages
-
-**Rationale:** Rule doc pages are build-time Astro static pages; they only require the rule registry from Phase 2 to exist. They can be built in parallel with Phase 5. They deliver 44+ SEO-indexable pages which are a significant traffic driver.
-
-**Delivers:** `src/pages/tools/compose-validator/rules/[code].astro` generating 44+ documentation pages via `getStaticPaths` from `allComposeRules`.
-
-**Research flag:** Standard patterns — direct mirror of Dockerfile Analyzer rule page template at `src/pages/tools/dockerfile-analyzer/rules/[code].astro`.
-
-### Phase 7: Tool Page and Site Integration
-
-**Rationale:** The tool page wraps the React island (Phase 4) in an Astro page with SEO metadata, JSON-LD structured data, and navigation integration. All modification targets are well-understood: Header, tools index, homepage callout.
-
-**Delivers:** `src/pages/tools/compose-validator/index.astro`, `ComposeValidatorJsonLd.astro`, Header nav link (under Tools, not as a standalone 9th item), tools index card, homepage callout.
-
-**Avoids:** Adding a standalone nav link that creates visual clutter — the Compose Validator lives under the Tools section, not as a top-level nav item.
-
-**Research flag:** Standard patterns. Integration targets (Header, tools index, homepage) are all well-understood files.
-
-### Phase 8: OG Images, Blog Post, and Polish
-
-**Rationale:** Finalization tasks depend on pages existing (Phase 7) and have no blocking dependencies on each other.
-
-**Delivers:** OG image route (`compose-validator.png.ts`), `generateComposeValidatorOgImage()` addition to `og-image.ts`, companion blog post (MDX), Lighthouse audit (target 90+), accessibility review, sitemap verification, LLMs.txt updates (both `llms.txt.ts` and `llms-full.txt.ts` must include the tool page and all 44+ rule documentation pages).
-
-**Avoids:** Missing the LLMs.txt update (an easy omission that silently breaks AI-discoverable content)
-
-**Research flag:** Standard patterns. The LLMs.txt update is a checklist task — inspect existing Dockerfile Analyzer entries and mirror the pattern.
+**Addresses:** SEO powerhouse; expert credibility positioning; backlink structure for profile discoverability
 
 ### Phase Ordering Rationale
 
-- Phases 1 → 2 → 3 → 4 is a strict sequential chain: parsing enables rules, rules enable the editor integration, editor integration enables the results UI.
-- Phases 5 and 6 are parallel and depend only on Phase 4 (full analysis cycle) and Phase 2 (rule registry) respectively.
-- Phase 7 depends on Phase 4 (the React island must exist) and Phase 6 (rule pages must exist for cross-linking in navigation and rule violation detail links).
-- Phase 8 depends on Phase 7 (pages must exist for OG image routes).
-- Cycle detection (Phase 2) is deliberately built before graph visualization (Phase 4) because dagre hangs on cyclic graphs. Sharing one cycle-detection utility between both consumers prevents the pitfall without duplication.
-- Pitfalls 1, 2, 5, 6 are all addressed in Phase 1 — front-loading the highest-risk novel code into the most isolated, unit-testable phase.
+- **Phase 1 must be first** because schema compilation is the critical path with the highest recovery cost (rewriting the entire validation foundation if schema size is wrong). All downstream phases assume per-type validators exist and are within bundle budget.
+- **Phase 2 before Phase 3** because per-resource rules have no cross-resource dependencies; building them first provides a testable baseline and confirms the rule engine pattern works before introducing the more complex cross-resource layer.
+- **Phase 3 requires Phase 1** because the Resource Registry (Phase 1 output) is a precondition for all cross-resource validation. Label selector matcher must be built and tested before any cross-resource rules are implemented.
+- **Phase 4 can begin** as soon as Phase 2 is working (basic scoring). Phase 3 cross-resource rules and Phase 5 graph can be integrated into an already-functional UI.
+- **Phase 5 last among functional phases** because it requires both the Resource Registry (Phase 1) and cross-resource validation results (Phase 3) as inputs. Graph edges are the visual representation of cross-resource relationships.
+- **Phase 6 independent** — rule documentation pages can be written as rules are implemented in Phases 2-3, but the final pass (CIS tags, PSS profiles, fix suggestions) is cleanest after all rules are finalized.
 
 ### Research Flags
 
-**Phases needing deeper research during planning:** None identified. All 8 phases operate on well-documented libraries with verified APIs, or on direct adaptations of the existing Dockerfile Analyzer. Every major library was verified against official documentation during the research phase.
+Phases likely needing deeper research during planning:
 
-**Phases with standard patterns (skip additional research phase):**
-- Phase 1: yaml package and Ajv APIs fully verified with official docs.
-- Phase 2: Rule engine is a direct mirror of the existing Dockerfile Analyzer engine.
-- Phase 3: CodeMirror 6 integration pattern is already proven in production on the site.
-- Phase 4: React Flow v12 + dagre integration documented with official examples at reactflow.dev.
-- Phases 5-8: All adaptations of existing site patterns with no novel technical unknowns.
+- **Phase 1 (Schema Infrastructure):** Schema compilation is well-documented in Ajv docs, but the build script (compile-k8s-schemas.mjs) needs careful size measurement during implementation. Run bundle visualizer after first build. Target: validate-k8s.js < 200KB uncompressed.
+- **Phase 3 (Cross-Resource Validation):** Label selector matching semantics are tricky; the `matchExpressions NotIn` with absent key behavior needs unit tests before any cross-resource rule depends on it. Namespace scoping with well-known resource whitelist needs a written list verified against current K8s behavior.
+- **Phase 5 (Resource Graph):** Dagre layout quality for graphs with > 15 nodes and mixed edge types is unknown. May need edge type filtering implemented earlier than planned if layout is visually unusable.
+
+Phases with standard patterns (skip research-phase):
+
+- **Phase 2 (Per-Resource Rules):** Rule implementation follows established patterns from dockerfile-analyzer and compose-validator. PSS Baseline/Restricted check list is from official K8s docs. No novel patterns needed.
+- **Phase 4 (UI Shell):** All components are direct reuse or minor adaptation of proven compose-validator components. No research needed.
+- **Phase 6 (SEO):** Mirrors existing rule documentation page template exactly.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All 8 packages verified via npm registry, official docs, and GitHub. Version numbers confirmed. Bundle sizes estimated from official sources. The dual-parser architecture (yaml for AST + Ajv for schema) is the architectural cornerstone and was thoroughly verified. |
-| Features | HIGH | 44 rules sourced from compose-spec JSON Schema, OWASP Docker Security Cheat Sheet, DCLint, Code Pathfinder, and Docker official docs. Competitive analysis covered all significant browser and CLI tools. Rule gaps (no browser tool combines schema + semantic + security + scoring + graph) are confirmed. |
-| Architecture | HIGH | Based on direct codebase analysis of the existing Dockerfile Analyzer. yaml/ajv/@xyflow/react APIs verified via official documentation. The parallel-namespace, pattern-mirrored approach is the clear recommendation for independent tool evolution. |
-| Pitfalls | HIGH | Critical pitfalls sourced from yaml package GitHub issues, Docker Compose issue trackers, ajv strict mode docs, React Flow SSR issue trackers, and direct codebase pattern analysis. Most pitfalls are verified against real library behavior, not speculation. |
+| Stack | HIGH | Zero new dependencies; all libraries are already installed and proven in compose-validator. yannh/kubernetes-json-schema verified with daily-updated schemas for v1.31.0. Ajv standalone multi-schema compilation verified in official docs. |
+| Features | HIGH | Rule set sourced from official K8s docs (PSS, RBAC, deprecation guide) and 4 CLI tools (KubeLinter, Polaris, kube-score, Checkov). 67-rule count is precise with per-rule codes defined. Browser competitor analysis confirms unique positioning. |
+| Architecture | HIGH | Based on direct codebase analysis of compose-validator. Three new layers (Resource Registry, schema-registry, cross-resource-validator) have concrete TypeScript interfaces documented. parseAllDocuments shared LineCounter behavior verified in eemeli/yaml official docs. |
+| Pitfalls | HIGH | 12 pitfalls documented with CRITICAL/HIGH/MEDIUM severity, recovery cost, specific warning signs, and phase mapping. All critical pitfalls have code-level prevention strategies. Sources include official K8s docs for selector semantics, NetworkPolicy behavior, and RBAC structure. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Variable interpolation normalizer edge cases:** Research identified the need for interpolation handling but did not fully specify normalizer behavior for all Docker Compose interpolation syntax variants (`${VAR:?error}`, `$$` literal dollar sign, nested `${VAR:-${FOO}}`). The regex approach in PITFALLS.md is a starting point; verify all edge cases against Docker Compose's official interpolation docs during Phase 1 implementation before writing any semantic rules.
-
-- **Ajv standalone pre-compilation evaluation:** STACK.md recommends this as a production optimization (reduces Ajv from ~110 KB to ~20 KB gzip), but the `ajv-cli` build step was not fully specified. Evaluate during Phase 1 — start with runtime Ajv for development velocity, add standalone compilation only if bundle size triggers a Lighthouse regression.
-
-- **LLMs.txt update format:** Both `llms.txt.ts` and `llms-full.txt.ts` must be updated for the new tool and all rule pages. The exact format was not researched. Inspect the existing Dockerfile Analyzer entries during Phase 8 and mirror the pattern exactly.
-
-- **React Flow CSS import behavior in Astro islands:** The `@xyflow/react/dist/style.css` import inside a `client:only` component may behave unexpectedly in Vite's CSS pipeline. Test CSS extraction on the first DependencyGraph render in Phase 4 and adjust if styles do not apply correctly. This is a known caveat from PITFALLS.md.
+- **Schema bundle size (Phase 1):** The target of <200KB for the compiled validate-k8s.js is based on Ajv standalone compression estimates. Actual size must be measured during Phase 1 implementation. If it exceeds 500KB, the lazy-loading strategy must be adjusted (per-type lazy loading instead of single module).
+- **Cross-resource false positive rate (Phase 3):** Users who paste partial manifests (e.g., only a Deployment without its Service) will get cross-resource warnings. The "Checks references within the pasted YAML" UX messaging needs to be prominent. Severity should be `info`, not `warning`, for most cross-resource reference checks to minimize noise.
+- **Graph layout quality (Phase 5):** Dagre handles ~50 nodes well but may degrade on K8s manifests with complex RBAC + workload + networking resources. If layout quality is poor at 15+ nodes, edge type filtering or ELK.js must be considered. Validate with a realistic 15-resource sample manifest during Phase 5.
+- **RBAC rule accuracy (Phase 3):** RBAC rules are rated MEDIUM-HIGH confidence because RBAC resources are less commonly pasted into browser validators. The false positive risk (especially around RoleBinding-references-ClusterRole which is valid) must be verified with representative test cases before shipping.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-- [yaml (Eemeli) official docs](https://eemeli.org/yaml/) — parseDocument API, LineCounter, YAML 1.1 vs 1.2 merge key behavior, range property
-- [yaml GitHub repo + Issue #573](https://github.com/eemeli/yaml) — range undefined edge case, documented but not reflected in TypeScript types
-- [Ajv official docs](https://ajv.js.org/) — JSON Schema validation, allErrors, strict mode, standalone compilation
-- [Ajv strict mode docs](https://ajv.js.org/strict-mode.html) — patternProperties interaction with compose-spec schema's `^x-` extension fields
-- [compose-spec JSON Schema](https://github.com/compose-spec/compose-spec/blob/main/schema/compose-spec.json) — Draft-07, verified structural coverage
-- [React Flow / xyflow docs](https://reactflow.dev/) — dagre layout example, SSR crash fix, v12 migration guide
-- [React Flow Astro Example](https://github.com/xyflow/react-flow-example-apps/tree/main/reactflow-astro) — official Astro integration
-- [graphology-dag docs](https://graphology.github.io/standard-library/dag.html) — hasCycle, topologicalSort, topologicalGenerations APIs
-- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) — security rule foundation
-- [Docker Compose Interpolation Docs](https://docs.docker.com/reference/compose-file/interpolation/) — variable substitution syntax
-- [Docker Compose Fragments Docs](https://docs.docker.com/reference/compose-file/fragments/) — anchors, aliases, merge keys
-- [Docker Compose Version and Name Docs](https://docs.docker.com/reference/compose-file/version-and-name/) — version field is obsolete in Compose v2+
-- Existing codebase: `src/lib/tools/dockerfile-analyzer/` — rule engine, scorer, CodeMirror hook, nanostore patterns (verified by direct inspection)
+- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/) — PSS Baseline/Restricted profiles; complete control reference with exact field paths
+- [Kubernetes API Deprecation Guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) — deprecated and removed apiVersions by K8s version
+- [Kubernetes Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) — matchLabels/matchExpressions semantics; In/NotIn/Exists/DoesNotExist operators; label format constraints
+- [Kubernetes Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) — AND/OR semantics in from/to blocks; empty vs absent ingress/egress
+- [Kubernetes RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) — Role/ClusterRole/RoleBinding/ClusterRoleBinding relationships; namespace scoping
+- [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema) — actively maintained K8s JSON Schema registry, auto-updated daily, v1.31.0-standalone-strict schemas verified
+- [Ajv Standalone Code Generation](https://ajv.js.org/standalone.html) — multi-schema ESM export support confirmed
+- [eemeli/yaml Documentation](https://eemeli.org/yaml/#documents) — `parseAllDocuments()` with shared LineCounter verified
+- [KubeLinter checks.md](https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md) — complete ~60 rule reference including cross-resource "dangling-*" checks
+- [Polaris Security/Reliability Checks](https://polaris.docs.fairwinds.com/checks/) — 24 security + 12 reliability rules with severity levels
+- [kube-score README_CHECKS.md](https://github.com/zegl/kube-score/blob/master/README_CHECKS.md) — 43 checks, strongest reliability focus
+- [Checkov Kubernetes Policy Index](https://www.checkov.io/5.Policy%20Index/kubernetes.html) — 139+ CKV_K8S checks
+- Existing codebase: `src/lib/tools/compose-validator/` and `src/lib/tools/dockerfile-analyzer/` — first-party proven patterns
 
 ### Secondary (MEDIUM confidence)
-
-- [DCLint GitHub](https://github.com/zavoloklom/docker-compose-linter) — competitive rule set, auto-fix patterns
-- [Code Pathfinder COMPOSE-SEC Rules](https://codepathfinder.dev/blog/announcing-docker-compose-security-rules) — CWE-mapped security rules
-- [Docker Compose port conflict issue #6708](https://github.com/docker/compose/issues/6708) — semantic rule basis
-- [Docker Compose circular dependency issue #7239](https://github.com/docker/compose/issues/7239) — semantic rule basis
-- npm registry — all version numbers verified via `npm view [pkg] version`
-- [dagre GitHub](https://github.com/dagrejs/dagre) — unmaintained since 2018; DAG-only, no cycle handling (informs pitfall 8)
+- [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes) — CIS 5.1 RBAC and 5.2 Pod Security controls; rule code references (5.1.1, 5.1.2, etc.)
+- [EaseCloud K8s Manifest Validator](https://www.easecloud.io/tools/docker/kubernetes-manifest-validator/) — browser competitor analysis confirming gap in scoring and cross-resource validation
+- [FOSSA K8s Manifest Linter](https://fossa.com/resources/devops-tools/kubernetes-manifest-linter/) — browser competitor confirming "basic validation only" positioning
+- [ValidKube](https://validkube.com/) — browser competitor analysis
+- [Kubernetes RBAC Good Practices](https://kubernetes.io/docs/concepts/security/rbac-good-practices/) — security anti-patterns; wildcard permissions risk
+- [Datree GitHub](https://github.com/datreeio/datree) — 100+ rules (company closed July 2023; referenced for rule coverage, not as active tool)
 
 ---
-*Research completed: 2026-02-22*
+*Research completed: 2026-02-23*
 *Ready for roadmap: yes*

@@ -1,579 +1,632 @@
-# Pitfalls Research: Docker Compose Validator
+# Pitfalls Research: Kubernetes Manifest Analyzer
 
-**Domain:** Adding a browser-based Docker Compose validation tool with interactive graph visualization to an existing Astro 5 portfolio site
-**Researched:** 2026-02-22
-**Confidence:** HIGH (verified against codebase analysis, yaml npm package docs, compose-spec JSON Schema source, React Flow/xyflow documentation, ajv documentation, existing Dockerfile Analyzer patterns)
+**Domain:** Adding a browser-based Kubernetes manifest linter with cross-resource validation and security analysis to an existing Astro 5 portfolio site
+**Researched:** 2026-02-23
+**Confidence:** HIGH (verified against K8s OpenAPI spec structure, yannh/kubernetes-json-schema repo, K8s deprecation guide, Polaris security checks, eemeli/yaml parseAllDocuments docs, existing compose-validator codebase patterns)
 
-**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.6. The site (patrykgolabek.dev) already has 180 requirements across 6 milestones, including a Dockerfile Analyzer (v1.4) that solved CodeMirror lifecycle with View Transitions, React island hydration via `client:only="react"`, and Buffer polyfill for browser. The Compose Validator introduces three new classes of complexity: (1) YAML AST parsing with line number tracking, (2) JSON Schema validation via ajv against the compose-spec schema, and (3) interactive graph visualization with React Flow for service dependency graphs. Each of these intersects with each other and with the existing Astro architecture in non-obvious ways.
+**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.7. The site already has a Dockerfile Analyzer (v1.5) and Docker Compose Validator (v1.6) that solved: YAML 1.1 merge keys, CodeMirror lifecycle with View Transitions, React Flow SSR/lazy loading, ajv configuration and line mapping, lz-string URL state encoding, and dagre cycle handling. This document covers ONLY K8s-specific pitfalls that are NEW -- problems unique to Kubernetes manifest analysis that were not encountered in previous milestones.
+
+**Key differences from Compose Validator:**
+- Multi-document YAML (multiple resources in one file separated by `---`)
+- Per-resource-type schemas (not a single unified schema)
+- apiVersion/kind combinatorial validation
+- Cross-resource reference resolution (Service -> Deployment, Pod -> ConfigMap/Secret/PVC)
+- Label selector matching semantics (matchLabels + matchExpressions)
+- Schema size explosion (K8s OpenAPI is 4MB+; per-resource standalone schemas are 50-200KB each)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: YAML Version Mismatch Silently Breaks Merge Key and Anchor Resolution
+### Pitfall 1: K8s Schema Size Explosion Destroys Bundle Budget
 
 **What goes wrong:**
-The `yaml` npm package defaults to YAML 1.2, but Docker Compose files rely heavily on YAML 1.1 features -- specifically the `<<` merge key for DRY configuration. In YAML 1.2, `<<` is not a special key; it is treated as a literal string key in a mapping. This means a Compose file using anchors and merge keys like this:
+The Kubernetes OpenAPI specification (`swagger.json`) is approximately 4-5MB. Individual standalone schemas from `yannh/kubernetes-json-schema` are each 50-200KB because they inline ALL referenced definitions. A standalone `deployment-apps-v1.json` is approximately 150KB because it embeds the complete PodSpec, ObjectMeta, Container, Volume, Affinity, and every other nested type definition. If you bundle 18 resource types as standalone schemas, you are looking at 1-3MB of JSON schemas BEFORE gzip.
 
+For comparison, the compose-spec schema is 75KB total -- a single file covering all Compose structures. The K8s equivalent is 15-40x larger because K8s has vastly more resource types with deeply nested shared definitions (PodSpec alone references Container, Volume, Probe, ResourceRequirements, SecurityContext, etc.).
+
+Even with gzip compression (which JSON compresses well at ~70-80% reduction), you are still looking at 300-800KB of compressed schema data. The site's current Compose Validator page targets <350KB total gzipped JS. Adding K8s schemas as-is would more than double the bundle.
+
+**Why it happens:**
+Standalone schemas from yannh/kubernetes-json-schema resolve ALL `$ref` pointers into inline definitions. This makes each schema self-contained but massively redundant -- the ObjectMeta definition is duplicated identically inside Deployment, Service, Pod, ConfigMap, Secret, and every other resource schema. PodSpec (which alone is ~80KB) appears in Deployment, DaemonSet, StatefulSet, Job, CronJob, and ReplicaSet schemas.
+
+**How to avoid:**
+1. Do NOT use standalone schemas as-is. Extract and deduplicate. Create a shared definitions file containing common types (ObjectMeta, PodSpec, Container, Volume, etc.) and per-resource schemas that reference the shared definitions via `$ref`.
+
+2. Build a schema extraction pipeline at build time:
+   - Start from the full K8s OpenAPI spec for v1.31
+   - Extract only the 18 resource types needed (Deployment, Service, Pod, ConfigMap, Secret, PVC, Ingress, NetworkPolicy, RBAC types, DaemonSet, StatefulSet, Job, CronJob, HPA, ServiceAccount, Namespace)
+   - Deduplicate shared definitions into a single `k8s-definitions.json`
+   - Each resource schema references shared definitions via `$ref: "#/$defs/io.k8s.api.core.v1.PodSpec"`
+   - Pre-compile ALL schemas into a single ajv standalone validator module
+
+3. Pre-compile with ajv's standalone code generation (`ajv.compileToStandalone()`). This produces a JavaScript module with validation functions, which is much smaller than the source schemas because ajv generates only the validation logic needed, not the full schema structure. The compose-validator already uses pre-compiled ajv (`validate-compose.js`).
+
+4. Budget target: the compiled K8s validator module should be <200KB before gzip, <60KB gzipped. This is achievable because ajv standalone code is more compact than raw JSON schemas and benefits from gzip's deduplication of repeated validation patterns.
+
+5. Lazy-load the schema validator module. Do NOT import it at the top level of the page -- load it on first analysis click, similar to the React Flow lazy loading pattern.
+
+**Warning signs:**
+- `npm run build` output shows a chunk >500KB containing JSON schema data
+- Lighthouse Performance score drops below 80 on the K8s analyzer page
+- The page takes >2 seconds to become interactive
+- Schema JSON files are imported directly as ES module imports without pre-compilation
+- Bundle visualizer shows massive repeated JSON structures
+
+**Phase to address:**
+Schema extraction and compilation phase (first phase). This is THE critical path -- every subsequent phase depends on having correctly extracted and compiled schemas. Getting this wrong means a rewrite of the entire validation foundation.
+
+**Severity:** CRITICAL
+
+---
+
+### Pitfall 2: Multi-Document YAML Line Number Tracking Produces Wrong Lines After First Document
+
+**What goes wrong:**
+Kubernetes manifests typically contain multiple resources in a single YAML file separated by `---` document separators. The compose-validator uses `parseDocument()` for a single document. The K8s analyzer must use `parseAllDocuments()` which returns an array of Document objects.
+
+The `LineCounter` from `eemeli/yaml` tracks absolute offsets across the ENTIRE input string, not per-document. Each Document's nodes have `range` values that are absolute character offsets into the full multi-document string. This means `lineCounter.linePos(node.range[0])` correctly returns global line numbers.
+
+However, there are three failure modes:
+
+1. **Displaying document-relative context**: When reporting "Deployment 'api' in document 3 has no resource limits," the user expects to see the line number within the context of that resource. If the full file is 300 lines and the Deployment starts at line 180, showing "line 180" is correct but confusing when the user thinks of the Deployment as "starting at line 1 of that section."
+
+2. **The `---` separator itself**: The document separator line `---` has no AST node. If a parse error occurs at a `---` line (e.g., malformed separator `-- -`), there is no node to map. The LineCounter tracks it but the error cannot be attributed to any Document.
+
+3. **Empty documents**: A file like `---\n---\n` produces empty Document objects. `parseAllDocuments()` returns Documents with `contents: null`. Accessing `.contents` on these produces null, and any code that assumes every Document has contents will crash.
+
+**Why it happens:**
+The compose-validator never dealt with multi-document YAML because Docker Compose files are always single documents. The K8s analyzer introduces a fundamentally different parsing model where one input string produces N independent resources, each needing its own apiVersion/kind identification and schema selection.
+
+**How to avoid:**
+1. Use a single `LineCounter` for the entire input -- this is how `parseAllDocuments` works naturally. Global line numbers are correct.
+
+2. Build a document index that maps each Document to its start/end line range:
+```typescript
+interface K8sDocumentInfo {
+  doc: Document;
+  docIndex: number;      // 0-based document index
+  startLine: number;     // 1-based global start line
+  endLine: number;       // 1-based global end line
+  apiVersion: string;
+  kind: string;
+  name: string;          // metadata.name
+  namespace?: string;    // metadata.namespace
+}
+```
+
+3. Filter out empty documents (`doc.contents === null`) before processing. Log a count: "Parsed 5 documents (2 empty, 3 with resources)."
+
+4. For display, show both global line and document context: "Line 180 (Deployment 'api', document 3)."
+
+5. Handle the `---` separator parsing edge case: if a Document has errors and `contents === null`, map the error to the line of the preceding `---` separator using the Document's `range` property.
+
+**Warning signs:**
+- Violations in the second or third document show line 1
+- Empty `---` blocks crash the parser loop
+- The UI shows "Unknown resource" for documents that have valid content
+- Tests only use single-document YAML files
+
+**Phase to address:**
+Multi-document parsing infrastructure phase (first phase). The document index must be built before any per-resource validation runs.
+
+**Severity:** CRITICAL
+
+---
+
+### Pitfall 3: apiVersion/Kind Validation Is a Combinatorial Problem, Not a Simple Lookup
+
+**What goes wrong:**
+Kubernetes resources are identified by the combination of `apiVersion` and `kind`. These are not independent -- each `kind` has a specific set of valid `apiVersion` values. A `Deployment` must use `apiVersion: apps/v1`, never `apiVersion: v1`. A `Service` must use `apiVersion: v1`, never `apiVersion: apps/v1`. An `Ingress` must use `apiVersion: networking.k8s.io/v1`, not the deprecated `apiVersion: extensions/v1beta1`.
+
+The combinatorial mapping for just the 18 target resource types:
+
+| kind | Valid apiVersion | Deprecated apiVersions |
+|------|-----------------|----------------------|
+| Pod | v1 | -- |
+| Service | v1 | -- |
+| ConfigMap | v1 | -- |
+| Secret | v1 | -- |
+| PersistentVolumeClaim | v1 | -- |
+| ServiceAccount | v1 | -- |
+| Namespace | v1 | -- |
+| Deployment | apps/v1 | apps/v1beta1 (removed 1.16), apps/v1beta2 (removed 1.16), extensions/v1beta1 (removed 1.16) |
+| DaemonSet | apps/v1 | apps/v1beta2 (removed 1.16), extensions/v1beta1 (removed 1.16) |
+| StatefulSet | apps/v1 | apps/v1beta1 (removed 1.16), apps/v1beta2 (removed 1.16) |
+| ReplicaSet | apps/v1 | apps/v1beta2 (removed 1.16), extensions/v1beta1 (removed 1.16) |
+| Job | batch/v1 | -- |
+| CronJob | batch/v1 | batch/v1beta1 (removed 1.25) |
+| Ingress | networking.k8s.io/v1 | networking.k8s.io/v1beta1 (removed 1.22), extensions/v1beta1 (removed 1.22) |
+| NetworkPolicy | networking.k8s.io/v1 | extensions/v1beta1 (removed 1.16) |
+| Role | rbac.authorization.k8s.io/v1 | rbac.authorization.k8s.io/v1beta1 (removed 1.22) |
+| ClusterRole | rbac.authorization.k8s.io/v1 | rbac.authorization.k8s.io/v1beta1 (removed 1.22) |
+| RoleBinding | rbac.authorization.k8s.io/v1 | rbac.authorization.k8s.io/v1beta1 (removed 1.22) |
+| ClusterRoleBinding | rbac.authorization.k8s.io/v1 | rbac.authorization.k8s.io/v1beta1 (removed 1.22) |
+| HorizontalPodAutoscaler | autoscaling/v2 | autoscaling/v2beta1 (removed 1.25), autoscaling/v2beta2 (removed 1.26) |
+
+Getting this mapping wrong means either (a) rejecting valid manifests or (b) allowing invalid apiVersion/kind combinations through to schema validation, where they will produce confusing errors like "schema not found" instead of "wrong apiVersion for this kind."
+
+**Why it happens:**
+The compose-validator had a simple problem: one schema, one spec. K8s has a GVK (Group-Version-Kind) system where the same Kind can exist in multiple API groups and versions, some current and some deprecated. The mapping is not derivable from the schema files alone -- it requires domain knowledge of the K8s API structure.
+
+**How to avoid:**
+1. Build a static GVK registry as a TypeScript constant:
+```typescript
+const GVK_REGISTRY: Record<string, { validApiVersions: string[]; deprecatedApiVersions: Record<string, string> }> = {
+  Deployment: {
+    validApiVersions: ['apps/v1'],
+    deprecatedApiVersions: {
+      'apps/v1beta1': 'Removed in K8s 1.16. Use apps/v1.',
+      'apps/v1beta2': 'Removed in K8s 1.16. Use apps/v1.',
+      'extensions/v1beta1': 'Removed in K8s 1.16. Use apps/v1.',
+    },
+  },
+  // ... etc
+};
+```
+
+2. Validate apiVersion/kind BEFORE selecting a schema. If the combination is invalid, report a clear error: "Deployment resources use apiVersion: apps/v1, not v1." If the apiVersion is deprecated, report: "apiVersion apps/v1beta2 for Deployment was removed in Kubernetes 1.16. Use apps/v1."
+
+3. Handle unknown kinds gracefully. If `kind: MyCustomResource`, skip schema validation and report info: "Custom resource 'MyCustomResource' -- schema validation skipped (CRD schemas are cluster-specific)."
+
+4. The schema file lookup key must be derived from the GVK, not guessed. The yannh schema naming convention is `{kind-lowercase}-{group}-{version}.json` (e.g., `deployment-apps-v1.json`). Core API types (v1) use just `{kind-lowercase}-v1.json` (e.g., `pod-v1.json`).
+
+**Warning signs:**
+- A Deployment with `apiVersion: v1` passes validation
+- Deprecated apiVersions produce no warning
+- Unknown kinds crash the schema lookup instead of being skipped
+- The GVK mapping is hardcoded in multiple places instead of a central registry
+
+**Phase to address:**
+GVK registry and schema selection phase (first or second phase). Must be complete before per-resource-type schema validation can work.
+
+**Severity:** CRITICAL
+
+---
+
+### Pitfall 4: Label Selector Matching Has Subtle Semantics That Cross-Resource Validation Gets Wrong
+
+**What goes wrong:**
+Cross-resource validation is the most valuable differentiator of this tool. The core use case: "Does this Service's selector match any Deployment's pod template labels?" Getting selector matching semantics wrong produces either false positives (claiming a match where none exists) or false negatives (missing broken references).
+
+The subtle semantics:
+
+1. **matchLabels is AND, not OR**: A selector with `{app: "api", tier: "backend"}` matches only pods with BOTH labels. Matching against a pod template with only `{app: "api"}` is NOT a match, even though one label matches.
+
+2. **matchExpressions operators have non-obvious behavior**:
+   - `In` with values `[a, b]` matches if the label key exists AND its value is "a" OR "b"
+   - `NotIn` with values `[a, b]` matches if the label key does NOT exist OR its value is neither "a" nor "b". Note: NotIn matches resources WITHOUT the label key -- this is counterintuitive.
+   - `Exists` matches if the label key exists, regardless of value
+   - `DoesNotExist` matches if the label key does NOT exist
+
+3. **matchLabels + matchExpressions are ANDed together**: If both are specified, ALL matchLabels must match AND ALL matchExpressions must match.
+
+4. **Service selector uses simple equality only**: Service `.spec.selector` is a flat `map[string]string` -- it does NOT support `matchLabels`/`matchExpressions`. It uses strict equality-based matching only. This is different from Deployment's `.spec.selector` which uses `matchLabels`/`matchExpressions`.
+
+5. **Empty selector semantics differ by resource type**:
+   - Deployment with empty `spec.selector.matchLabels`: selects nothing (invalid, rejected by API server)
+   - Service with empty `spec.selector`: selects all pods in namespace
+   - NetworkPolicy with empty `spec.podSelector`: selects all pods in namespace
+
+6. **Label value format validation**: Label keys must be `[prefix/]name` where prefix is a DNS subdomain (max 253 chars) and name is max 63 chars matching `[a-z0-9A-Z][-_.a-z0-9A-Z]*[a-z0-9A-Z]`. Label values must be max 63 chars with the same pattern (or empty). Cross-resource validation should verify label format, not just matching.
+
+**Why it happens:**
+The compose-validator's cross-resource validation was simple: "Does service X reference network Y that exists in the networks section?" K8s cross-resource validation requires implementing a label selector matching engine, which is a non-trivial algorithm with edge cases.
+
+**How to avoid:**
+1. Build a dedicated label selector matcher as a standalone utility:
+```typescript
+function matchesSelector(
+  podLabels: Record<string, string>,
+  selector: {
+    matchLabels?: Record<string, string>;
+    matchExpressions?: Array<{
+      key: string;
+      operator: 'In' | 'NotIn' | 'Exists' | 'DoesNotExist';
+      values?: string[];
+    }>;
+  }
+): boolean
+```
+
+2. Write exhaustive tests for the matcher covering:
+   - matchLabels with exact match
+   - matchLabels with subset (extra labels on pod -- should still match)
+   - matchLabels with missing label (should NOT match)
+   - matchExpressions `In` with matching and non-matching values
+   - matchExpressions `NotIn` with absent key (should match!)
+   - matchExpressions `Exists` and `DoesNotExist`
+   - Combined matchLabels + matchExpressions
+   - Empty selectors per resource type
+
+3. Distinguish between Service selectors (simple map) and Deployment/DaemonSet selectors (matchLabels/matchExpressions). Do NOT apply matchExpressions logic to Service selectors.
+
+4. For cross-resource matching, report partial matches as info (not errors): "Service 'api-svc' selector matches Deployment 'api' pod labels on 2 of 3 labels -- missing label 'version'."
+
+**Warning signs:**
+- Cross-resource validation reports Service selectors as "not matching" when they do match
+- `NotIn` expressions always report "no match" when the label is absent (should report match)
+- Service selector matching uses matchExpressions logic (Services don't support matchExpressions)
+- Tests only cover exact-match cases, not subset or partial match scenarios
+
+**Phase to address:**
+Cross-resource validation phase (middle phase). The selector matcher must be built and tested BEFORE any cross-resource rules that depend on it.
+
+**Severity:** CRITICAL
+
+---
+
+### Pitfall 5: Cross-Resource Reference Resolution Across Multi-Document YAML Has an Identity Problem
+
+**What goes wrong:**
+Cross-resource validation requires building a resource index: all ConfigMaps, all Secrets, all Services, all Deployments defined in the YAML input. Then rules check references: "Pod mounts ConfigMap 'app-config' -- does it exist?" But K8s resources are identified by namespace + kind + name, not just name. Two resources with the same name in different namespaces are different resources.
+
+The pitfalls:
+
+1. **Namespace resolution**: If a resource has no `metadata.namespace`, it belongs to the "default" namespace. But when a user pastes a multi-document file, they may intend all resources to be in the same namespace without specifying it. If a Pod references ConfigMap "app-config" and both omit namespace, they are in the same namespace. But if the Pod specifies `namespace: production` and the ConfigMap omits namespace, the ConfigMap is in "default" -- a cross-namespace reference that will fail at deploy time.
+
+2. **Scope confusion for cluster-scoped resources**: ClusterRole, ClusterRoleBinding, Namespace, and PersistentVolume are cluster-scoped (no namespace). A RoleBinding can reference a ClusterRole, but a Role cannot be referenced from a different namespace. The validator must know which resources are namespaced vs. cluster-scoped.
+
+3. **Resources not in the YAML**: A Pod may reference ConfigMap "kube-root-ca.crt" which is auto-created by K8s in every namespace. Flagging this as "ConfigMap not found" is a false positive. Similarly, ServiceAccount "default" always exists. The validator should distinguish "reference to resource in this YAML file" from "reference to external resource that may exist in the cluster."
+
+4. **Multiple resources of the same kind and name**: A multi-document YAML could contain two ConfigMaps named "app-config" -- one intentionally for different namespaces, or one accidentally duplicated. The resource index must handle this.
+
+**Why it happens:**
+The compose-validator's resource index was flat and unique: each service name, network name, and volume name appeared exactly once. K8s resources exist in a three-dimensional space (namespace x kind x name) and have external references to resources that may not be in the input file.
+
+**How to avoid:**
+1. Build a resource index keyed by `{namespace}/{kind}/{name}`:
+```typescript
+interface ResourceIndex {
+  byKey: Map<string, K8sDocumentInfo[]>;  // "default/ConfigMap/app-config" -> [doc1, doc2]
+  byKind: Map<string, K8sDocumentInfo[]>; // "Deployment" -> [dep1, dep2, ...]
+  clusterScoped: Set<string>;             // resource kinds that have no namespace
+}
+```
+
+2. For cross-resource reference checks, use a three-tier severity:
+   - ERROR: Reference to a resource of the same kind in the same namespace that appears elsewhere in the file with a different name (likely typo)
+   - WARNING: Reference to a resource that does not exist in the YAML file (may exist in cluster)
+   - INFO: Reference where namespace inference is ambiguous
+
+3. Maintain a list of "well-known" resources that always exist and should not trigger warnings: `ServiceAccount/default`, `ConfigMap/kube-root-ca.crt`, `Namespace/default`, `Namespace/kube-system`, `Namespace/kube-public`.
+
+4. Handle duplicate resources: if two ConfigMaps with the same name and namespace appear, flag as warning: "Duplicate ConfigMap 'app-config' in namespace 'default' (documents 2 and 5)."
+
+**Warning signs:**
+- Every Pod that uses ServiceAccount "default" gets flagged as "ServiceAccount not found"
+- Cross-resource checks ignore namespace, matching resources that would be in different namespaces
+- The resource index crashes on duplicate names
+- Cluster-scoped resources are treated as namespaced
+
+**Phase to address:**
+Cross-resource validation phase (middle phase). The resource index must be designed before any cross-resource rules are implemented.
+
+**Severity:** CRITICAL
+
+---
+
+### Pitfall 6: NetworkPolicy Selector Semantics Are Subtly Different from Deployment Selectors
+
+**What goes wrong:**
+NetworkPolicy uses `podSelector`, `namespaceSelector`, and `ipBlock` in its ingress/egress rules. These have semantics that differ from Deployment/Service selectors in critical ways:
+
+1. **AND vs OR in ingress/egress rules**: When `podSelector` and `namespaceSelector` appear in the SAME `from`/`to` block, they are ANDed (pods matching the podSelector IN namespaces matching the namespaceSelector). When they appear in SEPARATE `from`/`to` blocks, they are ORed. This is the single most confusing aspect of NetworkPolicy and a common source of security misconfigurations.
+
+Example of AND (one from block):
 ```yaml
-x-common: &common
-  restart: always
-  networks:
-    - backend
-
-services:
-  api:
-    <<: *common
-    image: api:latest
+ingress:
+- from:
+  - namespaceSelector:
+      matchLabels:
+        project: myproject
+    podSelector:
+      matchLabels:
+        role: frontend
 ```
 
-...will parse without error in YAML 1.2 mode, but the merged keys (`restart`, `networks`) will NOT be present on the `api` service object. Instead, `api` will have a key literally named `<<` with the alias value. When this parsed object is then validated against the compose-spec JSON Schema, ajv will report `api` as missing required fields or having unknown properties -- producing misleading validation errors that point to the wrong problem.
+Example of OR (two from blocks):
+```yaml
+ingress:
+- from:
+  - namespaceSelector:
+      matchLabels:
+        project: myproject
+  - podSelector:
+      matchLabels:
+        role: frontend
+```
+
+The YAML indentation is the only difference -- a single hyphen changes the semantics from "frontend pods in myproject namespace" to "ALL pods in myproject namespace OR ALL frontend pods in ANY namespace."
+
+2. **Empty podSelector `{}` means ALL pods**: `spec.podSelector: {}` applies the NetworkPolicy to all pods in the namespace. An empty `from: [{}]` allows traffic from all pods. This is valid but often unintentional.
+
+3. **Absent vs empty ingress/egress**: If `spec.ingress` is absent, all inbound traffic is allowed (pod is not isolated for ingress). If `spec.ingress: []` is present but empty, ALL inbound traffic is denied. The difference between "field absent" and "field present but empty" has opposite security implications.
 
 **Why it happens:**
-The `yaml` npm package explicitly documents: "The `merge` option enables `<<` merge keys (a YAML 1.1 feature). Default is `true` for version 1.1, `false` for 1.2." Since the package defaults to YAML 1.2, merge key resolution is off by default. Developers who test with simple Compose files (no anchors) will never encounter this. It surfaces only when users paste real-world production Compose files that use `x-` extension fields with anchors.
+NetworkPolicy is widely acknowledged as one of the most confusing K8s resources. The YAML structure does not visually communicate the AND/OR distinction. Security audit tools frequently flag NetworkPolicies but rarely explain WHY the configuration may be wrong.
 
 **How to avoid:**
-Configure `parseDocument` explicitly for Docker Compose's YAML dialect:
+1. Build NetworkPolicy analysis as a dedicated rule module, not as part of the generic cross-resource validator. It needs specialized parsing logic.
 
-```typescript
-import { parseDocument, LineCounter } from 'yaml';
+2. Detect the AND/OR ambiguity and surface it as an informational check: "NetworkPolicy 'allow-frontend' has a combined podSelector + namespaceSelector in a single 'from' block. This matches pods that satisfy BOTH selectors (AND logic). If you intended OR logic, separate them into individual 'from' entries."
 
-const lineCounter = new LineCounter();
-const doc = parseDocument(yamlText, {
-  version: '1.1',        // Docker Compose uses YAML 1.1 semantics
-  merge: true,            // Enable << merge key resolution
-  lineCounter,            // Track line positions for error mapping
-  prettyErrors: true,     // Include line/col in parse errors
-  uniqueKeys: false,      // Compose allows duplicate keys in some contexts
-});
-```
+3. Flag empty selectors with clear explanation: "`podSelector: {}` applies this policy to ALL pods in the namespace. Ensure this is intentional."
 
-Do NOT use `yaml.parse()` (the convenience function) -- it discards the AST document node and line position data needed for CodeMirror annotations.
+4. Flag absent vs. empty ingress/egress explicitly: "This NetworkPolicy has no `ingress` field -- inbound traffic is NOT restricted by this policy. To deny all inbound traffic, add `ingress: []`."
+
+5. Do NOT attempt to evaluate NetworkPolicy effects across resources (e.g., "Can Pod A talk to Pod B?"). This requires full namespace/label resolution and is beyond the scope of static analysis. Stick to structural checks and common misconfiguration detection.
 
 **Warning signs:**
-- Compose files with `x-` extension anchors produce unexpected ajv validation errors
-- Tests use only simple Compose files without anchors or merge keys
-- The `yaml` import does not pass `version: '1.1'` or `merge: true`
-- Users report "missing required property" errors on services that clearly use `<<: *anchor`
+- NetworkPolicy rules pass validation without any semantic checks
+- AND/OR ambiguity in from/to blocks is not detected
+- Empty vs. absent ingress/egress is not distinguished
+- The analyzer tries to compute network reachability (scope explosion)
 
 **Phase to address:**
-YAML parsing infrastructure phase (Phase 1). This is a configuration decision that must be correct from the first line of parsing code. Retrofitting it later means re-testing every validation rule against anchor-heavy files.
+Security rules phase (middle to late phase). NetworkPolicy analysis should be one of the last security rules implemented because it is the most complex.
+
+**Severity:** HIGH
 
 ---
 
-### Pitfall 2: YAML-to-JSON Lossy Conversion Destroys Line Number Mapping for CodeMirror Annotations
+### Pitfall 7: Deployment spec.selector Is Immutable -- Validation Should Warn About Matching
 
 **What goes wrong:**
-The validation pipeline has three steps: (1) parse YAML to AST, (2) convert to plain JS object for ajv validation, (3) map ajv errors back to YAML source lines for CodeMirror annotations. Step 2 loses all positional information. The `yaml` package's `doc.toJSON()` produces a plain object with no line numbers. When ajv reports an error at JSON path `/services/api/ports/0`, there is no built-in way to map that back to the line in the YAML source where `ports:` appears.
+In Kubernetes, a Deployment's `spec.selector` is immutable after creation. If a user creates a Deployment with `matchLabels: {app: api}`, they cannot later update it to `matchLabels: {app: api, version: v2}` without deleting and recreating the Deployment. This is a K8s constraint that causes real-world deployment failures.
 
-The Dockerfile Analyzer did not face this problem because `dockerfile-ast` nodes retain line/column properties directly. YAML-to-JSON-Schema validation introduces a fundamentally different error mapping architecture.
+The validator should check: `spec.selector.matchLabels` MUST be a subset of `spec.template.metadata.labels`. The template can have additional labels, but every label in the selector must appear in the template. This is a server-side validation that K8s performs, but catching it client-side with a clear message is highly valuable.
 
-**Why it happens:**
-JSON Schema validation (ajv) operates on plain JavaScript objects, not YAML AST nodes. The conversion to JSON is necessary but destructive -- it strips comments, anchors, merge key resolution metadata, and most importantly, source positions. Rebuilding the path-to-line mapping requires walking the YAML AST document in parallel with the JSON path from each ajv error.
-
-**How to avoid:**
-Build an explicit JSON-path-to-YAML-line resolver that walks the parsed YAML Document AST:
-
-```typescript
-import { Document, isMap, isSeq, isPair, isScalar } from 'yaml';
-
-function resolveJsonPathToLine(
-  doc: Document,
-  jsonPath: string,
-  lineCounter: LineCounter
-): { line: number; col: number } | null {
-  // Split "/services/api/ports/0" into ["services", "api", "ports", "0"]
-  const segments = jsonPath.replace(/^\//, '').split('/');
-  let node = doc.contents;
-
-  for (const segment of segments) {
-    if (isMap(node)) {
-      const pair = node.items.find(
-        (item) => isPair(item) && isScalar(item.key) && String(item.key.value) === segment
-      );
-      if (!pair || !isPair(pair)) return null;
-      node = pair.value;
-    } else if (isSeq(node)) {
-      const index = parseInt(segment, 10);
-      if (isNaN(index) || index >= node.items.length) return null;
-      node = node.items[index];
-    } else {
-      return null;
-    }
-  }
-
-  if (node && node.range) {
-    return lineCounter.linePos(node.range[0]);
-  }
-  return null; // Fallback: node has no range (known yaml package edge case)
-}
-```
-
-Store the `LineCounter` instance from parsing and pass it through the entire validation pipeline. Every ajv error must be mapped through this resolver before being converted to a CodeMirror `Diagnostic`.
-
-**Warning signs:**
-- All ajv validation errors highlight line 1 in the editor (the fallback position)
-- `doc.toJSON()` is called but no reference to the original Document AST is retained
-- The `LineCounter` is created in parsing code but not passed to the validation or annotation layer
-- Clicking an error in the results panel does not scroll to the correct line
-
-**Phase to address:**
-YAML parsing infrastructure phase (Phase 1) for the resolver function. Annotation integration phase (Phase 2-3) for CodeMirror diagnostics. These are tightly coupled -- the resolver API must be designed before annotation code consumes it.
-
----
-
-### Pitfall 3: Compose-Spec JSON Schema Has Structural Quirks That Break Default ajv Configuration
-
-**What goes wrong:**
-The official compose-spec JSON Schema (`compose-spec.json` from `compose-spec/compose-spec`) uses JSON Schema Draft-07, which ajv supports. However, the schema has several structural patterns that cause problems with ajv's default configuration:
-
-1. **`patternProperties` with `^x-`**: Every Compose object allows extension fields prefixed with `x-`. The schema uses `patternProperties: {"^x-": {}}` to permit these. With ajv's strict mode enabled (the default), this triggers warnings or errors because `patternProperties` interacts with `additionalProperties: false` in ways that strict mode flags.
-
-2. **Complex `oneOf`/`anyOf` unions**: The `depends_on` property supports both a simple string array (`["db", "redis"]`) and an object form (`{db: {condition: "service_healthy"}}`). The schema uses `oneOf` to express this, but ajv's error messages for `oneOf` failures are notoriously unhelpful -- they list every branch that failed without indicating which branch the user likely intended.
-
-3. **`$ref` chains**: The schema uses internal `$ref` extensively (e.g., service definitions reference shared definitions for volumes, networks, etc.). ajv resolves these at compile time, but the resulting error paths include the resolved definition paths, not the original document paths.
-
-4. **Mixed type fields**: Many Compose properties accept `["string", "number"]` or `["string", "boolean"]` -- for example, `ports` can be strings ("8080:80") or objects. This produces confusing validation errors when the user's value does not match either type.
-
-5. **Format validators**: The schema uses `format: "duration"` for healthcheck intervals, which requires `ajv-formats` to be installed and configured. Without it, format validation is silently skipped.
+Additionally, the selector labels should be "stable" -- labels like `version` that change across deployments should NOT be in the selector, only in the template labels. This is a best practice, not a hard requirement.
 
 **Why it happens:**
-The compose-spec schema was designed for specification compliance validation, not for user-friendly error reporting. It is maximally correct but minimally helpful. ajv faithfully validates against it but produces error messages that require expert interpretation.
+Users often copy labels into matchLabels without understanding that matchLabels is the identity selector for the ReplicaSet. Changing it creates a new ReplicaSet instead of updating the existing one, leading to orphaned pods.
 
 **How to avoid:**
-1. Disable strict mode for the compose-spec schema specifically:
+1. Implement a rule that validates selector-to-template label consistency:
+   - ERROR if any selector label is not in template labels
+   - WARNING if selector contains labels that look ephemeral (e.g., "version", "build", "hash")
+   - INFO noting that selector is immutable after deployment
 
-```typescript
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+2. Apply the same check to StatefulSet, DaemonSet, ReplicaSet, and Job (all have immutable selectors).
 
-const ajv = new Ajv({
-  strict: false,              // Compose schema uses patterns strict mode dislikes
-  allErrors: true,            // Collect ALL errors, not just the first
-  verbose: true,              // Include schema and data in error objects
-  discriminator: true,        // Better oneOf matching
-});
-addFormats(ajv);
-```
-
-2. Post-process ajv errors to produce human-readable messages. Do NOT show raw ajv error messages to users. Map each `instancePath` + `keyword` combination to a domain-specific message:
-
-```typescript
-// Raw ajv: { instancePath: '/services/api/ports/0', keyword: 'oneOf', message: 'must match exactly one schema in oneOf' }
-// Mapped: "Port '8080' is ambiguous. Use format '8080:80' (host:container) or an object with 'target' and 'published' fields."
-```
-
-3. Use ajv's `validateSchema: false` option if the compose-spec schema itself triggers validation warnings (it should not, but some draft-07 constructs are edge cases).
-
-4. Pre-compile the schema at build time or on first use, cache the compiled validator function. Schema compilation is expensive (~50-100ms) and should not happen on every analysis click.
+3. For Services, check that the Service selector labels exist as labels on at least one Deployment/Pod template in the same file.
 
 **Warning signs:**
-- Raw ajv error messages like "must match exactly one schema in oneOf" appear in the UI
-- Strict mode errors appear in the browser console during schema compilation
-- Format validation for durations or URIs silently passes invalid values
-- Schema compilation runs on every analysis button click (visible lag)
+- The validator does not check selector-to-template label consistency
+- Tests only verify that selector exists, not that it matches template labels
+- The immutability warning is missing
 
 **Phase to address:**
-Schema validation infrastructure phase (Phase 2). ajv configuration must be finalized before any validation rules are written that depend on schema error output format.
+Best practice rules phase (middle phase).
 
----
-
-### Pitfall 4: React Flow SSR Crash and Bundle Size Explosion in Astro Island
-
-**What goes wrong:**
-React Flow (`@xyflow/react`) requires DOM APIs (window, document, ResizeObserver) that do not exist during server-side rendering. In Astro, even `client:load` attempts to SSR the component first, which crashes React Flow. The existing Dockerfile Analyzer already solved a similar problem by using `client:only="react"`, but React Flow introduces a new concern: bundle size.
-
-React Flow v12 (`@xyflow/react`) is approximately 200-250KB minified (before gzip). Combined with the existing Dockerfile Analyzer's CodeMirror bundle (~192KB client-side as noted in the v1.5 architecture research), the Compose Validator page will ship a significantly larger client bundle than any other page on the site. If dagre is added for layout, that adds another ~30KB. The total client-side JavaScript for this page could reach 400-500KB, far exceeding the Lighthouse performance thresholds that the site maintains at 90+.
-
-Additionally, React Flow requires its CSS stylesheet to be imported. In Astro's `client:only` islands, CSS imports from npm packages can behave unexpectedly -- they may not be extracted and optimized by Vite's CSS pipeline the same way they would in a full SPA.
-
-**Why it happens:**
-The Dockerfile Analyzer's client bundle is dominated by CodeMirror (~100KB) and React (~40KB). React Flow adds a second heavy library to the same island. Since both the editor and the graph live in the same React island (they share state -- clicking a service in the graph should highlight it in the editor), they cannot be separate islands without a cross-island state synchronization mechanism.
-
-**How to avoid:**
-1. Use `client:only="react"` (proven pattern from Dockerfile Analyzer). Do NOT use `client:load` or `client:visible` -- both attempt SSR.
-
-2. Lazy-load React Flow. The graph is not visible until the user analyzes a Compose file. Use `React.lazy()` with dynamic import:
-
-```typescript
-const DependencyGraph = React.lazy(() => import('./DependencyGraph'));
-
-// In the component:
-{showGraph && (
-  <Suspense fallback={<GraphSkeleton />}>
-    <DependencyGraph nodes={nodes} edges={edges} />
-  </Suspense>
-)}
-```
-
-This splits React Flow into a separate chunk that only loads when the graph tab is activated, keeping the initial page load fast.
-
-3. Import React Flow CSS in the lazy-loaded component, not at the top level:
-
-```typescript
-// Inside DependencyGraph.tsx
-import '@xyflow/react/dist/style.css';
-```
-
-4. Consider `@xyflow/react`'s tree-shaking capabilities. Import only the components you need:
-
-```typescript
-import { ReactFlow, Background, Controls } from '@xyflow/react';
-// NOT: import ReactFlow from '@xyflow/react'; (pulls everything)
-```
-
-5. Measure the final bundle with `npx vite-bundle-visualizer` after integration. Set a budget: the Compose Validator page's total JS should not exceed 350KB gzipped.
-
-**Warning signs:**
-- Lighthouse Performance score drops below 90 on the Compose Validator page
-- Browser console shows "window is not defined" or "document is not defined" errors
-- React Flow CSS does not render (nodes appear as unstyled divs)
-- Initial page load transfers >500KB of JavaScript before user interaction
-
-**Phase to address:**
-React island architecture phase (Phase 1-2). The `client:only` directive and lazy loading strategy must be decided before any React Flow code is written. Bundle size measurement is a verification gate at the end of the graph visualization phase.
-
----
-
-### Pitfall 5: Variable Interpolation Syntax `${VAR:-default}` Treated as YAML Content Instead of Docker Compose Tokens
-
-**What goes wrong:**
-Docker Compose supports Bash-like variable interpolation (`${VAR}`, `${VAR:-default}`, `${VAR:?error}`, `${VAR:+replacement}`, and `$$` for literal dollar signs). The `yaml` npm package correctly parses these as string values (they are just strings in YAML). However, the validator must understand that these are NOT literal values -- they are templates that will be resolved at runtime by Docker Compose.
-
-This creates three specific problems:
-
-1. **Schema validation false positives**: A port mapping `"${HOST_PORT:-8080}:80"` is a valid Compose port, but if the validator tries to parse port numbers from the literal string, it will fail. Similarly, `"${POSTGRES_VERSION:-16}"` as an image tag is valid but un-parseable as a version number.
-
-2. **Semantic rule false positives**: A security rule checking for hardcoded secrets will flag `DB_PASSWORD: ${DB_PASSWORD}` as "variable references environment variable" but cannot determine if the actual value is hardcoded in a `.env` file. Meanwhile, `DB_PASSWORD: supersecret123` IS a hardcoded secret, but both look like string scalars to the YAML parser.
-
-3. **Nested interpolation**: Docker Compose supports `${VARIABLE:-${FOO:-default}}`. The validator must not attempt to parse the inner `${...}` as a separate expression when the outer one is already being handled.
-
-**Why it happens:**
-The Dockerfile Analyzer did not face this problem because Dockerfiles have no variable interpolation syntax at the YAML level (ARG/ENV variables are Dockerfile instructions, not YAML constructs). The Compose Validator operates at a higher abstraction level where the raw YAML content includes runtime template syntax.
-
-**How to avoid:**
-1. Build an interpolation-aware value normalizer that runs BEFORE schema validation and semantic analysis:
-
-```typescript
-const INTERPOLATION_REGEX = /\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
-
-function containsInterpolation(value: string): boolean {
-  return INTERPOLATION_REGEX.test(value);
-}
-
-function resolveInterpolationForValidation(value: string): string {
-  // Replace ${VAR:-default} with just "default" for validation purposes
-  // Replace ${VAR} with a placeholder that passes schema validation
-  return value.replace(/\$\{([^:}]+):-([^}]+)\}/g, '$2')
-              .replace(/\$\{([^:}]+):?\?[^}]*\}/g, 'placeholder')
-              .replace(/\$\{([^}]+)\}/g, 'placeholder')
-              .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, 'placeholder');
-}
-```
-
-2. Tag interpolated values in semantic analysis so rules can distinguish between "definitely hardcoded" and "might be a variable reference."
-
-3. Do NOT attempt to validate the interpolated value itself -- only validate the structure around it. For example, `"${PORT}:80"` has valid port mapping structure even if `${PORT}` is unknown.
-
-**Warning signs:**
-- Valid Compose files with `${}` variables produce dozens of spurious validation errors
-- Port mapping rules fail on `"${PORT}:80"` with "invalid port number"
-- Security rules cannot distinguish `password: ${SECRET}` from `password: hardcoded123`
-- Tests use only literal values, never interpolated variables
-
-**Phase to address:**
-YAML parsing and normalization phase (Phase 1). The interpolation handler must exist before schema validation or semantic rules are written, because it affects what data both systems receive.
-
----
-
-### Pitfall 6: YAML AST Nodes Can Have Undefined `range` Property, Crashing the Line Number Resolver
-
-**What goes wrong:**
-The `yaml` npm package has a documented bug (GitHub issue #573) where certain YAML constructs produce parsed nodes without a `range` property, even when the document parses successfully. The specific case documented is `[a:]` (a flow mapping inside a sequence), but similar edge cases exist for:
-
-- Empty mapping values (bare keys with no value)
-- Flow sequences with complex nested structures
-- Documents with only comments and no content nodes
-- Alias nodes (`*anchor`) when the anchor definition is malformed
-
-When the line number resolver (from Pitfall 2) calls `node.range[0]` on such a node, it throws `TypeError: Cannot read properties of undefined (reading '0')`. This crashes the entire validation pipeline for that Compose file.
-
-**Why it happens:**
-The `yaml` package's TypeScript types declare `range` as `[number, number, number]` on Node, but the runtime implementation can return `undefined` in edge cases. The types do not reflect this, so TypeScript will not catch the error at compile time.
-
-**How to avoid:**
-1. Always guard `range` access with a null check:
-
-```typescript
-function getNodeLine(node: any, lineCounter: LineCounter): number {
-  if (node?.range && Array.isArray(node.range) && node.range.length >= 1) {
-    const pos = lineCounter.linePos(node.range[0]);
-    return pos.line;
-  }
-  return 1; // Fallback to line 1 if range unavailable
-}
-```
-
-2. Add a unit test specifically for the `[a:]` edge case and other known range-less nodes.
-
-3. Wrap the entire JSON-path-to-line resolver in a try/catch that falls back to line 1 rather than crashing the analysis.
-
-4. Log a console warning (dev-only) when a node lacks a range so edge cases can be identified and reported upstream.
-
-**Warning signs:**
-- Pasting unusual YAML constructs crashes the analyzer with no error message in the UI
-- TypeScript compiles without error but runtime throws on `node.range[0]`
-- The error is intermittent -- only certain Compose files trigger it
-- The crash prevents ALL validation results from appearing, not just the affected line
-
-**Phase to address:**
-YAML parsing infrastructure phase (Phase 1). The `getNodeLine` helper with defensive checks must be the ONLY way any code accesses node positions. No direct `node.range[0]` access anywhere.
-
----
-
-### Pitfall 7: Compose-Spec `version` Field Produces Confusing Validator Behavior
-
-**What goes wrong:**
-The `version` field in Docker Compose files is officially deprecated and obsolete. Docker Compose v2+ ignores it entirely and validates against the current Compose Specification regardless of what `version` says. However, the vast majority of existing Compose files in the wild still include `version: "3.8"` or similar. This creates a UX trap:
-
-1. If the validator warns about the deprecated `version` field, users who do not know it is deprecated will be confused -- "but all my Compose files have this!"
-2. If the validator does NOT warn about `version`, it misses an opportunity to educate users about modern Compose practices.
-3. If the validator uses the `version` field to determine which schema to validate against (v2 schema vs v3 schema vs unified spec), it replicates the very complexity Docker Compose abandoned.
-
-Additionally, files with `version: "2"` or `version: "2.1"` may use features that exist in v2 but are structured differently in the unified spec (e.g., `depends_on` with conditions was added differently in v2 vs v3 vs unified). Validating a v2 file against the unified spec may produce false positives.
-
-**Why it happens:**
-The compose-spec schema marks `version` as a deprecated string property. The schema validates any Compose file against the unified specification regardless of the version field. But user expectations are shaped by years of Docker Compose documentation that treated version as a critical field.
-
-**How to avoid:**
-1. Always validate against the unified Compose Specification schema, regardless of the `version` field value. This matches what Docker Compose itself does.
-
-2. Add a specific informational rule (not a warning, not an error) that detects `version` and explains:
-   - "The `version` field is obsolete and ignored by Docker Compose v2+. You can safely remove it."
-   - Link to Docker's official documentation on this topic.
-
-3. If the `version` field contains a v2.x value AND the file uses v2-only syntax (e.g., `links`, `volume_driver`, `extends` with `file`), surface a specific warning: "This file appears to use Docker Compose v2 syntax which may not be fully compatible with the current Compose Specification."
-
-4. Do NOT build separate validation paths for v2 vs v3 vs unified. This is scope explosion that Docker themselves abandoned.
-
-**Warning signs:**
-- The validator has a `switch(version)` statement in validation logic
-- Users paste files with `version: "3.8"` and get warnings that confuse rather than help
-- The validator rejects valid Compose files because they use v2 syntax
-- No test files include the `version` field
-
-**Phase to address:**
-Semantic rules phase (Phase 3). The `version` deprecation rule is a specific semantic rule, not a schema validation concern. It should be authored as a named rule with documentation page, consistent with the Dockerfile Analyzer's rule architecture.
+**Severity:** HIGH
 
 ---
 
 ## Moderate Pitfalls
 
-### Pitfall 8: Dagre Layout Engine Cannot Handle Cycles in `depends_on`
+### Pitfall 8: K8s Schema Validation Misses Server-Side-Only Constraints
 
 **What goes wrong:**
-Docker Compose's `depends_on` can create dependency cycles (A depends on B, B depends on C, C depends on A). Docker Compose itself detects and rejects these. However, dagre (the most common layout engine for React Flow) is designed for DAGs (Directed Acyclic Graphs) and produces unpredictable or infinite-loop behavior when given cyclic edges. The layout computation may hang the browser tab.
+K8s JSON schemas derived from the OpenAPI spec do NOT capture all validation rules. Many constraints are implemented in server-side admission controllers and are not expressed in the schema. Examples:
 
-Elkjs handles cycles slightly better but is significantly larger (~100KB) and slower than dagre (~30KB).
+- Container port numbers must be 1-65535 (schema says `integer`, does not constrain range)
+- `replicas` cannot be negative (schema says `integer`, does not constrain range)
+- Resource quantities like "100m" (100 millicores) or "256Mi" (256 mebibytes) have a specific format not captured in the schema
+- Label keys and values have format constraints (63 char max, alphanumeric start/end) not in the schema
+- `metadata.name` must be a valid DNS subdomain (lowercase, max 253 chars) -- the schema says `string`
+
+If the validator only uses schema validation, these common errors pass silently and the user discovers them only at `kubectl apply` time.
 
 **Why it happens:**
-Dagre's algorithm assumes acyclic input. It does not validate this assumption -- it simply produces wrong output or runs forever. Since the Compose Validator's job is to DETECT cycle issues (as a semantic rule), the graph visualization must render them visually without relying on the layout engine to handle them correctly.
+K8s's OpenAPI spec is generated from Go struct definitions and does not fully express all validation logic. Many validations are in Go code (apiserver admission controllers) that cannot be represented in JSON Schema. This is a known limitation of kubeconform and kubeval -- they miss the same issues.
 
 **How to avoid:**
-1. Run cycle detection BEFORE layout computation. Use Tarjan's algorithm or simple DFS-based cycle detection on the dependency graph. This is a semantic analysis rule, not a layout concern.
+1. Implement custom semantic rules for K8s-specific constraints that the schema misses:
+   - Port range validation (1-65535)
+   - Replica count non-negativity
+   - Resource quantity format validation (`/^\d+(\.\d+)?[mKMGTPE]?i?$/`)
+   - Label key/value format validation
+   - metadata.name DNS subdomain format
+   - Container name RFC 1123 label format
 
-2. If cycles are detected, break them for layout purposes by removing one edge per cycle (visually mark the removed edge as a cycle indicator with a distinct color/style -- red dashed line with a cycle icon).
+2. These rules are HIGH VALUE because they catch errors that schema validation and kubeconform miss. Highlight this as a differentiator: "Catches issues that kubeconform misses."
 
-3. Alternatively, use a force-directed layout (d3-force) instead of dagre for graphs with cycles. Force-directed layouts handle cycles gracefully because they do not assume DAG structure. However, they produce less visually organized results for tree-like graphs.
-
-4. Set a timeout on the layout computation. If dagre does not return within 500ms, abort and fall back to a simple grid layout.
+3. Do NOT try to implement ALL server-side validations. Focus on the 10-15 most common ones that users actually encounter.
 
 **Warning signs:**
-- The browser tab freezes when analyzing a Compose file with circular `depends_on`
-- The graph renders but edges cross chaotically because dagre's cycle-breaking heuristic is insufficient
-- No test Compose files include circular dependencies
-- The cycle detection semantic rule and the graph visualization are developed independently
+- `replicas: -1` passes validation
+- `containerPort: 99999` passes validation
+- Resource quantities like "100MiB" (invalid -- should be "100Mi") pass validation
+- Label values with 100+ characters pass validation
 
 **Phase to address:**
-Graph visualization phase (Phase 4). Cycle detection must be a shared utility used by both the semantic analysis rules (to report the error) and the graph layout code (to break cycles for rendering).
+Semantic validation rules phase (middle phase). These rules should be prioritized after schema validation but before security rules.
+
+**Severity:** HIGH
 
 ---
 
-### Pitfall 9: CodeMirror YAML Language Support Uses Lezer Parser, Not `yaml` npm Package
+### Pitfall 9: RBAC Rules Analysis Crosses Resource Boundaries in Non-Obvious Ways
 
 **What goes wrong:**
-CodeMirror 6's YAML support (`@codemirror/lang-yaml`) uses the Lezer YAML grammar for syntax highlighting and folding. The `yaml` npm package uses its own parser. These are two completely different parsers with different behaviors. Key mismatches:
+RBAC validation requires understanding four interconnected resource types: Role, ClusterRole, RoleBinding, ClusterRoleBinding. The relationships are:
 
-1. **Line numbering**: CodeMirror uses 0-based internal positions but 1-based line numbers via `state.doc.line(n)`. The `yaml` package's `LineCounter` produces 1-based `{line, col}`. But the offset systems are different -- CodeMirror counts characters from the start of the document, while `yaml`'s `range` values are byte offsets in the original string.
+- A RoleBinding references a Role OR a ClusterRole (via `roleRef`)
+- A ClusterRoleBinding references only a ClusterRole
+- A RoleBinding + ClusterRole grants the ClusterRole's permissions only in the RoleBinding's namespace
+- A ClusterRoleBinding + ClusterRole grants permissions cluster-wide
 
-2. **Error positions**: When the `yaml` parser reports an error at offset 142, converting that to a CodeMirror position requires mapping through `state.doc.line()` -- but only if the document has not been edited since parsing. If the user edits the document and re-analyzes, the offsets shift.
-
-3. **Syntax highlighting vs. semantic errors**: The Lezer parser may highlight syntactically valid YAML differently than the `yaml` package parses it. For example, Lezer may treat `<<:` as a plain key, while the `yaml` package with `merge: true` treats it as a merge key.
+The common mistakes to detect:
+- RoleBinding references a Role that does not exist (in the same namespace)
+- ClusterRoleBinding references a ClusterRole that does not exist
+- Binding grants `cluster-admin` privileges (Polaris security check)
+- Role/ClusterRole grants `pods/exec` or `pods/attach` (security risk)
+- Role grants wildcard (`*`) on resources or verbs (overly permissive)
+- RoleBinding in one namespace references a Role from a different namespace (impossible -- Roles are namespaced, RoleBinding can only reference a Role in its own namespace)
 
 **Why it happens:**
-The Dockerfile Analyzer avoided this by using a single parser (`dockerfile-ast`) for both analysis and annotation mapping. The Compose Validator uses three parsers: Lezer (CodeMirror highlighting), `yaml` (AST analysis), and ajv (schema validation). Their offset systems do not naturally align.
+RBAC is four separate resource types with complex inter-dependencies. Unlike Service-to-Deployment matching (which is just label comparison), RBAC matching uses string references (`roleRef.name`, `roleRef.kind`, `roleRef.apiGroup`) that must be resolved against the resource index.
 
 **How to avoid:**
-1. Always re-parse the YAML from `view.state.doc.toString()` on each analysis. Do NOT cache the parsed document across edits.
+1. Build RBAC analysis as a dedicated module that:
+   - Indexes all Role, ClusterRole, RoleBinding, ClusterRoleBinding resources
+   - Validates roleRef references (name exists, kind is correct, apiGroup is correct)
+   - Flags security anti-patterns (wildcard permissions, cluster-admin binding, pods/exec)
 
-2. Use character offsets consistently. The `yaml` package's `range` values are character offsets into the original string, which aligns with CodeMirror's `from`/`to` positions in `Diagnostic`. This alignment is correct as long as both operate on the same string.
+2. Keep RBAC checks focused on structural correctness and security anti-patterns. Do NOT try to compute effective permissions (requires full cluster state).
 
-3. Wrap the offset-to-diagnostic conversion in a validation step:
-
-```typescript
-function yamlOffsetToDiagnostic(
-  view: EditorView,
-  offset: number,
-  endOffset: number,
-  severity: 'error' | 'warning' | 'info',
-  message: string,
-): Diagnostic | null {
-  const docLength = view.state.doc.length;
-  const from = Math.max(0, Math.min(offset, docLength));
-  const to = Math.max(from, Math.min(endOffset, docLength));
-  if (from === to && from === docLength) return null; // Offset beyond document
-  return { from, to, severity, message, source: 'compose-validator' };
-}
-```
-
-4. Do NOT assume the `yaml` package's character offsets match byte offsets. For documents containing multi-byte UTF-8 characters (common in comments), character offset !== byte offset. JavaScript strings use UTF-16, and `yaml`'s offsets are character-based (matching JavaScript string indexing), which aligns with CodeMirror's character-based positions.
+3. Be careful with namespace scoping: a RoleBinding can reference a ClusterRole, but the resulting permissions are scoped to the RoleBinding's namespace. Do NOT flag this as an error -- it is a valid and common pattern.
 
 **Warning signs:**
-- Squiggly underlines appear on the wrong line or shifted by a few characters
-- Annotations work on ASCII-only files but are misaligned on files with emoji or CJK characters in comments
-- The same analysis produces different annotation positions on successive runs without document changes
+- RoleBinding referencing a ClusterRole is flagged as an error (it is valid)
+- RBAC rules ignore namespace scoping
+- The validator tries to compute "effective permissions" from RBAC resources (too complex)
+- ClusterRole with wildcard verbs is not flagged
 
 **Phase to address:**
-CodeMirror integration phase (Phase 2). The offset-to-diagnostic conversion helper must be tested with multi-byte character documents and re-analysis after edits.
+Security rules phase (middle to late phase). RBAC analysis should come after basic cross-resource validation is working.
+
+**Severity:** HIGH
 
 ---
 
-### Pitfall 10: Large Compose Files Cause Visible UI Lag from Synchronous Validation Pipeline
+### Pitfall 10: Resource Quantity Parsing Is More Complex Than It Appears
 
 **What goes wrong:**
-The Dockerfile Analyzer runs analysis synchronously on the main thread. This works because Dockerfiles are small (typically <100 lines) and `dockerfile-ast` parsing is fast (<5ms). Docker Compose files can be significantly larger -- production files with 20+ services, complex network configurations, and extensive environment variables can exceed 500+ lines. The validation pipeline (YAML parse + merge key resolution + JSON conversion + ajv schema validation + semantic analysis + graph layout computation) on a 500-line Compose file can take 100-500ms, causing visible UI jank (dropped frames, unresponsive button).
+Kubernetes resource quantities (for CPU, memory, storage) use a specific format that is not a standard unit system. Common formats:
+
+- CPU: `100m` (100 millicores), `0.1` (same), `1` (1 core), `1.5` (1.5 cores)
+- Memory: `128Mi` (128 mebibytes), `1Gi` (1 gibibyte), `128M` (128 megabytes), `1G` (1 gigabyte)
+- Note: `Mi` vs `M` and `Gi` vs `G` are DIFFERENT (binary vs decimal)
+
+Edge cases:
+- `0` is valid for both CPU and memory
+- `100m` for memory means 100 millibytes (valid but nonsensical -- 0.1 bytes)
+- Exponential notation: `1e3` (1000), `1.5e2` (150) -- valid but unusual
+- Negative quantities are invalid
+- No spaces between number and suffix
+- `Ki`, `Mi`, `Gi`, `Ti`, `Pi`, `Ei` are binary suffixes
+- `k` (note: lowercase for kilo), `M`, `G`, `T`, `P`, `E` are decimal suffixes
+
+The validator should detect:
+- Invalid format (e.g., "100 Mi" with a space, "100MiB" with extra "B")
+- Nonsensical values (e.g., memory request of `100m` = 0.1 bytes)
+- Request exceeding limit (`resources.requests.memory > resources.limits.memory`)
+- Missing requests when limits are set (best practice: always set both)
 
 **Why it happens:**
-The Dockerfile Analyzer set the precedent of synchronous, main-thread analysis. The Compose Validator inherits this pattern but adds significantly more computation: YAML parsing is more complex than Dockerfile parsing, ajv schema compilation is expensive (~50-100ms on first run), and graph layout with dagre adds another 50-100ms for 20+ nodes.
+Resource quantities use a K8s-specific format that is neither SI units nor IEC units exactly. The `m` suffix is overloaded (millicores for CPU, millibytes for memory). Parser must understand context.
 
 **How to avoid:**
-1. Cache the compiled ajv validator. Compile the schema once on module load (or on first analysis), not on every click:
+1. Build a resource quantity parser that handles all valid formats
+2. Validate quantities in context (CPU vs memory)
+3. Compare requests vs limits with parsed values
+4. Flag nonsensical values (sub-byte memory, sub-millicore CPU)
 
+**Warning signs:**
+- `resources.limits.memory: 100m` passes without a warning
+- `resources.requests.cpu: 2` and `resources.limits.cpu: 1` (request > limit) not detected
+- Exponential notation crashes the parser
+
+**Phase to address:**
+Semantic validation rules phase (middle phase).
+
+**Severity:** MEDIUM
+
+---
+
+### Pitfall 11: Pre-Compiled ajv Validators Need One Function Per Resource Type, Not One Monolithic Validator
+
+**What goes wrong:**
+The compose-validator has one schema and one pre-compiled validator function (`validate-compose.js`). The K8s analyzer has 18+ resource types, each with its own schema. If you pre-compile all 18 schemas into a single ajv instance and generate standalone code, the output module will be massive because ajv inlines all referenced definitions for each resource type.
+
+Alternatively, if you try to compile each schema separately, you get 18 separate ajv instances, which wastes memory on duplicated shared definitions.
+
+**Why it happens:**
+ajv's standalone code generation produces a self-contained module. If you add 18 schemas to one ajv instance, the standalone output contains all 18 validators with their full dependency trees. Shared definitions (ObjectMeta, PodSpec, Container) are deduplicated within the ajv instance but still produce one validation function per schema.
+
+**How to avoid:**
+1. Add all 18 schemas to a SINGLE ajv instance (shared definitions are compiled once)
+2. Generate standalone code with all validators exported as named functions
+3. The build script should produce one file (`validate-k8s.js`) exporting functions like:
 ```typescript
-let compiledValidator: ValidateFunction | null = null;
-
-function getValidator(): ValidateFunction {
-  if (!compiledValidator) {
-    const ajv = new Ajv({ strict: false, allErrors: true });
-    addFormats(ajv);
-    compiledValidator = ajv.compile(composeSchema);
-  }
-  return compiledValidator;
-}
+export const validateDeployment: ValidateFunction;
+export const validateService: ValidateFunction;
+export const validatePod: ValidateFunction;
+// ... etc
 ```
-
-2. If total analysis time exceeds 100ms on a representative large Compose file, move the analysis pipeline to a Web Worker. The existing `analysisResult` nanostore can receive results via `postMessage`:
-
+4. At runtime, select the correct validator based on the GVK registry:
 ```typescript
-// Main thread:
-worker.postMessage({ type: 'analyze', content: yamlText });
-worker.onmessage = (e) => {
-  analysisResult.set(e.data.result);
+const validators: Record<string, ValidateFunction> = {
+  'apps/v1/Deployment': validateDeployment,
+  'v1/Service': validateService,
+  // ...
 };
 ```
-
-3. Profile the pipeline on a 500-line Compose file during development. Measure each step: YAML parse, JSON conversion, ajv validation, semantic rules, graph layout. Optimize the slowest step first.
-
-4. Add a loading indicator (spinner or skeleton) during analysis, even if analysis is fast. This prevents the perception of jank if analysis occasionally takes longer than expected.
+5. Measure the output file size. Target: <200KB before gzip for all 18 validators combined.
 
 **Warning signs:**
-- Clicking "Analyze" produces a visible freeze before results appear
-- Users report the page "hangs" when pasting large Compose files
-- Lighthouse Time to Interactive (TTI) degrades
-- The "Analyze" button does not show a loading state
+- 18 separate `validate-*.js` files are generated
+- Each file is >100KB because shared definitions are duplicated
+- Runtime creates 18 ajv instances
+- Schema compilation happens at runtime instead of build time
 
 **Phase to address:**
-Core validation engine phase (Phase 2) for caching the ajv validator. Performance optimization phase (late phase) for Web Worker extraction if needed. The loading indicator should be in the React island architecture from the start (copy the `isAnalyzing` nanostore pattern from the Dockerfile Analyzer).
+Schema extraction and compilation phase (first phase).
+
+**Severity:** MEDIUM
 
 ---
 
-### Pitfall 11: React Flow CSS Conflicts with Site's Quantum Explorer Theme
+### Pitfall 12: The Resource Relationship Graph Is Much More Complex Than Compose's Dependency Graph
 
 **What goes wrong:**
-React Flow ships its own CSS (`@xyflow/react/dist/style.css`) that includes styles for nodes, edges, handles, controls, and the canvas background. These styles use class names like `.react-flow`, `.react-flow__node`, `.react-flow__edge` and set properties like `background`, `color`, `font-family`, `border`, and `z-index`. Several of these conflict with the site's "Quantum Explorer" theme:
+The compose-validator's graph shows service dependencies (`depends_on` edges). It is a simple directed graph with one edge type. The K8s resource relationship graph has MANY edge types:
 
-1. React Flow's default light background clashes with the dark theme
-2. React Flow's font-family overrides do not match Space Grotesk / Inter / JetBrains Mono
-3. React Flow's z-index values may conflict with the particle canvas, floating orbs, or modal overlays
-4. React Flow's selection rectangle uses colors that do not match the site's accent color system
+- Service -> Deployment/Pod (selector matching)
+- Deployment -> ConfigMap (volume mount, envFrom, env.valueFrom)
+- Deployment -> Secret (volume mount, envFrom, env.valueFrom, imagePullSecrets)
+- Deployment -> PVC (volume mount)
+- Deployment -> ServiceAccount (spec.serviceAccountName)
+- Ingress -> Service (backend service reference)
+- NetworkPolicy -> Pod (podSelector)
+- RoleBinding -> Role/ClusterRole (roleRef)
+- RoleBinding -> ServiceAccount/User/Group (subjects)
+- Job/CronJob -> ConfigMap/Secret (same as Deployment)
+- HPA -> Deployment/StatefulSet (scaleTargetRef)
 
-**Why it happens:**
-React Flow is designed as a standalone component library with its own design system. It does not inherit CSS custom properties from the host page. The site's theme is implemented via CSS custom properties (`--color-accent`, `--color-surface`, etc.), which React Flow does not use.
-
-**How to avoid:**
-1. Override React Flow's default styles with a custom theme CSS file specific to the Compose Validator:
-
-```css
-.react-flow {
-  --xy-background-color: transparent;
-  --xy-node-background-color: var(--color-surface, #1a1a2e);
-  --xy-node-border-color: var(--color-border, #2a2a4a);
-  --xy-node-color: var(--color-text-primary, #e0e0e0);
-  --xy-edge-stroke: var(--color-accent, #c44b20);
-  font-family: 'Inter', system-ui, sans-serif;
-}
-```
-
-2. React Flow v12 supports CSS custom properties for theming. Use these instead of overriding class selectors directly.
-
-3. Set `proOptions={{ hideAttribution: false }}` only if using the pro version. For open source, the attribution watermark appears -- plan for this in the layout.
-
-4. Test the graph in both dark and light mode. The site supports both, and React Flow's defaults look different in each.
-
-**Warning signs:**
-- The graph area has a white background while the rest of the page is dark
-- Node text uses a serif font or a font that does not match the site
-- The graph's minimap or controls appear with different styling than the rest of the UI
-- z-index issues cause the particle canvas to render over or under the graph
-
-**Phase to address:**
-Graph visualization phase (Phase 4). Theme integration is a styling task that should be done alongside the first graph rendering, not deferred to a polish phase.
-
----
-
-### Pitfall 12: Compose-Spec Schema Evolution Creates a Maintenance Burden
-
-**What goes wrong:**
-The Compose Specification is a living document. New features are added periodically (e.g., `models` for AI/ML services was added recently, `include` for sub-projects, `develop` for development-time configuration). The JSON Schema at `compose-spec/compose-spec` on GitHub is updated accordingly. If the validator bundles a static copy of the schema, it will become outdated.
-
-Unlike the Dockerfile Analyzer's rules (which are authored custom content), the compose-spec schema is an external dependency. When Docker adds new Compose features, the validator will incorrectly reject valid files using those features.
+This means 10+ edge types with different semantics. Rendering them all on one graph produces visual chaos. The compose dependency graph typically has 5-15 nodes with 5-20 edges. A K8s manifest with 15 resources could have 30-50 edges.
 
 **Why it happens:**
-Static sites cannot fetch the latest schema at runtime. The schema must be bundled at build time. There is no webhook or notification system for compose-spec schema updates. The maintainer must manually check for updates.
+K8s resources are more interconnected than Compose services. Each resource type has multiple reference mechanisms (label selectors, name references, volume mounts). The graph complexity grows quadratically with the number of resources.
 
 **How to avoid:**
-1. Pin a specific commit SHA of the compose-spec schema in the codebase, not just "latest." Document the commit SHA and date in a comment:
+1. Implement edge type filtering in the graph UI. Let users toggle edge types: "Show selector matches," "Show ConfigMap/Secret references," "Show RBAC bindings."
 
-```typescript
-// compose-spec schema from: https://github.com/compose-spec/compose-spec
-// Commit: abc123def (2026-02-15)
-// Check for updates: https://github.com/compose-spec/compose-spec/commits/main/schema/compose-spec.json
-import composeSchema from '../data/compose-spec.json';
-```
+2. Use different visual styles for different edge types:
+   - Selector matches: solid lines
+   - Name references (ConfigMap, Secret, PVC): dashed lines
+   - RBAC bindings: dotted lines
+   - Each type gets a distinct color
 
-2. Add a "Schema version" indicator on the tool page: "Validates against Compose Specification as of February 2026."
+3. Group related resources visually (all core resources together, all RBAC together).
 
-3. Consider making schema validation lenient by default: unknown properties produce info-level notices rather than errors. This prevents the validator from rejecting files that use newer Compose features.
+4. Consider a simplified "overview" mode that only shows the primary relationships (Service -> Deployment -> ConfigMap/Secret) and hides RBAC/NetworkPolicy edges by default.
 
-4. Add a `"Schema last updated: [date]"` note in the tool's footer.
+5. Set a reasonable node limit for the graph. If there are >30 resources, show a warning: "Large manifest detected. Graph shows primary relationships only."
 
 **Warning signs:**
-- The bundled schema has no version indicator or date comment
-- The validator rejects Compose files that work with `docker compose config` because they use new features
-- No process exists for updating the schema
+- The graph is an unreadable tangle of edges on a 15+ resource manifest
+- All edge types look the same (no visual distinction)
+- Users cannot understand what relationship each edge represents
+- dagre layout produces overlapping nodes because of too many edges
 
 **Phase to address:**
-Data and schema authoring phase (Phase 1) for initial schema bundling with version tracking. Site integration phase for the "last updated" indicator.
+Graph visualization phase (late phase). The graph is the LAST feature to implement because it depends on all cross-resource validation being complete first.
+
+**Severity:** MEDIUM
 
 ---
 
@@ -581,138 +634,126 @@ Data and schema authoring phase (Phase 1) for initial schema bundling with versi
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Synchronous analysis on main thread | Simpler code, matches Dockerfile Analyzer pattern | UI jank on large Compose files (500+ lines); blocks user interaction during analysis | MVP only -- extract to Web Worker if profiling shows >100ms analysis time |
-| Bundling entire compose-spec schema as JSON | No build-time fetch, no network dependency | Schema becomes stale when compose-spec adds features; 200KB+ of JSON in the bundle | Always acceptable for a static site, but must include version tracking and date indicator |
-| Copying `useCodeMirror` hook from Dockerfile Analyzer | Immediate working editor | Two parallel hooks with identical lifecycle management, diverging maintenance | MVP only -- extract a shared `useCodeMirror` hook that accepts a language extension parameter |
-| Skipping Web Worker for graph layout | Simpler architecture, less IPC complexity | Browser jank on graphs with 30+ nodes; layout computation blocks main thread | Acceptable until 20+ nodes are common in test files |
-| Using dagre over elkjs | 30KB vs 100KB bundle, simpler API | Dagre is unmaintained (last release 2018); no subgraph support; cycle handling is fragile | Acceptable for v1.6 MVP -- dagre is sufficient for typical Compose file dependency graphs (5-15 nodes) |
-| Inline compose-spec schema rather than importing from npm | No npm dependency on `compose-spec/compose-spec` (not published as npm package) | Manual update process when schema changes | Always -- the schema is not available as an npm package |
+| Bundling standalone schemas without deduplication | No build tooling needed | 1-3MB of JSON in the bundle; Lighthouse score tanks | Never -- deduplication is mandatory for browser delivery |
+| Skipping apiVersion deprecation checks | Fewer rules to write initially | Users deploy deprecated resources without warning | MVP only -- deprecation checks should be in the first release |
+| Treating all namespaces as "default" | Simpler cross-resource matching | False matches across namespaces; incorrect validation results | MVP only -- must handle explicit namespaces before cross-resource validation is trustworthy |
+| Ignoring well-known auto-created resources | Simpler reference checking | Every Pod gets "ServiceAccount 'default' not found" | Never -- the false positive noise destroys trust in the tool |
+| Single edge type in graph | Simpler graph rendering | Graph shows connections but not what KIND of connection; limited utility | MVP acceptable -- add edge types in a follow-up phase |
+| Skipping resource quantity parsing | Simpler validation | Missing the most common user error (requests > limits, nonsensical values) | MVP only -- resource quantity checks are high value |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| yaml + ajv pipeline | Calling `yaml.parse()` instead of `yaml.parseDocument()` | Always use `parseDocument()` to retain AST nodes with range data for line mapping |
-| yaml + CodeMirror | Assuming yaml package's character offsets differ from CodeMirror's | Both use JavaScript string character indexing; offsets are compatible as long as both read the same string from `view.state.doc.toString()` |
-| ajv error paths + yaml AST | Passing ajv's `instancePath` directly to CodeMirror as a line number | Build a JSON-path-to-YAML-line resolver that walks the Document AST; ajv paths are JSON pointer format (`/services/api/ports/0`) |
-| React Flow + Astro | Using `client:load` or `client:visible` instead of `client:only="react"` | Only `client:only` avoids SSR entirely; React Flow crashes during SSR |
-| React Flow CSS + site theme | Importing React Flow CSS globally | Import CSS inside the lazy-loaded graph component; override with Quantum Explorer theme custom properties |
-| CodeMirror YAML mode + yaml parser | Expecting Lezer YAML grammar and yaml npm package to produce identical parse trees | They are separate parsers; Lezer handles highlighting, yaml handles analysis; accept the duplication |
-| Nanostore bridge | Creating new stores instead of reusing Dockerfile Analyzer pattern | Create `composeValidatorStore.ts` mirroring `dockerfileAnalyzerStore.ts` -- separate stores, same architecture |
-| View Transitions cleanup | Forgetting to destroy React Flow instance on navigation | Add `astro:before-swap` listener in the `useCodeMirror` hook (already proven) and extend it to destroy the React Flow instance |
-| URL state encoding | Using the same URL hash namespace as the Dockerfile Analyzer | Use a different hash prefix or parameter name; both tools should support deep links simultaneously |
-| Header navigation | Adding a 9th nav item | Do NOT add a separate "Compose Validator" nav link; it lives under "Tools" alongside the Dockerfile Analyzer |
-| Sample compose file | Using a trivially simple example | Include a sample with anchors, merge keys, depends_on, networks, volumes, ports, env vars, and health checks -- exercise ALL rule categories |
-| LLMs.txt endpoints | Forgetting to add Compose Validator rule pages | Update both `llms.txt.ts` and `llms-full.txt.ts` with Compose Validator tool page and all rule documentation pages |
+| Multi-doc YAML + ajv | Running one ajv validator on the entire multi-doc output | Parse into Document array, extract apiVersion/kind per document, select correct schema per resource |
+| parseAllDocuments + LineCounter | Creating a new LineCounter per document | Use ONE LineCounter for entire input; offsets are global |
+| GVK registry + schema selection | Hardcoding schema file paths inline | Central GVK registry maps apiVersion+kind to schema key; schema key maps to pre-compiled validator function |
+| Cross-resource refs + namespace | Ignoring namespace in reference resolution | Build resource index keyed by namespace/kind/name; handle omitted namespace as "default" |
+| Label selector matching | Treating matchLabels as OR | matchLabels entries are ANDed; matchExpressions entries are ANDed; matchLabels + matchExpressions are ANDed |
+| Service selector vs Deployment selector | Applying matchExpressions logic to Service selector | Service uses simple `map[string]string` equality matching only |
+| NetworkPolicy from/to blocks | Treating all selectors in a from block as AND | Multiple items in a `from` array are ORed; selectors within a single item are ANDed |
+| RBAC RoleBinding + ClusterRole | Flagging RoleBinding referencing ClusterRole as error | Valid pattern -- ClusterRole permissions are scoped to RoleBinding's namespace |
+| Resource quantity comparison | String comparison of "100Mi" vs "1Gi" | Parse quantities to numeric bytes/millicores before comparison |
+| URL state with multi-document | Assuming single document in URL-decoded state | URL state contains full multi-doc YAML; display all documents on decode |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Re-compiling ajv schema on every analysis | 50-100ms delay before validation starts; visible on every click | Compile once, cache the validator function; use module-level `let` | Every analysis click |
-| Synchronous YAML parse + ajv validate + dagre layout | UI freezes for 200-500ms on large files | Profile early; extract to Web Worker if >100ms; add loading indicator | Compose files with 20+ services |
-| React Flow rendering all nodes on mount | Initial render stutter; graph appears then jumps as layout computes | Use `fitView` after layout completes; show skeleton during layout | Always -- layout is async |
-| dagre layout with cycles | Infinite loop or browser tab crash | Run cycle detection before dagre; break cycles for layout | Any Compose file with circular depends_on |
-| Importing React Flow at top level of island | 200KB+ loaded on page load before user clicks anything | Lazy-load React Flow with React.lazy() and dynamic import | Always -- graph is below the fold and optional |
-| Full compose-spec schema bundled as ES module import | 200KB+ of JSON parsed at module load time | Use dynamic import or lazy loading for the schema JSON | Impacts First Contentful Paint |
-| Re-running YAML parse on every keystroke | Parsing 500-line YAML on every character typed | On-demand analysis (button click), NOT real-time -- matches Dockerfile Analyzer pattern | Any attempt at as-you-type validation |
+| Loading all 18 schemas at module init | 1-3MB parsed on page load | Pre-compile to ajv standalone; lazy-load the compiled module | Always -- schemas must be lazy or pre-compiled |
+| Running cross-resource validation on every document pair | O(n^2) comparisons for n documents | Build resource index once, then run rules against index | Manifests with 20+ resources |
+| dagre layout on 30+ node graph | Layout computation >500ms; browser jank | Set node limit for graph; simplify edges; add timeout | Large manifests with many cross-references |
+| Re-parsing all documents when only one changed | Unnecessary work if editor supports incremental edits | Re-parse the full input on each analysis (K8s files are edited then analyzed, not live-validated) | Not an issue unless live validation is attempted |
+| N schema validations per analysis (one per document) | 18 ajv calls on an 18-resource file | Pre-compiled validators are fast (<1ms each); total should be <20ms | Only if validators are compiled at runtime instead of build time |
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Displaying user-pasted secrets in the graph visualization | Service nodes show environment variables including `DB_PASSWORD=actual_secret` | Only show service names, ports, and dependency edges in the graph; never render env var values |
-| eval()-based YAML tag resolution | Custom YAML tags can trigger constructor calls; `yaml` package has safe defaults | Use `yaml` package with default settings (safe by default); never enable `customTags` with executable constructors |
-| Transmitting Compose file content to a server | Privacy violation; user expectation is client-side only | All parsing, validation, and visualization runs in the browser; no fetch() calls; clearly state "100% client-side" |
-| URL state encoding exposes Compose file content | Shared URLs contain the full Compose file, potentially including secrets | Add a warning when users share URLs: "The shared URL contains your Compose file content. Remove sensitive values before sharing." |
-| Hardcoded example credentials in sample Compose file | Users copy the sample and deploy with example credentials | Use obviously fake values: `password: change-me-before-deploying`, `POSTGRES_PASSWORD: example-only` |
+| Displaying Secret data values in the graph or results | Users paste real Secrets with base64-encoded credentials | Never render Secret `.data` or `.stringData` values; show only Secret name and referenced keys |
+| Not warning about Secrets in base64 (not encrypted) | Users think K8s Secrets are encrypted | Add an informational rule: "K8s Secrets are base64-encoded, not encrypted. Use external secret management for sensitive data." |
+| Flagging ServiceAccount automount as always-bad | Some workloads need API access | Frame as "review needed" not "error": "automountServiceAccountToken is true. Verify this workload needs K8s API access." |
+| Missing wildcard RBAC detection | ClusterRole with `resources: ["*"], verbs: ["*"]` is cluster-admin equivalent | Detect and flag wildcard permissions in Roles/ClusterRoles as critical security finding |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Showing raw ajv error messages | "must match exactly one schema in oneOf" is meaningless to users | Map every ajv error to a human-readable message with context-specific fix suggestions |
-| Graph appears empty before first analysis | Users think the graph feature is broken | Show a placeholder message: "Analyze a Compose file to see the service dependency graph" |
-| Graph and editor are disconnected | Clicking a service in the graph does nothing in the editor | Implement bidirectional navigation: click a graph node to scroll editor to that service; click a service in editor to highlight the graph node |
-| No visual distinction between schema errors and semantic warnings | Users cannot prioritize which issues to fix first | Use the same severity + category system as the Dockerfile Analyzer: error/warning/info with color-coded indicators |
-| Graph layout jumps after analysis | Nodes appear then rearrange as dagre computes positions | Compute layout before rendering; show a skeleton/spinner during computation; animate nodes to final positions |
-| Variable interpolation errors overwhelm real issues | Files with many `${VAR}` references produce dozens of false-positive warnings | Recognize and skip interpolated values during validation; group interpolation notices separately |
-| Version deprecation warning feels like an attack on users' existing files | Users feel judged for using `version: "3.8"` | Frame as informational, not warning: "Good to know: The `version` field is optional in modern Docker Compose. Your file works fine with or without it." |
-| Tab switching between editor and graph loses context | User analyzes, switches to graph, switches back, loses scroll position in editor | Preserve editor scroll position across tab switches; do not recreate EditorView when toggling visibility |
+| Showing all 67 rules as one flat list | Users cannot find the issues relevant to their resource type | Group results by resource (document) first, then by category within each resource |
+| Not identifying which document a violation belongs to | "Line 145: missing resource limits" -- which resource? | Prefix violations with resource identity: "[Deployment/api] Line 145: missing resource limits" |
+| Graph shows all edge types at once | Visual chaos on complex manifests | Default to showing primary edges only; let users toggle edge types |
+| CRD / unknown resource rejection | User pastes a file with a CRD and the tool rejects the whole file | Skip unknown resource types gracefully; validate only known types; inform user which resources were skipped |
+| Deprecated apiVersion shown as error | Users feel their working manifests are "wrong" | Frame as warning with migration path: "apiVersion extensions/v1beta1 for Ingress is deprecated. Use networking.k8s.io/v1." |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **YAML parsing**: `version: '1.1'` and `merge: true` passed to `parseDocument()` -- without this, anchors and merge keys silently fail
-- [ ] **Line number mapping**: Every ajv error and semantic violation maps to a specific YAML source line -- not defaulting to line 1
-- [ ] **ajv schema caching**: Schema compiled once and cached, not recompiled on every analysis click -- verify with `console.time()`
-- [ ] **Variable interpolation**: Compose files with `${VAR:-default}` syntax do not produce false validation errors -- test with a heavily-interpolated file
-- [ ] **Cycle detection**: Compose files with circular `depends_on` produce a clear error message AND the graph renders without hanging -- test with A->B->C->A cycle
-- [ ] **React Flow lazy loading**: React Flow JS chunk is NOT in the initial page load -- verify with browser DevTools Network tab
-- [ ] **React Flow theme**: Graph renders correctly in both dark and light mode -- test both explicitly
-- [ ] **View Transitions**: Navigating away from the Compose Validator and back does not leave orphaned EditorView or React Flow instances -- test with browser DevTools memory snapshot
-- [ ] **URL state**: Shared URL reproduces the exact Compose file and analysis results -- test with a file containing special characters, anchors, and multi-byte characters
-- [ ] **Sample Compose file**: Exercises ALL rule categories (schema, security, best practice, semantic) and includes anchors, merge keys, depends_on, and interpolated variables
-- [ ] **Rule documentation pages**: Every rule has a page at `/tools/compose-validator/rules/[code]` -- count pages in build output
-- [ ] **LLMs.txt**: Both `llms.txt.ts` and `llms-full.txt.ts` include Compose Validator tool page and all rule documentation pages
-- [ ] **Sitemap**: All new pages appear in `sitemap-index.xml` -- grep build output
-- [ ] **CodeMirror annotation accuracy**: Squiggly underlines appear on the correct token, not the entire line -- test with multi-service file where errors are on specific nested keys
-- [ ] **Graph node dimensions**: React Flow nodes have measured dimensions before dagre layout runs -- verify nodes are not all 0x0 pixels
-- [ ] **Bundle size**: Total JS for the Compose Validator page < 350KB gzipped -- measure with `npx vite-bundle-visualizer`
+- [ ] **Multi-doc parsing**: `parseAllDocuments()` with shared LineCounter; empty documents filtered; document index built
+- [ ] **GVK registry**: All 18 resource types mapped with valid and deprecated apiVersions; unknown kinds handled gracefully
+- [ ] **Schema size**: Pre-compiled ajv module <200KB; NOT shipping raw JSON schemas in the bundle
+- [ ] **Label selector matching**: matchLabels AND semantics tested; matchExpressions NotIn-with-absent-key tested; Service vs Deployment selector distinction implemented
+- [ ] **Cross-resource namespace scoping**: Resources without namespace treated as "default"; cluster-scoped resources handled; well-known resources whitelisted
+- [ ] **NetworkPolicy AND/OR**: Combined selectors detected; empty vs absent ingress/egress distinguished
+- [ ] **RBAC cross-references**: RoleBinding->ClusterRole is valid; wildcard permissions flagged; namespace scoping correct
+- [ ] **Resource quantities**: Parsed to numeric values; requests vs limits compared; nonsensical values flagged
+- [ ] **Selector-to-template consistency**: Deployment selector labels are subset of template labels; same for StatefulSet/DaemonSet
+- [ ] **Per-document violations**: Every violation includes document index and resource identity (kind/name)
+- [ ] **Graph edge types**: At least 3 edge types visually distinguishable; edge count manageable on 15+ resource files
+- [ ] **Deprecated apiVersions**: All deprecated versions from the GVK table produce clear warnings with migration paths
+- [ ] **Server-side constraint rules**: Port range, replica non-negativity, resource quantity format, label format validated
+- [ ] **Secret data safety**: Secret .data/.stringData values never rendered in UI, graph, or URL state
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| YAML 1.2 default breaks merge keys (P1) | LOW | Add `version: '1.1', merge: true` to parseDocument options; re-test all anchor-using files |
-| Line mapping broken (P2) | MEDIUM | Build JSON-path-to-line resolver; requires touching every place that creates CodeMirror Diagnostics |
-| ajv configuration wrong (P3) | LOW | Fix ajv constructor options; recompile schema; rebuild error message mapper |
-| React Flow SSR crash (P4) | LOW | Switch to `client:only="react"` (proven fix from Dockerfile Analyzer) |
-| Variable interpolation false positives (P5) | MEDIUM | Build interpolation normalizer; retrofit into parsing pipeline; re-test all semantic rules |
-| Node range undefined crash (P6) | LOW | Add null guard to every `node.range` access; wrap resolver in try/catch |
-| Version field confusion (P7) | LOW | Add informational rule with friendly copy; adjust severity from warning to info |
-| Dagre cycle hang (P8) | MEDIUM | Add cycle detection before layout; implement cycle-breaking logic; add timeout |
-| CodeMirror offset mismatch (P9) | MEDIUM | Audit all offset conversion code; add multi-byte character test cases |
-| Performance jank (P10) | HIGH | Extract validation pipeline to Web Worker; requires IPC bridge, message serialization |
-| React Flow CSS conflicts (P11) | LOW | Add CSS override file; map React Flow variables to site custom properties |
-| Schema staleness (P12) | LOW | Update bundled JSON; rebuild; deploy -- but requires knowing updates exist |
+| Schema size explosion (P1) | HIGH | Must build schema extraction/deduplication pipeline; rewrite schema compilation; rebuild validation layer |
+| Multi-doc line tracking (P2) | MEDIUM | Switch from parseDocument to parseAllDocuments; build document index; update all line mapping code |
+| GVK validation wrong (P3) | LOW | Update GVK registry constant; fix schema selection logic; add tests for each apiVersion/kind combination |
+| Label selector matching wrong (P4) | MEDIUM | Rewrite selector matcher; add comprehensive test suite; re-test all cross-resource rules |
+| Cross-resource namespace issues (P5) | MEDIUM | Add namespace to resource index key; update all cross-resource rules to namespace-aware matching |
+| NetworkPolicy semantics (P6) | LOW | Fix AND/OR detection logic in NetworkPolicy rules; add test cases for each pattern |
+| Selector-template mismatch (P7) | LOW | Add new rule; straightforward implementation |
+| Schema misses server-side constraints (P8) | MEDIUM | Add custom semantic rules for each missing constraint; must know which constraints to add |
+| RBAC analysis wrong (P9) | MEDIUM | Fix RBAC module; add namespace scoping; add RoleBinding->ClusterRole test cases |
+| Resource quantity parsing (P10) | LOW | Build/fix quantity parser; add test suite with edge cases |
+| ajv compilation strategy wrong (P11) | HIGH | Rewrite build script; regenerate standalone validator; potentially restructure schema loading |
+| Graph complexity (P12) | MEDIUM | Add edge type filtering; limit node count; add visual grouping |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| YAML 1.1 / merge key config (P1) | Phase 1: YAML parsing infrastructure | Unit test with anchor+merge-key Compose file; merged values appear on service objects |
-| Line number mapping (P2) | Phase 1-2: YAML parsing + CodeMirror integration | Click-to-navigate from results panel jumps to correct line for every error type |
-| ajv configuration (P3) | Phase 2: Schema validation infrastructure | Compose files with `x-` extensions, complex ports, and depends_on variants validate correctly |
-| React Flow SSR + bundle (P4) | Phase 1: React island architecture | `client:only="react"` in Astro page; React Flow in separate lazy chunk; Lighthouse 90+ |
-| Variable interpolation (P5) | Phase 1: YAML parsing and normalization | Compose file with 10+ `${VAR:-default}` expressions produces zero false positives |
-| Node range undefined (P6) | Phase 1: YAML parsing infrastructure | Edge case `[a:]` and empty-value YAML constructs do not crash analysis |
-| Version field UX (P7) | Phase 3: Semantic rules | `version: "3.8"` produces info-level notice, not warning/error; copy is friendly |
-| Dagre cycle handling (P8) | Phase 4: Graph visualization | Circular depends_on file renders graph without hang; cycle edges visually distinct |
-| CodeMirror offset alignment (P9) | Phase 2: CodeMirror integration | Annotations on file with emoji in comments appear at correct positions |
-| Performance (P10) | Phase 2: Core validation engine | Analysis of 500-line file completes in <200ms; loading indicator visible |
-| React Flow theme (P11) | Phase 4: Graph visualization | Graph matches site theme in both dark and light mode |
-| Schema maintenance (P12) | Phase 1: Data authoring | Schema JSON has version comment; tool page shows "validates against [date] spec" |
+| Schema size explosion (P1) | Phase 1: Schema extraction & compilation | Bundle visualizer shows K8s validator <200KB; Lighthouse 85+ |
+| Multi-doc line tracking (P2) | Phase 1: Multi-doc parsing infrastructure | Violations in doc 3 of a 5-doc file show correct global line numbers AND resource identity |
+| GVK validation (P3) | Phase 1: GVK registry & schema selection | Each of 18 resource types validates with correct apiVersion; deprecated versions produce warnings |
+| Label selector matching (P4) | Phase 2: Cross-resource validation infrastructure | Comprehensive selector matching test suite passes (20+ test cases including NotIn-absent-key) |
+| Cross-resource namespace scoping (P5) | Phase 2: Cross-resource validation | Same-name resources in different namespaces are not confused; well-known resources not flagged |
+| NetworkPolicy semantics (P6) | Phase 3: Security rules | AND/OR detection works on canonical examples; empty/absent ingress/egress distinguished |
+| Selector-template consistency (P7) | Phase 2-3: Best practice rules | Deployment with mismatched selector/template labels flagged; correct deployments pass |
+| Server-side constraints (P8) | Phase 2: Semantic validation rules | Port range, replicas, resource quantities, label format all validated beyond schema |
+| RBAC analysis (P9) | Phase 3: Security rules | RoleBinding->ClusterRole is valid; wildcard permissions flagged; non-existent role references flagged |
+| Resource quantities (P10) | Phase 2: Semantic validation rules | Quantity parser handles all formats; request>limit detected; nonsensical values flagged |
+| ajv compilation strategy (P11) | Phase 1: Schema extraction & compilation | One compiled module exports all validators; shared definitions not duplicated |
+| Graph complexity (P12) | Phase 4: Graph visualization | Graph is usable on 15-resource manifest; edge types are filterable |
 
 ## Sources
 
-- [yaml npm package documentation](https://eemeli.org/yaml/) -- parseDocument options, LineCounter, merge key behavior, YAML 1.1 vs 1.2 defaults (HIGH confidence)
-- [yaml GitHub Issue #573: Node without range](https://github.com/eemeli/yaml/issues/573) -- confirmed edge case where parsed nodes lack range property (HIGH confidence)
-- [The YAML Document from Hell - JavaScript Edition](https://philna.sh/blog/2023/02/02/yaml-document-from-hell-javascript-edition/) -- YAML parsing edge cases: Norway problem, sexagesimal numbers, accidental types (HIGH confidence)
-- [Docker Compose Interpolation Docs](https://docs.docker.com/reference/compose-file/interpolation/) -- variable substitution syntax: `${VAR:-default}`, `${VAR:?error}`, nesting, `$$` escaping (HIGH confidence)
-- [Docker Compose Fragments Docs](https://docs.docker.com/reference/compose-file/fragments/) -- anchors, aliases, merge keys in Compose context; anchor resolution before interpolation (HIGH confidence)
-- [Docker Compose Version and Name Docs](https://docs.docker.com/reference/compose-file/version-and-name/) -- version field is obsolete, Compose Specification is rolling (HIGH confidence)
-- [compose-spec/compose-spec schema](https://github.com/compose-spec/compose-spec/blob/main/schema/compose-spec.json) -- Draft-07, patternProperties for x- extensions, oneOf for depends_on variants (HIGH confidence)
-- [Ajv JSON Schema Validator](https://ajv.js.org/) -- strict mode, allErrors, format validation, standalone code generation, browser support (HIGH confidence)
-- [Ajv Formats](https://ajv.js.org/packages/ajv-formats.html) -- duration format required by compose-spec healthcheck intervals (HIGH confidence)
-- [Ajv Strict Mode](https://ajv.js.org/strict-mode.html) -- patternProperties interaction with additionalProperties, strict mode defaults (HIGH confidence)
-- [React Flow / xyflow SSR Issue #3384](https://github.com/xyflow/xyflow/issues/3384) -- SSR crash in Vite/Astro, fixed in v11.9.0, `client:only` workaround (HIGH confidence)
-- [React Flow Astro Example](https://github.com/xyflow/react-flow-example-apps/tree/main/reactflow-astro) -- official Astro integration example (HIGH confidence)
-- [React Flow Layouting Guide](https://reactflow.dev/learn/layouting/layouting) -- dagre vs elkjs vs d3-force comparison (HIGH confidence)
-- [dagre GitHub](https://github.com/dagrejs/dagre) -- unmaintained since 2018; DAG-only, no cycle handling (HIGH confidence)
-- [CodeMirror lang-yaml](https://github.com/codemirror/lang-yaml) -- Lezer-based YAML grammar, separate from yaml npm package (HIGH confidence)
-- [Docker Compose History](https://docs.docker.com/compose/intro/history/) -- v1/v2/v3 history, unified Compose Specification (HIGH confidence)
-- Codebase analysis: `use-codemirror.ts` (View Transitions cleanup pattern), `buffer-polyfill.ts` (browser polyfill pattern), `EditorPanel.tsx` (analysis pipeline), `dockerfileAnalyzerStore.ts` (nanostore bridge), `types.ts` (rule/violation/score architecture), `package.json` (existing dependencies) (HIGH confidence -- direct code inspection)
+- [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema) -- per-version, per-resource standalone JSON Schemas for K8s; naming conventions; standalone format produces ~150KB per resource due to inlined definitions (HIGH confidence -- verified via WebFetch of actual schema file)
+- [Kubernetes Deprecated API Migration Guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) -- complete list of deprecated and removed apiVersions by K8s version; removal dates for extensions/v1beta1, apps/v1beta1, etc. (HIGH confidence -- official K8s docs)
+- [Kubernetes v1.31 Upcoming Changes](https://kubernetes.io/blog/2024/07/19/kubernetes-1-31-upcoming-changes/) -- v1.31-specific removals and deprecations (HIGH confidence -- official K8s blog)
+- [Kubernetes Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) -- matchLabels/matchExpressions semantics; In/NotIn/Exists/DoesNotExist operators; label format constraints; Service vs Deployment selector differences (HIGH confidence -- official K8s docs)
+- [Kubernetes Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) -- AND/OR semantics in from/to blocks; empty/absent ingress/egress; podSelector/namespaceSelector (HIGH confidence -- official K8s docs)
+- [Kubernetes RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) -- Role/ClusterRole/RoleBinding/ClusterRoleBinding relationships; roleRef structure; namespace scoping (HIGH confidence -- official K8s docs)
+- [RBAC Good Practices](https://kubernetes.io/docs/concepts/security/rbac-good-practices/) -- security anti-patterns; wildcard permissions; cluster-admin binding risks (HIGH confidence -- official K8s docs)
+- [Polaris Security Checks](https://polaris.docs.fairwinds.com/checks/security/) -- 23 security checks including privilege escalation, host access, RBAC, capabilities; implementation via JSON Schema-based check definitions (HIGH confidence -- verified via WebFetch)
+- [Datree: Selector Does Not Match Template Labels](https://www.datree.io/resources/kubernetes-error-codes-selector-does-not-match-template-labels) -- selector-template label mismatch; immutability of selector field; historical context for explicit matchLabels requirement (MEDIUM confidence -- verified by multiple sources)
+- [kubeconform Limitations](https://github.com/yannh/kubeconform) -- schema validation misses server-side constraints; property type checks work but value validation is incomplete; CRD schema challenges (MEDIUM confidence -- community source, verified by multiple articles)
+- [eemeli/yaml parseAllDocuments](https://eemeli.org/yaml/) -- single LineCounter across all documents; absolute offsets for node ranges; multi-document parsing behavior (HIGH confidence -- verified via WebFetch of official docs)
+- [instrumenta/openapi2jsonschema](https://github.com/instrumenta/openapi2jsonschema) -- tool for extracting per-resource JSON Schemas from K8s OpenAPI spec; standalone/local/strict flavors (HIGH confidence -- official tool for schema extraction)
+- [Ajv Managing Schemas](https://ajv.js.org/guide/managing-schemas.html) -- single ajv instance for multiple schemas; compileAsync for on-demand loading; standalone code generation (HIGH confidence -- official ajv docs)
+- [Kubernetes API Groups and Versions](https://book.kubebuilder.io/cronjob-tutorial/gvks) -- GVK (Group-Version-Kind) concept; API group organization; core vs named groups (HIGH confidence -- Kubebuilder book)
+- Codebase analysis: compose-validator parser.ts (parseDocument + LineCounter pattern), schema-validator.ts (pre-compiled ajv, error categorization), engine.ts (validation pipeline), types.ts (rule/violation architecture), compose-spec-schema.json (75KB single schema for comparison) (HIGH confidence -- direct code inspection)
 
 ---
-*Pitfalls research for: Docker Compose Validator -- browser-based Compose validation tool with graph visualization (v1.6 milestone)*
-*Researched: 2026-02-22*
+*Pitfalls research for: Kubernetes Manifest Analyzer -- browser-based K8s manifest linter with cross-resource validation (v1.7 milestone)*
+*Researched: 2026-02-23*
