@@ -106,7 +106,11 @@ Plans:
   3. A clean manifest with no issues shows a congratulatory empty state; the resource summary panel shows parsed resource types and counts
   4. User can download a score badge PNG, share the analysis via URL (with #k8s= hash prefix), and the tool works responsively on mobile (stacked) and desktop (side-by-side)
   5. The React island renders via client:only="react", survives View Transitions navigation, and communicates with the editor via nanostore bridge
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 45-01-PLAN.md -- Foundation utilities (scorer, store, URL state, badge, CodeMirror hook)
+- [ ] 45-02-PLAN.md -- Editor panel + results sub-components (8 React components)
+- [ ] 45-03-PLAN.md -- Assembly (results panel, root component, Astro page, tools index)
 
 ### Phase 46: Resource Relationship Graph
 **Goal**: Users can visualize the dependency relationships between all K8s resources in their manifest as an interactive graph
