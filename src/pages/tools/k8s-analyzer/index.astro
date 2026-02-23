@@ -1,12 +1,15 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import K8sAnalyzer from '../../../components/tools/K8sAnalyzer';
+import K8sAnalyzerJsonLd from '../../../components/K8sAnalyzerJsonLd.astro';
 import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 ---
 
 <Layout
   title="Kubernetes Manifest Analyzer | Patryk Golabek"
   description="Free Kubernetes manifest analyzer and best-practice linter by a Kubernetes architect. 67 rules across schema, security, reliability, best-practice, and cross-resource categories. 100% browser-based. Your code never leaves your device."
+  ogImage={new URL('/open-graph/tools/k8s-analyzer.png', Astro.site).toString()}
+  ogImageAlt="Kubernetes Manifest Analyzer - 67 rules across schema, security, reliability, best-practice, and cross-resource categories"
 >
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]">
@@ -21,11 +24,22 @@ import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 
     <aside class="mt-8 p-4 rounded-lg border border-[var(--color-border)]">
       <p class="text-sm text-[var(--color-text-secondary)]">
-        Want to learn the rules in depth? Individual rule documentation coming soon.
+        Want to learn the rules in depth? Read the
+        <a href="/blog/kubernetes-manifest-best-practices/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">
+          companion guide: Kubernetes Manifest Best Practices
+        </a>
+        or browse
+        <a href="/tools/k8s-analyzer/rules/ka-s001/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">
+          individual rule documentation
+        </a>.
+      </p>
+      <p class="text-xs text-[var(--color-text-secondary)] mt-2">
+        All analysis runs 100% client-side. Your manifests never leave your browser.
       </p>
     </aside>
   </section>
 
+  <K8sAnalyzerJsonLd />
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
     { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },

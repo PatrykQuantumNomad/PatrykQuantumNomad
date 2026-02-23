@@ -1,0 +1,64 @@
+---
+/**
+ * K8sAnalyzerJsonLd.astro -- SoftwareApplication JSON-LD structured data
+ * for the Kubernetes Manifest Analyzer tool page. Helps search engines understand
+ * the tool's purpose, features, and authorship.
+ */
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Kubernetes Manifest Analyzer",
+  "description": "Free browser-based Kubernetes manifest analyzer and best-practice linter by a Kubernetes architect. 67 rules across schema, security, reliability, best-practice, and cross-resource categories. Scored with category-weighted grading. 100% client-side -- your code never leaves your device.",
+  "url": "https://patrykgolabek.dev/tools/k8s-analyzer/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web Browser",
+  "softwareVersion": "1.0",
+  "datePublished": "2026-02-23",
+  "screenshot": "https://patrykgolabek.dev/open-graph/tools/k8s-analyzer.png",
+  "softwareHelp": {
+    "@type": "CreativeWork",
+    "name": "Kubernetes Manifest Best Practices",
+    "url": "https://patrykgolabek.dev/blog/kubernetes-manifest-best-practices/",
+  },
+  "keywords": [
+    "kubernetes manifest analyzer",
+    "kubernetes linter",
+    "kubernetes manifest best practices",
+    "k8s manifest validator",
+    "kubernetes yaml analyzer",
+    "kubernetes security scanner",
+    "pod security standards",
+    "kubernetes manifest checker",
+    "kubernetes manifest lint",
+  ],
+  "featureList": [
+    "67 validation rules across 5 categories (schema, security, reliability, best-practice, cross-resource)",
+    "Category-weighted scoring with letter grades (A+ through F)",
+    "Pod Security Standards (PSS) Baseline and Restricted compliance checks",
+    "Cross-resource validation (Service selectors, HPA targets, RBAC references)",
+    "Interactive resource relationship graph with dagre layout",
+    "Inline CodeMirror annotations with severity-colored gutter markers",
+    "100% client-side analysis -- no data transmitted",
+    "YAML syntax highlighting with CodeMirror 6",
+    "Multi-document YAML support (19 Kubernetes resource types)",
+    "67 individual rule documentation pages with fix examples",
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+    "name": "Patryk Golabek",
+    "url": "https://patrykgolabek.dev/",
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://patrykgolabek.dev/#website",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
