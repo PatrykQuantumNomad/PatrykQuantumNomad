@@ -120,7 +120,10 @@ Plans:
   1. Switching to the Graph tab in the results panel renders an interactive React Flow graph where each resource is a node and edges represent relationships (selector match, volume mount, envFrom, Ingress backend, HPA target, RBAC binding)
   2. Nodes are color-coded by resource kind category (workloads, services, config, storage, RBAC, scaling) and dangling references appear as red dashed edges
   3. The graph component is lazy-loaded via React.lazy() so it does not impact initial page load or Lighthouse scores
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 46-01-PLAN.md -- Graph data extractor + custom React Flow node/edge/skeleton/CSS components
+- [ ] 46-02-PLAN.md -- K8sResourceGraph assembly + K8sResultsPanel integration
 
 ### Phase 47: SEO, Documentation & Site Integration
 **Goal**: The K8s Manifest Analyzer is fully integrated into the site with 67+ individually indexed rule documentation pages, a companion blog post, and all standard site integration touchpoints
