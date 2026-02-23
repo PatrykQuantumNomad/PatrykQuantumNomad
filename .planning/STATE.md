@@ -44,6 +44,7 @@ Progress: ▓▓▓▓▓▓▓░░░ 67%
 | Phase 46 P02 | 3min | 2 tasks | 2 files |
 | Phase 47 P01 | 2min | 2 tasks | 3 files |
 | Phase 47 P02 | 3min | 2 tasks | 4 files |
+| Phase 47 P03 | 2min | 1 tasks | 1 files |
 | Phase 47 P04 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
@@ -110,6 +111,8 @@ v1.7 decisions pending (to be logged during execution):
 - [Phase 47]: getRelatedK8sRules follows exact compose-validator/rules/related.ts pattern
 - [Phase 47]: Follow exact ComposeValidator pattern for both OG image and JSON-LD
 - [Phase 47]: Use new URL() with Astro.site for ogImage prop (same as compose-validator)
+- [Phase 47]: PSS Restricted check priority over Baseline in rule page badge rendering (one badge per rule)
+- [Phase 47]: CIS reference rendered as subtitle text below header badges (not separate section)
 
 ### Pending Todos
 
