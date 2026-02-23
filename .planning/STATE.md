@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 41 of 47 (Foundation & Schema Infrastructure)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: Executing
-Last activity: 2026-02-23 — Completed 41-01 types and schema compilation
+Last activity: 2026-02-23 — Completed 41-02 GVK registry, parser, and diagnostic rules
 
-Progress: ▓░░░░░░░░░ 3%
+Progress: ▓▓░░░░░░░░ 6%
 
 ## Performance Metrics
 
@@ -49,6 +49,8 @@ v1.7 decisions pending (to be logged during execution):
 - Strip format fields from K8s schemas to avoid ajv-formats require() in standalone output
 - Commit source schemas for reproducibility (pinned to K8s v1.31.0)
 - 19 resource types (not 18) -- ClusterRoleBinding is the 19th
+- GVK flat array with find() over Map -- 19 entries makes linear scan negligible
+- checkMetadata skips documents without apiVersion/kind to avoid duplicate diagnostics
 
 ### Pending Todos
 
@@ -70,6 +72,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 41-01-PLAN.md (types and schema compilation)
+Stopped at: Completed 41-02-PLAN.md (GVK registry, parser, and diagnostic rules)
 Resume file: None
-Next: Execute 41-02-PLAN.md (multi-document parser and GVK registry)
+Next: Execute 41-03-PLAN.md (resource registry and schema validator)

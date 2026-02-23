@@ -45,7 +45,7 @@ See previous milestone archives for details.
   3. Invalid apiVersion/kind combinations, deprecated API versions, missing metadata.name, and malformed label keys/values all produce appropriate diagnostics with accurate line numbers
   4. The compiled schema validators load via dynamic import and the total bundle contribution stays under 200KB gzipped
   5. A resource registry indexes all parsed resources by kind, name, namespace, and labels for downstream cross-resource lookups
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 Plans:
 - [ ] 41-01-PLAN.md -- Types & schema compilation (compile K8s 1.31 validators, validate <200KB gzipped)
 - [ ] 41-02-PLAN.md -- GVK registry, multi-doc parser & diagnostic rules (KA-S001 through KA-S010)
@@ -125,7 +125,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 41. Foundation & Schema Infrastructure | 1/4 | In Progress|  | - |
+| 41. Foundation & Schema Infrastructure | 2/4 | In Progress|  | - |
 | 42. Security Rules | v1.7 | 0/TBD | Not started | - |
 | 43. Reliability & Best Practice Rules | v1.7 | 0/TBD | Not started | - |
 | 44. Cross-Resource Validation & RBAC | v1.7 | 0/TBD | Not started | - |

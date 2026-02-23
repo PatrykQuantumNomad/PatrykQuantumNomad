@@ -2,27 +2,27 @@
 
 ## Foundation & Parsing
 
-- [ ] **PARSE-01**: Multi-document YAML parsing splits input on `---` separators and parses each document independently with source range preservation
-- [ ] **PARSE-02**: Per-document apiVersion/kind detection identifies resource type from each parsed document
-- [ ] **PARSE-03**: GVK registry maps valid apiVersion/kind combinations to the 18 supported resource types
+- [x] **PARSE-01**: Multi-document YAML parsing splits input on `---` separators and parses each document independently with source range preservation
+- [x] **PARSE-02**: Per-document apiVersion/kind detection identifies resource type from each parsed document
+- [x] **PARSE-03**: GVK registry maps valid apiVersion/kind combinations to the 18 supported resource types
 - [ ] **PARSE-04**: Resource Registry builds an in-memory index of all parsed resources by kind, name, namespace, and labels for cross-resource validation
 - [ ] **PARSE-05**: Resource summary displays count of each resource type found ("Found: 3 Deployments, 2 Services, 1 ConfigMap")
-- [ ] **PARSE-06**: YAML syntax errors reported with accurate line numbers in the original editor content
+- [x] **PARSE-06**: YAML syntax errors reported with accurate line numbers in the original editor content
 
 ## Schema Validation (10 rules)
 
 - [x] **SCHEMA-01**: Per-resource-type JSON Schema validation for 18 K8s resource types using K8s 1.31 schemas from yannh/kubernetes-json-schema
 - [x] **SCHEMA-02**: Schema validators pre-compiled via ajv standalone for bundle size efficiency, lazy-loaded per resource type
-- [ ] **SCHEMA-03**: KA-S001 — Invalid YAML syntax (error)
-- [ ] **SCHEMA-04**: KA-S002 — Missing apiVersion field (error)
-- [ ] **SCHEMA-05**: KA-S003 — Missing kind field (error)
-- [ ] **SCHEMA-06**: KA-S004 — Unknown apiVersion/kind combination (error)
+- [x] **SCHEMA-03**: KA-S001 — Invalid YAML syntax (error)
+- [x] **SCHEMA-04**: KA-S002 — Missing apiVersion field (error)
+- [x] **SCHEMA-05**: KA-S003 — Missing kind field (error)
+- [x] **SCHEMA-06**: KA-S004 — Unknown apiVersion/kind combination (error)
 - [ ] **SCHEMA-07**: KA-S005 — Schema validation failure per resource type (error)
-- [ ] **SCHEMA-08**: KA-S006 — Deprecated API version (warning) — extensions/v1beta1, apps/v1beta1, apps/v1beta2, etc.
-- [ ] **SCHEMA-09**: KA-S007 — Missing metadata.name (error)
-- [ ] **SCHEMA-10**: KA-S008 — Invalid metadata.name format (warning) — RFC 1123 DNS subdomain validation
-- [ ] **SCHEMA-11**: KA-S009 — Invalid label key/value format (warning)
-- [ ] **SCHEMA-12**: KA-S010 — Empty document in multi-doc YAML (info)
+- [x] **SCHEMA-08**: KA-S006 — Deprecated API version (warning) — extensions/v1beta1, apps/v1beta1, apps/v1beta2, etc.
+- [x] **SCHEMA-09**: KA-S007 — Missing metadata.name (error)
+- [x] **SCHEMA-10**: KA-S008 — Invalid metadata.name format (warning) — RFC 1123 DNS subdomain validation
+- [x] **SCHEMA-11**: KA-S009 — Invalid label key/value format (warning)
+- [x] **SCHEMA-12**: KA-S010 — Empty document in multi-doc YAML (info)
 
 ## Security Rules (20 rules)
 
@@ -172,24 +172,24 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PARSE-01 | Phase 41 | Pending |
-| PARSE-02 | Phase 41 | Pending |
-| PARSE-03 | Phase 41 | Pending |
+| PARSE-01 | Phase 41 | Complete |
+| PARSE-02 | Phase 41 | Complete |
+| PARSE-03 | Phase 41 | Complete |
 | PARSE-04 | Phase 41 | Pending |
 | PARSE-05 | Phase 41 | Pending |
-| PARSE-06 | Phase 41 | Pending |
+| PARSE-06 | Phase 41 | Complete |
 | SCHEMA-01 | Phase 41 | Complete |
 | SCHEMA-02 | Phase 41 | Complete |
-| SCHEMA-03 | Phase 41 | Pending |
-| SCHEMA-04 | Phase 41 | Pending |
-| SCHEMA-05 | Phase 41 | Pending |
-| SCHEMA-06 | Phase 41 | Pending |
+| SCHEMA-03 | Phase 41 | Complete |
+| SCHEMA-04 | Phase 41 | Complete |
+| SCHEMA-05 | Phase 41 | Complete |
+| SCHEMA-06 | Phase 41 | Complete |
 | SCHEMA-07 | Phase 41 | Pending |
-| SCHEMA-08 | Phase 41 | Pending |
-| SCHEMA-09 | Phase 41 | Pending |
-| SCHEMA-10 | Phase 41 | Pending |
-| SCHEMA-11 | Phase 41 | Pending |
-| SCHEMA-12 | Phase 41 | Pending |
+| SCHEMA-08 | Phase 41 | Complete |
+| SCHEMA-09 | Phase 41 | Complete |
+| SCHEMA-10 | Phase 41 | Complete |
+| SCHEMA-11 | Phase 41 | Complete |
+| SCHEMA-12 | Phase 41 | Complete |
 | SEC-01 | Phase 42 | Pending |
 | SEC-02 | Phase 42 | Pending |
 | SEC-03 | Phase 42 | Pending |
