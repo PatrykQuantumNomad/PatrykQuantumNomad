@@ -44,7 +44,7 @@ export function DependencyEdge({
         path={path}
         markerEnd={markerEnd}
         style={{
-          stroke: isCycle ? '#ef4444' : 'rgba(255,255,255,0.2)',
+          stroke: isCycle ? '#ef4444' : 'var(--color-text-secondary, #888)',
           strokeWidth: isCycle ? 2.5 : 1.5,
         }}
       />

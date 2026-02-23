@@ -157,7 +157,7 @@ function DependencyGraph({ result, yamlContent }: DependencyGraphProps) {
       source: e.from,
       target: e.to,
       type: 'dependency' as const,
-      markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(255,255,255,0.3)' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#888' },
       data: {
         condition: e.condition,
         isCycle: cycleSet.has(e.from) && cycleSet.has(e.to),

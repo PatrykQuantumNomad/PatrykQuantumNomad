@@ -2,7 +2,7 @@
 .compose-graph .react-flow {
   --xy-background-color: transparent;
   --xy-node-color: var(--color-text-primary, #e0e0e0);
-  --xy-edge-stroke: rgba(255, 255, 255, 0.2);
+  --xy-edge-stroke: var(--color-text-secondary, #888);
   --xy-edge-stroke-selected: var(--color-accent, #c44b20);
   --xy-connectionline-stroke: var(--color-accent, #c44b20);
   --xy-attribution-background-color: transparent;
@@ -32,6 +32,6 @@
 
 /* Arrow marker color override */
 .compose-graph .react-flow__arrowhead polyline {
-  stroke: rgba(255, 255, 255, 0.3);
-  fill: rgba(255, 255, 255, 0.3);
+  stroke: var(--color-text-secondary, #888);
+  fill: var(--color-text-secondary, #888);
 }
