@@ -90,7 +90,7 @@ Plans:
   2. References to ConfigMaps, Secrets, PVCs, and ServiceAccounts that do not exist in the manifest produce informational diagnostics (not false positives for well-known system resources like default ServiceAccount or kube-root-ca.crt ConfigMap)
   3. Roles or ClusterRoles with wildcard permissions, cluster-admin RoleBindings, or permissions granting pod exec/attach/create or secret access produce RBAC violations with CIS Benchmark references
   4. RBAC violations are scored under the Security category weight (35%)
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 44-01-PLAN.md -- 8 cross-resource validation rules (KA-X001 through KA-X008) with well-known resources whitelist
 - [ ] 44-02-PLAN.md -- 5 RBAC analysis rules (KA-A001 through KA-A005) with category index
@@ -139,7 +139,7 @@ Plans:
 | 41. Foundation & Schema Infrastructure | 4/4 | Complete   | 2026-02-23 | 2026-02-23 |
 | 42. Security Rules | 2/2 | Complete | 2026-02-23 | 2026-02-23 |
 | 43. Reliability & Best Practice Rules | v1.7 | 3/3 | Complete | 2026-02-23 |
-| 44. Cross-Resource Validation & RBAC | v1.7 | 0/TBD | Not started | - |
+| 44. Cross-Resource Validation & RBAC | 1/3 | In Progress|  | - |
 | 45. Editor UI & Scoring | v1.7 | 0/TBD | Not started | - |
 | 46. Resource Relationship Graph | v1.7 | 0/TBD | Not started | - |
 | 47. SEO, Documentation & Site Integration | v1.7 | 0/TBD | Not started | - |
