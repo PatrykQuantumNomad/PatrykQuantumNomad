@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 41 of 47 (Foundation & Schema Infrastructure)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-23 — Roadmap created for v1.7 (7 phases, 123 requirements)
+Plan: 1 of 4 complete
+Status: Executing
+Last activity: 2026-02-23 — Completed 41-01 types and schema compilation
 
-Progress: ░░░░░░░░░░ 0%
+Progress: ▓░░░░░░░░░ 3%
 
 ## Performance Metrics
 
@@ -44,8 +44,11 @@ v1.0-v1.6 decisions archived in respective milestone files.
 
 v1.7 decisions pending (to be logged during execution):
 - Async engine (dynamic schema imports require async unlike compose-validator)
-- Single compiled Ajv module for all 18 K8s schemas (dedup shared definitions)
+- Single compiled Ajv module for all 19 K8s schemas (dedup shared definitions)
 - Phase 42/43 can run in parallel (both are per-resource, no cross-deps)
+- Strip format fields from K8s schemas to avoid ajv-formats require() in standalone output
+- Commit source schemas for reproducibility (pinned to K8s v1.31.0)
+- 19 resource types (not 18) -- ClusterRoleBinding is the 19th
 
 ### Pending Todos
 
@@ -61,12 +64,12 @@ None.
 - [Deferred]: LinkedIn removal from JSON-LD sameAs (CONFIG-02)
 - [v1.3 Gap]: Dark mode strategy deferred -- charts use light mode CSS custom properties only
 - [v1.4 Tech Debt]: Category colors/grade colors duplicated in badge-generator.ts
-- [v1.7 Risk]: Schema bundle size must be validated <200KB gzipped in Phase 41 before proceeding
+- [v1.7 Risk RESOLVED]: Schema bundle size validated at 76KB gzipped (well under 200KB limit)
 - [v1.7 Risk]: Cross-resource false positives for partial manifests (Phase 44)
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Roadmap created for v1.7 Kubernetes Manifest Analyzer (7 phases, 123 reqs)
+Stopped at: Completed 41-01-PLAN.md (types and schema compilation)
 Resume file: None
-Next: Plan Phase 41 via /gsd:plan-phase 41
+Next: Execute 41-02-PLAN.md (multi-document parser and GVK registry)

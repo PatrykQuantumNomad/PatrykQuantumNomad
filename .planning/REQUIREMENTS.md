@@ -11,8 +11,8 @@
 
 ## Schema Validation (10 rules)
 
-- [ ] **SCHEMA-01**: Per-resource-type JSON Schema validation for 18 K8s resource types using K8s 1.31 schemas from yannh/kubernetes-json-schema
-- [ ] **SCHEMA-02**: Schema validators pre-compiled via ajv standalone for bundle size efficiency, lazy-loaded per resource type
+- [x] **SCHEMA-01**: Per-resource-type JSON Schema validation for 18 K8s resource types using K8s 1.31 schemas from yannh/kubernetes-json-schema
+- [x] **SCHEMA-02**: Schema validators pre-compiled via ajv standalone for bundle size efficiency, lazy-loaded per resource type
 - [ ] **SCHEMA-03**: KA-S001 — Invalid YAML syntax (error)
 - [ ] **SCHEMA-04**: KA-S002 — Missing apiVersion field (error)
 - [ ] **SCHEMA-05**: KA-S003 — Missing kind field (error)
@@ -178,8 +178,8 @@
 | PARSE-04 | Phase 41 | Pending |
 | PARSE-05 | Phase 41 | Pending |
 | PARSE-06 | Phase 41 | Pending |
-| SCHEMA-01 | Phase 41 | Pending |
-| SCHEMA-02 | Phase 41 | Pending |
+| SCHEMA-01 | Phase 41 | Complete |
+| SCHEMA-02 | Phase 41 | Complete |
 | SCHEMA-03 | Phase 41 | Pending |
 | SCHEMA-04 | Phase 41 | Pending |
 | SCHEMA-05 | Phase 41 | Pending |
