@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 38 complete (Rule Documentation Pages)
+**Current focus:** v1.6 Docker Compose Validator - Phase 39 complete (Tool Page & Site Integration)
 
 ## Current Position
 
-Phase: 38 of 40 (Rule Documentation Pages) -- COMPLETE
+Phase: 39 of 40 (Tool Page & Site Integration) -- COMPLETE
 Plan: 1 of 1 complete in current phase
-Status: Phase 38 complete (all 4 requirements: DOC-01, DOC-02, DOC-03, DOC-04)
-Last activity: 2026-02-22 -- Plan 38-01 complete (52 rule documentation pages, related rules, violation list links)
+Status: Phase 39 complete (all 6 requirements: SITE-01, SITE-02, SITE-03, SITE-04, SITE-05, SITE-06)
+Last activity: 2026-02-23 -- Plan 39-01 complete (JSON-LD, breadcrumbs, tools page card, homepage callout, sitemap verified)
 
-Progress: [██████████] 100% (Phase 38 plan 1/1)
+Progress: [██████████] 100% (Phase 39 plan 1/1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 77 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 11 v1.6)
+- Total plans completed: 78 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 12 v1.6)
 
 **Cumulative Stats:**
 
@@ -42,6 +42,7 @@ Progress: [██████████] 100% (Phase 38 plan 1/1)
 | Phase 36 P02 | 4min | 2 tasks | 8 files |
 | Phase 37 P01 | 3min | 2 tasks | 5 files |
 | Phase 38 P01 | 3min | 2 tasks | 4 files |
+| Phase 39 P01 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - DocumentedRule interface unifies ComposeLintRule and SchemaRuleMetadata for page generation without requiring check() method
 - allDocumentedRules merges 44 custom + 8 schema rules via cast to DocumentedRule[] for 52-rule static path generation
 - Compose rule pages mirror Dockerfile Analyzer pattern: [code].astro with getStaticPaths from allDocumentedRules
+- No header nav changes for Compose Validator -- existing /tools/ link with startsWith covers all /tools/* pages
+- Database Compass excluded from tools page per user's prior removal (commit 222e677)
+- Minimal aside linking to rule docs; companion blog post aside deferred to Phase 40
 
 ### Pending Todos
 
@@ -111,7 +115,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 38-01-PLAN.md (52 rule documentation pages, related rules, violation list links) -- Phase 38 complete
+Last session: 2026-02-23
+Stopped at: Completed 39-01-PLAN.md (JSON-LD, breadcrumbs, tools page card, homepage callout, sitemap verified) -- Phase 39 complete
 Resume file: None
-Next: Phase 39 -- Rules Index Page
+Next: Phase 40 -- OG Images, Blog Post & Polish

@@ -136,12 +136,12 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Site Integration
 
-- [ ] **SITE-01**: Header navigation link for Docker Compose Validator
-- [ ] **SITE-02**: Homepage callout linking to the Compose Validator
-- [ ] **SITE-03**: Tools page card for Compose Validator
-- [ ] **SITE-04**: JSON-LD SoftwareApplication structured data on tool page
-- [ ] **SITE-05**: BreadcrumbList JSON-LD on tool page and rule documentation pages
-- [ ] **SITE-06**: All tool and rule pages in sitemap
+- [x] **SITE-01**: Header navigation link for Docker Compose Validator
+- [x] **SITE-02**: Homepage callout linking to the Compose Validator
+- [x] **SITE-03**: Tools page card for Compose Validator
+- [x] **SITE-04**: JSON-LD SoftwareApplication structured data on tool page
+- [x] **SITE-05**: BreadcrumbList JSON-LD on tool page and rule documentation pages
+- [x] **SITE-06**: All tool and rule pages in sitemap
 - [ ] **SITE-07**: Build-time OG image for tool page via Satori + Sharp
 
 ### Content
@@ -278,12 +278,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOC-02 | Phase 38 | Complete |
 | DOC-03 | Phase 38 | Complete |
 | DOC-04 | Phase 38 | Complete |
-| SITE-01 | Phase 39 | Pending |
-| SITE-02 | Phase 39 | Pending |
-| SITE-03 | Phase 39 | Pending |
-| SITE-04 | Phase 39 | Pending |
-| SITE-05 | Phase 39 | Pending |
-| SITE-06 | Phase 39 | Pending |
+| SITE-01 | Phase 39 | Complete |
+| SITE-02 | Phase 39 | Complete |
+| SITE-03 | Phase 39 | Complete |
+| SITE-04 | Phase 39 | Complete |
+| SITE-05 | Phase 39 | Complete |
+| SITE-06 | Phase 39 | Complete |
 | SITE-07 | Phase 40 | Pending |
 | CONTENT-01 | Phase 40 | Pending |
 | CONTENT-02 | Phase 40 | Pending |
