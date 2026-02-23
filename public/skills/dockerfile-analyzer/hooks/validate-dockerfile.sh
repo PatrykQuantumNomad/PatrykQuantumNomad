@@ -1,22 +1,50 @@
 #!/usr/bin/env bash
-# validate-dockerfile.sh — Claude Code PostToolUse hook
-# Validates Dockerfiles after Claude edits or creates them.
-# Catches critical security, reliability, and best-practice violations.
+# Hook:    validate-dockerfile.sh
+# Author:  Patryk Golabek
+# Website: https://patrykgolabek.dev
+# Type:    Claude Code PostToolUse hook
+#
+# Purpose:
+#   - Validate Dockerfiles after file-edit tool calls
+#   - Return actionable violations via stderr for Claude feedback
+#   - Stay fail-safe (exit 0) for unrelated or malformed hook payloads
+#
+# Environment:
+#   CLAUDE_PROJECT_DIR — set by Claude Code to the project root
 #
 # Install:
 #   1. Copy this file to .claude/hooks/validate-dockerfile.sh
 #   2. chmod +x .claude/hooks/validate-dockerfile.sh
-#   3. Add the PostToolUse hook config to .claude/settings.json
+#   3. Add the PostToolUse hook config to .claude/settings.json:
+#      {
+#        "hooks": {
+#          "PostToolUse": [{
+#            "matcher": "Edit|Write",
+#            "hooks": [{
+#              "type": "command",
+#              "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/validate-dockerfile.sh"
+#            }]
+#          }]
+#        }
+#      }
 #
-# Exit codes:
+# Exit codes (per Claude Code hook contract):
 #   0 — file is not a Dockerfile, or Dockerfile passed validation
-#   2 — Dockerfile has violations (stderr sent as feedback to Claude)
+#   2 — Dockerfile has violations (stderr is sent as feedback to Claude)
 
 set -euo pipefail
 
+# --- Prerequisite checks ---
+# Exit 1 (not 2) so Claude Code logs the error but doesn't treat it as a
+# validation block — exit 2 would send stderr as feedback to the model.
+if ! command -v jq >/dev/null 2>&1; then
+  echo "validate-dockerfile.sh: jq is required but not installed." >&2
+  exit 1
+fi
+
 # --- Read hook input from stdin ---
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
 
 # No file path means this isn't a file-editing tool call
 if [[ -z "$FILE_PATH" ]]; then
@@ -88,10 +116,7 @@ fi
 
 # --- Track state for multi-stage and consecutive-RUN detection ---
 LAST_INSTRUCTION=""        # previous instruction keyword (for DL3059)
-LAST_INSTRUCTION_LINE=0
 FINAL_STAGE_USER=""        # USER in the current (final) stage
-HAS_APT_UPDATE=false       # tracks apt-get update without cleanup in current RUN
-APT_UPDATE_LINE=0
 
 for i in "${!LOGICAL_LINES[@]}"; do
   FULL_LINE="${LOGICAL_LINES[$i]}"
@@ -123,7 +148,6 @@ for i in "${!LOGICAL_LINES[@]}"; do
       fi
     fi
     LAST_INSTRUCTION="from"
-    LAST_INSTRUCTION_LINE=$LN
     continue
   fi
 
@@ -245,7 +269,6 @@ for i in "${!LOGICAL_LINES[@]}"; do
 
   # Track last instruction for consecutive-RUN detection (skip comments)
   LAST_INSTRUCTION="$KEYWORD_LOWER"
-  LAST_INSTRUCTION_LINE=$LN
 
 done
 

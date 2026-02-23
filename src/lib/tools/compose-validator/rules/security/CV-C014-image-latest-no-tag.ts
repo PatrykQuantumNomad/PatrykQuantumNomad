@@ -42,7 +42,7 @@ export const CVC014: ComposeLintRule = {
         const colonIdx = imageStr.lastIndexOf(':');
 
         if (colonIdx === -1) {
-          // No colon at all -- no tag specified
+          // No colon at all, no tag specified
           const pos = getNodeLine(item.key, ctx.lineCounter);
           violations.push({
             ruleId: 'CV-C014',
@@ -51,7 +51,7 @@ export const CVC014: ComposeLintRule = {
             message: `Service '${serviceName}' uses image '${imageStr}' without a specific version tag.`,
           });
         } else {
-          // Has a colon -- check if the tag portion is "latest"
+          // Has a colon, check if the tag portion is "latest"
           // Handle registry URLs with port: registry.example.com:5000/repo:latest
           // Only consider the part after the last colon as the tag if it doesn't contain /
           const afterColon = imageStr.slice(colonIdx + 1);

@@ -13,7 +13,7 @@ export const CVB006: ComposeLintRule = {
   category: 'best-practice',
   explanation:
     'The top-level "version" field was used in Docker Compose V1 to specify the Compose file ' +
-    'format version. Docker Compose V2 no longer requires or uses this field -- it is silently ' +
+    'format version. Docker Compose V2 no longer requires or uses this field. It is silently ' +
     'ignored. Keeping it adds confusion and suggests the file targets an older format.',
   fix: {
     description: 'Remove the top-level version field entirely',

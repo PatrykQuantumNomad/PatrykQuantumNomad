@@ -66,7 +66,7 @@ export const CVM014: ComposeLintRule = {
       }
     }
 
-    // Compare ports from DIFFERENT services -- M014 handles range overlaps only
+    // Compare ports from DIFFERENT services; M014 handles range overlaps only
     for (let i = 0; i < allPorts.length; i++) {
       for (let j = i + 1; j < allPorts.length; j++) {
         const a = allPorts[i];

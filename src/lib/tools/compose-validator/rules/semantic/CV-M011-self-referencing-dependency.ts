@@ -10,7 +10,7 @@ export const CVM011: ComposeLintRule = {
   category: 'semantic',
   explanation:
     'A service lists itself in its own depends_on declaration. A service cannot depend on ' +
-    'itself -- this creates an impossible startup condition. Docker Compose will reject ' +
+    'itself. This creates an impossible startup condition. Docker Compose will reject ' +
     'the file with a dependency resolution error. Remove the self-reference from depends_on.',
   fix: {
     description: 'Remove the self-referencing entry from depends_on.',

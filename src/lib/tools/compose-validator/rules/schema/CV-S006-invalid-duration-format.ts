@@ -7,7 +7,7 @@ export const CVS006: SchemaRuleMetadata = {
   category: 'schema',
   explanation:
     'Healthcheck fields (interval, timeout, start_period, start_interval) and stop_grace_period ' +
-    'accept Docker duration format: a sequence of decimal numbers with unit suffixes -- "us" ' +
+    'accept Docker duration format: a sequence of decimal numbers with unit suffixes such as "us" ' +
     '(microseconds), "ms" (milliseconds), "s" (seconds), "m" (minutes), "h" (hours). Examples: ' +
     '"30s", "5m", "1h30m", "2h30m15s". ISO 8601 durations (e.g., "PT30S") are also accepted. ' +
     'A common mistake is using a bare integer without a unit suffix (e.g., 30 instead of "30s"), ' +

@@ -2,6 +2,7 @@
 import { Code as AstroCode } from 'astro:components';
 import Layout from '../../../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../../../components/BreadcrumbJsonLd.astro';
+import FAQPageJsonLd from '../../../../components/FAQPageJsonLd.astro';
 import { allRules } from '../../../../lib/tools/dockerfile-analyzer/rules/index';
 import { getRelatedRules } from '../../../../lib/tools/dockerfile-analyzer/rules/related';
 import type { LintRule, RuleSeverity, RuleCategory } from '../../../../lib/tools/dockerfile-analyzer/types';
@@ -54,6 +55,16 @@ const pageUrl = new URL(`/tools/dockerfile-analyzer/rules/${rule.id.toLowerCase(
     { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
     { name: 'Dockerfile Analyzer', url: 'https://patrykgolabek.dev/tools/dockerfile-analyzer/' },
     { name: rule.id, url: pageUrl },
+  ]} />
+  <FAQPageJsonLd items={[
+    {
+      question: `What does Dockerfile rule ${rule.id} mean?`,
+      answer: rule.explanation,
+    },
+    {
+      question: `How do I fix ${rule.id} (${rule.title}) in my Dockerfile?`,
+      answer: rule.fix.description,
+    },
   ]} />
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 

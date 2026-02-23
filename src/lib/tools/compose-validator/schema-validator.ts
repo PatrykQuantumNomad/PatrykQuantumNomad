@@ -1,9 +1,11 @@
-import type { ErrorObject } from 'ajv';
+import type { ErrorObject, ValidateFunction } from 'ajv';
 import type { Document, LineCounter } from 'yaml';
 
 // Pre-compiled standalone Ajv validator (no `new Function()` at runtime).
 // Regenerate with: node scripts/compile-compose-schema.mjs
-import { validate } from './validate-compose.js';
+import { validate as _validate } from './validate-compose.js';
+
+const validate = _validate as ValidateFunction;
 import { resolveInstancePath, getNodeLine } from './parser';
 import type { ComposeRuleViolation } from './types';
 
@@ -32,7 +34,7 @@ export function categorizeSchemaErrors(
   doc: Document,
   lineCounter: LineCounter,
 ): ComposeRuleViolation[] {
-  const raw: ComposeRuleViolation[] = [];
+  const raw: { violation: ComposeRuleViolation; instancePath: string }[] = [];
 
   // Track which instancePaths have been categorised into a specific rule
   // so we can suppress fallback duplicates later.
@@ -41,7 +43,7 @@ export function categorizeSchemaErrors(
   for (const error of errors) {
     const categorised = categoriseSingleError(error, doc, lineCounter);
     if (categorised) {
-      raw.push(categorised);
+      raw.push({ violation: categorised, instancePath: error.instancePath });
       if (categorised.ruleId !== 'CV-S002') {
         specificPaths.add(error.instancePath);
       }
@@ -52,18 +54,12 @@ export function categorizeSchemaErrors(
   // If any error at a given instancePath was categorised into a specific
   // rule (CV-S004, CV-S005, CV-S008, etc.), remove fallback CV-S002 errors
   // at the same path to avoid noisy duplicates.
-  const filtered = raw.filter((v) => {
-    if (v.ruleId !== 'CV-S002') return true;
-    // Check if a specific rule already covers a parent or exact path
-    for (const sp of specificPaths) {
-      if (v.message === humanizeAjvErrorByParts(v)) continue; // keep truly unique fallbacks
-      // If the violation's instancePath (embedded via line) maps to the same
-      // conceptual location as a specific-path rule, suppress it.
-      // We use a simpler heuristic: if any specific path starts with or equals
-      // the error's instancePath, suppress the fallback.
-    }
-    return true;
-  });
+  const filtered = raw
+    .filter(({ violation, instancePath }) => {
+      if (violation.ruleId !== 'CV-S002') return true;
+      return !specificPaths.has(instancePath);
+    })
+    .map(({ violation }) => violation);
 
   // ── Deduplication ────────────────────────────────────────────────
   // Multiple ajv errors can map to the same rule + line + message.
@@ -118,7 +114,7 @@ function categoriseSingleError(
 
   // ── CV-S003: Unknown service property ────────────────────────────
   if (keyword === 'additionalProperties' && SERVICE_PATH_RE.test(instancePath)) {
-    const serviceName = instancePath.match(SERVICE_PATH_RE)?.[1] ?? 'unknown';
+    const serviceName = SERVICE_PATH_RE.exec(instancePath)?.[1] ?? 'unknown';
     const prop = (params as Record<string, unknown>).additionalProperty as string;
     return {
       ruleId: 'CV-S003',
@@ -245,12 +241,4 @@ export function humanizeAjvError(error: ErrorObject): string {
       return cleaned.charAt(0).toUpperCase() + cleaned.slice(1) + '.';
     }
   }
-}
-
-/**
- * Stub used only for type-level reference in suppression logic.
- * Returns the humanized message from the violation's own data.
- */
-function humanizeAjvErrorByParts(_violation: ComposeRuleViolation): string {
-  return '';
 }

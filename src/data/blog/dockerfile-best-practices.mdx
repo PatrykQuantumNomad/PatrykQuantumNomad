@@ -1,5 +1,5 @@
 ---
-title: "Dockerfile Best Practices From a Kubernetes Architect"
+title: "Dockerfile Best Practices"
 description: "A production-tested guide to writing secure, efficient, and maintainable Dockerfiles. Each rule explained with real-world consequences and fix examples. Try the free browser-based analyzer."
 publishedDate: 2026-02-21
 tags: ["docker", "kubernetes", "devops", "cloud-native", "security", "containers"]
@@ -13,7 +13,7 @@ import Callout from '../../components/blog/Callout.astro';
 
 <OpeningStatement>Most Dockerfiles in production right now have at least three preventable issues. I built a tool to find all of them.</OpeningStatement>
 
-After 17 years building cloud-native systems and adopting Kubernetes before it hit version 1.0, I have reviewed thousands of Dockerfiles. They come in pull requests, in vendor evaluations, in incident post-mortems where a bloated or misconfigured image was the root cause. The patterns repeat: hardcoded secrets in `ENV`, images running as root, 900 MB images that should be 90 MB, `CMD` instructions that silently swallow signals. Each of these is a production incident waiting to happen.
+After 17 years building cloud-native systems, I have reviewed thousands of Dockerfiles. They come in pull requests, in vendor evaluations, in incident post-mortems where a bloated or misconfigured image was the root cause. The patterns repeat: hardcoded secrets in `ENV`, images running as root, 900 MB images that should be 90 MB, `CMD` instructions that silently swallow signals. Each of these is a production incident waiting to happen.
 
 I wrote the rules down. Then I turned them into an [analyzer you can run right now](/tools/dockerfile-analyzer/).
 
@@ -306,3 +306,7 @@ If you have made it this far, you know what good Dockerfiles look like. Now find
 The [Dockerfile Analyzer](/tools/dockerfile-analyzer/) is free, private, and instant. Paste your Dockerfile, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes before/after code examples and explanations of why the rule exists.
 
 I built this tool because I got tired of giving the same Dockerfile feedback in code reviews. If it saves you one production incident or one hour of debugging an image size problem, it was worth it.
+
+<Callout>
+**Running multiple containers?** Validate your docker-compose.yml with the [Docker Compose Validator](/tools/compose-validator/) -- 52 rules for schema, security, semantic, and best-practice analysis. Read the full guide: [Docker Compose Best Practices](/blog/docker-compose-best-practices/).
+</Callout>

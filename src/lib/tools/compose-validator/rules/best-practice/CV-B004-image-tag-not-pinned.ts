@@ -55,14 +55,14 @@ export const CVB004: ComposeLintRule = {
 
         // Extract tag portion
         const colonIdx = imageStr.lastIndexOf(':');
-        if (colonIdx === -1) continue; // No tag at all -- handled by CV-C014
+        if (colonIdx === -1) continue; // No tag at all, handled by CV-C014
 
         const tag = imageStr.slice(colonIdx + 1);
 
         // Skip if tag contains / (it's a registry port, not a tag)
         if (tag.includes('/')) continue;
 
-        // Skip "latest" -- handled by CV-C014
+        // Skip "latest", handled by CV-C014
         if (tag === 'latest') continue;
 
         if (MUTABLE_TAGS.has(tag.toLowerCase())) {

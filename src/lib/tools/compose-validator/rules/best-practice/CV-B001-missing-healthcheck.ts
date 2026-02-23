@@ -54,7 +54,7 @@ export const CVB001: ComposeLintRule = {
         }
       }
 
-      // Skip services with explicit healthcheck (even disabled ones -- that's an opt-out)
+      // Skip services with explicit healthcheck (even disabled ones, that is an opt-out)
       if (hasHealthcheck) continue;
 
       const serviceNameNode = findServiceNameNode(ctx, serviceName);

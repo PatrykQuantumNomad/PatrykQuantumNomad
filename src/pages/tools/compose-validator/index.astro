@@ -7,9 +7,9 @@ import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 
 <Layout
   title="Docker Compose Validator | Patryk Golabek"
-  description="Free Docker Compose validator and best-practice analyzer by a Kubernetes architect. 52 rules across schema, semantic, security, best-practice, and style categories. 100% browser-based -- your code never leaves your device."
+  description="Free Docker Compose validator and best-practice analyzer by a Kubernetes architect. 52 rules across schema, semantic, security, best-practice, and style categories. 100% browser-based. Your code never leaves your device."
   ogImage={new URL('/open-graph/tools/compose-validator.png', Astro.site).toString()}
-  ogImageAlt="Docker Compose Validator -- browser-based compose file linter with 52 rules across schema, security, semantic, best-practice, and style categories"
+  ogImageAlt="Docker Compose Validator: browser-based compose file linter with 52 rules across schema, security, semantic, best-practice, and style categories"
 >
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]">
@@ -33,6 +33,112 @@ import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
           individual rule documentation
         </a>.
       </p>
+    </aside>
+
+    <aside class="mt-6 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))]">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex-1">
+          <h2 class="text-base font-heading font-semibold text-[var(--color-text-primary)] mb-1">
+            Claude Skill: Compose Validator
+          </h2>
+          <p class="text-sm text-[var(--color-text-secondary)]">
+            Download this validator as a
+            <a href="https://docs.anthropic.com/en/docs/claude-code/skills" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">Claude Skill</a>
+            to run the same 52-rule analysis directly inside Claude Code, Claude Desktop, or Claude.ai.
+            The skill applies identical rules, scoring, and fix recommendations.
+          </p>
+        </div>
+        <a
+          href="/skills/compose-validator/SKILL.md"
+          download="SKILL.md"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all whitespace-nowrap
+            bg-[var(--color-accent)] text-white
+            hover:brightness-110 hover:shadow-lg
+            active:brightness-95
+            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download Skill
+        </a>
+      </div>
+      <details class="mt-3">
+        <summary class="text-xs text-[var(--color-text-secondary)] cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
+          Installation instructions
+        </summary>
+        <ol class="mt-2 text-xs text-[var(--color-text-secondary)] list-decimal list-inside space-y-1">
+          <li>Create a folder named <code class="bg-white/10 px-1 py-0.5 rounded">compose-validator</code> and place <code class="bg-white/10 px-1 py-0.5 rounded">SKILL.md</code> inside it</li>
+          <li><strong>Claude Code:</strong> Move the folder to <code class="bg-white/10 px-1 py-0.5 rounded">~/.claude/skills/</code></li>
+          <li><strong>Claude Desktop:</strong> Go to Settings &rarr; Capabilities &rarr; Skills, then upload the folder</li>
+          <li><strong>Claude.ai:</strong> Go to Settings &rarr; Capabilities &rarr; Skills, then upload the folder</li>
+        </ol>
+      </details>
+    </aside>
+
+    <aside class="mt-6 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))]">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex-1">
+          <h2 class="text-base font-heading font-semibold text-[var(--color-text-primary)] mb-1">
+            Claude Code Hook: Auto-validate Docker Compose
+          </h2>
+          <p class="text-sm text-[var(--color-text-secondary)]">
+            A
+            <a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">Claude Code hook</a>
+            that automatically validates Docker Compose files every time Claude edits or creates one.
+            Catches critical security, semantic, and best-practice issues and feeds them back to Claude for immediate fixes.
+          </p>
+        </div>
+        <a
+          href="/skills/compose-validator/hooks/validate-compose.sh"
+          download="validate-compose.sh"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all whitespace-nowrap
+            bg-[var(--color-accent)] text-white
+            hover:brightness-110 hover:shadow-lg
+            active:brightness-95
+            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download Hook
+        </a>
+      </div>
+      <details class="mt-3">
+        <summary class="text-xs text-[var(--color-text-secondary)] cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
+          Installation instructions
+        </summary>
+        <div class="mt-2 text-xs text-[var(--color-text-secondary)] space-y-3">
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Save the script to <code class="bg-white/10 px-1 py-0.5 rounded">.claude/hooks/validate-compose.sh</code> in your project</li>
+            <li>Make it executable: <code class="bg-white/10 px-1 py-0.5 rounded">chmod +x .claude/hooks/validate-compose.sh</code></li>
+            <li>Add this hook config to <code class="bg-white/10 px-1 py-0.5 rounded">.claude/settings.json</code>:</li>
+          </ol>
+          <pre class="bg-black/30 rounded-lg p-3 overflow-x-auto text-[11px] leading-relaxed"><code set:html={`{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\\"$CLAUDE_PROJECT_DIR\\"/.claude/hooks/validate-compose.sh"
+          }
+        ]
+      }
+    ]
+  }
+}`} /></pre>
+          <p class="text-[var(--color-text-secondary)]">
+            Requires <code class="bg-white/10 px-1 py-0.5 rounded">jq</code> for JSON parsing.
+            The hook silently skips non-Compose files and only reports violations.
+          </p>
+        </div>
+      </details>
     </aside>
   </section>
 

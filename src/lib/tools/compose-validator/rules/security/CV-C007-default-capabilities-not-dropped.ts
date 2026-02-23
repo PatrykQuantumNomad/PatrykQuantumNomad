@@ -49,7 +49,7 @@ export const CVC007: ComposeLintRule = {
       }
 
       if (!hasCapDropAll) {
-        // Report on the service name node -- find it in the parent services map
+        // Report on the service name node; find it in the parent services map
         const serviceNameNode = findServiceNameNode(ctx, serviceName);
         const pos = getNodeLine(serviceNameNode, ctx.lineCounter);
         violations.push({

@@ -181,8 +181,8 @@ export function resolveInstancePath(doc: Document, path: string): any {
         return null;
       }
     } else if (isSeq(current)) {
-      const index = parseInt(segment, 10);
-      if (isNaN(index) || index < 0 || index >= current.items.length) {
+      const index = Number.parseInt(segment, 10);
+      if (Number.isNaN(index) || index < 0 || index >= current.items.length) {
         return null;
       }
       current = current.items[index];

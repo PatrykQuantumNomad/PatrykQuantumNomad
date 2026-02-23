@@ -9,7 +9,7 @@ import { CVS006 } from './CV-S006-invalid-duration-format';
 import { CVS007 } from './CV-S007-invalid-restart-policy';
 import { CVS008 } from './CV-S008-invalid-depends-on-condition';
 
-// Schema rule registry -- all 8 schema rules exported as a flat array
+// Schema rule registry: all 8 schema rules exported as a flat array
 export const schemaRules: SchemaRuleMetadata[] = [
   CVS001,
   CVS002,

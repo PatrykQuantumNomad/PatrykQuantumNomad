@@ -14,7 +14,7 @@ export const CVB008: ComposeLintRule = {
   explanation:
     'When a service specifies both "build" and "image", Docker Compose builds the image from ' +
     'the Dockerfile and tags it with the "image" name. While this is valid, it can cause ' +
-    'confusion -- developers may expect "image" to pull a pre-built image, not realize a ' +
+    'confusion. Developers may expect "image" to pull a pre-built image, not realize a ' +
     'local build occurs, or accidentally push locally-built images to a registry.',
   fix: {
     description:

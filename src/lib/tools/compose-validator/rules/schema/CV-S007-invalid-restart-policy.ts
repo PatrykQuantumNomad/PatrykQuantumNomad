@@ -6,7 +6,7 @@ export const CVS007: SchemaRuleMetadata = {
   severity: 'error',
   category: 'schema',
   explanation:
-    'Docker Compose supports exactly four restart policies: "no" (default -- container does ' +
+    'Docker Compose supports exactly four restart policies: "no" (the default, container does ' +
     'not restart automatically), "always" (always restarts on exit regardless of exit code), ' +
     '"on-failure" (restarts only on non-zero exit code), and "unless-stopped" (restarts on ' +
     'exit unless the container was explicitly stopped). Common mistakes include using "never" ' +

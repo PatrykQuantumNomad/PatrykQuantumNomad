@@ -19,7 +19,7 @@ export interface ComposeRuleFix {
   afterCode: string;
 }
 
-// The rule interface -- one per rule file
+// The rule interface, one per rule file
 export interface ComposeLintRule {
   id: string;
   title: string;
@@ -95,7 +95,7 @@ export interface ComposeAnalysisResult {
   timestamp: number;
 }
 
-// Schema rule metadata (no check method -- ajv drives validation, not per-rule check() calls)
+// Schema rule metadata (no check method; ajv drives validation, not per-rule check() calls)
 export interface SchemaRuleMetadata {
   id: string;
   title: string;

@@ -14,7 +14,7 @@ export const CVB012: ComposeLintRule = {
     'When no custom networks are defined, all services share the default bridge network. ' +
     'With multiple services, this means every container can reach every other container, ' +
     'which violates the principle of least privilege for network access. Custom networks ' +
-    'enable micro-segmentation -- only services that need to communicate share a network.',
+    'enable micro-segmentation so that only services that need to communicate share a network.',
   fix: {
     description:
       'Define custom networks for logical grouping and isolate services that should not communicate directly',
@@ -45,7 +45,7 @@ export const CVB012: ComposeLintRule = {
       }
     }
 
-    // Report on line 1 -- this is a file-level issue
+    // Report on line 1 (file-level issue)
     violations.push({
       ruleId: 'CV-B012',
       line: 1,

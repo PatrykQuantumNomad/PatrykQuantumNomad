@@ -69,7 +69,7 @@ export const CVM001: ComposeLintRule = {
       }
     }
 
-    // Compare ports from DIFFERENT services -- M001 handles single-port conflicts only
+    // Compare ports from DIFFERENT services; M001 handles single-port conflicts only
     for (let i = 0; i < allPorts.length; i++) {
       for (let j = i + 1; j < allPorts.length; j++) {
         const a = allPorts[i];

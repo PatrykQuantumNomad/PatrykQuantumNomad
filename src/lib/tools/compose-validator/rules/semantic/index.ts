@@ -16,7 +16,7 @@ import { CVM013 } from './CV-M013-duplicate-container-names';
 import { CVM014 } from './CV-M014-port-range-overlap';
 import { CVM015 } from './CV-M015-invalid-image-reference';
 
-// Semantic rule registry -- all 15 semantic rules exported as a flat array
+// Semantic rule registry: all 15 semantic rules exported as a flat array
 export const semanticRules: ComposeLintRule[] = [
   CVM001,
   CVM002,

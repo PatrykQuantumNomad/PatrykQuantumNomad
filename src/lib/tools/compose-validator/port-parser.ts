@@ -23,12 +23,12 @@ export interface ParsedPort {
 function parseRange(s: string): { start: number; end?: number } | null {
   const dashIdx = s.indexOf('-');
   if (dashIdx === -1) {
-    const n = parseInt(s, 10);
-    return isNaN(n) ? null : { start: n };
+    const n = Number.parseInt(s, 10);
+    return Number.isNaN(n) ? null : { start: n };
   }
-  const start = parseInt(s.slice(0, dashIdx), 10);
-  const end = parseInt(s.slice(dashIdx + 1), 10);
-  if (isNaN(start) || isNaN(end)) return null;
+  const start = Number.parseInt(s.slice(0, dashIdx), 10);
+  const end = Number.parseInt(s.slice(dashIdx + 1), 10);
+  if (Number.isNaN(start) || Number.isNaN(end)) return null;
   return { start, end };
 }
 
@@ -69,7 +69,7 @@ export function parsePortString(port: string): ParsedPort | null {
   }
 
   if (parts.length === 2) {
-    // host:container -- "8080:80" or "8000-8010:8000-8010"
+    // host:container, e.g. "8080:80" or "8000-8010:8000-8010"
     const host = parseRange(parts[0]);
     const container = parseRange(parts[1]);
     if (!host || !container) return null;
@@ -133,8 +133,8 @@ export function parseLongSyntaxPort(portMap: any): ParsedPort | null {
   const target = portMap.target;
   if (target === undefined || target === null) return null;
 
-  const containerPort = typeof target === 'number' ? target : parseInt(String(target), 10);
-  if (isNaN(containerPort)) return null;
+  const containerPort = typeof target === 'number' ? target : Number.parseInt(String(target), 10);
+  if (Number.isNaN(containerPort)) return null;
 
   const protocol: 'tcp' | 'udp' =
     portMap.protocol === 'udp' ? 'udp' : 'tcp';
@@ -148,16 +148,16 @@ export function parseLongSyntaxPort(portMap: any): ParsedPort | null {
   if (portMap.published !== undefined && portMap.published !== null) {
     const pubStr = String(portMap.published);
     const dashIdx = pubStr.indexOf('-');
-    if (dashIdx !== -1) {
-      result.hostPort = parseInt(pubStr.slice(0, dashIdx), 10);
-      result.hostPortEnd = parseInt(pubStr.slice(dashIdx + 1), 10);
-    } else {
+    if (dashIdx === -1) {
       const pub = typeof portMap.published === 'number'
         ? portMap.published
-        : parseInt(pubStr, 10);
-      if (!isNaN(pub)) {
+        : Number.parseInt(pubStr, 10);
+      if (!Number.isNaN(pub)) {
         result.hostPort = pub;
       }
+    } else {
+      result.hostPort = Number.parseInt(pubStr.slice(0, dashIdx), 10);
+      result.hostPortEnd = Number.parseInt(pubStr.slice(dashIdx + 1), 10);
     }
   }
 

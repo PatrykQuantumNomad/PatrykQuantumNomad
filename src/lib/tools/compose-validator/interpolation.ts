@@ -2,15 +2,15 @@
  * Variable interpolation detection and normalization for Docker Compose.
  *
  * Docker Compose supports shell-style variable interpolation:
- *   ${VAR:-default}  -- use default if VAR is unset or empty
- *   ${VAR-default}   -- use default if VAR is unset
- *   ${VAR:+replacement} -- use replacement if VAR is set and non-empty
- *   ${VAR+replacement}  -- use replacement if VAR is set
- *   ${VAR:?error}    -- error if VAR is unset or empty
- *   ${VAR?error}     -- error if VAR is unset
- *   ${VAR}           -- substitute variable value
- *   $VAR             -- substitute variable value (short form)
- *   $$               -- literal dollar sign escape
+ *   ${VAR:-default}     use default if VAR is unset or empty
+ *   ${VAR-default}      use default if VAR is unset
+ *   ${VAR:+replacement} use replacement if VAR is set and non-empty
+ *   ${VAR+replacement}  use replacement if VAR is set
+ *   ${VAR:?error}       error if VAR is unset or empty
+ *   ${VAR?error}        error if VAR is unset
+ *   ${VAR}              substitute variable value
+ *   $VAR               substitute variable value (short form)
+ *   $$                 literal dollar sign escape
  *
  * The normalizer replaces interpolation patterns with concrete values
  * so that JSON Schema validation (ajv) does not produce false positives.
@@ -19,7 +19,7 @@
  */
 
 // Regex to detect any interpolation pattern in a string
-const INTERPOLATION_REGEX = /\$\$|\$\{[^}]+\}|\$[A-Za-z_][A-Za-z0-9_]*/;
+const INTERPOLATION_REGEX = /\$\$|\$\{[^}]+\}|\$[A-Za-z_]\w*/;
 
 /**
  * Test whether a string contains Docker Compose variable interpolation.
@@ -43,47 +43,47 @@ export function normalizeInterpolation(value: string): string {
   let result = value;
 
   // 1. Literal dollar escape: $$ -> $
-  result = result.replace(/\$\$/g, '$');
+  result = result.replaceAll('$$', '$');
 
   // 2. Default value patterns: ${VAR:-default} and ${VAR-default}
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*:-([^}]*)\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*:-([^}]*)\}/g,
     '$1',
   );
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*-([^}]*)\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*-([^}]*)\}/g,
     '$1',
   );
 
   // 3. Replacement patterns: ${VAR:+replacement} and ${VAR+replacement}
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*:\+([^}]*)\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*:\+([^}]*)\}/g,
     '$1',
   );
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*\+([^}]*)\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*\+([^}]*)\}/g,
     '$1',
   );
 
   // 4. Error patterns: ${VAR:?error} and ${VAR?error} -> placeholder
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*:\?[^}]*\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*:\?[^}]*\}/g,
     'placeholder',
   );
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*\?[^}]*\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*\?[^}]*\}/g,
     'placeholder',
   );
 
   // 5. Bare braced variable: ${VAR} -> placeholder
-  result = result.replace(
-    /\$\{[A-Za-z_][A-Za-z0-9_]*\}/g,
+  result = result.replaceAll(
+    /\$\{[A-Za-z_]\w*\}/g,
     'placeholder',
   );
 
   // 6. Bare variable: $VAR -> placeholder
-  result = result.replace(
-    /\$[A-Za-z_][A-Za-z0-9_]*/g,
+  result = result.replaceAll(
+    /\$[A-Za-z_]\w*/g,
     'placeholder',
   );
 

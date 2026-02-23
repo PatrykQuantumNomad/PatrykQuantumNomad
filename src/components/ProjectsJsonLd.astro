@@ -13,7 +13,9 @@ const schemas = projects.map((project) => ({
   "applicationCategory": project.category,
   "author": {
     "@type": "Person",
-    "@id": "https://patrykgolabek.dev/#person"
+    "@id": "https://patrykgolabek.dev/#person",
+    "name": "Patryk Golabek",
+    "url": "https://patrykgolabek.dev/",
   },
   ...(project.liveUrl && { "installUrl": project.liveUrl }),
 }));

@@ -2,6 +2,7 @@
 import { Code as AstroCode } from 'astro:components';
 import Layout from '../../../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../../../components/BreadcrumbJsonLd.astro';
+import FAQPageJsonLd from '../../../../components/FAQPageJsonLd.astro';
 import { allDocumentedRules } from '../../../../lib/tools/compose-validator/rules/index';
 import { getRelatedComposeRules } from '../../../../lib/tools/compose-validator/rules/related';
 import type { ComposeSeverity, ComposeCategory } from '../../../../lib/tools/compose-validator/types';
@@ -41,7 +42,7 @@ const severityColor: Record<ComposeSeverity, { bg: string; text: string }> = {
   info: { bg: 'bg-blue-100', text: 'text-blue-700' },
 };
 
-const pageTitle = `${rule.id}: ${rule.title} -- Docker Compose Validator`;
+const pageTitle = `${rule.id}: ${rule.title} | Docker Compose Validator`;
 const truncatedExplanation = rule.explanation.length > 155
   ? rule.explanation.slice(0, 155) + '...'
   : rule.explanation;
@@ -55,6 +56,16 @@ const pageUrl = new URL(`/tools/compose-validator/rules/${rule.id.toLowerCase()}
     { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
     { name: 'Compose Validator', url: 'https://patrykgolabek.dev/tools/compose-validator/' },
     { name: rule.id, url: pageUrl },
+  ]} />
+  <FAQPageJsonLd items={[
+    {
+      question: `What does Docker Compose rule ${rule.id} mean?`,
+      answer: rule.explanation,
+    },
+    {
+      question: `How do I fix ${rule.id} (${rule.title}) in my docker-compose.yml?`,
+      answer: rule.fix.description,
+    },
   ]} />
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
@@ -154,6 +165,12 @@ const pageUrl = new URL(`/tools/compose-validator/rules/${rule.id.toLowerCase()}
         class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium"
       >
         &larr; Try the Compose Validator
+      </a>
+      <a
+        href="/blog/docker-compose-best-practices/"
+        class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium"
+      >
+        Read the best practices guide &rarr;
       </a>
     </footer>
   </article>

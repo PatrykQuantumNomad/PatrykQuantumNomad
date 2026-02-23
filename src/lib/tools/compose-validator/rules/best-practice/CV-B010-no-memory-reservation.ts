@@ -14,7 +14,7 @@ export const CVB010: ComposeLintRule = {
   explanation:
     'When a container has memory limits but no memory reservation, the scheduler cannot ' +
     'differentiate between the minimum memory needed to function and the maximum allowed. ' +
-    'Memory reservations enable graceful scheduling -- the orchestrator guarantees the ' +
+    'Memory reservations enable graceful scheduling: the orchestrator guarantees the ' +
     'reserved amount and allows bursting up to the limit when resources are available.',
   fix: {
     description:

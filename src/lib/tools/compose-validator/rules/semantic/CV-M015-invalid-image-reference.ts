@@ -6,7 +6,7 @@ import { getNodeLine } from '../../parser';
  * Simplified OCI image reference regex.
  *
  * Matches: registry/repo:tag, repo:tag, repo@sha256:..., multi-level paths.
- * Intentionally simplified -- catches obviously invalid references (spaces,
+ * Intentionally simplified: catches obviously invalid references (spaces,
  * uppercase repo names, invalid characters) without enforcing every OCI rule.
  *
  * Components:

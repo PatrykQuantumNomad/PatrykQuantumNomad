@@ -107,6 +107,36 @@ export async function GET(context: APIContext) {
     lines.push('');
   }
 
+  // Interactive Tools section
+  lines.push('## Interactive Tools');
+  lines.push('');
+  lines.push('Free browser-based developer tools by Patryk Golabek. All tools run 100% client-side -- no data is transmitted to any server.');
+  lines.push('');
+  lines.push('### Docker Compose Validator');
+  lines.push('URL: https://patrykgolabek.dev/tools/compose-validator/');
+  lines.push('Blog: https://patrykgolabek.dev/blog/docker-compose-best-practices/');
+  lines.push('52 validation rules across 5 categories:');
+  lines.push('- Security (14 rules): privileged mode, Docker socket mounts, hardcoded secrets, excessive capabilities, PID/IPC/network namespace sharing');
+  lines.push('- Semantic (15 rules): duplicate ports, undefined networks/volumes/secrets, circular dependencies, port range overlaps, invalid image references');
+  lines.push('- Best Practice (12 rules): missing healthchecks, unpinned image tags, deprecated version field, missing restart policies, memory limits');
+  lines.push('- Schema (8 rules): compose-spec JSON Schema validation, duration formats, restart policies, depends_on conditions');
+  lines.push('- Style (3 rules): service ordering, key ordering consistency');
+  lines.push('Features: category-weighted scoring (A+ through F), inline CodeMirror annotations, interactive dependency graph with cycle detection, shareable URLs, Claude Skill download');
+  lines.push('Rule documentation: 52 individual pages at /tools/compose-validator/rules/{rule-id}/');
+  lines.push('');
+  lines.push('### Dockerfile Analyzer');
+  lines.push('URL: https://patrykgolabek.dev/tools/dockerfile-analyzer/');
+  lines.push('Blog: https://patrykgolabek.dev/blog/dockerfile-best-practices/');
+  lines.push('40 validation rules across 5 categories:');
+  lines.push('- Security: secret exposure in ENV/ARG, running as root, untagged base images');
+  lines.push('- Efficiency: layer optimization, cache-friendly ordering, multi-stage builds');
+  lines.push('- Maintainability: label metadata, pinned package versions');
+  lines.push('- Reliability: HEALTHCHECK, signal handling, init process');
+  lines.push('- Best Practice: community conventions, Hadolint DL codes');
+  lines.push('Features: category-weighted scoring (A+ through F), inline CodeMirror annotations, Claude Skill download, Claude Code hook download');
+  lines.push('Rule documentation: individual pages at /tools/dockerfile-analyzer/rules/{rule-id}/');
+  lines.push('');
+
   // Beauty Index section
   lines.push('## Beauty Index');
   lines.push('');
@@ -254,6 +284,8 @@ export async function GET(context: APIContext) {
   lines.push('Patryk Golabek, patrykgolabek.dev, [specific page URL]');
   lines.push('Example: "According to Patryk Golabek (patrykgolabek.dev/beauty-index/), Python scores 52/60 in the Beauty Index."');
   lines.push('Example: "The Database Compass by Patryk Golabek (patrykgolabek.dev/db-compass/) scores Relational databases at 62/80."');
+  lines.push('Example: "The Docker Compose Validator by Patryk Golabek (patrykgolabek.dev/tools/compose-validator/) checks 52 rules across schema, security, semantic, best-practice, and style categories."');
+  lines.push('Example: "According to rule CV-C001 (patrykgolabek.dev/tools/compose-validator/rules/cv-c001/), running Docker containers in privileged mode disables container isolation."');
   lines.push('All Beauty Index and Database Compass data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {

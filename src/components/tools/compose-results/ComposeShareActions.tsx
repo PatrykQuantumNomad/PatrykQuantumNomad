@@ -9,6 +9,7 @@ import {
   buildShareUrl,
   isUrlSafeLength,
 } from '../../../lib/tools/compose-validator/url-state';
+import { ComposePromptGenerator } from './ComposePromptGenerator';
 
 export function ComposeShareActions() {
   const result = useStore(composeResult);
@@ -40,7 +41,7 @@ export function ComposeShareActions() {
     const { safe, length } = isUrlSafeLength(content);
     if (!safe) {
       setUrlWarning(
-        `URL is ${length.toLocaleString()} chars -- may be truncated on some platforms`,
+        `URL is ${length.toLocaleString()} chars and may be truncated on some platforms`,
       );
     } else {
       setUrlWarning(null);
@@ -57,9 +58,9 @@ export function ComposeShareActions() {
         });
         return;
       } catch (err) {
-        // User cancelled -- silently return
+        // User cancelled; silently return
         if (err instanceof Error && err.name === 'AbortError') return;
-        // Other error -- fall through to clipboard
+        // Other error: fall through to clipboard
       }
     }
 
@@ -71,7 +72,7 @@ export function ComposeShareActions() {
       setTimeout(() => setCopied(false), 2000);
       return;
     } catch {
-      // Clipboard unavailable -- fall through to prompt
+      // Clipboard unavailable: fall through to prompt
     }
 
     // Tier 3: Prompt fallback
@@ -112,6 +113,8 @@ export function ComposeShareActions() {
         </svg>
         {copied ? 'Copied!' : 'Share Link'}
       </button>
+
+      <ComposePromptGenerator />
 
       {urlWarning && (
         <p className="w-full text-xs text-amber-400 mt-1">{urlWarning}</p>

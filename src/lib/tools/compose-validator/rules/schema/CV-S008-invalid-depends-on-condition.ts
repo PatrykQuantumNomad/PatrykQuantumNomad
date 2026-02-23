@@ -7,7 +7,7 @@ export const CVS008: SchemaRuleMetadata = {
   category: 'schema',
   explanation:
     'The long-form depends_on syntax allows specifying startup conditions for service ' +
-    'dependencies. There are exactly three valid conditions: "service_started" (default -- ' +
+    'dependencies. There are exactly three valid conditions: "service_started" (the default, ' +
     'waits for the container to start), "service_healthy" (waits for the dependency\'s ' +
     'healthcheck to pass, which requires a healthcheck definition on the target service), ' +
     'and "service_completed_successfully" (waits for the dependency to exit with code 0, ' +
