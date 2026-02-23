@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 35: CodeMirror YAML Editor & Nanostores** - CodeMirror 6 editor with YAML highlighting, analyze trigger, sample file, and nanostore state management (completed 2026-02-22)
 - [x] **Phase 36: Results Panel & Dependency Graph** - Score gauge, category breakdown, violation list, tabbed results panel, and React Flow dependency graph with dagre layout (completed 2026-02-22)
 - [x] **Phase 37: Shareability & Badge Export** - Score badge PNG download, lz-string URL state encoding, and Web Share / Clipboard API sharing (completed 2026-02-22)
-- [ ] **Phase 38: Rule Documentation Pages** - 52 per-rule documentation pages with explanations, fix suggestions, before/after code, and SEO metadata
+- [x] **Phase 38: Rule Documentation Pages** - 52 per-rule documentation pages with explanations, fix suggestions, before/after code, and SEO metadata (completed 2026-02-23)
 - [ ] **Phase 39: Tool Page & Site Integration** - Astro tool page, header navigation, homepage callout, tools page card, JSON-LD structured data, breadcrumbs, and sitemap
 - [ ] **Phase 40: OG Images, Blog Post & Polish** - Build-time OG image, companion blog post with bidirectional cross-links
 
@@ -157,6 +157,6 @@ Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 | 35. CodeMirror YAML Editor & Nanostores | 2/2 | Complete | 2026-02-22 |
 | 36. Results Panel & Dependency Graph | 2/2 | Complete | 2026-02-22 |
 | 37. Shareability & Badge Export | 1/1 | Complete   | 2026-02-22 |
-| 38. Rule Documentation Pages | 0/1 | Not started | - |
+| 38. Rule Documentation Pages | 1/1 | Complete   | 2026-02-23 |
 | 39. Tool Page & Site Integration | 0/1 | Not started | - |
 | 40. OG Images, Blog Post & Polish | 0/2 | Not started | - |

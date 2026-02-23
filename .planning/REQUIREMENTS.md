@@ -129,10 +129,10 @@ Requirements for Docker Compose Validator milestone. Each maps to roadmap phases
 
 ### Rule Documentation
 
-- [ ] **DOC-01**: Per-rule documentation pages at /tools/compose-validator/rules/[code]
-- [ ] **DOC-02**: Each rule page includes: expert explanation, fix suggestion, before/after code, related rules
-- [ ] **DOC-03**: Rule pages generated via getStaticPaths from rule registry
-- [ ] **DOC-04**: SEO-optimized meta descriptions for each rule page
+- [x] **DOC-01**: Per-rule documentation pages at /tools/compose-validator/rules/[code]
+- [x] **DOC-02**: Each rule page includes: expert explanation, fix suggestion, before/after code, related rules
+- [x] **DOC-03**: Rule pages generated via getStaticPaths from rule registry
+- [x] **DOC-04**: SEO-optimized meta descriptions for each rule page
 
 ### Site Integration
 
@@ -274,10 +274,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHARE-01 | Phase 37 | Complete |
 | SHARE-02 | Phase 37 | Complete |
 | SHARE-03 | Phase 37 | Complete |
-| DOC-01 | Phase 38 | Pending |
-| DOC-02 | Phase 38 | Pending |
-| DOC-03 | Phase 38 | Pending |
-| DOC-04 | Phase 38 | Pending |
+| DOC-01 | Phase 38 | Complete |
+| DOC-02 | Phase 38 | Complete |
+| DOC-03 | Phase 38 | Complete |
+| DOC-04 | Phase 38 | Complete |
 | SITE-01 | Phase 39 | Pending |
 | SITE-02 | Phase 39 | Pending |
 | SITE-03 | Phase 39 | Pending |

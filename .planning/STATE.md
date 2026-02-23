@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.6 Docker Compose Validator - Phase 37 complete (Shareability & Badge Export)
+**Current focus:** v1.6 Docker Compose Validator - Phase 38 complete (Rule Documentation Pages)
 
 ## Current Position
 
-Phase: 37 of 40 (Shareability & Badge Export) -- COMPLETE
+Phase: 38 of 40 (Rule Documentation Pages) -- COMPLETE
 Plan: 1 of 1 complete in current phase
-Status: Phase 37 complete (all 3 requirements: SHARE-01, SHARE-02, SHARE-03)
-Last activity: 2026-02-22 -- Plan 37-01 complete (badge export, URL sharing, share actions)
+Status: Phase 38 complete (all 4 requirements: DOC-01, DOC-02, DOC-03, DOC-04)
+Last activity: 2026-02-22 -- Plan 38-01 complete (52 rule documentation pages, related rules, violation list links)
 
-Progress: [██████████] 100% (Phase 37 plan 1/1)
+Progress: [██████████] 100% (Phase 38 plan 1/1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 76 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 10 v1.6)
+- Total plans completed: 77 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 11 v1.6)
 
 **Cumulative Stats:**
 
@@ -41,6 +41,7 @@ Progress: [██████████] 100% (Phase 37 plan 1/1)
 | Phase 36 P01 | 4min | 2 tasks | 5 files |
 | Phase 36 P02 | 4min | 2 tasks | 8 files |
 | Phase 37 P01 | 3min | 2 tasks | 5 files |
+| Phase 38 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,7 +76,7 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - Line number clamping (Math.min(v.line, view.state.doc.lines)) prevents CodeMirror Position out of range crash
 - ComposeResultsPanel refactored from stub to tabbed panel with Violations and Dependency Graph tabs
 - Compose-specific wrapper components (ComposeCategoryBreakdown, ComposeViolationList, ComposeEmptyState) instead of extending shared Dockerfile components
-- Rule IDs rendered as plain span (no anchor) in ComposeViolationList -- compose rule pages created in Phase 38
+- Rule IDs rendered as anchor links in ComposeViolationList with stopPropagation to prevent details toggle (Phase 38)
 - Tab state via useState (UI-local) not nanostore since tab selection is component-local
 - Used @xyflow/react 12.x (scoped package) and @dagrejs/dagre 2.x (maintained fork) for dependency graph
 - Cycle-safe dagre layout: remove cycle edges before dagre.layout() to prevent infinite loops, recombine after
@@ -86,6 +87,9 @@ v1.0-v1.5 decisions archived in respective milestone files.
 - 3-tier share fallback: Web Share API (mobile) > Clipboard API (desktop) > prompt() (fallback) -- enhanced over Dockerfile pattern
 - #compose= hash prefix distinct from #dockerfile= to prevent cross-tool URL collision
 - No PromptGenerator in ComposeShareActions -- compose rules differ from Dockerfile rules, deferred to future phase
+- DocumentedRule interface unifies ComposeLintRule and SchemaRuleMetadata for page generation without requiring check() method
+- allDocumentedRules merges 44 custom + 8 schema rules via cast to DocumentedRule[] for 52-rule static path generation
+- Compose rule pages mirror Dockerfile Analyzer pattern: [code].astro with getStaticPaths from allDocumentedRules
 
 ### Pending Todos
 
@@ -108,6 +112,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 37-01-PLAN.md (badge export, URL sharing, share actions) -- Phase 37 complete
+Stopped at: Completed 38-01-PLAN.md (52 rule documentation pages, related rules, violation list links) -- Phase 38 complete
 Resume file: None
-Next: Phase 38 -- Rule Pages
+Next: Phase 39 -- Rules Index Page
