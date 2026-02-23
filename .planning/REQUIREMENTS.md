@@ -111,16 +111,16 @@
 - [x] **UI-03**: Analyze button triggers analysis cycle (on-demand, not real-time)
 - [x] **UI-04**: Keyboard shortcut Cmd/Ctrl+Enter to trigger analysis
 - [x] **UI-05**: Inline CodeMirror annotations — squiggly underlines + gutter severity markers
-- [ ] **UI-06**: Score gauge component (SVG circular gauge with letter grade)
+- [x] **UI-06**: Score gauge component (SVG circular gauge with letter grade)
 - [x] **UI-07**: Category breakdown panel with sub-scores per dimension
 - [x] **UI-08**: Violation list grouped by severity with expandable details
 - [x] **UI-09**: Click-to-navigate from results panel to corresponding editor line
 - [x] **UI-10**: Clean manifest empty state ("No issues found" with congratulatory message)
-- [ ] **UI-11**: Responsive layout — stacked on mobile, side-by-side on desktop
-- [ ] **UI-12**: React island with client:only="react" directive
+- [x] **UI-11**: Responsive layout — stacked on mobile, side-by-side on desktop
+- [x] **UI-12**: React island with client:only="react" directive
 - [x] **UI-13**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 - [x] **UI-14**: Nanostore bridge for CodeMirror-React state communication
-- [ ] **UI-15**: Tabbed results panel (Results | Graph)
+- [x] **UI-15**: Tabbed results panel (Results | Graph)
 - [x] **UI-16**: Resource summary panel showing parsed resource types and counts
 
 ## Resource Relationship Graph
@@ -254,16 +254,16 @@
 | UI-03 | Phase 45 | Complete |
 | UI-04 | Phase 45 | Complete |
 | UI-05 | Phase 45 | Complete |
-| UI-06 | Phase 45 | Pending |
+| UI-06 | Phase 45 | Complete |
 | UI-07 | Phase 45 | Complete |
 | UI-08 | Phase 45 | Complete |
 | UI-09 | Phase 45 | Complete |
 | UI-10 | Phase 45 | Complete |
-| UI-11 | Phase 45 | Pending |
-| UI-12 | Phase 45 | Pending |
+| UI-11 | Phase 45 | Complete |
+| UI-12 | Phase 45 | Complete |
 | UI-13 | Phase 45 | Complete |
 | UI-14 | Phase 45 | Complete |
-| UI-15 | Phase 45 | Pending |
+| UI-15 | Phase 45 | Complete |
 | UI-16 | Phase 45 | Complete |
 | SHARE-01 | Phase 45 | Complete |
 | SHARE-02 | Phase 45 | Complete |
