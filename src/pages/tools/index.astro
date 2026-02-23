@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 
 <Layout
   title="Tools | Patryk Golabek"
-  description="Free browser-based developer tools by a Kubernetes architect. Dockerfile analysis, Docker Compose validation, security analysis, and more. 100% client-side -- your code never leaves your device."
+  description="Free browser-based developer tools by a Kubernetes architect. Dockerfile analysis, Docker Compose validation, Kubernetes manifest analysis, and more. 100% client-side -- your code never leaves your device."
 >
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]" data-word-reveal>
@@ -68,6 +68,34 @@ import Layout from '../../layouts/Layout.astro';
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">52-rule engine</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Scoring &amp; grades</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Dependency graph</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Share links</li>
+        </ul>
+      </a>
+
+      <!-- Kubernetes Manifest Analyzer -->
+      <a
+        href="/tools/k8s-analyzer/"
+        class="block card-hover p-6 rounded-lg border border-[var(--color-border)] no-underline group"
+        data-reveal
+        data-tilt
+      >
+        <div class="mb-4 text-[var(--color-accent)]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-heading font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">
+          Kubernetes Manifest Analyzer
+        </h2>
+        <p class="meta-mono mt-1">Free Browser Tool</p>
+        <p class="text-sm text-[var(--color-text-secondary)] mt-3">
+          Analyze your Kubernetes manifests against 67 rules across schema, security, reliability,
+          best-practice, and cross-resource categories. Multi-document YAML support with resource dependency analysis.
+        </p>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">67-rule engine</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Scoring &amp; grades</li>
+          <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">PSS compliance</li>
           <li class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">Share links</li>
         </ul>
       </a>

@@ -1,0 +1,34 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import K8sAnalyzer from '../../../components/tools/K8sAnalyzer';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+---
+
+<Layout
+  title="Kubernetes Manifest Analyzer | Patryk Golabek"
+  description="Free Kubernetes manifest analyzer and best-practice linter by a Kubernetes architect. 67 rules across schema, security, reliability, best-practice, and cross-resource categories. 100% browser-based. Your code never leaves your device."
+>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]">
+      Kubernetes Manifest Analyzer
+    </h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">
+      Paste your Kubernetes YAML below and click <strong>Analyze</strong>.
+      100% client-side, your code never leaves your browser.
+    </p>
+
+    <K8sAnalyzer client:only="react" />
+
+    <aside class="mt-8 p-4 rounded-lg border border-[var(--color-border)]">
+      <p class="text-sm text-[var(--color-text-secondary)]">
+        Want to learn the rules in depth? Individual rule documentation coming soon.
+      </p>
+    </aside>
+  </section>
+
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'K8s Analyzer', url: 'https://patrykgolabek.dev/tools/k8s-analyzer/' },
+  ]} />
+</Layout>
