@@ -126,10 +126,10 @@ Plans:
   2. The homepage displays a callout card linking to the Compose Validator
   3. The tools page shows a Compose Validator card alongside the Dockerfile Analyzer and Database Compass
   4. The tool page has JSON-LD SoftwareApplication structured data, BreadcrumbList JSON-LD on tool and rule pages, and all tool + rule pages appear in the sitemap
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 39-01: TBD
+- [ ] 39-01-PLAN.md — ComposeValidatorJsonLd component, tool page JSON-LD + breadcrumbs + aside, tools page card, homepage callout, and sitemap verification
 
 ### Phase 40: OG Images, Blog Post & Polish
 **Goal**: The Compose Validator has a professional social preview image, a companion blog post provides editorial context and SEO value, and all pages pass Lighthouse and accessibility audits
