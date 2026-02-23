@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 46 in progress (resource relationship graph)
+**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 47 in progress (SEO, documentation & site integration)
 
 ## Current Position
 
-Phase: 46 of 47 (Resource Relationship Graph) -- COMPLETE
-Plan: 2 of 2
-Status: Phase Complete
-Last activity: 2026-02-23 — Completed 46-02 K8sResourceGraph assembly + panel integration
+Phase: 47 of 47 (SEO, Documentation & Site Integration)
+Plan: 1 of 6
+Status: In Progress
+Last activity: 2026-02-23 — Completed 47-01 rule data foundation
 
 Progress: ▓▓▓▓▓▓░░░░ 50%
 
@@ -42,6 +42,7 @@ Progress: ▓▓▓▓▓▓░░░░ 50%
 | Phase 45 P03 | 3min | 2 tasks | 4 files |
 | Phase 46 P01 | 3min | 2 tasks | 5 files |
 | Phase 46 P02 | 3min | 2 tasks | 2 files |
+| Phase 47 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ v1.7 decisions pending (to be logged during execution):
 - [Phase 46]: CATEGORY_COLORS exported from K8sResourceNode for reuse in graph layout
 - [Phase 46]: Include all edges (including dangling) in dagre layout so phantom nodes get positioned
 - [Phase 46]: Rebuild ResourceRegistry from result.resources inside useMemo (no stale registry)
+- [Phase 47]: SCHEMA_RULE_METADATA spread into allDocumentedK8sRules (compatible DocumentedK8sRule shape)
+- [Phase 47]: 21 CIS Benchmark mappings (omit KA-C009/C012/C018 -- no direct CIS section)
+- [Phase 47]: getRelatedK8sRules follows exact compose-validator/rules/related.ts pattern
 
 ### Pending Todos
 
@@ -123,6 +127,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 46-02-PLAN.md (K8sResourceGraph assembly + K8sResultsPanel integration)
+Stopped at: Completed 47-01-PLAN.md (rule data foundation)
 Resume file: None
-Next: Phase 47 (final phase)
+Next: 47-02-PLAN.md (OG image, JSON-LD, tool page SEO)
