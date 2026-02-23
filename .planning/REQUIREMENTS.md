@@ -126,11 +126,11 @@
 ## Resource Relationship Graph
 
 - [ ] **GRAPH-01**: Interactive React Flow dependency graph with dagre layout
-- [ ] **GRAPH-02**: Node types color-coded by resource kind (workloads, services, config, storage, RBAC, scaling)
-- [ ] **GRAPH-03**: Edge types represent references (selector match, volume mount, envFrom, Ingress backend, HPA target, RBAC binding)
-- [ ] **GRAPH-04**: Dangling references shown as red dashed edges
+- [x] **GRAPH-02**: Node types color-coded by resource kind (workloads, services, config, storage, RBAC, scaling)
+- [x] **GRAPH-03**: Edge types represent references (selector match, volume mount, envFrom, Ingress backend, HPA target, RBAC binding)
+- [x] **GRAPH-04**: Dangling references shown as red dashed edges
 - [ ] **GRAPH-05**: React Flow lazy-loaded via React.lazy() to maintain Lighthouse 90+
-- [ ] **GRAPH-06**: Graph data derived from cross-resource validation results
+- [x] **GRAPH-06**: Graph data derived from cross-resource validation results
 
 ## Shareability
 
@@ -272,11 +272,11 @@
 | SCORE-02 | Phase 45 | Complete |
 | SCORE-03 | Phase 45 | Complete |
 | GRAPH-01 | Phase 46 | Pending |
-| GRAPH-02 | Phase 46 | Pending |
-| GRAPH-03 | Phase 46 | Pending |
-| GRAPH-04 | Phase 46 | Pending |
+| GRAPH-02 | Phase 46 | Complete |
+| GRAPH-03 | Phase 46 | Complete |
+| GRAPH-04 | Phase 46 | Complete |
 | GRAPH-05 | Phase 46 | Pending |
-| GRAPH-06 | Phase 46 | Pending |
+| GRAPH-06 | Phase 46 | Complete |
 | DOCS-01 | Phase 47 | Pending |
 | DOCS-02 | Phase 47 | Pending |
 | DOCS-03 | Phase 47 | Pending |

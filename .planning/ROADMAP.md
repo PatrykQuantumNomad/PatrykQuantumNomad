@@ -122,7 +122,7 @@ Plans:
   3. The graph component is lazy-loaded via React.lazy() so it does not impact initial page load or Lighthouse scores
 **Plans:** 2 plans
 Plans:
-- [ ] 46-01-PLAN.md -- Graph data extractor + custom React Flow node/edge/skeleton/CSS components
+- [x] 46-01-PLAN.md -- Graph data extractor + custom React Flow node/edge/skeleton/CSS components
 - [ ] 46-02-PLAN.md -- K8sResourceGraph assembly + K8sResultsPanel integration
 
 ### Phase 47: SEO, Documentation & Site Integration
@@ -148,5 +148,5 @@ Plans:
 | 43. Reliability & Best Practice Rules | v1.7 | 3/3 | Complete | 2026-02-23 |
 | 44. Cross-Resource Validation & RBAC | 3/3 | Complete   | 2026-02-23 | - |
 | 45. Editor UI & Scoring | 3/3 | Complete   | 2026-02-23 | - |
-| 46. Resource Relationship Graph | v1.7 | 0/TBD | Not started | - |
+| 46. Resource Relationship Graph | v1.7 | 1/2 | In progress | - |
 | 47. SEO, Documentation & Site Integration | v1.7 | 0/TBD | Not started | - |
