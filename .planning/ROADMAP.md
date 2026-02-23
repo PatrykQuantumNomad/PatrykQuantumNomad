@@ -134,7 +134,14 @@ Plans:
   2. The companion blog post "Kubernetes Manifest Best Practices" is published with ~20 cross-links to rule pages and bidirectional linking from the tool page
   3. The tool page appears in header navigation, homepage callout, tools page card, sitemap, and LLMs.txt; JSON-LD SoftwareApplication schema and breadcrumb navigation are present
   4. Lighthouse scores 90+ on the tool page and rule documentation pages; WCAG 2.1 AA accessibility and responsive design pass on mobile, tablet, and desktop
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 47-01-PLAN.md -- Rule data foundation (allDocumentedK8sRules 67 rules, related rules, CIS benchmark refs)
+- [ ] 47-02-PLAN.md -- OG image, JSON-LD, tool page SEO enhancements
+- [ ] 47-03-PLAN.md -- 67 dynamic rule documentation pages with PSS/CIS tags
+- [ ] 47-04-PLAN.md -- Homepage 3-card grid, LLMs.txt integration
+- [ ] 47-05-PLAN.md -- Companion blog post "Kubernetes Manifest Best Practices" with ~20 cross-links
+- [ ] 47-06-PLAN.md -- Build verification + UAT
 
 ## Progress
 
