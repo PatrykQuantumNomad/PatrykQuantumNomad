@@ -112,10 +112,10 @@ Plans:
   1. Navigating to /tools/compose-validator/rules/CV-C001 (or any rule code) loads a documentation page with expert explanation, fix suggestion, before/after YAML code, and related rules
   2. Pages are generated at build time via getStaticPaths from the rule registry (one page per rule)
   3. Each rule page has an SEO-optimized meta description unique to that rule
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 38-01: TBD
+- [ ] 38-01-PLAN.md — Combined rule registry, related-rules utility, 52 dynamic route pages, and violation list rule ID links
 
 ### Phase 39: Tool Page & Site Integration
 **Goal**: The Compose Validator is discoverable from every entry point -- header navigation, homepage callout, tools page, search engines (via JSON-LD and sitemap), and breadcrumb navigation
