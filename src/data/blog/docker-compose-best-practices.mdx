@@ -1,0 +1,321 @@
+---
+title: "Docker Compose Best Practices From a Kubernetes Architect"
+description: "A production-tested guide to writing secure, efficient Docker Compose files. 52 rules explained with real-world consequences and fix examples. Try the free browser-based validator."
+publishedDate: 2026-02-23
+tags: ["docker", "docker-compose", "kubernetes", "devops", "cloud-native", "security", "containers"]
+draft: false
+---
+
+import OpeningStatement from '../../components/blog/OpeningStatement.astro';
+import TldrSummary from '../../components/blog/TldrSummary.astro';
+import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
+import Callout from '../../components/blog/Callout.astro';
+
+<OpeningStatement>Most docker-compose.yml files in production right now have at least five preventable issues. I built a tool to find all of them.</OpeningStatement>
+
+After 17 years building cloud-native systems and running Kubernetes clusters since before version 1.0, I have reviewed thousands of Docker Compose files. They come in onboarding guides, developer setup docs, CI pipeline definitions, and production deployment configs. The patterns repeat: services running in privileged mode, secrets hardcoded in environment variables, port conflicts that only surface when two developers run the stack simultaneously, circular dependencies that cause random startup failures. Each of these is a wasted hour -- or a production incident -- waiting to happen.
+
+I wrote the rules down. All 52 of them. Then I turned them into a [validator you can run right now](/tools/compose-validator/).
+
+This post walks through the rules the validator checks, organized by category. Each rule is linked to its own documentation page with detailed explanations and fix examples. By the end, you will know what to fix in your compose files, why it matters, and how to verify it automatically.
+
+<TldrSummary>
+
+- **52 rules** across **5 categories**: Schema, Security, Semantic, Best Practice, Style
+- Scoring: **0-100** with category-weighted deductions by production impact
+- **100% client-side** -- your compose file never leaves your browser
+- Interactive dependency graph visualizes service relationships and detects cycles
+- Try it now: [Docker Compose Validator](/tools/compose-validator/)
+
+</TldrSummary>
+
+## Why Your Docker Compose File Matters
+
+Docker Compose files are often treated as disposable configuration. You copy one from a blog post, tweak the image names, run `docker compose up`, and move on. But that compose file defines the architecture of your local development environment, your CI integration tests, and sometimes your production stack. It specifies which services exist, how they connect, what ports they expose, what volumes they mount, and what security posture each container runs with.
+
+A bad compose file compounds in ways that are hard to trace back to the source. A service running in privileged mode gives an attacker root-level access to the Docker host if they compromise the application. An unquoted port mapping like `80:80` gets parsed by YAML as a base-60 integer, not a string, causing silent misrouting. A circular dependency between services causes `docker compose up` to hang or start services in an unpredictable order. An undefined volume reference works locally because Docker creates it implicitly, then fails in CI where the implicit behavior differs.
+
+The 52 rules below are not theoretical. Every one comes from a real compose file I reviewed during a security audit, a debugging session, or a CI pipeline investigation. They are organized into five categories: Schema, Security, Semantic, Best Practice, and Style. Security and semantic rules catch the dangerous issues. Best practice rules prevent the frustrating ones. Schema and style rules ensure structural correctness and consistency.
+
+## Security Rules: The Non-Negotiables
+
+Security rules carry the highest weight in the validator's scoring. A single security violation in a compose file can compromise an entire Docker host. These are the rules I enforce without exception.
+
+### Never Run Services in Privileged Mode
+
+```yaml
+# Bad: Full host access
+services:
+  app:
+    image: myapp:1.0
+    privileged: true
+```
+<br />
+```yaml
+# Good: Grant only needed capabilities
+services:
+  app:
+    image: myapp:1.0
+    cap_add:
+      - NET_ADMIN
+```
+
+`privileged: true` gives the container full access to the host kernel, including all devices, all capabilities, and the ability to modify host-level settings. It effectively disables all container isolation. An attacker who gains code execution inside a privileged container can escape to the host in seconds using well-documented techniques. Rule [CV-C001](/tools/compose-validator/rules/cv-c001/) flags any service with `privileged: true`.
+
+The fix is almost always to identify the specific Linux capability the service actually needs and grant only that via `cap_add`. Most services that claim to need privileged mode actually need one or two capabilities like `NET_ADMIN` or `SYS_PTRACE`.
+
+### Never Mount the Docker Socket
+
+```yaml
+# Bad: Full Docker API access
+services:
+  monitoring:
+    image: monitoring-tool:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+```
+<br />
+```yaml
+# Good: Use Docker API proxy with read-only access
+services:
+  monitoring:
+    image: monitoring-tool:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+```
+
+Mounting `/var/run/docker.sock` into a container gives that container full control over the Docker daemon. It can create new containers, mount host filesystems, and effectively gain root access to the host. The Graboid cryptomining worm spread specifically by exploiting Docker socket mounts to deploy malicious containers across unprotected hosts.
+
+Rule [CV-C002](/tools/compose-validator/rules/cv-c002/) detects Docker socket mounts in any service's volume configuration. If you genuinely need container-to-Docker communication (for monitoring or log collection), use a socket proxy like Tecnativa's docker-socket-proxy that restricts which API endpoints are accessible, and mount read-only at minimum.
+
+### Never Put Secrets in Environment Variables
+
+```yaml
+# Bad: Secrets in plaintext
+services:
+  api:
+    image: myapi:1.0
+    environment:
+      DATABASE_PASSWORD: hunter2
+      AWS_SECRET_ACCESS_KEY: AKIA...
+```
+<br />
+```yaml
+# Good: Use Docker secrets
+services:
+  api:
+    image: myapi:1.0
+    secrets:
+      - db_password
+    environment:
+      DATABASE_PASSWORD_FILE: /run/secrets/db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+```
+
+Environment variables in a compose file are visible to anyone who can run `docker inspect` on the container. They appear in process listings, they get logged by many application frameworks, and they persist in Docker's internal metadata. Storing a database password or API key in an `environment` block is equivalent to writing it on a whiteboard in the office.
+
+Rule [CV-C008](/tools/compose-validator/rules/cv-c008/) scans environment variables for common secret patterns -- passwords, tokens, API keys, and private keys. The fix is to use Docker's built-in secrets mechanism, which mounts sensitive values as files at `/run/secrets/` inside the container, keeping them out of the environment, process table, and inspect output.
+
+<KeyTakeaway title="Security Is Not Optional">
+Privileged mode, Docker socket mounts, and plaintext secrets are the three most common security violations in compose files. Each one can give an attacker full control of your Docker host. The validator catches all three -- and 11 more security rules covering capabilities ([CV-C006](/tools/compose-validator/rules/cv-c006/)), host networking ([CV-C003](/tools/compose-validator/rules/cv-c003/)), host PID ([CV-C004](/tools/compose-validator/rules/cv-c004/)), unbound ports ([CV-C009](/tools/compose-validator/rules/cv-c009/)), and writable filesystems ([CV-C011](/tools/compose-validator/rules/cv-c011/)).
+</KeyTakeaway>
+
+## Semantic Rules: Catching What Humans Miss
+
+Semantic rules analyze the relationships between services, networks, volumes, and dependencies. These are the bugs that pass a syntax check but break at runtime.
+
+### Duplicate Port Mappings
+
+```yaml
+# Bad: Two services on the same host port
+services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"
+  api:
+    image: myapi:1.0
+    ports:
+      - "8080:3000"
+```
+<br />
+```yaml
+# Good: Unique host ports
+services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"
+  api:
+    image: myapi:1.0
+    ports:
+      - "3000:3000"
+```
+
+When two services bind to the same host port, `docker compose up` fails with a "port already allocated" error. This is obvious when both mappings are on adjacent lines, but in a compose file with 15 services across 200 lines, duplicates are easy to miss. Rule [CV-M001](/tools/compose-validator/rules/cv-m001/) detects identical host port bindings across all services, including port ranges checked by its companion rule [CV-M014](/tools/compose-validator/rules/cv-m014/).
+
+### Circular Dependencies
+
+```yaml
+# Bad: A depends on B, B depends on A
+services:
+  web:
+    image: nginx:1.25
+    depends_on:
+      - api
+  api:
+    image: myapi:1.0
+    depends_on:
+      - web
+```
+
+Circular dependencies cause Docker Compose to either hang during startup or start services in an undefined order, negating the purpose of `depends_on` entirely. In complex stacks, cycles often span three or more services, making them invisible during a casual review. Rule [CV-M002](/tools/compose-validator/rules/cv-m002/) performs a full graph traversal to detect cycles of any length in the dependency chain, and the validator's interactive dependency graph visualizes the cycle so you can see exactly which services form the loop.
+
+### Undefined Network and Volume References
+
+```yaml
+# Bad: Network not defined at top level
+services:
+  web:
+    image: nginx:1.25
+    networks:
+      - frontend
+
+# Missing top-level networks: section
+```
+<br />
+```yaml
+# Good: Explicit network definition
+services:
+  web:
+    image: nginx:1.25
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+```
+
+When a service references a network that is not defined in the top-level `networks` section, Docker Compose creates it implicitly with default settings -- or fails entirely depending on the Docker version and compose file format. The same applies to volume references. This inconsistency between local dev (where implicit creation works) and CI (where it sometimes doesn't) has caused more debugging sessions than I care to count.
+
+Rule [CV-M003](/tools/compose-validator/rules/cv-m003/) catches undefined network references and [CV-M004](/tools/compose-validator/rules/cv-m004/) catches undefined volume references. Their counterparts, [CV-M007](/tools/compose-validator/rules/cv-m007/) and [CV-M008](/tools/compose-validator/rules/cv-m008/), flag the reverse: networks and volumes defined at the top level but never referenced by any service. Both patterns indicate configuration drift.
+
+## Best Practice Rules: Production Readiness
+
+Best practice rules do not prevent your compose file from running. They prevent it from running well.
+
+### Always Define Healthchecks
+
+```yaml
+# Bad: No health monitoring
+services:
+  api:
+    image: myapi:1.0
+    ports:
+      - "3000:3000"
+```
+<br />
+```yaml
+# Good: Explicit healthcheck
+services:
+  api:
+    image: myapi:1.0
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+```
+
+Without a healthcheck, Docker reports a container as "running" the moment the process starts, even if the application inside is still initializing, has crashed into an error loop, or is accepting connections but returning 500s. Services that depend on an unhealthy upstream via `depends_on` with `condition: service_healthy` will wait correctly -- but only if the upstream actually defines a healthcheck.
+
+Rule [CV-B001](/tools/compose-validator/rules/cv-b001/) flags services without a `healthcheck` configuration. Its companion rule [CV-M010](/tools/compose-validator/rules/cv-m010/) catches a subtler issue: services that use `depends_on` with `condition: service_healthy` pointing at a service that has no healthcheck defined -- a configuration that will cause Docker Compose to wait indefinitely.
+
+### Set Resource Limits
+
+```yaml
+# Bad: Unlimited resource consumption
+services:
+  worker:
+    image: myworker:1.0
+```
+<br />
+```yaml
+# Good: Memory and CPU limits defined
+services:
+  worker:
+    image: myworker:1.0
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.50"
+        reservations:
+          memory: 256M
+```
+
+A service without resource limits can consume all available memory or CPU on the Docker host, starving every other service. A memory leak in one container takes down the entire stack. This is especially dangerous in development environments where developers run the full stack alongside an IDE, browser, and other tools.
+
+Rule [CV-B003](/tools/compose-validator/rules/cv-b003/) flags services without `deploy.resources.limits` and [CV-B010](/tools/compose-validator/rules/cv-b010/) checks for missing memory reservations. Together, they ensure every service has both a ceiling (limits) and a guaranteed minimum (reservations).
+
+### Define Restart Policies
+
+```yaml
+# Bad: Container stays down after crash
+services:
+  api:
+    image: myapi:1.0
+```
+<br />
+```yaml
+# Good: Automatic restart with backoff
+services:
+  api:
+    image: myapi:1.0
+    restart: unless-stopped
+```
+
+Without a restart policy, a crashed container stays down. In a development environment, this means manually running `docker compose up` again. In a CI environment, it means a flaky test failure. In production (for those using Compose in production), it means downtime until someone notices.
+
+Rule [CV-B002](/tools/compose-validator/rules/cv-b002/) flags services without an explicit `restart` policy. The recommended value is `unless-stopped` for most services -- it restarts on crashes and host reboots, but respects a manual `docker compose stop`.
+
+## Schema Rules: Structural Correctness
+
+Before the validator even looks at security or best practices, it validates your compose file against the official [Compose Specification](https://github.com/compose-spec/compose-spec) schema. This catches structural errors that would cause `docker compose up` to fail immediately.
+
+The validator uses [Ajv](https://ajv.js.org/) (Another JSON Schema Validator) to validate against the compose-spec JSON Schema. This catches issues like unknown top-level properties ([CV-S002](/tools/compose-validator/rules/cv-s002/)), unknown service properties ([CV-S003](/tools/compose-validator/rules/cv-s003/)), invalid port formats ([CV-S004](/tools/compose-validator/rules/cv-s004/)), invalid volume mount syntax ([CV-S005](/tools/compose-validator/rules/cv-s005/)), and invalid duration formats in healthcheck intervals ([CV-S006](/tools/compose-validator/rules/cv-s006/)).
+
+Schema validation runs first because there is no point analyzing security rules or dependency graphs if the compose file does not parse as a valid Compose document. The validator reports schema errors with the exact property path and line number so you can fix structural issues before moving on to deeper analysis.
+
+## How the Validator Works
+
+The validator processes your compose file through four stages: parsing, schema validation, rule analysis, and scoring.
+
+**Stage 1: YAML Parsing.** The compose file is parsed using the yaml library configured in YAML 1.1 mode. This is critical because Docker Compose uses YAML 1.1 features like merge keys (`<<: *anchor`) that YAML 1.2 parsers reject. The parser produces both a JavaScript object and an abstract syntax tree (AST) that preserves line numbers for every key and value.
+
+**Stage 2: Schema Validation.** The parsed object is validated against the bundled compose-spec JSON Schema using Ajv. Schema violations are mapped to specific CV-S rules with line numbers extracted from the AST. This catches structural errors before deeper analysis begins.
+
+**Stage 3: Rule Engine.** 44 custom rules run against the parsed document and AST. Each rule is a self-contained module with a `check()` function that returns violations with line numbers, severity levels, and fix guidance. Security rules check for privileged mode, socket mounts, and secret exposure. Semantic rules analyze the dependency graph, detect port conflicts, and verify that every referenced network, volume, and secret is defined. Best practice rules check for healthchecks, resource limits, and restart policies. Style rules enforce consistency.
+
+**Stage 4: Scoring.** Violations are aggregated into a 0-100 score using category weights that reflect production impact: Security (30%), Semantic (25%), Best Practice (20%), Schema (15%), Style (10%). A diminishing returns formula prevents a single category from dominating the score.
+
+<Callout>
+**Your compose file stays private.** The entire validation pipeline -- YAML parsing, schema validation, 52-rule analysis, scoring, and dependency graph rendering -- runs in JavaScript in your browser. No server receives your code. No API call is made. There is no backend, no telemetry, no logging. What you paste stays on your machine.
+</Callout>
+
+## Start Validating
+
+If you have made it this far, you know what good Docker Compose files look like. Now find out what yours actually scores.
+
+The [Docker Compose Validator](/tools/compose-validator/) is free, private, and instant. Paste your `docker-compose.yml`, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes explanations of why the rule exists and what production issues it prevents.
+
+I built this tool because I got tired of finding the same compose file issues in security audits and code reviews. Privileged containers, hardcoded secrets, undefined networks, missing healthchecks -- the same patterns in every project. If the validator catches even one of these before it reaches production, it was worth building.
+
+Browse all 52 rules starting from [CV-C001: Privileged Mode](/tools/compose-validator/rules/cv-c001/), or paste your compose file and let the validator find the issues for you.
