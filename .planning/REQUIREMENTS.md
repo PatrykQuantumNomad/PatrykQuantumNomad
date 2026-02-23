@@ -26,26 +26,26 @@
 
 ## Security Rules (20 rules)
 
-- [ ] **SEC-01**: KA-C001 — Container runs as privileged (error) — PSS Baseline
-- [ ] **SEC-02**: KA-C002 — Privilege escalation allowed (error) — PSS Restricted
-- [ ] **SEC-03**: KA-C003 — Container runs as root (warning) — PSS Restricted
-- [ ] **SEC-04**: KA-C004 — Missing runAsNonRoot (warning) — PSS Restricted
-- [ ] **SEC-05**: KA-C005 — Running with UID 0 (error) — PSS Restricted
-- [ ] **SEC-06**: KA-C006 — Host PID namespace shared (error) — PSS Baseline
-- [ ] **SEC-07**: KA-C007 — Host IPC namespace shared (error) — PSS Baseline
-- [ ] **SEC-08**: KA-C008 — Host network enabled (warning) — PSS Baseline
-- [ ] **SEC-09**: KA-C009 — Host port specified (info) — PSS Baseline
-- [ ] **SEC-10**: KA-C010 — Dangerous capabilities SYS_ADMIN, NET_RAW, ALL (error) — PSS Baseline/Restricted
-- [ ] **SEC-11**: KA-C011 — Capabilities not dropped (warning) — PSS Restricted
-- [ ] **SEC-12**: KA-C012 — Filesystem not read-only (warning)
-- [ ] **SEC-13**: KA-C013 — Missing seccomp profile (warning) — PSS Baseline
-- [ ] **SEC-14**: KA-C014 — Sensitive host path mounted (error) — PSS Baseline
-- [ ] **SEC-15**: KA-C015 — Docker socket mounted (error)
-- [ ] **SEC-16**: KA-C016 — ServiceAccount token auto-mounted (warning)
-- [ ] **SEC-17**: KA-C017 — Default ServiceAccount used (warning)
-- [ ] **SEC-18**: KA-C018 — Secrets in environment variables (warning)
-- [ ] **SEC-19**: KA-C019 — Default namespace used (info)
-- [ ] **SEC-20**: KA-C020 — Missing security context entirely (warning)
+- [x] **SEC-01**: KA-C001 — Container runs as privileged (error) — PSS Baseline
+- [x] **SEC-02**: KA-C002 — Privilege escalation allowed (error) — PSS Restricted
+- [x] **SEC-03**: KA-C003 — Container runs as root (warning) — PSS Restricted
+- [x] **SEC-04**: KA-C004 — Missing runAsNonRoot (warning) — PSS Restricted
+- [x] **SEC-05**: KA-C005 — Running with UID 0 (error) — PSS Restricted
+- [x] **SEC-06**: KA-C006 — Host PID namespace shared (error) — PSS Baseline
+- [x] **SEC-07**: KA-C007 — Host IPC namespace shared (error) — PSS Baseline
+- [x] **SEC-08**: KA-C008 — Host network enabled (warning) — PSS Baseline
+- [x] **SEC-09**: KA-C009 — Host port specified (info) — PSS Baseline
+- [x] **SEC-10**: KA-C010 — Dangerous capabilities SYS_ADMIN, NET_RAW, ALL (error) — PSS Baseline/Restricted
+- [x] **SEC-11**: KA-C011 — Capabilities not dropped (warning) — PSS Restricted
+- [x] **SEC-12**: KA-C012 — Filesystem not read-only (warning)
+- [x] **SEC-13**: KA-C013 — Missing seccomp profile (warning) — PSS Baseline
+- [x] **SEC-14**: KA-C014 — Sensitive host path mounted (error) — PSS Baseline
+- [x] **SEC-15**: KA-C015 — Docker socket mounted (error)
+- [x] **SEC-16**: KA-C016 — ServiceAccount token auto-mounted (warning)
+- [x] **SEC-17**: KA-C017 — Default ServiceAccount used (warning)
+- [x] **SEC-18**: KA-C018 — Secrets in environment variables (warning)
+- [x] **SEC-19**: KA-C019 — Default namespace used (info)
+- [x] **SEC-20**: KA-C020 — Missing security context entirely (warning)
 
 ## Reliability Rules (12 rules)
 
@@ -102,7 +102,7 @@
 - [ ] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F) using diminishing returns formula
 - [ ] **SCORE-03**: Per-category sub-scores alongside aggregate
 - [ ] **SCORE-04**: RBAC rules scored under Security category
-- [ ] **SCORE-05**: PSS profile compliance summary — count of Baseline/Restricted violations
+- [x] **SCORE-05**: PSS profile compliance summary — count of Baseline/Restricted violations
 
 ## Editor & UI
 
@@ -210,7 +210,7 @@
 | SEC-18 | Phase 42 | Pending |
 | SEC-19 | Phase 42 | Pending |
 | SEC-20 | Phase 42 | Pending |
-| SCORE-05 | Phase 42 | Pending |
+| SCORE-05 | Phase 42 | Complete |
 | REL-01 | Phase 43 | Pending |
 | REL-02 | Phase 43 | Pending |
 | REL-03 | Phase 43 | Pending |
