@@ -107,21 +107,21 @@
 ## Editor & UI
 
 - [x] **UI-01**: CodeMirror 6 YAML editor with dark theme matching site aesthetic
-- [ ] **UI-02**: Pre-loaded sample K8s manifest with deliberate issues across all rule categories
-- [ ] **UI-03**: Analyze button triggers analysis cycle (on-demand, not real-time)
+- [x] **UI-02**: Pre-loaded sample K8s manifest with deliberate issues across all rule categories
+- [x] **UI-03**: Analyze button triggers analysis cycle (on-demand, not real-time)
 - [x] **UI-04**: Keyboard shortcut Cmd/Ctrl+Enter to trigger analysis
-- [ ] **UI-05**: Inline CodeMirror annotations — squiggly underlines + gutter severity markers
+- [x] **UI-05**: Inline CodeMirror annotations — squiggly underlines + gutter severity markers
 - [ ] **UI-06**: Score gauge component (SVG circular gauge with letter grade)
-- [ ] **UI-07**: Category breakdown panel with sub-scores per dimension
-- [ ] **UI-08**: Violation list grouped by severity with expandable details
-- [ ] **UI-09**: Click-to-navigate from results panel to corresponding editor line
-- [ ] **UI-10**: Clean manifest empty state ("No issues found" with congratulatory message)
+- [x] **UI-07**: Category breakdown panel with sub-scores per dimension
+- [x] **UI-08**: Violation list grouped by severity with expandable details
+- [x] **UI-09**: Click-to-navigate from results panel to corresponding editor line
+- [x] **UI-10**: Clean manifest empty state ("No issues found" with congratulatory message)
 - [ ] **UI-11**: Responsive layout — stacked on mobile, side-by-side on desktop
 - [ ] **UI-12**: React island with client:only="react" directive
 - [x] **UI-13**: View Transitions lifecycle — destroy/recreate EditorView on navigation
 - [x] **UI-14**: Nanostore bridge for CodeMirror-React state communication
 - [ ] **UI-15**: Tabbed results panel (Results | Graph)
-- [ ] **UI-16**: Resource summary panel showing parsed resource types and counts
+- [x] **UI-16**: Resource summary panel showing parsed resource types and counts
 
 ## Resource Relationship Graph
 
@@ -136,7 +136,7 @@
 
 - [x] **SHARE-01**: Score badge download as PNG image
 - [x] **SHARE-02**: URL state encoding — manifest content in URL hash with `#k8s=` prefix via lz-string
-- [ ] **SHARE-03**: 3-tier share fallback — Web Share API > Clipboard API > prompt()
+- [x] **SHARE-03**: 3-tier share fallback — Web Share API > Clipboard API > prompt()
 
 ## Rule Documentation
 
@@ -250,24 +250,24 @@
 | RBAC-05 | Phase 44 | Pending |
 | SCORE-04 | Phase 44 | Pending |
 | UI-01 | Phase 45 | Complete |
-| UI-02 | Phase 45 | Pending |
-| UI-03 | Phase 45 | Pending |
+| UI-02 | Phase 45 | Complete |
+| UI-03 | Phase 45 | Complete |
 | UI-04 | Phase 45 | Complete |
-| UI-05 | Phase 45 | Pending |
+| UI-05 | Phase 45 | Complete |
 | UI-06 | Phase 45 | Pending |
-| UI-07 | Phase 45 | Pending |
-| UI-08 | Phase 45 | Pending |
-| UI-09 | Phase 45 | Pending |
-| UI-10 | Phase 45 | Pending |
+| UI-07 | Phase 45 | Complete |
+| UI-08 | Phase 45 | Complete |
+| UI-09 | Phase 45 | Complete |
+| UI-10 | Phase 45 | Complete |
 | UI-11 | Phase 45 | Pending |
 | UI-12 | Phase 45 | Pending |
 | UI-13 | Phase 45 | Complete |
 | UI-14 | Phase 45 | Complete |
 | UI-15 | Phase 45 | Pending |
-| UI-16 | Phase 45 | Pending |
+| UI-16 | Phase 45 | Complete |
 | SHARE-01 | Phase 45 | Complete |
 | SHARE-02 | Phase 45 | Complete |
-| SHARE-03 | Phase 45 | Pending |
+| SHARE-03 | Phase 45 | Complete |
 | SCORE-01 | Phase 45 | Complete |
 | SCORE-02 | Phase 45 | Complete |
 | SCORE-03 | Phase 45 | Complete |
