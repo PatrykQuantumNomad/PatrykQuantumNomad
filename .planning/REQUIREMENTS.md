@@ -5,8 +5,8 @@
 - [x] **PARSE-01**: Multi-document YAML parsing splits input on `---` separators and parses each document independently with source range preservation
 - [x] **PARSE-02**: Per-document apiVersion/kind detection identifies resource type from each parsed document
 - [x] **PARSE-03**: GVK registry maps valid apiVersion/kind combinations to the 18 supported resource types
-- [ ] **PARSE-04**: Resource Registry builds an in-memory index of all parsed resources by kind, name, namespace, and labels for cross-resource validation
-- [ ] **PARSE-05**: Resource summary displays count of each resource type found ("Found: 3 Deployments, 2 Services, 1 ConfigMap")
+- [x] **PARSE-04**: Resource Registry builds an in-memory index of all parsed resources by kind, name, namespace, and labels for cross-resource validation
+- [x] **PARSE-05**: Resource summary displays count of each resource type found ("Found: 3 Deployments, 2 Services, 1 ConfigMap")
 - [x] **PARSE-06**: YAML syntax errors reported with accurate line numbers in the original editor content
 
 ## Schema Validation (10 rules)
@@ -17,7 +17,7 @@
 - [x] **SCHEMA-04**: KA-S002 — Missing apiVersion field (error)
 - [x] **SCHEMA-05**: KA-S003 — Missing kind field (error)
 - [x] **SCHEMA-06**: KA-S004 — Unknown apiVersion/kind combination (error)
-- [ ] **SCHEMA-07**: KA-S005 — Schema validation failure per resource type (error)
+- [x] **SCHEMA-07**: KA-S005 — Schema validation failure per resource type (error)
 - [x] **SCHEMA-08**: KA-S006 — Deprecated API version (warning) — extensions/v1beta1, apps/v1beta1, apps/v1beta2, etc.
 - [x] **SCHEMA-09**: KA-S007 — Missing metadata.name (error)
 - [x] **SCHEMA-10**: KA-S008 — Invalid metadata.name format (warning) — RFC 1123 DNS subdomain validation
@@ -175,8 +175,8 @@
 | PARSE-01 | Phase 41 | Complete |
 | PARSE-02 | Phase 41 | Complete |
 | PARSE-03 | Phase 41 | Complete |
-| PARSE-04 | Phase 41 | Pending |
-| PARSE-05 | Phase 41 | Pending |
+| PARSE-04 | Phase 41 | Complete |
+| PARSE-05 | Phase 41 | Complete |
 | PARSE-06 | Phase 41 | Complete |
 | SCHEMA-01 | Phase 41 | Complete |
 | SCHEMA-02 | Phase 41 | Complete |
@@ -184,7 +184,7 @@
 | SCHEMA-04 | Phase 41 | Complete |
 | SCHEMA-05 | Phase 41 | Complete |
 | SCHEMA-06 | Phase 41 | Complete |
-| SCHEMA-07 | Phase 41 | Pending |
+| SCHEMA-07 | Phase 41 | Complete |
 | SCHEMA-08 | Phase 41 | Complete |
 | SCHEMA-09 | Phase 41 | Complete |
 | SCHEMA-10 | Phase 41 | Complete |

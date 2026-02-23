@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 41 of 47 (Foundation & Schema Infrastructure)
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: Executing
-Last activity: 2026-02-23 — Completed 41-02 GVK registry, parser, and diagnostic rules
+Last activity: 2026-02-23 — Completed 41-03 resource registry and schema validator
 
-Progress: ▓▓░░░░░░░░ 6%
+Progress: ▓▓▓░░░░░░░ 8%
 
 ## Performance Metrics
 
@@ -51,6 +51,9 @@ v1.7 decisions pending (to be logged during execution):
 - 19 resource types (not 18) -- ClusterRoleBinding is the 19th
 - GVK flat array with find() over Map -- 19 entries makes linear scan negligible
 - checkMetadata skips documents without apiVersion/kind to avoid duplicate diagnostics
+- ResourceRegistry implements types.ts interface, keeps forward-reference pattern for K8sRuleContext
+- Schema validator caches validators at module level -- dynamic import only happens once
+- Inline ValidateFunction/ErrorObject types to avoid runtime ajv dependency
 
 ### Pending Todos
 
@@ -72,6 +75,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 41-02-PLAN.md (GVK registry, parser, and diagnostic rules)
+Stopped at: Completed 41-03-PLAN.md (resource registry and schema validator)
 Resume file: None
-Next: Execute 41-03-PLAN.md (resource registry and schema validator)
+Next: Execute 41-04-PLAN.md (engine, sample manifest, URL state)
