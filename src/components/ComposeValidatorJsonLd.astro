@@ -1,0 +1,42 @@
+---
+/**
+ * ComposeValidatorJsonLd.astro -- SoftwareApplication JSON-LD structured data
+ * for the Docker Compose Validator tool page. Helps search engines understand
+ * the tool's purpose, features, and authorship.
+ */
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Docker Compose Validator",
+  "description": "Free browser-based Docker Compose validator and best-practice analyzer. 52 rules across schema, semantic, security, best-practice, and style categories. Scored by a Kubernetes architect with 17+ years of experience.",
+  "url": "https://patrykgolabek.dev/tools/compose-validator/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web Browser",
+  "softwareVersion": "1.0",
+  "featureList": [
+    "52 validation rules across 5 categories (schema, semantic, security, best-practice, style)",
+    "Category-weighted scoring with letter grades (A+ through F)",
+    "Inline CodeMirror annotations with severity-colored gutter markers",
+    "Interactive service dependency graph with cycle detection",
+    "100% client-side analysis -- no data transmitted",
+    "YAML syntax highlighting with CodeMirror 6",
+    "Shareable URLs with lz-string compression",
+    "Score badge PNG download for social sharing",
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://patrykgolabek.dev/#website",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

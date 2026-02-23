@@ -1,6 +1,8 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import ComposeValidator from '../../../components/tools/ComposeValidator';
+import ComposeValidatorJsonLd from '../../../components/ComposeValidatorJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 ---
 
 <Layout
@@ -17,5 +19,22 @@ import ComposeValidator from '../../../components/tools/ComposeValidator';
     </p>
 
     <ComposeValidator client:only="react" />
+
+    <aside class="mt-8 p-4 rounded-lg border border-[var(--color-border)]">
+      <p class="text-sm text-[var(--color-text-secondary)]">
+        Want to learn the rules in depth? Browse
+        <a href="/tools/compose-validator/rules/cv-c001/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">
+          individual rule documentation
+        </a>
+        for all 52 validation rules.
+      </p>
+    </aside>
   </section>
+
+  <ComposeValidatorJsonLd />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'Compose Validator', url: 'https://patrykgolabek.dev/tools/compose-validator/' },
+  ]} />
 </Layout>
