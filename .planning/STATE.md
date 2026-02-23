@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 41: Foundation & Schema Infrastructure
+**Current focus:** v1.7 Kubernetes Manifest Analyzer — Phase 41 Complete, ready for Phase 42
 
 ## Current Position
 
-Phase: 41 of 47 (Foundation & Schema Infrastructure)
-Plan: 3 of 4 complete
-Status: Executing
-Last activity: 2026-02-23 — Completed 41-03 resource registry and schema validator
+Phase: 41 of 47 (Foundation & Schema Infrastructure) -- COMPLETE
+Plan: 4 of 4 complete
+Status: Phase Complete
+Last activity: 2026-02-23 — Completed 41-04 engine orchestrator and sample manifest
 
-Progress: ▓▓▓░░░░░░░ 8%
+Progress: ▓▓▓▓░░░░░░ 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 80 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6)
+- Total plans completed: 84 (16 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 9 v1.5 + 14 v1.6 + 4 v1.7)
 
 **Cumulative Stats:**
 
@@ -33,7 +33,7 @@ Progress: ▓▓▓░░░░░░░ 8%
 | v1.5 Database Compass | 28-32 | 10 | 28 | 2026-02-22 |
 | v1.6 Compose Validator | 33-40 | 14 | 100 | 2026-02-23 |
 | v1.7 K8s Analyzer | 41-47 | TBD | 123 | In progress |
-| **Total** | **47** | **80+** | **403** | |
+| **Total** | **47** | **84+** | **403** | |
 
 ## Accumulated Context
 
@@ -54,6 +54,9 @@ v1.7 decisions pending (to be logged during execution):
 - ResourceRegistry implements types.ts interface, keeps forward-reference pattern for K8sRuleContext
 - Schema validator caches validators at module level -- dynamic import only happens once
 - Inline ValidateFunction/ErrorObject types to avoid runtime ajv dependency
+- Engine tracks rulesTriggered via Set for accurate rulesPassed count
+- Deprecated GVK takes precedence over unknown GVK (KA-S006 over KA-S004)
+- Case-insensitive key search for "Did you mean?" suggestions on missing apiVersion/kind
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 41-03-PLAN.md (resource registry and schema validator)
+Stopped at: Completed 41-04-PLAN.md (engine orchestrator and sample manifest) -- Phase 41 COMPLETE
 Resume file: None
-Next: Execute 41-04-PLAN.md (engine, sample manifest, URL state)
+Next: Plan Phase 42 (Security & Resource Limit Rules)
