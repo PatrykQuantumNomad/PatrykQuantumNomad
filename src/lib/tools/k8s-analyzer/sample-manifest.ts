@@ -19,6 +19,10 @@
  *
  * Best practice triggers: KA-B001-B004 (missing resource requests/limits),
  * KA-B005 (missing labels), KA-B008 (NodePort service).
+ *
+ * Cross-resource triggers: KA-X002 (broken-ingress -> nonexistent-api-svc).
+ *
+ * RBAC triggers: KA-A001 (wildcard permissions), KA-A002 (cluster-admin binding).
  */
 
 export const SAMPLE_K8S_MANIFEST = `# Kubernetes Manifest — Online Store Example
@@ -269,5 +273,48 @@ spec:
     - port: 8080
       targetPort: 8080
       nodePort: 30080
+---
+# Issue: RBAC wildcard permissions (triggers KA-A001)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: overly-permissive-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+# Issue: cluster-admin binding to regular user (triggers KA-A002)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: give-admin-to-dev
+subjects:
+  - kind: User
+    name: developer
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+# Issue: Ingress referencing non-existent service (triggers KA-X002)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-ingress
+  namespace: online-store
+spec:
+  rules:
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nonexistent-api-svc
+                port:
+                  number: 8080
 ---
 ` as const;
