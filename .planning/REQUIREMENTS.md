@@ -107,12 +107,12 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Foundations
 
-- [ ] **FOUND-01**: "What is EDA?" page at /eda/foundations/what-is-eda/ covering §1.1.1–1.1.4
-- [ ] **FOUND-02**: "Role of Graphics" page at /eda/foundations/role-of-graphics/ covering §1.1.5–1.1.6
-- [ ] **FOUND-03**: "Problem Categories" page at /eda/foundations/problem-categories/ covering §1.1.7
-- [ ] **FOUND-04**: "Assumptions" page at /eda/foundations/assumptions/ covering §1.2.1–1.2.3
-- [ ] **FOUND-05**: "The 4-Plot" page at /eda/foundations/the-4-plot/ covering §1.2.4
-- [ ] **FOUND-06**: "When Assumptions Fail" page at /eda/foundations/when-assumptions-fail/ covering §1.2.5
+- [ ] **FOUND-01**: "What is EDA?" page at /eda/foundations/what-is-eda/ covering section 1.1.1-1.1.4
+- [ ] **FOUND-02**: "Role of Graphics" page at /eda/foundations/role-of-graphics/ covering section 1.1.5-1.1.6
+- [ ] **FOUND-03**: "Problem Categories" page at /eda/foundations/problem-categories/ covering section 1.1.7
+- [ ] **FOUND-04**: "Assumptions" page at /eda/foundations/assumptions/ covering section 1.2.1-1.2.3
+- [ ] **FOUND-05**: "The 4-Plot" page at /eda/foundations/the-4-plot/ covering section 1.2.4
+- [ ] **FOUND-06**: "When Assumptions Fail" page at /eda/foundations/when-assumptions-fail/ covering section 1.2.5
 
 ### Distributions
 
@@ -138,22 +138,22 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Case Studies
 
-- [ ] **CASE-01**: Normal random numbers case study at /eda/case-studies/normal-random-numbers/ (§1.4.2.1)
-- [ ] **CASE-02**: Uniform random numbers case study at /eda/case-studies/uniform-random-numbers/ (§1.4.2.2)
-- [ ] **CASE-03**: Random walk case study at /eda/case-studies/random-walk/ (§1.4.2.3)
-- [ ] **CASE-04**: Cryothermometry case study at /eda/case-studies/cryothermometry/ (§1.4.2.4)
-- [ ] **CASE-05**: Beam deflections case study at /eda/case-studies/beam-deflections/ (§1.4.2.5)
-- [ ] **CASE-06**: Filter transmittance case study at /eda/case-studies/filter-transmittance/ (§1.4.2.6)
-- [ ] **CASE-07**: Heat flow meter case study at /eda/case-studies/heat-flow-meter/ (§1.4.2.8)
-- [ ] **CASE-08**: Fatigue life case study at /eda/case-studies/fatigue-life/ (§1.4.2.9)
-- [ ] **CASE-09**: Ceramic strength case study at /eda/case-studies/ceramic-strength/ (§1.4.2.10)
+- [ ] **CASE-01**: Normal random numbers case study at /eda/case-studies/normal-random-numbers/ (section 1.4.2.1)
+- [ ] **CASE-02**: Uniform random numbers case study at /eda/case-studies/uniform-random-numbers/ (section 1.4.2.2)
+- [ ] **CASE-03**: Random walk case study at /eda/case-studies/random-walk/ (section 1.4.2.3)
+- [ ] **CASE-04**: Cryothermometry case study at /eda/case-studies/cryothermometry/ (section 1.4.2.4)
+- [ ] **CASE-05**: Beam deflections case study at /eda/case-studies/beam-deflections/ (section 1.4.2.5)
+- [ ] **CASE-06**: Filter transmittance case study at /eda/case-studies/filter-transmittance/ (section 1.4.2.6)
+- [ ] **CASE-07**: Heat flow meter case study at /eda/case-studies/heat-flow-meter/ (section 1.4.2.8)
+- [ ] **CASE-08**: Fatigue life case study at /eda/case-studies/fatigue-life/ (section 1.4.2.9)
+- [ ] **CASE-09**: Ceramic strength case study at /eda/case-studies/ceramic-strength/ (section 1.4.2.10)
 
 ### Reference Pages
 
-- [ ] **REF-01**: Analysis questions page at /eda/reference/analysis-questions/ (§1.3.2)
-- [ ] **REF-02**: Techniques by category page at /eda/reference/techniques-by-category/ (§1.3.4)
-- [ ] **REF-03**: Distribution tables page at /eda/reference/distribution-tables/ (§1.3.6.7)
-- [ ] **REF-04**: Related distributions page at /eda/reference/related-distributions/ (§1.3.6.2–5)
+- [ ] **REF-01**: Analysis questions page at /eda/reference/analysis-questions/ (section 1.3.2)
+- [ ] **REF-02**: Techniques by category page at /eda/reference/techniques-by-category/ (section 1.3.4)
+- [ ] **REF-03**: Distribution tables page at /eda/reference/distribution-tables/ (section 1.3.6.7)
+- [ ] **REF-04**: Related distributions page at /eda/reference/related-distributions/ (section 1.3.6.2-5)
 
 ### Landing Page
 
@@ -162,7 +162,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [ ] **LAND-03**: Section navigation (Foundations, Techniques, Quantitative Methods, Distributions, Case Studies, Reference)
 - [ ] **LAND-04**: Responsive card grid (3 columns desktop, 2 tablet, 1 mobile)
 - [ ] **LAND-05**: Build-time SVG thumbnails on technique cards
-- [ ] **LAND-06**: Section reference (§X.X.X) displayed on each card
+- [ ] **LAND-06**: Section reference (section X.X.X) displayed on each card
 - [ ] **LAND-07**: CategoryFilter.tsx React island for landing page filtering (mirrors LanguageFilter.tsx pattern)
 
 ### Site Integration
@@ -218,13 +218,159 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| INFRA-01 | Phase 48 | Pending |
+| INFRA-02 | Phase 48 | Pending |
+| INFRA-03 | Phase 48 | Pending |
+| INFRA-04 | Phase 48 | Pending |
+| INFRA-05 | Phase 48 | Pending |
+| INFRA-06 | Phase 48 | Pending |
+| INFRA-07 | Phase 48 | Pending |
+| INFRA-08 | Phase 48 | Pending |
+| INFRA-09 | Phase 48 | Pending |
+| INFRA-10 | Phase 48 | Pending |
+| INFRA-11 | Phase 48 | Pending |
+| DATA-01 | Phase 49 | Pending |
+| DATA-02 | Phase 49 | Pending |
+| DATA-03 | Phase 49 | Pending |
+| DATA-04 | Phase 49 | Pending |
+| DATA-05 | Phase 49 | Pending |
+| DATA-06 | Phase 49 | Pending |
+| DATA-07 | Phase 49 | Pending |
+| DATA-08 | Phase 49 | Pending |
+| DATA-09 | Phase 49 | Pending |
+| SVG-01 | Phase 50 | Pending |
+| SVG-02 | Phase 50 | Pending |
+| SVG-03 | Phase 50 | Pending |
+| SVG-04 | Phase 50 | Pending |
+| SVG-05 | Phase 50 | Pending |
+| SVG-06 | Phase 50 | Pending |
+| SVG-07 | Phase 50 | Pending |
+| SVG-08 | Phase 50 | Pending |
+| SVG-09 | Phase 50 | Pending |
+| SVG-10 | Phase 50 | Pending |
+| SVG-11 | Phase 50 | Pending |
+| SVG-12 | Phase 50 | Pending |
+| SVG-13 | Phase 50 | Pending |
+| SVG-14 | Phase 50 | Pending |
+| SVG-15 | Phase 50 | Pending |
+| GRAPH-01 | Phase 51 | Pending |
+| GRAPH-02 | Phase 51 | Pending |
+| GRAPH-03 | Phase 51 | Pending |
+| GRAPH-04 | Phase 51 | Pending |
+| GRAPH-05 | Phase 51 | Pending |
+| GRAPH-06 | Phase 51 | Pending |
+| GRAPH-07 | Phase 51 | Pending |
+| GRAPH-08 | Phase 51 | Pending |
+| GRAPH-09 | Phase 51 | Pending |
+| GRAPH-10 | Phase 51 | Pending |
+| GRAPH-11 | Phase 51 | Pending |
+| GRAPH-12 | Phase 51 | Pending |
+| GRAPH-13 | Phase 51 | Pending |
+| GRAPH-14 | Phase 51 | Pending |
+| GRAPH-15 | Phase 51 | Pending |
+| GRAPH-16 | Phase 51 | Pending |
+| GRAPH-17 | Phase 51 | Pending |
+| GRAPH-18 | Phase 51 | Pending |
+| GRAPH-19 | Phase 51 | Pending |
+| GRAPH-20 | Phase 51 | Pending |
+| GRAPH-21 | Phase 51 | Pending |
+| GRAPH-22 | Phase 51 | Pending |
+| GRAPH-23 | Phase 51 | Pending |
+| GRAPH-24 | Phase 51 | Pending |
+| GRAPH-25 | Phase 51 | Pending |
+| GRAPH-26 | Phase 51 | Pending |
+| GRAPH-27 | Phase 51 | Pending |
+| GRAPH-28 | Phase 51 | Pending |
+| GRAPH-29 | Phase 51 | Pending |
+| GRAPH-30 | Phase 51 | Pending |
+| LAND-05 | Phase 51 | Pending |
+| QUANT-01 | Phase 52 | Pending |
+| QUANT-02 | Phase 52 | Pending |
+| QUANT-03 | Phase 52 | Pending |
+| QUANT-04 | Phase 52 | Pending |
+| QUANT-05 | Phase 52 | Pending |
+| QUANT-06 | Phase 52 | Pending |
+| QUANT-07 | Phase 52 | Pending |
+| QUANT-08 | Phase 52 | Pending |
+| QUANT-09 | Phase 52 | Pending |
+| QUANT-10 | Phase 52 | Pending |
+| QUANT-11 | Phase 52 | Pending |
+| QUANT-12 | Phase 52 | Pending |
+| QUANT-13 | Phase 52 | Pending |
+| QUANT-14 | Phase 52 | Pending |
+| QUANT-15 | Phase 52 | Pending |
+| QUANT-16 | Phase 52 | Pending |
+| QUANT-17 | Phase 52 | Pending |
+| QUANT-18 | Phase 52 | Pending |
+| FOUND-01 | Phase 52 | Pending |
+| FOUND-02 | Phase 52 | Pending |
+| FOUND-03 | Phase 52 | Pending |
+| FOUND-04 | Phase 52 | Pending |
+| FOUND-05 | Phase 52 | Pending |
+| FOUND-06 | Phase 52 | Pending |
+| SITE-13 | Phase 52 | Pending |
+| DIST-01 | Phase 53 | Pending |
+| DIST-02 | Phase 53 | Pending |
+| DIST-03 | Phase 53 | Pending |
+| DIST-04 | Phase 53 | Pending |
+| DIST-05 | Phase 53 | Pending |
+| DIST-06 | Phase 53 | Pending |
+| DIST-07 | Phase 53 | Pending |
+| DIST-08 | Phase 53 | Pending |
+| DIST-09 | Phase 53 | Pending |
+| DIST-10 | Phase 53 | Pending |
+| DIST-11 | Phase 53 | Pending |
+| DIST-12 | Phase 53 | Pending |
+| DIST-13 | Phase 53 | Pending |
+| DIST-14 | Phase 53 | Pending |
+| DIST-15 | Phase 53 | Pending |
+| DIST-16 | Phase 53 | Pending |
+| DIST-17 | Phase 53 | Pending |
+| DIST-18 | Phase 53 | Pending |
+| DIST-19 | Phase 53 | Pending |
+| CASE-01 | Phase 54 | Pending |
+| CASE-02 | Phase 54 | Pending |
+| CASE-03 | Phase 54 | Pending |
+| CASE-04 | Phase 54 | Pending |
+| CASE-05 | Phase 54 | Pending |
+| CASE-06 | Phase 54 | Pending |
+| CASE-07 | Phase 54 | Pending |
+| CASE-08 | Phase 54 | Pending |
+| CASE-09 | Phase 54 | Pending |
+| REF-01 | Phase 54 | Pending |
+| REF-02 | Phase 54 | Pending |
+| REF-03 | Phase 54 | Pending |
+| REF-04 | Phase 54 | Pending |
+| LAND-01 | Phase 54 | Pending |
+| LAND-02 | Phase 54 | Pending |
+| LAND-03 | Phase 54 | Pending |
+| LAND-04 | Phase 54 | Pending |
+| LAND-06 | Phase 54 | Pending |
+| LAND-07 | Phase 54 | Pending |
+| SITE-01 | Phase 55 | Pending |
+| SITE-02 | Phase 55 | Pending |
+| SITE-03 | Phase 55 | Pending |
+| SITE-04 | Phase 55 | Pending |
+| SITE-05 | Phase 55 | Pending |
+| SITE-06 | Phase 55 | Pending |
+| SITE-07 | Phase 55 | Pending |
+| SITE-08 | Phase 55 | Pending |
+| SITE-09 | Phase 55 | Pending |
+| SITE-10 | Phase 55 | Pending |
+| SITE-11 | Phase 55 | Pending |
+| SITE-12 | Phase 55 | Pending |
+| QUAL-01 | Phase 55 | Pending |
+| QUAL-02 | Phase 55 | Pending |
+| QUAL-03 | Phase 55 | Pending |
+| QUAL-04 | Phase 55 | Pending |
 
 **Coverage:**
-- v1.8 requirements: 131 total
-- Mapped to phases: 0
-- Unmapped: 131
+- v1.8 requirements: 145 total (12 categories)
+- Mapped to phases: 145
+- Unmapped: 0
+
+**Note:** DIST-16 duplicates DIST-05 (both Lognormal distribution) in the original requirement list. Both are mapped to Phase 53 and will be delivered as a single page.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-24 after roadmap creation*
