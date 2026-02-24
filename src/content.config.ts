@@ -2,6 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 import { languageSchema } from './lib/beauty-index/schema';
 import { dbModelSchema } from './lib/db-compass/schema';
+import { edaTechniqueSchema, edaDistributionSchema } from './lib/eda/schema';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
@@ -28,4 +29,25 @@ const dbModels = defineCollection({
   schema: dbModelSchema,
 });
 
-export const collections = { blog, languages, dbModels };
+const edaTechniques = defineCollection({
+  loader: file('src/data/eda/techniques.json'),
+  schema: edaTechniqueSchema,
+});
+
+const edaDistributions = defineCollection({
+  loader: file('src/data/eda/distributions.json'),
+  schema: edaDistributionSchema,
+});
+
+const edaPages = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/data/eda/pages' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    section: z.string(),
+    category: z.enum(['foundations', 'case-studies', 'reference']),
+    nistSection: z.string(),
+  }),
+});
+
+export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages };

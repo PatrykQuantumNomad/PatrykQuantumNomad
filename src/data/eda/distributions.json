@@ -1,0 +1,54 @@
+[
+  {
+    "id": "normal",
+    "title": "Normal Distribution",
+    "slug": "normal",
+    "parameters": [
+      {
+        "name": "mu",
+        "symbol": "\\mu",
+        "min": -5,
+        "max": 5,
+        "default": 0,
+        "step": 0.1
+      },
+      {
+        "name": "sigma",
+        "symbol": "\\sigma",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{1}{2}\\left(\\frac{x - \\mu}{\\sigma}\\right)^2}",
+    "cdfFormula": "F(x) = \\frac{1}{2}\\left[1 + \\text{erf}\\left(\\frac{x - \\mu}{\\sigma\\sqrt{2}}\\right)\\right]",
+    "mean": "\\mu",
+    "variance": "\\sigma^2",
+    "relatedDistributions": ["exponential"],
+    "nistSection": "1.3.6.6.1 Normal Distribution",
+    "description": "The normal (Gaussian) distribution is the most important continuous probability distribution. It is symmetric and bell-shaped, fully characterized by its mean and standard deviation."
+  },
+  {
+    "id": "exponential",
+    "title": "Exponential Distribution",
+    "slug": "exponential",
+    "parameters": [
+      {
+        "name": "lambda",
+        "symbol": "\\lambda",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\lambda e^{-\\lambda x}, \\quad x \\geq 0",
+    "cdfFormula": "F(x) = 1 - e^{-\\lambda x}, \\quad x \\geq 0",
+    "mean": "\\frac{1}{\\lambda}",
+    "variance": "\\frac{1}{\\lambda^2}",
+    "relatedDistributions": ["normal"],
+    "nistSection": "1.3.6.6.7 Exponential Distribution",
+    "description": "The exponential distribution models the time between events in a Poisson process. It is a one-parameter distribution commonly used for reliability analysis and waiting time problems."
+  }
+]

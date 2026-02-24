@@ -1,0 +1,41 @@
+[
+  {
+    "id": "histogram",
+    "title": "Histogram",
+    "slug": "histogram",
+    "category": "graphical",
+    "section": "1.3.3.14",
+    "nistSection": "1.3.3.14 Histogram",
+    "description": "A histogram is a graphical summary of the frequency distribution of a single variable. It displays the shape, center, and spread of a dataset by dividing the data range into bins and counting observations in each bin.",
+    "tier": "B",
+    "variantCount": 4,
+    "relatedTechniques": ["scatter-plot", "mean"],
+    "tags": ["distribution", "shape", "frequency", "univariate"]
+  },
+  {
+    "id": "scatter-plot",
+    "title": "Scatter Plot",
+    "slug": "scatter-plot",
+    "category": "graphical",
+    "section": "1.3.3.26",
+    "nistSection": "1.3.3.26 Scatter Plot",
+    "description": "A scatter plot displays the relationship between two quantitative variables by plotting data points on a two-dimensional graph. It is used to identify patterns, trends, correlations, and outliers.",
+    "tier": "B",
+    "variantCount": 2,
+    "relatedTechniques": ["histogram"],
+    "tags": ["correlation", "bivariate", "relationship", "outliers"]
+  },
+  {
+    "id": "mean",
+    "title": "Mean",
+    "slug": "mean",
+    "category": "quantitative",
+    "section": "1.3.5.2",
+    "nistSection": "1.3.5.2 Mean",
+    "description": "The arithmetic mean is the most common measure of location (central tendency). It is calculated as the sum of all observations divided by the number of observations.",
+    "tier": "A",
+    "variantCount": 0,
+    "relatedTechniques": ["histogram", "scatter-plot"],
+    "tags": ["location", "central-tendency", "summary-statistic"]
+  }
+]
