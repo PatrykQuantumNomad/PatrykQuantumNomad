@@ -3,6 +3,8 @@ import expressiveCode from 'astro-expressive-code';
 import mdx from '@astrojs/mdx';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { remarkReadingTime } from './remark-reading-time.mjs';
 import indexNow from './src/integrations/indexnow';
 
@@ -21,6 +23,7 @@ export default defineConfig({
     ],
   }), indexNow(), react()],
   markdown: {
-    remarkPlugins: [remarkReadingTime],
+    remarkPlugins: [remarkReadingTime, remarkMath],
+    rehypePlugins: [rehypeKatex],
   },
 });
