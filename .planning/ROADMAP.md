@@ -51,12 +51,12 @@ See `.planning/milestones/` for detailed archives.
   3. Building the site with OG image caching skips regeneration for unchanged pages (measured build time delta)
   4. Content collections accept a sample technique entry and a sample distribution entry through Zod validation without errors
   5. Navigating Home > EDA test page > Blog > EDA test page > Home (5 cycles) produces no console errors or animation leaks
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 48-01: TBD
-- [ ] 48-02: TBD
-- [ ] 48-03: TBD
+- [ ] 48-01-PLAN.md — KaTeX pipeline, EDA layout, technique template, breadcrumbs, and formula test page
+- [ ] 48-02-PLAN.md — Zod schemas, content collections, sample data, and OG image caching
+- [ ] 48-03-PLAN.md — D3 micro-modules, bundle isolation verification, and navigation lifecycle check
 
 ### Phase 49: Data Model + Schema Population
 **Goal**: The complete data model for all 90+ EDA pages exists as validated JSON and MDX stubs, with every technique tagged by interactivity tier, every cross-link slug verified against the route structure, and sample datasets ready for SVG generation
