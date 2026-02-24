@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.7 Kubernetes Manifest Analyzer (Shipped: 2026-02-23)
+
+**Delivered:** Interactive browser-based Kubernetes manifest linter with 67 rules across 5 categories, multi-resource schema validation (19 K8s resource types), security analysis with PSS/CIS compliance, cross-resource validation, RBAC analysis, interactive dependency graph, CodeMirror 6 editor, category-weighted scoring, 67 rule documentation pages, companion blog post, and shareable results
+
+**Phases completed:** 41-47 (23 plans total)
+
+**Key accomplishments:**
+- Async K8s analysis engine with multi-document YAML parser, GVK registry, resource registry, and pre-compiled K8s 1.31 JSON Schema validators for 19 resource types (76KB gzipped)
+- 20 pod/container security rules covering PSS Baseline/Restricted profiles and CIS Benchmarks with compliance summary
+- 24 reliability and best practice rules for production-readiness (probes, replicas, resource limits, labels, namespace)
+- 13 cross-resource validation and RBAC analysis rules (selector matching, ConfigMap/Secret/PVC/SA references, wildcard permissions, cluster-admin bindings)
+- Polished browser UI with CodeMirror 6 editor, tabbed results panel (score gauge, category breakdown, violations, PSS compliance, resource summary), and interactive React Flow dependency graph with dagre layout
+- 67 SEO-optimized rule documentation pages, companion blog post "Kubernetes Manifest Best Practices" with 21 cross-links, OG images, JSON-LD, full site integration (857 total site pages)
+
+**Stats:**
+- 189 files created/modified (+44,040 / -194 lines)
+- 7 phases, 23 plans, 80 commits
+- 1 day from start to ship (2026-02-23)
+
+**Git range:** `docs(41)` → `docs(47-06)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.6 Docker Compose Validator (Shipped: 2026-02-23)
 
 **Delivered:** Interactive browser-based Docker Compose validation tool with 52 rules across 5 categories, category-weighted scoring, CodeMirror 6 YAML editor, React Flow dependency graph, 52 rule documentation pages, companion blog post, and shareable results

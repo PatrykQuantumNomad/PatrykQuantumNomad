@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes four content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), and Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes five content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), and Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages).
 
 ## Core Value
 
@@ -163,24 +163,20 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Build-time OG image via Satori + Sharp for social sharing — v1.6
 - ✓ Companion blog post "Docker Compose Best Practices" with 26 rule links and bidirectional cross-linking — v1.6
 
+- ✓ Multi-document YAML parser with GVK registry and pre-compiled K8s 1.31 JSON Schema validators for 19 resource types (76KB gzipped) — v1.7
+- ✓ 67 K8s rules across 5 categories: 10 schema, 20 security (PSS/CIS), 12 reliability, 12 best practice, 8 cross-resource, 5 RBAC — v1.7
+- ✓ CodeMirror 6 YAML editor with tabbed results panel (score gauge, categories, violations, PSS compliance, resource summary) — v1.7
+- ✓ Interactive React Flow dependency graph with dagre layout and color-coded resource kind nodes — v1.7
+- ✓ Category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%) — v1.7
+- ✓ 67 per-rule SEO documentation pages at /tools/k8s-analyzer/rules/[code] with PSS/CIS tags — v1.7
+- ✓ Full site integration (header nav, homepage 3-card grid, tools page, JSON-LD, breadcrumbs, sitemap, LLMs.txt) — v1.7
+- ✓ Build-time OG image and companion blog post "Kubernetes Manifest Best Practices" with 21 cross-links — v1.7
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-See `.planning/REQUIREMENTS.md` for full v1.7 requirements.
-
-## Current Milestone: v1.7 Kubernetes Manifest Analyzer
-
-**Goal:** Build an interactive browser-based K8s manifest linter with multi-resource validation, security analysis, and resource dependency graph.
-
-**Target features:**
-- Multi-document YAML parsing with per-resource-type schema validation (K8s 1.31, 18 resource types)
-- Full security suite: Polaris-style pod security, CIS Benchmark 5.2, RBAC analysis, NetworkPolicy checks, image validation
-- Cross-resource validation: selector matching, ConfigMap/Secret/PVC/ServiceAccount/Ingress references
-- Interactive resource relationship graph (React Flow + dagre)
-- Category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%)
-- ~67 rules with per-rule SEO documentation pages
-- Companion blog post, homepage callout, full site integration
+(None yet — next milestone to be defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -205,17 +201,18 @@ See `.planning/REQUIREMENTS.md` for full v1.7 requirements.
 
 ## Context
 
-Shipped v1.6 Docker Compose Validator on top of v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Shipped v1.7 Kubernetes Manifest Analyzer on top of v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 requirements delivered (280 total). Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 requirements delivered (403 total). 857 total pages. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 17 posts (7 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 21 posts (11 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
+Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -275,6 +272,17 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | #compose= hash prefix | Distinct from #dockerfile= to prevent cross-tool collision | ✓ Good — clean URL namespace |
 | DocumentedRule interface | Unifies ComposeLintRule and SchemaRuleMetadata for page generation | ✓ Good — 52 rule pages from single source |
 | 3-tier share fallback | Web Share API > Clipboard API > prompt() | ✓ Good — platform-adaptive sharing |
+| Async K8s engine with dynamic schema imports | K8s schemas too large for sync import; dynamic per-resource loading | ✓ Good — 76KB gzipped bundle |
+| Single compiled Ajv module for 19 K8s schemas | Dedup shared definitions across resource types | ✓ Good — efficient schema compilation |
+| Strip format fields from K8s schemas | Avoids ajv-formats require() in standalone output | ✓ Good — clean browser-safe validators |
+| 19 resource types including ClusterRoleBinding | ClusterRoleBinding needed for RBAC analysis | ✓ Good — complete RBAC coverage |
+| PSS Restricted inherits Baseline | Zero Baseline AND zero Restricted violations required | ✓ Good — accurate PSS compliance |
+| totalRules = 10 + allK8sRules.length | Auto-adapts rule count without hardcoding | ✓ Good — zero Phase 44-47 engine changes needed |
+| RBAC rules under Security category (35% weight) | RBAC is fundamentally a security concern | ✓ Good — SCORE-04 compliance |
+| React Flow lazy-loaded for K8s graph | 222 KB separate chunk loads only on Graph tab | ✓ Good — Lighthouse 90+ maintained |
+| #k8s= hash prefix for URL state | Distinct from #dockerfile= and #compose= | ✓ Good — clean cross-tool URL namespace |
+| allDocumentedK8sRules includes SCHEMA_RULE_METADATA | Compatible DocumentedK8sRule shape via spread | ✓ Good — 67 rule pages from single source |
+| 21 CIS Benchmark mappings on rule pages | Omit 3 rules with no direct CIS mapping | ✓ Good — accurate reference linking |
 
 ## Constraints
 
@@ -289,4 +297,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-23 after v1.7 milestone started*
+*Last updated: 2026-02-23 after v1.7 milestone complete*
