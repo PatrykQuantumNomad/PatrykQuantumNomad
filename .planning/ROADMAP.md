@@ -68,11 +68,12 @@ Plans:
   3. All MDX stub files exist for 6 foundations, 9 case studies, and 4 reference pages with valid frontmatter and NIST section references
   4. Every cross-linking slug in the data files resolves to a valid route in the Astro page structure
   5. Sample datasets in datasets.ts produce plottable numeric arrays for at least 5 representative chart types
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 49-01: TBD
-- [ ] 49-02: TBD
+- [ ] 49-01-PLAN.md — Populate techniques.json with 48 entries (30 graphical + 18 quantitative) with tier assignments and cross-links
+- [ ] 49-02-PLAN.md — Populate distributions.json with 19 probability distribution entries with KaTeX PDF/CDF formulas
+- [ ] 49-03-PLAN.md — MDX stubs (19 files), sample datasets, route map, and cross-link validation script
 
 ### Phase 50: SVG Generator Library
 **Goal**: A complete library of build-time TypeScript SVG generators produces publication-quality statistical charts for every chart type needed across the encyclopedia, styled to the Quantum Explorer palette and verified in both dark and light themes
@@ -189,11 +190,11 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 33-40 | v1.6 Docker Compose Validator | 14/14 | Complete | 2026-02-23 |
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48. Infrastructure Foundation | v1.8 | 3/3 | Complete | 2026-02-24 |
-| 49. Data Model + Schema Population | v1.8 | 0/2 | Not started | - |
+| 49. Data Model + Schema Population | v1.8 | 0/3 | Not started | - |
 | 50. SVG Generator Library | v1.8 | 0/3 | Not started | - |
 | 51. Graphical Technique Pages | v1.8 | 0/3 | Not started | - |
 | 52. Quantitative Techniques + Foundations | v1.8 | 0/3 | Not started | - |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 0/3 | Not started | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **105/126** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **106/127** | **In progress** | |
