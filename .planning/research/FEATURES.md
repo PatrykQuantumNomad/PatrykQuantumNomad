@@ -1,671 +1,266 @@
-# Feature Research: Kubernetes Manifest Analyzer
+# Feature Research: EDA Visual Encyclopedia
 
-**Domain:** Interactive browser-based Kubernetes manifest validation/linting tool on an Astro 5 portfolio site
-**Researched:** 2026-02-23
+**Domain:** Interactive statistics education / modernized reference encyclopedia
+**Researched:** 2026-02-24
 **Confidence:** HIGH
-**Scope:** Kubernetes Manifest Analyzer at /tools/k8s-analyzer/ with multi-document YAML parsing, per-resource-type K8s OpenAPI schema validation, security checks (Pod Security Standards, CIS-aligned, RBAC analysis), cross-resource validation, interactive resource relationship graph, category-weighted scoring, ~67 rules with per-rule SEO documentation, and companion blog post
-
----
-
-## Existing Infrastructure (Already Built)
-
-These capabilities exist on patrykgolabek.dev from v1.4 Dockerfile Analyzer and v1.6 Docker Compose Validator:
-
-| Capability | Where | Reuse Potential |
-|------------|-------|-----------------|
-| **Dockerfile Analyzer pattern** | `src/lib/tools/dockerfile-analyzer/` -- LintRule interface, engine, scorer, types | MIRROR -- K8s Analyzer follows same modular rule architecture |
-| **Docker Compose Validator pattern** | `src/lib/tools/compose-validator/` -- YAML parsing, ajv schema validation, semantic analysis | ADAPT -- YAML parsing reusable, K8s schema validation is structurally different (per-resource-type OpenAPI schemas vs single compose-spec schema) |
-| **Category-weighted scoring** | `scorer.ts` -- diminishing returns formula | ADAPT -- same algorithm with new categories and weights (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%) |
-| **CodeMirror 6 YAML editor** | `use-codemirror.ts` + `@codemirror/lang-yaml` | DIRECT -- same YAML language mode already used in Compose Validator |
-| **Inline annotations** | `highlight-line.ts` -- squiggly underlines + gutter markers | DIRECT -- same annotation pattern |
-| **Score gauge component** | React SVG circular gauge + letter grade | DIRECT -- identical component |
-| **Category breakdown panel** | React component showing sub-scores per dimension | ADAPT -- new category names (6 categories vs 5) |
-| **Violation list component** | Severity-grouped, expandable details, click-to-navigate | DIRECT -- same UX pattern |
-| **Badge generator** | `badge-generator.ts` -- programmatic SVG-to-PNG | ADAPT -- "K8s Manifest Analyzer" branding |
-| **URL state compression** | `url-state.ts` -- lz-string | ADAPT -- need `#k8s=` hash prefix distinct from `#dockerfile=` and `#compose=` |
-| **Rule documentation pages** | `/tools/compose-validator/rules/[code].astro` | MIRROR -- same template at `/tools/k8s-analyzer/rules/[code]` |
-| **OG image generation** | `src/lib/og-image.ts` using Satori + Sharp | EXTEND -- K8s Analyzer OG images |
-| **JSON-LD structured data** | SoftwareApplication schema | DIRECT -- same schema |
-| **Nanostore bridge** | Editor-to-React state communication pattern | DIRECT -- same cross-framework pattern |
-| **React island pattern** | `client:only="react"` with View Transitions lifecycle | DIRECT -- same island approach |
-| **React Flow dependency graph** | Compose Validator service graph with dagre layout, cycle detection | ADAPT -- resource relationship graph instead of service dependency graph |
-
----
-
-## Competitive Landscape Analysis
-
-### Existing Kubernetes Manifest Validation Tools
-
-| Tool | Type | Rule Count | Strengths | Weaknesses |
-|------|------|------------|-----------|------------|
-| **KubeLinter** (StackRox/Red Hat) | CLI, Go | ~60 checks | Comprehensive checks covering security, reliability, RBAC; CIS 5.1 checks; "dangling" cross-resource checks (Service->Deployment, Ingress->Service, NetworkPolicy->Pod, HPA->target); configurable templates for custom checks | CLI only; no scoring; no browser UI; no graph visualization |
-| **Polaris** (Fairwinds) | CLI + Dashboard | ~40 checks across 4 categories (Security, Reliability, Efficiency, Networking) | Category-based check organization; JSON Schema-based custom checks; dashboard UI exists but is cluster-connected; security checks include RBAC exec/attach and NetworkPolicy | Dashboard requires cluster connection (not static file analysis in browser); no weighted scoring; limited cross-resource validation |
-| **kube-score** | CLI, Go | ~43 checks | Good reliability focus (PDB, anti-affinity, topology spread, HPA conflicts); strong probe validation (identical probe detection); stable API version detection | CLI only; no browser UI; no scoring system (uses OK/WARNING/CRITICAL per-check); limited security depth; no RBAC checks |
-| **Checkov** (Bridgecrew/Palo Alto) | CLI, Python | ~139 CKV_K8S checks | Most comprehensive rule set; CIS/NIST mapped; covers API server config, RBAC wildcards, image digest validation; custom rules via Python | CLI/CI only; enterprise-focused; many checks target cluster runtime config (not manifest files); no browser UI; no scoring |
-| **kubeconform** | CLI, Go | Schema-only | Fastest K8s schema validator; supports custom CRD schemas; version-specific validation (K8s 1.x); multi-version JSON Schema registry | Schema validation ONLY -- no security, best practice, or semantic checks; CLI only |
-| **kubeval** (deprecated) | CLI, Go | Schema-only | Was the standard schema validator | DEPRECATED -- replaced by kubeconform; unmaintained since 2022 |
-| **Datree** | CLI | ~100 rules across 9 categories | Broad rule set; NSA hardening guide rules; Argo CD rules | Company CLOSED July 2023; effectively dead project; no browser UI |
-| **Snyk IaC** | CLI + SaaS | Undisclosed (extensive) | CIS/NIST/SOC2 mapping; Helm chart support; context-aware prioritization | Enterprise SaaS; not open-source rule details; no standalone browser tool |
-| **FOSSA K8s Linter** | Web | Basic | Browser-based; paste-and-validate UX | "Basic validation" only -- explicitly recommends other tools for depth; no scoring; no graph |
-| **EaseCloud Validator** | Web | ~15 checks | Browser-based; client-side processing; multi-document support; PSS Baseline/Restricted checks; version 1.19-1.30 support | Limited rule depth; no scoring; no cross-resource validation; no graph; no rule documentation pages |
-| **ValidKube** | Web | Multiple tools | Combines validation + cleaning + security scanning | JavaScript-heavy SPA; unclear which checks are actually run; no scoring |
-
-### Gap Analysis
-
-**What NO existing browser-based tool provides:**
-
-1. **Category-weighted scoring with letter grades** -- no browser K8s tool scores manifests on a 0-100 scale
-2. **Interactive resource relationship graph** -- no browser tool visualizes how Deployments, Services, ConfigMaps, Secrets, PVCs, and Ingresses reference each other
-3. **Cross-resource validation** -- KubeLinter has "dangling" checks (Service->Deployment, Ingress->Service, NetworkPolicy->Pod, HPA->target) but only as CLI; no browser tool does this
-4. **Combined schema + security + reliability + cross-resource analysis in one browser tool** -- existing browser tools do schema + basic security at most
-5. **Per-rule SEO documentation pages** -- no K8s tool has 67+ individually indexed, expert-written rule pages
-6. **Exportable score badges** -- unique to our tool pattern
-7. **Shareable URL state** -- unique to our tool pattern
-8. **Pod Security Standards mapping** -- KubeLinter/Polaris/Checkov do PSS checks but not in a browser-based tool with clear PSS Baseline/Restricted mapping
-9. **Multi-document YAML with per-resource validation** -- browser tools that exist treat the whole file as one unit; we validate each `---` separated document against its resource-type-specific schema
-
-**The opportunity is massive.** K8s manifest validation is a significantly larger domain than Dockerfile or Docker Compose validation. The existing browser-based tools are shallow. CLI tools are deep but inaccessible for quick checks. A browser tool that matches CLI-tool depth with interactive visualization would be a unique offering.
-
----
-
-## Validation Rule Categories (Research Synthesis)
-
-### Category 1: Schema Validation (Target: ~10 rules)
-
-**What it is:** Structural correctness against Kubernetes OpenAPI schemas. Multi-document YAML is split on `---` separators, each document's `apiVersion` + `kind` is detected, and the appropriate schema is loaded for validation.
-
-**Implementation approach:** Use Kubernetes JSON Schemas (from https://github.com/yannh/kubernetes-json-schema -- the same registry kubeconform uses) compiled for K8s 1.31. Bundle schemas for the 18 target resource types as static JSON at build time. Validate each document against its resource-type-specific schema using ajv.
-
-**Key rules:**
-
-| Rule Code | Name | Severity | What It Catches |
-|-----------|------|----------|-----------------|
-| KA-S001 | Invalid YAML syntax | error | Indentation errors, missing colons, tab characters, malformed arrays |
-| KA-S002 | Missing apiVersion field | error | Document lacks required `apiVersion` field |
-| KA-S003 | Missing kind field | error | Document lacks required `kind` field |
-| KA-S004 | Unknown apiVersion/kind combination | error | `apiVersion`/`kind` pair does not match any known K8s resource type |
-| KA-S005 | Schema validation failure | error | Resource fields violate the OpenAPI schema for that resource type (wrong types, invalid enum values, extra properties in strict resources) |
-| KA-S006 | Deprecated API version | warning | Using API versions removed in K8s 1.16+ (extensions/v1beta1, apps/v1beta1, apps/v1beta2, etc.) |
-| KA-S007 | Missing metadata.name | error | Resource lacks required `metadata.name` field |
-| KA-S008 | Invalid metadata.name format | warning | Name doesn't comply with K8s naming rules (RFC 1123 DNS subdomain: lowercase, alphanumeric, hyphens, max 253 chars) |
-| KA-S009 | Invalid label key/value format | warning | Labels violate K8s label syntax (key: prefix/name max 63 chars; value max 63 chars, alphanumeric with hyphens/dots/underscores) |
-| KA-S010 | Empty document in multi-doc YAML | info | `---` separator followed by empty content or comments-only |
-
-**Confidence:** HIGH -- Kubernetes JSON Schema registry (yannh/kubernetes-json-schema) is the authoritative source, used by kubeconform. K8s API deprecation guide is official Kubernetes documentation.
-
-**Complexity note:** MEDIUM-HIGH. The per-resource-type schema approach is more complex than the Compose Validator's single-schema approach. Bundling 18 schemas at build time requires careful tree-shaking. Schema sizes for K8s resources are substantial (Deployment schema is ~50KB of JSON).
-
-### Category 2: Security (Target: ~20 rules)
-
-**What it is:** Pod security configuration checks aligned with Kubernetes Pod Security Standards (PSS Baseline + Restricted profiles), CIS Kubernetes Benchmark Section 5, and patterns from KubeLinter, Polaris, and Checkov.
-
-This is the deepest category because security is the primary value proposition for a K8s linting tool. Every competing tool leads with security.
-
-**Key rules:**
-
-| Rule Code | Name | Severity | PSS Profile | Source Tools |
-|-----------|------|----------|-------------|--------------|
-| KA-C001 | Container runs as privileged | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_2/16 |
-| KA-C002 | Privilege escalation allowed | error | Restricted | Polaris, Checkov CKV_K8S_5/20 |
-| KA-C003 | Container runs as root | warning | Restricted | KubeLinter, Polaris, Checkov CKV_K8S_6/23 |
-| KA-C004 | Missing runAsNonRoot | warning | Restricted | Polaris, Checkov CKV_K8S_6 |
-| KA-C005 | Running with UID 0 | error | Restricted | Checkov CKV_K8S_40 |
-| KA-C006 | Host PID namespace shared | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_1/17 |
-| KA-C007 | Host IPC namespace shared | error | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_3/18 |
-| KA-C008 | Host network enabled | warning | Baseline | KubeLinter, Polaris, Checkov CKV_K8S_4/19 |
-| KA-C009 | Host port specified | info | Baseline | Polaris, Checkov CKV_K8S_26 |
-| KA-C010 | Dangerous capabilities (SYS_ADMIN, NET_RAW, ALL) | error | Baseline/Restricted | KubeLinter, Polaris, Checkov CKV_K8S_25/28/39 |
-| KA-C011 | Capabilities not dropped | warning | Restricted | Polaris (insecureCapabilities), Checkov CKV_K8S_37 |
-| KA-C012 | Filesystem not read-only | warning | -- | KubeLinter, Polaris, Checkov CKV_K8S_22 |
-| KA-C013 | Missing seccomp profile | warning | Baseline | Checkov CKV_K8S_31/32, kube-score |
-| KA-C014 | Sensitive host path mounted | error | Baseline | KubeLinter (sensitive-host-mounts), Checkov CKV_K8S_27 |
-| KA-C015 | Docker socket mounted | error | -- | KubeLinter (docker-sock), Checkov CKV_K8S_27 |
-| KA-C016 | ServiceAccount token auto-mounted | warning | -- | Polaris, Checkov CKV_K8S_38 |
-| KA-C017 | Default ServiceAccount used | warning | -- | KubeLinter, Checkov CKV_K8S_41/42 |
-| KA-C018 | Secrets in environment variables | warning | -- | KubeLinter (env-var-secret), Checkov CKV_K8S_35 |
-| KA-C019 | Default namespace used | info | -- | Checkov CKV_K8S_21 |
-| KA-C020 | Missing security context entirely | warning | -- | Checkov CKV_K8S_29/30 |
-
-**Confidence:** HIGH -- every rule maps directly to at least 2 competing tools and/or official Kubernetes Pod Security Standards. PSS Baseline/Restricted profiles are official Kubernetes documentation.
-
-### Category 3: Reliability (Target: ~12 rules)
-
-**What it is:** Configuration that prevents downtime, ensures recoverability, and validates operational readiness. Sourced primarily from kube-score (strongest reliability focus), Polaris reliability checks, and KubeLinter.
-
-**Key rules:**
-
-| Rule Code | Name | Severity | Source Tools |
-|-----------|------|----------|--------------|
-| KA-R001 | Missing liveness probe | warning | All tools (KubeLinter, Polaris, kube-score, Checkov CKV_K8S_8) |
-| KA-R002 | Missing readiness probe | warning | All tools (Checkov CKV_K8S_9, kube-score) |
-| KA-R003 | Identical liveness and readiness probes | warning | kube-score (pod-probes-identical) -- unique check |
-| KA-R004 | Single replica Deployment | warning | KubeLinter (minimum-three-replicas), Polaris (deploymentMissingReplicas), kube-score |
-| KA-R005 | Missing PodDisruptionBudget | info | kube-score, Polaris (missingPodDisruptionBudget) |
-| KA-R006 | No rolling update strategy | warning | KubeLinter (no-rolling-update-strategy) |
-| KA-R007 | Missing pod anti-affinity | info | KubeLinter (no-anti-affinity), kube-score |
-| KA-R008 | Missing topology spread constraint | info | Polaris (topologySpreadConstraint) |
-| KA-R009 | Image uses latest or no tag | warning | All tools |
-| KA-R010 | Image pull policy not Always | info | kube-score, Checkov CKV_K8S_15 |
-| KA-R011 | Selector/template label mismatch | error | KubeLinter (mismatching-selector), kube-score |
-| KA-R012 | CronJob missing deadline | warning | kube-score (cronjob-has-deadline) |
-
-**Confidence:** HIGH -- these are the most agreed-upon checks across all tools. Every major tool checks probes, replicas, and image tags.
-
-### Category 4: Best Practice (Target: ~12 rules)
-
-**What it is:** Resource management, operational hygiene, and configuration patterns that every K8s practitioner expects. Distinct from reliability (which prevents downtime) and security (which prevents attacks).
-
-**Key rules:**
-
-| Rule Code | Name | Severity | Source Tools |
-|-----------|------|----------|--------------|
-| KA-B001 | Missing CPU requests | warning | KubeLinter, Polaris, Checkov CKV_K8S_10 |
-| KA-B002 | Missing CPU limits | warning | KubeLinter, Polaris, Checkov CKV_K8S_11 |
-| KA-B003 | Missing memory requests | warning | KubeLinter, Polaris, Checkov CKV_K8S_12 |
-| KA-B004 | Missing memory limits | warning | KubeLinter, Polaris, Checkov CKV_K8S_13 |
-| KA-B005 | Missing required labels (app, version) | info | KubeLinter (required-label-owner), Polaris (metadataAndInstanceMismatched) |
-| KA-B006 | Missing namespace | info | KubeLinter (use-namespace), Checkov CKV_K8S_21 |
-| KA-B007 | SSH port exposed | info | KubeLinter (ssh-port) |
-| KA-B008 | NodePort service type used | info | kube-score (service-type), KubeLinter (exposed-services) |
-| KA-B009 | Liveness probe port not in container ports | warning | KubeLinter (liveness-port) |
-| KA-B010 | Readiness probe port not in container ports | warning | KubeLinter (readiness-port) |
-| KA-B011 | Missing priorityClassName | info | KubeLinter (priority-class-name), Polaris |
-| KA-B012 | Duplicate environment variable keys | warning | KubeLinter (duplicate-env-var), kube-score |
-
-**Confidence:** HIGH -- resource requests/limits are the single most agreed-upon best practice across every K8s linting tool.
-
-### Category 5: Cross-Resource Validation (Target: ~8 rules)
-
-**What it is:** Validation that spans multiple documents in a multi-document YAML file. This is the analysis that checks if a Service's selector actually matches a Deployment's pod template labels, if a ConfigMap referenced by a Deployment exists in the same file, etc.
-
-This is the HEADLINE DIFFERENTIATOR for the K8s Analyzer. No browser-based tool does this. KubeLinter is the only CLI tool with meaningful cross-resource checks ("dangling-*" checks), and our tool surfaces these visually in the relationship graph.
-
-**Key rules:**
-
-| Rule Code | Name | Severity | Inspired By |
-|-----------|------|----------|-------------|
-| KA-X001 | Service selector matches no Pod template | warning | KubeLinter (dangling-service), kube-score (service-targets-pod) |
-| KA-X002 | Ingress references undefined Service | warning | KubeLinter (dangling-ingress), kube-score (ingress-targets-service) |
-| KA-X003 | ConfigMap reference not found in file | info | KubeLinter (env-value-from) |
-| KA-X004 | Secret reference not found in file | info | KubeLinter (env-value-from) |
-| KA-X005 | PVC reference not found in file | info | Novel check -- no tool does this specifically |
-| KA-X006 | ServiceAccount reference not found in file | warning | KubeLinter (non-existent-service-account) |
-| KA-X007 | NetworkPolicy selector matches no Pod | info | KubeLinter (dangling-networkpolicy) |
-| KA-X008 | HPA targets non-existent resource | warning | KubeLinter (dangling-horizontalpodautoscaler), kube-score (horizontalpodautoscaler-has-target) |
-
-**Confidence:** MEDIUM -- cross-resource validation in a browser-based single-file context is inherently limited. Users may paste only a Deployment without its Service; false positives are likely. MUST be clearly communicated as "checks references within the pasted YAML" not "validates complete cluster state." These should surface as informational or warning, never error.
-
-**Complexity note:** HIGH -- requires building an in-memory resource registry from all parsed documents, then resolving references between them. Label selector matching requires understanding K8s matchLabels/matchExpressions semantics.
-
-### Category 6: RBAC Analysis (Target: ~5 rules)
-
-**What it is:** Analysis of Role, ClusterRole, RoleBinding, and ClusterRoleBinding resources for over-permissive configurations. Aligned with CIS Kubernetes Benchmark Section 5.1.
-
-**Key rules:**
-
-| Rule Code | Name | Severity | Source |
-|-----------|------|----------|--------|
-| KA-A001 | Wildcard permissions in Role/ClusterRole | error | KubeLinter (wildcard-in-rules), Checkov CKV_K8S_49, CIS 5.1.3 |
-| KA-A002 | cluster-admin RoleBinding | error | KubeLinter (cluster-admin-role-binding), Polaris, CIS 5.1.1 |
-| KA-A003 | Pod exec/attach permissions | warning | Polaris (clusterrolePodExecAttach, rolePodExecAttach) |
-| KA-A004 | Secret access permissions | warning | KubeLinter (access-to-secrets), CIS 5.1.2 |
-| KA-A005 | Pod creation permissions | warning | KubeLinter (access-to-create-pods), CIS 5.1.4 |
-
-**Confidence:** MEDIUM-HIGH -- RBAC checks are well-defined in CIS benchmarks and implemented by KubeLinter and Polaris. However, RBAC resources may be less commonly pasted into a browser-based validator (they're often managed by platform teams via GitOps). Worth including because they add credibility and SEO value, but expect lower usage frequency.
-
-### Recommended Category Weights
-
-| Category | Weight | Rationale |
-|----------|--------|-----------|
-| Security | 35% | Container escapes, privilege escalation, host compromise -- highest real-world impact. K8s security is the #1 reason people lint manifests. |
-| Reliability | 20% | Probes, replicas, update strategies -- prevents downtime in production |
-| Best Practice | 20% | Resource limits, labels, operational hygiene -- expected by every K8s practitioner |
-| Schema Validation | 15% | Structural correctness -- foundational but usually caught early |
-| Cross-Resource | 10% | Reference validation between resources -- valuable but inherently limited in single-file browser context |
-
-**Total target: ~67 rules** (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC)
-
-RBAC rules are scored within the Security category since they are security-focused checks. The 6 categories above represent 5 weighted scoring dimensions (with RBAC folded into Security).
-
-This is 72% more rules than the Dockerfile Analyzer (39 rules) and 29% more than the Compose Validator (52 rules), reflecting the significantly larger K8s configuration surface area.
-
----
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = product feels incomplete.
+Features users assume exist on any modernized statistics reference site. Missing these means the pillar feels incomplete or amateurish compared to NIST's original, Seeing Theory, Khan Academy, or Stat Trek.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| CodeMirror 6 editor with YAML syntax highlighting | Two prior tools set this precedent | LOW | Direct reuse of @codemirror/lang-yaml from Compose Validator |
-| Multi-document YAML support (`---` separators) | K8s manifests are almost always multi-document | MEDIUM | Must parse each document independently and report per-resource findings |
-| Pre-loaded sample K8s manifest with deliberate issues | Established pattern from both prior tools | LOW | New sample, same pattern |
-| On-demand analysis (Analyze button + Cmd/Ctrl+Enter) | Proven UX from two prior tools | LOW | Direct reuse |
-| Per-resource-type schema validation (K8s 1.31) | kubeconform and every CLI tool does this; browser tools that lack it feel shallow | HIGH | Bundle K8s JSON Schemas for 18 resource types; per-document apiVersion/kind detection |
-| Security checks (Pod Security Standards aligned) | EVERY K8s linting tool leads with security; users expect it | MEDIUM | 20 rules covering PSS Baseline + Restricted profiles |
-| Reliability checks (probes, replicas, update strategy) | Second most expected category after security | MEDIUM | 12 rules sourced from kube-score, Polaris, KubeLinter consensus |
-| Resource limits/requests validation | Most universally agreed-upon K8s best practice | LOW | 4 rules checking CPU/memory requests and limits |
-| Category-weighted 0-100 scoring with letter grades | Trademark of the tool suite | LOW | Adapt scorer.ts with new 5-category weights |
-| Inline editor annotations | Established pattern | LOW | Direct reuse of highlight-line.ts |
-| Score gauge with letter grade | Visual centerpiece | LOW | Direct reuse |
-| Category breakdown panel | Shows where points are lost | LOW | Adapt with new category names |
-| Violation list (severity-grouped, click-to-navigate) | Standard results presentation | LOW | Direct reuse |
-| Per-rule documentation pages at /tools/k8s-analyzer/rules/[code] | SEO powerhouse -- 67+ indexable pages | MEDIUM | Mirror existing rule page template |
-| Score badge PNG download | Proven sharing feature | LOW | Adapt badge-generator.ts |
-| Shareable URL state (lz-string, `#k8s=` prefix) | Users want to share findings | LOW | Adapt url-state.ts with new hash prefix |
-| Deprecated API version detection | Official K8s deprecation guide exists; users expect this flagged | LOW | extensions/v1beta1 -> apps/v1, etc. |
-| Image tag/latest detection | Every single competing tool checks this | LOW | Same pattern as Compose Validator CV-C014 |
+| **Filterable card grid landing page** | Every encyclopedia-style pillar on this site (Beauty Index, Database Compass) has a filterable grid. Users expect to browse and find techniques by category. The NIST handbook's plain hyperlink table of contents is exactly what we're replacing. | MEDIUM | Reuse `UseCaseFilter.tsx` / `LanguageFilter.tsx` pattern from db-compass/beauty-index. Filter by category (Graphical, Quantitative, Distribution, Case Study). Cards need thumbnail SVG preview, technique name, complexity indicator. Data attributes on cards, React island for filter toggle. |
+| **Build-time SVG plot for every technique page** | The NIST handbook's static GIF/PNG plots are its most useful asset. Every technique page must show at least one representative plot rendered at build time. This is the visual in "Visual Encyclopedia." Without plots, it's just another text-heavy stats reference. | HIGH | 30 graphical technique pages each need at least one SVG plot computed from sample data at build time. Use Astro component pattern from `RadarChart.astro` -- pure SVG, zero client JS. Must handle diverse chart types: histograms, scatter plots, box plots, probability plots, autocorrelation plots, spectral plots, etc. This is the highest-effort table-stakes feature. |
+| **KaTeX formula rendering** | Every quantitative technique and distribution page requires mathematical notation. Users of statistics references expect properly typeset formulas, not plain text or images of equations. Seeing Theory, R Psychologist, and every modern stats site uses LaTeX-rendered math. | LOW | KaTeX already works with `astro-expressive-code` and MDX. Add `remark-math` + `rehype-katex` to the Astro pipeline. Both inline `$...$` and display `$$...$$` math. Site already renders MDX blog posts; same pipeline. One-time config, then authors just write LaTeX in MDX files. |
+| **Python code examples** | The NIST handbook uses Dataplot (obsolete). Modern practitioners use Python (pandas, matplotlib, scipy, numpy). Every quantitative technique and distribution page should show how to compute/plot the technique in Python. This is what makes the encyclopedia actionable, not just theoretical. | LOW | `astro-expressive-code` already handles syntax highlighting including Python. Each technique page includes a fenced code block with Python. No runtime execution needed -- static code display with copy button (expressive-code provides this). |
+| **Technique categorization taxonomy** | The NIST handbook organizes EDA techniques into graphical techniques, quantitative techniques, and probability distributions. Users expect clear categorical navigation. Without taxonomy, 80+ pages feel like an undifferentiated blob. | LOW | Define categories in a TypeScript data file (like `use-case-categories.ts` in db-compass). Categories: Foundations, Graphical Techniques, Quantitative Techniques, Probability Distributions, Case Studies, Reference. Each technique tagged with one primary category and optional secondary tags (e.g., "location", "scale", "randomness", "normality"). |
+| **Breadcrumb navigation** | With 86+ pages in a deep hierarchy (landing > category > technique), users need orientation. The site already has breadcrumbs on tool rule pages. NIST's handbook has breadcrumb-like navigation at the top of every page -- users expect this. | LOW | Reuse existing breadcrumb pattern from tool rule pages. `EDA Encyclopedia > Graphical Techniques > Histogram`. Astro component, no client JS. |
+| **Cross-linking between related techniques** | The NIST handbook links related sections extensively (e.g., histogram page links to normal probability plot, box plot, run-sequence plot). Statistics techniques form a web of related concepts. Without cross-links, each page is an island. | LOW | Add `relatedTechniques: string[]` field to each technique's data entry (array of slugs). Render a "Related Techniques" section at the bottom of each page with card links. Similar to the `related.ts` pattern in dockerfile-analyzer rules. |
+| **Responsive layout** | Mobile usage for reference sites is significant. NIST's handbook renders poorly on mobile (fixed-width tables, small images). A modern replacement must be mobile-first. | LOW | Tailwind CSS handles this. Build-time SVGs scale with `viewBox`. Existing site is fully responsive. No extra effort beyond using established patterns. |
+| **SEO metadata per page** | 86+ individually indexed pages are the SEO powerhouse of this pillar (same strategy as the 67 K8s analyzer rule pages). Each page needs unique title, description, OG image, JSON-LD. | MEDIUM | Reuse `SEOHead.astro` pattern. Generate OG images at build time using `satori` (proven pattern). JSON-LD `Article` or `TechArticle` schema per page. Bulk generation script for OG images across 86 pages -- same approach as blog post OG images. |
+| **Consistent page template** | Every technique page should follow a predictable structure: title, category badge, "What it is", "When to use it", visual plot, interpretation guide, formula (if applicable), Python code, related techniques. Users expect consistency across an encyclopedia. | MEDIUM | Create a single `EdaTechniquePage.astro` layout component. Props: technique data object. Sections conditionally render based on data presence. Similar to how `[slug].astro` works for blog posts but with more structured sections. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart. Not required, but high value.
+Features that set this apart from NIST's original handbook, Seeing Theory, Khan Academy, Stat Trek, and other statistics references. These are where the "Visual Encyclopedia" earns its name.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Interactive resource relationship graph | NO browser K8s tool visualizes how Deployments, Services, ConfigMaps, Secrets, PVCs, and Ingresses reference each other. This is THE headline feature. | HIGH | React Flow + dagre layout. Nodes = K8s resources (color-coded by kind). Edges = references (Service->Deployment selector, Deployment->ConfigMap volume/envFrom, Ingress->Service backend, etc.) |
-| Cross-resource validation with graph integration | Dangling references (Service selecting nothing, Ingress pointing to missing Service) are both flagged as violations AND shown as red dashed edges in the graph | HIGH | Requires building resource registry from all parsed documents, resolving selectors and references |
-| Pod Security Standards (PSS) profile mapping | Each security rule explicitly maps to PSS Baseline or Restricted profile. Results panel shows "Baseline: X violations, Restricted: Y violations" so users know their PSS compliance level at a glance | MEDIUM | Metadata on security rules; summary calculation in scorer |
-| RBAC analysis | Validate Role/ClusterRole/RoleBinding for over-permissive configs (wildcards, cluster-admin, exec/attach). No browser tool does this. | MEDIUM | 5 rules targeting RBAC resource types specifically |
-| 18 resource type coverage | Deployment, StatefulSet, DaemonSet, Service, Ingress, ConfigMap, Secret, PVC, PV, Job, CronJob, NetworkPolicy, Role, ClusterRole, RoleBinding, ClusterRoleBinding, HPA, PDB -- broader than any browser competitor | HIGH | Each requires its own schema bundle and resource-type-specific rules |
-| Multi-document resource count and type summary | Before even scoring, show "Found: 3 Deployments, 2 Services, 1 ConfigMap, 1 Secret" -- instant structural overview | LOW | Byproduct of multi-document parsing |
-| CIS Benchmark reference tags | Security rules tagged with CIS Kubernetes Benchmark control numbers (5.1.1, 5.1.2, 5.2.x) where applicable | LOW | Metadata tags on rule definitions; shown in rule documentation pages |
-| Companion blog post ("Kubernetes Manifest Best Practices") | SEO content pillar; bidirectional cross-linking with tool | MEDIUM | Same MDX blog pattern |
-| Homepage callout + JSON-LD + OG images | Standard site integration for discoverability | LOW | Proven pattern |
+| **Interactive parameter explorers for probability distributions** | Seeing Theory's strongest feature is letting users drag sliders and watch distributions change in real time. The 19 distribution pages should each have a parameter explorer where users adjust mu, sigma, n, p, lambda, etc. and see the PDF/CDF update live. No existing static site does this with the depth of the NIST gallery (19 distributions vs Seeing Theory's ~12). This is the headline differentiator. | HIGH | D3.js client-side rendering in React islands. Each distribution page has an `InteractiveDistribution.tsx` component with parameter sliders. Render PDF + CDF curves. Use `jstat` or hand-coded distribution functions (most are straightforward math). This is Tier 3 interactivity (D3 dynamic rendering). Lazy-load D3 per-page to avoid bundle bloat. ~19 distribution components but share a common shell. |
+| **SVG swap interactivity for graphical techniques** | Beyond static SVGs, users can toggle between different data scenarios on the same chart. E.g., histogram page shows "Normal", "Bimodal", "Skewed Right", "Skewed Left" via dataset selector buttons. The NIST handbook shows these as separate pages; we show them as instant swaps on one page. Distill.pub's "details-on-demand" pattern. | MEDIUM | Tier 2 interactivity. Pre-render multiple SVG variants at build time (one per dataset). Client-side JS swaps `display:none` / `display:block` on button click. Minimal JS, no D3 needed. Each graphical technique with multiple interpretive variants gets this treatment (~15 of the 30 graphical technique pages). Button bar component reusable across pages. |
+| **Interpretation guides with annotated plots** | Every graphical technique page shows not just the plot but how to read it. Annotations on the SVG (arrows, callout labels, highlighted regions) that explain "this peak means X", "this tail indicates Y". NIST has text-only interpretation. Seeing Theory has no interpretation guidance. R Psychologist does this well but only for ~8 concepts. | MEDIUM | Build-time SVG annotations rendered as additional SVG elements (text, lines, arrows, colored regions). No client JS needed. Part of the SVG generation logic. Each annotated plot is a dedicated Astro component variant. ~20 pages get annotations. Design effort is moderate; code effort is low per annotation. |
+| **"EDA 4-Plot" interactive diagnostic page** | The NIST handbook's 4-Plot (run-sequence, lag plot, histogram, normal probability plot) is its signature diagnostic tool. An interactive version where users paste their own data (CSV or space-separated) and see all 4 plots generated client-side would be a unique differentiator. No existing browser tool does this. | HIGH | React island with text input for data, D3 rendering of 4 plots simultaneously. CSV parsing (simple split). Shares distribution fitting logic with distribution pages. This is the "tool" differentiator that parallels the Dockerfile Analyzer / K8s Analyzer pattern on this site. URL state with `lz-string` for shareable 4-plots. |
+| **Case studies with step-by-step EDA walkthrough** | The NIST handbook has 9 case studies (ceramic strength, heat flow meter, etc.) that walk through the full EDA process. Modernizing these with step-by-step narrative -- where each step reveals a new plot and interpretation -- creates a learning experience no static reference offers. | HIGH | 9 case study pages, each with 5-10 steps. Each step: narrative text + plot (build-time SVG) + interpretation. Use scroll-triggered section reveals (GSAP ScrollTrigger already in the site). Data for each case study is static (from NIST public domain datasets). Not true scrollytelling (too complex for static site), but step-based accordion/tab progression with animated reveals. |
+| **Expandable formula tooltips** | KaTeX formulas with hover/click tooltips that explain each symbol. E.g., hovering over sigma shows "population standard deviation". Distill.pub pioneered this pattern. Reduces cognitive load for readers who know some but not all notation. | MEDIUM | Custom KaTeX macro that wraps symbols in `<span>` with tooltip data attributes. CSS tooltip on hover. Works with existing KaTeX pipeline. Define a symbol glossary once (sigma, mu, chi-squared, etc.) and reuse across all pages. ~50 symbols to define. No D3 or heavy JS needed. |
+| **Technique comparison tables** | The NIST handbook organizes techniques "by problem category" (testing location, testing scale, testing normality, etc.). A comparison table showing which techniques apply to which problem category -- with links to each technique page -- provides a decision-making interface that no competitor offers as a structured, filterable reference. | LOW | Build-time rendered Astro component. Data: a matrix of techniques x problem categories (from NIST Section 1.3.4). Renders as a responsive table with checkmarks and links. Similar to the `FeatureMatrix.astro` in beauty-index. One page, one component. |
+| **Distribution relationship diagram** | The NIST handbook Section 1.3.6.2 covers "Related Distributions" (e.g., chi-squared is sum of squared normals, t-distribution is normal/chi-squared ratio). A visual relationship diagram showing how the 19 distributions connect to each other is a unique reference artifact. | MEDIUM | Build-time SVG diagram (like the radar chart pattern). Nodes = distributions, edges = mathematical relationships. Static, not interactive. Could reuse dagre for layout or hand-position nodes in a meaningful arrangement. One component, one page section. Alternative: simple hand-crafted SVG if dagre is overkill for 19 nodes. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems. Explicitly NOT building these.
+Features that seem good but create problems for a static-site statistics encyclopedia.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Helm chart rendering | Real projects use Helm | Template rendering requires a Go runtime (tiller/helm template); cannot run in browser; massive scope | Validate rendered manifests -- users should run `helm template` first, then paste output |
-| Kustomize overlay resolution | Real projects use Kustomize | Same problem -- `kustomize build` requires Go runtime and filesystem access | Same approach -- paste rendered output from `kustomize build` |
-| CRD validation | Custom resources are common in real clusters | CRD schemas are infinite and project-specific; cannot bundle all possible CRDs | Validate core K8s resource types only (18 types); skip unknown `kind` values with informational message |
-| Cluster-connected validation | `kubectl --dry-run=server` catches more issues | Requires API server access; authentication; network calls; privacy/security concerns | Pure client-side static analysis; clearly document this is offline validation |
-| Auto-fix / auto-remediation | KubeLinter and Polaris suggest fixes | Modifying K8s YAML has high blast radius (wrong indentation can change semantics); YAML anchor/alias preservation is hard; security fixes may break application logic | Show detailed fix suggestions with before/after code in rule documentation pages |
-| Real-time as-you-type validation | Feels responsive | Multi-document K8s YAML parsing + schema validation per document is expensive; partial YAML is always invalid; creates noise mid-edit | On-demand analysis (proven UX from two prior tools) |
-| AI-powered analysis | Trendy | Contradicts human-expertise positioning; requires API calls (violates zero-backend architecture); unpredictable suggestions | Expert-written rule explanations with production consequences |
-| Container image vulnerability scanning | Snyk/Trivy do this | Requires network calls to vulnerability databases; rate limits; slow; completely different concern from manifest linting | Out of scope -- link to Snyk/Trivy in companion blog post |
-| Policy-as-code (OPA/Rego, Kyverno) | Enterprises use policy engines | Rego/CEL evaluation in browser is possible but massive scope; not a validator concern; these are enforcement mechanisms | Static lint rules with clear mapping to CIS/PSS standards |
-| Multi-cluster version support | Different clusters run different K8s versions | Version matrix (1.25-1.31) multiplies schema bundles; UI complexity for version selection; diminishing returns | Target K8s 1.31 only; flag deprecated APIs from historical removals |
-
----
+| **In-browser Python/R execution** | "Let users run the code examples live." Jupyter-notebook-in-the-browser feeling. | Requires Pyodide (14MB+ WASM bundle) or server backend. Destroys page load performance. CSP complications. Maintenance burden of Python environment in browser. The code examples are illustrative, not computational -- users should run them locally. | Static code blocks with copy button (astro-expressive-code already does this). Link to a downloadable `.py` file or Jupyter notebook for each case study. |
+| **User data upload for all techniques** | "Let users upload their own CSV data and see every plot applied to it." | Turns an encyclopedia into a data analysis tool. Scope explosion (parsing, error handling, outlier detection, axis scaling for arbitrary data). The 4-Plot interactive tool covers the most valuable use case; extending to all 30+ graphical techniques is 10x the effort for diminishing returns. | Provide the 4-Plot interactive tool as the "bring your own data" feature. All other technique pages use curated sample datasets that demonstrate the technique clearly. |
+| **Real-time formula editing** | "Let users edit the formulas to try different parameter values." | KaTeX renders LaTeX strings; making formulas editable requires a LaTeX editor component, formula parsing, and parameter extraction. Massive scope for minimal educational value -- parameter exploration is better served by the distribution sliders. | Interactive parameter sliders on distribution pages (where parameter exploration matters). Static annotated formulas on technique pages (where the formula is the reference, not the exploration). |
+| **Quiz/assessment system** | "Test comprehension with quizzes after each section." | Turns an encyclopedia/reference into a course. Different content architecture, different user intent. Users come to look up techniques, not take tests. CourseKata and Khan Academy already do this well. | Optional "Check your understanding" callout boxes with a question and expandable answer (pure HTML `<details>` element). No grading, no state, no backend. |
+| **Multi-language support (i18n)** | "Translate the encyclopedia into Spanish, Chinese, etc." like Seeing Theory does. | 86+ pages x N languages = massive translation and maintenance burden. NIST content is English-only public domain. Translation quality for statistical terminology requires domain expertise. | English only. Formulas are universal. Python code is universal. If demand materializes, i18n can be added to the Astro pipeline later (Astro has i18n routing support). |
+| **Animated plot transitions** | "Animate the histogram bars growing, the scatter points appearing, the distribution curves drawing." | GSAP/D3 animation on 80+ SVG plots is enormous scope. Most animations add visual polish but not educational value. The SVG swap feature (Tier 2) covers the valuable transitions (e.g., switching between data scenarios). Full animation is Distill.pub territory and requires per-plot choreography. | SVG swap for meaningful transitions (dataset changes). CSS `transition` on hover states for interactivity hints. Reserve D3 animation budget exclusively for the 19 distribution parameter explorers where animation directly serves comprehension. |
+| **Dark mode SVG theming** | "SVG plots should respect dark/light theme toggle." | Every SVG uses hardcoded stroke/fill colors. Dynamic theming requires either CSS custom properties in SVG (limited browser support for external SVG) or rendering two variants of every plot. With 100+ SVGs, this doubles build-time rendering work. | Use a neutral color palette that works on both light and dark backgrounds. The site's `--color-surface` and `--color-text-primary` CSS variables work for page chrome; SVGs use a fixed palette with sufficient contrast on both themes (dark strokes on light fill, with a subtle background rect). Test contrast ratios once, apply consistently. |
 
 ## Feature Dependencies
 
 ```
-[YAML Multi-Document Parser]
+[KaTeX Pipeline Config]
     |
-    +--requires--> [Per-Document apiVersion/kind Detection]
-    |                  |
-    |                  +--requires--> [Resource Type Registry (18 types)]
-    |                  |                  |
-    |                  |                  +--enables--> [Schema Validation (per-resource-type)]
-    |                  |
-    |                  +--enables--> [Resource Summary ("Found: 3 Deployments, 2 Services...")]
+    +--requires--> [Technique Page Template]
+    |                   |
+    |                   +--requires--> [Technique Data Model]
+    |                   |                   |
+    |                   |                   +--requires--> [Category Taxonomy]
+    |                   |
+    |                   +--requires--> [Build-time SVG Plots]
+    |                                       |
+    |                                       +--enhances--> [SVG Swap Interactivity]
+    |                                       |
+    |                                       +--enhances--> [Annotated Plot Variants]
     |
-    +--requires--> [Resource Registry (in-memory index of all parsed resources)]
-                       |
-                       +--enables--> [Cross-Resource Validation]
-                       |                  |
-                       |                  +--enables--> [Interactive Resource Relationship Graph]
-                       |                  |
-                       |                  +--enables--> [Dangling Reference Detection]
-                       |
-                       +--enables--> [Security Rules (per-container analysis)]
-                       +--enables--> [Reliability Rules (per-workload analysis)]
-                       +--enables--> [Best Practice Rules (per-resource analysis)]
-                       +--enables--> [RBAC Analysis (Role/ClusterRole rules)]
+    +--enhances--> [Expandable Formula Tooltips]
 
-[Scoring Engine (adapted from existing scorer)]
+[Category Taxonomy]
     |
-    +--requires--> [All rule categories producing violations]
-    +--enables--> [Score Gauge Component]
-    +--enables--> [Category Breakdown Panel]
-    +--enables--> [PSS Profile Summary (Baseline/Restricted compliance)]
-    +--enables--> [Badge Generator]
-    +--enables--> [URL State (shareable links)]
+    +--requires--> [Filterable Card Grid Landing Page]
+    |
+    +--requires--> [Technique Comparison Tables]
 
-[CodeMirror 6 Editor]
+[Build-time SVG Plots]
     |
-    +--requires--> [@codemirror/lang-yaml (already installed)]
-    +--enables--> [Inline Annotations]
-    +--enables--> [Click-to-navigate from violations]
+    +--enhances--> [Distribution Parameter Explorers] (D3 replaces static SVG)
+    |
+    +--enhances--> [4-Plot Interactive Diagnostic]
+    |
+    +--enhances--> [Case Study Walkthroughs]
 
-[Rule Documentation Pages]
-    |
-    +--requires--> [Rule definitions with explanations, CIS/PSS tags, fix suggestions]
-    +--enables--> [SEO indexable pages (67+)]
+[Cross-linking] --requires--> [Technique Data Model] (needs slug references)
 
-[Interactive Resource Relationship Graph]
-    |
-    +--requires--> [Resource Registry (from multi-doc parser)]
-    +--requires--> [Cross-Resource Validation results (edges with validity status)]
-    +--requires--> [React Flow + dagre layout]
-    +--enables--> [Visual dangling reference highlighting]
-    +--enables--> [Resource kind color-coding]
+[SEO Metadata] --requires--> [Technique Page Template] (needs page structure)
+
+[Breadcrumbs] --requires--> [Category Taxonomy] (needs hierarchy)
+
+[Distribution Relationship Diagram] --requires--> [Distribution Data Model]
+
+[4-Plot Interactive] --conflicts--> [Early phases] (depends on histogram, lag plot,
+    normal probability plot, and run-sequence plot SVG generators all being built first)
 ```
 
 ### Dependency Notes
 
-- **Multi-document parser is foundational:** Everything depends on splitting YAML on `---`, parsing each document, and detecting apiVersion/kind. The `yaml` npm package (already used in Compose Validator) handles multi-document parsing via `parseAllDocuments()`.
-- **Resource registry is the key new concept:** Unlike the Compose Validator (which has a single document model), the K8s Analyzer must build an in-memory index of all resources by kind+name so cross-resource rules and the graph can resolve references.
-- **Schema validation per resource type:** Requires bundling ~18 JSON Schema files at build time. These are substantial files (10-80KB each). Must be tree-shaken or lazy-loaded to maintain bundle size.
-- **Cross-resource validation requires the graph builder:** The same data structure that powers the visual graph (edges between resources) also powers the "dangling reference" checks.
-- **RBAC rules are independent of cross-resource:** They examine Role/ClusterRole resources in isolation for over-permissive patterns.
-- **PSS profile mapping is metadata-only:** Each security rule has a `pssProfile: 'baseline' | 'restricted' | null` tag. The summary calculation is trivial once rules are tagged.
-- **React Flow can be lazy-loaded:** Proven pattern from Compose Validator (222KB separate chunk). Same approach here.
-
----
+- **Technique Page Template requires Technique Data Model:** The page template renders fields from the data model (title, category, formula, interpretation, related techniques). The data model must be defined before the template can be built.
+- **Build-time SVG Plots require Technique Data Model:** Each plot is parameterized by sample data defined in the data model. The SVG generator functions consume data arrays and render chart-specific SVGs.
+- **SVG Swap Interactivity enhances Build-time SVG Plots:** SVG swap is an overlay on static SVGs -- it pre-renders multiple variants and adds client-side toggle. Cannot exist without the base SVG generation capability.
+- **Distribution Parameter Explorers replace Build-time SVG Plots:** On distribution pages, the static build-time SVG serves as the initial view (SSR fallback), and the D3 interactive version hydrates on top. The static SVG must exist first.
+- **4-Plot Interactive conflicts with early phases:** The 4-Plot tool requires histogram, lag plot, normal probability plot, and run-sequence plot generators to all be implemented and tested. It cannot be built until all four underlying chart types are production-ready. Schedule it after all graphical technique pages are complete.
+- **Filterable Card Grid requires Category Taxonomy:** The filter buttons correspond to taxonomy categories. The taxonomy must be defined before the grid can filter.
+- **Expandable Formula Tooltips enhance KaTeX Pipeline:** Tooltips are a KaTeX macro layer on top of the base rendering pipeline. Base KaTeX must work first.
 
 ## MVP Definition
 
-### Launch With (v1.7)
+### Launch With (v1)
 
-Everything needed to ship a credible K8s manifest analyzer that surpasses every existing browser-based tool.
+Minimum viable encyclopedia -- enough to demonstrate the concept and start generating SEO value.
 
-- [ ] Multi-document YAML parsing with per-document apiVersion/kind detection -- foundational
-- [ ] Per-resource-type schema validation for 18 K8s resource types (K8s 1.31 schemas) -- structural correctness baseline
-- [ ] Security rules (~20 rules) with PSS Baseline/Restricted profile mapping -- the primary value proposition
-- [ ] Reliability rules (~12 rules) -- probes, replicas, update strategy, image tags
-- [ ] Best practice rules (~12 rules) -- resource limits, labels, namespace, operational hygiene
-- [ ] RBAC analysis (~5 rules) -- wildcard permissions, cluster-admin binding, exec/attach
-- [ ] Cross-resource validation (~8 rules) -- Service->Deployment selector matching, Ingress->Service, ConfigMap/Secret/PVC/SA references, NetworkPolicy->Pod, HPA->target
-- [ ] Category-weighted scoring (Security 35%, Reliability 20%, Best Practice 20%, Schema 15%, Cross-Resource 10%)
-- [ ] CodeMirror 6 YAML editor with dark theme, sample manifest, Cmd/Ctrl+Enter shortcut
-- [ ] Inline annotations (squiggly underlines + gutter markers)
-- [ ] Score gauge, category breakdown, violation list (tabbed results panel)
-- [ ] Resource summary panel ("Found: 3 Deployments, 2 Services, 1 ConfigMap")
-- [ ] Interactive resource relationship graph (React Flow + dagre) -- headline differentiator
-- [ ] Dangling references shown as red dashed edges in graph
-- [ ] Per-rule documentation pages (67+ pages at /tools/k8s-analyzer/rules/[code])
-- [ ] PSS profile tags and CIS benchmark references on rule documentation pages
-- [ ] Score badge download (PNG)
-- [ ] Shareable URL state (lz-string, `#k8s=` prefix)
-- [ ] Companion blog post
-- [ ] OG images, homepage callout, header navigation, JSON-LD, breadcrumbs, sitemap
+- [ ] **Category taxonomy and technique data model** -- Foundation for all pages; defines the structure
+- [ ] **Filterable card grid landing page** -- Entry point; first impression; reuses proven pattern
+- [ ] **Technique page template** -- Consistent structure across all pages
+- [ ] **KaTeX formula rendering** -- Required for quantitative technique and distribution pages
+- [ ] **6 Foundations pages** -- EDA philosophy, assumptions; narrative content, minimal SVG
+- [ ] **10 highest-value graphical technique pages with build-time SVGs** -- Histogram, box plot, scatter plot, normal probability plot, run-sequence plot, lag plot, autocorrelation plot, 4-plot, 6-plot, probability plot. These are the most-referenced techniques in the NIST handbook.
+- [ ] **5 core quantitative technique pages** -- Measures of location, measures of scale, t-test, ANOVA, Anderson-Darling test. Cover the fundamentals.
+- [ ] **5 core probability distribution pages** -- Normal, uniform, t, chi-squared, exponential. The five most commonly referenced distributions.
+- [ ] **Python code examples on all technique/distribution pages** -- Static code blocks with copy button
+- [ ] **Cross-linking between related techniques** -- "Related Techniques" section on each page
+- [ ] **Breadcrumbs** -- Orientation within the hierarchy
+- [ ] **SEO metadata** -- Title, description, OG images for launched pages
 
 ### Add After Validation (v1.x)
 
-Features to add once core is working and user feedback is available.
+Features to add once the core encyclopedia pattern is proven and initial pages are live.
 
-- [ ] Resource kind color-coding in relationship graph (blue for workloads, green for services, yellow for config, purple for RBAC)
-- [ ] Graph export as PNG/SVG
-- [ ] K8s version selector (1.28, 1.29, 1.30, 1.31) for schema validation
-- [ ] Namespace grouping in graph visualization
-- [ ] Additional resource types (ServiceMonitor, Ingress routes, etc.)
-- [ ] Fix suggestions panel with copy-to-clipboard before/after code
+- [ ] **Remaining 20 graphical technique pages** -- Trigger: v1 pages are live and generating traffic
+- [ ] **Remaining 13 quantitative technique pages** -- Trigger: v1 quantitative pages validated
+- [ ] **Remaining 14 probability distribution pages** -- Trigger: distribution page template proven
+- [ ] **SVG swap interactivity for graphical techniques** -- Trigger: static SVGs working; adds Tier 2 interactivity
+- [ ] **Annotated plot variants** -- Trigger: base SVG plots stable; adds interpretation layer
+- [ ] **Interactive parameter explorers for distributions** -- Trigger: all 19 distribution pages have static SVGs; add D3 layer
+- [ ] **Expandable formula tooltips** -- Trigger: KaTeX rendering stable; symbol glossary defined
+- [ ] **Technique comparison tables** -- Trigger: enough techniques to make comparison meaningful
+- [ ] **4 Reference pages** -- Trigger: technique pages complete enough to reference
 
 ### Future Consideration (v2+)
 
-Features to defer until the tool has proven its value.
+Features to defer until the encyclopedia has meaningful traffic and validated user interest.
 
-- [ ] Custom rule configuration (enable/disable individual rules, adjust severity)
-- [ ] Partial CRD support (common CRDs like cert-manager, external-dns)
-- [ ] Import from URL (fetch manifest from raw GitHub URL)
-- [ ] Side-by-side diff comparison of two manifests
-- [ ] Integration with Compose Validator (detect manifests vs compose files automatically)
-
----
+- [ ] **4-Plot interactive diagnostic tool** -- Defer because it requires all four chart types to be production-ready, CSV parsing, URL state, and is essentially a mini-tool. Build after the encyclopedia content is complete.
+- [ ] **9 Case study walkthrough pages** -- Defer because step-by-step walkthroughs with scrollytelling-style reveals are the highest per-page effort. Build after technique pages prove the format.
+- [ ] **Distribution relationship diagram** -- Defer because it requires all 19 distribution pages to exist for the links to work. Build as a capstone after all distribution pages are live.
+- [ ] **Downloadable Python notebooks (.ipynb)** -- Defer because packaging executable notebooks requires additional tooling and maintenance. Only if user demand surfaces.
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority | Notes |
-|---------|------------|---------------------|----------|-------|
-| Multi-document YAML parsing + resource detection | HIGH | MEDIUM | P1 | Foundation for everything else |
-| Per-resource-type schema validation (18 types) | HIGH | HIGH | P1 | Credibility baseline -- kubeconform-level schema checking |
-| Security rules (20 rules, PSS mapped) | HIGH | MEDIUM | P1 | #1 reason users lint K8s manifests |
-| Reliability rules (12 rules) | HIGH | MEDIUM | P1 | Probes + replicas are universally expected |
-| Best practice rules (12 rules) | HIGH | LOW | P1 | Resource limits are universally expected |
-| RBAC analysis (5 rules) | MEDIUM | MEDIUM | P1 | Unique for browser tool; CIS-aligned credibility |
-| Cross-resource validation (8 rules) | HIGH | HIGH | P1 | Headline differentiator -- no browser tool does this |
-| Category-weighted scoring | HIGH | LOW | P1 | Proven pattern; adapted from existing scorer |
-| CodeMirror 6 YAML editor | HIGH | LOW | P1 | Direct reuse from Compose Validator |
-| Inline annotations | HIGH | LOW | P1 | Direct reuse |
-| Score gauge + category breakdown + violations | HIGH | LOW | P1 | Direct reuse |
-| Interactive resource relationship graph | HIGH | HIGH | P1 | Headline visual differentiator |
-| Per-rule documentation pages (67+ pages) | HIGH | MEDIUM | P1 | SEO powerhouse; expert credibility |
-| Score badge + shareable URL | MEDIUM | LOW | P1 | Low cost, proven feature |
-| Companion blog post | MEDIUM | MEDIUM | P1 | SEO content pillar |
-| OG images + JSON-LD + site integration | MEDIUM | LOW | P1 | Standard site integration |
-| PSS profile summary in results | MEDIUM | LOW | P1 | Low-cost add-on to security rules |
-| Resource summary panel | MEDIUM | LOW | P1 | Low-cost; immediate user orientation |
-| K8s version selector | LOW | HIGH | P2 | Requires bundling multiple schema versions |
-| Graph export (PNG/SVG) | LOW | LOW | P2 | Nice to have |
-| Resource kind color-coding in graph | MEDIUM | LOW | P2 | Visual polish for the graph |
-| Custom rule configuration | LOW | MEDIUM | P3 | Power user feature |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Filterable card grid landing page | HIGH | LOW | P1 |
+| Build-time SVG plots (core 10) | HIGH | HIGH | P1 |
+| KaTeX formula rendering | HIGH | LOW | P1 |
+| Technique page template | HIGH | MEDIUM | P1 |
+| Category taxonomy | HIGH | LOW | P1 |
+| Python code examples | HIGH | LOW | P1 |
+| Breadcrumbs | MEDIUM | LOW | P1 |
+| Cross-linking | MEDIUM | LOW | P1 |
+| SEO metadata per page | MEDIUM | MEDIUM | P1 |
+| Foundations pages (6) | MEDIUM | LOW | P1 |
+| SVG swap interactivity | HIGH | MEDIUM | P2 |
+| Annotated plot variants | HIGH | MEDIUM | P2 |
+| Remaining graphical techniques (20) | MEDIUM | HIGH | P2 |
+| Remaining quantitative techniques (13) | MEDIUM | MEDIUM | P2 |
+| Remaining distributions (14) | MEDIUM | MEDIUM | P2 |
+| Interactive distribution explorers | HIGH | HIGH | P2 |
+| Expandable formula tooltips | MEDIUM | MEDIUM | P2 |
+| Technique comparison tables | MEDIUM | LOW | P2 |
+| Reference pages (4) | LOW | LOW | P2 |
+| 4-Plot interactive tool | HIGH | HIGH | P3 |
+| Case study walkthroughs (9) | HIGH | HIGH | P3 |
+| Distribution relationship diagram | MEDIUM | MEDIUM | P3 |
 
----
+**Priority key:**
+- P1: Must have for launch -- defines the encyclopedia pattern and proves the concept
+- P2: Should have, add incrementally -- expands content and adds interactivity layers
+- P3: Nice to have, future consideration -- high-effort features that build on complete content
 
 ## Competitor Feature Analysis
 
-| Feature | KubeLinter (CLI) | Polaris (CLI+Dashboard) | kube-score (CLI) | Checkov (CLI) | EaseCloud (Web) | Our Approach |
-|---------|-----------------|------------------------|-----------------|---------------|-----------------|-------------|
-| Schema validation | Yes (basic) | No | No (best practice focus) | No (policy focus) | Yes (K8s 1.19-1.30) | Yes -- per-resource-type for 18 types, K8s 1.31 |
-| Security checks | Yes (14+ checks) | Yes (24 checks) | Yes (5 checks) | Yes (45+ CKV_K8S checks) | Yes (basic PSS) | Yes -- 20 rules, PSS Baseline/Restricted mapped, CIS-tagged |
-| Reliability checks | Yes (probes, replicas) | Yes (12 checks) | Yes (strongest, 15+ checks) | Yes (probes, resources) | Basic | Yes -- 12 rules sourced from kube-score/Polaris consensus |
-| Resource limits | Yes | Yes (4 checks) | Yes | Yes | Yes | Yes -- 4 explicit rules |
-| RBAC analysis | Yes (5 checks) | Yes (8 checks) | No | Yes (wildcards) | No | Yes -- 5 rules, CIS 5.1 mapped |
-| Cross-resource validation | Yes ("dangling-*" checks: Service, Ingress, NetworkPolicy, HPA, ServiceMonitor) | No | Yes (service-targets-pod, ingress-targets-service, networkpolicy-targets-pod) | No | No | Yes -- 8 rules with VISUAL graph integration |
-| Scoring system | None | Category pass/fail | OK/WARNING/CRITICAL per-check | Pass/fail per-check | Error/Warning/Info | Category-weighted 0-100 with letter grades |
-| Visualization | None | Dashboard (cluster-connected) | None | None | None | Interactive resource relationship graph (React Flow) |
-| Browser-based | No | No (dashboard needs cluster) | No | No | Yes | Yes -- fully client-side |
-| Per-rule documentation | Markdown | Docs site | README_CHECKS.md | Policy index | None | 67+ dedicated SEO pages with expert explanations |
-| Deprecated API detection | Yes (no-extensions-v1beta) | No | Yes (stable-version) | No | Yes | Yes -- comprehensive deprecation guide mapping |
-| PSS profile mapping | No | Implicit in checks | No | Implicit | Yes (Baseline/Restricted) | Yes -- explicit per-rule PSS profile tags |
-| Custom rules | Yes (templates) | Yes (JSON Schema) | No | Yes (Python) | No | No (anti-feature for v1; P3 for future) |
-| Badge/sharing | No | No | No | No | No | PNG badge + lz-string URL |
-| Multi-document | Yes | N/A (cluster) | Yes | Yes | Yes | Yes -- per-resource parsing and validation |
+| Feature | NIST Handbook | Seeing Theory | R Psychologist | Stat Trek | Khan Academy | Our Approach |
+|---------|--------------|---------------|----------------|-----------|-------------|--------------|
+| **Content scope** | Comprehensive: 33 graphical, 18 quantitative, 19 distributions, 9 case studies. The gold standard for EDA coverage. | Narrow: 6 chapters, 18 visualizations. Covers probability/inference, not EDA techniques. | Narrow: ~8 interactive visualizations. Effect size, power, CI, Bayes. | Broad: Dictionary-style entries for 100+ terms. Text-heavy, few visuals. | Broad: Full AP Statistics curriculum. Video-first, exercise-second. | Comprehensive like NIST (86+ pages) but modernized. Covers the full NIST Ch. 1 scope with visual-first presentation. |
+| **Visual quality** | Poor: 1990s-era static GIFs. Small, pixelated, fixed-size. No responsive scaling. The content is authoritative but the presentation is 25 years behind. | Excellent: D3.js animations, smooth transitions, beautiful color palette. The benchmark for visual quality in statistics education. | Good: Clean D3 visualizations with academic aesthetic. Purposeful design, not decorative. | Poor: Minimal visuals. Occasional static images. Text-dominant. | Good: Polished video production. In-browser exercises have clean UI. | High: Build-time SVGs with consistent design language. Not animated (Seeing Theory territory) but crisp, responsive, and annotated. Distribution pages get D3 interactivity. |
+| **Interactivity** | None. Completely static HTML. Users cannot interact with any visualization. The handbook is a reference document, not an interactive experience. | High: Every visualization has sliders, dropdowns, drag-and-drop. Interactivity is the core value proposition. But no code, no formulas, no "how to compute this." | High: Parameter sliders directly modify visualizations. Clear cause-effect feedback loops. Small scope but deep interaction. | None. Pure text reference with occasional formula images. | Medium: Video + practice exercises. Not interactive visualizations -- quiz-style interaction. | Three-tier: (1) Static SVG for all technique pages (zero JS), (2) SVG swap for dataset variants (minimal JS), (3) D3 interactive parameter explorers for distributions (full JS). Avoids Seeing Theory's "everything interactive" approach which limits content scope. |
+| **Mathematical rigor** | High: Full formulas, parameter definitions, estimation methods. Written by NIST statisticians. The definitive reference. | Low: Formulas are minimal. Visual-first, math-second. Great for intuition, weak for reference. | Medium: Key formulas shown, but emphasis is on visual intuition over derivation. | High: Formulas present in entries. Text explanation of computation steps. | Medium: Videos explain concepts. Formulas shown but not the focus. | High: Full KaTeX formulas (matching NIST rigor), plus annotated tooltips that explain notation, plus Python code that makes formulas executable. The "show the math AND make it accessible" approach. |
+| **Code examples** | Uses Dataplot (obsolete NIST-internal software). Completely unusable for modern practitioners. The biggest gap in the original handbook. | None. Visual-only. Users cannot see how to reproduce any visualization in code. | None in the visualizations. Blog posts have R code. | None. | None directly; separate computing exercises use JavaScript. | Python (pandas, matplotlib, scipy, numpy) on every technique and distribution page. Copy-button code blocks. This is the "actionable reference" differentiator that no competitor provides alongside visual explanation. |
+| **Navigation** | Deep hierarchy with numbered sections (1.3.3.14.5). Hard to browse. No filtering. Must know what you're looking for or read sequentially. Table of contents is a wall of hyperlinks. | Clean 6-chapter structure. Easy to navigate but limited scope (18 pages total). No search or filtering needed because the content is small. | Simple list of ~8 tools. Tiny scope, trivially navigable. | Alphabetical dictionary + topic index. Good for lookup, bad for discovery. | Structured curriculum with progress tracking. Designed for sequential learning, not reference lookup. | Filterable card grid (proven pattern from Beauty Index/Database Compass). Filter by category, browse by card. Plus breadcrumbs, cross-links, and technique comparison tables. Designed for both sequential learning and random-access reference. |
+| **Mobile experience** | Terrible. Fixed-width layout from 2003. Tables overflow. Images don't scale. Unusable on phones. | Good. Responsive D3 visualizations. Touch-friendly sliders. | Good. Responsive layout. Touch-friendly. | Adequate. Simple text renders fine on mobile. | Excellent. Native app and responsive web. | Excellent. Tailwind CSS responsive grid. Build-time SVGs scale with viewBox. Distribution sliders touch-friendly. Same pattern as existing mobile-optimized pillars. |
+| **SEO value** | High (established .gov domain authority). But individual page titles are generic ("1.3.3.14 Histogram") and content is not structured for modern SEO. | Low. Single-page app. Search engines see one page, not 18 individual technique pages. | Medium. Individual pages exist but small scope. | High. Individual pages for each term. Good organic search traffic. | Very high. Massive domain authority. Videos in search results. | Very high. 86+ individually indexed pages with keyword-rich titles ("Histogram for EDA: Interpretation Guide with Python Examples"), JSON-LD structured data, OG images. Each page targets a specific long-tail search query. |
+| **Case studies** | Excellent: 9 real-world case studies with actual NIST measurement data. The strongest pedagogical feature of the original. | None. | None. | None. | Some within curriculum flow. | Modernized versions of the NIST case studies (public domain data) with step-by-step walkthrough, modern Python code, and visual progression. Deferred to v2+ due to high per-page effort. |
+| **Accessibility** | Poor. No ARIA labels, no alt text on images, no keyboard navigation for interactive elements. | Mixed. D3 visualizations lack screen reader support. Keyboard navigation limited. | Better. Some ARIA labels. Still D3-dependent. | Good for text content. Simple HTML renders well with screen readers. | Excellent. Major accessibility investment. | Good. Build-time SVGs get `role="img"` and `aria-label` (proven pattern from RadarChart.astro). KaTeX formulas have MathML fallback. Semantic HTML. Keyboard-navigable filters. Interactive distribution sliders need ARIA slider role. |
 
----
+### Competitor Strengths to Learn From
 
-## Supported Resource Types (18)
+**From Seeing Theory:** Parameter sliders on distribution pages are the gold standard for building statistical intuition. The dual PDF/CDF display with color differentiation (yellow PDF, orange CDF) is a design pattern worth adopting. Keep distribution explorers simple -- one distribution per page, 2-3 adjustable parameters, instant visual feedback.
 
-| Resource Type | apiVersion | Schema Needed | Rule Categories |
-|---------------|------------|---------------|-----------------|
-| Deployment | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
-| StatefulSet | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
-| DaemonSet | apps/v1 | Yes | Schema, Security, Reliability, Best Practice, Cross-Resource |
-| Job | batch/v1 | Yes | Schema, Security, Best Practice |
-| CronJob | batch/v1 | Yes | Schema, Security, Best Practice, Reliability |
-| Service | v1 | Yes | Schema, Best Practice, Cross-Resource |
-| Ingress | networking.k8s.io/v1 | Yes | Schema, Cross-Resource |
-| ConfigMap | v1 | Yes | Schema, Cross-Resource |
-| Secret | v1 | Yes | Schema, Security (sensitive data patterns), Cross-Resource |
-| PersistentVolumeClaim | v1 | Yes | Schema, Cross-Resource |
-| PersistentVolume | v1 | Yes | Schema |
-| NetworkPolicy | networking.k8s.io/v1 | Yes | Schema, Cross-Resource |
-| Role | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
-| ClusterRole | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
-| RoleBinding | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
-| ClusterRoleBinding | rbac.authorization.k8s.io/v1 | Yes | Schema, RBAC |
-| HorizontalPodAutoscaler | autoscaling/v2 | Yes | Schema, Cross-Resource, Reliability |
-| PodDisruptionBudget | policy/v1 | Yes | Schema, Reliability |
+**From R Psychologist:** Each visualization focuses on ONE concept and does it deeply. The "overlapping distributions" visualization for Cohen's d is referenced in hundreds of textbooks. Lesson: depth beats breadth for differentiator features. The 4-Plot interactive tool should aim for this level of polish on a single concept.
 
----
+**From Distill.pub:** The five affordances framework (connecting to data, making systems playful, prompting self-reflection, personalizing reading, reducing cognitive load) provides design principles. Most relevant for this project: "reducing cognitive load" via expandable formula tooltips and "making systems playful" via parameter explorers. Key insight: interactivity should be deployed surgically where it enhances understanding, not everywhere.
 
-## Rule Naming Convention
+**From the NIST handbook:** The content itself is exceptional. The systematic coverage (every technique has: purpose, definition, sample plot, interpretation, related techniques) is the structural template to follow. The weakness is purely presentational.
 
-Following the established pattern:
+**From Khan Academy:** Progress tracking and sequential learning paths work for courses, not encyclopedias. Do NOT try to replicate this. The encyclopedia is a reference, not a curriculum.
 
-- **Dockerfile Analyzer:** DL-prefixed (Hadolint-compatible) and PG-prefixed (custom)
-- **Compose Validator:** CV-prefixed with sub-prefixes (CV-S, CV-M, CV-C, CV-B, CV-F)
-- **K8s Manifest Analyzer:** KA-prefixed (K8s Analyzer custom), with sub-prefixes for categories:
-  - `KA-S0xx` -- Schema validation
-  - `KA-C0xx` -- seCurity (including RBAC analysis rules KA-A0xx for docs, scored under Security)
-  - `KA-R0xx` -- Reliability
-  - `KA-B0xx` -- Best practices
-  - `KA-X0xx` -- cross-Resource (X for cross)
-  - `KA-A0xx` -- RBAC Analysis (scored under Security category)
+### Competitor Weaknesses to Exploit
 
-Each rule maps to a documentation URL: `/tools/k8s-analyzer/rules/ka-s001`.
+**NIST Handbook:** Obsolete presentation (1990s HTML), Dataplot software examples (nobody uses Dataplot), no mobile support, no interactivity, no modern code examples. This is the primary competitive gap we're filling.
 
----
+**Seeing Theory:** Beautiful but shallow. Only 18 visualizations. No formulas. No code. No reference depth. Cannot function as a practitioner's reference. We provide depth.
 
-## Sample K8s Manifest Design
+**R Psychologist:** Tiny scope (8 visualizations). Focused on inference concepts, not EDA techniques. We provide breadth.
 
-The pre-loaded sample should contain deliberate issues across ALL categories:
+**Stat Trek:** Text-heavy, visually poor. Good reference structure but feels like reading a textbook from 2005. We provide visual-first presentation.
 
-```yaml
-# Sample K8s manifest with deliberate issues for demonstration
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web-app
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: web
-  template:
-    metadata:
-      labels:
-        app: web-frontend
-    spec:
-      containers:
-        - name: web
-          image: nginx:latest
-          ports:
-            - containerPort: 80
-          securityContext:
-            privileged: true
-            allowPrivilegeEscalation: true
-          env:
-            - name: DB_PASSWORD
-              value: "supersecret123"
-            - name: API_KEY
-              value: "sk-1234567890abcdef"
-          volumeMounts:
-            - name: docker-sock
-              mountPath: /var/run/docker.sock
-            - name: app-config
-              mountPath: /etc/config
-      volumes:
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
-        - name: app-config
-          configMap:
-            name: app-settings
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-service
-spec:
-  type: NodePort
-  selector:
-    app: web-app
-  ports:
-    - port: 80
-      targetPort: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: web-ingress
-spec:
-  rules:
-    - host: example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: missing-service
-                port:
-                  number: 80
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: overpermissive-role
-rules:
-  - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["*"]
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: data-cleanup
-spec:
-  schedule: "0 2 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: cleanup
-              image: busybox
-              command: ["sh", "-c", "echo cleanup"]
-          restartPolicy: OnFailure
-```
+**Khan Academy:** Video-first format means you cannot quickly scan for a specific formula or technique. Encyclopedia format is faster for reference lookup. We provide scanability.
 
-This sample triggers:
-- **Schema:** selector/template label mismatch (web vs web-frontend)
-- **Security:** privileged container, privilege escalation allowed, no runAsNonRoot, docker socket mounted, secrets in env vars, no security context on CronJob, no capabilities dropped, no read-only root filesystem, no seccomp profile
-- **Reliability:** single replica, no liveness probe, no readiness probe, no rolling update strategy, latest tag, no image pull policy
-- **Best Practice:** no CPU/memory requests or limits, no labels beyond app, NodePort service type, SSH-adjacent port exposure, no namespace, no priorityClassName, missing CronJob deadline
-- **Cross-Resource:** Service selector matches no pod template (web-app vs web-frontend), Ingress references missing-service (not defined), ConfigMap app-settings not defined, dangling Service
-- **RBAC:** wildcard permissions on ClusterRole (all apiGroups, resources, verbs)
+## Existing Site Dependencies
 
----
+Features that leverage capabilities already built into the Astro portfolio site.
 
-## Key Implementation Considerations
-
-### Schema Bundle Size
-
-K8s JSON Schemas are large. The Deployment schema alone is ~50-80KB. Bundling 18 types naively would add 500KB-1MB to the build.
-
-**Mitigation:** Lazy-load schemas per resource type. When a document is parsed and its kind is identified, dynamically import only the needed schema. Use Astro/Vite code splitting.
-
-### False Positives in Cross-Resource Validation
-
-Users may paste only a Deployment without its Service, triggering "Service selector matches no Pod template" false positives.
-
-**Mitigation:** Cross-resource rules should default to `info` severity, not `warning` or `error`. The UI should clearly communicate "Checks references within the pasted YAML -- paste complete manifests for best results." The resource summary panel helps users understand what was parsed.
-
-### Multi-Document Line Number Mapping
-
-When YAML is split on `---`, line numbers must be offset correctly so violations point to the right line in the original editor content.
-
-**Mitigation:** The `yaml` package's `parseAllDocuments()` with LineCounter handles this natively. Each document knows its range within the source.
-
----
+| Existing Capability | Location | How EDA Pillar Uses It |
+|---------------------|----------|------------------------|
+| Build-time SVG rendering | `RadarChart.astro`, `CompassRadarChart.astro` | Pattern for all EDA technique SVG plots. Astro frontmatter computes coordinates; template renders `<svg>`. Zero client JS. |
+| Filterable card grid with React island | `UseCaseFilter.tsx`, `ModelCardGrid.astro` | Landing page filter. Data attributes on cards, React toggle buttons, DOM visibility sync. |
+| Nanostore state management | `compassFilterStore.ts`, `languageFilterStore.ts` | Filter state for landing page. SVG swap state for Tier 2 interactivity. |
+| SEO metadata pipeline | `SEOHead.astro`, `PersonJsonLd.astro`, `BlogPostingJsonLd.astro` | Per-page title, description, OG image, JSON-LD. |
+| OG image generation | `satori` + `sharp` in `src/pages/open-graph/` | Bulk OG image generation for 86+ encyclopedia pages. |
+| Expressive Code syntax highlighting | `astro-expressive-code` config in `astro.config.mjs` | Python code blocks with copy button on every technique page. |
+| MDX content pipeline | `@astrojs/mdx`, `src/content.config.ts` | Content authoring for technique pages. KaTeX + code blocks + Astro components. |
+| GSAP ScrollTrigger | `src/lib/scroll-animations.ts` | Animated section reveals on case study walkthrough pages. |
+| lz-string URL state | `lz-string` in compose-validator/k8s-analyzer | URL state for 4-Plot interactive tool (shareable analysis links). |
+| React islands with client:load | `DockerfileAnalyzer.tsx`, `K8sAnalyzer.tsx` | Interactive distribution explorers, 4-Plot tool, filter islands. |
+| D3 (not yet installed) | -- | NEW DEPENDENCY: needed for distribution parameter explorers and 4-Plot tool. Not in current `package.json`. |
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/) -- Official Kubernetes documentation for PSS Baseline/Restricted profiles
-- [Kubernetes API Deprecation Guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) -- Official deprecated API version list
-- [KubeLinter checks.md](https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md) -- Complete list of ~60 KubeLinter checks
-- [Polaris Security Checks](https://polaris.docs.fairwinds.com/checks/security/) -- 24 security checks with severity levels
-- [Polaris Reliability Checks](https://polaris.docs.fairwinds.com/checks/reliability/) -- 12 reliability checks
-- [Polaris Efficiency Checks](https://polaris.docs.fairwinds.com/checks/efficiency/) -- 4 resource limit checks
-- [kube-score README_CHECKS.md](https://github.com/zegl/kube-score/blob/master/README_CHECKS.md) -- Complete list of 43 checks
-- [Checkov Kubernetes Policy Index](https://www.checkov.io/5.Policy%20Index/kubernetes.html) -- 139+ CKV_K8S checks
-- [kubernetes-json-schema registry](https://github.com/yannh/kubernetes-json-schema) -- JSON Schemas used by kubeconform
-- [Kubernetes RBAC Good Practices](https://kubernetes.io/docs/concepts/security/rbac-good-practices/) -- Official RBAC security guidance
+- [NIST/SEMATECH e-Handbook of Statistical Methods Chapter 1](https://www.itl.nist.gov/div898/handbook/eda/eda.htm) -- Complete EDA chapter structure with 33 graphical techniques, 18 quantitative techniques, 19 probability distributions, 9 case studies. Public domain content.
+- [NIST Detailed Table of Contents](https://www.itl.nist.gov/div898/handbook/dtoc.htm) -- Full hierarchical breakdown of all sections and subsections.
+- [Seeing Theory](https://seeing-theory.brown.edu/) -- Brown University interactive probability/statistics platform. 6 chapters, 18 visualizations, D3.js-based.
+- [Seeing Theory - Probability Distributions](https://seeing-theory.brown.edu/probability-distributions/index.html) -- Parameter sliders for discrete/continuous distributions, PMF/PDF + CDF dual display.
+- [Distill.pub: Communicating with Interactive Articles](https://distill.pub/2020/communicating-with-interactive-articles/) -- Five affordances of interactive articles: connecting to data, making playful, prompting reflection, personalizing, reducing cognitive load.
+- [R Psychologist Visualizations](https://rpsychologist.com/viz/) -- Interactive D3.js statistics visualizations: Cohen's d, confidence intervals, statistical power, Bayesian inference.
+- Existing codebase: `RadarChart.astro`, `ModelCardGrid.astro`, `UseCaseFilter.tsx`, `LanguageFilter.tsx` -- Proven build-time SVG, filterable card grid, and React island filter patterns.
 
 ### Secondary (MEDIUM confidence)
-- [EaseCloud K8s Manifest Validator](https://www.easecloud.io/tools/docker/kubernetes-manifest-validator/) -- Browser-based competitor analysis
-- [FOSSA K8s Manifest Linter](https://fossa.com/resources/devops-tools/kubernetes-manifest-linter/) -- Browser-based competitor analysis
-- [ValidKube](https://validkube.com/) -- Browser-based competitor analysis
-- [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes) -- CIS 5.1 RBAC and 5.2 Pod Security controls
-- [Datree GitHub](https://github.com/datreeio/datree) -- 100+ rules (company closed July 2023, project effectively dead)
-
-### Existing Codebase (VERIFIED)
-- `src/lib/tools/dockerfile-analyzer/types.ts` -- LintRule interface, RuleViolation, ScoreResult
-- `src/lib/tools/dockerfile-analyzer/engine.ts` -- rule engine loop pattern
-- `src/lib/tools/dockerfile-analyzer/scorer.ts` -- diminishing returns scoring algorithm
-- `src/lib/tools/dockerfile-analyzer/rules/index.ts` -- rule registry pattern
-- Compose Validator's YAML parsing (yaml npm package), ajv schema validation, React Flow graph
+- [Awesome Explorable Explanations (GitHub)](https://github.com/blob42/awesome-explorables) -- Curated list of interactive explanations across domains.
+- [KaTeX](https://katex.org/) -- Fast math typesetting library for the web. Confirmed SSR support.
+- [D3.js Gallery](https://observablehq.com/@d3/gallery) -- Reference for chart type implementations in D3.
+- [CourseKata](https://www.coursekata.org/) -- Interactive statistics textbook with simulation-based approach. Reference for quiz/assessment anti-feature decision.
+- [OpenIntro: Introduction to Modern Statistics](https://www.openintro.org/book/ims/) -- Modern stats textbook with R tutorials. Reference for code example format.
+- [Gabors Data Analysis Case Studies](http://gabors-data-analysis.com/casestudies/) -- 47 real-world case studies. Reference for case study walkthrough format.
+- [Online Statistics Education (Rice University)](https://onlinestatbook.com/) -- Multimedia statistics course with simulations and demos.
+- [Stat Trek](https://stattrek.com/) -- Free statistics tutorials and tools. Text-heavy reference format.
+- [Khan Academy Statistics](https://www.khanacademy.org/math/statistics-probability) -- Video + exercise curriculum approach.
+- [Scrollytelling Guide 2025](https://ui-deploy.com/blog/complete-scrollytelling-guide-how-to-create-interactive-web-narratives-2025) -- Design patterns for step-based narrative.
 
 ---
-*Feature research for: Kubernetes Manifest Analyzer (v1.7 milestone)*
-*Researched: 2026-02-23*
+*Feature research for: EDA Visual Encyclopedia*
+*Researched: 2026-02-24*
