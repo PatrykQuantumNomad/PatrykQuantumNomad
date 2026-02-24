@@ -11,7 +11,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 - [x] **INFRA-01**: KaTeX pipeline installed and configured (remark-math + rehype-katex) with build-time formula rendering and zero client-side JS
 - [x] **INFRA-02**: KaTeX CSS and woff2 fonts self-hosted, loaded conditionally only on EDA pages that use formulas
-- [ ] **INFRA-03**: D3 micro-modules (d3-scale, d3-shape, d3-axis, d3-selection, d3-array, d3-path) installed and verified to load only on distribution pages via client:visible
+- [x] **INFRA-03**: D3 micro-modules (d3-scale, d3-shape, d3-axis, d3-selection, d3-array, d3-path) installed and verified to load only on distribution pages via client:visible
 - [x] **INFRA-04**: EDALayout.astro created extending base Layout.astro with isolated animation lifecycle (no GSAP/D3 conflicts)
 - [x] **INFRA-05**: OG image caching implemented (content-hash based) to prevent build time regression with 90+ new pages
 - [x] **INFRA-06**: Zod schemas defined for EdaTechnique and EdaDistribution content types in content.config.ts
@@ -19,7 +19,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **INFRA-08**: EDA technique page template (TechniquePage.astro) with slots for plot, formulas, Python code, interpretation, related links
 - [x] **INFRA-09**: Breadcrumb component for EDA pages (EDA > Section > Technique)
 - [x] **INFRA-10**: KaTeX test page validates 10+ representative NIST formula categories without build errors
-- [ ] **INFRA-11**: Vite bundle analysis confirms D3 modules appear only in Tier C page chunks
+- [x] **INFRA-11**: Vite bundle analysis confirms D3 modules appear only in Tier C page chunks
 
 ### Data Model
 
@@ -220,7 +220,7 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | INFRA-01 | Phase 48 | Complete |
 | INFRA-02 | Phase 48 | Complete |
-| INFRA-03 | Phase 48 | Pending |
+| INFRA-03 | Phase 48 | Complete |
 | INFRA-04 | Phase 48 | Complete |
 | INFRA-05 | Phase 48 | Complete |
 | INFRA-06 | Phase 48 | Complete |
@@ -228,7 +228,7 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | INFRA-08 | Phase 48 | Complete |
 | INFRA-09 | Phase 48 | Complete |
 | INFRA-10 | Phase 48 | Complete |
-| INFRA-11 | Phase 48 | Pending |
+| INFRA-11 | Phase 48 | Complete |
 | DATA-01 | Phase 49 | Pending |
 | DATA-02 | Phase 49 | Pending |
 | DATA-03 | Phase 49 | Pending |

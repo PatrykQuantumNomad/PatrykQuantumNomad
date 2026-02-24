@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 
 ## Current Position
 
-Phase: 48 of 55 (Infrastructure Foundation)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-02-24 — Completed 48-02 (Zod schemas, content collections, OG caching)
+Phase: 48 of 55 (Infrastructure Foundation) -- COMPLETE
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase 48 complete, ready for Phase 49
+Last activity: 2026-02-24 — Completed 48-03 (D3 bundle isolation, navigation lifecycle verification)
 
-Progress: ░░░░░░░░░░ 9% (v1.8 — 2/23 plans)
+Progress: █░░░░░░░░░ 13% (v1.8 — 3/23 plans)
 
 ## Performance Metrics
 
@@ -49,6 +49,9 @@ v1.8 decisions:
 - OG caching: content-hash of (title + description), md5 truncated to 12 hex chars, CACHE_VERSION salt (confirmed in 48-02)
 - D3 micro-modules only (17KB gzipped), never full d3 package (280KB)
 - EDA content collections use file() loader for JSON, glob() for MDX pages (confirmed in 48-02)
+- D3 bundle isolation confirmed: exactly 1 chunk (16.7KB), distribution pages only (confirmed in 48-03)
+- client:visible hydration for D3 islands (load on scroll, not page load) (confirmed in 48-03)
+- SVG cleanup on mount+unmount for view transition safety (confirmed in 48-03)
 
 ### Pending Todos
 
@@ -57,7 +60,7 @@ None.
 ### Blockers/Concerns
 
 - ~~[Infra]: KaTeX + MDX formula parsing version conflicts~~ RESOLVED: remark-math@6.0.0 works (48-01)
-- [Infra]: D3 bundle must not leak to non-distribution pages (verify with Vite bundle analysis)
+- ~~[Infra]: D3 bundle must not leak to non-distribution pages (verify with Vite bundle analysis)~~ RESOLVED: D3 isolated to 1 chunk, distribution pages only (48-03)
 - ~~[Infra]: OG image generation at 90+ page scale risks build time regression~~ RESOLVED: content-hash caching implemented (48-02)
 - [Content]: NIST formula accuracy -- character-by-character verification required
 - [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification
@@ -66,6 +69,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 48-02-PLAN.md (Zod schemas, content collections, OG caching)
+Stopped at: Completed 48-03-PLAN.md (D3 bundle isolation, Phase 48 complete)
 Resume file: None
-Next: Execute 48-03-PLAN.md
+Next: Execute Phase 49 (Data Model + Schema Population)
