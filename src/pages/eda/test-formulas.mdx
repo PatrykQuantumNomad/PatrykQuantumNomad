@@ -1,0 +1,60 @@
+---
+title: "KaTeX Formula Test | EDA Visual Encyclopedia"
+description: "Validation page for KaTeX formula rendering across 11 formula categories"
+---
+
+import EDALayout from '../../layouts/EDALayout.astro';
+
+<EDALayout title="KaTeX Formula Test | EDA Visual Encyclopedia" description="Validation page for KaTeX formula rendering across 11 formula categories" useKatex={true}>
+  <div class="prose prose-lg dark:prose-invert max-w-3xl mx-auto px-4 py-16">
+
+## KaTeX Formula Validation
+
+This page validates the remark-math + rehype-katex build-time rendering pipeline. All formulas below should render as formatted mathematics, not raw LaTeX.
+
+### 1. Greek Symbols
+
+Inline: $\alpha, \beta, \gamma, \delta, \sigma, \mu, \lambda, \chi^2$
+
+### 2. Fractions
+
+$$\frac{x + y}{z - w}$$
+
+### 3. Summations
+
+$$\sum_{i=1}^{n} x_i$$
+
+### 4. Integrals
+
+$$\int_{-\infty}^{\infty} f(x) \, dx$$
+
+### 5. Square Roots
+
+$$\sqrt{\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2}$$
+
+### 6. Matrices
+
+$$\begin{pmatrix} a & b \\ c & d \end{pmatrix}$$
+
+### 7. Subscripts and Superscripts
+
+$$\hat{\beta}_1 = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}$$
+
+### 8. Probability Density Function (Normal)
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2}$$
+
+### 9. Multi-line Aligned Equations
+
+$$\begin{aligned} \bar{x} &= \frac{1}{n}\sum_{i=1}^n x_i \\ s^2 &= \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar{x})^2 \end{aligned}$$
+
+### 10. Chi-Squared Test
+
+$$\chi^2 = \sum_{i=1}^k \frac{(O_i - E_i)^2}{E_i}$$
+
+### 11. Product / Large Operators
+
+$$L(\theta) = \prod_{i=1}^n f(x_i | \theta)$$
+
+  </div>
+</EDALayout>

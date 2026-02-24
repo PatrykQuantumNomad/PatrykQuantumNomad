@@ -1,0 +1,29 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  useKatex?: boolean;
+}
+
+const { title, description, ogImage, ogImageAlt, useKatex = false } = Astro.props;
+---
+
+<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt}>
+  {/* Conditionally load KaTeX CSS only when page uses formulas */}
+  {useKatex && (
+    <link slot="head" rel="stylesheet" href="/styles/katex.min.css" />
+  )}
+
+  {/* Dark-mode override for KaTeX formula visibility */}
+  {useKatex && (
+    <style slot="head" is:inline>
+      .katex { color: var(--color-text-primary); }
+    </style>
+  )}
+
+  <slot />
+</Layout>
