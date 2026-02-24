@@ -23,7 +23,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Data Model
 
-- [ ] **DATA-01**: techniques.json populated with all 30 graphical technique entries (title, slug, section ref, category, description, related techniques, interactivity tier)
+- [ ] **DATA-01**: techniques.json populated with all 29 graphical technique entries (title, slug, section ref, category, description, related techniques, interactivity tier). Note: NIST catalog consolidates to 29 graphical techniques; GRAPH-30 is the PlotVariantSwap component, not a data entry.
 - [ ] **DATA-02**: techniques.json populated with all 18 quantitative technique entries
 - [ ] **DATA-03**: distributions.json populated with all 19 probability distribution entries (title, slug, parameters, PDF/CDF formulas, related distributions)
 - [ ] **DATA-04**: Each technique tagged with interactivity tier (A/B/C) and variant count
@@ -373,4 +373,4 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after roadmap creation*
+*Last updated: 2026-02-24 after plan revision (DATA-01 corrected from 30 to 29 graphical entries)*

@@ -33,7 +33,7 @@ See `.planning/milestones/` for detailed archives.
 - [ ] **Phase 48: Infrastructure Foundation** - KaTeX pipeline, D3 isolation, OG caching, Zod schemas, EDA layout, content collections, technique template, breadcrumbs
 - [ ] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation
 - [ ] **Phase 50: SVG Generator Library** - Build-time TypeScript SVG generators for all statistical chart types
-- [ ] **Phase 51: Graphical Technique Pages** - 30 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component
+- [ ] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component
 - [ ] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages
 - [ ] **Phase 53: Distribution Pages with D3 Explorers** - 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks
 - [ ] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering
@@ -63,17 +63,17 @@ Plans:
 **Depends on**: Phase 48
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06, DATA-07, DATA-08, DATA-09
 **Success Criteria** (what must be TRUE):
-  1. techniques.json contains 48 entries (30 graphical + 18 quantitative) that pass Zod schema validation with zero errors
+  1. techniques.json contains 47 entries (29 graphical + 18 quantitative) that pass Zod schema validation with zero errors
   2. distributions.json contains 19 entries with PDF/CDF formulas and parameter definitions that pass Zod schema validation
   3. All MDX stub files exist for 6 foundations, 9 case studies, and 4 reference pages with valid frontmatter and NIST section references
-  4. Every cross-linking slug in the data files resolves to a valid route in the Astro page structure
-  5. Sample datasets in datasets.ts produce plottable numeric arrays for at least 5 representative chart types
+  4. Every cross-linking slug in the data files resolves to a valid route in the Astro page structure, with correct category-based route prefixes
+  5. Sample datasets in datasets.ts produce plottable numeric arrays meeting minimum size requirements for at least 5 representative chart types
 **Plans**: 3 plans
 
 Plans:
-- [ ] 49-01-PLAN.md — Populate techniques.json with 48 entries (30 graphical + 18 quantitative) with tier assignments and cross-links
+- [ ] 49-01-PLAN.md — Populate techniques.json with 47 entries (29 graphical + 18 quantitative) with tier assignments and cross-links
 - [ ] 49-02-PLAN.md — Populate distributions.json with 19 probability distribution entries with KaTeX PDF/CDF formulas
-- [ ] 49-03-PLAN.md — MDX stubs (19 files), sample datasets, route map, and cross-link validation script
+- [ ] 49-03-PLAN.md — MDX stubs (19 files), sample datasets, route map, and route-aware cross-link validation script
 
 ### Phase 50: SVG Generator Library
 **Goal**: A complete library of build-time TypeScript SVG generators produces publication-quality statistical charts for every chart type needed across the encyclopedia, styled to the Quantum Explorer palette and verified in both dark and light themes
@@ -93,11 +93,11 @@ Plans:
 - [ ] 50-03: TBD
 
 ### Phase 51: Graphical Technique Pages
-**Goal**: All 30 graphical technique pages are live with build-time SVG plots, interpretation prose, related technique links, and Tier B pages offer interactive SVG variant switching for pattern exploration
+**Goal**: All 29 graphical technique pages are live with build-time SVG plots, interpretation prose, related technique links, and Tier B pages offer interactive SVG variant switching via the PlotVariantSwap component for pattern exploration
 **Depends on**: Phase 50
 **Requirements**: GRAPH-01, GRAPH-02, GRAPH-03, GRAPH-04, GRAPH-05, GRAPH-06, GRAPH-07, GRAPH-08, GRAPH-09, GRAPH-10, GRAPH-11, GRAPH-12, GRAPH-13, GRAPH-14, GRAPH-15, GRAPH-16, GRAPH-17, GRAPH-18, GRAPH-19, GRAPH-20, GRAPH-21, GRAPH-22, GRAPH-23, GRAPH-24, GRAPH-25, GRAPH-26, GRAPH-27, GRAPH-28, GRAPH-29, GRAPH-30, LAND-05
 **Success Criteria** (what must be TRUE):
-  1. All 30 graphical technique pages render at their defined URLs with build-time SVG plots, 200+ words of explanatory prose, and NIST section citations
+  1. All 29 graphical technique pages render at their defined URLs with build-time SVG plots, 200+ words of explanatory prose, and NIST section citations
   2. Tier B pages (histogram, scatter, normal probability, lag, autocorrelation, spectral) display working tab-based SVG variant switching with vanilla JS (~3KB)
   3. Every technique page displays breadcrumb navigation (EDA > Techniques > [Technique Name]) and links to related techniques
   4. Build-time SVG thumbnails render on technique cards for the landing page grid
