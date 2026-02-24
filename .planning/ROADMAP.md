@@ -9,7 +9,7 @@
 - ~~v1.4 Dockerfile Analyzer~~ - Phases 22-27 (shipped 2026-02-20)
 - ~~v1.5 Database Compass~~ - Phases 28-32 (shipped 2026-02-22)
 - ~~v1.6 Docker Compose Validator~~ - Phases 33-40 (shipped 2026-02-23)
-- **v1.7 Kubernetes Manifest Analyzer** - Phases 41-47 (in progress)
+- ~~v1.7 Kubernetes Manifest Analyzer~~ - Phases 41-47 (shipped 2026-02-23)
 
 ## Phases
 
@@ -31,7 +31,7 @@ See previous milestone archives for details.
 - [x] **Phase 44: Cross-Resource Validation & RBAC** - 8 cross-resource reference checks (selector matching, ConfigMap/Secret/PVC/SA references) and 5 RBAC analysis rules (completed 2026-02-23)
 - [x] **Phase 45: Editor UI & Scoring** - CodeMirror 6 YAML editor, score gauge, category breakdown, violation list, resource summary, share controls, and category-weighted scoring engine (completed 2026-02-23)
 - [x] **Phase 46: Resource Relationship Graph** - Interactive React Flow dependency graph with dagre layout, color-coded node types, and dangling reference visualization (completed 2026-02-23)
-- [ ] **Phase 47: SEO, Documentation & Site Integration** - 67 rule documentation pages, companion blog post, OG images, homepage callout, header navigation, JSON-LD, and quality validation
+- [x] **Phase 47: SEO, Documentation & Site Integration** - 67 rule documentation pages, companion blog post, OG images, homepage callout, header navigation, JSON-LD, and quality validation (completed 2026-02-23)
 
 ## Phase Details
 
@@ -134,14 +134,14 @@ Plans:
   2. The companion blog post "Kubernetes Manifest Best Practices" is published with ~20 cross-links to rule pages and bidirectional linking from the tool page
   3. The tool page appears in header navigation, homepage callout, tools page card, sitemap, and LLMs.txt; JSON-LD SoftwareApplication schema and breadcrumb navigation are present
   4. Lighthouse scores 90+ on the tool page and rule documentation pages; WCAG 2.1 AA accessibility and responsive design pass on mobile, tablet, and desktop
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 Plans:
-- [ ] 47-01-PLAN.md -- Rule data foundation (allDocumentedK8sRules 67 rules, related rules, CIS benchmark refs)
-- [ ] 47-02-PLAN.md -- OG image, JSON-LD, tool page SEO enhancements
-- [ ] 47-03-PLAN.md -- 67 dynamic rule documentation pages with PSS/CIS tags
-- [ ] 47-04-PLAN.md -- Homepage 3-card grid, LLMs.txt integration
-- [ ] 47-05-PLAN.md -- Companion blog post "Kubernetes Manifest Best Practices" with ~20 cross-links
-- [ ] 47-06-PLAN.md -- Build verification + UAT
+- [x] 47-01-PLAN.md -- Rule data foundation (allDocumentedK8sRules 67 rules, related rules, CIS benchmark refs)
+- [x] 47-02-PLAN.md -- OG image, JSON-LD, tool page SEO enhancements
+- [x] 47-03-PLAN.md -- 67 dynamic rule documentation pages with PSS/CIS tags
+- [x] 47-04-PLAN.md -- Homepage 3-card grid, LLMs.txt integration
+- [x] 47-05-PLAN.md -- Companion blog post "Kubernetes Manifest Best Practices" with ~20 cross-links
+- [x] 47-06-PLAN.md -- Build verification + UAT
 
 ## Progress
 
@@ -156,4 +156,4 @@ Plans:
 | 44. Cross-Resource Validation & RBAC | 3/3 | Complete   | 2026-02-23 | - |
 | 45. Editor UI & Scoring | 3/3 | Complete   | 2026-02-23 | - |
 | 46. Resource Relationship Graph | 2/2 | Complete   | 2026-02-23 | - |
-| 47. SEO, Documentation & Site Integration | 5/6 | In Progress|  | - |
+| 47. SEO, Documentation & Site Integration | v1.7 | 6/6 | Complete | 2026-02-23 |
