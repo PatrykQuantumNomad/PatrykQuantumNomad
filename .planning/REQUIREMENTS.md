@@ -218,16 +218,16 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 48 | Pending |
-| INFRA-02 | Phase 48 | Pending |
+| INFRA-01 | Phase 48 | Complete |
+| INFRA-02 | Phase 48 | Complete |
 | INFRA-03 | Phase 48 | Pending |
-| INFRA-04 | Phase 48 | Pending |
+| INFRA-04 | Phase 48 | Complete |
 | INFRA-05 | Phase 48 | Complete |
 | INFRA-06 | Phase 48 | Complete |
 | INFRA-07 | Phase 48 | Complete |
-| INFRA-08 | Phase 48 | Pending |
-| INFRA-09 | Phase 48 | Pending |
-| INFRA-10 | Phase 48 | Pending |
+| INFRA-08 | Phase 48 | Complete |
+| INFRA-09 | Phase 48 | Complete |
+| INFRA-10 | Phase 48 | Complete |
 | INFRA-11 | Phase 48 | Pending |
 | DATA-01 | Phase 49 | Pending |
 | DATA-02 | Phase 49 | Pending |
