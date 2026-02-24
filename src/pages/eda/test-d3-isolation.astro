@@ -1,0 +1,29 @@
+---
+import EDALayout from '../../layouts/EDALayout.astro';
+import DistributionExplorerStub from '../../components/eda/DistributionExplorerStub.tsx';
+---
+
+<EDALayout title="D3 Isolation Test | EDA Visual Encyclopedia" description="Verification page confirming D3 micro-modules are code-split and isolated to distribution pages only">
+  <div class="prose prose-lg dark:prose-invert max-w-3xl mx-auto px-4 py-16">
+    <h2>D3 Bundle Isolation Test</h2>
+    <p>
+      This page verifies that D3 micro-modules (d3-scale, d3-shape, d3-axis, d3-selection)
+      are loaded <strong>only</strong> on distribution pages and do not leak into shared chunks.
+    </p>
+    <p>
+      The chart below is a minimal normal distribution curve rendered by a React island
+      using <code>client:visible</code> — meaning D3 JavaScript loads only when this
+      component scrolls into the viewport.
+    </p>
+
+    <DistributionExplorerStub client:visible />
+
+    <h3>Verification Checklist</h3>
+    <ul>
+      <li>Open DevTools Network tab — D3 chunks should load on scroll, not on page load</li>
+      <li>Navigate to <a href="/eda/test-formulas/">/eda/test-formulas/</a> — no D3 chunks should appear in Network tab</li>
+      <li>Navigate to <a href="/blog/">/blog/</a> — neither KaTeX CSS nor D3 chunks should load</li>
+      <li>Return here — chart should re-render cleanly without duplicates</li>
+    </ul>
+  </div>
+</EDALayout>
