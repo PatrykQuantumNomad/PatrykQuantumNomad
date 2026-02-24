@@ -7,36 +7,64 @@ import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 
 <Layout
   title="Kubernetes Manifest Analyzer | Patryk Golabek"
-  description="Free Kubernetes manifest analyzer and best-practice linter by a Kubernetes architect. 67 rules across schema, security, reliability, best-practice, and cross-resource categories. 100% browser-based. Your code never leaves your device."
+  description="Free online Kubernetes YAML validator and linter. 67 rules for security, reliability, and best practices. 100% browser-based, your code never leaves your device."
   ogImage={new URL('/open-graph/tools/k8s-analyzer.png', Astro.site).toString()}
   ogImageAlt="Kubernetes Manifest Analyzer - 67 rules across schema, security, reliability, best-practice, and cross-resource categories"
 >
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-2 text-[var(--color-text-primary)]">
-      Kubernetes Manifest Analyzer
-    </h1>
-    <p class="text-[var(--color-text-secondary)] mb-8">
-      Paste your Kubernetes YAML below and click <strong>Analyze</strong>.
-      100% client-side, your code never leaves your browser.
+  <section class="py-8 sm:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold text-[var(--color-text-primary)] mb-2">
+        Kubernetes Manifest Analyzer
+      </h1>
+      <div class="mb-8">
+        <div class="inline-flex items-center gap-2 rounded-md border border-[var(--color-border)] px-3 py-1.5">
+          <span class="text-xs text-[var(--color-text-secondary)] mr-1">Claude Code:</span>
+          <a
+            href="/skills/k8s-analyzer/SKILL.md"
+            download="SKILL.md"
+            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium transition-all whitespace-nowrap
+              text-[var(--color-accent)] hover:bg-[rgba(196,75,32,0.08)]
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Skill
+          </a>
+          <a
+            href="/skills/k8s-analyzer/hooks/validate-k8s.sh"
+            download="validate-k8s.sh"
+            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium transition-all whitespace-nowrap
+              text-[var(--color-accent)] hover:bg-[rgba(196,75,32,0.08)]
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Hook
+          </a>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 sm:px-6 lg:px-8">
+      <K8sAnalyzer client:only="react" />
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <p class="mt-8 text-sm text-[var(--color-text-secondary)]">
+      Paste your Kubernetes YAML and click <strong>Analyze</strong>. 100% client-side, your code never leaves your browser.
+      Want to learn the rules in depth? Read the
+      <a href="/blog/kubernetes-manifest-best-practices/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">companion guide</a>
+      or browse
+      <a href="/tools/k8s-analyzer/rules/ka-s001/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">individual rule docs</a>.
     </p>
-
-    <K8sAnalyzer client:only="react" />
-
-    <aside class="mt-8 p-4 rounded-lg border border-[var(--color-border)]">
-      <p class="text-sm text-[var(--color-text-secondary)]">
-        Want to learn the rules in depth? Read the
-        <a href="/blog/kubernetes-manifest-best-practices/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">
-          companion guide: Kubernetes Manifest Best Practices
-        </a>
-        or browse
-        <a href="/tools/k8s-analyzer/rules/ka-s001/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">
-          individual rule documentation
-        </a>.
-      </p>
-      <p class="text-xs text-[var(--color-text-secondary)] mt-2">
-        All analysis runs 100% client-side. Your manifests never leave your browser.
-      </p>
-    </aside>
+    </div>
   </section>
 
   <K8sAnalyzerJsonLd />

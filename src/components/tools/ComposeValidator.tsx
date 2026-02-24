@@ -1,18 +1,26 @@
+import { useState } from 'react';
 import ComposeEditorPanel from './ComposeEditorPanel';
 import ComposeResultsPanel from './ComposeResultsPanel';
 
-/**
- * Root React island composing ComposeEditorPanel + ComposeResultsPanel in a responsive grid.
- * EDIT-06: grid-cols-1 stacks on mobile, lg:grid-cols-2 goes side-by-side on desktop.
- */
 export default function ComposeValidator() {
+  const [fullscreen, setFullscreen] = useState<'editor' | 'results' | null>(null);
+
+  const toggleFullscreen = (panel: 'editor' | 'results') =>
+    setFullscreen((prev) => (prev === panel ? null : panel));
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-      <div className="min-h-[350px] lg:min-h-[500px]">
-        <ComposeEditorPanel />
+    <div className={`grid grid-cols-1 ${fullscreen ? '' : 'lg:grid-cols-2'} gap-4 lg:gap-6`}>
+      <div className={fullscreen === 'results' ? 'hidden' : ''}>
+        <ComposeEditorPanel
+          onToggleFullscreen={() => toggleFullscreen('editor')}
+          isFullscreen={fullscreen === 'editor'}
+        />
       </div>
-      <div className="min-h-[200px] lg:min-h-[500px]">
-        <ComposeResultsPanel />
+      <div className={fullscreen === 'editor' ? 'hidden' : ''}>
+        <ComposeResultsPanel
+          onToggleFullscreen={() => toggleFullscreen('results')}
+          isFullscreen={fullscreen === 'results'}
+        />
       </div>
     </div>
   );

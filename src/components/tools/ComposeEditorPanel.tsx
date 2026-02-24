@@ -21,8 +21,14 @@ import type {
   ComposeSeverity,
   ComposeCategory,
 } from '../../lib/tools/compose-validator/types';
+import { FullscreenToggle } from './results/FullscreenToggle';
 
-export default function ComposeEditorPanel() {
+interface ComposeEditorPanelProps {
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
+}
+
+export default function ComposeEditorPanel({ onToggleFullscreen, isFullscreen }: ComposeEditorPanelProps) {
   const hashContentRef = useRef<string | null>(typeof window !== 'undefined' ? decodeFromHash() : null);
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
 
@@ -123,9 +129,6 @@ export default function ComposeEditorPanel() {
 
   const { containerRef, viewRef } = useCodeMirrorYaml({
     initialDoc: hashContentRef.current || SAMPLE_COMPOSE,
-    onAnalyze: () => {
-      if (viewRef.current) analyzeRef.current(viewRef.current);
-    },
   });
 
   // Auto-analyze when loading from a shared URL hash
@@ -133,6 +136,15 @@ export default function ComposeEditorPanel() {
     if (hashContentRef.current && viewRef.current) {
       analyzeRef.current(viewRef.current);
     }
+  }, []);
+
+  // Listen for re-analyze requests from the stale results banner
+  useEffect(() => {
+    const handler = () => {
+      if (viewRef.current) analyzeRef.current(viewRef.current);
+    };
+    document.addEventListener('tool:reanalyze', handler);
+    return () => document.removeEventListener('tool:reanalyze', handler);
   }, []);
 
   const handleButtonClick = useCallback(() => {
@@ -150,13 +162,19 @@ export default function ComposeEditorPanel() {
     view.dispatch(setDiagnostics(view.state, []));
     composeResult.set(null);
     composeResultsStale.set(false);
+    try { localStorage.removeItem('compose-editor-content'); } catch { /* ignore */ }
     view.focus();
   }, [viewRef]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       <div className="flex items-center justify-between mb-3 min-h-[40px]">
-        <h2 className="text-lg font-heading font-semibold">Editor</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-heading font-semibold">Editor</h2>
+          {onToggleFullscreen && (
+            <FullscreenToggle isFullscreen={!!isFullscreen} onClick={onToggleFullscreen} />
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleClear}
@@ -180,10 +198,7 @@ export default function ComposeEditorPanel() {
           </button>
         </div>
       </div>
-      <div
-        ref={containerRef}
-        className="flex-1 min-h-[300px] lg:min-h-[450px] overflow-hidden rounded-lg"
-      />
+      <div ref={containerRef} className="rounded-lg" />
     </div>
   );
 }

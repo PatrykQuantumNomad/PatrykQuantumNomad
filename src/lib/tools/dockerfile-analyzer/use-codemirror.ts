@@ -13,6 +13,8 @@ import {
   analysisResult,
 } from '../../../stores/dockerfileAnalyzerStore';
 
+const STORAGE_KEY = 'dockerfile-editor-content';
+
 interface UseCodeMirrorOptions {
   initialDoc: string;
 }
@@ -22,12 +24,12 @@ interface UseCodeMirrorOptions {
  *
  * Key design decisions:
  * - Empty deps array: EditorView is created once, destroyed on unmount.
- *   The onAnalyze callback is NOT in deps to avoid destroying/recreating the
- *   entire editor on every render. Callers should wrap changing callbacks in a ref.
  * - Double cleanup: React useEffect cleanup AND astro:before-swap listener
  *   ensure no orphaned EditorView instances during View Transitions navigation.
  * - lintGutter() included without linter(): enables gutter markers when
  *   setDiagnostics pushes diagnostics on-demand (EDIT-02 requires button-triggered only).
+ * - localStorage persistence: auto-saves editor content on change (debounced 500ms).
+ *   Priority: URL hash > localStorage > sample file.
  */
 export function useCodeMirror({ initialDoc }: UseCodeMirrorOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,8 +38,14 @@ export function useCodeMirror({ initialDoc }: UseCodeMirrorOptions) {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Restore from localStorage if no URL hash was provided
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    const doc = saved?.trim() && !window.location.hash ? saved : initialDoc;
+
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
     const state = EditorState.create({
-      doc: initialDoc,
+      doc,
       extensions: [
         basicSetup,
         StreamLanguage.define(dockerFile),
@@ -50,10 +58,19 @@ export function useCodeMirror({ initialDoc }: UseCodeMirrorOptions) {
         EditorView.contentAttributes.of({
           'aria-label': 'Dockerfile editor — paste or type your Dockerfile here',
         }),
-        // Detect stale results: set flag when doc changes after analysis
+        // Detect stale results + persist to localStorage
         EditorView.updateListener.of((update) => {
-          if (update.docChanged && analysisResult.get() !== null) {
-            resultsStale.set(true);
+          if (update.docChanged) {
+            if (analysisResult.get() !== null) {
+              resultsStale.set(true);
+            }
+            // Debounced localStorage save
+            if (saveTimer) clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+              try {
+                localStorage.setItem(STORAGE_KEY, update.state.doc.toString());
+              } catch { /* quota exceeded — ignore */ }
+            }, 500);
           }
         }),
       ],
@@ -78,6 +95,7 @@ export function useCodeMirror({ initialDoc }: UseCodeMirrorOptions) {
     document.addEventListener('astro:before-swap', handleSwap);
 
     return () => {
+      if (saveTimer) clearTimeout(saveTimer);
       document.removeEventListener('astro:before-swap', handleSwap);
       view.destroy();
       editorViewRef.set(null);

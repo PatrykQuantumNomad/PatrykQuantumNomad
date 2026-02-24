@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 COMPOSE_HOOK="$REPO_ROOT/public/skills/compose-validator/hooks/validate-compose.sh"
 DOCKERFILE_HOOK="$REPO_ROOT/public/skills/dockerfile-analyzer/hooks/validate-dockerfile.sh"
+K8S_HOOK="$REPO_ROOT/public/skills/k8s-analyzer/hooks/validate-k8s.sh"
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -72,6 +73,7 @@ run_hook_case() {
 assert_cmd_exists jq
 assert_file_exists "$COMPOSE_HOOK"
 assert_file_exists "$DOCKERFILE_HOOK"
+assert_file_exists "$K8S_HOOK"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -158,6 +160,79 @@ DOCKER
 cat > "$NON_DOCKER" <<'TXT'
 not a dockerfile
 TXT
+
+K8S_GOOD="$TMP_DIR/deployment.yaml"
+K8S_BAD="$TMP_DIR/insecure-pod.yaml"
+K8S_RBAC_BAD="$TMP_DIR/cluster-role.yaml"
+K8S_NON_K8S="$TMP_DIR/config.yaml"
+K8S_COMPOSE="$TMP_DIR/docker-compose.yaml"
+
+cat > "$K8S_GOOD" <<'YAML'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: app
+          image: nginx:1.25.3-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+YAML
+
+cat > "$K8S_BAD" <<'YAML'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: insecure-pod
+spec:
+  containers:
+    - name: app
+      image: nginx
+      securityContext:
+        privileged: true
+YAML
+
+cat > "$K8S_RBAC_BAD" <<'YAML'
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: god-mode
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+YAML
+
+cat > "$K8S_NON_K8S" <<'YAML'
+database:
+  host: localhost
+  port: 5432
+YAML
+
+# Reuse compose bad file for K8s compose-exclusion test (already created above as COMPOSE_BAD)
 
 echo "Running Compose hook tests..."
 run_hook_case \
@@ -250,6 +325,65 @@ run_hook_case \
   "{\"session_id\":\"abc\",\"cwd\":\"/tmp\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$DOCKER_BAD\"}}" \
   2 \
   "DL4000"
+
+echo "Running Kubernetes hook tests..."
+run_hook_case \
+  "k8s: valid manifest passes" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$K8S_GOOD\"}}" \
+  0
+
+run_hook_case \
+  "k8s: privileged container fails with KA-C001" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$K8S_BAD\"}}" \
+  2 \
+  "KA-C001"
+
+run_hook_case \
+  "k8s: missing image tag detected as KA-R009" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$K8S_BAD\"}}" \
+  2 \
+  "KA-R009"
+
+run_hook_case \
+  "k8s: RBAC wildcard fails with KA-A001" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$K8S_RBAC_BAD\"}}" \
+  2 \
+  "KA-A001"
+
+run_hook_case \
+  "k8s: non-K8s YAML ignored" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$K8S_NON_K8S\"}}" \
+  0
+
+run_hook_case \
+  "k8s: docker-compose file excluded" \
+  "$K8S_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$COMPOSE_BAD\"}}" \
+  0
+
+run_hook_case \
+  "k8s: missing file_path ignored" \
+  "$K8S_HOOK" \
+  "{}" \
+  0
+
+run_hook_case \
+  "k8s: malformed JSON input ignored" \
+  "$K8S_HOOK" \
+  "not-json-at-all" \
+  0
+
+run_hook_case \
+  "k8s: full PostToolUse payload shape" \
+  "$K8S_HOOK" \
+  "{\"session_id\":\"abc\",\"cwd\":\"/tmp\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$K8S_BAD\"}}" \
+  2 \
+  "KA-C001"
 
 echo
 echo "Test results: $PASS_COUNT passed, $FAIL_COUNT failed"

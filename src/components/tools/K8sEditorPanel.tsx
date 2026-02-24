@@ -20,8 +20,14 @@ import type {
   K8sSeverity,
   K8sCategory,
 } from '../../lib/tools/k8s-analyzer/types';
+import { FullscreenToggle } from './results/FullscreenToggle';
 
-export default function K8sEditorPanel() {
+interface K8sEditorPanelProps {
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
+}
+
+export default function K8sEditorPanel({ onToggleFullscreen, isFullscreen }: K8sEditorPanelProps) {
   const hashContentRef = useRef<string | null>(typeof window !== 'undefined' ? decodeFromHash() : null);
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
 
@@ -140,9 +146,6 @@ export default function K8sEditorPanel() {
 
   const { containerRef, viewRef } = useCodeMirrorK8s({
     initialDoc: hashContentRef.current || SAMPLE_K8S_MANIFEST,
-    onAnalyze: () => {
-      if (viewRef.current) analyzeRef.current(viewRef.current);
-    },
   });
 
   // Auto-analyze when loading from a shared URL hash
@@ -150,6 +153,15 @@ export default function K8sEditorPanel() {
     if (hashContentRef.current && viewRef.current) {
       analyzeRef.current(viewRef.current);
     }
+  }, []);
+
+  // Listen for re-analyze requests from the stale results banner
+  useEffect(() => {
+    const handler = () => {
+      if (viewRef.current) analyzeRef.current(viewRef.current);
+    };
+    document.addEventListener('tool:reanalyze', handler);
+    return () => document.removeEventListener('tool:reanalyze', handler);
   }, []);
 
   const handleButtonClick = useCallback(() => {
@@ -167,13 +179,19 @@ export default function K8sEditorPanel() {
     view.dispatch(setDiagnostics(view.state, []));
     k8sResult.set(null);
     k8sResultsStale.set(false);
+    try { localStorage.removeItem('k8s-editor-content'); } catch { /* ignore */ }
     view.focus();
   }, [viewRef]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       <div className="flex items-center justify-between mb-3 min-h-[40px]">
-        <h2 className="text-lg font-heading font-semibold">Editor</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-heading font-semibold">Editor</h2>
+          {onToggleFullscreen && (
+            <FullscreenToggle isFullscreen={!!isFullscreen} onClick={onToggleFullscreen} />
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleClear}
@@ -197,10 +215,7 @@ export default function K8sEditorPanel() {
           </button>
         </div>
       </div>
-      <div
-        ref={containerRef}
-        className="flex-1 min-h-[300px] lg:min-h-[450px] overflow-hidden rounded-lg"
-      />
+      <div ref={containerRef} className="rounded-lg" />
     </div>
   );
 }

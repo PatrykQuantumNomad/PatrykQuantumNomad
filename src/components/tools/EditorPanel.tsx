@@ -11,8 +11,14 @@ import { getRuleById } from '../../lib/tools/dockerfile-analyzer/rules';
 import { SAMPLE_DOCKERFILE } from '../../lib/tools/dockerfile-analyzer/sample-dockerfile';
 import { decodeFromHash } from '../../lib/tools/dockerfile-analyzer/url-state';
 import { analysisResult, isAnalyzing, resultsStale } from '../../stores/dockerfileAnalyzerStore';
+import { FullscreenToggle } from './results/FullscreenToggle';
 
-export default function EditorPanel() {
+interface EditorPanelProps {
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
+}
+
+export default function EditorPanel({ onToggleFullscreen, isFullscreen }: EditorPanelProps) {
   // Decode shared Dockerfile from URL hash (synchronous, before editor creation)
   const hashContentRef = useRef<string | null>(
     typeof window !== 'undefined' ? decodeFromHash() : null,
@@ -98,13 +104,24 @@ export default function EditorPanel() {
     isAnalyzing.set(false);
   };
 
-  const { containerRef, viewRef } = useCodeMirror({ initialDoc });
+  const { containerRef, viewRef } = useCodeMirror({
+    initialDoc,
+  });
 
   // Auto-trigger analysis when loading from a shared URL hash
   useEffect(() => {
     if (hashContentRef.current && viewRef.current) {
       analyzeRef.current(viewRef.current);
     }
+  }, []);
+
+  // Listen for re-analyze requests from the stale results banner
+  useEffect(() => {
+    const handler = () => {
+      if (viewRef.current) analyzeRef.current(viewRef.current);
+    };
+    document.addEventListener('tool:reanalyze', handler);
+    return () => document.removeEventListener('tool:reanalyze', handler);
   }, []);
 
   const handleButtonClick = useCallback(() => {
@@ -122,13 +139,19 @@ export default function EditorPanel() {
     view.dispatch(setDiagnostics(view.state, []));
     analysisResult.set(null);
     resultsStale.set(false);
+    try { localStorage.removeItem('dockerfile-editor-content'); } catch { /* ignore */ }
     view.focus();
   }, [viewRef]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       <div className="flex items-center justify-between mb-3 min-h-[40px]">
-        <h2 className="text-lg font-heading font-semibold">Editor</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-heading font-semibold">Editor</h2>
+          {onToggleFullscreen && (
+            <FullscreenToggle isFullscreen={!!isFullscreen} onClick={onToggleFullscreen} />
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleClear}
@@ -152,10 +175,7 @@ export default function EditorPanel() {
           </button>
         </div>
       </div>
-      <div
-        ref={containerRef}
-        className="flex-1 min-h-[300px] lg:min-h-[450px] overflow-hidden rounded-lg"
-      />
+      <div ref={containerRef} className="rounded-lg" />
     </div>
   );
 }

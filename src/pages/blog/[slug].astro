@@ -38,10 +38,15 @@ const ogImageURL = new URL('/open-graph/blog/' + post.id + '.png?cb=20260216', A
 const wordCount = remarkPluginFrontmatter.words as number | undefined;
 
 const isBeautyIndexPost = post.id === 'the-beauty-index';
-const articleSection = isBeautyIndexPost ? 'Programming Languages' : undefined;
+const isK8sPost = post.id === 'kubernetes-manifest-best-practices';
+const articleSection = isBeautyIndexPost ? 'Programming Languages'
+  : isK8sPost ? 'Kubernetes Security'
+  : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
-  : undefined;
+  : isK8sPost
+    ? { type: 'SoftwareApplication', name: 'Kubernetes Manifest Analyzer', url: 'https://patrykgolabek.dev/tools/k8s-analyzer/' }
+    : undefined;
 
 const beautyIndexFAQ = isBeautyIndexPost ? [
   {
@@ -55,6 +60,33 @@ const beautyIndexFAQ = isBeautyIndexPost ? [
   {
     question: 'What are the six aesthetic dimensions of the Beauty Index?',
     answer: 'The six dimensions are: Phi (Aesthetic Geometry) — visual cleanliness and grid-based order; Omega (Mathematical Elegance) — inevitability, unexpectedness, and economy à la Hardy; Lambda (Linguistic Clarity) — Knuthian literate readability; Psi (Practitioner Happiness) — developer experience and community love; Gamma (Organic Habitability) — Wabi-Sabi growth points and lived-in quality; Sigma (Conceptual Integrity) — whether the language has a coherent design philosophy.',
+  },
+] : [];
+
+const k8sFAQ = isK8sPost ? [
+  {
+    question: 'What is a Kubernetes manifest?',
+    answer: 'A Kubernetes manifest is a YAML file that declares the desired state of resources in a Kubernetes cluster. It specifies which containers run, what security boundaries they operate within, how much CPU and memory they can consume, and how traffic reaches them. Every Deployment, Service, ConfigMap, and RBAC role is defined through a manifest.',
+  },
+  {
+    question: 'How do I secure a Kubernetes manifest?',
+    answer: 'Secure a Kubernetes manifest by setting runAsNonRoot: true, allowPrivilegeEscalation: false, and readOnlyRootFilesystem: true in the container securityContext. Drop all Linux capabilities with capabilities.drop: ["ALL"] and add back only what is needed. Never run containers in privileged mode, never mount the Docker socket, and never share host namespaces (hostPID, hostNetwork, hostIPC).',
+  },
+  {
+    question: 'What are Kubernetes Pod Security Standards (PSS)?',
+    answer: 'Kubernetes Pod Security Standards define three security profiles: Privileged (unrestricted), Baseline (prevents known privilege escalations like privileged mode and host namespaces), and Restricted (enforces hardening best practices like non-root execution and dropping all capabilities). The Restricted profile is recommended for production workloads and aligns with CIS Kubernetes Benchmark sections 5.2.1 through 5.2.9.',
+  },
+  {
+    question: 'What is a free online Kubernetes YAML validator?',
+    answer: 'The Kubernetes Manifest Analyzer at patrykgolabek.dev/tools/k8s-analyzer/ is a free online Kubernetes YAML validator that runs 67 rules across schema, security, reliability, best practice, cross-resource, and RBAC categories. It runs 100% in the browser with no server-side processing, so your manifests never leave your device.',
+  },
+  {
+    question: 'What is cross-resource validation in Kubernetes?',
+    answer: 'Cross-resource validation checks relationships between Kubernetes resources. It catches issues like a Service selector that does not match any Pod template labels, an Ingress that references a non-existent Service, a pod that mounts a ConfigMap or Secret not defined in the manifest, and an HPA that targets a missing Deployment. These bugs only surface at runtime and are invisible to single-resource linters.',
+  },
+  {
+    question: 'How should I configure RBAC in Kubernetes?',
+    answer: 'Follow the principle of least privilege: never use wildcard (*) in apiGroups, resources, or verbs. Never bind service accounts to cluster-admin. Use namespace-scoped Roles instead of ClusterRoles when possible. Restrict pod exec/attach permissions and limit Secret access to specific service accounts. These rules align with CIS Kubernetes Benchmark Section 5.1.',
   },
 ] : [];
 
@@ -133,6 +165,7 @@ const titleTag = (title.length + suffix.length > 65)
       about={aboutDataset}
     />
     {beautyIndexFAQ.length > 0 && <FAQPageJsonLd items={beautyIndexFAQ} />}
+    {k8sFAQ.length > 0 && <FAQPageJsonLd items={k8sFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },

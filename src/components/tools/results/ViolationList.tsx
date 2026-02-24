@@ -1,8 +1,11 @@
+import { useState, useCallback } from 'react';
 import type { LintViolation, RuleSeverity } from '../../../lib/tools/dockerfile-analyzer/types';
 
 interface ViolationListProps {
   violations: LintViolation[];
   onNavigate: (line: number) => void;
+  selectedCategory?: string | null;
+  searchQuery?: string;
 }
 
 const SEVERITY_ORDER: Record<string, number> = { error: 0, warning: 1, info: 2 };
@@ -49,14 +52,30 @@ function groupBySeverity(
 function ViolationItem({
   violation,
   onNavigate,
+  isOpen,
+  onToggle,
 }: {
   violation: LintViolation;
   onNavigate: (line: number) => void;
+  isOpen: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <details className="group border-b border-white/10 last:border-0">
-      <summary className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-white/5 transition-colors list-none [&::-webkit-details-marker]:hidden">
-        <span className="transition-transform duration-200 text-[var(--color-text-secondary)] text-xs group-open:rotate-90">
+    <div className="border-b border-white/10 last:border-0">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-white/5 transition-colors select-none"
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+      >
+        <span className={`transition-transform duration-200 text-[var(--color-text-secondary)] text-xs ${isOpen ? 'rotate-90' : ''}`}>
           &#9654;
         </span>
         <SeverityIcon severity={violation.severity} />
@@ -80,35 +99,125 @@ function ViolationItem({
         >
           L{violation.line}
         </button>
-      </summary>
-      <div className="px-3 pb-3 text-sm text-[var(--color-text-secondary)]">
-        <p className="mb-2">{violation.explanation}</p>
-        {violation.fix.beforeCode && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-            <div>
-              <span className="text-red-400 text-xs">Before:</span>
-              <pre className="bg-black/30 rounded p-2 mt-1 overflow-x-auto whitespace-pre-wrap">
-                {violation.fix.beforeCode}
-              </pre>
-            </div>
-            <div>
-              <span className="text-green-400 text-xs">After:</span>
-              <pre className="bg-black/30 rounded p-2 mt-1 overflow-x-auto whitespace-pre-wrap">
-                {violation.fix.afterCode}
-              </pre>
-            </div>
-          </div>
-        )}
       </div>
-    </details>
+      {isOpen && (
+        <div className="px-3 pb-3 text-sm text-[var(--color-text-secondary)]">
+          <p className="mb-2">{violation.explanation}</p>
+          {violation.fix.beforeCode && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+              <div>
+                <span className="text-red-400 text-xs">Before:</span>
+                <pre className="bg-black/30 rounded p-2 mt-1 overflow-x-auto whitespace-pre-wrap">
+                  {violation.fix.beforeCode}
+                </pre>
+              </div>
+              <div>
+                <span className="text-green-400 text-xs">After:</span>
+                <pre className="bg-black/30 rounded p-2 mt-1 overflow-x-auto whitespace-pre-wrap">
+                  {violation.fix.afterCode}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
-export function ViolationList({ violations, onNavigate }: ViolationListProps) {
-  const groups = groupBySeverity(violations);
+export function ViolationList({ violations, onNavigate, selectedCategory, searchQuery }: ViolationListProps) {
+  const [expandedSet, setExpandedSet] = useState<Set<string>>(new Set());
+  const [allExpanded, setAllExpanded] = useState(false);
+
+  // Filter by category
+  let filtered = violations;
+  if (selectedCategory) {
+    filtered = filtered.filter((v) => v.category === selectedCategory);
+  }
+  // Filter by search query
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(
+      (v) =>
+        v.ruleId.toLowerCase().includes(q) ||
+        v.message.toLowerCase().includes(q) ||
+        v.explanation.toLowerCase().includes(q),
+    );
+  }
+
+  const groups = groupBySeverity(filtered);
+  const totalFiltered = filtered.length;
+
+  const makeKey = (v: LintViolation, i: number) => `${v.ruleId}-${v.line}-${i}`;
+
+  const isItemOpen = (key: string) => allExpanded || expandedSet.has(key);
+
+  const toggleItem = useCallback((key: string) => {
+    setExpandedSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+    // If user manually toggles, clear global expand state
+    setAllExpanded(false);
+  }, []);
+
+  const handleExpandAll = () => {
+    if (allExpanded) {
+      setAllExpanded(false);
+      setExpandedSet(new Set());
+    } else {
+      setAllExpanded(true);
+    }
+  };
 
   return (
     <div className="max-h-[400px] lg:max-h-none overflow-y-auto">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-3 py-1.5 mb-1">
+        {selectedCategory || searchQuery ? (
+          <span className="text-xs text-[var(--color-text-secondary)]">
+            Showing {totalFiltered} of {violations.length} issues
+          </span>
+        ) : (
+          <span />
+        )}
+        <button
+          onClick={handleExpandAll}
+          className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1"
+          title={allExpanded ? 'Collapse all' : 'Expand all'}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {allExpanded ? (
+              <>
+                <polyline points="4 14 10 14 10 20" />
+                <polyline points="20 10 14 10 14 4" />
+                <line x1="14" y1="10" x2="21" y2="3" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </>
+            ) : (
+              <>
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </>
+            )}
+          </svg>
+          {allExpanded ? 'Collapse all' : 'Expand all'}
+        </button>
+      </div>
+
+      {totalFiltered === 0 && (selectedCategory || searchQuery) && (
+        <p className="text-sm text-[var(--color-text-secondary)] px-3 py-4 text-center">
+          No matching issues found.
+        </p>
+      )}
+
       {groups.map(([severity, items]) => (
         <div key={severity} className="mb-3 last:mb-0">
           <h4
@@ -117,13 +226,18 @@ export function ViolationList({ violations, onNavigate }: ViolationListProps) {
           >
             {SEVERITY_LABELS[severity] ?? severity} ({items.length})
           </h4>
-          {items.map((v, i) => (
-            <ViolationItem
-              key={`${v.ruleId}-${v.line}-${i}`}
-              violation={v}
-              onNavigate={onNavigate}
-            />
-          ))}
+          {items.map((v, i) => {
+            const key = makeKey(v, i);
+            return (
+              <ViolationItem
+                key={key}
+                violation={v}
+                onNavigate={onNavigate}
+                isOpen={isItemOpen(key)}
+                onToggle={() => toggleItem(key)}
+              />
+            );
+          })}
         </div>
       ))}
     </div>

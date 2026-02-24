@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from 'react';
+
 interface ScoreGaugeProps {
   score: number;
   grade: string;
@@ -12,12 +14,45 @@ function getGradeColor(grade: string): string {
   return '#ef4444';
 }
 
+function useAnimatedNumber(target: number, duration = 600): number {
+  const [display, setDisplay] = useState(0);
+  const prevTarget = useRef(0);
+
+  useEffect(() => {
+    const from = prevTarget.current;
+    prevTarget.current = target;
+    if (from === target) {
+      setDisplay(target);
+      return;
+    }
+
+    let start: number | null = null;
+    let raf: number;
+
+    const step = (ts: number) => {
+      if (start === null) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (progress < 1) {
+        raf = requestAnimationFrame(step);
+      }
+    };
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return display;
+}
+
 export function ScoreGauge({ score, grade, size = 120 }: ScoreGaugeProps) {
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
   const gradeColor = getGradeColor(grade);
+  const displayScore = useAnimatedNumber(score);
 
   return (
     <div className="relative flex flex-col items-center">
@@ -54,9 +89,9 @@ export function ScoreGauge({ score, grade, size = 120 }: ScoreGaugeProps) {
       <div
         className="absolute inset-0 flex flex-col items-center justify-center"
         role="status"
-        aria-label={`Dockerfile analysis score: ${score} out of 100, grade ${grade}`}
+        aria-label={`Analysis score: ${score} out of 100, grade ${grade}`}
       >
-        <span className="text-2xl font-bold font-heading">{score}</span>
+        <span className="text-2xl font-bold font-heading">{displayScore}</span>
         <span className="text-sm font-semibold" style={{ color: gradeColor }}>
           {grade}
         </span>

@@ -17,7 +17,6 @@ import {
   type Node,
   type Edge,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import dagre from '@dagrejs/dagre';
 
 import { K8sResourceNode, type K8sResourceNodeData, CATEGORY_COLORS } from './K8sResourceNode';
@@ -132,7 +131,7 @@ function K8sResourceGraph({ result }: K8sResourceGraphProps) {
 
   if (!graphData) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-[var(--color-text-secondary)]">
+      <div className="flex items-center justify-center h-[300px] lg:h-[450px] text-[var(--color-text-secondary)]">
         <p className="text-sm">No resources found in the manifest.</p>
       </div>
     );
@@ -169,7 +168,7 @@ function K8sResourceGraph({ result }: K8sResourceGraphProps) {
           </span>
         ))}
       </div>
-      <div className="h-[300px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
+      <div className="h-[300px] lg:h-[450px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
         <ReactFlow
           nodes={graphData.nodes}
           edges={graphData.edges}

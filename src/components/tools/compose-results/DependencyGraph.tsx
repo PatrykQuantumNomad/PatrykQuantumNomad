@@ -18,7 +18,6 @@ import {
   type Node,
   type Edge,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import dagre from '@dagrejs/dagre';
 
 import { ServiceNode, type ServiceNodeData } from './ServiceNode';
@@ -179,7 +178,7 @@ function DependencyGraph({ result, yamlContent }: DependencyGraphProps) {
 
   if (!graphData) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-[var(--color-text-secondary)]">
+      <div className="flex items-center justify-center h-[300px] lg:h-[450px] text-[var(--color-text-secondary)]">
         <p className="text-sm">No services found in the compose file.</p>
       </div>
     );
@@ -205,7 +204,7 @@ function DependencyGraph({ result, yamlContent }: DependencyGraphProps) {
           Circular dependency detected -- cycle edges highlighted in red
         </div>
       )}
-      <div className="h-[300px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
+      <div className="h-[300px] lg:h-[450px] rounded-lg overflow-hidden border border-[var(--color-border,rgba(255,255,255,0.1))]">
         <ReactFlow
           nodes={graphData.nodes}
           edges={graphData.edges}

@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { EditorView, keymap } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { yaml } from '@codemirror/lang-yaml';
@@ -12,49 +12,44 @@ import {
   k8sResult,
 } from '../../../stores/k8sAnalyzerStore';
 
+const STORAGE_KEY = 'k8s-editor-content';
+
 interface UseCodeMirrorK8sOptions {
   initialDoc: string;
-  onAnalyze: () => void;
 }
 
 /**
  * React hook that creates and manages a CodeMirror 6 EditorView with YAML
- * syntax highlighting, a dark theme, and a Mod-Enter keyboard shortcut.
+ * syntax highlighting and a dark theme.
  *
  * Key design decisions:
  * - Empty deps array: EditorView is created once, destroyed on unmount.
- *   The onAnalyze callback is held in analyzeRef to avoid stale closures
- *   without recreating the editor on every render.
  * - Double cleanup: React useEffect cleanup AND astro:before-swap listener
  *   ensure no orphaned EditorView instances during View Transitions navigation.
  * - lintGutter() included without linter(): enables gutter markers when
  *   setDiagnostics pushes diagnostics on-demand (button-triggered only).
- * - keymap.of() placed before theme extensions for correct precedence.
+ * - localStorage persistence: auto-saves editor content on change (debounced 500ms).
+ *   Priority: URL hash > localStorage > sample file.
  */
-export function useCodeMirrorK8s({ initialDoc, onAnalyze }: UseCodeMirrorK8sOptions) {
+export function useCodeMirrorK8s({ initialDoc }: UseCodeMirrorK8sOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const analyzeRef = useRef<() => void>(onAnalyze);
-
-  // Keep analyzeRef current to avoid stale closures in keymap
-  analyzeRef.current = onAnalyze;
 
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Restore from localStorage if no URL hash was provided
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    const doc = saved?.trim() && !window.location.hash ? saved : initialDoc;
+
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
     const state = EditorState.create({
-      doc: initialDoc,
+      doc,
       extensions: [
         basicSetup,
         yaml(),
         lintGutter(),
-        keymap.of([{
-          key: 'Mod-Enter',
-          run: () => {
-            analyzeRef.current();
-            return true;
-          },
-        }]),
         oneDarkTheme,
         a11ySyntaxHighlighting,
         editorTheme,
@@ -63,10 +58,19 @@ export function useCodeMirrorK8s({ initialDoc, onAnalyze }: UseCodeMirrorK8sOpti
         EditorView.contentAttributes.of({
           'aria-label': 'Kubernetes manifest editor — paste or type your K8s YAML here',
         }),
-        // Detect stale results: set flag when doc changes after analysis
+        // Detect stale results + persist to localStorage
         EditorView.updateListener.of((update) => {
-          if (update.docChanged && k8sResult.get() !== null) {
-            k8sResultsStale.set(true);
+          if (update.docChanged) {
+            if (k8sResult.get() !== null) {
+              k8sResultsStale.set(true);
+            }
+            // Debounced localStorage save
+            if (saveTimer) clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+              try {
+                localStorage.setItem(STORAGE_KEY, update.state.doc.toString());
+              } catch { /* quota exceeded — ignore */ }
+            }, 500);
           }
         }),
       ],
@@ -91,6 +95,7 @@ export function useCodeMirrorK8s({ initialDoc, onAnalyze }: UseCodeMirrorK8sOpti
     document.addEventListener('astro:before-swap', handleSwap);
 
     return () => {
+      if (saveTimer) clearTimeout(saveTimer);
       document.removeEventListener('astro:before-swap', handleSwap);
       view.destroy();
       k8sEditorViewRef.set(null);

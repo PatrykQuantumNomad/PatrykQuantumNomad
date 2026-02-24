@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   k8sResult,
@@ -13,8 +13,10 @@ import { K8sEmptyState } from './k8s-results/K8sEmptyState';
 import { K8sShareActions } from './k8s-results/K8sShareActions';
 import { K8sResourceSummary } from './k8s-results/K8sResourceSummary';
 import { K8sPssCompliance } from './k8s-results/K8sPssCompliance';
+import { FullscreenToggle } from './results/FullscreenToggle';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
 import { K8sGraphSkeleton } from './k8s-results/K8sGraphSkeleton';
+import '@xyflow/react/dist/style.css';
 
 const LazyK8sResourceGraph = lazy(() => import('./k8s-results/K8sResourceGraph'));
 
@@ -34,11 +36,25 @@ function severitySummary(
   return parts.join(', ');
 }
 
-export default function K8sResultsPanel() {
+interface K8sResultsPanelProps {
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
+}
+
+export default function K8sResultsPanel({ onToggleFullscreen, isFullscreen }: K8sResultsPanelProps) {
   const [activeTab, setActiveTab] = useState<ResultTab>('results');
   const result = useStore(k8sResult);
   const analyzing = useStore(k8sAnalyzing);
   const stale = useStore(k8sResultsStale);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const violationCounts = useMemo(() => {
+    if (!result?.violations) return {};
+    const counts: Record<string, number> = {};
+    for (const v of result.violations) counts[v.category] = (counts[v.category] ?? 0) + 1;
+    return counts;
+  }, [result]);
 
   const handleNavigate = (line: number) => {
     const view = k8sEditorViewRef.get();
@@ -47,7 +63,7 @@ export default function K8sResultsPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       {/* Tab bar */}
       <div className="flex border-b border-[var(--color-border)] mb-3 min-h-[40px]">
         <button
@@ -70,10 +86,15 @@ export default function K8sResultsPanel() {
         >
           Graph
         </button>
+        {onToggleFullscreen && (
+          <div className="ml-auto flex items-center">
+            <FullscreenToggle isFullscreen={!!isFullscreen} onClick={onToggleFullscreen} />
+          </div>
+        )}
       </div>
 
       {/* Tab content */}
-      <div className={`rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4 ${activeTab === 'results' ? 'flex-1 overflow-y-auto' : 'overflow-y-auto'}`}>
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt,rgba(0,0,0,0.2))] p-4">
         {activeTab === 'results' ? (
           /* Results tab content */
           analyzing ? (
@@ -98,7 +119,13 @@ export default function K8sResultsPanel() {
             <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
               {stale && (
                 <div className="text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2 text-xs mb-3">
-                  Results may be outdated. Re-analyze to refresh.
+                  Results may be outdated.
+                  <button
+                    onClick={() => document.dispatchEvent(new CustomEvent('tool:reanalyze'))}
+                    className="ml-1.5 underline hover:text-amber-300 transition-colors font-medium"
+                  >
+                    Re-analyze
+                  </button>
                 </div>
               )}
               <K8sEmptyState score={result.score.overall} grade={result.score.grade} />
@@ -108,15 +135,26 @@ export default function K8sResultsPanel() {
             <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
               {stale && (
                 <div className="text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2 text-xs mb-3">
-                  Results may be outdated. Re-analyze to refresh.
+                  Results may be outdated.
+                  <button
+                    onClick={() => document.dispatchEvent(new CustomEvent('tool:reanalyze'))}
+                    className="ml-1.5 underline hover:text-amber-300 transition-colors font-medium"
+                  >
+                    Re-analyze
+                  </button>
                 </div>
               )}
 
               {/* Score + Category breakdown */}
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4">
-                <ScoreGauge score={result.score.overall} grade={result.score.grade} size={100} />
+                <ScoreGauge score={result.score.overall} grade={result.score.grade} size={80} />
                 <div className="flex-1 w-full">
-                  <K8sCategoryBreakdown categories={result.score.categories} />
+                  <K8sCategoryBreakdown
+                    categories={result.score.categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={setSelectedCategory}
+                    violationCounts={violationCounts}
+                  />
                 </div>
               </div>
 
@@ -140,9 +178,27 @@ export default function K8sResultsPanel() {
                 </span>
               </p>
 
+              <div className="mb-4">
+                <K8sShareActions />
+              </div>
+
+              {/* Search */}
+              {result.violations.length > 5 && (
+                <div className="mb-3">
+                  <input
+                    id="k8s-issue-search"
+                    name="k8s-issue-search"
+                    type="search"
+                    placeholder="Search issues..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded border border-[var(--color-border)] bg-transparent text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  />
+                </div>
+              )}
+
               {/* Violation list */}
-              <K8sViolationList violations={result.violations} onNavigate={handleNavigate} />
-              <K8sShareActions />
+              <K8sViolationList violations={result.violations} onNavigate={handleNavigate} selectedCategory={selectedCategory} searchQuery={searchQuery} />
             </div>
           )
         ) : (

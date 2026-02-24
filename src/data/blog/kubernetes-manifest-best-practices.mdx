@@ -1,7 +1,7 @@
 ---
 title: "Kubernetes Manifest Best Practices"
-description: "A production-tested guide to writing secure, reliable Kubernetes manifests. 67 rules explained with real-world consequences and fix examples. Try the free browser-based analyzer."
-publishedDate: 2026-02-23
+description: "Production-tested guide to writing secure Kubernetes manifests. 67 rules across security, reliability, RBAC, and cross-resource validation with fix examples."
+publishedDate: 2026-02-24
 tags: ["kubernetes", "k8s", "devops", "cloud-native", "security", "containers", "yaml"]
 draft: false
 ---
@@ -13,7 +13,7 @@ import Callout from '../../components/blog/Callout.astro';
 
 <OpeningStatement>Most Kubernetes manifests in production right now have at least six preventable issues. I built a tool to find all of them.</OpeningStatement>
 
-After 17 years building cloud-native systems -- including adopting Kubernetes before it reached 1.0 -- I have reviewed hundreds of Kubernetes manifests. They arrive in pull requests, in migration assessments, in incident post-mortems where a missing security context or a misconfigured probe was the root cause. The patterns repeat: containers running as root with full privilege escalation, workloads with no resource limits that starve the node, Services pointing at selectors that match nothing, RBAC roles granting wildcard permissions because someone copied a ClusterRole from a blog post and never scoped it down. Each one is a production incident or a security finding waiting to happen.
+After 17 years building cloud-native systems, I have reviewed hundreds of Kubernetes manifests. They show up in pull requests, migration assessments, and incident post-mortems where a missing security context or a misconfigured probe turned out to be the root cause. The patterns keep repeating: containers running as root with full privilege escalation, workloads with no resource limits starving the node, Services pointing at selectors that match nothing, RBAC roles granting wildcard permissions because someone copied a ClusterRole from a blog post and never scoped it down. Every one of these is a production incident or security finding waiting to happen.
 
 I wrote the rules down. All 67 of them. Then I turned them into an [analyzer you can run right now](/tools/k8s-analyzer/).
 
@@ -25,25 +25,46 @@ This post walks through the rules the analyzer checks, organized by category. Ea
 - Scoring: **0-100** with letter grades, category-weighted by production impact
 - **Pod Security Standards (PSS)** compliance: Baseline and Restricted profile checks
 - **CIS Kubernetes Benchmark** mappings for audit-ready security
-- **100% client-side** -- your manifests never leave your browser
+- **100% client-side**: your manifests never leave your browser
 - Cross-resource validation catches Service-to-Deployment mismatches, missing ConfigMaps, and orphaned Secrets
 - Try it now: [Kubernetes Manifest Analyzer](/tools/k8s-analyzer/)
 
 </TldrSummary>
 
+## What Is a Kubernetes Manifest?
+
+A Kubernetes manifest is a YAML file that declares the desired state of resources in a Kubernetes cluster. It tells the cluster what to run (containers, images, replicas), how to run it (security contexts, resource limits, scheduling constraints), and how to expose it (Services, Ingress, NetworkPolicy). Every Deployment, StatefulSet, CronJob, Service, and RBAC role starts as a manifest. If the manifest is wrong, the workload is wrong.
+
+## Top 10 Kubernetes Manifest Best Practices
+
+Before diving into the full 67-rule breakdown, here are the ten practices that prevent the most production incidents:
+
+1. **Never run containers in privileged mode** ([KA-C001](/tools/k8s-analyzer/rules/ka-c001/)). It disables all container isolation.
+2. **Set `allowPrivilegeEscalation: false`** ([KA-C002](/tools/k8s-analyzer/rules/ka-c002/)). The default is permissive, which means you must opt out explicitly.
+3. **Enforce `runAsNonRoot: true`** ([KA-C003](/tools/k8s-analyzer/rules/ka-c003/)). Containers run as root by default unless you prevent it.
+4. **Define liveness and readiness probes** ([KA-R001](/tools/k8s-analyzer/rules/ka-r001/), [KA-R002](/tools/k8s-analyzer/rules/ka-r002/)). Without probes, Kubernetes cannot detect unhealthy pods.
+5. **Set CPU and memory requests and limits** ([KA-B001](/tools/k8s-analyzer/rules/ka-b001/) through [KA-B004](/tools/k8s-analyzer/rules/ka-b004/)). A pod without limits can starve every other pod on the node.
+6. **Pin image tags to specific versions** ([KA-R009](/tools/k8s-analyzer/rules/ka-r009/)). The `:latest` tag is a moving target that breaks reproducibility.
+7. **Deploy multiple replicas with anti-affinity** ([KA-R004](/tools/k8s-analyzer/rules/ka-r004/)). A single replica is a single point of failure.
+8. **Drop all capabilities and add back selectively** ([KA-C011](/tools/k8s-analyzer/rules/ka-c011/)). Containers inherit capabilities you probably do not need.
+9. **Never use wildcard RBAC permissions** ([KA-A001](/tools/k8s-analyzer/rules/ka-a001/)). Scope every Role to specific resources and verbs.
+10. **Always specify a namespace** ([KA-B006](/tools/k8s-analyzer/rules/ka-b006/)). Omitting it deploys to whatever namespace `kubectl` is currently configured for.
+
+You can validate all ten automatically with the free [Kubernetes Manifest Analyzer](/tools/k8s-analyzer/), an online YAML validator and linter that checks all 67 rules in the browser.
+
 ## Why Your Kubernetes Manifests Matter
 
-Kubernetes manifests define the runtime identity of every workload in your cluster. They specify which containers run, what security boundaries they operate within, how much CPU and memory they can consume, how the scheduler places them, and how traffic reaches them. A manifest is not configuration boilerplate -- it is the contract between your application and the cluster.
+Kubernetes manifests define the runtime identity of every workload in your cluster. They specify which containers run, what security boundaries they operate within, how much CPU and memory they can consume, how the scheduler places them, and how traffic reaches them. A manifest is not configuration boilerplate. It is the contract between your application and the cluster.
 
-A bad manifest compounds in ways that are hard to trace back to the source. A container running in privileged mode gives an attacker root-level access to the node if they compromise the application. A Deployment with a single replica and no PodDisruptionBudget goes down during every node drain. A Service whose selector does not match any Pod labels routes traffic to nothing, producing cryptic connection timeouts that take hours to debug. A CronJob without a `startingDeadlineSeconds` silently skips runs when the controller is busy, and you do not find out until the data pipeline is three days stale.
+A bad manifest compounds in ways that are hard to trace back to the source. A container running in privileged mode gives an attacker root-level access to the node if they compromise the application. A Deployment with a single replica and no PodDisruptionBudget goes down during every node drain. A Service whose selector does not match any Pod labels routes traffic to nothing, producing cryptic connection timeouts that take hours to debug. A CronJob without `startingDeadlineSeconds` silently skips runs when the controller is busy, and you only find out when the data pipeline is three days stale.
 
-The 67 rules below are not theoretical. Every single one comes from a production incident, a security audit finding, or a cluster debugging session. They are organized into six categories: Schema, Security, Reliability, Best Practice, Cross-Resource, and RBAC. Security rules catch the dangerous stuff. Reliability rules prevent the frustrating stuff. Cross-resource rules catch the invisible stuff -- mismatches between resources that only surface at runtime.
+The 67 rules below are not theoretical. Every single one comes from a production incident, a security audit finding, or a cluster debugging session. They are organized into six categories: Schema, Security, Reliability, Best Practice, Cross-Resource, and RBAC. Security rules catch the dangerous stuff. Reliability rules prevent the frustrating stuff. Cross-resource rules catch the invisible stuff, like mismatches between resources that only surface at runtime.
 
 ## Schema Validation: Catching Broken Manifests Early
 
 Before the analyzer checks any rules, it validates your manifests against the official Kubernetes API schemas for 19 resource types. This catches structural errors that `kubectl apply` would reject immediately.
 
-Rule [KA-S001](/tools/k8s-analyzer/rules/ka-s001/) catches invalid YAML syntax -- tabs instead of spaces, unclosed quotes, malformed anchors. These errors prevent the manifest from parsing at all, but the error messages from `kubectl` are often cryptic ("error converting YAML to JSON") and do not point to the exact line. The analyzer does.
+Rule [KA-S001](/tools/k8s-analyzer/rules/ka-s001/) catches invalid YAML syntax: tabs instead of spaces, unclosed quotes, malformed anchors. These errors prevent the manifest from parsing at all, but the error messages from `kubectl` are often cryptic ("error converting YAML to JSON") and do not point to the exact line. The analyzer does.
 
 Rule [KA-S002](/tools/k8s-analyzer/rules/ka-s002/) catches missing `apiVersion` or `kind` fields. Every Kubernetes resource requires both, but copy-paste errors and partial manifest templates often omit one or both. Without these fields, `kubectl` cannot even determine which API endpoint to call. The analyzer flags the exact document that is missing them.
 
@@ -51,7 +72,7 @@ Schema validation runs first because there is no point analyzing security rules 
 
 ## Security Rules: The Non-Negotiables
 
-Security rules carry the highest weight in the analyzer's scoring. A single security violation in a Kubernetes manifest can compromise an entire node, or -- through lateral movement -- the entire cluster. These are the rules I enforce without exception.
+Security rules carry the highest weight in the analyzer's scoring. A single security violation in a Kubernetes manifest can compromise an entire node or, through lateral movement, the entire cluster. These are the rules I enforce without exception.
 
 ### Never Run Containers in Privileged Mode
 
@@ -187,12 +208,12 @@ spec:
         - "--destination=registry.example.com/myapp:latest"
 ```
 
-Mounting `/var/run/docker.sock` into a pod gives that container full control over the container runtime on the node. It can create new containers, mount host filesystems, and effectively gain root access to the node. This is one of the most common attack vectors in Kubernetes clusters -- the Graboid cryptomining worm and numerous supply chain attacks have exploited exactly this pattern. Rule [KA-C015](/tools/k8s-analyzer/rules/ka-c015/) detects Docker socket mounts in any pod's volume configuration.
+Mounting `/var/run/docker.sock` into a pod gives that container full control over the container runtime on the node. It can create new containers, mount host filesystems, and effectively gain root access to the node. This is one of the most common attack vectors in Kubernetes clusters. The Graboid cryptomining worm and numerous supply chain attacks exploited exactly this pattern. Rule [KA-C015](/tools/k8s-analyzer/rules/ka-c015/) detects Docker socket mounts in any pod's volume configuration.
 
 If you need in-cluster container builds (for CI pipelines), use Kaniko, Buildah, or BuildKit in rootless mode. None of them require access to the container runtime socket.
 
 <Callout>
-**Pod Security Standards compliance.** The security rules above map directly to the Kubernetes Pod Security Standards. Privileged mode, privilege escalation, running as root, and host namespace sharing are all violations of the PSS Restricted profile. The analyzer checks PSS compliance automatically -- a manifest that passes all security rules is typically PSS Restricted compliant. Rules like KA-C001 and KA-C002 also map to CIS Kubernetes Benchmark sections 5.2.1 through 5.2.9.
+**Pod Security Standards compliance.** The security rules above map directly to the Kubernetes Pod Security Standards. Privileged mode, privilege escalation, running as root, and host namespace sharing are all violations of the PSS Restricted profile. The analyzer checks PSS compliance automatically, and a manifest that passes all security rules is typically PSS Restricted compliant. Rules like KA-C001 and KA-C002 also map to CIS Kubernetes Benchmark sections 5.2.1 through 5.2.9.
 </Callout>
 
 <KeyTakeaway title="Security Is Not Optional">
@@ -243,7 +264,7 @@ spec:
 
 Without probes, Kubernetes considers a pod healthy the moment the container process starts. If the application is still initializing, has crashed into an error loop, or is accepting connections but returning errors, Kubernetes keeps sending traffic to it. A readiness probe tells Kubernetes when the pod is ready to receive traffic. A liveness probe tells Kubernetes when the pod is stuck and needs to be restarted. A startup probe gives slow-starting applications time to initialize without triggering the liveness probe.
 
-Rule [KA-R001](/tools/k8s-analyzer/rules/ka-r001/) flags containers that define no probes at all. Missing probes are the single most common reliability issue in Kubernetes manifests I review. The impact is invisible during normal operation and catastrophic during failures -- the exact combination that causes long, painful outages.
+Rule [KA-R001](/tools/k8s-analyzer/rules/ka-r001/) flags containers that define no probes at all. Missing probes are the single most common reliability issue in the Kubernetes manifests I review. The impact is invisible during normal operation and catastrophic during failures, which is exactly the combination that causes long, painful outages.
 
 ### Never Deploy Single Replicas in Production
 
@@ -325,11 +346,11 @@ spec:
 
 The `:latest` tag is a moving target. What deploys today may differ from what deploys tomorrow when the image is rebuilt. In a Kubernetes rolling update, some pods may run the old `latest` while new pods pull a different `latest`, creating inconsistent behavior within the same Deployment. Even named tags like `:1.0` can be overwritten. Rule [KA-R009](/tools/k8s-analyzer/rules/ka-r009/) flags containers using `:latest` or no tag at all.
 
-For production workloads, pin to a specific version tag and, ideally, to a digest. A digest is an immutable hash of the image manifest -- it cannot change. This guarantees that every pod in your Deployment runs the exact same image.
+For production workloads, pin to a specific version tag and, ideally, to a digest. A digest is an immutable hash of the image manifest, so it cannot change. This guarantees that every pod in your Deployment runs the exact same image.
 
 ## Best Practice Rules: Operational Excellence
 
-Best practice rules will not stop your manifests from being applied. They will stop your operations from running smoothly.
+Best practice rules will not stop your manifests from being applied, but they will stop your operations from running smoothly.
 
 ### Apply Recommended Labels
 
@@ -403,7 +424,7 @@ spec:
               image: backup-tool:1.0
 ```
 
-Without `startingDeadlineSeconds`, a CronJob that misses its scheduled time (because the controller was busy, the cluster was under load, or the Job quota was exceeded) silently skips that run. There is no error, no event, no notification. You find out when the nightly backup is three days old or the data pipeline has a gap. Rule [KA-B007](/tools/k8s-analyzer/rules/ka-b007/) flags CronJobs without a starting deadline.
+Without `startingDeadlineSeconds`, a CronJob that misses its scheduled time (because the controller was busy, the cluster was under load, or the Job quota was exceeded) silently skips that run. There is no error, no event, no notification. You find out when the nightly backup is three days old or when the data pipeline has a gap. Rule [KA-R012](/tools/k8s-analyzer/rules/ka-r012/) flags CronJobs without a starting deadline.
 
 Setting `startingDeadlineSeconds: 600` tells Kubernetes to create the Job even if it is up to 10 minutes late. If it is later than that, the CronJob reports a missed run that you can detect through monitoring.
 
@@ -517,7 +538,7 @@ spec:
 # No ConfigMap named 'app-config' in the manifest
 ```
 
-When a container references a ConfigMap via `envFrom` or `env.valueFrom.configMapKeyRef`, and that ConfigMap does not exist in the cluster, the pod gets stuck in `CreateContainerConfigError`. This is a particularly frustrating failure because the pod does not crash -- it just never starts, and the error message requires inspecting pod events. Rule [KA-X003](/tools/k8s-analyzer/rules/ka-x003/) checks that every ConfigMap reference in the manifest has a corresponding ConfigMap resource defined in the same manifest.
+When a container references a ConfigMap via `envFrom` or `env.valueFrom.configMapKeyRef`, and that ConfigMap does not exist in the cluster, the pod gets stuck in `CreateContainerConfigError`. This is a particularly frustrating failure because the pod does not crash. It just never starts, and the error message requires inspecting pod events. Rule [KA-X003](/tools/k8s-analyzer/rules/ka-x003/) checks that every ConfigMap reference in the manifest has a corresponding ConfigMap resource defined in the same manifest.
 
 ### Missing Secret References
 
@@ -613,9 +634,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-Binding a ServiceAccount to `cluster-admin` gives that account full control over every resource in every namespace. If the workload using that ServiceAccount is compromised, the attacker inherits cluster-admin privileges -- they can exfiltrate every Secret in every namespace, deploy cryptominers, modify admission webhooks, and pivot to other clusters via stored kubeconfigs. Rule [KA-A002](/tools/k8s-analyzer/rules/ka-a002/) flags any ClusterRoleBinding that references the `cluster-admin` ClusterRole.
+Binding a ServiceAccount to `cluster-admin` gives that account full control over every resource in every namespace. If the workload using that ServiceAccount is compromised, the attacker inherits cluster-admin privileges. They can exfiltrate every Secret in every namespace, deploy cryptominers, modify admission webhooks, and pivot to other clusters via stored kubeconfigs. Rule [KA-A002](/tools/k8s-analyzer/rules/ka-a002/) flags any ClusterRoleBinding that references the `cluster-admin` ClusterRole.
 
-Every Kubernetes security audit I have conducted has found at least one unnecessary `cluster-admin` binding. They are typically created during initial setup ("just make it work") and never scoped down. The fix is to create a custom Role or ClusterRole with only the permissions the workload needs, scoped to the namespaces it operates in.
+Every Kubernetes security audit I have conducted has found at least one unnecessary `cluster-admin` binding. They are typically created during initial setup ("just make it work") and never scoped down afterward. The fix is to create a custom Role or ClusterRole with only the permissions the workload needs, scoped to the namespaces it operates in.
 
 <Callout>
 **CIS Kubernetes Benchmark alignment.** The RBAC rules map directly to CIS Benchmark Section 5.1: "RBAC and Service Accounts." Specifically, KA-A001 aligns with CIS 5.1.3 ("Minimize wildcard use in Roles and ClusterRoles") and KA-A002 aligns with CIS 5.1.5 ("Ensure that default service accounts are not actively used"). If your organization requires CIS compliance, the analyzer's RBAC checks provide automated coverage for these sections.
@@ -634,19 +655,28 @@ The analyzer processes your manifests through four stages: parsing, schema valid
 **Stage 4: Scoring.** Violations are aggregated into a 0-100 score using category weights: Security (35%), Reliability (25%), Best Practice (15%), Cross-Resource (10%), Schema (10%), RBAC (5%). A diminishing returns formula prevents a single category from dominating the score. The analyzer also evaluates Pod Security Standards compliance, reporting whether each workload meets PSS Baseline and Restricted profiles.
 
 <Callout>
-**Your manifests stay private.** The entire analysis pipeline -- YAML parsing, schema validation, 67-rule analysis, scoring, PSS compliance checks, and resource graph rendering -- runs in JavaScript in your browser. No server receives your code. No API call is made. There is no backend, no telemetry, no logging. What you paste stays on your machine.
+**Your manifests stay private.** The entire analysis pipeline (YAML parsing, schema validation, 67-rule analysis, scoring, PSS compliance checks, and resource graph rendering) runs in JavaScript in your browser. No server receives your code. No API call is made. There is no backend, no telemetry, no logging. What you paste stays on your machine.
 </Callout>
+
+## Further Reading
+
+The rules in this guide align with several industry standards and frameworks:
+
+- <a href="https://kubernetes.io/docs/concepts/security/pod-security-standards/" target="_blank" rel="noopener noreferrer">Kubernetes Pod Security Standards</a> define the official Baseline and Restricted security profiles.
+- <a href="https://www.cisecurity.org/benchmark/kubernetes" target="_blank" rel="noopener noreferrer">CIS Kubernetes Benchmark</a> provides audit-ready controls for cluster and workload security (Sections 5.1 and 5.2 map directly to our RBAC and security rules).
+- <a href="https://csrc.nist.gov/pubs/sp/800/190/final" target="_blank" rel="noopener noreferrer">NIST SP 800-190: Application Container Security Guide</a> covers container image, runtime, and orchestrator hardening.
+- <a href="https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP Kubernetes Security Cheat Sheet</a> provides a concise reference for common Kubernetes security patterns.
 
 ## Start Analyzing
 
 If you have read this far, you know what good Kubernetes manifests look like. Now find out what yours actually score.
 
-The [Kubernetes Manifest Analyzer](/tools/k8s-analyzer/) is free, private, and instant. Paste your manifests, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes explanations of why the rule exists, what production issues it prevents, PSS and CIS mappings where applicable, and related rules.
+The [Kubernetes Manifest Analyzer](/tools/k8s-analyzer/) is a free online Kubernetes YAML validator and static analysis tool. Paste your manifests, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes explanations of why the rule exists, what production issues it prevents, PSS and CIS mappings where applicable, and related rules. The tool runs entirely in your browser, so your manifests never leave your device.
 
-I built this tool because I got tired of finding the same manifest issues in security audits and cluster debugging sessions. Privileged containers, missing probes, wildcard RBAC, Service selector mismatches. The same patterns in every cluster. If the analyzer catches even one of these before it reaches production, it was worth building.
+I built this manifest linter because I got tired of finding the same issues in Kubernetes security audits and cluster debugging sessions. Privileged containers, missing probes, wildcard RBAC, Service selector mismatches. The same patterns in every cluster. If the analyzer catches even one of these before it reaches production, it was worth building.
 
 Browse all 67 rules starting from [KA-C001: Privileged Containers](/tools/k8s-analyzer/rules/ka-c001/), or paste your manifests and let the analyzer find the issues for you.
 
 <Callout>
-**Containerizing your applications?** Check your Dockerfiles with the [Dockerfile Analyzer](/tools/dockerfile-analyzer/) -- 40 rules for security, efficiency, and maintainability. Orchestrating with Compose? Validate your docker-compose.yml with the [Docker Compose Validator](/tools/compose-validator/) -- 52 rules for schema, security, semantic, and best-practice analysis.
+**Containerizing your applications?** Check your Dockerfiles with the [Dockerfile Analyzer](/tools/dockerfile-analyzer/), which covers 40 rules for security, efficiency, and maintainability. Orchestrating with Compose? Validate your docker-compose.yml with the [Docker Compose Validator](/tools/compose-validator/), which covers 52 rules for schema, security, semantic, and best-practice analysis.
 </Callout>

@@ -1,18 +1,26 @@
+import { useState } from 'react';
 import K8sEditorPanel from './K8sEditorPanel';
 import K8sResultsPanel from './K8sResultsPanel';
 
-/**
- * Root React island composing K8sEditorPanel + K8sResultsPanel in a responsive grid.
- * UI-11: grid-cols-1 stacks on mobile, lg:grid-cols-2 goes side-by-side on desktop.
- */
 export default function K8sAnalyzer() {
+  const [fullscreen, setFullscreen] = useState<'editor' | 'results' | null>(null);
+
+  const toggleFullscreen = (panel: 'editor' | 'results') =>
+    setFullscreen((prev) => (prev === panel ? null : panel));
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-      <div className="min-h-[350px] lg:min-h-[500px]">
-        <K8sEditorPanel />
+    <div className={`grid grid-cols-1 ${fullscreen ? '' : 'lg:grid-cols-2'} gap-4 lg:gap-6`}>
+      <div className={fullscreen === 'results' ? 'hidden' : ''}>
+        <K8sEditorPanel
+          onToggleFullscreen={() => toggleFullscreen('editor')}
+          isFullscreen={fullscreen === 'editor'}
+        />
       </div>
-      <div className="min-h-[200px] lg:min-h-[500px]">
-        <K8sResultsPanel />
+      <div className={fullscreen === 'editor' ? 'hidden' : ''}>
+        <K8sResultsPanel
+          onToggleFullscreen={() => toggleFullscreen('results')}
+          isFullscreen={fullscreen === 'results'}
+        />
       </div>
     </div>
   );
