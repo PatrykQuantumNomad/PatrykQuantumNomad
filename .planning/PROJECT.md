@@ -176,7 +176,24 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 <!-- Current scope. Building toward these. -->
 
-(None yet — next milestone to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.8 EDA Visual Encyclopedia
+
+**Goal:** Modernize the NIST/SEMATECH Engineering Statistics Handbook Chapter 1 (Exploratory Data Analysis) as a complete interactive pillar section with 90+ pages, build-time SVG plots, Python code examples, KaTeX formulas, and D3.js distribution parameter explorers.
+
+**Target features:**
+- Visual Encyclopedia landing page at /eda/ with filterable technique card grid
+- 6 Foundations pages (EDA philosophy, assumptions, 4-plot interpretation)
+- 30 Graphical Technique walkthrough pages with build-time SVG plots and interpretation variants
+- 18 Quantitative Technique pages with formulas, Python code, and annotated examples
+- 19 Probability Distribution pages with D3.js interactive parameter explorers (~30KB micro-bundle)
+- 9 Case Study walkthrough pages with datasets and sequential analysis
+- 4 Reference pages (analysis questions, techniques-by-category, distribution tables, related distributions)
+- 3-tier interactivity: build-time SVG + vanilla JS hover/swap (70% of pages), D3 micro-bundle for distributions only
+- Python-generated SVG plots styled to Quantum Explorer palette
+- KaTeX-rendered mathematical formulas
+- Python code blocks replacing Dataplot commands (matplotlib/seaborn/scipy/plotly)
+- Companion blog post + full site integration (nav, homepage callout, JSON-LD, sitemap, OG images)
+- Source: NIST/SEMATECH e-Handbook of Statistical Methods (public domain)
 
 ### Out of Scope
 
@@ -203,6 +220,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 Shipped v1.7 Kubernetes Manifest Analyzer on top of v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs.
+v1.8 additions: KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~30KB) for distribution parameter explorers, Python build scripts for SVG plot generation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 requirements delivered (403 total). 857 total pages. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
@@ -297,4 +315,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-23 after v1.7 milestone complete*
+*Last updated: 2026-02-24 after v1.8 milestone started*
