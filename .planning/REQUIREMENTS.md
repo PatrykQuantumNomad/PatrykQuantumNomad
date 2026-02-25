@@ -27,11 +27,11 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **DATA-02**: techniques.json populated with all 18 quantitative technique entries
 - [x] **DATA-03**: distributions.json populated with all 19 probability distribution entries (title, slug, parameters, PDF/CDF formulas, related distributions)
 - [x] **DATA-04**: Each technique tagged with interactivity tier (A/B/C) and variant count
-- [ ] **DATA-05**: MDX stub files created for 6 foundations pages with NIST section references
-- [ ] **DATA-06**: MDX stub files created for 9 case study pages with NIST section references
-- [ ] **DATA-07**: MDX stub files created for 4 reference pages
-- [ ] **DATA-08**: Sample datasets defined in datasets.ts for technique plot generation (NIST reference data)
-- [ ] **DATA-09**: All cross-linking slugs pre-populated and validated against route structure
+- [x] **DATA-05**: MDX stub files created for 6 foundations pages with NIST section references
+- [x] **DATA-06**: MDX stub files created for 9 case study pages with NIST section references
+- [x] **DATA-07**: MDX stub files created for 4 reference pages
+- [x] **DATA-08**: Sample datasets defined in datasets.ts for technique plot generation (NIST reference data)
+- [x] **DATA-09**: All cross-linking slugs pre-populated and validated against route structure
 
 ### SVG Generators
 
@@ -233,11 +233,11 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | DATA-02 | Phase 49 | Complete |
 | DATA-03 | Phase 49 | Complete |
 | DATA-04 | Phase 49 | Complete |
-| DATA-05 | Phase 49 | Pending |
-| DATA-06 | Phase 49 | Pending |
-| DATA-07 | Phase 49 | Pending |
-| DATA-08 | Phase 49 | Pending |
-| DATA-09 | Phase 49 | Pending |
+| DATA-05 | Phase 49 | Complete |
+| DATA-06 | Phase 49 | Complete |
+| DATA-07 | Phase 49 | Complete |
+| DATA-08 | Phase 49 | Complete |
+| DATA-09 | Phase 49 | Complete |
 | SVG-01 | Phase 50 | Pending |
 | SVG-02 | Phase 50 | Pending |
 | SVG-03 | Phase 50 | Pending |

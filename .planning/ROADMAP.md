@@ -31,7 +31,7 @@ See `.planning/milestones/` for detailed archives.
 - Decimal phases (48.1, 48.2): Urgent insertions (marked with INSERTED)
 
 - [ ] **Phase 48: Infrastructure Foundation** - KaTeX pipeline, D3 isolation, OG caching, Zod schemas, EDA layout, content collections, technique template, breadcrumbs
-- [ ] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation
+- [x] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation (completed 2026-02-25)
 - [ ] **Phase 50: SVG Generator Library** - Build-time TypeScript SVG generators for all statistical chart types
 - [ ] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component
 - [ ] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages
@@ -190,7 +190,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 33-40 | v1.6 Docker Compose Validator | 14/14 | Complete | 2026-02-23 |
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48. Infrastructure Foundation | v1.8 | 3/3 | Complete | 2026-02-24 |
-| 49. Data Model + Schema Population | 2/3 | In Progress|  | - |
+| 49. Data Model + Schema Population | 3/3 | Complete   | 2026-02-25 | - |
 | 50. SVG Generator Library | v1.8 | 0/3 | Not started | - |
 | 51. Graphical Technique Pages | v1.8 | 0/3 | Not started | - |
 | 52. Quantitative Techniques + Foundations | v1.8 | 0/3 | Not started | - |
