@@ -86,11 +86,11 @@ const pdfLabel = discrete ? 'Probability Mass Function' : 'Probability Density F
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] mb-2">{discrete ? 'PMF' : 'PDF'}</h3>
-          <div set:html={pdfSvg} />
+          <div role="img" aria-label={`${distribution.title} ${discrete ? 'PMF' : 'PDF'} curve`} set:html={pdfSvg} />
         </div>
         <div>
           <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] mb-2">CDF</h3>
-          <div set:html={cdfSvg} />
+          <div role="img" aria-label={`${distribution.title} CDF curve`} set:html={cdfSvg} />
         </div>
       </div>
     </div>

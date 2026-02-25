@@ -53,9 +53,9 @@ const variants = isTierB ? renderVariants(technique.slug) : [];
 >
   <Fragment slot="plot">
     {isTierB ? (
-      <PlotVariantSwap variants={variants} />
+      <PlotVariantSwap variants={variants} techniqueTitle={technique.title} />
     ) : (
-      <div class="mt-8 mb-10" set:html={plotSvg} />
+      <div role="img" aria-label={`${technique.title} statistical chart`} class="mt-8 mb-10" set:html={plotSvg} />
     )}
   </Fragment>
 

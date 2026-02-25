@@ -13,9 +13,10 @@ interface Variant {
 interface Props {
   variants: Variant[];
   defaultLabel?: string;
+  techniqueTitle?: string;
 }
 
-const { variants } = Astro.props;
+const { variants, techniqueTitle = 'Technique' } = Astro.props;
 const componentId = `pvs-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
@@ -47,6 +48,7 @@ const componentId = `pvs-${Math.random().toString(36).slice(2, 8)}`;
           role="tabpanel"
           id={panelId}
           data-panel={`variant-${i}`}
+          aria-label={`${techniqueTitle} — ${v.label} chart`}
           class={isDefault ? '' : 'hidden'}
           set:html={v.svg}
         />
