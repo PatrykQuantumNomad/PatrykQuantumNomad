@@ -173,9 +173,9 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **SITE-04**: Unique SEO meta description for every EDA page
 - [x] **SITE-05**: All EDA pages included in sitemap
 - [x] **SITE-06**: LLMs.txt updated with EDA section
-- [ ] **SITE-07**: Build-time OG images for EDA overview and key pages
-- [ ] **SITE-08**: Companion blog post covering EDA methodology and tool walkthrough
-- [ ] **SITE-09**: Bidirectional cross-links between blog post and EDA pages
+- [x] **SITE-07**: Build-time OG images for EDA overview and key pages
+- [x] **SITE-08**: Companion blog post covering EDA methodology and tool walkthrough
+- [x] **SITE-09**: Bidirectional cross-links between blog post and EDA pages
 - [ ] **SITE-10**: Lighthouse 90+ verified on representative pages from each tier (A, B, C)
 - [ ] **SITE-11**: WCAG 2.1 AA accessibility (role="img" + aria-label on SVGs, keyboard nav, screen reader)
 - [ ] **SITE-12**: Every EDA page cites its NIST source section
@@ -353,9 +353,9 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | SITE-04 | Phase 55 | Complete |
 | SITE-05 | Phase 55 | Complete |
 | SITE-06 | Phase 55 | Complete |
-| SITE-07 | Phase 55 | Pending |
-| SITE-08 | Phase 55 | Pending |
-| SITE-09 | Phase 55 | Pending |
+| SITE-07 | Phase 55 | Complete |
+| SITE-08 | Phase 55 | Complete |
+| SITE-09 | Phase 55 | Complete |
 | SITE-10 | Phase 55 | Pending |
 | SITE-11 | Phase 55 | Pending |
 | SITE-12 | Phase 55 | Pending |
