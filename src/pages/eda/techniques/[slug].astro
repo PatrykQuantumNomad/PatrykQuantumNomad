@@ -1,0 +1,87 @@
+---
+/**
+ * Dynamic route for all 29 graphical technique pages.
+ * Composes technique-renderer (SVG), technique-content (prose),
+ * and PlotVariantSwap (Tier B tab switching) into TechniquePage layout.
+ */
+import { getCollection } from 'astro:content';
+import TechniquePage from '../../../components/eda/TechniquePage.astro';
+import PlotVariantSwap from '../../../components/eda/PlotVariantSwap.astro';
+import { renderTechniquePlot, renderVariants } from '../../../lib/eda/technique-renderer';
+import { getTechniqueContent } from '../../../lib/eda/technique-content';
+import { techniqueUrl } from '../../../lib/eda/routes';
+
+export async function getStaticPaths() {
+  const allTechniques = await getCollection('edaTechniques');
+  const allTechMap = new Map(allTechniques.map(t => [t.data.slug, t.data]));
+  const graphical = allTechniques
+    .filter(t => t.data.category === 'graphical')
+    .map(t => t.data);
+
+  return graphical.map(technique => ({
+    params: { slug: technique.slug },
+    props: {
+      technique,
+      relatedTechniques: technique.relatedTechniques
+        .filter(slug => allTechMap.has(slug))
+        .map(slug => {
+          const related = allTechMap.get(slug)!;
+          return {
+            slug,
+            name: related.title,
+            url: techniqueUrl(slug, related.category),
+          };
+        }),
+    },
+  }));
+}
+
+const { technique, relatedTechniques } = Astro.props;
+const plotSvg = renderTechniquePlot(technique.slug);
+const content = getTechniqueContent(technique.slug);
+const isTierB = technique.tier === 'B';
+const variants = isTierB ? renderVariants(technique.slug) : [];
+---
+
+<TechniquePage
+  title={technique.title}
+  description={technique.description}
+  category="Graphical Techniques"
+  nistSection={technique.nistSection}
+  slug={technique.slug}
+  relatedTechniques={relatedTechniques}
+>
+  <Fragment slot="plot">
+    {isTierB ? (
+      <PlotVariantSwap variants={variants} />
+    ) : (
+      <div class="mt-8 mb-10" set:html={plotSvg} />
+    )}
+  </Fragment>
+
+  {content && (
+    <Fragment slot="description">
+      <section class="prose-section mt-8 space-y-6">
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">What It Is</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.definition}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">When to Use It</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.purpose}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">How to Interpret</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.interpretation}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.assumptions}</p>
+        </div>
+        <p class="text-sm text-[var(--color-text-secondary)] italic mt-4">
+          Reference: {content.nistReference}
+        </p>
+      </section>
+    </Fragment>
+  )}
+</TechniquePage>

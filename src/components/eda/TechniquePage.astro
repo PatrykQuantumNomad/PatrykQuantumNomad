@@ -8,11 +8,12 @@ interface Props {
   description: string;
   category: string;
   nistSection: string;
-  relatedTechniques?: Array<{ slug: string; name: string }>;
+  slug?: string;
+  relatedTechniques?: Array<{ slug: string; name: string; url: string }>;
   useKatex?: boolean;
 }
 
-const { title, description, category, nistSection, relatedTechniques = [], useKatex = false } = Astro.props;
+const { title, description, category, nistSection, slug, relatedTechniques = [], useKatex = false } = Astro.props;
 
 const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
 ---
@@ -22,7 +23,7 @@ const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
     { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
     { name: category, url: `https://patrykgolabek.dev/eda/${categorySlug}/` },
-    { name: title, url: `https://patrykgolabek.dev/eda/techniques/${title.toLowerCase().replace(/\s+/g, '-')}/` },
+    { name: title, url: `https://patrykgolabek.dev/eda/techniques/${slug ?? title.toLowerCase().replace(/\s+/g, '-')}/` },
   ]} />
 
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -46,7 +47,7 @@ const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
         <h2 class="text-xl font-heading font-bold mb-4">Related Techniques</h2>
         <div class="flex flex-wrap gap-3">
           {relatedTechniques.map((t) => (
-            <a href={`/eda/techniques/${t.slug}/`}
+            <a href={t.url}
                class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors">
               {t.name}
             </a>
