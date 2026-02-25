@@ -1,0 +1,207 @@
+---
+/**
+ * EDA Visual Encyclopedia landing page — /eda/
+ * Filterable card grid aggregating all 90+ pages across graphical techniques,
+ * quantitative methods, probability distributions, foundations, case studies,
+ * and reference material.
+ */
+import { getCollection } from 'astro:content';
+import EDALayout from '../../layouts/EDALayout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import CategoryFilter from '../../components/eda/CategoryFilter.tsx';
+import { techniqueUrl, distributionUrl, caseStudyUrl, referenceUrl, foundationUrl } from '../../lib/eda/routes';
+import { generateThumbnail } from '../../lib/eda/thumbnail';
+import { generateDistributionCurve } from '../../lib/eda/svg-generators/distribution-curve';
+
+interface LandingCard {
+  title: string;
+  url: string;
+  category: string;
+  section: string;
+  description: string;
+  thumbnail?: string;
+}
+
+// ── Aggregate all collections ──────────────────────────────────────────
+
+const techniques = await getCollection('edaTechniques');
+const distributions = await getCollection('edaDistributions');
+const pages = await getCollection('edaPages');
+
+const cards: LandingCard[] = [];
+
+// 1. Graphical techniques
+techniques
+  .filter((t) => t.data.category === 'graphical')
+  .forEach((t) => {
+    cards.push({
+      title: t.data.title,
+      url: techniqueUrl(t.data.slug, 'graphical'),
+      category: 'graphical',
+      section: t.data.section,
+      description: t.data.description,
+      thumbnail: generateThumbnail(t.data.slug),
+    });
+  });
+
+// 2. Quantitative techniques
+techniques
+  .filter((t) => t.data.category === 'quantitative')
+  .forEach((t) => {
+    cards.push({
+      title: t.data.title,
+      url: techniqueUrl(t.data.slug, 'quantitative'),
+      category: 'quantitative',
+      section: t.data.section,
+      description: t.data.description,
+    });
+  });
+
+// 3. Distributions
+distributions.forEach((dist) => {
+  const defaultParams = Object.fromEntries(
+    dist.data.parameters.map((p: { name: string; default: number }) => [p.name, p.default])
+  );
+  const thumbnailSvg = generateDistributionCurve({
+    type: 'pdf',
+    distribution: dist.data.id,
+    params: defaultParams,
+    config: { width: 200, height: 140, margin: { top: 10, right: 10, bottom: 20, left: 25 } },
+  });
+  const sectionMatch = dist.data.nistSection.match(/[\d.]+/);
+  cards.push({
+    title: dist.data.title,
+    url: distributionUrl(dist.data.slug),
+    category: 'distributions',
+    section: sectionMatch ? sectionMatch[0] : '',
+    description: dist.data.description,
+    thumbnail: thumbnailSvg,
+  });
+});
+
+// 4. edaPages (foundations, case-studies, reference)
+const urlFn: Record<string, (slug: string) => string> = {
+  foundations: foundationUrl,
+  'case-studies': caseStudyUrl,
+  reference: referenceUrl,
+};
+
+pages.forEach((page) => {
+  const cat = page.data.category;
+  const fn = urlFn[cat];
+  if (!fn) return;
+  // page.id includes category prefix: e.g. "foundations/what-is-eda"
+  const slug = page.id.replace(`${cat}/`, '');
+  cards.push({
+    title: page.data.title,
+    url: fn(slug),
+    category: cat,
+    section: page.data.section,
+    description: page.data.description,
+  });
+});
+
+// ── Group and sort by section ──────────────────────────────────────────
+
+type SectionDef = { id: string; heading: string; category: string };
+
+const SECTIONS: SectionDef[] = [
+  { id: 'foundations', heading: 'Foundations', category: 'foundations' },
+  { id: 'techniques', heading: 'Graphical Techniques', category: 'graphical' },
+  { id: 'quantitative', heading: 'Quantitative Methods', category: 'quantitative' },
+  { id: 'distributions', heading: 'Probability Distributions', category: 'distributions' },
+  { id: 'case-studies', heading: 'Case Studies', category: 'case-studies' },
+  { id: 'reference', heading: 'Reference', category: 'reference' },
+];
+
+function getCards(category: string): LandingCard[] {
+  return cards
+    .filter((c) => c.category === category)
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+const NAV_ITEMS = [
+  { label: 'Foundations', href: '#foundations' },
+  { label: 'Techniques', href: '#techniques' },
+  { label: 'Quantitative', href: '#quantitative' },
+  { label: 'Distributions', href: '#distributions' },
+  { label: 'Case Studies', href: '#case-studies' },
+  { label: 'Reference', href: '#reference' },
+];
+---
+
+<EDALayout
+  title="EDA Visual Encyclopedia | Exploratory Data Analysis"
+  description="Interactive visual encyclopedia of Exploratory Data Analysis covering 90+ techniques, distributions, case studies, and reference material based on the NIST/SEMATECH Engineering Statistics Handbook."
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA Visual Encyclopedia', url: 'https://patrykgolabek.dev/eda/' },
+  ]} />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Header -->
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
+        EDA Visual Encyclopedia
+      </h1>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+        A comprehensive interactive reference for Exploratory Data Analysis, covering graphical
+        techniques, quantitative methods, probability distributions, case studies, and reference
+        tables. Based on the NIST/SEMATECH Engineering Statistics Handbook.
+      </p>
+    </header>
+
+    <!-- Section Navigation -->
+    <nav class="flex flex-wrap gap-2 mb-6" aria-label="Section navigation">
+      {NAV_ITEMS.map((item) => (
+        <a
+          href={item.href}
+          class="text-sm px-3 py-1 rounded-full border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Category Filter -->
+    <CategoryFilter client:visible />
+
+    <!-- Card Grid grouped by section -->
+    {SECTIONS.map((sec) => {
+      const sectionCards = getCards(sec.category);
+      return sectionCards.length > 0 && (
+        <section id={sec.id} data-category={sec.category} class="mb-16">
+          <h2 class="text-2xl font-heading font-bold mb-6">{sec.heading}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sectionCards.map((card) => (
+              <a
+                href={card.url}
+                data-category={card.category}
+                class="group rounded-lg border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
+              >
+                {card.thumbnail && (
+                  <div
+                    role="img"
+                    aria-label={`${card.title} preview`}
+                    class="w-full overflow-hidden mb-3"
+                    set:html={card.thumbnail}
+                  />
+                )}
+                <h3 class="text-base font-heading font-bold group-hover:text-[var(--color-accent)] transition-colors">
+                  {card.title}
+                </h3>
+                <p class="text-xs text-[var(--color-text-secondary)] mt-1">
+                  Section {card.section}
+                </p>
+                <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-2">
+                  {card.description}
+                </p>
+              </a>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+  </article>
+</EDALayout>
