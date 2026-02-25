@@ -101,12 +101,12 @@ Plans:
   2. Tier B pages (histogram, scatter, normal probability, lag, autocorrelation, spectral) display working tab-based SVG variant switching with vanilla JS (~3KB)
   3. Every technique page displays breadcrumb navigation (EDA > Techniques > [Technique Name]) and links to related techniques
   4. Build-time SVG thumbnails render on technique cards for the landing page grid
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 51-01: TBD
-- [ ] 51-02: TBD
-- [ ] 51-03: TBD
+- [ ] 51-01-PLAN.md — PlotVariantSwap component and technique-renderer slug-to-generator mapping with Tier B variant datasets
+- [ ] 51-02-PLAN.md — Prose content module with 200+ words per technique for all 29 graphical techniques
+- [ ] 51-03-PLAN.md — Dynamic [slug].astro route, TechniquePage cross-link fix, and SVG thumbnail utility
 
 ### Phase 52: Quantitative Techniques + Foundations
 **Goal**: All 18 quantitative technique pages display properly typeset KaTeX formulas with Python code examples, and all 6 foundation pages provide the conceptual framework that contextualizes the entire encyclopedia
