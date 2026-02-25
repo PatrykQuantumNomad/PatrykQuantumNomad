@@ -23,10 +23,10 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Data Model
 
-- [ ] **DATA-01**: techniques.json populated with all 29 graphical technique entries (title, slug, section ref, category, description, related techniques, interactivity tier). Note: NIST catalog consolidates to 29 graphical techniques; GRAPH-30 is the PlotVariantSwap component, not a data entry.
-- [ ] **DATA-02**: techniques.json populated with all 18 quantitative technique entries
+- [x] **DATA-01**: techniques.json populated with all 29 graphical technique entries (title, slug, section ref, category, description, related techniques, interactivity tier). Note: NIST catalog consolidates to 29 graphical techniques; GRAPH-30 is the PlotVariantSwap component, not a data entry.
+- [x] **DATA-02**: techniques.json populated with all 18 quantitative technique entries
 - [ ] **DATA-03**: distributions.json populated with all 19 probability distribution entries (title, slug, parameters, PDF/CDF formulas, related distributions)
-- [ ] **DATA-04**: Each technique tagged with interactivity tier (A/B/C) and variant count
+- [x] **DATA-04**: Each technique tagged with interactivity tier (A/B/C) and variant count
 - [ ] **DATA-05**: MDX stub files created for 6 foundations pages with NIST section references
 - [ ] **DATA-06**: MDX stub files created for 9 case study pages with NIST section references
 - [ ] **DATA-07**: MDX stub files created for 4 reference pages
@@ -229,10 +229,10 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | INFRA-09 | Phase 48 | Complete |
 | INFRA-10 | Phase 48 | Complete |
 | INFRA-11 | Phase 48 | Complete |
-| DATA-01 | Phase 49 | Pending |
-| DATA-02 | Phase 49 | Pending |
+| DATA-01 | Phase 49 | Complete |
+| DATA-02 | Phase 49 | Complete |
 | DATA-03 | Phase 49 | Pending |
-| DATA-04 | Phase 49 | Pending |
+| DATA-04 | Phase 49 | Complete |
 | DATA-05 | Phase 49 | Pending |
 | DATA-06 | Phase 49 | Pending |
 | DATA-07 | Phase 49 | Pending |

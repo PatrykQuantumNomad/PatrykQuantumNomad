@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 48 (Infrastructure Foundation)
+**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 49 (Data Model + Schema Population)
 
 ## Current Position
 
-Phase: 48 of 55 (Infrastructure Foundation) -- COMPLETE
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 48 complete, ready for Phase 49
-Last activity: 2026-02-24 — Completed 48-03 (D3 bundle isolation, navigation lifecycle verification)
+Phase: 49 of 55 (Data Model + Schema Population)
+Plan: 2 of 3 in current phase
+Status: Executing Phase 49 Wave 1
+Last activity: 2026-02-25 — Completed 49-01 (Technique data population, 47 entries)
 
-Progress: █░░░░░░░░░ 13% (v1.8 — 3/23 plans)
+Progress: █░░░░░░░░░ 17% (v1.8 — 4/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 103 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7)
+- Total plans completed: 104 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 1 v1.8)
 
 **Cumulative Stats:**
 
@@ -52,6 +52,8 @@ v1.8 decisions:
 - D3 bundle isolation confirmed: exactly 1 chunk (16.7KB), distribution pages only (confirmed in 48-03)
 - client:visible hydration for D3 islands (load on scroll, not page load) (confirmed in 48-03)
 - SVG cleanup on mount+unmount for view transition safety (confirmed in 48-03)
+- 29 graphical entries (not 30): DATA-01 count includes PlotVariantSwap component (GRAPH-30), not a data entry (confirmed in 49-01)
+- Cross-links validated at data level: relatedTechniques slugs reference entries within techniques.json (confirmed in 49-01)
 
 ### Pending Todos
 
@@ -68,7 +70,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 48-03-PLAN.md (D3 bundle isolation, Phase 48 complete)
+Last session: 2026-02-25
+Stopped at: Completed 49-01-PLAN.md (Technique data population)
 Resume file: None
-Next: Execute Phase 49 (Data Model + Schema Population)
+Next: Execute 49-02-PLAN.md (Distribution data population)
