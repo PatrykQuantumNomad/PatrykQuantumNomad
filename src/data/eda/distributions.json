@@ -21,13 +21,147 @@
         "step": 0.1
       }
     ],
-    "pdfFormula": "f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{1}{2}\\left(\\frac{x - \\mu}{\\sigma}\\right)^2}",
-    "cdfFormula": "F(x) = \\frac{1}{2}\\left[1 + \\text{erf}\\left(\\frac{x - \\mu}{\\sigma\\sqrt{2}}\\right)\\right]",
+    "pdfFormula": "f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} \\exp\\!\\left(-\\frac{(x - \\mu)^2}{2\\sigma^2}\\right)",
+    "cdfFormula": "F(x) = \\frac{1}{2}\\left[1 + \\operatorname{erf}\\!\\left(\\frac{x - \\mu}{\\sigma\\sqrt{2}}\\right)\\right]",
     "mean": "\\mu",
     "variance": "\\sigma^2",
-    "relatedDistributions": ["exponential"],
+    "relatedDistributions": ["t-distribution", "chi-square", "lognormal"],
     "nistSection": "1.3.6.6.1 Normal Distribution",
-    "description": "The normal (Gaussian) distribution is the most important continuous probability distribution. It is symmetric and bell-shaped, fully characterized by its mean and standard deviation."
+    "description": "The normal (Gaussian) distribution is the most important continuous probability distribution, characterized by its symmetric bell-shaped curve. It is fully defined by its mean and standard deviation and arises naturally via the central limit theorem."
+  },
+  {
+    "id": "uniform",
+    "title": "Uniform Distribution",
+    "slug": "uniform",
+    "parameters": [
+      {
+        "name": "a",
+        "symbol": "a",
+        "min": -5,
+        "max": 0,
+        "default": -1,
+        "step": 0.1
+      },
+      {
+        "name": "b",
+        "symbol": "b",
+        "min": 0,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\begin{cases} \\frac{1}{b - a} & a \\le x \\le b \\\\ 0 & \\text{otherwise} \\end{cases}",
+    "cdfFormula": "F(x) = \\begin{cases} 0 & x < a \\\\ \\frac{x - a}{b - a} & a \\le x \\le b \\\\ 1 & x > b \\end{cases}",
+    "mean": "\\frac{a + b}{2}",
+    "variance": "\\frac{(b - a)^2}{12}",
+    "relatedDistributions": ["beta", "normal"],
+    "nistSection": "1.3.6.6.2 Uniform Distribution",
+    "description": "The uniform distribution assigns equal probability to all values within a specified interval. It is the simplest continuous distribution and serves as a baseline for random number generation."
+  },
+  {
+    "id": "cauchy",
+    "title": "Cauchy Distribution",
+    "slug": "cauchy",
+    "parameters": [
+      {
+        "name": "x0",
+        "symbol": "x_0",
+        "min": -5,
+        "max": 5,
+        "default": 0,
+        "step": 0.1
+      },
+      {
+        "name": "gamma",
+        "symbol": "\\gamma",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{\\pi\\gamma\\left[1 + \\left(\\frac{x - x_0}{\\gamma}\\right)^2\\right]}",
+    "cdfFormula": "F(x) = \\frac{1}{\\pi}\\arctan\\!\\left(\\frac{x - x_0}{\\gamma}\\right) + \\frac{1}{2}",
+    "mean": "\\text{undefined}",
+    "variance": "\\text{undefined}",
+    "relatedDistributions": ["t-distribution", "normal"],
+    "nistSection": "1.3.6.6.3 Cauchy Distribution",
+    "description": "The Cauchy distribution is a symmetric distribution with heavy tails. Its mean and variance are undefined, making it a canonical example of a pathological distribution in statistics."
+  },
+  {
+    "id": "t-distribution",
+    "title": "Student's t-Distribution",
+    "slug": "t-distribution",
+    "parameters": [
+      {
+        "name": "nu",
+        "symbol": "\\nu",
+        "min": 1,
+        "max": 30,
+        "default": 5,
+        "step": 1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{\\Gamma\\!\\left(\\frac{\\nu+1}{2}\\right)}{\\sqrt{\\nu\\pi}\\,\\Gamma\\!\\left(\\frac{\\nu}{2}\\right)} \\left(1 + \\frac{x^2}{\\nu}\\right)^{\\!-\\frac{\\nu+1}{2}}",
+    "cdfFormula": "F(x) = \\frac{1}{2} + x\\,\\Gamma\\!\\left(\\frac{\\nu+1}{2}\\right) \\frac{{}_2F_1\\!\\left(\\frac{1}{2},\\frac{\\nu+1}{2};\\frac{3}{2};-\\frac{x^2}{\\nu}\\right)}{\\sqrt{\\nu\\pi}\\,\\Gamma\\!\\left(\\frac{\\nu}{2}\\right)}",
+    "mean": "0 \\;(\\nu > 1)",
+    "variance": "\\frac{\\nu}{\\nu - 2} \\;(\\nu > 2)",
+    "relatedDistributions": ["normal", "cauchy", "f-distribution"],
+    "nistSection": "1.3.6.6.4 Student's t-Distribution",
+    "description": "Student's t-distribution arises when estimating the mean of a normally distributed population with small sample sizes. It approaches the normal distribution as degrees of freedom increase."
+  },
+  {
+    "id": "f-distribution",
+    "title": "F-Distribution",
+    "slug": "f-distribution",
+    "parameters": [
+      {
+        "name": "d1",
+        "symbol": "d_1",
+        "min": 1,
+        "max": 30,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "d2",
+        "symbol": "d_2",
+        "min": 1,
+        "max": 30,
+        "default": 10,
+        "step": 1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{\\sqrt{\\frac{(d_1 x)^{d_1} \\cdot d_2^{d_2}}{(d_1 x + d_2)^{d_1+d_2}}}}{x\\,B\\!\\left(\\frac{d_1}{2},\\frac{d_2}{2}\\right)}",
+    "cdfFormula": "F(x) = I_{\\frac{d_1 x}{d_1 x + d_2}}\\!\\left(\\frac{d_1}{2},\\frac{d_2}{2}\\right)",
+    "mean": "\\frac{d_2}{d_2 - 2} \\;(d_2 > 2)",
+    "variance": "\\frac{2d_2^2(d_1+d_2-2)}{d_1(d_2-2)^2(d_2-4)} \\;(d_2 > 4)",
+    "relatedDistributions": ["chi-square", "t-distribution", "beta"],
+    "nistSection": "1.3.6.6.5 F-Distribution",
+    "description": "The F-distribution is the ratio of two scaled chi-squared variables. It is used in analysis of variance (ANOVA) and for comparing variances of two populations."
+  },
+  {
+    "id": "chi-square",
+    "title": "Chi-Square Distribution",
+    "slug": "chi-square",
+    "parameters": [
+      {
+        "name": "k",
+        "symbol": "k",
+        "min": 1,
+        "max": 30,
+        "default": 5,
+        "step": 1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{x^{k/2-1}\\,e^{-x/2}}{2^{k/2}\\,\\Gamma(k/2)}, \\quad x > 0",
+    "cdfFormula": "F(x) = \\frac{\\gamma(k/2,\\, x/2)}{\\Gamma(k/2)}",
+    "mean": "k",
+    "variance": "2k",
+    "relatedDistributions": ["normal", "gamma", "f-distribution"],
+    "nistSection": "1.3.6.6.6 Chi-Square Distribution",
+    "description": "The chi-square distribution with k degrees of freedom is the distribution of a sum of squares of k independent standard normal random variables. It is fundamental to hypothesis testing and confidence interval estimation."
   },
   {
     "id": "exponential",
@@ -43,12 +177,348 @@
         "step": 0.1
       }
     ],
-    "pdfFormula": "f(x) = \\lambda e^{-\\lambda x}, \\quad x \\geq 0",
-    "cdfFormula": "F(x) = 1 - e^{-\\lambda x}, \\quad x \\geq 0",
+    "pdfFormula": "f(x) = \\lambda\\, e^{-\\lambda x}, \\quad x \\ge 0",
+    "cdfFormula": "F(x) = 1 - e^{-\\lambda x}, \\quad x \\ge 0",
     "mean": "\\frac{1}{\\lambda}",
     "variance": "\\frac{1}{\\lambda^2}",
-    "relatedDistributions": ["normal"],
+    "relatedDistributions": ["gamma", "weibull", "poisson"],
     "nistSection": "1.3.6.6.7 Exponential Distribution",
     "description": "The exponential distribution models the time between events in a Poisson process. It is a one-parameter distribution commonly used for reliability analysis and waiting time problems."
+  },
+  {
+    "id": "weibull",
+    "title": "Weibull Distribution",
+    "slug": "weibull",
+    "parameters": [
+      {
+        "name": "alpha",
+        "symbol": "\\alpha",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{\\alpha}{\\beta}\\left(\\frac{x}{\\beta}\\right)^{\\alpha-1} e^{-(x/\\beta)^\\alpha}, \\quad x \\ge 0",
+    "cdfFormula": "F(x) = 1 - e^{-(x/\\beta)^\\alpha}, \\quad x \\ge 0",
+    "mean": "\\beta\\,\\Gamma\\!\\left(1 + \\frac{1}{\\alpha}\\right)",
+    "variance": "\\beta^2\\left[\\Gamma\\!\\left(1+\\frac{2}{\\alpha}\\right) - \\Gamma^2\\!\\left(1+\\frac{1}{\\alpha}\\right)\\right]",
+    "relatedDistributions": ["exponential", "gamma", "extreme-value"],
+    "nistSection": "1.3.6.6.8 Weibull Distribution",
+    "description": "The Weibull distribution is a versatile distribution used in reliability engineering and failure analysis. It can model increasing, decreasing, or constant failure rates depending on its shape parameter."
+  },
+  {
+    "id": "lognormal",
+    "title": "Lognormal Distribution",
+    "slug": "lognormal",
+    "parameters": [
+      {
+        "name": "mu",
+        "symbol": "\\mu",
+        "min": -2,
+        "max": 2,
+        "default": 0,
+        "step": 0.1
+      },
+      {
+        "name": "sigma",
+        "symbol": "\\sigma",
+        "min": 0.1,
+        "max": 3,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{x\\sigma\\sqrt{2\\pi}} \\exp\\!\\left(-\\frac{(\\ln x - \\mu)^2}{2\\sigma^2}\\right), \\quad x > 0",
+    "cdfFormula": "F(x) = \\frac{1}{2}\\left[1 + \\operatorname{erf}\\!\\left(\\frac{\\ln x - \\mu}{\\sigma\\sqrt{2}}\\right)\\right]",
+    "mean": "e^{\\mu + \\sigma^2/2}",
+    "variance": "(e^{\\sigma^2} - 1)\\,e^{2\\mu + \\sigma^2}",
+    "relatedDistributions": ["normal", "weibull", "gamma"],
+    "nistSection": "1.3.6.6.9 Lognormal Distribution",
+    "description": "The lognormal distribution describes a random variable whose logarithm is normally distributed. It is commonly used to model positive-valued data with right skew, such as income, stock prices, and particle sizes."
+  },
+  {
+    "id": "fatigue-life",
+    "title": "Birnbaum-Saunders (Fatigue Life) Distribution",
+    "slug": "fatigue-life",
+    "parameters": [
+      {
+        "name": "alpha",
+        "symbol": "\\alpha",
+        "min": 0.1,
+        "max": 3,
+        "default": 1,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{\\sqrt{x/\\beta} + \\sqrt{\\beta/x}}{2\\alpha x}\\,\\phi\\!\\left(\\frac{\\sqrt{x/\\beta} - \\sqrt{\\beta/x}}{\\alpha}\\right), \\quad x > 0",
+    "cdfFormula": "F(x) = \\Phi\\!\\left(\\frac{\\sqrt{x/\\beta} - \\sqrt{\\beta/x}}{\\alpha}\\right)",
+    "mean": "\\beta\\left(1 + \\frac{\\alpha^2}{2}\\right)",
+    "variance": "\\beta^2 \\alpha^2\\left(1 + \\frac{5\\alpha^2}{4}\\right)",
+    "relatedDistributions": ["lognormal", "weibull", "gamma"],
+    "nistSection": "1.3.6.6.10 Birnbaum-Saunders (Fatigue Life) Distribution",
+    "description": "The Birnbaum-Saunders distribution models fatigue life of materials subject to cyclic stress. It is derived from a physical crack-growth model and is widely used in reliability engineering."
+  },
+  {
+    "id": "gamma",
+    "title": "Gamma Distribution",
+    "slug": "gamma",
+    "parameters": [
+      {
+        "name": "alpha",
+        "symbol": "\\alpha",
+        "min": 0.1,
+        "max": 10,
+        "default": 2,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{x^{\\alpha-1}\\,e^{-x/\\beta}}{\\beta^\\alpha\\,\\Gamma(\\alpha)}, \\quad x > 0",
+    "cdfFormula": "F(x) = \\frac{\\gamma(\\alpha,\\, x/\\beta)}{\\Gamma(\\alpha)}",
+    "mean": "\\alpha\\beta",
+    "variance": "\\alpha\\beta^2",
+    "relatedDistributions": ["chi-square", "exponential", "beta"],
+    "nistSection": "1.3.6.6.11 Gamma Distribution",
+    "description": "The gamma distribution is a two-parameter family of continuous distributions that generalizes the exponential and chi-square distributions. It is used to model waiting times, rainfall amounts, and insurance claims."
+  },
+  {
+    "id": "double-exponential",
+    "title": "Double Exponential (Laplace) Distribution",
+    "slug": "double-exponential",
+    "parameters": [
+      {
+        "name": "mu",
+        "symbol": "\\mu",
+        "min": -5,
+        "max": 5,
+        "default": 0,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{2\\beta}\\exp\\!\\left(-\\frac{|x - \\mu|}{\\beta}\\right)",
+    "cdfFormula": "F(x) = \\begin{cases} \\frac{1}{2}\\exp\\!\\left(\\frac{x-\\mu}{\\beta}\\right) & x < \\mu \\\\ 1 - \\frac{1}{2}\\exp\\!\\left(-\\frac{x-\\mu}{\\beta}\\right) & x \\ge \\mu \\end{cases}",
+    "mean": "\\mu",
+    "variance": "2\\beta^2",
+    "relatedDistributions": ["normal", "exponential", "cauchy"],
+    "nistSection": "1.3.6.6.12 Double Exponential Distribution",
+    "description": "The double exponential (Laplace) distribution is a symmetric distribution with heavier tails than the normal distribution. It is the distribution of the difference of two independent exponential random variables."
+  },
+  {
+    "id": "power-normal",
+    "title": "Power Normal Distribution",
+    "slug": "power-normal",
+    "parameters": [
+      {
+        "name": "p",
+        "symbol": "p",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = p\\,\\phi(x)\\left[\\Phi(x)\\right]^{p-1}",
+    "cdfFormula": "F(x) = \\left[\\Phi(x)\\right]^p",
+    "mean": "\\text{no closed form}",
+    "variance": "\\text{no closed form}",
+    "relatedDistributions": ["normal", "power-lognormal"],
+    "nistSection": "1.3.6.6.13 Power Normal Distribution",
+    "description": "The power normal distribution is a family of distributions obtained by raising the standard normal CDF to a power p. When p equals 1 it reduces to the standard normal distribution."
+  },
+  {
+    "id": "power-lognormal",
+    "title": "Power Lognormal Distribution",
+    "slug": "power-lognormal",
+    "parameters": [
+      {
+        "name": "p",
+        "symbol": "p",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      },
+      {
+        "name": "sigma",
+        "symbol": "\\sigma",
+        "min": 0.1,
+        "max": 3,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{p}{x\\sigma}\\,\\phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\left[\\Phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\right]^{p-1}, \\quad x > 0",
+    "cdfFormula": "F(x) = \\left[\\Phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\right]^p",
+    "mean": "\\text{no closed form}",
+    "variance": "\\text{no closed form}",
+    "relatedDistributions": ["lognormal", "power-normal", "weibull"],
+    "nistSection": "1.3.6.6.14 Power Lognormal Distribution",
+    "description": "The power lognormal distribution generalizes the lognormal distribution by raising its CDF to a power p. It is used in reliability analysis when the lognormal model needs additional shape flexibility."
+  },
+  {
+    "id": "tukey-lambda",
+    "title": "Tukey-Lambda Distribution",
+    "slug": "tukey-lambda",
+    "parameters": [
+      {
+        "name": "lambda",
+        "symbol": "\\lambda",
+        "min": -2,
+        "max": 2,
+        "default": 0.14,
+        "step": 0.01
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{Q'(F)}, \\quad Q(F) = \\frac{F^\\lambda - (1-F)^\\lambda}{\\lambda}",
+    "cdfFormula": "F(x) = Q^{-1}(x), \\quad Q(F) = \\frac{F^\\lambda - (1-F)^\\lambda}{\\lambda}",
+    "mean": "0",
+    "variance": "\\frac{2}{\\lambda^2}\\left(\\frac{1}{1+2\\lambda} - \\frac{\\Gamma(\\lambda+1)^2}{\\Gamma(2\\lambda+2)}\\right)",
+    "relatedDistributions": ["normal", "cauchy", "uniform"],
+    "nistSection": "1.3.6.6.15 Tukey-Lambda Distribution",
+    "description": "The Tukey-Lambda distribution is a symmetric family defined by its quantile function. By varying the shape parameter lambda, it can approximate the normal, logistic, Cauchy, and uniform distributions."
+  },
+  {
+    "id": "extreme-value",
+    "title": "Extreme Value Type I (Gumbel) Distribution",
+    "slug": "extreme-value",
+    "parameters": [
+      {
+        "name": "mu",
+        "symbol": "\\mu",
+        "min": -5,
+        "max": 5,
+        "default": 0,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 5,
+        "default": 1,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{1}{\\beta}\\exp\\!\\left(-\\frac{x-\\mu}{\\beta} - e^{-(x-\\mu)/\\beta}\\right)",
+    "cdfFormula": "F(x) = e^{-e^{-(x-\\mu)/\\beta}}",
+    "mean": "\\mu + \\beta\\,\\gamma_E",
+    "variance": "\\frac{\\pi^2\\beta^2}{6}",
+    "relatedDistributions": ["weibull", "normal", "double-exponential"],
+    "nistSection": "1.3.6.6.16 Extreme Value Type I Distribution",
+    "description": "The extreme value type I (Gumbel) distribution models the maximum or minimum of a large number of independent samples. It is widely used in hydrology, meteorology, and structural engineering for modeling extreme events."
+  },
+  {
+    "id": "beta",
+    "title": "Beta Distribution",
+    "slug": "beta",
+    "parameters": [
+      {
+        "name": "alpha",
+        "symbol": "\\alpha",
+        "min": 0.1,
+        "max": 10,
+        "default": 2,
+        "step": 0.1
+      },
+      {
+        "name": "beta",
+        "symbol": "\\beta",
+        "min": 0.1,
+        "max": 10,
+        "default": 5,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "f(x) = \\frac{x^{\\alpha-1}(1-x)^{\\beta-1}}{B(\\alpha,\\beta)}, \\quad 0 \\le x \\le 1",
+    "cdfFormula": "F(x) = I_x(\\alpha,\\beta)",
+    "mean": "\\frac{\\alpha}{\\alpha+\\beta}",
+    "variance": "\\frac{\\alpha\\beta}{(\\alpha+\\beta)^2(\\alpha+\\beta+1)}",
+    "relatedDistributions": ["uniform", "gamma", "binomial"],
+    "nistSection": "1.3.6.6.17 Beta Distribution",
+    "description": "The beta distribution is a continuous distribution defined on the interval [0, 1]. It is commonly used to model proportions, probabilities, and random variables with bounded support."
+  },
+  {
+    "id": "binomial",
+    "title": "Binomial Distribution",
+    "slug": "binomial",
+    "parameters": [
+      {
+        "name": "n",
+        "symbol": "n",
+        "min": 1,
+        "max": 50,
+        "default": 10,
+        "step": 1
+      },
+      {
+        "name": "p",
+        "symbol": "p",
+        "min": 0.01,
+        "max": 0.99,
+        "default": 0.5,
+        "step": 0.01
+      }
+    ],
+    "pdfFormula": "P(X = k) = \\binom{n}{k} p^k (1-p)^{n-k}, \\quad k = 0, 1, \\ldots, n",
+    "cdfFormula": "F(k) = \\sum_{i=0}^{\\lfloor k \\rfloor} \\binom{n}{i} p^i (1-p)^{n-i}",
+    "mean": "np",
+    "variance": "np(1-p)",
+    "relatedDistributions": ["poisson", "normal", "beta"],
+    "nistSection": "1.3.6.6.18 Binomial Distribution",
+    "description": "The binomial distribution models the number of successes in a fixed number of independent Bernoulli trials. It is the foundation for binary outcome analysis and quality control sampling."
+  },
+  {
+    "id": "poisson",
+    "title": "Poisson Distribution",
+    "slug": "poisson",
+    "parameters": [
+      {
+        "name": "lambda",
+        "symbol": "\\lambda",
+        "min": 0.1,
+        "max": 20,
+        "default": 5,
+        "step": 0.1
+      }
+    ],
+    "pdfFormula": "P(X = k) = \\frac{\\lambda^k e^{-\\lambda}}{k!}, \\quad k = 0, 1, 2, \\ldots",
+    "cdfFormula": "F(k) = e^{-\\lambda} \\sum_{i=0}^{\\lfloor k \\rfloor} \\frac{\\lambda^i}{i!}",
+    "mean": "\\lambda",
+    "variance": "\\lambda",
+    "relatedDistributions": ["binomial", "exponential", "normal"],
+    "nistSection": "1.3.6.6.19 Poisson Distribution",
+    "description": "The Poisson distribution models the number of events occurring in a fixed interval of time or space when events occur independently at a constant average rate. It is used for count data in fields ranging from telecommunications to epidemiology."
   }
 ]
