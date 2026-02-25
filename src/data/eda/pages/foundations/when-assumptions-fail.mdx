@@ -6,4 +6,71 @@ category: "foundations"
 nistSection: "1.2.6 Consequences of Non-Compliance"
 ---
 
-{/* Content will be populated in Phase 52 */}
+## Consequences of Assumption Violations
+
+When the [four underlying assumptions](/eda/foundations/assumptions/) of a statistical analysis are violated, the consequences range from mild inaccuracy to completely misleading conclusions. Section 1.2.5 of the NIST/SEMATECH Engineering Statistics Handbook addresses this directly: understanding what happens when assumptions fail is just as important as checking them.
+
+Not all violations are equally severe. A slight departure from normality in a large sample may have negligible practical impact, while even a mild autocorrelation in a small sample can dramatically distort confidence intervals and p-values. The analyst must judge both the nature of the violation and its magnitude before deciding how to proceed.
+
+## Common Violations and Their Effects
+
+### Non-Fixed Location (Drifting Mean)
+
+When the process mean shifts over time, standard estimators of the mean are still unbiased but they no longer describe a single, stable population. Confidence intervals become meaningless because they describe a target that is moving. Hypothesis tests may fail to detect real differences (or detect spurious ones) because the variability attributed to random error actually includes systematic drift.
+
+**Detection:** A trend or step change in the [run sequence plot](/eda/techniques/run-sequence-plot/).
+
+### Non-Fixed Variation (Changing Spread)
+
+When the variance changes over time or across groups, ordinary least squares regression assigns equal weight to all observations, even though some carry more information than others. Standard errors computed under constant-variance assumptions will be wrong, and confidence intervals will have incorrect coverage.
+
+**Detection:** A widening or narrowing pattern in the [run sequence plot](/eda/techniques/run-sequence-plot/); formal testing via [Bartlett's test](/eda/quantitative/bartletts-test/) or the [Levene test](/eda/quantitative/levene-test/).
+
+### Non-Randomness (Autocorrelation)
+
+Serial dependence is perhaps the most dangerous violation because it directly attacks the standard error formulas that underpin all classical inference. Positive autocorrelation causes the effective sample size to be much smaller than the nominal sample size, which means standard errors are underestimated, confidence intervals are too narrow, and hypothesis tests reject the null hypothesis far more often than the stated significance level.
+
+**Detection:** Structure in the [lag plot](/eda/techniques/lag-plot/); significant spikes in the [autocorrelation plot](/eda/techniques/autocorrelation-plot/); formal testing via the [runs test](/eda/quantitative/runs-test/) or [autocorrelation statistic](/eda/quantitative/autocorrelation/).
+
+### Non-Normal Distribution
+
+Many classical procedures (t-tests, F-tests, ANOVA) assume that the data -- or the residuals from a fitted model -- follow a normal distribution. Moderate departures from normality have limited impact in large samples thanks to the Central Limit Theorem. However, heavy tails inflate the variance of the sample mean, skewness biases confidence intervals, and extreme outliers can dominate least-squares estimates.
+
+**Detection:** Curvature in the [normal probability plot](/eda/techniques/normal-probability-plot/); elevated [skewness or kurtosis](/eda/quantitative/skewness-kurtosis/); formal testing via the [Anderson-Darling test](/eda/quantitative/anderson-darling/) or [Kolmogorov-Smirnov test](/eda/quantitative/kolmogorov-smirnov/).
+
+## Remedial Actions
+
+### Data Transformations
+
+A common first response to assumption violations is to transform the data. Logarithmic, square root, or reciprocal transformations can stabilize variance, reduce skewness, and improve normality simultaneously. The [Box-Cox normality plot](/eda/techniques/box-cox-normality/) provides a data-driven method for selecting the optimal power transformation.
+
+### Robust Methods
+
+When outliers or heavy tails are the primary concern, robust statistical methods reduce their influence. Trimmed means, Winsorized estimators, and M-estimators all downweight extreme observations. These methods sacrifice some efficiency under perfect normality in exchange for much better performance when the normality assumption is violated.
+
+### Non-Parametric Alternatives
+
+When the distributional assumption cannot be rescued by transformation, non-parametric methods provide a distribution-free alternative. The Wilcoxon rank-sum test replaces the two-sample t-test, the Kruskal-Wallis test replaces one-factor ANOVA, and rank-based correlation (Spearman) replaces Pearson correlation. These methods rely on ranks rather than raw values and make no assumption about the underlying distribution.
+
+### Time-Series Methods
+
+When randomness is violated because the data exhibit autocorrelation, time-series methods -- autoregressive models, moving-average models, and their ARIMA generalizations -- explicitly model the dependence structure. Alternatively, the analyst can subsample the data at intervals large enough to achieve approximate independence.
+
+## When to Proceed Despite Violations
+
+Not every violation requires remedial action. The decision depends on:
+
+- **Severity of the violation.** A slight departure from normality in a sample of 500 observations is far less concerning than the same departure in a sample of 15.
+- **Robustness of the procedure.** Some methods (e.g., the two-sample t-test with equal sample sizes) are quite robust to moderate non-normality. Others (e.g., the chi-square variance test) are extremely sensitive.
+- **Purpose of the analysis.** If the goal is rough characterization rather than precise inference, mild violations may be acceptable.
+
+The Handbook recommends: when in doubt, apply both the standard method and a robust alternative. If they agree, the violation is likely inconsequential. If they disagree, investigate further.
+
+### Cross-References
+
+- [Skewness and Kurtosis](/eda/quantitative/skewness-kurtosis/) -- quantifying distributional shape departures
+- [Anderson-Darling Test](/eda/quantitative/anderson-darling/) -- formal normality test
+- [Kolmogorov-Smirnov Test](/eda/quantitative/kolmogorov-smirnov/) -- distribution comparison test
+- [Box-Cox Normality Plot](/eda/techniques/box-cox-normality/) -- optimal power transformation selection
+- [Underlying Assumptions](/eda/foundations/assumptions/) -- the four assumptions and how to check them
+- [The 4-Plot](/eda/foundations/the-4-plot/) -- the diagnostic display that reveals violations

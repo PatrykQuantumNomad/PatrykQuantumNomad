@@ -6,4 +6,40 @@ category: "foundations"
 nistSection: "1.1.5 The Role of Graphics"
 ---
 
-{/* Content will be populated in Phase 52 */}
+## Why Graphics Are Central to EDA
+
+The NIST/SEMATECH Engineering Statistics Handbook devotes Section 1.1.5 to the role of graphics because visualization is not merely helpful in EDA -- it is foundational. Summary statistics such as the mean and standard deviation compress an entire dataset into one or two numbers. That compression is useful for communication, but it inevitably discards information. A graphical display preserves the richness of the data: its shape, its outliers, its clusters, and its gaps.
+
+The human visual system is extraordinarily good at detecting patterns. We perceive trends, clusters, gaps, and anomalies in a scatter plot almost instantaneously -- long before a formal test could be specified. EDA leverages this perceptual strength by making graphics the primary investigative tool rather than an afterthought.
+
+## Anscombe's Quartet: The Case for Visualization
+
+Perhaps the most famous illustration of why graphics matter is Anscombe's quartet (1973). Four datasets share nearly identical summary statistics -- the same mean, variance, correlation coefficient, and regression line -- yet their scatter plots are dramatically different. One is linear, one is curved, one contains an influential outlier, and one has a single leverage point that determines the regression. No numerical summary alone can distinguish them; only a [scatter plot](/eda/techniques/scatter-plot/) reveals the truth.
+
+This example underscores a core EDA principle: always plot your data before computing summary statistics. The statistics may confirm what the plot shows, but they can never replace it.
+
+## The Spectrum of Graphical Techniques
+
+EDA draws on a wide range of graphical methods, from simple to sophisticated:
+
+- **Univariate displays** such as the [histogram](/eda/techniques/histogram/) and [box plot](/eda/techniques/box-plot/) show the distribution of a single variable -- its center, spread, skewness, and outliers.
+- **Bivariate displays** such as the [scatter plot](/eda/techniques/scatter-plot/) reveal relationships between two variables, including linearity, curvature, and heteroscedasticity.
+- **Diagnostic displays** such as the [normal probability plot](/eda/techniques/normal-probability-plot/) and [lag plot](/eda/techniques/lag-plot/) test specific assumptions about the data-generating process.
+- **Multi-panel displays** such as the [4-plot](/eda/techniques/4-plot/) and [6-plot](/eda/techniques/6-plot/) combine several diagnostics into a single view for rapid assumption checking.
+
+The choice of technique depends on the question being asked and the structure of the data. Section 1.1.5 of the Handbook emphasizes that no single plot is sufficient; effective EDA uses multiple complementary views.
+
+## Graphics vs. Quantitative Summaries
+
+Graphical and quantitative methods serve different but complementary roles. Quantitative summaries -- [measures of location](/eda/quantitative/measures-of-location/), [measures of scale](/eda/quantitative/measures-of-scale/), [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) -- provide precise numerical characterizations that are easy to compare across datasets. Graphics provide context that those numbers lack: the overall shape of the distribution, the presence of multiple modes, and the nature of departures from an assumed model.
+
+In practice, EDA alternates between graphical exploration and quantitative confirmation. A histogram may suggest that the data are right-skewed; a skewness statistic quantifies how much. A normal probability plot may show curvature in the tails; an [Anderson-Darling test](/eda/quantitative/anderson-darling/) provides a formal p-value. Neither approach is complete without the other.
+
+### Cross-References
+
+- [Scatter Plot](/eda/techniques/scatter-plot/) -- the workhorse bivariate display
+- [Box Plot](/eda/techniques/box-plot/) -- compact distribution summary with outlier flagging
+- [Normal Probability Plot](/eda/techniques/normal-probability-plot/) -- distributional assessment tool
+- [4-Plot](/eda/techniques/4-plot/) -- multi-panel diagnostic for rapid assumption testing
+- [6-Plot](/eda/techniques/6-plot/) -- extended diagnostic display
+- [What is EDA?](/eda/foundations/what-is-eda/) -- the philosophy behind the graphical approach

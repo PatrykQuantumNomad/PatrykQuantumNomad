@@ -6,4 +6,68 @@ category: "foundations"
 nistSection: "1.1.6-1.1.7 General Problem Categories"
 ---
 
-{/* Content will be populated in Phase 52 */}
+## The Four General Problem Categories
+
+The NIST/SEMATECH Engineering Statistics Handbook (Sections 1.1.6-1.1.7) organizes data analysis problems into four broad categories. Recognizing which category your problem falls into is the first step toward selecting the right set of EDA techniques -- and ultimately the right confirmatory analysis.
+
+### 1. Univariate Characterization
+
+The most basic question in data analysis is: "What does this single variable look like?" Univariate characterization aims to describe the distribution of a single measured quantity -- its center, spread, shape, and outliers.
+
+Typical EDA techniques for characterization include:
+
+- [Histogram](/eda/techniques/histogram/) to visualize the shape of the distribution
+- [Box plot](/eda/techniques/box-plot/) to summarize center, spread, and outliers
+- [Normal probability plot](/eda/techniques/normal-probability-plot/) to assess normality
+- [Measures of location](/eda/quantitative/measures-of-location/) (mean, median) and [measures of scale](/eda/quantitative/measures-of-scale/) (standard deviation, interquartile range) for numerical summaries
+
+Characterization questions arise whenever you receive a new dataset and need to understand its basic properties before proceeding to more complex analyses.
+
+### 2. Comparison
+
+Comparison problems ask: "Are these groups different?" You might be comparing the yield from two manufacturing processes, the performance of several materials, or the output of multiple shifts. The goal is to determine whether observed differences reflect real effects or merely random variation.
+
+Key EDA and quantitative techniques for comparison include:
+
+- [Box plot](/eda/techniques/box-plot/) for visual side-by-side comparison
+- [Two-sample t-test](/eda/quantitative/two-sample-t-test/) to test whether two means differ significantly
+- [One-factor ANOVA](/eda/quantitative/one-factor-anova/) to compare means across three or more groups
+- [F-test](/eda/quantitative/f-test/) and [Levene test](/eda/quantitative/levene-test/) to compare variances between groups
+
+Before running formal comparison tests, EDA encourages visual inspection: do the box plots overlap? Are the spreads comparable? Are there outliers that could distort the comparison?
+
+### 3. Regression and Modeling
+
+Modeling problems ask: "What is the relationship between these variables?" Linear regression, polynomial fits, and other modeling approaches attempt to describe how one or more predictor variables influence a response.
+
+EDA contributes to modeling through:
+
+- [Scatter plot](/eda/techniques/scatter-plot/) to visualize bivariate relationships before fitting a model
+- Residual analysis plots to check whether model assumptions hold after fitting
+- [Run sequence plot](/eda/techniques/run-sequence-plot/) of residuals to detect time-dependent patterns
+
+The Handbook emphasizes that blind model fitting without exploratory graphics is a common source of error. A scatter plot that reveals curvature, for example, would prevent the analyst from fitting a straight line to inherently nonlinear data.
+
+### 4. Screening and Design of Experiments (DOE)
+
+Screening problems ask: "Which factors matter?" In designed experiments, multiple factors are varied simultaneously, and the goal is to identify which ones have a significant effect on the response. This category is central to industrial process improvement and quality engineering.
+
+Relevant EDA techniques include:
+
+- [DOE plots](/eda/techniques/doe-plots/) (main effects plots, interaction plots) to visualize factor effects
+- [Multi-factor ANOVA](/eda/quantitative/multi-factor-anova/) to test factor significance formally
+- [Yates analysis](/eda/quantitative/yates-analysis/) for systematic effect estimation in factorial designs
+
+DOE problems are distinctive because the data are collected according to a deliberate experimental plan rather than observed passively. EDA techniques adapted for DOE help the analyst interpret results and detect unexpected interactions between factors.
+
+## Choosing the Right Approach
+
+The problem category determines which EDA toolkit to reach for first. The Handbook recommends starting with graphical displays appropriate to your category, then following up with the corresponding quantitative techniques for formal confirmation. See [What is EDA?](/eda/foundations/what-is-eda/) for the overall philosophy and [The Role of Graphics](/eda/foundations/role-of-graphics/) for why visual inspection should precede numerical analysis.
+
+### Cross-References
+
+- [Two-Sample t-Test](/eda/quantitative/two-sample-t-test/) -- formal comparison of two group means
+- [One-Factor ANOVA](/eda/quantitative/one-factor-anova/) -- comparison across multiple groups
+- [DOE Plots](/eda/techniques/doe-plots/) -- graphical tools for designed experiments
+- [Histogram](/eda/techniques/histogram/) -- the starting point for univariate characterization
+- [Scatter Plot](/eda/techniques/scatter-plot/) -- the starting point for regression and modeling

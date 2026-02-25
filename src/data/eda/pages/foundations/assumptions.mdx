@@ -6,4 +6,55 @@ category: "foundations"
 nistSection: "1.2.1-1.2.5 Underlying Assumptions"
 ---
 
-{/* Content will be populated in Phase 52 */}
+## Why Assumptions Matter
+
+Nearly every standard statistical procedure -- from a simple t-test to an ANOVA to a regression model -- rests on a set of assumptions about the data. When those assumptions hold, the procedure produces valid results. When they are violated, the conclusions can be misleading or outright wrong: confidence intervals may be too narrow, hypothesis tests may reject too often (or not often enough), and parameter estimates may be biased.
+
+The NIST/SEMATECH Engineering Statistics Handbook (Sections 1.2.1-1.2.3) identifies four fundamental assumptions that underlie most univariate statistical analyses. EDA provides the tools to test each one before any formal procedure is applied.
+
+## The Four Standard Assumptions
+
+### 1. Fixed Location
+
+The process that generates the data has a constant, stable mean over time. In other words, the typical value of the measurements does not drift upward or downward during the course of data collection.
+
+**How to check:** A [run sequence plot](/eda/techniques/run-sequence-plot/) shows the data in collection order. If the location is fixed, the points will scatter randomly around a horizontal band. Visible trends, shifts, or cycles indicate a violation.
+
+### 2. Fixed Variation (Scale)
+
+The spread of the data -- its standard deviation or variance -- remains constant over time. If variation increases or decreases during data collection, the process is said to exhibit heteroscedasticity.
+
+**How to check:** The [run sequence plot](/eda/techniques/run-sequence-plot/) is again the primary tool. If the vertical spread of points widens or narrows as you move from left to right, the fixed-variation assumption is suspect. Formal tests such as [Bartlett's test](/eda/quantitative/bartletts-test/) and the [Levene test](/eda/quantitative/levene-test/) can quantify this.
+
+### 3. Randomness (Independence)
+
+Each observation is statistically independent of every other observation. The value of one measurement does not influence or predict the next. This assumption is critical because most standard formulas for standard errors, confidence intervals, and test statistics depend on independence.
+
+**How to check:** A [lag plot](/eda/techniques/lag-plot/) graphs each observation against the previous one. If the data are random, the lag plot will show no discernible pattern. Serial correlation appears as diagonal structure. The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) quantifies the correlation at multiple lag distances, and the [runs test](/eda/quantitative/runs-test/) provides a formal hypothesis test for randomness.
+
+### 4. Fixed Distribution
+
+The data come from a single, identifiable probability distribution -- typically the normal (Gaussian) distribution. Knowing the distribution allows the analyst to compute exact probabilities, quantiles, and critical values for hypothesis tests.
+
+**How to check:** A [histogram](/eda/techniques/histogram/) reveals the overall shape of the distribution. A [normal probability plot](/eda/techniques/normal-probability-plot/) is more sensitive: if the data are normally distributed, the points will fall on a straight line. Formal tests include the [Anderson-Darling test](/eda/quantitative/anderson-darling/), the [Kolmogorov-Smirnov test](/eda/quantitative/kolmogorov-smirnov/), and the [chi-square goodness-of-fit test](/eda/quantitative/chi-square-goodness-of-fit/). Departures from normality can also be quantified using [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/).
+
+## The Importance of Checking All Four
+
+The four assumptions are not independent of one another. A shift in location, for example, can make data appear non-normal even when the underlying distribution at any fixed point in time is perfectly Gaussian. Similarly, autocorrelation can inflate variance estimates, making the fixed-variation assumption appear violated when the real problem is a lack of independence.
+
+Section 1.2.3 of the Handbook stresses that all four assumptions should be checked as a set rather than in isolation. The [4-Plot](/eda/foundations/the-4-plot/) is specifically designed for this purpose: it combines a run sequence plot, lag plot, histogram, and normal probability plot into a single diagnostic display that simultaneously addresses all four assumptions.
+
+## What to Do When Assumptions Fail
+
+When one or more assumptions are violated, the analyst must decide whether to transform the data, use robust or non-parametric methods, or restructure the analysis entirely. See [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) for detailed guidance on remedial actions.
+
+### Cross-References
+
+- [Run Sequence Plot](/eda/techniques/run-sequence-plot/) -- checks fixed location and fixed variation
+- [Lag Plot](/eda/techniques/lag-plot/) -- checks randomness and independence
+- [Autocorrelation](/eda/quantitative/autocorrelation/) -- quantifies serial dependence at multiple lags
+- [Runs Test](/eda/quantitative/runs-test/) -- formal hypothesis test for randomness
+- [Normal Probability Plot](/eda/techniques/normal-probability-plot/) -- checks fixed distribution (normality)
+- [Anderson-Darling Test](/eda/quantitative/anderson-darling/) -- formal test for distributional fit
+- [The 4-Plot](/eda/foundations/the-4-plot/) -- tests all four assumptions simultaneously
+- [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) -- remedial actions for violations
