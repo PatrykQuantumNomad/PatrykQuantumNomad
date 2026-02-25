@@ -161,7 +161,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [ ] **LAND-02**: Category filter pills (All, Graphical, Quantitative, Distributions, Case Studies, Reference)
 - [ ] **LAND-03**: Section navigation (Foundations, Techniques, Quantitative Methods, Distributions, Case Studies, Reference)
 - [ ] **LAND-04**: Responsive card grid (3 columns desktop, 2 tablet, 1 mobile)
-- [ ] **LAND-05**: Build-time SVG thumbnails on technique cards
+- [x] **LAND-05**: Build-time SVG thumbnails on technique cards
 - [ ] **LAND-06**: Section reference (section X.X.X) displayed on each card
 - [ ] **LAND-07**: CategoryFilter.tsx React island for landing page filtering (mirrors LanguageFilter.tsx pattern)
 
@@ -283,7 +283,7 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | GRAPH-28 | Phase 51 | Complete |
 | GRAPH-29 | Phase 51 | Complete |
 | GRAPH-30 | Phase 51 | Complete |
-| LAND-05 | Phase 51 | Pending |
+| LAND-05 | Phase 51 | Complete |
 | QUANT-01 | Phase 52 | Pending |
 | QUANT-02 | Phase 52 | Pending |
 | QUANT-03 | Phase 52 | Pending |

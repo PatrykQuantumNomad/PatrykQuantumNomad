@@ -33,7 +33,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 48: Infrastructure Foundation** - KaTeX pipeline, D3 isolation, OG caching, Zod schemas, EDA layout, content collections, technique template, breadcrumbs (completed 2026-02-24)
 - [x] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation (completed 2026-02-25)
 - [x] **Phase 50: SVG Generator Library** - Build-time TypeScript SVG generators for all statistical chart types (completed 2026-02-25)
-- [ ] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component
+- [x] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component (completed 2026-02-25)
 - [ ] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages
 - [ ] **Phase 53: Distribution Pages with D3 Explorers** - 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks
 - [ ] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering
@@ -192,7 +192,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 48. Infrastructure Foundation | v1.8 | 3/3 | Complete | 2026-02-24 |
 | 49. Data Model + Schema Population | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 50. SVG Generator Library | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 51. Graphical Technique Pages | 2/3 | In Progress|  | - |
+| 51. Graphical Technique Pages | 3/3 | Complete   | 2026-02-25 | - |
 | 52. Quantitative Techniques + Foundations | v1.8 | 0/3 | Not started | - |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 0/3 | Not started | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
