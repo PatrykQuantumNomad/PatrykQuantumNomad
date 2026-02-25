@@ -1,0 +1,109 @@
+---
+/**
+ * PlotVariantSwap — Tier B interactive SVG variant switching component.
+ * Renders all SVG variants at build time in hidden panels.
+ * Vanilla JS (~3KB) tab buttons toggle visibility client-side.
+ * CSS attribute selectors for tab styling (no Tailwind classList toggling).
+ */
+interface Variant {
+  label: string;
+  svg: string;
+}
+
+interface Props {
+  variants: Variant[];
+  defaultLabel?: string;
+}
+
+const { variants } = Astro.props;
+const componentId = `pvs-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class="plot-variant-swap mt-8 mb-10" id={componentId}>
+  <div role="tablist" aria-label="Plot variants" class="flex flex-wrap gap-2 mb-4">
+    {variants.map((v, i) => {
+      const panelId = `${componentId}-panel-${i}`;
+      const isDefault = i === 0;
+      return (
+        <button
+          role="tab"
+          aria-selected={isDefault ? 'true' : 'false'}
+          aria-controls={panelId}
+          data-variant={`variant-${i}`}
+          type="button"
+        >
+          {v.label}
+        </button>
+      );
+    })}
+  </div>
+
+  <div>
+    {variants.map((v, i) => {
+      const panelId = `${componentId}-panel-${i}`;
+      const isDefault = i === 0;
+      return (
+        <div
+          role="tabpanel"
+          id={panelId}
+          data-panel={`variant-${i}`}
+          class={isDefault ? '' : 'hidden'}
+          set:html={v.svg}
+        />
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .plot-variant-swap [role="tab"] {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 9999px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .plot-variant-swap [role="tab"]:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  .plot-variant-swap [role="tab"][aria-selected="true"] {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  // View Transition safe: re-query on each click, no cached references
+  document.querySelectorAll('.plot-variant-swap').forEach((container) => {
+    container.addEventListener('click', (e) => {
+      const tab = (e.target as HTMLElement).closest('[role="tab"]');
+      if (!tab) return;
+
+      const variant = tab.getAttribute('data-variant');
+      if (!variant) return;
+
+      // Update all tabs within this container
+      const tabs = container.querySelectorAll('[role="tab"]');
+      tabs.forEach((t) => {
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.setAttribute('aria-selected', 'true');
+
+      // Toggle panel visibility
+      const panels = container.querySelectorAll('[role="tabpanel"]');
+      panels.forEach((p) => {
+        const panel = p as HTMLElement;
+        if (panel.getAttribute('data-panel') === variant) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>
