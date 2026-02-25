@@ -30,7 +30,7 @@ See `.planning/milestones/` for detailed archives.
 - Integer phases (48, 49, ...): Planned milestone work
 - Decimal phases (48.1, 48.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 48: Infrastructure Foundation** - KaTeX pipeline, D3 isolation, OG caching, Zod schemas, EDA layout, content collections, technique template, breadcrumbs
+- [x] **Phase 48: Infrastructure Foundation** - KaTeX pipeline, D3 isolation, OG caching, Zod schemas, EDA layout, content collections, technique template, breadcrumbs (completed 2026-02-24)
 - [x] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation (completed 2026-02-25)
 - [ ] **Phase 50: SVG Generator Library** - Build-time TypeScript SVG generators for all statistical chart types
 - [ ] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component
@@ -71,9 +71,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 49-01-PLAN.md — Populate techniques.json with 47 entries (29 graphical + 18 quantitative) with tier assignments and cross-links
-- [ ] 49-02-PLAN.md — Populate distributions.json with 19 probability distribution entries with KaTeX PDF/CDF formulas
-- [ ] 49-03-PLAN.md — MDX stubs (19 files), sample datasets, route map, and route-aware cross-link validation script
+- [x] 49-01-PLAN.md — Populate techniques.json with 47 entries (29 graphical + 18 quantitative) with tier assignments and cross-links
+- [x] 49-02-PLAN.md — Populate distributions.json with 19 probability distribution entries with KaTeX PDF/CDF formulas
+- [x] 49-03-PLAN.md — MDX stubs (19 files), sample datasets, route map, and route-aware cross-link validation script
 
 ### Phase 50: SVG Generator Library
 **Goal**: A complete library of build-time TypeScript SVG generators produces publication-quality statistical charts for every chart type needed across the encyclopedia, styled to the Quantum Explorer palette and verified in both dark and light themes
@@ -190,11 +190,11 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 33-40 | v1.6 Docker Compose Validator | 14/14 | Complete | 2026-02-23 |
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48. Infrastructure Foundation | v1.8 | 3/3 | Complete | 2026-02-24 |
-| 49. Data Model + Schema Population | 3/3 | Complete   | 2026-02-25 | - |
+| 49. Data Model + Schema Population | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 50. SVG Generator Library | v1.8 | 0/3 | Not started | - |
 | 51. Graphical Technique Pages | v1.8 | 0/3 | Not started | - |
 | 52. Quantitative Techniques + Foundations | v1.8 | 0/3 | Not started | - |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 0/3 | Not started | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **106/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **109/127** | **In progress** | |
