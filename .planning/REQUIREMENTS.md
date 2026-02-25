@@ -134,7 +134,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **DIST-16**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
 - [x] **DIST-17**: DistributionExplorer.tsx React island with parameter sliders, dual PDF+CDF display, touch-friendly controls
 - [x] **DIST-18**: Static build-time SVG fallback for each distribution (no-JS users)
-- [ ] **DIST-19**: Distribution landing page at /eda/distributions/ with browsable grid and shape previews
+- [x] **DIST-19**: Distribution landing page at /eda/distributions/ with browsable grid and shape previews
 
 ### Case Studies
 
@@ -176,17 +176,17 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **SITE-07**: Build-time OG images for EDA overview and key pages
 - [x] **SITE-08**: Companion blog post covering EDA methodology and tool walkthrough
 - [x] **SITE-09**: Bidirectional cross-links between blog post and EDA pages
-- [ ] **SITE-10**: Lighthouse 90+ verified on representative pages from each tier (A, B, C)
-- [ ] **SITE-11**: WCAG 2.1 AA accessibility (role="img" + aria-label on SVGs, keyboard nav, screen reader)
-- [ ] **SITE-12**: Every EDA page cites its NIST source section
+- [x] **SITE-10**: Lighthouse 90+ verified on representative pages from each tier (A, B, C)
+- [x] **SITE-11**: WCAG 2.1 AA accessibility (role="img" + aria-label on SVGs, keyboard nav, screen reader)
+- [x] **SITE-12**: Every EDA page cites its NIST source section
 - [x] **SITE-13**: Python code blocks with copy button using existing astro-expressive-code
 
 ### Content Quality
 
-- [ ] **QUAL-01**: Every formula verified character-by-character against NIST source
-- [ ] **QUAL-02**: Every page contains 200+ words of unique explanatory prose
-- [ ] **QUAL-03**: All Python code examples are runnable (matplotlib/seaborn/scipy/plotly)
-- [ ] **QUAL-04**: Cross-links between related techniques functional on all pages
+- [x] **QUAL-01**: Every formula verified character-by-character against NIST source
+- [x] **QUAL-02**: Every page contains 200+ words of unique explanatory prose
+- [x] **QUAL-03**: All Python code examples are runnable (matplotlib/seaborn/scipy/plotly)
+- [x] **QUAL-04**: Cross-links between related techniques functional on all pages
 
 ## Future Requirements
 
@@ -327,7 +327,7 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | DIST-16 | Phase 53 | Complete |
 | DIST-17 | Phase 53 | Complete |
 | DIST-18 | Phase 53 | Complete |
-| DIST-19 | Phase 53 | Pending |
+| DIST-19 | Phase 53 | Complete |
 | CASE-01 | Phase 54 | Complete |
 | CASE-02 | Phase 54 | Complete |
 | CASE-03 | Phase 54 | Complete |
@@ -356,13 +356,13 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | SITE-07 | Phase 55 | Complete |
 | SITE-08 | Phase 55 | Complete |
 | SITE-09 | Phase 55 | Complete |
-| SITE-10 | Phase 55 | Pending |
-| SITE-11 | Phase 55 | Pending |
-| SITE-12 | Phase 55 | Pending |
-| QUAL-01 | Phase 55 | Pending |
-| QUAL-02 | Phase 55 | Pending |
-| QUAL-03 | Phase 55 | Pending |
-| QUAL-04 | Phase 55 | Pending |
+| SITE-10 | Phase 55 | Complete |
+| SITE-11 | Phase 55 | Complete |
+| SITE-12 | Phase 55 | Complete |
+| QUAL-01 | Phase 55 | Complete |
+| QUAL-02 | Phase 55 | Complete |
+| QUAL-03 | Phase 55 | Complete |
+| QUAL-04 | Phase 55 | Complete |
 
 **Coverage:**
 - v1.8 requirements: 145 total (12 categories)

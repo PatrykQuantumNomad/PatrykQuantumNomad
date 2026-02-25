@@ -10,7 +10,7 @@
 - ~~v1.5 Database Compass~~ - Phases 28-32 (shipped 2026-02-22)
 - ~~v1.6 Docker Compose Validator~~ - Phases 33-40 (shipped 2026-02-23)
 - ~~v1.7 Kubernetes Manifest Analyzer~~ - Phases 41-47 (shipped 2026-02-23)
-- 🚧 **v1.8 EDA Visual Encyclopedia** - Phases 48-55 (in progress)
+- ~~v1.8 EDA Visual Encyclopedia~~ - Phases 48-55 (shipped 2026-02-25)
 
 ## Phases
 
@@ -22,7 +22,7 @@ See `.planning/milestones/` for detailed archives.
 
 </details>
 
-### 🚧 v1.8 EDA Visual Encyclopedia (In Progress)
+### v1.8 EDA Visual Encyclopedia (Shipped 2026-02-25)
 
 **Milestone Goal:** Modernize NIST/SEMATECH Engineering Statistics Handbook Chapter 1 as a complete interactive pillar section with 90+ pages, build-time SVG plots, Python code examples, KaTeX formulas, and D3.js distribution parameter explorers.
 
@@ -37,7 +37,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages (completed 2026-02-25)
 - [x] **Phase 53: Distribution Pages with D3 Explorers** - 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks (completed 2026-02-25)
 - [x] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering (completed 2026-02-25)
-- [ ] **Phase 55: Site Integration + SEO + Polish** - Header nav, homepage callout, JSON-LD, OG images, companion blog post, Lighthouse audit, accessibility
+- [x] **Phase 55: Site Integration + SEO + Polish** - Header nav, homepage callout, JSON-LD, OG images, companion blog post, Lighthouse audit, accessibility (completed 2026-02-25)
 
 ## Phase Details
 
@@ -171,9 +171,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 55-01-PLAN.md — Navigation, homepage callout, JSON-LD structured data, and LLMs.txt integration
-- [ ] 55-02-PLAN.md — Build-time OG images, companion blog post, and bidirectional cross-links
-- [ ] 55-03-PLAN.md — Quality audits, accessibility fixes, and Lighthouse 90+ verification
+- [x] 55-01-PLAN.md — Navigation, homepage callout, JSON-LD structured data, and LLMs.txt integration
+- [x] 55-02-PLAN.md — Build-time OG images, companion blog post, and bidirectional cross-links
+- [x] 55-03-PLAN.md — Quality audits, accessibility fixes, and Lighthouse 90+ verification
 
 ## Progress
 
@@ -197,5 +197,5 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 55. Site Integration + SEO + Polish | 2/3 | In Progress|  | - |
-| **Total** | **v1.0-v1.8** | **124/127** | **In progress** | |
+| 55. Site Integration + SEO + Polish | v1.8 | 3/3 | Complete | 2026-02-25 |
+| **Total** | **v1.0-v1.8** | **126/126** | **Complete** | |
