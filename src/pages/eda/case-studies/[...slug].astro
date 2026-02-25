@@ -1,0 +1,67 @@
+---
+import { getCollection, render } from 'astro:content';
+import EDALayout from '../../../layouts/EDALayout.astro';
+import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('edaPages');
+  const caseStudies = pages.filter((p) => p.data.category === 'case-studies');
+
+  return caseStudies.map((page) => ({
+    params: { slug: page.id.replace('case-studies/', '') },
+    props: { page },
+  }));
+}
+
+interface Props {
+  page: Awaited<ReturnType<typeof getCollection<'edaPages'>>>[number];
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const slug = page.id.replace('case-studies/', '');
+---
+
+<EDALayout
+  title={`${page.data.title} | EDA Visual Encyclopedia`}
+  description={page.data.description}
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Case Studies', url: 'https://patrykgolabek.dev/eda/case-studies/' },
+    { name: page.data.title, url: `https://patrykgolabek.dev/eda/case-studies/${slug}/` },
+  ]} />
+
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Case Studies" techniqueName={page.data.title} />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">{page.data.title}</h1>
+      <p class="text-sm text-[var(--color-text-secondary)]">
+        NIST/SEMATECH Section {page.data.nistSection}
+      </p>
+    </header>
+
+    <div class="prose-foundations
+      [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
+      [&>h3]:text-lg [&>h3]:font-heading [&>h3]:font-bold [&>h3]:mt-8 [&>h3]:mb-3
+      [&>p]:text-[var(--color-text-secondary)] [&>p]:leading-relaxed [&>p]:mb-4
+      [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ul]:space-y-2
+      [&>ul>li]:text-[var(--color-text-secondary)]
+      [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>ol]:space-y-2
+      [&>ol>li]:text-[var(--color-text-secondary)]
+      [&_a]:text-[var(--color-accent)] [&_a:hover]:underline
+      [&>strong]:text-[var(--color-text-primary)]
+      [&_li>strong]:text-[var(--color-text-primary)]
+      [&_li>p]:text-[var(--color-text-secondary)] [&_li>p]:leading-relaxed [&_li>p]:mb-2
+      [&_li>ul]:list-disc [&_li>ul]:pl-6 [&_li>ul]:mt-2 [&_li>ul]:space-y-1
+      [&>table]:w-full [&>table]:mb-6 [&>table]:border-collapse
+      [&_th]:text-left [&_th]:p-2 [&_th]:border-b [&_th]:border-[var(--color-border)] [&_th]:text-[var(--color-text-primary)] [&_th]:font-medium
+      [&_td]:p-2 [&_td]:border-b [&_td]:border-[var(--color-border)] [&_td]:text-[var(--color-text-secondary)]
+    ">
+      <Content />
+    </div>
+  </article>
+</EDALayout>
