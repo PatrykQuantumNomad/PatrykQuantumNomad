@@ -36,7 +36,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component (completed 2026-02-25)
 - [x] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages (completed 2026-02-25)
 - [x] **Phase 53: Distribution Pages with D3 Explorers** - 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks (completed 2026-02-25)
-- [ ] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering
+- [x] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering (completed 2026-02-25)
 - [ ] **Phase 55: Site Integration + SEO + Polish** - Header nav, homepage callout, JSON-LD, OG images, companion blog post, Lighthouse audit, accessibility
 
 ## Phase Details
@@ -196,6 +196,6 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 54. Case Studies + Reference + Landing Page | v1.8 | 3/3 | Complete | 2026-02-25 |
+| 54. Case Studies + Reference + Landing Page | 3/3 | Complete   | 2026-02-25 | 2026-02-25 |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
 | **Total** | **v1.0-v1.8** | **120/127** | **In progress** | |
