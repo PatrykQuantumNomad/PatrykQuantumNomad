@@ -107,12 +107,12 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Foundations
 
-- [ ] **FOUND-01**: "What is EDA?" page at /eda/foundations/what-is-eda/ covering section 1.1.1-1.1.4
-- [ ] **FOUND-02**: "Role of Graphics" page at /eda/foundations/role-of-graphics/ covering section 1.1.5-1.1.6
-- [ ] **FOUND-03**: "Problem Categories" page at /eda/foundations/problem-categories/ covering section 1.1.7
-- [ ] **FOUND-04**: "Assumptions" page at /eda/foundations/assumptions/ covering section 1.2.1-1.2.3
-- [ ] **FOUND-05**: "The 4-Plot" page at /eda/foundations/the-4-plot/ covering section 1.2.4
-- [ ] **FOUND-06**: "When Assumptions Fail" page at /eda/foundations/when-assumptions-fail/ covering section 1.2.5
+- [x] **FOUND-01**: "What is EDA?" page at /eda/foundations/what-is-eda/ covering section 1.1.1-1.1.4
+- [x] **FOUND-02**: "Role of Graphics" page at /eda/foundations/role-of-graphics/ covering section 1.1.5-1.1.6
+- [x] **FOUND-03**: "Problem Categories" page at /eda/foundations/problem-categories/ covering section 1.1.7
+- [x] **FOUND-04**: "Assumptions" page at /eda/foundations/assumptions/ covering section 1.2.1-1.2.3
+- [x] **FOUND-05**: "The 4-Plot" page at /eda/foundations/the-4-plot/ covering section 1.2.4
+- [x] **FOUND-06**: "When Assumptions Fail" page at /eda/foundations/when-assumptions-fail/ covering section 1.2.5
 
 ### Distributions
 
@@ -302,12 +302,12 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | QUANT-16 | Phase 52 | Pending |
 | QUANT-17 | Phase 52 | Pending |
 | QUANT-18 | Phase 52 | Pending |
-| FOUND-01 | Phase 52 | Pending |
-| FOUND-02 | Phase 52 | Pending |
-| FOUND-03 | Phase 52 | Pending |
-| FOUND-04 | Phase 52 | Pending |
-| FOUND-05 | Phase 52 | Pending |
-| FOUND-06 | Phase 52 | Pending |
+| FOUND-01 | Phase 52 | Complete |
+| FOUND-02 | Phase 52 | Complete |
+| FOUND-03 | Phase 52 | Complete |
+| FOUND-04 | Phase 52 | Complete |
+| FOUND-05 | Phase 52 | Complete |
+| FOUND-06 | Phase 52 | Complete |
 | SITE-13 | Phase 52 | Pending |
 | DIST-01 | Phase 53 | Pending |
 | DIST-02 | Phase 53 | Pending |
