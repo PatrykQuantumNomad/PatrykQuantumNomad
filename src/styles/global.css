@@ -19,6 +19,22 @@
   --color-glow-neon: rgba(0, 109, 109, 0.3);
 }
 
+/* ─── Dark Palette (Quantum Explorer) ─────────────────────────────────── */
+html.dark {
+  --color-surface: #0f1117;
+  --color-surface-alt: #1a1d27;
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary: #9ca3af;
+  --color-accent: #e06040;
+  --color-accent-hover: #f07050;
+  --color-accent-secondary: #00a3a3;
+  --color-accent-glow: rgba(224, 96, 64, 0.3);
+  --color-gradient-start: #e06040;
+  --color-gradient-end: #00a3a3;
+  --color-border: #2a2d3a;
+  --color-glow-intense: rgba(224, 96, 64, 0.5);
+  --color-glow-neon: rgba(0, 163, 163, 0.3);
+}
 
 /* ─── Font Fallback Metrics (reduce CLS from font swap) ────────────────── */
 @font-face {
