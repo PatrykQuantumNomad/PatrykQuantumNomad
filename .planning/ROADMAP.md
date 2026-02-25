@@ -117,12 +117,12 @@ Plans:
   2. Python code examples on quantitative pages use matplotlib/seaborn/scipy and include copy buttons via astro-expressive-code
   3. All 6 foundation pages render from MDX content with NIST section references and cross-links to relevant technique pages
   4. Cross-links between quantitative techniques, graphical techniques, and foundation pages are all functional
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 52-01: TBD
-- [ ] 52-02: TBD
-- [ ] 52-03: TBD
+- [ ] 52-01-PLAN.md — Quantitative content module and dynamic route for 18 KaTeX + Python technique pages
+- [ ] 52-02-PLAN.md — Populate 6 foundation MDX stubs and create foundation dynamic route
+- [ ] 52-03-PLAN.md — Cross-link validation, build verification, and visual review of all 24 new pages
 
 ### Phase 53: Distribution Pages with D3 Explorers
 **Goal**: All 19 distribution pages offer both static SVG fallbacks (for no-JS users) and interactive D3 parameter explorers that let users adjust distribution parameters and see PDF/CDF curves update in real time
