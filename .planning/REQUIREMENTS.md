@@ -133,7 +133,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [ ] **DIST-15**: Cauchy distribution page at /eda/distributions/cauchy/ with D3 interactive parameter explorer
 - [ ] **DIST-16**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
 - [ ] **DIST-17**: DistributionExplorer.tsx React island with parameter sliders, dual PDF+CDF display, touch-friendly controls
-- [ ] **DIST-18**: Static build-time SVG fallback for each distribution (no-JS users)
+- [x] **DIST-18**: Static build-time SVG fallback for each distribution (no-JS users)
 - [ ] **DIST-19**: Distribution landing page at /eda/distributions/ with browsable grid and shape previews
 
 ### Case Studies
@@ -326,7 +326,7 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | DIST-15 | Phase 53 | Pending |
 | DIST-16 | Phase 53 | Pending |
 | DIST-17 | Phase 53 | Pending |
-| DIST-18 | Phase 53 | Pending |
+| DIST-18 | Phase 53 | Complete |
 | DIST-19 | Phase 53 | Pending |
 | CASE-01 | Phase 54 | Pending |
 | CASE-02 | Phase 54 | Pending |
