@@ -1,0 +1,159 @@
+---
+/**
+ * Dynamic route for all 19 distribution pages.
+ * Generates static SVG fallbacks at build time, hydrates DistributionExplorer
+ * client:visible for interactive parameter exploration, and renders KaTeX
+ * formulas for PDF/CDF/mean/variance.
+ */
+import { getCollection } from 'astro:content';
+import katex from 'katex';
+import DistributionPage from '../../../components/eda/DistributionPage.astro';
+import DistributionExplorer from '../../../components/eda/DistributionExplorer';
+import { generateDistributionCurve } from '../../../lib/eda/svg-generators/distribution-curve';
+import { distributionUrl } from '../../../lib/eda/routes';
+import { isDiscrete } from '../../../lib/eda/math/distribution-math';
+
+export async function getStaticPaths() {
+  const distributions = await getCollection('edaDistributions');
+  const distMap = new Map(distributions.map(d => [d.data.slug, d.data]));
+
+  return distributions.map(dist => ({
+    params: { slug: dist.data.slug },
+    props: {
+      distribution: dist.data,
+      relatedDistributions: dist.data.relatedDistributions
+        .filter((slug: string) => distMap.has(slug))
+        .map((slug: string) => ({
+          slug,
+          name: distMap.get(slug)!.title,
+          url: distributionUrl(slug),
+        })),
+    },
+  }));
+}
+
+const { distribution, relatedDistributions } = Astro.props;
+const discrete = isDiscrete(distribution.id);
+
+// Build default parameters for static SVG generation
+const defaultParams = Object.fromEntries(
+  distribution.parameters.map((p: { name: string; default: number }) => [p.name, p.default])
+);
+
+// Generate static SVG fallbacks (PDF + CDF)
+const pdfSvg = generateDistributionCurve({
+  type: 'pdf',
+  distribution: distribution.id,
+  params: defaultParams,
+});
+const cdfSvg = generateDistributionCurve({
+  type: 'cdf',
+  distribution: distribution.id,
+  params: defaultParams,
+});
+
+// Pre-render KaTeX formulas at build time
+const pdfFormulaHtml = katex.renderToString(distribution.pdfFormula, {
+  displayMode: true,
+  throwOnError: false,
+});
+const cdfFormulaHtml = katex.renderToString(distribution.cdfFormula, {
+  displayMode: true,
+  throwOnError: false,
+});
+const meanHtml = katex.renderToString(distribution.mean, {
+  displayMode: true,
+  throwOnError: false,
+});
+const varianceHtml = katex.renderToString(distribution.variance, {
+  displayMode: true,
+  throwOnError: false,
+});
+
+const pdfLabel = discrete ? 'Probability Mass Function' : 'Probability Density Function';
+---
+
+<DistributionPage
+  title={distribution.title}
+  description={distribution.description}
+  nistSection={distribution.nistSection}
+  slug={distribution.slug}
+  relatedDistributions={relatedDistributions}
+>
+  {/* Static SVG fallback (visible before JS loads) */}
+  <Fragment slot="fallback">
+    <div class="distribution-fallback mt-8 mb-10" data-distribution-fallback>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] mb-2">{discrete ? 'PMF' : 'PDF'}</h3>
+          <div set:html={pdfSvg} />
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] mb-2">CDF</h3>
+          <div set:html={cdfSvg} />
+        </div>
+      </div>
+    </div>
+  </Fragment>
+
+  {/* Interactive D3 explorer (hydrates on scroll) */}
+  <Fragment slot="explorer">
+    <section class="mt-8 mb-10">
+      <h2 class="text-xl font-heading font-bold mb-4">Interactive Explorer</h2>
+      <DistributionExplorer
+        client:visible
+        distributionId={distribution.id}
+        parameters={distribution.parameters}
+        title={distribution.title}
+        isDiscrete={discrete}
+      />
+    </section>
+  </Fragment>
+
+  {/* KaTeX formulas */}
+  <Fragment slot="formulas">
+    <section class="prose-section mt-8 space-y-6">
+      <h2 class="text-xl font-heading font-bold mb-3">Formulas</h2>
+      <div class="formula-block mb-6">
+        <h3 class="text-lg font-semibold mb-2">{pdfLabel}</h3>
+        <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={pdfFormulaHtml} />
+      </div>
+      <div class="formula-block mb-6">
+        <h3 class="text-lg font-semibold mb-2">Cumulative Distribution Function</h3>
+        <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={cdfFormulaHtml} />
+      </div>
+    </section>
+  </Fragment>
+
+  {/* Mean / Variance properties */}
+  <Fragment slot="properties">
+    <section class="prose-section mt-8 space-y-6">
+      <h2 class="text-xl font-heading font-bold mb-3">Properties</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="formula-block">
+          <h3 class="text-lg font-semibold mb-2">Mean</h3>
+          <div class="katex-display-wrapper my-2 overflow-x-auto" set:html={meanHtml} />
+        </div>
+        <div class="formula-block">
+          <h3 class="text-lg font-semibold mb-2">Variance</h3>
+          <div class="katex-display-wrapper my-2 overflow-x-auto" set:html={varianceHtml} />
+        </div>
+      </div>
+    </section>
+  </Fragment>
+
+  {/* Description prose */}
+  <Fragment slot="description">
+    <section class="prose-section mt-8">
+      <h2 class="text-xl font-heading font-bold mb-3">Overview</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed">{distribution.description}</p>
+    </section>
+  </Fragment>
+</DistributionPage>
+
+<style>
+  /* Hide static SVG fallback when explorer is active */
+  .distribution-fallback:has(~ section [data-explorer-active]) {
+    display: none;
+  }
+</style>

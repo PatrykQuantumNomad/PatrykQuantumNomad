@@ -1,0 +1,63 @@
+---
+import EDALayout from '../../layouts/EDALayout.astro';
+import EdaBreadcrumb from './EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../BreadcrumbJsonLd.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  nistSection: string;
+  slug: string;
+  relatedDistributions?: Array<{ slug: string; name: string; url: string }>;
+}
+
+const { title, description, nistSection, slug, relatedDistributions = [] } = Astro.props;
+---
+
+<EDALayout title={`${title} | EDA Visual Encyclopedia`} description={description} useKatex={true}>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Distributions', url: 'https://patrykgolabek.dev/eda/distributions/' },
+    { name: title, url: `https://patrykgolabek.dev/eda/distributions/${slug}/` },
+  ]} />
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Distributions" techniqueName={title} />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">{title}</h1>
+      <p class="text-sm text-[var(--color-text-secondary)]">NIST/SEMATECH Section {nistSection}</p>
+    </header>
+
+    {/* Static SVG fallback (hidden when explorer loads) */}
+    <slot name="fallback" />
+
+    {/* Interactive D3 explorer */}
+    <slot name="explorer" />
+
+    {/* KaTeX formulas */}
+    <slot name="formulas" />
+
+    {/* Mean / Variance properties */}
+    <slot name="properties" />
+
+    {/* Description prose */}
+    <slot name="description" />
+
+    {/* Related distributions */}
+    {relatedDistributions.length > 0 && (
+      <section class="mt-12 pt-8 border-t border-[var(--color-border)]">
+        <h2 class="text-xl font-heading font-bold mb-4">Related Distributions</h2>
+        <div class="flex flex-wrap gap-3">
+          {relatedDistributions.map((d) => (
+            <a href={d.url}
+               class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors">
+              {d.name}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</EDALayout>
