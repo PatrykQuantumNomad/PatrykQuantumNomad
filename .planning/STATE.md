@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 53 (Distribution Pages with D3 Explorers)
+**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 54 (Case Studies + Reference + Landing Page)
 
 ## Current Position
 
-Phase: 53 of 55 (Distribution Pages with D3 Explorers)
-Plan: 2 of 3 in current phase
-Status: Executing Phase 53
-Last activity: 2026-02-25 — Completed 53-02 (distribution explorer and pages)
+Phase: 54 of 55 (Case Studies + Reference + Landing Page)
+Plan: 0 of 3 in current phase
+Status: Ready to plan Phase 54
+Last activity: 2026-02-25 — Completed Phase 53 (all 3 plans, visual verification approved)
 
-Progress: ██████░░░░ 65% (v1.8 — 15/23 plans)
+Progress: ███████░░░ 70% (v1.8 — 16/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 118 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 15 v1.8)
+- Total plans completed: 119 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 16 v1.8)
 
 **Cumulative Stats:**
 
@@ -54,6 +54,7 @@ Progress: ██████░░░░ 65% (v1.8 — 15/23 plans)
 | 52-03 | 5min | 1 | 1 |
 | 53-01 | 7min | 2 | 2 |
 | 53-02 | 3min | 2 | 3 |
+| 53-03 | 3min | 2 | 1 |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ v1.8 decisions:
 - [Phase 53]: CSS :has() selector for static SVG fallback hiding when DistributionExplorer mounts (confirmed in 53-02)
 - [Phase 53]: max-w-4xl container for distribution pages (wider than technique pages for dual charts) (confirmed in 53-02)
 - [Phase 53]: Parameter symbols as raw text in sliders (not KaTeX, too heavy for client) (confirmed in 53-02)
+- [Phase 53]: Compact 200x140 SVG config for thumbnail previews on distribution landing page (confirmed in 53-03)
+- [Phase 53]: No category filtering on /eda/distributions/ landing page (reserved for /eda/ in Phase 54) (confirmed in 53-03)
 
 ### Pending Todos
 
@@ -133,6 +136,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 53-02-PLAN.md (distribution explorer and pages)
+Stopped at: Phase 53 complete (all 3 plans executed, visual verification approved)
 Resume file: None
-Next: Execute 53-03-PLAN.md (distribution landing page with thumbnail grid)
+Next: Plan Phase 54 (Case Studies + Reference + Landing Page)
