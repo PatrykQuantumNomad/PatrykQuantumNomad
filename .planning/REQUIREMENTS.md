@@ -138,15 +138,15 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Case Studies
 
-- [ ] **CASE-01**: Normal random numbers case study at /eda/case-studies/normal-random-numbers/ (section 1.4.2.1)
-- [ ] **CASE-02**: Uniform random numbers case study at /eda/case-studies/uniform-random-numbers/ (section 1.4.2.2)
-- [ ] **CASE-03**: Random walk case study at /eda/case-studies/random-walk/ (section 1.4.2.3)
-- [ ] **CASE-04**: Cryothermometry case study at /eda/case-studies/cryothermometry/ (section 1.4.2.4)
-- [ ] **CASE-05**: Beam deflections case study at /eda/case-studies/beam-deflections/ (section 1.4.2.5)
-- [ ] **CASE-06**: Filter transmittance case study at /eda/case-studies/filter-transmittance/ (section 1.4.2.6)
-- [ ] **CASE-07**: Heat flow meter case study at /eda/case-studies/heat-flow-meter/ (section 1.4.2.8)
-- [ ] **CASE-08**: Fatigue life case study at /eda/case-studies/fatigue-life/ (section 1.4.2.9)
-- [ ] **CASE-09**: Ceramic strength case study at /eda/case-studies/ceramic-strength/ (section 1.4.2.10)
+- [x] **CASE-01**: Normal random numbers case study at /eda/case-studies/normal-random-numbers/ (section 1.4.2.1)
+- [x] **CASE-02**: Uniform random numbers case study at /eda/case-studies/uniform-random-numbers/ (section 1.4.2.2)
+- [x] **CASE-03**: Random walk case study at /eda/case-studies/random-walk/ (section 1.4.2.3)
+- [x] **CASE-04**: Cryothermometry case study at /eda/case-studies/cryothermometry/ (section 1.4.2.4)
+- [x] **CASE-05**: Beam deflections case study at /eda/case-studies/beam-deflections/ (section 1.4.2.5)
+- [x] **CASE-06**: Filter transmittance case study at /eda/case-studies/filter-transmittance/ (section 1.4.2.6)
+- [x] **CASE-07**: Heat flow meter case study at /eda/case-studies/heat-flow-meter/ (section 1.4.2.8)
+- [x] **CASE-08**: Fatigue life case study at /eda/case-studies/fatigue-life/ (section 1.4.2.9)
+- [x] **CASE-09**: Ceramic strength case study at /eda/case-studies/ceramic-strength/ (section 1.4.2.10)
 
 ### Reference Pages
 
@@ -328,15 +328,15 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | DIST-17 | Phase 53 | Complete |
 | DIST-18 | Phase 53 | Complete |
 | DIST-19 | Phase 53 | Pending |
-| CASE-01 | Phase 54 | Pending |
-| CASE-02 | Phase 54 | Pending |
-| CASE-03 | Phase 54 | Pending |
-| CASE-04 | Phase 54 | Pending |
-| CASE-05 | Phase 54 | Pending |
-| CASE-06 | Phase 54 | Pending |
-| CASE-07 | Phase 54 | Pending |
-| CASE-08 | Phase 54 | Pending |
-| CASE-09 | Phase 54 | Pending |
+| CASE-01 | Phase 54 | Complete |
+| CASE-02 | Phase 54 | Complete |
+| CASE-03 | Phase 54 | Complete |
+| CASE-04 | Phase 54 | Complete |
+| CASE-05 | Phase 54 | Complete |
+| CASE-06 | Phase 54 | Complete |
+| CASE-07 | Phase 54 | Complete |
+| CASE-08 | Phase 54 | Complete |
+| CASE-09 | Phase 54 | Complete |
 | REF-01 | Phase 54 | Complete |
 | REF-02 | Phase 54 | Complete |
 | REF-03 | Phase 54 | Complete |

@@ -55,6 +55,7 @@ Progress: ████████░░ 78% (v1.8 — 18/23 plans)
 | 53-01 | 7min | 2 | 2 |
 | 53-02 | 3min | 2 | 3 |
 | 53-03 | 3min | 2 | 1 |
+| 54-01 | 8min | 2 | 10 |
 | 54-02 | 7min | 2 | 5 |
 
 ## Accumulated Context
@@ -120,6 +121,8 @@ v1.8 decisions:
 - [Phase 53]: Parameter symbols as raw text in sliders (not KaTeX, too heavy for client) (confirmed in 53-02)
 - [Phase 53]: Compact 200x140 SVG config for thumbnail previews on distribution landing page (confirmed in 53-03)
 - [Phase 53]: No category filtering on /eda/distributions/ landing page (reserved for /eda/ in Phase 54) (confirmed in 53-03)
+- [Phase 54]: Case study route mirrors foundations route exactly (same layout, breadcrumb, prose styling) (confirmed in 54-01)
+- [Phase 54]: Table styling via [&>table]/[&_th]/[&_td] added to case-studies prose-foundations class (confirmed in 54-01)
 - [Phase 54]: Unicode entities for MDX-unsafe characters (<=, curly braces) in reference table content (confirmed in 54-02)
 - [Phase 54]: Table styling via [&_table]/[&_th]/[&_td] Tailwind selectors extending prose-foundations class (confirmed in 54-02)
 
