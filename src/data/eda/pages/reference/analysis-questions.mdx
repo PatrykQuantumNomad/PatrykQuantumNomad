@@ -6,4 +6,44 @@ category: "reference"
 nistSection: "1.3.2 Analysis Questions"
 ---
 
-{/* Content will be populated in Phase 54 */}
+Every exploratory data analysis addresses a core set of questions. These questions drive the selection of [graphical](/eda/reference/techniques-by-category/) and [quantitative](/eda/reference/techniques-by-category/) techniques and guide the analyst toward a valid statistical model.
+
+## The Seven Standard EDA Questions
+
+| # | Question | Key Techniques |
+|---|----------|---------------|
+| 1 | What is a typical value (location)? | [Histogram](/eda/techniques/histogram/), [Box Plot](/eda/techniques/box-plot/), [Measures of Location](/eda/quantitative/measures-of-location/) |
+| 2 | How spread out is the data? | [Measures of Scale](/eda/quantitative/measures-of-scale/), [Box Plot](/eda/techniques/box-plot/), [Histogram](/eda/techniques/histogram/) |
+| 3 | What is a good distributional model? | [Probability Plot](/eda/techniques/probability-plot/), [PPCC Plot](/eda/techniques/ppcc-plot/), [Anderson-Darling Test](/eda/quantitative/anderson-darling/) |
+| 4 | Are there outliers? | [Box Plot](/eda/techniques/box-plot/), [Grubbs' Test](/eda/quantitative/grubbs-test/), [Normal Probability Plot](/eda/techniques/normal-probability-plot/) |
+| 5 | Is the data random? | [Run-Sequence Plot](/eda/techniques/run-sequence-plot/), [Lag Plot](/eda/techniques/lag-plot/), [Runs Test](/eda/quantitative/runs-test/) |
+| 6 | Does the assumed model fit? | [Chi-Square GOF](/eda/quantitative/chi-square-gof/), [K-S Test](/eda/quantitative/kolmogorov-smirnov/), [Probability Plot](/eda/techniques/probability-plot/) |
+| 7 | Is the process in control? | [Mean Plot](/eda/techniques/mean-plot/), [Std Deviation Plot](/eda/techniques/std-deviation-plot/), [ANOVA](/eda/quantitative/one-factor-anova/) |
+
+## Location Estimates
+
+Estimating a "typical value" is the most fundamental EDA question. Common estimators include the **mean** (sensitive to outliers), **median** (robust), and **mode** (distributional peak). See [Measures of Location](/eda/quantitative/measures-of-location/) for formulas and [Confidence Limits](/eda/quantitative/confidence-limits/) for interval estimation.
+
+## Spread Estimates
+
+Quantifying variability uses the **standard deviation**, **range**, and **interquartile range (IQR)**. Robust spread measures resist outlier influence. Compare variances across groups with [Bartlett's Test](/eda/quantitative/bartletts-test/) or [Levene Test](/eda/quantitative/levene-test/).
+
+## Percentile Estimation
+
+Percentiles partition ordered data into hundredths. The [Box Plot](/eda/techniques/box-plot/) visualizes Q1, median, and Q3. For distributional percentiles, use the fitted CDF -- see [Probability Distribution Tables](/eda/reference/distribution-tables/).
+
+## Randomness Assessment
+
+Non-random patterns (trend, oscillation, clustering) violate assumptions of most statistical models. The [4-Plot](/eda/techniques/4-plot/) provides a rapid visual check combining run sequence, lag, histogram, and normal probability plots. Quantitatively, [Autocorrelation](/eda/quantitative/autocorrelation/) and [Runs Test](/eda/quantitative/runs-test/) detect departures from randomness.
+
+## Model Validation
+
+After selecting a candidate distribution from the [distribution families](/eda/reference/related-distributions/), validate the fit using both graphical evidence ([Probability Plot](/eda/techniques/probability-plot/) linearity) and formal tests ([Anderson-Darling](/eda/quantitative/anderson-darling/), [K-S Test](/eda/quantitative/kolmogorov-smirnov/)). The [6-Plot](/eda/techniques/6-plot/) combines multiple diagnostics in a single display.
+
+## Recommended Workflow
+
+1. **Screen** -- [4-Plot](/eda/techniques/4-plot/) or [6-Plot](/eda/techniques/6-plot/) for initial overview
+2. **Identify** -- [Histogram](/eda/techniques/histogram/) + [Box Plot](/eda/techniques/box-plot/) for shape and outliers
+3. **Test** -- [Probability Plot](/eda/techniques/probability-plot/) + [PPCC Plot](/eda/techniques/ppcc-plot/) for distribution selection
+4. **Validate** -- Formal goodness-of-fit test + residual analysis
+5. **Estimate** -- [Confidence Limits](/eda/quantitative/confidence-limits/) for key parameters

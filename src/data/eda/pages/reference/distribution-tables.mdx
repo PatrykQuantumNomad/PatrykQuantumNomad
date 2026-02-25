@@ -6,4 +6,71 @@ category: "reference"
 nistSection: "1.3.6.2-1.3.6.5 Probability Distribution Tables"
 ---
 
-{/* Content will be populated in Phase 54 */}
+These tables provide critical values for common probability distributions used in hypothesis testing and confidence interval construction. For interactive exploration, see the individual [distribution pages](/eda/distributions/).
+
+## Normal Distribution Critical Values
+
+Upper-tail critical values z_alpha where P(Z > z_alpha) = alpha for the standard [Normal Distribution](/eda/distributions/normal/).
+
+| alpha | 0.10 | 0.05 | 0.025 | 0.01 | 0.005 | 0.001 |
+|-------|------|------|-------|------|-------|-------|
+| z_alpha | 1.282 | 1.645 | 1.960 | 2.326 | 2.576 | 3.090 |
+
+Common two-sided intervals: 90% uses z = 1.645, 95% uses z = 1.960, 99% uses z = 2.576.
+
+## Student's t-Distribution Critical Values
+
+Upper-tail critical values t_(alpha,df) for the [t-Distribution](/eda/distributions/t-distribution/). Used in [Confidence Limits](/eda/quantitative/confidence-limits/) and [Two-Sample t-Test](/eda/quantitative/two-sample-t-test/).
+
+| df | t_0.10 | t_0.05 | t_0.025 | t_0.01 | t_0.005 |
+|----|--------|--------|---------|--------|---------|
+| 1 | 3.078 | 6.314 | 12.706 | 31.821 | 63.657 |
+| 2 | 1.886 | 2.920 | 4.303 | 6.965 | 9.925 |
+| 5 | 1.476 | 2.015 | 2.571 | 3.365 | 4.032 |
+| 10 | 1.372 | 1.812 | 2.228 | 2.764 | 3.169 |
+| 20 | 1.325 | 1.725 | 2.086 | 2.528 | 2.845 |
+| 30 | 1.310 | 1.697 | 2.042 | 2.457 | 2.750 |
+| 60 | 1.296 | 1.671 | 2.000 | 2.390 | 2.660 |
+| 120 | 1.289 | 1.658 | 1.980 | 2.358 | 2.617 |
+| inf | 1.282 | 1.645 | 1.960 | 2.326 | 2.576 |
+
+As df increases, t-values converge to normal z-values (bottom row).
+
+## Chi-Square Distribution Critical Values
+
+Upper-tail critical values chi2_(alpha,df) for the [Chi-Square Distribution](/eda/distributions/chi-square/). Used in [Chi-Square SD Test](/eda/quantitative/chi-square-sd-test/) and [Chi-Square GOF Test](/eda/quantitative/chi-square-gof/).
+
+| df | chi2_0.95 | chi2_0.90 | chi2_0.10 | chi2_0.05 | chi2_0.025 | chi2_0.01 |
+|----|-----------|-----------|-----------|-----------|------------|-----------|
+| 1 | 0.004 | 0.016 | 2.706 | 3.841 | 5.024 | 6.635 |
+| 2 | 0.103 | 0.211 | 4.605 | 5.991 | 7.378 | 9.210 |
+| 5 | 1.145 | 1.610 | 9.236 | 11.070 | 12.833 | 15.086 |
+| 10 | 3.940 | 4.865 | 15.987 | 18.307 | 20.483 | 23.209 |
+| 20 | 10.851 | 12.443 | 28.412 | 31.410 | 34.170 | 37.566 |
+| 30 | 18.493 | 20.599 | 40.256 | 43.773 | 46.979 | 50.892 |
+| 50 | 34.764 | 37.689 | 63.167 | 67.505 | 71.420 | 76.154 |
+| 100 | 77.929 | 82.358 | 118.498 | 124.342 | 129.561 | 135.807 |
+
+Left-tail values (chi2_0.95, chi2_0.90) are used for lower confidence bounds on variance.
+
+## F-Distribution Critical Values
+
+Upper-tail F_(0.05, df1, df2) for the [F-Distribution](/eda/distributions/f-distribution/). Used in [F-Test](/eda/quantitative/f-test/) and [ANOVA](/eda/quantitative/one-factor-anova/).
+
+| df1 \ df2 | 5 | 10 | 20 | 30 | 60 | 120 |
+|------------|------|------|------|------|------|-------|
+| 1 | 6.608 | 4.965 | 4.351 | 4.171 | 4.001 | 3.920 |
+| 2 | 5.786 | 4.103 | 3.493 | 3.316 | 3.150 | 3.072 |
+| 5 | 5.050 | 3.326 | 2.711 | 2.534 | 2.368 | 2.290 |
+| 10 | 4.735 | 2.978 | 2.348 | 2.165 | 1.993 | 1.910 |
+| 20 | 4.558 | 2.774 | 2.124 | 1.932 | 1.748 | 1.659 |
+| 30 | 4.496 | 2.700 | 2.039 | 1.841 | 1.649 | 1.554 |
+
+For alpha = 0.01, multiply these approximate values by approximately 1.5 (use exact tables for precise work).
+
+## Using These Tables
+
+- **One-tailed test** -- compare test statistic directly to the table value at your chosen alpha
+- **Two-tailed test** -- use alpha/2 column (e.g., for 5% two-tailed, use the 0.025 column)
+- **Confidence intervals** -- use the appropriate percentile to construct bounds
+- For distributions not tabulated here, see [Related Distributions](/eda/reference/related-distributions/) for transformation relationships

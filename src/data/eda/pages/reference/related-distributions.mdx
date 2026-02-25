@@ -6,4 +6,73 @@ category: "reference"
 nistSection: "1.3.6.7 Related Distributions"
 ---
 
-{/* Content will be populated in Phase 54 */}
+Probability distributions are connected through special cases, transformations, and limiting forms. Understanding these relationships helps select the right model and simplify computations. For critical value tables, see [Distribution Tables](/eda/reference/distribution-tables/).
+
+## Distribution Function Definitions
+
+| Function | Symbol | Definition |
+|----------|--------|------------|
+| PDF / PMF | f(x) | Probability density (continuous) or mass (discrete) |
+| CDF | F(x) | P(X ≤ x), cumulative probability |
+| Quantile (PPF) | Q(p) | Inverse CDF, F inverse of p |
+| Survival | S(x) | 1 - F(x), exceedance probability |
+| Hazard | h(x) | f(x) / S(x), instantaneous failure rate |
+
+## Normal Distribution Family
+
+The [Normal](/eda/distributions/normal/) distribution is the central reference for much of classical statistics.
+
+| Relationship | Description |
+|-------------|-------------|
+| [Normal](/eda/distributions/normal/) -> [Lognormal](/eda/distributions/lognormal/) | If X ~ Normal, then exp(X) ~ Lognormal |
+| [Normal](/eda/distributions/normal/) -> [Chi-Square](/eda/distributions/chi-square/) | Sum of k squared standard normals ~ Chi-Square(k) |
+| [Normal](/eda/distributions/normal/) -> [t-Distribution](/eda/distributions/t-distribution/) | Z / sqrt(Chi-Square(k)/k) ~ t(k) |
+| [Chi-Square](/eda/distributions/chi-square/) -> [F-Distribution](/eda/distributions/f-distribution/) | (Chi-Square(d1)/d1) / (Chi-Square(d2)/d2) ~ F(d1,d2) |
+| [Normal](/eda/distributions/normal/) -> [Power Normal](/eda/distributions/power-normal/) | Box-Cox transform of Normal |
+| [Lognormal](/eda/distributions/lognormal/) -> [Power Lognormal](/eda/distributions/power-lognormal/) | Box-Cox transform of Lognormal |
+
+## Exponential Distribution Family
+
+The [Exponential](/eda/distributions/exponential/) distribution connects to several lifetime and reliability models.
+
+| Relationship | Description |
+|-------------|-------------|
+| [Exponential](/eda/distributions/exponential/) -> [Gamma](/eda/distributions/gamma/) | Sum of k Exponentials ~ Gamma(k, beta) |
+| [Exponential](/eda/distributions/exponential/) -> [Weibull](/eda/distributions/weibull/) | Weibull(shape=1) = Exponential |
+| [Exponential](/eda/distributions/exponential/) -> [Double Exponential](/eda/distributions/double-exponential/) | Difference of two Exponentials |
+| [Gamma](/eda/distributions/gamma/) -> [Chi-Square](/eda/distributions/chi-square/) | Chi-Square(k) = Gamma(k/2, 2) |
+| [Gamma](/eda/distributions/gamma/) -> [Exponential](/eda/distributions/exponential/) | Gamma(1, beta) = Exponential(beta) |
+| [Exponential](/eda/distributions/exponential/) -> [Fatigue Life](/eda/distributions/fatigue-life/) | Derived via cycle-to-failure model |
+
+## Limiting Distributions
+
+| From | To | Condition |
+|------|----|-----------|
+| [t-Distribution](/eda/distributions/t-distribution/) | [Normal](/eda/distributions/normal/) | df -> infinity |
+| [Chi-Square](/eda/distributions/chi-square/) | [Normal](/eda/distributions/normal/) | df -> infinity (approx.) |
+| [F-Distribution](/eda/distributions/f-distribution/) | [Chi-Square](/eda/distributions/chi-square/) | df2 -> infinity, multiply by df1 |
+| [Binomial](/eda/distributions/binomial/) | [Normal](/eda/distributions/normal/) | n -> infinity (CLT) |
+| [Binomial](/eda/distributions/binomial/) | [Poisson](/eda/distributions/poisson/) | n -> infinity, p -> 0, np = lambda |
+| [Poisson](/eda/distributions/poisson/) | [Normal](/eda/distributions/normal/) | lambda -> infinity |
+| [Gamma](/eda/distributions/gamma/) | [Normal](/eda/distributions/normal/) | shape -> infinity (CLT) |
+
+## Flexible Distribution Families
+
+| Distribution | Role |
+|-------------|------|
+| [Beta](/eda/distributions/beta/) | Flexible shape on [0,1]; models proportions. Uniform is Beta(1,1). |
+| [Tukey-Lambda](/eda/distributions/tukey-lambda/) | Shape parameter sweeps from Cauchy-like (lambda=-1) through logistic (lambda=0) to uniform-like (lambda=1). Used with [PPCC Plot](/eda/techniques/ppcc-plot/) for distribution selection. |
+| [Extreme Value](/eda/distributions/extreme-value/) | Models maxima of large samples (Gumbel). Related to [Weibull](/eda/distributions/weibull/) via transformation. |
+
+## Discrete Distributions
+
+| Distribution | Support | Key Use |
+|-------------|---------|---------|
+| [Binomial](/eda/distributions/binomial/) | 0, 1, ..., n | Fixed trials, constant probability |
+| [Poisson](/eda/distributions/poisson/) | 0, 1, 2, ... | Rare events per unit time/space |
+
+Discrete distributions use PMF (probability mass function) rather than PDF. Both converge to Normal under appropriate limits (see table above).
+
+## Choosing a Distribution
+
+Start with the [PPCC Plot](/eda/techniques/ppcc-plot/) or [Probability Plot](/eda/techniques/probability-plot/) to identify candidate families, then validate with [Anderson-Darling](/eda/quantitative/anderson-darling/) or [K-S Test](/eda/quantitative/kolmogorov-smirnov/). Use the relationships above to simplify analysis when transformations connect your data to a better-known distribution.
