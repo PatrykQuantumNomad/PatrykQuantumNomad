@@ -104,9 +104,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 51-01-PLAN.md — PlotVariantSwap component and technique-renderer slug-to-generator mapping with Tier B variant datasets
-- [ ] 51-02-PLAN.md — Prose content module with 200+ words per technique for all 29 graphical techniques
-- [ ] 51-03-PLAN.md — Dynamic [slug].astro route, TechniquePage cross-link fix, and SVG thumbnail utility
+- [x] 51-01-PLAN.md — PlotVariantSwap component and technique-renderer slug-to-generator mapping with Tier B variant datasets
+- [x] 51-02-PLAN.md — Prose content module with 200+ words per technique for all 29 graphical techniques
+- [x] 51-03-PLAN.md — Dynamic [slug].astro route, TechniquePage cross-link fix, and SVG thumbnail utility
 
 ### Phase 52: Quantitative Techniques + Foundations
 **Goal**: All 18 quantitative technique pages display properly typeset KaTeX formulas with Python code examples, and all 6 foundation pages provide the conceptual framework that contextualizes the entire encyclopedia
@@ -192,9 +192,9 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 48. Infrastructure Foundation | v1.8 | 3/3 | Complete | 2026-02-24 |
 | 49. Data Model + Schema Population | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 50. SVG Generator Library | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 51. Graphical Technique Pages | 3/3 | Complete   | 2026-02-25 | - |
+| 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 52. Quantitative Techniques + Foundations | v1.8 | 0/3 | Not started | - |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 0/3 | Not started | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **112/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **115/127** | **In progress** | |
