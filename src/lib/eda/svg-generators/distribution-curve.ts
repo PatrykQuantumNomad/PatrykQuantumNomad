@@ -1,10 +1,11 @@
 /**
  * Distribution curve SVG generator for PDF and CDF visualization.
- * Supports 6 distributions: normal, exponential, chi-square, uniform, t, gamma.
- * Uses Abramowitz & Stegun erf approximation and Lanczos gamma approximation.
+ * Supports all 19 NIST distributions via the shared distribution-math module.
+ * Continuous distributions render as smooth curves; discrete (binomial, poisson)
+ * render as bar-stem PMF plots and step-function CDFs.
  */
 import { scaleLinear } from 'd3-scale';
-import { line, area, curveBasis } from 'd3-shape';
+import { line, area, curveBasis, curveStepAfter } from 'd3-shape';
 import {
   DEFAULT_CONFIG,
   PALETTE,
@@ -17,10 +18,11 @@ import {
   titleText,
   type PlotConfig,
 } from './plot-base';
+import { evalDistribution, getXDomain, isDiscrete } from '../math/distribution-math';
 
 export interface DistributionCurveOptions {
   type: 'pdf' | 'cdf';
-  distribution: 'normal' | 'exponential' | 'chi-square' | 'uniform' | 't' | 'gamma';
+  distribution: string;
   params: Record<string, number>;
   config?: Partial<PlotConfig>;
   title?: string;
@@ -29,253 +31,97 @@ export interface DistributionCurveOptions {
 }
 
 // ---------------------------------------------------------------------------
-// Math helpers: erf (Abramowitz & Stegun 7.1.26) and Lanczos gamma (g=7)
+// Label generation
 // ---------------------------------------------------------------------------
 
-/**
- * Error function approximation using Abramowitz & Stegun formula 7.1.26.
- * Max error: 1.5e-7.
- */
-function erf(x: number): number {
-  const sign = x >= 0 ? 1 : -1;
-  const ax = Math.abs(x);
-  const t = 1 / (1 + 0.3275911 * ax);
-  const a1 = 0.254829592;
-  const a2 = -0.284496736;
-  const a3 = 1.421413741;
-  const a4 = -1.453152027;
-  const a5 = 1.061405429;
-  const poly = ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t;
-  return sign * (1 - poly * Math.exp(-ax * ax));
-}
+const DIST_LABELS: Record<string, (p: Record<string, number>) => string> = {
+  'normal': (p) => `Normal(${p.mu ?? 0}, ${p.sigma ?? 1})`,
+  'uniform': (p) => `Uniform(${p.a ?? -1}, ${p.b ?? 1})`,
+  'cauchy': (p) => `Cauchy(${p.x0 ?? 0}, ${p.gamma ?? 1})`,
+  't-distribution': (p) => `t(df=${p.nu ?? 5})`,
+  'f-distribution': (p) => `F(${p.d1 ?? 5}, ${p.d2 ?? 10})`,
+  'chi-square': (p) => `Chi2(k=${p.k ?? 5})`,
+  'exponential': (p) => `Exp(${p.lambda ?? 1})`,
+  'weibull': (p) => `Weibull(${p.alpha ?? 1}, ${p.beta ?? 1})`,
+  'lognormal': (p) => `LogN(${p.mu ?? 0}, ${p.sigma ?? 1})`,
+  'fatigue-life': (p) => `BS(${p.alpha ?? 1}, ${p.beta ?? 1})`,
+  'gamma': (p) => `Gamma(${p.alpha ?? 2}, ${p.beta ?? 1})`,
+  'double-exponential': (p) => `Laplace(${p.mu ?? 0}, ${p.beta ?? 1})`,
+  'power-normal': (p) => `PowN(p=${p.p ?? 1})`,
+  'power-lognormal': (p) => `PowLN(p=${p.p ?? 1}, s=${p.sigma ?? 1})`,
+  'tukey-lambda': (p) => `TL(l=${p.lambda ?? 0.14})`,
+  'extreme-value': (p) => `Gumbel(${p.mu ?? 0}, ${p.beta ?? 1})`,
+  'beta': (p) => `Beta(${p.alpha ?? 2}, ${p.beta ?? 5})`,
+  'binomial': (p) => `Bin(n=${p.n ?? 10}, p=${p.p ?? 0.5})`,
+  'poisson': (p) => `Pois(l=${p.lambda ?? 5})`,
+};
 
-/**
- * Lanczos gamma function approximation with g=7.
- * Accurate for real positive arguments.
- */
-const LANCZOS_COEFFICIENTS = [
-  0.99999999999980993,
-  676.5203681218851,
-  -1259.1392167224028,
-  771.32342877765313,
-  -176.61502916214059,
-  12.507343278686905,
-  -0.13857109526572012,
-  9.9843695780195716e-6,
-  1.5056327351493116e-7,
-];
-
-function gammaFn(z: number): number {
-  if (z < 0.5) {
-    // Reflection formula: Gamma(z) = pi / (sin(pi*z) * Gamma(1-z))
-    return Math.PI / (Math.sin(Math.PI * z) * gammaFn(1 - z));
-  }
-  z -= 1;
-  let x = LANCZOS_COEFFICIENTS[0];
-  for (let i = 1; i < LANCZOS_COEFFICIENTS.length; i++) {
-    x += LANCZOS_COEFFICIENTS[i] / (z + i);
-  }
-  const t = z + 7.5; // g + 0.5
-  return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
-}
-
-function lnGamma(z: number): number {
-  return Math.log(gammaFn(z));
+function getLabel(distribution: string, params: Record<string, number>): string {
+  const fn = DIST_LABELS[distribution];
+  return fn ? fn(params) : distribution;
 }
 
 // ---------------------------------------------------------------------------
-// Distribution PDF/CDF implementations
+// Discrete rendering helpers
 // ---------------------------------------------------------------------------
 
-function normalPDF(x: number, mu: number, sigma: number): number {
-  const z = (x - mu) / sigma;
-  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
-}
-
-function normalCDF(x: number, mu: number, sigma: number): number {
-  return 0.5 * (1 + erf((x - mu) / (sigma * Math.SQRT2)));
-}
-
-function exponentialPDF(x: number, lambda: number): number {
-  return x < 0 ? 0 : lambda * Math.exp(-lambda * x);
-}
-
-function exponentialCDF(x: number, lambda: number): number {
-  return x < 0 ? 0 : 1 - Math.exp(-lambda * x);
-}
-
-function chiSquarePDF(x: number, k: number): number {
-  if (x <= 0) return 0;
-  const halfK = k / 2;
-  const coeff = 1 / (Math.pow(2, halfK) * gammaFn(halfK));
-  return coeff * Math.pow(x, halfK - 1) * Math.exp(-x / 2);
-}
-
-function chiSquareCDF(x: number, k: number): number {
-  if (x <= 0) return 0;
-  // Numerical integration via regularized lower incomplete gamma
-  // Use Simpson's rule for practical accuracy
-  return lowerIncompleteGammaRatio(k / 2, x / 2);
-}
-
-/**
- * Regularized lower incomplete gamma: P(a, x) = gamma(a,x) / Gamma(a)
- * Computed via series expansion for small x or continued fraction for large x.
- */
-function lowerIncompleteGammaRatio(a: number, x: number): number {
-  if (x < 0) return 0;
-  if (x === 0) return 0;
-
-  // Series expansion: P(a, x) = e^(-x) * x^a * sum(x^n / Gamma(a+n+1))
-  if (x < a + 1) {
-    let sum = 1 / a;
-    let term = 1 / a;
-    for (let n = 1; n < 200; n++) {
-      term *= x / (a + n);
-      sum += term;
-      if (Math.abs(term) < 1e-12 * Math.abs(sum)) break;
-    }
-    return sum * Math.exp(-x + a * Math.log(x) - lnGamma(a));
-  }
-
-  // Continued fraction (Legendre) for P = 1 - Q
-  // Using Lentz's method for the upper incomplete gamma
-  let f = 1e-30;
-  let c = 1e-30;
-  let d = 1 / (x + 1 - a);
-  f = d;
-  for (let n = 1; n < 200; n++) {
-    const an = n * (a - n);
-    const bn = x + 2 * n + 1 - a;
-    d = 1 / (bn + an * d);
-    c = bn + an / c;
-    const delta = c * d;
-    f *= delta;
-    if (Math.abs(delta - 1) < 1e-12) break;
-  }
-  const Q = Math.exp(-x + a * Math.log(x) - lnGamma(a)) * f;
-  return 1 - Q;
-}
-
-function uniformPDF(x: number, a: number, b: number): number {
-  return x >= a && x <= b ? 1 / (b - a) : 0;
-}
-
-function uniformCDF(x: number, a: number, b: number): number {
-  if (x < a) return 0;
-  if (x > b) return 1;
-  return (x - a) / (b - a);
-}
-
-function tPDF(x: number, nu: number): number {
-  const coeff = gammaFn((nu + 1) / 2) / (Math.sqrt(nu * Math.PI) * gammaFn(nu / 2));
-  return coeff * Math.pow(1 + (x * x) / nu, -(nu + 1) / 2);
-}
-
-function tCDF(x: number, nu: number): number {
-  // Use regularized incomplete beta function: I_x(a, b)
-  // t CDF = 0.5 + 0.5 * sign(x) * I(nu/(nu+x^2); nu/2, 0.5) ... or Simpson integration
-  // Simpler: numerical integration via Simpson's rule
-  const steps = 400;
-  const lower = -40;
-  const upper = x;
-  if (upper <= lower) return 0;
-  const h = (upper - lower) / steps;
-  let sum = tPDF(lower, nu) + tPDF(upper, nu);
-  for (let i = 1; i < steps; i++) {
-    const xi = lower + i * h;
-    sum += (i % 2 === 0 ? 2 : 4) * tPDF(xi, nu);
-  }
-  return Math.max(0, Math.min(1, (h / 3) * sum));
-}
-
-function gammaPDF(x: number, alpha: number, beta: number): number {
-  if (x <= 0) return 0;
-  return (
-    (Math.pow(beta, alpha) / gammaFn(alpha)) *
-    Math.pow(x, alpha - 1) *
-    Math.exp(-beta * x)
-  );
-}
-
-function gammaCDF(x: number, alpha: number, beta: number): number {
-  if (x <= 0) return 0;
-  return lowerIncompleteGammaRatio(alpha, beta * x);
-}
-
-// ---------------------------------------------------------------------------
-// Distribution dispatch
-// ---------------------------------------------------------------------------
-
-type DistFn = (x: number) => number;
-
-function getDistributionFn(
-  distribution: DistributionCurveOptions['distribution'],
-  type: 'pdf' | 'cdf',
+function renderDiscretepmf(
+  distribution: string,
   params: Record<string, number>,
-): { fn: DistFn; xDomain: [number, number]; label: string } {
-  switch (distribution) {
-    case 'normal': {
-      const mu = params.mu ?? 0;
-      const sigma = params.sigma ?? 1;
-      return {
-        fn: type === 'pdf' ? (x) => normalPDF(x, mu, sigma) : (x) => normalCDF(x, mu, sigma),
-        xDomain: [mu - 4 * sigma, mu + 4 * sigma],
-        label: `Normal(${mu}, ${sigma})`,
-      };
-    }
-    case 'exponential': {
-      const lambda = params.lambda ?? 1;
-      return {
-        fn: type === 'pdf' ? (x) => exponentialPDF(x, lambda) : (x) => exponentialCDF(x, lambda),
-        xDomain: [0, 5 / lambda],
-        label: `Exp(${lambda})`,
-      };
-    }
-    case 'chi-square': {
-      const k = params.k ?? 2;
-      return {
-        fn: type === 'pdf' ? (x) => chiSquarePDF(x, k) : (x) => chiSquareCDF(x, k),
-        xDomain: [0, Math.max(k + 4 * Math.sqrt(2 * k), 10)],
-        label: `Chi2(k=${k})`,
-      };
-    }
-    case 'uniform': {
-      const a = params.a ?? 0;
-      const b = params.b ?? 1;
-      const pad = (b - a) * 0.2;
-      return {
-        fn: type === 'pdf' ? (x) => uniformPDF(x, a, b) : (x) => uniformCDF(x, a, b),
-        xDomain: [a - pad, b + pad],
-        label: `Uniform(${a}, ${b})`,
-      };
-    }
-    case 't': {
-      const nu = params.nu ?? 5;
-      return {
-        fn: type === 'pdf' ? (x) => tPDF(x, nu) : (x) => tCDF(x, nu),
-        xDomain: [-5, 5],
-        label: `t(df=${nu})`,
-      };
-    }
-    case 'gamma': {
-      const alpha = params.alpha ?? 2;
-      const beta = params.beta ?? 1;
-      const meanG = alpha / beta;
-      const sdG = Math.sqrt(alpha) / beta;
-      return {
-        fn: type === 'pdf' ? (x) => gammaPDF(x, alpha, beta) : (x) => gammaCDF(x, alpha, beta),
-        xDomain: [0, meanG + 5 * sdG],
-        label: `Gamma(${alpha}, ${beta})`,
-      };
-    }
-    default:
-      return {
-        fn: () => 0,
-        xDomain: [0, 1],
-        label: 'Unknown',
-      };
+  xDomain: [number, number],
+  xScale: (v: number) => number,
+  yScale: (v: number) => number,
+): string {
+  const kMin = Math.max(0, Math.floor(xDomain[0]));
+  const kMax = Math.ceil(xDomain[1]);
+  const elements: string[] = [];
+
+  for (let k = kMin; k <= kMax; k++) {
+    const pmf = evalDistribution(distribution, 'pdf', k, params);
+    if (!isFinite(pmf) || pmf <= 0) continue;
+    const cx = xScale(k).toFixed(2);
+    const cy = yScale(pmf).toFixed(2);
+    const y0 = yScale(0).toFixed(2);
+    // Vertical bar-stem line
+    elements.push(
+      `<line x1="${cx}" y1="${y0}" x2="${cx}" y2="${cy}" stroke="${PALETTE.dataPrimary}" stroke-width="3" />`
+    );
+    // Circle at top
+    elements.push(
+      `<circle cx="${cx}" cy="${cy}" r="3" fill="${PALETTE.dataPrimary}" />`
+    );
   }
+  return elements.join('\n');
+}
+
+function renderDiscreteCdf(
+  distribution: string,
+  params: Record<string, number>,
+  xDomain: [number, number],
+  xScale: (v: number) => number,
+  yScale: (v: number) => number,
+): string {
+  const kMin = Math.max(0, Math.floor(xDomain[0]));
+  const kMax = Math.ceil(xDomain[1]);
+  const points: { x: number; y: number }[] = [];
+
+  // Add initial point at the left edge with CDF = 0 (before first integer)
+  if (kMin > 0) {
+    points.push({ x: xDomain[0], y: 0 });
+  }
+  for (let k = kMin; k <= kMax; k++) {
+    const cdf = evalDistribution(distribution, 'cdf', k, params);
+    points.push({ x: k, y: isFinite(cdf) ? cdf : 0 });
+  }
+  // Extend to right edge
+  points.push({ x: xDomain[1], y: points[points.length - 1]?.y ?? 1 });
+
+  const lineGen = line<{ x: number; y: number }>()
+    .x((d) => xScale(d.x))
+    .y((d) => yScale(d.y))
+    .curve(curveStepAfter);
+  const pathD = lineGen(points) ?? '';
+  return `<path d="${pathD}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="2" />`;
 }
 
 // ---------------------------------------------------------------------------
@@ -288,22 +134,32 @@ export function generateDistributionCurve(options: DistributionCurveOptions): st
   const { innerWidth, innerHeight } = innerDimensions(config);
   const { margin } = config;
 
-  const { fn, xDomain, label } = getDistributionFn(distribution, type, params);
+  const xDomain = getXDomain(distribution, params);
+  const label = getLabel(distribution, params);
+  const discrete = isDiscrete(distribution);
 
-  // Generate 200 evaluation points
-  const nPoints = 200;
-  const step = (xDomain[1] - xDomain[0]) / (nPoints - 1);
+  // Generate evaluation points (continuous: 200 points, discrete: per-integer)
   const points: { x: number; y: number }[] = [];
-  for (let i = 0; i < nPoints; i++) {
-    const x = xDomain[0] + i * step;
-    const y = fn(x);
-    points.push({ x, y: isFinite(y) ? y : 0 });
+  if (discrete) {
+    const kMin = Math.max(0, Math.floor(xDomain[0]));
+    const kMax = Math.ceil(xDomain[1]);
+    for (let k = kMin; k <= kMax; k++) {
+      const y = evalDistribution(distribution, type, k, params);
+      points.push({ x: k, y: isFinite(y) ? y : 0 });
+    }
+  } else {
+    const nPoints = 200;
+    const step = (xDomain[1] - xDomain[0]) / (nPoints - 1);
+    for (let i = 0; i < nPoints; i++) {
+      const x = xDomain[0] + i * step;
+      const y = evalDistribution(distribution, type, x, params);
+      points.push({ x, y: isFinite(y) ? y : 0 });
+    }
   }
 
   // Compute Y domain
   const yValues = points.map((p) => p.y);
   const yMax = Math.max(...yValues) * 1.1;
-  const yMin = type === 'cdf' ? 0 : 0;
   const yDomMax = type === 'cdf' ? 1.05 : (yMax > 0 ? yMax : 1);
 
   // Scales
@@ -311,7 +167,7 @@ export function generateDistributionCurve(options: DistributionCurveOptions): st
     .domain(xDomain)
     .range([margin.left, margin.left + innerWidth]);
   const yScale = scaleLinear()
-    .domain([yMin, yDomMax])
+    .domain([0, yDomMax])
     .range([margin.top + innerHeight, margin.top]);
 
   // Grid
@@ -322,34 +178,45 @@ export function generateDistributionCurve(options: DistributionCurveOptions): st
     '\n' +
     gridLinesV(xTicks, xScale, margin.top, margin.top + innerHeight);
 
-  // Curve path
-  const lineGen = line<{ x: number; y: number }>()
-    .x((d) => xScale(d.x))
-    .y((d) => yScale(d.y))
-    .curve(curveBasis);
-  const pathD = lineGen(points) ?? '';
-  const curvePath = `<path d="${pathD}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="2" />`;
+  // Render data content
+  let dataContent = '';
 
-  // Area fill under PDF curve (not for CDF)
-  let areaFill = '';
-  if (type === 'pdf') {
-    const areaGen = area<{ x: number; y: number }>()
-      .x((d) => xScale(d.x))
-      .y0(yScale(0))
-      .y1((d) => yScale(d.y))
-      .curve(curveBasis);
-    const areaD = areaGen(points) ?? '';
-    if (areaD) {
-      areaFill = `<path d="${areaD}" fill="${PALETTE.dataPrimary}" fill-opacity="0.1" stroke="none" />`;
+  if (discrete) {
+    if (type === 'pdf') {
+      dataContent = renderDiscretepmf(distribution, params, xDomain, xScale, yScale);
+    } else {
+      dataContent = renderDiscreteCdf(distribution, params, xDomain, xScale, yScale);
     }
+  } else {
+    // Continuous: smooth curve + area fill for PDF
+    const lineGen = line<{ x: number; y: number }>()
+      .x((d) => xScale(d.x))
+      .y((d) => yScale(d.y))
+      .curve(curveBasis);
+    const pathD = lineGen(points) ?? '';
+    const curvePath = `<path d="${pathD}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="2" />`;
+
+    let areaFill = '';
+    if (type === 'pdf') {
+      const areaGen = area<{ x: number; y: number }>()
+        .x((d) => xScale(d.x))
+        .y0(yScale(0))
+        .y1((d) => yScale(d.y))
+        .curve(curveBasis);
+      const areaD = areaGen(points) ?? '';
+      if (areaD) {
+        areaFill = `<path d="${areaD}" fill="${PALETTE.dataPrimary}" fill-opacity="0.1" stroke="none" />`;
+      }
+    }
+    dataContent = areaFill + '\n' + curvePath;
   }
 
   // Distribution label annotation
   const annotation = `<text x="${(margin.left + innerWidth - 10).toFixed(2)}" y="${(margin.top + 16).toFixed(2)}" text-anchor="end" font-size="11" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${label} ${type.toUpperCase()}</text>`;
 
   // Default axis labels
-  const xLabel = options.xLabel ?? 'x';
-  const yLabel = options.yLabel ?? (type === 'pdf' ? 'f(x)' : 'F(x)');
+  const xLbl = options.xLabel ?? (discrete ? 'k' : 'x');
+  const yLbl = options.yLabel ?? (type === 'pdf' ? (discrete ? 'P(X=k)' : 'f(x)') : 'F(x)');
 
   return (
     svgOpen(
@@ -358,15 +225,13 @@ export function generateDistributionCurve(options: DistributionCurveOptions): st
     ) +
     gridLines +
     '\n' +
-    areaFill +
-    '\n' +
-    curvePath +
+    dataContent +
     '\n' +
     annotation +
     '\n' +
-    xAxis(xTicks, xScale, margin.top + innerHeight, xLabel, config) +
+    xAxis(xTicks, xScale, margin.top + innerHeight, xLbl, config) +
     '\n' +
-    yAxis(yTicks, yScale, margin.left, yLabel, config) +
+    yAxis(yTicks, yScale, margin.left, yLbl, config) +
     '\n' +
     (options.title ? titleText(config, options.title) : '') +
     '</svg>'
