@@ -151,12 +151,12 @@ Plans:
   2. All 4 reference pages render with functional cross-links to technique and distribution pages
   3. The landing page at /eda/ displays a filterable card grid with category pills (All, Graphical, Quantitative, Distributions, Case Studies, Reference) that filter cards in real time
   4. The landing page card grid is responsive (3-col desktop, 2-col tablet, 1-col mobile) with section navigation and NIST section references on each card
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 54-01: TBD
-- [ ] 54-02: TBD
-- [ ] 54-03: TBD
+- [ ] 54-01-PLAN.md — Case study dynamic route and 9 NIST walkthrough MDX pages
+- [ ] 54-02-PLAN.md — Reference dynamic route and 4 cross-linked reference MDX pages
+- [ ] 54-03-PLAN.md — EDA landing page with CategoryFilter React island and filterable card grid
 
 ### Phase 55: Site Integration + SEO + Polish
 **Goal**: The EDA Visual Encyclopedia is fully integrated into the site with header navigation, homepage callout, structured data, OG images, companion blog post, and verified Lighthouse/accessibility scores -- ready for staged publication
