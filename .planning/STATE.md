@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 50 of 55 (SVG Generation)
-Plan: 2 of 3 in current phase
-Status: Plan 50-01 complete, ready for 50-02
-Last activity: 2026-02-25 — Completed 50-01 (plot-base, statistics, histogram, box plot, bar plot)
+Plan: 3 of 3 in current phase
+Status: Plan 50-02 complete, ready for 50-03
+Last activity: 2026-02-25 — Completed 50-02 (scatter, line, lag, probability, spectral, star plot generators)
 
-Progress: ████░░░░░░ 30% (v1.8 — 7/23 plans)
+Progress: ████░░░░░░ 35% (v1.8 — 8/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 107 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 4 v1.8)
+- Total plans completed: 108 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 5 v1.8)
 
 **Cumulative Stats:**
 
@@ -44,6 +44,7 @@ Progress: ████░░░░░░ 30% (v1.8 — 7/23 plans)
 | 49-02 | 2min | 1 | 1 |
 | 49-03 | 6min | 3 | 22 |
 | 50-01 | 4min | 2 | 6 |
+| 50-02 | 4min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -73,6 +74,11 @@ v1.8 decisions:
 - Dark mode CSS overrides added to global.css now (not deferred to Phase 55) for immediate visual verification (confirmed in 50-01)
 - statistics.ts pure TypeScript math (~200 lines): KDE, FFT, regression, normal quantile, autocorrelation (confirmed in 50-01)
 - All SVG coordinate values use .toFixed(2) to prevent markup bloat (confirmed in 50-01)
+- Scatter confidence band uses pointwise leverage-based 95% CI, rendered as polygon path (confirmed in 50-02)
+- ACF lollipop style (line+circle) for autocorrelation plots, significance bounds at 1.96/sqrt(n) (confirmed in 50-02)
+- PPCC mode uses Tukey-Lambda quantile Q(p)=(p^r-(1-p)^r)/r for shape parameter sweep (confirmed in 50-02)
+- Star plot reuses polarToCartesian from radar-math.ts with 40px viewBox padding for labels (confirmed in 50-02)
+- Spectral plot auto-selects log/linear Y scale based on PSD dynamic range (>100:1 triggers log) (confirmed in 50-02)
 
 ### Pending Todos
 
@@ -90,6 +96,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 50-01-PLAN.md (plot-base, statistics, histogram, box plot, bar plot generators)
+Stopped at: Completed 50-02-PLAN.md (scatter, line, lag, probability, spectral, star plot generators)
 Resume file: None
-Next: Execute 50-02-PLAN.md (scatter, line, lag, probability, spectral, star plot generators)
+Next: Execute 50-03-PLAN.md (contour, distribution curve, composite generators)

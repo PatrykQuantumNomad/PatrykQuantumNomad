@@ -38,18 +38,18 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **SVG-01**: Plot base generator (plot-base.ts) with shared axes, grid lines, viewBox responsiveness, and Quantum Explorer palette
 - [x] **SVG-02**: Histogram SVG generator with configurable bin count and kernel density overlay
 - [x] **SVG-03**: Box plot SVG generator with quartile markers, median line, whiskers, and outlier dots
-- [ ] **SVG-04**: Scatter plot SVG generator with optional regression line and confidence band
-- [ ] **SVG-05**: Line plot SVG generator for run-sequence, autocorrelation, and time series plots
-- [ ] **SVG-06**: Probability plot SVG generator (normal probability, Q-Q, Weibull, PPCC)
+- [x] **SVG-04**: Scatter plot SVG generator with optional regression line and confidence band
+- [x] **SVG-05**: Line plot SVG generator for run-sequence, autocorrelation, and time series plots
+- [x] **SVG-06**: Probability plot SVG generator (normal probability, Q-Q, Weibull, PPCC)
 - [x] **SVG-07**: Bar plot SVG generator for mean plots, standard deviation plots, and DOE plots
 - [ ] **SVG-08**: Contour plot SVG generator for response surface visualization
-- [ ] **SVG-09**: Star plot (radar) SVG generator for multivariate display
+- [x] **SVG-09**: Star plot (radar) SVG generator for multivariate display
 - [ ] **SVG-10**: Composite plot generators for 4-plot and 6-plot layouts
 - [ ] **SVG-11**: Distribution curve SVG generator for PDF/CDF static rendering (build-time fallback for Tier C)
 - [x] **SVG-12**: All SVG plots use viewBox for responsiveness with no fixed width/height
 - [x] **SVG-13**: All SVG plots render correctly in both dark and light themes
-- [ ] **SVG-14**: Spectral plot SVG generator for frequency domain visualization
-- [ ] **SVG-15**: Lag plot SVG generator for autocorrelation pattern detection
+- [x] **SVG-14**: Spectral plot SVG generator for frequency domain visualization
+- [x] **SVG-15**: Lag plot SVG generator for autocorrelation pattern detection
 
 ### Graphical Techniques
 
@@ -241,18 +241,18 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | SVG-01 | Phase 50 | Complete |
 | SVG-02 | Phase 50 | Complete |
 | SVG-03 | Phase 50 | Complete |
-| SVG-04 | Phase 50 | Pending |
-| SVG-05 | Phase 50 | Pending |
-| SVG-06 | Phase 50 | Pending |
+| SVG-04 | Phase 50 | Complete |
+| SVG-05 | Phase 50 | Complete |
+| SVG-06 | Phase 50 | Complete |
 | SVG-07 | Phase 50 | Complete |
 | SVG-08 | Phase 50 | Pending |
-| SVG-09 | Phase 50 | Pending |
+| SVG-09 | Phase 50 | Complete |
 | SVG-10 | Phase 50 | Pending |
 | SVG-11 | Phase 50 | Pending |
 | SVG-12 | Phase 50 | Complete |
 | SVG-13 | Phase 50 | Complete |
-| SVG-14 | Phase 50 | Pending |
-| SVG-15 | Phase 50 | Pending |
+| SVG-14 | Phase 50 | Complete |
+| SVG-15 | Phase 50 | Complete |
 | GRAPH-01 | Phase 51 | Pending |
 | GRAPH-02 | Phase 51 | Pending |
 | GRAPH-03 | Phase 51 | Pending |
