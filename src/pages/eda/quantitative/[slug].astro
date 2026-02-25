@@ -1,0 +1,108 @@
+---
+/**
+ * Dynamic route for all 18 quantitative technique pages.
+ * Renders KaTeX formulas at build time via katex.renderToString(),
+ * Python code via astro-expressive-code's Code component,
+ * and prose from quantitative-content.ts.
+ */
+import { getCollection } from 'astro:content';
+import { Code } from 'astro:components';
+import katex from 'katex';
+import TechniquePage from '../../../components/eda/TechniquePage.astro';
+import { getQuantitativeContent } from '../../../lib/eda/quantitative-content';
+import { techniqueUrl } from '../../../lib/eda/routes';
+
+export async function getStaticPaths() {
+  const allTechniques = await getCollection('edaTechniques');
+  const allTechMap = new Map(allTechniques.map(t => [t.data.slug, t.data]));
+  const quantitative = allTechniques
+    .filter(t => t.data.category === 'quantitative')
+    .map(t => t.data);
+
+  return quantitative.map(technique => ({
+    params: { slug: technique.slug },
+    props: {
+      technique,
+      relatedTechniques: technique.relatedTechniques
+        .filter((slug: string) => allTechMap.has(slug))
+        .map((slug: string) => {
+          const related = allTechMap.get(slug)!;
+          return {
+            slug,
+            name: related.title,
+            url: techniqueUrl(slug, related.category as 'graphical' | 'quantitative'),
+          };
+        }),
+    },
+  }));
+}
+
+const { technique, relatedTechniques } = Astro.props;
+const content = getQuantitativeContent(technique.slug);
+
+// Pre-render KaTeX formulas at build time
+const renderedFormulas = content?.formulas.map(f => ({
+  ...f,
+  html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
+})) ?? [];
+---
+
+<TechniquePage
+  title={technique.title}
+  description={technique.description}
+  category="Quantitative Techniques"
+  nistSection={technique.nistSection}
+  slug={technique.slug}
+  relatedTechniques={relatedTechniques}
+  useKatex={true}
+>
+  {content && (
+    <Fragment slot="description">
+      <section class="prose-section mt-8 space-y-6">
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">What It Is</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.definition}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">When to Use It</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.purpose}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">How to Interpret</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.interpretation}</p>
+        </div>
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.assumptions}</p>
+        </div>
+        <p class="text-sm text-[var(--color-text-secondary)] italic mt-4">
+          Reference: {content.nistReference}
+        </p>
+      </section>
+    </Fragment>
+  )}
+
+  {renderedFormulas.length > 0 && (
+    <Fragment slot="formula">
+      <section class="prose-section mt-8 space-y-6">
+        <h2 class="text-xl font-heading font-bold mb-3">Formulas</h2>
+        {renderedFormulas.map(f => (
+          <div class="formula-block mb-6">
+            <h3 class="text-lg font-semibold mb-2">{f.label}</h3>
+            <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={f.html} />
+            <p class="text-[var(--color-text-secondary)]">{f.explanation}</p>
+          </div>
+        ))}
+      </section>
+    </Fragment>
+  )}
+
+  {content?.pythonCode && (
+    <Fragment slot="code">
+      <section class="prose-section mt-8">
+        <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+        <Code code={content.pythonCode} lang="python" />
+      </section>
+    </Fragment>
+  )}
+</TechniquePage>
