@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 51 (Graphical Technique Pages)
+**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 52 (Quantitative Technique Pages)
 
 ## Current Position
 
@@ -50,6 +50,7 @@ Progress: ██████░░░░ 57% (v1.8 — 13/23 plans)
 | 51-02 | 5min | 1 | 1 |
 | Phase 51 P03 | 2min | 2 tasks | 3 files |
 | 52-02 | 5min | 2 | 7 |
+| Phase 52 P01 | 7min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ v1.8 decisions:
 - [Phase 51]: SVG thumbnails use viewBox scaling via width/height attrs, not post-processing (confirmed in 51-03)
 - [Phase 52]: Astro 5 render() from astro:content for MDX collection rendering (not page.render()) (confirmed in 52-02)
 - [Phase 52]: prose-foundations class with [&>tag] Tailwind nested selectors for MDX output styling (confirmed in 52-02)
+- [Phase 52]: katex.renderToString() at build time for .astro pages (remark-math only processes MDX)
+- [Phase 52]: Code component from astro:components for Python syntax highlighting with copy buttons
+- [Phase 52]: Cross-category allTechMap includes both graphical and quantitative for related technique links
 
 ### Pending Todos
 

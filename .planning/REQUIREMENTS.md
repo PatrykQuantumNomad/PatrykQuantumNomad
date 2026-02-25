@@ -86,24 +86,24 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Quantitative Techniques
 
-- [ ] **QUANT-01**: Measures of location page at /eda/quantitative/measures-of-location/ with KaTeX formulas
-- [ ] **QUANT-02**: Confidence limits page at /eda/quantitative/confidence-limits/ with KaTeX formulas
-- [ ] **QUANT-03**: Two-sample t-test page at /eda/quantitative/two-sample-t-test/ with KaTeX formulas and Python code
-- [ ] **QUANT-04**: One-factor ANOVA page at /eda/quantitative/one-factor-anova/ with KaTeX formulas and Python code
-- [ ] **QUANT-05**: Multi-factor ANOVA page at /eda/quantitative/multi-factor-anova/ with KaTeX formulas
-- [ ] **QUANT-06**: Measures of scale page at /eda/quantitative/measures-of-scale/ with KaTeX formulas
-- [ ] **QUANT-07**: Bartlett's test page at /eda/quantitative/bartletts-test/ with KaTeX formulas and Python code
-- [ ] **QUANT-08**: Chi-square SD test page at /eda/quantitative/chi-square-sd-test/ with KaTeX formulas
-- [ ] **QUANT-09**: F-test page at /eda/quantitative/f-test/ with KaTeX formulas and Python code
-- [ ] **QUANT-10**: Levene test page at /eda/quantitative/levene-test/ with KaTeX formulas and Python code
-- [ ] **QUANT-11**: Skewness and kurtosis page at /eda/quantitative/skewness-kurtosis/ with KaTeX formulas
-- [ ] **QUANT-12**: Autocorrelation page at /eda/quantitative/autocorrelation/ with KaTeX formulas
-- [ ] **QUANT-13**: Runs test page at /eda/quantitative/runs-test/ with KaTeX formulas
-- [ ] **QUANT-14**: Anderson-Darling test page at /eda/quantitative/anderson-darling/ with KaTeX formulas and Python code
-- [ ] **QUANT-15**: Chi-square goodness-of-fit page at /eda/quantitative/chi-square-gof/ with KaTeX formulas
-- [ ] **QUANT-16**: Kolmogorov-Smirnov test page at /eda/quantitative/kolmogorov-smirnov/ with KaTeX formulas and Python code
-- [ ] **QUANT-17**: Grubbs' test page at /eda/quantitative/grubbs-test/ with KaTeX formulas and Python code
-- [ ] **QUANT-18**: Yates analysis page at /eda/quantitative/yates-analysis/ with KaTeX formulas
+- [x] **QUANT-01**: Measures of location page at /eda/quantitative/measures-of-location/ with KaTeX formulas
+- [x] **QUANT-02**: Confidence limits page at /eda/quantitative/confidence-limits/ with KaTeX formulas
+- [x] **QUANT-03**: Two-sample t-test page at /eda/quantitative/two-sample-t-test/ with KaTeX formulas and Python code
+- [x] **QUANT-04**: One-factor ANOVA page at /eda/quantitative/one-factor-anova/ with KaTeX formulas and Python code
+- [x] **QUANT-05**: Multi-factor ANOVA page at /eda/quantitative/multi-factor-anova/ with KaTeX formulas
+- [x] **QUANT-06**: Measures of scale page at /eda/quantitative/measures-of-scale/ with KaTeX formulas
+- [x] **QUANT-07**: Bartlett's test page at /eda/quantitative/bartletts-test/ with KaTeX formulas and Python code
+- [x] **QUANT-08**: Chi-square SD test page at /eda/quantitative/chi-square-sd-test/ with KaTeX formulas
+- [x] **QUANT-09**: F-test page at /eda/quantitative/f-test/ with KaTeX formulas and Python code
+- [x] **QUANT-10**: Levene test page at /eda/quantitative/levene-test/ with KaTeX formulas and Python code
+- [x] **QUANT-11**: Skewness and kurtosis page at /eda/quantitative/skewness-kurtosis/ with KaTeX formulas
+- [x] **QUANT-12**: Autocorrelation page at /eda/quantitative/autocorrelation/ with KaTeX formulas
+- [x] **QUANT-13**: Runs test page at /eda/quantitative/runs-test/ with KaTeX formulas
+- [x] **QUANT-14**: Anderson-Darling test page at /eda/quantitative/anderson-darling/ with KaTeX formulas and Python code
+- [x] **QUANT-15**: Chi-square goodness-of-fit page at /eda/quantitative/chi-square-gof/ with KaTeX formulas
+- [x] **QUANT-16**: Kolmogorov-Smirnov test page at /eda/quantitative/kolmogorov-smirnov/ with KaTeX formulas and Python code
+- [x] **QUANT-17**: Grubbs' test page at /eda/quantitative/grubbs-test/ with KaTeX formulas and Python code
+- [x] **QUANT-18**: Yates analysis page at /eda/quantitative/yates-analysis/ with KaTeX formulas
 
 ### Foundations
 
@@ -179,7 +179,7 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [ ] **SITE-10**: Lighthouse 90+ verified on representative pages from each tier (A, B, C)
 - [ ] **SITE-11**: WCAG 2.1 AA accessibility (role="img" + aria-label on SVGs, keyboard nav, screen reader)
 - [ ] **SITE-12**: Every EDA page cites its NIST source section
-- [ ] **SITE-13**: Python code blocks with copy button using existing astro-expressive-code
+- [x] **SITE-13**: Python code blocks with copy button using existing astro-expressive-code
 
 ### Content Quality
 
@@ -284,31 +284,31 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | GRAPH-29 | Phase 51 | Complete |
 | GRAPH-30 | Phase 51 | Complete |
 | LAND-05 | Phase 51 | Complete |
-| QUANT-01 | Phase 52 | Pending |
-| QUANT-02 | Phase 52 | Pending |
-| QUANT-03 | Phase 52 | Pending |
-| QUANT-04 | Phase 52 | Pending |
-| QUANT-05 | Phase 52 | Pending |
-| QUANT-06 | Phase 52 | Pending |
-| QUANT-07 | Phase 52 | Pending |
-| QUANT-08 | Phase 52 | Pending |
-| QUANT-09 | Phase 52 | Pending |
-| QUANT-10 | Phase 52 | Pending |
-| QUANT-11 | Phase 52 | Pending |
-| QUANT-12 | Phase 52 | Pending |
-| QUANT-13 | Phase 52 | Pending |
-| QUANT-14 | Phase 52 | Pending |
-| QUANT-15 | Phase 52 | Pending |
-| QUANT-16 | Phase 52 | Pending |
-| QUANT-17 | Phase 52 | Pending |
-| QUANT-18 | Phase 52 | Pending |
+| QUANT-01 | Phase 52 | Complete |
+| QUANT-02 | Phase 52 | Complete |
+| QUANT-03 | Phase 52 | Complete |
+| QUANT-04 | Phase 52 | Complete |
+| QUANT-05 | Phase 52 | Complete |
+| QUANT-06 | Phase 52 | Complete |
+| QUANT-07 | Phase 52 | Complete |
+| QUANT-08 | Phase 52 | Complete |
+| QUANT-09 | Phase 52 | Complete |
+| QUANT-10 | Phase 52 | Complete |
+| QUANT-11 | Phase 52 | Complete |
+| QUANT-12 | Phase 52 | Complete |
+| QUANT-13 | Phase 52 | Complete |
+| QUANT-14 | Phase 52 | Complete |
+| QUANT-15 | Phase 52 | Complete |
+| QUANT-16 | Phase 52 | Complete |
+| QUANT-17 | Phase 52 | Complete |
+| QUANT-18 | Phase 52 | Complete |
 | FOUND-01 | Phase 52 | Complete |
 | FOUND-02 | Phase 52 | Complete |
 | FOUND-03 | Phase 52 | Complete |
 | FOUND-04 | Phase 52 | Complete |
 | FOUND-05 | Phase 52 | Complete |
 | FOUND-06 | Phase 52 | Complete |
-| SITE-13 | Phase 52 | Pending |
+| SITE-13 | Phase 52 | Complete |
 | DIST-01 | Phase 53 | Pending |
 | DIST-02 | Phase 53 | Pending |
 | DIST-03 | Phase 53 | Pending |
