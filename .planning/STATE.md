@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 49 of 55 (Data Model + Schema Population)
-Plan: 2 of 3 in current phase
+Plan: 3 of 3 in current phase
 Status: Executing Phase 49 Wave 1
-Last activity: 2026-02-25 — Completed 49-01 (Technique data population, 47 entries)
+Last activity: 2026-02-25 — Completed 49-02 (Distribution data population, 19 entries)
 
-Progress: █░░░░░░░░░ 17% (v1.8 — 4/23 plans)
+Progress: ██░░░░░░░░ 22% (v1.8 — 5/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 104 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 1 v1.8)
+- Total plans completed: 105 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 2 v1.8)
 
 **Cumulative Stats:**
 
@@ -35,6 +35,13 @@ Progress: █░░░░░░░░░ 17% (v1.8 — 4/23 plans)
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
 | v1.8 EDA Encyclopedia | 48-55 | ~23 | 145 | in progress |
 | **Total** | **55** | **~126** | **548** | |
+
+**Phase Execution Log:**
+
+| Phase-Plan | Duration | Tasks | Files |
+|------------|----------|-------|-------|
+| 49-01 | 4min | 2 | 1 |
+| 49-02 | 2min | 1 | 1 |
 
 ## Accumulated Context
 
@@ -54,6 +61,9 @@ v1.8 decisions:
 - SVG cleanup on mount+unmount for view transition safety (confirmed in 48-03)
 - 29 graphical entries (not 30): DATA-01 count includes PlotVariantSwap component (GRAPH-30), not a data entry (confirmed in 49-01)
 - Cross-links validated at data level: relatedTechniques slugs reference entries within techniques.json (confirmed in 49-01)
+- phi/Phi notation for power-normal, power-lognormal, fatigue-life PDF/CDF formulas (compact standard convention, confirmed in 49-02)
+- Tukey-Lambda defined via quantile function Q(F) -- no closed-form PDF/CDF (confirmed in 49-02)
+- Discrete distributions (binomial, poisson) use PMF notation P(X=k) in pdfFormula field (confirmed in 49-02)
 
 ### Pending Todos
 
@@ -71,6 +81,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 49-01-PLAN.md (Technique data population)
+Stopped at: Completed 49-02-PLAN.md (Distribution data population, 19 entries verified)
 Resume file: None
-Next: Execute 49-02-PLAN.md (Distribution data population)
+Next: Execute 49-03-PLAN.md (MDX stubs + datasets + cross-link validation)
