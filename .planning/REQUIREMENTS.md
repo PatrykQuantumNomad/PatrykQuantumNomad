@@ -167,12 +167,12 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Site Integration
 
-- [ ] **SITE-01**: "EDA" link added to Header.astro navigation between "DB Compass" and "Tools"
-- [ ] **SITE-02**: Homepage callout card linking to /eda/
-- [ ] **SITE-03**: JSON-LD structured data (TechArticle/LearningResource) on all EDA pages
-- [ ] **SITE-04**: Unique SEO meta description for every EDA page
-- [ ] **SITE-05**: All EDA pages included in sitemap
-- [ ] **SITE-06**: LLMs.txt updated with EDA section
+- [x] **SITE-01**: "EDA" link added to Header.astro navigation between "DB Compass" and "Tools"
+- [x] **SITE-02**: Homepage callout card linking to /eda/
+- [x] **SITE-03**: JSON-LD structured data (TechArticle/LearningResource) on all EDA pages
+- [x] **SITE-04**: Unique SEO meta description for every EDA page
+- [x] **SITE-05**: All EDA pages included in sitemap
+- [x] **SITE-06**: LLMs.txt updated with EDA section
 - [ ] **SITE-07**: Build-time OG images for EDA overview and key pages
 - [ ] **SITE-08**: Companion blog post covering EDA methodology and tool walkthrough
 - [ ] **SITE-09**: Bidirectional cross-links between blog post and EDA pages
@@ -347,12 +347,12 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | LAND-04 | Phase 54 | Complete |
 | LAND-06 | Phase 54 | Complete |
 | LAND-07 | Phase 54 | Complete |
-| SITE-01 | Phase 55 | Pending |
-| SITE-02 | Phase 55 | Pending |
-| SITE-03 | Phase 55 | Pending |
-| SITE-04 | Phase 55 | Pending |
-| SITE-05 | Phase 55 | Pending |
-| SITE-06 | Phase 55 | Pending |
+| SITE-01 | Phase 55 | Complete |
+| SITE-02 | Phase 55 | Complete |
+| SITE-03 | Phase 55 | Complete |
+| SITE-04 | Phase 55 | Complete |
+| SITE-05 | Phase 55 | Complete |
+| SITE-06 | Phase 55 | Complete |
 | SITE-07 | Phase 55 | Pending |
 | SITE-08 | Phase 55 | Pending |
 | SITE-09 | Phase 55 | Pending |

@@ -2245,3 +2245,474 @@ export async function generateCompassModelOgImage(model: DbModel): Promise<Buffe
 
   return renderOgPng(layout);
 }
+
+/**
+ * Generates a branded OG image for the EDA Visual Encyclopedia landing page (/eda/).
+ * Two-column layout with title/subtitle/pill on the left, decorative chart silhouettes on the right.
+ */
+export async function generateEdaOverviewOgImage(): Promise<Buffer> {
+  // EDA accent colors (from Quantum Explorer palette)
+  const accentSecondary = '#e8734a';
+  const dataPrimary = '#3b82f6';
+  const dataSecondary = '#8b5cf6';
+  const dataTertiary = '#10b981';
+  const dataQuaternary = '#f59e0b';
+
+  // Mini chart silhouettes as simple satori divs
+
+  // Histogram bars (5 bars of varying height)
+  const histogramBars = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '6px',
+        height: '100px',
+      },
+      children: [30, 55, 90, 70, 40].map((h, i) => ({
+        type: 'div',
+        props: {
+          style: {
+            width: '24px',
+            height: `${h}px`,
+            backgroundColor: i === 2 ? dataPrimary : `${dataPrimary}99`,
+            borderRadius: '3px 3px 0 0',
+          },
+        },
+      })),
+    },
+  };
+
+  // Scatter dots (6 dots in a rough upward trend)
+  const scatterDots = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        position: 'relative' as const,
+        width: '120px',
+        height: '100px',
+      },
+      children: [
+        { x: 8, y: 70 },
+        { x: 25, y: 55 },
+        { x: 45, y: 48 },
+        { x: 60, y: 30 },
+        { x: 80, y: 22 },
+        { x: 100, y: 10 },
+      ].map((pos) => ({
+        type: 'div',
+        props: {
+          style: {
+            position: 'absolute' as const,
+            left: `${pos.x}px`,
+            top: `${pos.y}px`,
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: dataSecondary,
+          },
+        },
+      })),
+    },
+  };
+
+  // Box plot whiskers (simplified as rectangles)
+  const boxPlot = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        height: '100px',
+        justifyContent: 'center',
+      },
+      children: [
+        // Upper whisker
+        {
+          type: 'div',
+          props: {
+            style: { width: '2px', height: '20px', backgroundColor: dataTertiary },
+          },
+        },
+        // Box
+        {
+          type: 'div',
+          props: {
+            style: {
+              width: '40px',
+              height: '40px',
+              border: `2px solid ${dataTertiary}`,
+              borderRadius: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+            children: [
+              // Median line
+              {
+                type: 'div',
+                props: {
+                  style: { width: '36px', height: '2px', backgroundColor: dataTertiary },
+                },
+              },
+            ],
+          },
+        },
+        // Lower whisker
+        {
+          type: 'div',
+          props: {
+            style: { width: '2px', height: '25px', backgroundColor: dataTertiary },
+          },
+        },
+      ],
+    },
+  };
+
+  // Bell curve (approximated with a tall rounded rectangle)
+  const bellCurve = {
+    type: 'div',
+    props: {
+      style: {
+        width: '120px',
+        height: '70px',
+        backgroundColor: `${dataQuaternary}33`,
+        borderRadius: '60px 60px 0 0',
+        border: `2px solid ${dataQuaternary}`,
+        borderBottom: 'none',
+        marginTop: '30px',
+      },
+    },
+  };
+
+  // Compose chart grid (2x2)
+  const chartGrid = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '24px',
+      },
+      children: [
+        {
+          type: 'div',
+          props: {
+            style: { display: 'flex', gap: '30px', alignItems: 'flex-end' },
+            children: [histogramBars, scatterDots],
+          },
+        },
+        {
+          type: 'div',
+          props: {
+            style: { display: 'flex', gap: '30px', alignItems: 'flex-end' },
+            children: [bellCurve, boxPlot],
+          },
+        },
+      ],
+    },
+  };
+
+  const categoryPills = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap' as const,
+        gap: '8px',
+      },
+      children: ['Techniques', 'Distributions', 'Case Studies', 'Methods'].map((name) => ({
+        type: 'div',
+        props: {
+          style: {
+            fontSize: '14px',
+            color: '#c44b20',
+            backgroundColor: 'rgba(196,75,32,0.1)',
+            borderRadius: '20px',
+            padding: '4px 14px',
+          },
+          children: name,
+        },
+      })),
+    },
+  };
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column: text
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '620px',
+              padding: '40px 0px 60px 56px',
+              gap: '20px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '48px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: 'EDA Visual Encyclopedia',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '20px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: 'Interactive visual reference for Exploratory Data Analysis',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '15px',
+                          color: '#ffffff',
+                          backgroundColor: accentSecondary,
+                          borderRadius: '20px',
+                          padding: '6px 18px',
+                          fontWeight: 700,
+                        },
+                        children: '90+ Pages',
+                      },
+                    },
+                  ],
+                },
+              },
+              categoryPills,
+            ],
+          },
+        },
+        // Right column: chart silhouettes
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '580px',
+              height: '630px',
+            },
+            children: [chartGrid],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/**
+ * Generates a branded OG image for an EDA section page (techniques, distributions, case-studies).
+ * Two-column layout with section title, description, and page count on the left, decorative element on the right.
+ */
+export async function generateEdaSectionOgImage(
+  sectionTitle: string,
+  sectionDescription: string,
+  pageCount: string,
+): Promise<Buffer> {
+  const accentPrimary = '#c44b20';
+  const accentSecondary = '#e8734a';
+
+  // Decorative bars (right side) -- abstract data visualization motif
+  const decorativeBars = {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '12px',
+        justifyContent: 'center',
+      },
+      children: [180, 280, 220, 320, 160, 240, 300].map((w, i) => ({
+        type: 'div',
+        props: {
+          style: {
+            width: `${w}px`,
+            height: '18px',
+            backgroundColor: i % 2 === 0 ? `${accentPrimary}44` : `${accentSecondary}44`,
+            borderRadius: '0 9px 9px 0',
+          },
+        },
+      })),
+    },
+  };
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column: text
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '640px',
+              padding: '40px 0px 60px 56px',
+              gap: '20px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '16px',
+                    color: accentPrimary,
+                    fontWeight: 700,
+                    textTransform: 'uppercase' as const,
+                    letterSpacing: '2px',
+                  },
+                  children: 'EDA Visual Encyclopedia',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '48px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: truncate(sectionTitle, 60),
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '20px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: truncate(sectionDescription, 120),
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: { display: 'flex' },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '15px',
+                          color: '#ffffff',
+                          backgroundColor: accentSecondary,
+                          borderRadius: '20px',
+                          padding: '6px 18px',
+                          fontWeight: 700,
+                        },
+                        children: pageCount,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Right column: decorative bars
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              width: '560px',
+              height: '630px',
+            },
+            children: [decorativeBars],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
