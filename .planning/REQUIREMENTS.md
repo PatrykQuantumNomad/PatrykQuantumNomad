@@ -53,36 +53,36 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Graphical Techniques
 
-- [ ] **GRAPH-01**: Histogram page at /eda/techniques/histogram/ with 8 interpretation variant sub-sections and SVG swap (Tier B)
-- [ ] **GRAPH-02**: Box plot page at /eda/techniques/box-plot/ with annotated diagram
-- [ ] **GRAPH-03**: Scatter plot page at /eda/techniques/scatter-plot/ with 12 relationship variant sub-sections and SVG swap (Tier B)
-- [ ] **GRAPH-04**: Normal probability plot page at /eda/techniques/normal-probability-plot/ with 4 shape variants (Tier B)
-- [ ] **GRAPH-05**: Run-sequence plot page at /eda/techniques/run-sequence-plot/
-- [ ] **GRAPH-06**: Lag plot page at /eda/techniques/lag-plot/ with 4 variants (Tier B)
-- [ ] **GRAPH-07**: Autocorrelation plot page at /eda/techniques/autocorrelation-plot/ with 4 variants (Tier B)
-- [ ] **GRAPH-08**: 4-plot page at /eda/techniques/4-plot/ with composite layout
-- [ ] **GRAPH-09**: 6-plot page at /eda/techniques/6-plot/ with extended composite layout
-- [ ] **GRAPH-10**: Probability plot page at /eda/techniques/probability-plot/
-- [ ] **GRAPH-11**: Q-Q plot page at /eda/techniques/qq-plot/
-- [ ] **GRAPH-12**: Spectral plot page at /eda/techniques/spectral-plot/ with 3 variants (Tier B)
-- [ ] **GRAPH-13**: Bihistogram page at /eda/techniques/bihistogram/
-- [ ] **GRAPH-14**: Block plot page at /eda/techniques/block-plot/
-- [ ] **GRAPH-15**: Bootstrap plot page at /eda/techniques/bootstrap-plot/
-- [ ] **GRAPH-16**: Box-Cox linearity plot page at /eda/techniques/box-cox-linearity/
-- [ ] **GRAPH-17**: Box-Cox normality plot page at /eda/techniques/box-cox-normality/
-- [ ] **GRAPH-18**: Complex demodulation page at /eda/techniques/complex-demodulation/
-- [ ] **GRAPH-19**: Contour plot page at /eda/techniques/contour-plot/
-- [ ] **GRAPH-20**: Star plot page at /eda/techniques/star-plot/
-- [ ] **GRAPH-21**: Weibull plot page at /eda/techniques/weibull-plot/
-- [ ] **GRAPH-22**: Youden plot page at /eda/techniques/youden-plot/
-- [ ] **GRAPH-23**: Mean plot page at /eda/techniques/mean-plot/
-- [ ] **GRAPH-24**: Standard deviation plot page at /eda/techniques/std-deviation-plot/
-- [ ] **GRAPH-25**: PPCC plot page at /eda/techniques/ppcc-plot/
-- [ ] **GRAPH-26**: Linear plots page at /eda/techniques/linear-plots/ (correlation, intercept, slope, residual SD)
-- [ ] **GRAPH-27**: DOE plots page at /eda/techniques/doe-plots/ (scatter, mean, SD)
-- [ ] **GRAPH-28**: Scatterplot matrix page at /eda/techniques/scatterplot-matrix/
-- [ ] **GRAPH-29**: Conditioning plot page at /eda/techniques/conditioning-plot/
-- [ ] **GRAPH-30**: PlotVariantSwap.astro component for Tier B pages with vanilla JS tab switching (~3KB)
+- [x] **GRAPH-01**: Histogram page at /eda/techniques/histogram/ with 8 interpretation variant sub-sections and SVG swap (Tier B)
+- [x] **GRAPH-02**: Box plot page at /eda/techniques/box-plot/ with annotated diagram
+- [x] **GRAPH-03**: Scatter plot page at /eda/techniques/scatter-plot/ with 12 relationship variant sub-sections and SVG swap (Tier B)
+- [x] **GRAPH-04**: Normal probability plot page at /eda/techniques/normal-probability-plot/ with 4 shape variants (Tier B)
+- [x] **GRAPH-05**: Run-sequence plot page at /eda/techniques/run-sequence-plot/
+- [x] **GRAPH-06**: Lag plot page at /eda/techniques/lag-plot/ with 4 variants (Tier B)
+- [x] **GRAPH-07**: Autocorrelation plot page at /eda/techniques/autocorrelation-plot/ with 4 variants (Tier B)
+- [x] **GRAPH-08**: 4-plot page at /eda/techniques/4-plot/ with composite layout
+- [x] **GRAPH-09**: 6-plot page at /eda/techniques/6-plot/ with extended composite layout
+- [x] **GRAPH-10**: Probability plot page at /eda/techniques/probability-plot/
+- [x] **GRAPH-11**: Q-Q plot page at /eda/techniques/qq-plot/
+- [x] **GRAPH-12**: Spectral plot page at /eda/techniques/spectral-plot/ with 3 variants (Tier B)
+- [x] **GRAPH-13**: Bihistogram page at /eda/techniques/bihistogram/
+- [x] **GRAPH-14**: Block plot page at /eda/techniques/block-plot/
+- [x] **GRAPH-15**: Bootstrap plot page at /eda/techniques/bootstrap-plot/
+- [x] **GRAPH-16**: Box-Cox linearity plot page at /eda/techniques/box-cox-linearity/
+- [x] **GRAPH-17**: Box-Cox normality plot page at /eda/techniques/box-cox-normality/
+- [x] **GRAPH-18**: Complex demodulation page at /eda/techniques/complex-demodulation/
+- [x] **GRAPH-19**: Contour plot page at /eda/techniques/contour-plot/
+- [x] **GRAPH-20**: Star plot page at /eda/techniques/star-plot/
+- [x] **GRAPH-21**: Weibull plot page at /eda/techniques/weibull-plot/
+- [x] **GRAPH-22**: Youden plot page at /eda/techniques/youden-plot/
+- [x] **GRAPH-23**: Mean plot page at /eda/techniques/mean-plot/
+- [x] **GRAPH-24**: Standard deviation plot page at /eda/techniques/std-deviation-plot/
+- [x] **GRAPH-25**: PPCC plot page at /eda/techniques/ppcc-plot/
+- [x] **GRAPH-26**: Linear plots page at /eda/techniques/linear-plots/ (correlation, intercept, slope, residual SD)
+- [x] **GRAPH-27**: DOE plots page at /eda/techniques/doe-plots/ (scatter, mean, SD)
+- [x] **GRAPH-28**: Scatterplot matrix page at /eda/techniques/scatterplot-matrix/
+- [x] **GRAPH-29**: Conditioning plot page at /eda/techniques/conditioning-plot/
+- [x] **GRAPH-30**: PlotVariantSwap.astro component for Tier B pages with vanilla JS tab switching (~3KB)
 
 ### Quantitative Techniques
 
@@ -253,36 +253,36 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | SVG-13 | Phase 50 | Complete |
 | SVG-14 | Phase 50 | Complete |
 | SVG-15 | Phase 50 | Complete |
-| GRAPH-01 | Phase 51 | Pending |
-| GRAPH-02 | Phase 51 | Pending |
-| GRAPH-03 | Phase 51 | Pending |
-| GRAPH-04 | Phase 51 | Pending |
-| GRAPH-05 | Phase 51 | Pending |
-| GRAPH-06 | Phase 51 | Pending |
-| GRAPH-07 | Phase 51 | Pending |
-| GRAPH-08 | Phase 51 | Pending |
-| GRAPH-09 | Phase 51 | Pending |
-| GRAPH-10 | Phase 51 | Pending |
-| GRAPH-11 | Phase 51 | Pending |
-| GRAPH-12 | Phase 51 | Pending |
-| GRAPH-13 | Phase 51 | Pending |
-| GRAPH-14 | Phase 51 | Pending |
-| GRAPH-15 | Phase 51 | Pending |
-| GRAPH-16 | Phase 51 | Pending |
-| GRAPH-17 | Phase 51 | Pending |
-| GRAPH-18 | Phase 51 | Pending |
-| GRAPH-19 | Phase 51 | Pending |
-| GRAPH-20 | Phase 51 | Pending |
-| GRAPH-21 | Phase 51 | Pending |
-| GRAPH-22 | Phase 51 | Pending |
-| GRAPH-23 | Phase 51 | Pending |
-| GRAPH-24 | Phase 51 | Pending |
-| GRAPH-25 | Phase 51 | Pending |
-| GRAPH-26 | Phase 51 | Pending |
-| GRAPH-27 | Phase 51 | Pending |
-| GRAPH-28 | Phase 51 | Pending |
-| GRAPH-29 | Phase 51 | Pending |
-| GRAPH-30 | Phase 51 | Pending |
+| GRAPH-01 | Phase 51 | Complete |
+| GRAPH-02 | Phase 51 | Complete |
+| GRAPH-03 | Phase 51 | Complete |
+| GRAPH-04 | Phase 51 | Complete |
+| GRAPH-05 | Phase 51 | Complete |
+| GRAPH-06 | Phase 51 | Complete |
+| GRAPH-07 | Phase 51 | Complete |
+| GRAPH-08 | Phase 51 | Complete |
+| GRAPH-09 | Phase 51 | Complete |
+| GRAPH-10 | Phase 51 | Complete |
+| GRAPH-11 | Phase 51 | Complete |
+| GRAPH-12 | Phase 51 | Complete |
+| GRAPH-13 | Phase 51 | Complete |
+| GRAPH-14 | Phase 51 | Complete |
+| GRAPH-15 | Phase 51 | Complete |
+| GRAPH-16 | Phase 51 | Complete |
+| GRAPH-17 | Phase 51 | Complete |
+| GRAPH-18 | Phase 51 | Complete |
+| GRAPH-19 | Phase 51 | Complete |
+| GRAPH-20 | Phase 51 | Complete |
+| GRAPH-21 | Phase 51 | Complete |
+| GRAPH-22 | Phase 51 | Complete |
+| GRAPH-23 | Phase 51 | Complete |
+| GRAPH-24 | Phase 51 | Complete |
+| GRAPH-25 | Phase 51 | Complete |
+| GRAPH-26 | Phase 51 | Complete |
+| GRAPH-27 | Phase 51 | Complete |
+| GRAPH-28 | Phase 51 | Complete |
+| GRAPH-29 | Phase 51 | Complete |
+| GRAPH-30 | Phase 51 | Complete |
 | LAND-05 | Phase 51 | Pending |
 | QUANT-01 | Phase 52 | Pending |
 | QUANT-02 | Phase 52 | Pending |

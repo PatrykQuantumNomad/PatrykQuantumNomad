@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 50 (SVG Generation)
+**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 51 (Graphical Technique Pages)
 
 ## Current Position
 
-Phase: 50 of 55 (SVG Generation) -- PHASE COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 50 complete, ready for Phase 51
-Last activity: 2026-02-25 — Completed 50-03 (contour, distribution curve, composite generators, barrel export)
+Phase: 51 of 55 (Graphical Technique Pages)
+Plan: 2 of 3 in current phase
+Status: Executing Phase 51
+Last activity: 2026-02-25 — Completed 51-02 (technique-content.ts prose module for 29 graphical techniques)
 
-Progress: ████░░░░░░ 39% (v1.8 — 9/23 plans)
+Progress: █████░░░░░ 48% (v1.8 — 11/23 plans)
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: ████░░░░░░ 39% (v1.8 — 9/23 plans)
 | 50-01 | 4min | 2 | 6 |
 | 50-02 | 4min | 2 | 6 |
 | 50-03 | 8min | 2 | 7 |
+| 51-01 | 6min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -85,6 +86,10 @@ v1.8 decisions:
 - Abramowitz & Stegun 7.1.26 erf approximation for normalCDF with max error 1.5e-7 (confirmed in 50-03)
 - Composite plots strip SVG wrappers and compose via <g transform> groups for multi-panel layouts (confirmed in 50-03)
 - Phase 50 complete: 13 generators + 2 cross-cutting requirements (SVG-12, SVG-13) = 15 SVG requirements satisfied (confirmed in 50-03)
+- CSS attribute selectors [aria-selected="true"] for tab styling instead of Tailwind classList toggling (JIT purge issue, confirmed in 51-01)
+- First variant in PlotVariantSwap array IS the default (no separate defaultSvg prop, confirmed in 51-01)
+- Seeded PRNG (seededRandom) for reproducible variant datasets across builds (confirmed in 51-01)
+- boxPlotData group-to-label mapping for BoxPlotOptions interface compatibility (confirmed in 51-01)
 
 ### Pending Todos
 
@@ -102,6 +107,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 50-03-PLAN.md (contour, distribution curve, composite generators, barrel export -- Phase 50 complete)
+Stopped at: Completed 51-01-PLAN.md (PlotVariantSwap component and technique-renderer with 29 slug mappings)
 Resume file: None
-Next: Execute Phase 51 (graphical technique pages)
+Next: Execute 51-02-PLAN.md (next plan in Phase 51)
