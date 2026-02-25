@@ -137,8 +137,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 53-01-PLAN.md — Shared distribution-math.ts module (19 distributions) and refactored SVG generator
-- [ ] 53-02-PLAN.md — DistributionExplorer.tsx React island, DistributionPage template, and [slug].astro dynamic route
+- [x] 53-01-PLAN.md — Shared distribution-math.ts module (19 distributions) and refactored SVG generator
+- [x] 53-02-PLAN.md — DistributionExplorer.tsx React island, DistributionPage template, and [slug].astro dynamic route
 - [ ] 53-03-PLAN.md — Distribution landing page with thumbnail grid and visual verification
 
 ### Phase 54: Case Studies + Reference + Landing Page
@@ -194,7 +194,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 50. SVG Generator Library | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 53. Distribution Pages with D3 Explorers | 1/3 | In Progress|  | - |
+| 53. Distribution Pages with D3 Explorers | v1.8 | 2/3 | In Progress | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **116/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **117/127** | **In progress** | |

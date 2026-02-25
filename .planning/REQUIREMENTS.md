@@ -116,23 +116,23 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Distributions
 
-- [ ] **DIST-01**: Normal distribution page at /eda/distributions/normal/ with D3 interactive parameter explorer
-- [ ] **DIST-02**: Uniform distribution page at /eda/distributions/uniform/ with D3 interactive parameter explorer
-- [ ] **DIST-03**: Exponential distribution page at /eda/distributions/exponential/ with D3 interactive parameter explorer
-- [ ] **DIST-04**: Weibull distribution page at /eda/distributions/weibull/ with D3 interactive parameter explorer
-- [ ] **DIST-05**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
-- [ ] **DIST-06**: Gamma distribution page at /eda/distributions/gamma/ with D3 interactive parameter explorer
-- [ ] **DIST-07**: Chi-square distribution page at /eda/distributions/chi-square/ with D3 interactive parameter explorer
-- [ ] **DIST-08**: Student's t-distribution page at /eda/distributions/t-distribution/ with D3 interactive parameter explorer
-- [ ] **DIST-09**: F-distribution page at /eda/distributions/f-distribution/ with D3 interactive parameter explorer
-- [ ] **DIST-10**: Tukey-Lambda distribution page at /eda/distributions/tukey-lambda/ with D3 interactive parameter explorer
-- [ ] **DIST-11**: Extreme Value Type I (Gumbel) page at /eda/distributions/extreme-value/ with D3 interactive parameter explorer
-- [ ] **DIST-12**: Beta distribution page at /eda/distributions/beta/ with D3 interactive parameter explorer
-- [ ] **DIST-13**: Binomial distribution page at /eda/distributions/binomial/ with D3 interactive parameter explorer
-- [ ] **DIST-14**: Poisson distribution page at /eda/distributions/poisson/ with D3 interactive parameter explorer
-- [ ] **DIST-15**: Cauchy distribution page at /eda/distributions/cauchy/ with D3 interactive parameter explorer
-- [ ] **DIST-16**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
-- [ ] **DIST-17**: DistributionExplorer.tsx React island with parameter sliders, dual PDF+CDF display, touch-friendly controls
+- [x] **DIST-01**: Normal distribution page at /eda/distributions/normal/ with D3 interactive parameter explorer
+- [x] **DIST-02**: Uniform distribution page at /eda/distributions/uniform/ with D3 interactive parameter explorer
+- [x] **DIST-03**: Exponential distribution page at /eda/distributions/exponential/ with D3 interactive parameter explorer
+- [x] **DIST-04**: Weibull distribution page at /eda/distributions/weibull/ with D3 interactive parameter explorer
+- [x] **DIST-05**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
+- [x] **DIST-06**: Gamma distribution page at /eda/distributions/gamma/ with D3 interactive parameter explorer
+- [x] **DIST-07**: Chi-square distribution page at /eda/distributions/chi-square/ with D3 interactive parameter explorer
+- [x] **DIST-08**: Student's t-distribution page at /eda/distributions/t-distribution/ with D3 interactive parameter explorer
+- [x] **DIST-09**: F-distribution page at /eda/distributions/f-distribution/ with D3 interactive parameter explorer
+- [x] **DIST-10**: Tukey-Lambda distribution page at /eda/distributions/tukey-lambda/ with D3 interactive parameter explorer
+- [x] **DIST-11**: Extreme Value Type I (Gumbel) page at /eda/distributions/extreme-value/ with D3 interactive parameter explorer
+- [x] **DIST-12**: Beta distribution page at /eda/distributions/beta/ with D3 interactive parameter explorer
+- [x] **DIST-13**: Binomial distribution page at /eda/distributions/binomial/ with D3 interactive parameter explorer
+- [x] **DIST-14**: Poisson distribution page at /eda/distributions/poisson/ with D3 interactive parameter explorer
+- [x] **DIST-15**: Cauchy distribution page at /eda/distributions/cauchy/ with D3 interactive parameter explorer
+- [x] **DIST-16**: Lognormal distribution page at /eda/distributions/lognormal/ with D3 interactive parameter explorer
+- [x] **DIST-17**: DistributionExplorer.tsx React island with parameter sliders, dual PDF+CDF display, touch-friendly controls
 - [x] **DIST-18**: Static build-time SVG fallback for each distribution (no-JS users)
 - [ ] **DIST-19**: Distribution landing page at /eda/distributions/ with browsable grid and shape previews
 
@@ -309,23 +309,23 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | FOUND-05 | Phase 52 | Complete |
 | FOUND-06 | Phase 52 | Complete |
 | SITE-13 | Phase 52 | Complete |
-| DIST-01 | Phase 53 | Pending |
-| DIST-02 | Phase 53 | Pending |
-| DIST-03 | Phase 53 | Pending |
-| DIST-04 | Phase 53 | Pending |
-| DIST-05 | Phase 53 | Pending |
-| DIST-06 | Phase 53 | Pending |
-| DIST-07 | Phase 53 | Pending |
-| DIST-08 | Phase 53 | Pending |
-| DIST-09 | Phase 53 | Pending |
-| DIST-10 | Phase 53 | Pending |
-| DIST-11 | Phase 53 | Pending |
-| DIST-12 | Phase 53 | Pending |
-| DIST-13 | Phase 53 | Pending |
-| DIST-14 | Phase 53 | Pending |
-| DIST-15 | Phase 53 | Pending |
-| DIST-16 | Phase 53 | Pending |
-| DIST-17 | Phase 53 | Pending |
+| DIST-01 | Phase 53 | Complete |
+| DIST-02 | Phase 53 | Complete |
+| DIST-03 | Phase 53 | Complete |
+| DIST-04 | Phase 53 | Complete |
+| DIST-05 | Phase 53 | Complete |
+| DIST-06 | Phase 53 | Complete |
+| DIST-07 | Phase 53 | Complete |
+| DIST-08 | Phase 53 | Complete |
+| DIST-09 | Phase 53 | Complete |
+| DIST-10 | Phase 53 | Complete |
+| DIST-11 | Phase 53 | Complete |
+| DIST-12 | Phase 53 | Complete |
+| DIST-13 | Phase 53 | Complete |
+| DIST-14 | Phase 53 | Complete |
+| DIST-15 | Phase 53 | Complete |
+| DIST-16 | Phase 53 | Complete |
+| DIST-17 | Phase 53 | Complete |
 | DIST-18 | Phase 53 | Complete |
 | DIST-19 | Phase 53 | Pending |
 | CASE-01 | Phase 54 | Pending |
