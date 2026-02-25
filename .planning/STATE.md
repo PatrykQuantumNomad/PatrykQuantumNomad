@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 50 of 55 (SVG Generation)
-Plan: 1 of 3 in current phase
-Status: Phase 49 complete, ready for Phase 50
-Last activity: 2026-02-25 — Completed 49-03 (MDX stubs, datasets, routes, validation)
+Plan: 2 of 3 in current phase
+Status: Plan 50-01 complete, ready for 50-02
+Last activity: 2026-02-25 — Completed 50-01 (plot-base, statistics, histogram, box plot, bar plot)
 
-Progress: ███░░░░░░░ 26% (v1.8 — 6/23 plans)
+Progress: ████░░░░░░ 30% (v1.8 — 7/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 106 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 3 v1.8)
+- Total plans completed: 107 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 4 v1.8)
 
 **Cumulative Stats:**
 
@@ -43,6 +43,7 @@ Progress: ███░░░░░░░ 26% (v1.8 — 6/23 plans)
 | 49-01 | 4min | 2 | 1 |
 | 49-02 | 2min | 1 | 1 |
 | 49-03 | 6min | 3 | 22 |
+| 50-01 | 4min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -68,6 +69,10 @@ v1.8 decisions:
 - MDX stub bodies use category-specific phase comments (Phase 52 for foundations, Phase 54 for case studies/reference) (confirmed in 49-03)
 - Dataset values use realistic NIST reference data subsets for meaningful plot output (confirmed in 49-03)
 - Validation script uses node:fs direct I/O rather than astro/zod imports for portability (confirmed in 49-03)
+- PALETTE uses CSS custom property references for automatic dark/light theme support without regenerating SVGs (confirmed in 50-01)
+- Dark mode CSS overrides added to global.css now (not deferred to Phase 55) for immediate visual verification (confirmed in 50-01)
+- statistics.ts pure TypeScript math (~200 lines): KDE, FFT, regression, normal quantile, autocorrelation (confirmed in 50-01)
+- All SVG coordinate values use .toFixed(2) to prevent markup bloat (confirmed in 50-01)
 
 ### Pending Todos
 
@@ -85,6 +90,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 49-03-PLAN.md (MDX stubs, datasets, routes, validation -- Phase 49 complete)
+Stopped at: Completed 50-01-PLAN.md (plot-base, statistics, histogram, box plot, bar plot generators)
 Resume file: None
-Next: Execute Phase 50 (SVG Generation)
+Next: Execute 50-02-PLAN.md (scatter, line, lag, probability, spectral, star plot generators)
