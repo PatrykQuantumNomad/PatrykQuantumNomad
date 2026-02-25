@@ -134,12 +134,12 @@ Plans:
   3. D3 bundle (d3-selection, d3-axis, d3-scale, d3-shape) loads only on distribution pages -- verified by checking network tab on a non-distribution EDA page
   4. The distribution landing page at /eda/distributions/ displays a browsable grid with shape preview thumbnails for all 19 distributions
   5. Parameter explorers are touch-friendly (sliders work on mobile) and handle resize events without duplicate chart instances
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 53-01: TBD
-- [ ] 53-02: TBD
-- [ ] 53-03: TBD
+- [ ] 53-01-PLAN.md — Shared distribution-math.ts module (19 distributions) and refactored SVG generator
+- [ ] 53-02-PLAN.md — DistributionExplorer.tsx React island, DistributionPage template, and [slug].astro dynamic route
+- [ ] 53-03-PLAN.md — Distribution landing page with thumbnail grid and visual verification
 
 ### Phase 54: Case Studies + Reference + Landing Page
 **Goal**: The encyclopedia is content-complete with 9 case study walkthroughs demonstrating EDA methodology on real NIST datasets, 4 reference pages providing lookup tables and technique taxonomies, and the landing page offering filterable discovery across all 90+ pages
