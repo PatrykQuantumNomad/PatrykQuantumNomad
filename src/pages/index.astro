@@ -158,7 +158,7 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
   {/* Content Pillars Section */}
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <h2 class="text-2xl sm:text-3xl font-heading font-bold mb-8" data-word-reveal>Reference Guides</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <a href="/beauty-index/" class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden" data-reveal data-tilt>
         <article>
           <div class="bg-[var(--color-surface-alt)] px-6 pt-6 pb-4 flex justify-center">
@@ -200,6 +200,41 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
               Compare 12 database models across 8 dimensions. From key-value simplicity to multi-model complexity.
             </p>
             <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Explore models &rarr;</span>
+          </div>
+        </article>
+      </a>
+      <a href="/eda/" class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden" data-reveal data-tilt>
+        <article>
+          <div class="bg-[var(--color-surface-alt)] px-6 pt-6 pb-4 flex justify-center items-center">
+            <svg viewBox="0 0 200 120" width="200" height="120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="max-w-full h-auto">
+              <!-- Histogram bars -->
+              <rect x="20" y="80" width="16" height="20" rx="2" fill="var(--color-accent)" opacity="0.3" />
+              <rect x="40" y="55" width="16" height="45" rx="2" fill="var(--color-accent)" opacity="0.5" />
+              <rect x="60" y="30" width="16" height="70" rx="2" fill="var(--color-accent)" opacity="0.7" />
+              <rect x="80" y="20" width="16" height="80" rx="2" fill="var(--color-accent)" opacity="0.9" />
+              <rect x="100" y="35" width="16" height="65" rx="2" fill="var(--color-accent)" opacity="0.7" />
+              <rect x="120" y="60" width="16" height="40" rx="2" fill="var(--color-accent)" opacity="0.5" />
+              <rect x="140" y="78" width="16" height="22" rx="2" fill="var(--color-accent)" opacity="0.3" />
+              <!-- Distribution curve -->
+              <path d="M20,95 Q50,80 70,45 Q88,15 105,40 Q130,75 160,95" fill="none" stroke="var(--color-accent-secondary)" stroke-width="2.5" stroke-linecap="round" />
+              <!-- Scatter dots -->
+              <circle cx="35" cy="75" r="3" fill="var(--color-accent-secondary)" opacity="0.6" />
+              <circle cx="55" cy="50" r="3" fill="var(--color-accent-secondary)" opacity="0.6" />
+              <circle cx="90" cy="25" r="3" fill="var(--color-accent-secondary)" opacity="0.6" />
+              <circle cx="115" cy="42" r="3" fill="var(--color-accent-secondary)" opacity="0.6" />
+              <circle cx="145" cy="72" r="3" fill="var(--color-accent-secondary)" opacity="0.6" />
+              <!-- Axis lines -->
+              <line x1="15" y1="100" x2="165" y2="100" stroke="var(--color-text-secondary)" stroke-width="1" opacity="0.3" />
+              <line x1="15" y1="15" x2="15" y2="100" stroke="var(--color-text-secondary)" stroke-width="1" opacity="0.3" />
+            </svg>
+          </div>
+          <div class="p-6 pt-4">
+            <p class="meta-mono text-[var(--color-accent)]">90+ Pages</p>
+            <h3 class="text-lg font-heading font-bold text-[var(--color-text-primary)] mt-2">EDA Visual Encyclopedia</h3>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+              Interactive visual reference for Exploratory Data Analysis covering graphical techniques, quantitative methods, probability distributions, and case studies.
+            </p>
+            <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Explore techniques &rarr;</span>
           </div>
         </article>
       </a>
