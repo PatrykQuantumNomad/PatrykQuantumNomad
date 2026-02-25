@@ -157,13 +157,13 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Landing Page
 
-- [ ] **LAND-01**: Visual Encyclopedia landing page at /eda/ with technique card grid
-- [ ] **LAND-02**: Category filter pills (All, Graphical, Quantitative, Distributions, Case Studies, Reference)
-- [ ] **LAND-03**: Section navigation (Foundations, Techniques, Quantitative Methods, Distributions, Case Studies, Reference)
-- [ ] **LAND-04**: Responsive card grid (3 columns desktop, 2 tablet, 1 mobile)
+- [x] **LAND-01**: Visual Encyclopedia landing page at /eda/ with technique card grid
+- [x] **LAND-02**: Category filter pills (All, Graphical, Quantitative, Distributions, Case Studies, Reference)
+- [x] **LAND-03**: Section navigation (Foundations, Techniques, Quantitative Methods, Distributions, Case Studies, Reference)
+- [x] **LAND-04**: Responsive card grid (3 columns desktop, 2 tablet, 1 mobile)
 - [x] **LAND-05**: Build-time SVG thumbnails on technique cards
-- [ ] **LAND-06**: Section reference (section X.X.X) displayed on each card
-- [ ] **LAND-07**: CategoryFilter.tsx React island for landing page filtering (mirrors LanguageFilter.tsx pattern)
+- [x] **LAND-06**: Section reference (section X.X.X) displayed on each card
+- [x] **LAND-07**: CategoryFilter.tsx React island for landing page filtering (mirrors LanguageFilter.tsx pattern)
 
 ### Site Integration
 
@@ -341,12 +341,12 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | REF-02 | Phase 54 | Complete |
 | REF-03 | Phase 54 | Complete |
 | REF-04 | Phase 54 | Complete |
-| LAND-01 | Phase 54 | Pending |
-| LAND-02 | Phase 54 | Pending |
-| LAND-03 | Phase 54 | Pending |
-| LAND-04 | Phase 54 | Pending |
-| LAND-06 | Phase 54 | Pending |
-| LAND-07 | Phase 54 | Pending |
+| LAND-01 | Phase 54 | Complete |
+| LAND-02 | Phase 54 | Complete |
+| LAND-03 | Phase 54 | Complete |
+| LAND-04 | Phase 54 | Complete |
+| LAND-06 | Phase 54 | Complete |
+| LAND-07 | Phase 54 | Complete |
 | SITE-01 | Phase 55 | Pending |
 | SITE-02 | Phase 55 | Pending |
 | SITE-03 | Phase 55 | Pending |

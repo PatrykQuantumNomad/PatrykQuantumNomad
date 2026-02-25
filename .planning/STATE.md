@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 54 (Case Studies + Reference + Landing Page)
+**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 55 (Site Integration + SEO + Polish)
 
 ## Current Position
 
-Phase: 54 of 55 (Case Studies + Reference + Landing Page)
-Plan: 2 of 3 in current phase
-Status: Executing Phase 54
-Last activity: 2026-02-25 — Completed 54-02 (reference pages)
+Phase: 55 of 55 (Site Integration + SEO + Polish)
+Plan: 0 of 3 in current phase
+Status: Phase 54 complete, ready for Phase 55
+Last activity: 2026-02-25 — Completed 54-03 (EDA landing page)
 
-Progress: ████████░░ 78% (v1.8 — 18/23 plans)
+Progress: █████████░ 83% (v1.8 — 21/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 121 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 18 v1.8)
+- Total plans completed: 124 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 21 v1.8)
 
 **Cumulative Stats:**
 
@@ -57,6 +57,7 @@ Progress: ████████░░ 78% (v1.8 — 18/23 plans)
 | 53-03 | 3min | 2 | 1 |
 | 54-01 | 8min | 2 | 10 |
 | 54-02 | 7min | 2 | 5 |
+| 54-03 | 4min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -125,6 +126,10 @@ v1.8 decisions:
 - [Phase 54]: Table styling via [&>table]/[&_th]/[&_td] added to case-studies prose-foundations class (confirmed in 54-01)
 - [Phase 54]: Unicode entities for MDX-unsafe characters (<=, curly braces) in reference table content (confirmed in 54-02)
 - [Phase 54]: Table styling via [&_table]/[&_th]/[&_td] Tailwind selectors extending prose-foundations class (confirmed in 54-02)
+- [Phase 54]: Single-select category filter (not multi-select) for /eda/ landing page -- categories are mutually exclusive sections (confirmed in 54-03)
+- [Phase 54]: Foundations category visible under "All" but not in filter pills (contextual background, not primary browse category) (confirmed in 54-03)
+- [Phase 54]: 85 cards total on landing page: 29 graphical + 18 quantitative + 19 distributions + 9 case studies + 6 foundations + 4 reference (confirmed in 54-03)
+- [Phase 54]: DOM-based data-category toggling on both cards and sections for unified filter behavior (confirmed in 54-03)
 
 ### Pending Todos
 
@@ -142,6 +147,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 54-02-PLAN.md (reference pages)
+Stopped at: Completed 54-03-PLAN.md (EDA landing page) -- Phase 54 complete
 Resume file: None
-Next: Execute 54-03-PLAN.md (landing page)
+Next: Plan and execute Phase 55 (Site Integration + SEO + Polish)

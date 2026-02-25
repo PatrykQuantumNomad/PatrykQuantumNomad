@@ -154,9 +154,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 54-01-PLAN.md — Case study dynamic route and 9 NIST walkthrough MDX pages
-- [ ] 54-02-PLAN.md — Reference dynamic route and 4 cross-linked reference MDX pages
-- [ ] 54-03-PLAN.md — EDA landing page with CategoryFilter React island and filterable card grid
+- [x] 54-01-PLAN.md — Case study dynamic route and 9 NIST walkthrough MDX pages
+- [x] 54-02-PLAN.md — Reference dynamic route and 4 cross-linked reference MDX pages
+- [x] 54-03-PLAN.md — EDA landing page with CategoryFilter React island and filterable card grid
 
 ### Phase 55: Site Integration + SEO + Polish
 **Goal**: The EDA Visual Encyclopedia is fully integrated into the site with header navigation, homepage callout, structured data, OG images, companion blog post, and verified Lighthouse/accessibility scores -- ready for staged publication
@@ -196,6 +196,6 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 54. Case Studies + Reference + Landing Page | 2/3 | In Progress|  | - |
+| 54. Case Studies + Reference + Landing Page | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **117/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **120/127** | **In progress** | |
