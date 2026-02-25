@@ -34,7 +34,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 49: Data Model + Schema Population** - Populate techniques.json, distributions.json, MDX stubs, sample datasets, cross-link validation (completed 2026-02-25)
 - [x] **Phase 50: SVG Generator Library** - Build-time TypeScript SVG generators for all statistical chart types (completed 2026-02-25)
 - [x] **Phase 51: Graphical Technique Pages** - 29 graphical technique pages with Tier A/B interactivity and PlotVariantSwap component (completed 2026-02-25)
-- [ ] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages
+- [x] **Phase 52: Quantitative Techniques + Foundations** - 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages (completed 2026-02-25)
 - [ ] **Phase 53: Distribution Pages with D3 Explorers** - 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks
 - [ ] **Phase 54: Case Studies + Reference + Landing Page** - 9 case study walkthroughs, 4 reference pages, complete landing page with category filtering
 - [ ] **Phase 55: Site Integration + SEO + Polish** - Header nav, homepage callout, JSON-LD, OG images, companion blog post, Lighthouse audit, accessibility
@@ -120,9 +120,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 52-01-PLAN.md — Quantitative content module and dynamic route for 18 KaTeX + Python technique pages
-- [ ] 52-02-PLAN.md — Populate 6 foundation MDX stubs and create foundation dynamic route
-- [ ] 52-03-PLAN.md — Cross-link validation, build verification, and visual review of all 24 new pages
+- [x] 52-01-PLAN.md — Quantitative content module and dynamic route for 18 KaTeX + Python technique pages
+- [x] 52-02-PLAN.md — Populate 6 foundation MDX stubs and create foundation dynamic route
+- [x] 52-03-PLAN.md — Cross-link validation, build verification, and visual review of all 24 new pages
 
 ### Phase 53: Distribution Pages with D3 Explorers
 **Goal**: All 19 distribution pages offer both static SVG fallbacks (for no-JS users) and interactive D3 parameter explorers that let users adjust distribution parameters and see PDF/CDF curves update in real time
@@ -193,8 +193,8 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 49. Data Model + Schema Population | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 50. SVG Generator Library | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 52. Quantitative Techniques + Foundations | 2/3 | In Progress|  | - |
+| 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 0/3 | Not started | - |
 | 54. Case Studies + Reference + Landing Page | v1.8 | 0/3 | Not started | - |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **115/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **116/127** | **In progress** | |
