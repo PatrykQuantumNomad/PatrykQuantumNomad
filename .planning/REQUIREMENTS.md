@@ -42,10 +42,10 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 - [x] **SVG-05**: Line plot SVG generator for run-sequence, autocorrelation, and time series plots
 - [x] **SVG-06**: Probability plot SVG generator (normal probability, Q-Q, Weibull, PPCC)
 - [x] **SVG-07**: Bar plot SVG generator for mean plots, standard deviation plots, and DOE plots
-- [ ] **SVG-08**: Contour plot SVG generator for response surface visualization
+- [x] **SVG-08**: Contour plot SVG generator for response surface visualization
 - [x] **SVG-09**: Star plot (radar) SVG generator for multivariate display
-- [ ] **SVG-10**: Composite plot generators for 4-plot and 6-plot layouts
-- [ ] **SVG-11**: Distribution curve SVG generator for PDF/CDF static rendering (build-time fallback for Tier C)
+- [x] **SVG-10**: Composite plot generators for 4-plot and 6-plot layouts
+- [x] **SVG-11**: Distribution curve SVG generator for PDF/CDF static rendering (build-time fallback for Tier C)
 - [x] **SVG-12**: All SVG plots use viewBox for responsiveness with no fixed width/height
 - [x] **SVG-13**: All SVG plots render correctly in both dark and light themes
 - [x] **SVG-14**: Spectral plot SVG generator for frequency domain visualization
@@ -245,10 +245,10 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | SVG-05 | Phase 50 | Complete |
 | SVG-06 | Phase 50 | Complete |
 | SVG-07 | Phase 50 | Complete |
-| SVG-08 | Phase 50 | Pending |
+| SVG-08 | Phase 50 | Complete |
 | SVG-09 | Phase 50 | Complete |
-| SVG-10 | Phase 50 | Pending |
-| SVG-11 | Phase 50 | Pending |
+| SVG-10 | Phase 50 | Complete |
+| SVG-11 | Phase 50 | Complete |
 | SVG-12 | Phase 50 | Complete |
 | SVG-13 | Phase 50 | Complete |
 | SVG-14 | Phase 50 | Complete |
