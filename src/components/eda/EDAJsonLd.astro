@@ -1,0 +1,90 @@
+---
+/**
+ * EDAJsonLd.astro — TechArticle/LearningResource or Dataset JSON-LD
+ * structured data for EDA Visual Encyclopedia pages.
+ *
+ * Mode 1 (individual page): @type ["TechArticle", "LearningResource"]
+ * Mode 2 (landing page):    @type "Dataset" (when isOverview is true)
+ */
+
+interface Props {
+  title: string;
+  description: string;
+  url: string;
+  nistSection?: string;
+  pageType?: 'technique' | 'distribution' | 'foundation' | 'case-study' | 'reference';
+  isOverview?: boolean;
+}
+
+const { title, description, url, nistSection, pageType, isOverview = false } = Astro.props;
+
+const person = {
+  "@type": "Person",
+  "@id": "https://patrykgolabek.dev/#person",
+  "name": "Patryk Golabek",
+  "url": "https://patrykgolabek.dev/",
+};
+
+const nistHandbook = {
+  "@type": "Book",
+  "name": "NIST/SEMATECH e-Handbook of Statistical Methods",
+  "url": nistSection
+    ? `https://www.itl.nist.gov/div898/handbook/eda/section3/${nistSection}`
+    : "https://www.itl.nist.gov/div898/handbook/",
+};
+
+let schema: Record<string, unknown>;
+
+if (isOverview) {
+  schema = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "EDA Visual Encyclopedia",
+    "alternateName": "Exploratory Data Analysis Visual Encyclopedia 2026",
+    "description": description,
+    "url": url,
+    "datePublished": "2026-02-25",
+    "dateModified": "2026-02-25",
+    "version": "2026 Edition",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "creator": person,
+    "isBasedOn": nistHandbook,
+    "keywords": [
+      "exploratory data analysis",
+      "EDA",
+      "data visualization",
+      "statistical techniques",
+      "probability distributions",
+      "NIST handbook",
+      "graphical methods",
+      "quantitative methods",
+    ],
+  };
+} else {
+  const learningResourceType = pageType === 'case-study' ? 'Case Study' : 'Reference';
+
+  schema = {
+    "@context": "https://schema.org",
+    "@type": ["TechArticle", "LearningResource"],
+    "headline": title,
+    "description": description,
+    "url": url,
+    "datePublished": "2026-02-25",
+    "dateModified": "2026-02-25",
+    "inLanguage": "en",
+    "proficiencyLevel": "Expert",
+    "learningResourceType": learningResourceType,
+    "educationalLevel": "Advanced",
+    "isBasedOn": nistHandbook,
+    "author": person,
+    "publisher": person,
+    "isPartOf": {
+      "@type": "WebPage",
+      "name": "EDA Visual Encyclopedia",
+      "url": "https://patrykgolabek.dev/eda/",
+    },
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

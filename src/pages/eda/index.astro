@@ -8,6 +8,7 @@
 import { getCollection } from 'astro:content';
 import EDALayout from '../../layouts/EDALayout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import EDAJsonLd from '../../components/eda/EDAJsonLd.astro';
 import CategoryFilter from '../../components/eda/CategoryFilter.tsx';
 import { techniqueUrl, distributionUrl, caseStudyUrl, referenceUrl, foundationUrl } from '../../lib/eda/routes';
 import { generateThumbnail } from '../../lib/eda/thumbnail';
@@ -138,6 +139,12 @@ const NAV_ITEMS = [
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
     { name: 'EDA Visual Encyclopedia', url: 'https://patrykgolabek.dev/eda/' },
   ]} />
+  <EDAJsonLd
+    isOverview
+    title="EDA Visual Encyclopedia"
+    description="Interactive visual encyclopedia of Exploratory Data Analysis covering 90+ techniques, distributions, case studies, and reference material based on the NIST/SEMATECH Engineering Statistics Handbook."
+    url="https://patrykgolabek.dev/eda/"
+  />
 
   <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <!-- Header -->

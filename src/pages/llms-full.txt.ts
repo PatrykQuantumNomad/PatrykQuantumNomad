@@ -238,6 +238,49 @@ export async function GET(context: APIContext) {
   }
   lines.push('');
 
+  // EDA Visual Encyclopedia section
+  lines.push('## EDA Visual Encyclopedia');
+  lines.push('');
+  lines.push('Interactive visual encyclopedia of Exploratory Data Analysis covering 90+ pages.');
+  lines.push('Based on the NIST/SEMATECH Engineering Statistics Handbook. All data visualizations are');
+  lines.push('server-rendered SVGs with interactive D3 explorers for probability distributions.');
+  lines.push('');
+  lines.push('URL: https://patrykgolabek.dev/eda/');
+  lines.push('License: CC-BY 4.0');
+  lines.push('');
+  lines.push('### Graphical Techniques (29 pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/techniques/{slug}/');
+  lines.push('Covers: histogram, scatter plot, box plot, run sequence plot, lag plot, normal probability plot,');
+  lines.push('autocorrelation plot, spectral plot, 4-plot, 6-plot, star plot, contour plot, and more.');
+  lines.push('Each page includes server-rendered SVG plots, interpretation guidance, and NIST section references.');
+  lines.push('');
+  lines.push('### Quantitative Methods (18 pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/quantitative/{slug}/');
+  lines.push('Covers: mean, standard deviation, skewness, kurtosis, autocorrelation, PPCC,');
+  lines.push('normal probability plot correlation coefficient, and more.');
+  lines.push('Each page includes KaTeX-rendered formulas, Python code examples, and interpretation guidance.');
+  lines.push('');
+  lines.push('### Probability Distributions (19 interactive pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/distributions/{slug}/');
+  lines.push('Covers: normal, uniform, t, chi-square, F, exponential, gamma, Weibull, lognormal,');
+  lines.push('beta, Cauchy, binomial, Poisson, double-exponential, power-normal, power-lognormal,');
+  lines.push('Tukey-Lambda, fatigue-life, and half-normal distributions.');
+  lines.push('Each page features an interactive D3 parameter explorer with real-time PDF/CDF rendering,');
+  lines.push('KaTeX formulas, and mean/variance properties.');
+  lines.push('');
+  lines.push('### Case Studies (9 pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/case-studies/{slug}/');
+  lines.push('Worked examples applying EDA techniques to real datasets from the NIST handbook.');
+  lines.push('');
+  lines.push('### Foundations (6 pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/foundations/{slug}/');
+  lines.push('Introductory material on EDA philosophy, assumptions testing, and the role of graphical analysis.');
+  lines.push('');
+  lines.push('### Reference (4 pages)');
+  lines.push('URL pattern: https://patrykgolabek.dev/eda/reference/{slug}/');
+  lines.push('Tables, glossaries, and cross-reference material.');
+  lines.push('');
+
   // Blog Posts section
   lines.push('## Blog Posts');
   lines.push('');

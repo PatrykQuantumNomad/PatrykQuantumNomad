@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import EDALayout from '../../../layouts/EDALayout.astro';
 import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
 import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import EDAJsonLd from '../../../components/eda/EDAJsonLd.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('edaPages');
@@ -33,6 +34,13 @@ const slug = page.id.replace('case-studies/', '');
     { name: 'Case Studies', url: 'https://patrykgolabek.dev/eda/case-studies/' },
     { name: page.data.title, url: `https://patrykgolabek.dev/eda/case-studies/${slug}/` },
   ]} />
+  <EDAJsonLd
+    title={page.data.title}
+    description={page.data.description}
+    url={`https://patrykgolabek.dev/eda/case-studies/${slug}/`}
+    nistSection={page.data.nistSection}
+    pageType="case-study"
+  />
 
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <EdaBreadcrumb category="Case Studies" techniqueName={page.data.title} />

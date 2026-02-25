@@ -2,6 +2,7 @@
 import EDALayout from '../../layouts/EDALayout.astro';
 import EdaBreadcrumb from './EdaBreadcrumb.astro';
 import BreadcrumbJsonLd from '../BreadcrumbJsonLd.astro';
+import EDAJsonLd from './EDAJsonLd.astro';
 
 interface Props {
   title: string;
@@ -16,6 +17,7 @@ interface Props {
 const { title, description, category, nistSection, slug, relatedTechniques = [], useKatex = false } = Astro.props;
 
 const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+const pageUrl = `https://patrykgolabek.dev${Astro.url.pathname}`;
 ---
 
 <EDALayout title={`${title} | EDA Visual Encyclopedia`} description={description} useKatex={useKatex}>
@@ -25,6 +27,7 @@ const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
     { name: category, url: `https://patrykgolabek.dev/eda/${categorySlug}/` },
     { name: title, url: `https://patrykgolabek.dev/eda/techniques/${slug ?? title.toLowerCase().replace(/\s+/g, '-')}/` },
   ]} />
+  <EDAJsonLd title={title} description={description} url={pageUrl} nistSection={nistSection} pageType="technique" />
 
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <EdaBreadcrumb category={category} techniqueName={title} />
