@@ -1,0 +1,77 @@
+---
+/**
+ * Distribution landing page — /eda/distributions/
+ * Browsable thumbnail grid of all 19 probability distributions with
+ * build-time PDF shape previews linking to interactive detail pages.
+ */
+import { getCollection } from 'astro:content';
+import EDALayout from '../../../layouts/EDALayout.astro';
+import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import { generateDistributionCurve } from '../../../lib/eda/svg-generators/distribution-curve';
+import { distributionUrl } from '../../../lib/eda/routes';
+
+const distributions = await getCollection('edaDistributions');
+
+// Build thumbnail data: default params + SVG for each distribution
+const cards = distributions.map((dist) => {
+  const defaultParams = Object.fromEntries(
+    dist.data.parameters.map((p: { name: string; default: number }) => [p.name, p.default])
+  );
+  const thumbnailSvg = generateDistributionCurve({
+    type: 'pdf',
+    distribution: dist.data.id,
+    params: defaultParams,
+    config: { width: 200, height: 140, margin: { top: 10, right: 10, bottom: 20, left: 25 } },
+  });
+  return {
+    title: dist.data.title,
+    slug: dist.data.slug,
+    url: distributionUrl(dist.data.slug),
+    svg: thumbnailSvg,
+  };
+});
+---
+
+<EDALayout
+  title="Probability Distributions | EDA Visual Encyclopedia"
+  description="Explore 19 probability distributions with interactive parameter explorers, PDF/CDF visualization, and KaTeX formulas. Part of the EDA Visual Encyclopedia."
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Distributions', url: 'https://patrykgolabek.dev/eda/distributions/' },
+  ]} />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Distributions" />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Probability Distributions</h1>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+        Interactive reference pages for 19 probability distributions covering continuous, discrete,
+        and special-purpose families. Each page features a D3-powered parameter explorer with
+        real-time PDF and CDF visualization, KaTeX-rendered formulas, and statistical properties.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      {cards.map((card) => (
+        <a
+          href={card.url}
+          class="hover:bg-[var(--color-accent)]/5 transition-colors rounded-lg p-3 group"
+        >
+          <div
+            role="img"
+            aria-label={`PDF shape preview for ${card.title}`}
+            class="w-full overflow-hidden"
+            set:html={card.svg}
+          />
+          <p class="mt-2 text-sm font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors text-center">
+            {card.title}
+          </p>
+        </a>
+      ))}
+    </div>
+  </article>
+</EDALayout>
