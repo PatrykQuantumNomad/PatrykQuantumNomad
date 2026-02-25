@@ -168,12 +168,12 @@ Plans:
   3. Build-time OG images generate for the EDA overview and key section pages; LLMs.txt includes EDA section
   4. Companion blog post is published with bidirectional cross-links to EDA pages
   5. Lighthouse 90+ verified on one representative page from each tier (A: static SVG, B: SVG swap, C: D3 explorer) and WCAG 2.1 AA accessibility passes (role="img" + aria-label on SVGs, keyboard nav)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 55-01: TBD
-- [ ] 55-02: TBD
-- [ ] 55-03: TBD
+- [ ] 55-01-PLAN.md — Navigation, homepage callout, JSON-LD structured data, and LLMs.txt integration
+- [ ] 55-02-PLAN.md — Build-time OG images, companion blog post, and bidirectional cross-links
+- [ ] 55-03-PLAN.md — Quality audits, accessibility fixes, and Lighthouse 90+ verification
 
 ## Progress
 
@@ -196,6 +196,6 @@ Phases execute in numeric order: 48 → 49 → 50 → 51 → 52 → 53 → 54 �
 | 51. Graphical Technique Pages | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 52. Quantitative Techniques + Foundations | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 53. Distribution Pages with D3 Explorers | v1.8 | 3/3 | Complete | 2026-02-25 |
-| 54. Case Studies + Reference + Landing Page | 3/3 | Complete   | 2026-02-25 | 2026-02-25 |
+| 54. Case Studies + Reference + Landing Page | v1.8 | 3/3 | Complete | 2026-02-25 |
 | 55. Site Integration + SEO + Polish | v1.8 | 0/3 | Not started | - |
-| **Total** | **v1.0-v1.8** | **120/127** | **In progress** | |
+| **Total** | **v1.0-v1.8** | **124/127** | **In progress** | |
