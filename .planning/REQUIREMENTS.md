@@ -150,10 +150,10 @@ Requirements for the EDA Visual Encyclopedia milestone. Each maps to roadmap pha
 
 ### Reference Pages
 
-- [ ] **REF-01**: Analysis questions page at /eda/reference/analysis-questions/ (section 1.3.2)
-- [ ] **REF-02**: Techniques by category page at /eda/reference/techniques-by-category/ (section 1.3.4)
-- [ ] **REF-03**: Distribution tables page at /eda/reference/distribution-tables/ (section 1.3.6.7)
-- [ ] **REF-04**: Related distributions page at /eda/reference/related-distributions/ (section 1.3.6.2-5)
+- [x] **REF-01**: Analysis questions page at /eda/reference/analysis-questions/ (section 1.3.2)
+- [x] **REF-02**: Techniques by category page at /eda/reference/techniques-by-category/ (section 1.3.4)
+- [x] **REF-03**: Distribution tables page at /eda/reference/distribution-tables/ (section 1.3.6.7)
+- [x] **REF-04**: Related distributions page at /eda/reference/related-distributions/ (section 1.3.6.2-5)
 
 ### Landing Page
 
@@ -337,10 +337,10 @@ Deferred to v1.9+ milestone. Tracked but not in current roadmap.
 | CASE-07 | Phase 54 | Pending |
 | CASE-08 | Phase 54 | Pending |
 | CASE-09 | Phase 54 | Pending |
-| REF-01 | Phase 54 | Pending |
-| REF-02 | Phase 54 | Pending |
-| REF-03 | Phase 54 | Pending |
-| REF-04 | Phase 54 | Pending |
+| REF-01 | Phase 54 | Complete |
+| REF-02 | Phase 54 | Complete |
+| REF-03 | Phase 54 | Complete |
+| REF-04 | Phase 54 | Complete |
 | LAND-01 | Phase 54 | Pending |
 | LAND-02 | Phase 54 | Pending |
 | LAND-03 | Phase 54 | Pending |
