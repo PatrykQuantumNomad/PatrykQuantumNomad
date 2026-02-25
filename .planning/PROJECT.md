@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes five content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), and Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, and Python code examples).
 
 ## Core Value
 
@@ -171,29 +171,28 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ 67 per-rule SEO documentation pages at /tools/k8s-analyzer/rules/[code] with PSS/CIS tags — v1.7
 - ✓ Full site integration (header nav, homepage 3-card grid, tools page, JSON-LD, breadcrumbs, sitemap, LLMs.txt) — v1.7
 - ✓ Build-time OG image and companion blog post "Kubernetes Manifest Best Practices" with 21 cross-links — v1.7
+- ✓ KaTeX formula pipeline (remark-math + rehype-katex) with build-time rendering and conditional CSS loading — v1.8
+- ✓ D3 micro-modules (16.7KB gzipped) isolated to distribution page chunks only via client:visible — v1.8
+- ✓ EDALayout.astro with isolated animation lifecycle (no GSAP/D3 conflicts) — v1.8
+- ✓ OG image content-hash caching preventing build time regression at 90+ pages — v1.8
+- ✓ Zod content collections for edaTechniques (JSON), edaDistributions (JSON), edaPages (MDX) — v1.8
+- ✓ 47 technique entries (29 graphical + 18 quantitative) and 19 distribution entries with validated cross-links — v1.8
+- ✓ 13 build-time TypeScript SVG generators with dark/light theme support via CSS custom properties — v1.8
+- ✓ 29 graphical technique pages with Tier B interactive variant switching via PlotVariantSwap (~3KB vanilla JS) — v1.8
+- ✓ 18 quantitative technique pages with KaTeX formulas and Python code examples (astro-expressive-code) — v1.8
+- ✓ 6 foundation pages covering NIST sections 1.1-1.2 — v1.8
+- ✓ 19 distribution pages with D3 interactive parameter explorers and static SVG fallbacks — v1.8
+- ✓ 9 case study walkthroughs with sequential NIST analysis and embedded SVG plots — v1.8
+- ✓ 4 reference pages with cross-linked technique taxonomies and distribution tables — v1.8
+- ✓ EDA landing page at /eda/ with CategoryFilter React island (85 cards, 6 categories) — v1.8
+- ✓ Distribution landing at /eda/distributions/ with browsable thumbnail grid — v1.8
+- ✓ Full EDA site integration: header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt — v1.8
+- ✓ Companion blog post with 28 bidirectional cross-links to EDA pages — v1.8
+- ✓ Lighthouse 99/96 (performance/accessibility) across all EDA tiers, WCAG 2.1 AA — v1.8
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
-
-## Current Milestone: v1.8 EDA Visual Encyclopedia
-
-**Goal:** Modernize the NIST/SEMATECH Engineering Statistics Handbook Chapter 1 (Exploratory Data Analysis) as a complete interactive pillar section with 90+ pages, build-time SVG plots, Python code examples, KaTeX formulas, and D3.js distribution parameter explorers.
-
-**Target features:**
-- Visual Encyclopedia landing page at /eda/ with filterable technique card grid
-- 6 Foundations pages (EDA philosophy, assumptions, 4-plot interpretation)
-- 30 Graphical Technique walkthrough pages with build-time SVG plots and interpretation variants
-- 18 Quantitative Technique pages with formulas, Python code, and annotated examples
-- 19 Probability Distribution pages with D3.js interactive parameter explorers (~30KB micro-bundle)
-- 9 Case Study walkthrough pages with datasets and sequential analysis
-- 4 Reference pages (analysis questions, techniques-by-category, distribution tables, related distributions)
-- 3-tier interactivity: build-time SVG + vanilla JS hover/swap (70% of pages), D3 micro-bundle for distributions only
-- Python-generated SVG plots styled to Quantum Explorer palette
-- KaTeX-rendered mathematical formulas
-- Python code blocks replacing Dataplot commands (matplotlib/seaborn/scipy/plotly)
-- Companion blog post + full site integration (nav, homepage callout, JSON-LD, sitemap, OG images)
-- Source: NIST/SEMATECH e-Handbook of Statistical Methods (public domain)
+<!-- No active requirements. Next milestone to be defined via /gsd:new-milestone -->
 
 ### Out of Scope
 
@@ -215,22 +214,26 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - AI-powered Dockerfile analysis — contradicts the human-expertise positioning
 - Auto-fix / auto-correct for Dockerfiles — too many edge cases
 - Real-time as-you-type linting — on-demand is better UX
+- In-browser Python/R execution (Pyodide) — 14MB+ WASM destroys performance
+- User data upload for all EDA techniques — scope explosion; 4-Plot tool covers the valuable use case (deferred to v1.9+)
+- Animated plot transitions on all SVGs — D3 animation budget reserved for distributions only
+- Full D3 bundle import — 280KB vs 17KB micro-bundle; explicit anti-pattern
 
 ## Context
 
-Shipped v1.7 Kubernetes Manifest Analyzer on top of v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs.
-v1.8 additions: KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~30KB) for distribution parameter explorers, Python build scripts for SVG plot generation.
+Shipped v1.8 EDA Visual Encyclopedia on top of v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 requirements delivered (403 total). 857 total pages. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 requirements delivered (548 total). 90+ new EDA pages. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 21 posts (11 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
 Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
+EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies, 6 foundations, 4 reference pages, filterable landing page, 13 build-time SVG generators, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -301,6 +304,17 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | #k8s= hash prefix for URL state | Distinct from #dockerfile= and #compose= | ✓ Good — clean cross-tool URL namespace |
 | allDocumentedK8sRules includes SCHEMA_RULE_METADATA | Compatible DocumentedK8sRule shape via spread | ✓ Good — 67 rule pages from single source |
 | 21 CIS Benchmark mappings on rule pages | Omit 3 rules with no direct CIS mapping | ✓ Good — accurate reference linking |
+| remark-math@6.0.0 for KaTeX | Works with Astro 5, no version fallback needed | ✓ Good — build-time formula rendering |
+| D3 micro-modules only (17KB gzipped) | Never full d3 package (280KB) | ✓ Good — isolated to distribution pages |
+| OG content-hash caching | Prevent build time regression at 90+ pages | ✓ Good — skips unchanged pages |
+| CSS custom properties for SVG theming | Dark/light without SVG regeneration | ✓ Good — automatic theme support |
+| Lanczos gamma (g=7) for distribution math | Accurate gamma function for chi-square, t, gamma PDFs | ✓ Good — max error 1.5e-7 |
+| PlotVariantSwap with CSS attribute selectors | JIT purge workaround for tab styling | ✓ Good — reliable tab switching |
+| Content module pattern (prose in TypeScript) | Separate from routing, type-safe Record keyed by slug | ✓ Good — clean content architecture |
+| Single-select CategoryFilter on /eda/ | Categories are mutually exclusive sections | ✓ Good — clear UX |
+| katex.renderToString() for .astro pages | remark-math only processes MDX, not Astro | ✓ Good — formula rendering in both contexts |
+| CSS :has() for D3 explorer fallback hiding | Static SVG hidden when React island mounts | ✓ Good — progressive enhancement |
+| Seeded PRNG for variant datasets | Reproducible chart output across builds | ✓ Good — deterministic SVGs |
 
 ## Constraints
 
@@ -315,4 +329,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-24 after v1.8 milestone started*
+*Last updated: 2026-02-25 after v1.8 milestone complete*

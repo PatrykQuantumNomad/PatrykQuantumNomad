@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.8 EDA Visual Encyclopedia (Shipped: 2026-02-25)
+
+**Delivered:** Complete interactive EDA Visual Encyclopedia with 90+ pages modernizing the NIST/SEMATECH Engineering Statistics Handbook Chapter 1 — featuring 29 graphical technique pages with SVG variant switching, 18 quantitative technique pages with KaTeX formulas and Python code, 19 distribution pages with D3 interactive parameter explorers, 9 case study walkthroughs, 6 foundation pages, 4 reference pages, filterable landing page, 13 build-time SVG generators, companion blog post, and full site integration
+
+**Phases completed:** 48-55 (24 plans total)
+
+**Key accomplishments:**
+- KaTeX formula pipeline, D3 micro-bundle isolation (16.7KB), OG image caching, Zod content collections, and EDA layout with animation lifecycle isolation
+- Complete data model (47 techniques, 19 distributions, 19 MDX stubs) with validated cross-links and NIST reference datasets
+- 13 build-time TypeScript SVG generators (histogram, box, scatter, line, lag, probability, spectral, star, contour, distribution curves, composite 4-plot/6-plot) with dark/light theme support
+- 90+ EDA encyclopedia pages: 29 graphical technique pages with Tier B variant switching, 18 quantitative technique pages with KaTeX formulas and Python code, 6 foundation pages, 19 distribution pages with D3 interactive parameter explorers, 9 case studies, 4 reference pages
+- Filterable landing page at /eda/ with CategoryFilter React island (85 cards across 6 categories), distribution landing with thumbnail grid
+- Full site integration — header nav, homepage callout, JSON-LD structured data, OG images, companion blog post with 28 cross-links, Lighthouse 99/96 scores, WCAG 2.1 AA accessibility
+
+**Stats:**
+- 171 files created/modified (+26,907 / -371 lines)
+- 8 phases, 24 plans, 96 commits
+- 2 days from start to ship (2026-02-24 → 2026-02-25)
+
+**Git range:** `docs(48)` → `docs(phase-55)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.7 Kubernetes Manifest Analyzer (Shipped: 2026-02-23)
 
 **Delivered:** Interactive browser-based Kubernetes manifest linter with 67 rules across 5 categories, multi-resource schema validation (19 K8s resource types), security analysis with PSS/CIS compliance, cross-resource validation, RBAC analysis, interactive dependency graph, CodeMirror 6 editor, category-weighted scoring, 67 rule documentation pages, companion blog post, and shareable results

@@ -1,38 +1,38 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v1.8
 milestone_name: EDA Visual Encyclopedia
-status: unknown
-last_updated: "2026-02-25T16:17:25.221Z"
+status: complete
+last_updated: "2026-02-25T17:00:00.000Z"
 progress:
   total_phases: 55
   completed_phases: 55
-  total_plans: 125
-  completed_plans: 125
+  total_plans: 127
+  completed_plans: 127
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-24)
+See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.8 EDA Visual Encyclopedia — Phase 55 (Site Integration + SEO + Polish)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 55 of 55 (Site Integration + SEO + Polish)
-Plan: 3 of 3 in current phase
-Status: Phase 55 COMPLETE -- v1.8 EDA Visual Encyclopedia COMPLETE
-Last activity: 2026-02-25 — Completed 55-03 (quality audits + Lighthouse verification)
+Phase: 55 of 55 (all milestones complete)
+Plan: N/A
+Status: v1.8 milestone archived. Ready for next milestone.
+Last activity: 2026-02-25 — v1.8 EDA Visual Encyclopedia milestone complete
 
-Progress: ██████████ 100% (v1.8 — 23/23 plans)
+Progress: ██████████ 100% (v1.0-v1.8 — 127/127 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 125 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 22 v1.8)
+- Total plans completed: 127 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8)
 
 **Cumulative Stats:**
 
@@ -46,114 +46,15 @@ Progress: ██████████ 100% (v1.8 — 23/23 plans)
 | v1.5 Database Compass | 28-32 | 10 | 28 | 2026-02-22 |
 | v1.6 Compose Validator | 33-40 | 14 | 100 | 2026-02-23 |
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
-| v1.8 EDA Encyclopedia | 48-55 | 23 | 145 | 2026-02-25 |
-| **Total** | **55** | **126** | **548** | |
-
-**Phase Execution Log:**
-
-| Phase-Plan | Duration | Tasks | Files |
-|------------|----------|-------|-------|
-| 49-01 | 4min | 2 | 1 |
-| 49-02 | 2min | 1 | 1 |
-| 49-03 | 6min | 3 | 22 |
-| 50-01 | 4min | 2 | 6 |
-| 50-02 | 4min | 2 | 6 |
-| 50-03 | 8min | 2 | 7 |
-| 51-01 | 6min | 2 | 2 |
-| 51-02 | 5min | 1 | 1 |
-| Phase 51 P03 | 2min | 2 tasks | 3 files |
-| 52-02 | 5min | 2 | 7 |
-| Phase 52 P01 | 7min | 2 tasks | 2 files |
-| 52-03 | 5min | 1 | 1 |
-| 53-01 | 7min | 2 | 2 |
-| 53-02 | 3min | 2 | 3 |
-| 53-03 | 3min | 2 | 1 |
-| 54-01 | 8min | 2 | 10 |
-| 54-02 | 7min | 2 | 5 |
-| 54-03 | 4min | 2 | 3 |
-| Phase 55 P01 | 7min | 2 tasks | 11 files |
-| 55-02 | 13min | 2 | 7 |
-| Phase 55 P03 | 14min | 2 tasks | 3 files |
+| v1.8 EDA Encyclopedia | 48-55 | 24 | 145 | 2026-02-25 |
+| **Total** | **55** | **127** | **548** | |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-v1.0-v1.7 decisions archived in respective milestone files.
-
-v1.8 decisions:
-- KaTeX version: remark-math@6.0.0 works with Astro 5 (no fallback needed, confirmed in 48-01)
-- KaTeX CSS conditional loading via Layout head slot pattern (confirmed in 48-01)
-- OG caching: content-hash of (title + description), md5 truncated to 12 hex chars, CACHE_VERSION salt (confirmed in 48-02)
-- D3 micro-modules only (17KB gzipped), never full d3 package (280KB)
-- EDA content collections use file() loader for JSON, glob() for MDX pages (confirmed in 48-02)
-- D3 bundle isolation confirmed: exactly 1 chunk (16.7KB), distribution pages only (confirmed in 48-03)
-- client:visible hydration for D3 islands (load on scroll, not page load) (confirmed in 48-03)
-- SVG cleanup on mount+unmount for view transition safety (confirmed in 48-03)
-- 29 graphical entries (not 30): DATA-01 count includes PlotVariantSwap component (GRAPH-30), not a data entry (confirmed in 49-01)
-- Cross-links validated at data level: relatedTechniques slugs reference entries within techniques.json (confirmed in 49-01)
-- phi/Phi notation for power-normal, power-lognormal, fatigue-life PDF/CDF formulas (compact standard convention, confirmed in 49-02)
-- Tukey-Lambda defined via quantile function Q(F) -- no closed-form PDF/CDF (confirmed in 49-02)
-- Discrete distributions (binomial, poisson) use PMF notation P(X=k) in pdfFormula field (confirmed in 49-02)
-- MDX stub bodies use category-specific phase comments (Phase 52 for foundations, Phase 54 for case studies/reference) (confirmed in 49-03)
-- Dataset values use realistic NIST reference data subsets for meaningful plot output (confirmed in 49-03)
-- Validation script uses node:fs direct I/O rather than astro/zod imports for portability (confirmed in 49-03)
-- PALETTE uses CSS custom property references for automatic dark/light theme support without regenerating SVGs (confirmed in 50-01)
-- Dark mode CSS overrides added to global.css now (not deferred to Phase 55) for immediate visual verification (confirmed in 50-01)
-- statistics.ts pure TypeScript math (~200 lines): KDE, FFT, regression, normal quantile, autocorrelation (confirmed in 50-01)
-- All SVG coordinate values use .toFixed(2) to prevent markup bloat (confirmed in 50-01)
-- Scatter confidence band uses pointwise leverage-based 95% CI, rendered as polygon path (confirmed in 50-02)
-- ACF lollipop style (line+circle) for autocorrelation plots, significance bounds at 1.96/sqrt(n) (confirmed in 50-02)
-- PPCC mode uses Tukey-Lambda quantile Q(p)=(p^r-(1-p)^r)/r for shape parameter sweep (confirmed in 50-02)
-- Star plot reuses polarToCartesian from radar-math.ts with 40px viewBox padding for labels (confirmed in 50-02)
-- Spectral plot auto-selects log/linear Y scale based on PSD dynamic range (>100:1 triggers log) (confirmed in 50-02)
-- Contour fills use quantized-opacity with PALETTE.dataSecondary (low) and PALETTE.dataPrimary (high) -- no hardcoded hex colors (confirmed in 50-03)
-- Lanczos gamma (g=7, 9 coefficients) for chi-square, t, gamma distribution math (confirmed in 50-03)
-- Abramowitz & Stegun 7.1.26 erf approximation for normalCDF with max error 1.5e-7 (confirmed in 50-03)
-- Composite plots strip SVG wrappers and compose via <g transform> groups for multi-panel layouts (confirmed in 50-03)
-- Phase 50 complete: 13 generators + 2 cross-cutting requirements (SVG-12, SVG-13) = 15 SVG requirements satisfied (confirmed in 50-03)
-- CSS attribute selectors [aria-selected="true"] for tab styling instead of Tailwind classList toggling (JIT purge issue, confirmed in 51-01)
-- First variant in PlotVariantSwap array IS the default (no separate defaultSvg prop, confirmed in 51-01)
-- Seeded PRNG (seededRandom) for reproducible variant datasets across builds (confirmed in 51-01)
-- boxPlotData group-to-label mapping for BoxPlotOptions interface compatibility (confirmed in 51-01)
-- Content module pattern: prose in technique-content.ts keyed by slug, separate from routing (confirmed in 51-02)
-- Record<string, TechniqueContent> with as const for type narrowing on content map (confirmed in 51-02)
-- Tier B interpretation sections include variant pattern descriptions matching variant counts (confirmed in 51-02)
-- [Phase 51]: allTechMap includes graphical+quantitative for cross-category related links (confirmed in 51-03)
-- [Phase 51]: BreadcrumbJsonLd slug fallback pattern: slug ?? title-derived for backwards compat (confirmed in 51-03)
-- [Phase 51]: SVG thumbnails use viewBox scaling via width/height attrs, not post-processing (confirmed in 51-03)
-- [Phase 52]: Astro 5 render() from astro:content for MDX collection rendering (not page.render()) (confirmed in 52-02)
-- [Phase 52]: prose-foundations class with [&>tag] Tailwind nested selectors for MDX output styling (confirmed in 52-02)
-- [Phase 52]: katex.renderToString() at build time for .astro pages (remark-math only processes MDX)
-- [Phase 52]: Code component from astro-expressive-code/components (NOT astro:components) for Python syntax highlighting with copy buttons in .astro files
-- [Phase 52]: Cross-category allTechMap includes both graphical and quantitative for related technique links
-- [Phase 52]: Build-time validation: 912 pages, 17/17 cross-link checks, KaTeX + expressive-code both verified in HTML output
-- [Phase 53]: Gamma distribution uses scale parameterization (mean=alpha*beta) matching distributions.json (confirmed in 53-01)
-- [Phase 53]: Fixed lowerIncompleteGammaRatio CF branch with modified Lentz algorithm (c=1e30, ai=-i*(i-a)) (confirmed in 53-01)
-- [Phase 53]: Tukey-Lambda PDF via Newton inversion of Q(F), lambda=0 special-cased as logistic (confirmed in 53-01)
-- [Phase 53]: Discrete distributions render bar-stem PMF (line+circle) and step CDF (curveStepAfter) (confirmed in 53-01)
-- [Phase 53]: CSS :has() selector for static SVG fallback hiding when DistributionExplorer mounts (confirmed in 53-02)
-- [Phase 53]: max-w-4xl container for distribution pages (wider than technique pages for dual charts) (confirmed in 53-02)
-- [Phase 53]: Parameter symbols as raw text in sliders (not KaTeX, too heavy for client) (confirmed in 53-02)
-- [Phase 53]: Compact 200x140 SVG config for thumbnail previews on distribution landing page (confirmed in 53-03)
-- [Phase 53]: No category filtering on /eda/distributions/ landing page (reserved for /eda/ in Phase 54) (confirmed in 53-03)
-- [Phase 54]: Case study route mirrors foundations route exactly (same layout, breadcrumb, prose styling) (confirmed in 54-01)
-- [Phase 54]: Table styling via [&>table]/[&_th]/[&_td] added to case-studies prose-foundations class (confirmed in 54-01)
-- [Phase 54]: Unicode entities for MDX-unsafe characters (<=, curly braces) in reference table content (confirmed in 54-02)
-- [Phase 54]: Table styling via [&_table]/[&_th]/[&_td] Tailwind selectors extending prose-foundations class (confirmed in 54-02)
-- [Phase 54]: Single-select category filter (not multi-select) for /eda/ landing page -- categories are mutually exclusive sections (confirmed in 54-03)
-- [Phase 54]: Foundations category visible under "All" but not in filter pills (contextual background, not primary browse category) (confirmed in 54-03)
-- [Phase 54]: 85 cards total on landing page: 29 graphical + 18 quantitative + 19 distributions + 9 case studies + 6 foundations + 4 reference (confirmed in 54-03)
-- [Phase 54]: DOM-based data-category toggling on both cards and sections for unified filter behavior (confirmed in 54-03)
-- [Phase 55]: EDAJsonLd uses conditional isOverview prop for dual-mode rendering (Dataset vs TechArticle/LearningResource)
-- [Phase 55]: Inline SVG composite (histogram+curve+scatter) for homepage EDA card -- no external image dependency, theme-compatible via CSS custom properties
-- [Phase 55]: OG overview uses 2x2 chart silhouettes (histogram, scatter, bell curve, box plot) as decorative satori divs (confirmed in 55-02)
-- [Phase 55]: OG section images use horizontal bar motif as abstract data visualization decoration (confirmed in 55-02)
-- [Phase 55]: Blog post has 28 cross-links to EDA pages across all 6 categories (confirmed in 55-02)
-- [Phase 55]: Companion blog callout at bottom of EDA landing page after card grid (confirmed in 55-02)
-- [Phase 55]: SVG aria-label includes variant name for Tier B PlotVariantSwap tabpanels (confirmed in 55-03)
-- [Phase 55]: Lighthouse scores: Tier A 99/96, Tier B 99/96, Tier C 98/95 (performance/accessibility) (confirmed in 55-03)
+v1.0-v1.8 decisions archived in respective milestone files.
 
 ### Pending Todos
 
@@ -161,16 +62,11 @@ None.
 
 ### Blockers/Concerns
 
-- ~~[Infra]: KaTeX + MDX formula parsing version conflicts~~ RESOLVED: remark-math@6.0.0 works (48-01)
-- ~~[Infra]: D3 bundle must not leak to non-distribution pages (verify with Vite bundle analysis)~~ RESOLVED: D3 isolated to 1 chunk, distribution pages only (48-03)
-- ~~[Infra]: OG image generation at 90+ page scale risks build time regression~~ RESOLVED: content-hash caching implemented (48-02)
-- ~~[Content]: NIST formula accuracy -- character-by-character verification required~~ RESOLVED: Formula audit passed with 0 issues (55-03)
-- [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification
-- ~~[Tech Debt]: GSAP/D3 animation lifecycle conflicts need EDALayout.astro isolation~~ RESOLVED: EDALayout uses slot composition (48-01)
+- [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification (monitor post-deploy)
 
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 55-03-PLAN.md (quality audits + Lighthouse) -- v1.8 COMPLETE
+Stopped at: v1.8 milestone archived and tagged
 Resume file: None
-Next: v1.8 milestone complete. Consider v1.9 planning or deployment.
+Next: Define next milestone via `/gsd:new-milestone`
