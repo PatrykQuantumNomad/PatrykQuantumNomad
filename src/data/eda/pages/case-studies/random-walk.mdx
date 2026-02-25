@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.3 Random Walk"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to 500 observations from the NIST RANDWALK.DAT dataset, which is a cumulative sum (random walk) of standard normal random numbers. The purpose is to demonstrate how EDA techniques detect a non-stationary process where the fixed-location assumption is violated. In a random walk, each observation equals the previous observation plus a random increment, creating persistent drift.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.3. This is a critically important case study because random walks appear frequently in financial time series, sensor drift, and instrument calibration problems.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) reveals severe violations of assumptions. The run sequence plot shows a meandering, non-stationary trajectory rather than a stable band. The lag plot shows a tight diagonal line indicating extreme autocorrelation. The histogram and normal probability plot are less informative because the underlying assumptions of fixed location and independence are violated.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) is the most informative panel for this dataset. Instead of fluctuating around a fixed horizontal location, the data wander freely with no tendency to return to a central value. The trajectory drifts both positive and negative over the 500 observations, demonstrating the classic non-stationary behavior of a random walk. This is the primary diagnostic for a location assumption violation.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows an extremely tight linear cluster along the diagonal y = x, with very little scatter. This indicates that consecutive observations are nearly identical -- the hallmark of a strongly autocorrelated process. The randomness assumption fails catastrophically.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) shows an irregular, multi-modal shape that depends entirely on the particular path taken by the random walk. It does not represent a meaningful underlying distribution because the data are not identically distributed.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows substantial curvature and departure from linearity. However, this result must be interpreted cautiously: the distributional test is invalid when the location and independence assumptions are violated.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean | -2.127 |
+| Std Dev | 8.326 |
+| Median | -1.683 |
+| Min | -22.930 |
+| Max | 15.843 |
+| Range | 38.773 |
+| n | 500 |
+
+The large standard deviation relative to the mean reflects the wide-ranging drift of the random walk. These summary statistics are essentially meaningless as descriptors of a fixed process because the location is non-stationary.
+
+### Location Test
+
+A linear regression against run order shows a statistically significant slope, confirming that the location is not fixed. However, the linear model underestimates the true non-stationarity because the random walk drifts non-linearly.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) may or may not reject constant variance, depending on how the drift affects the within-group variability. The test result is unreliable because the independence assumption is violated.
+
+### Randomness Tests
+
+The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.997, an extreme value that dwarfs the significance bound of approximately 0.088. Autocorrelation remains significant at all tested lags. The [runs test](/eda/quantitative/runs-test/) also strongly rejects randomness (p < 0.001). The data are not independent.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) rejects normality, but this result is not meaningful because the test assumes independent observations. When data are strongly autocorrelated, distributional tests produce unreliable results.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) results are unreliable for autocorrelated data and should not be interpreted.
+
+## Conclusions
+
+The random walk violates two of the four assumptions: fixed location and randomness. The data exhibit extreme positive autocorrelation (lag-1 correlation near 1.0) and a non-stationary, drifting location. The recommended remedial action is to difference the data -- computing the first differences (each observation minus its predecessor) recovers the underlying N(0,1) random increments, which satisfy all four assumptions. This case study demonstrates why the [run sequence plot](/eda/techniques/run-sequence-plot/) and [lag plot](/eda/techniques/lag-plot/) should always be examined first: without confirming stationarity and independence, location and distributional estimates are meaningless.

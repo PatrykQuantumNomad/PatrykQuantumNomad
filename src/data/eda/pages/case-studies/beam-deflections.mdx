@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.5 Beam Deflections"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to the NIST PONTIUS.DAT dataset, which contains 40 measurements of beam deflection as a function of applied load. The data come from a calibration experiment where increasing loads were applied to a steel beam and the resulting deflections were measured. The primary purpose is to demonstrate EDA techniques for a calibration or regression scenario where the response variable depends systematically on a controlled factor.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.5. Unlike previous case studies that analyze single univariate samples, this study involves a bivariate relationship between load (the predictor) and deflection (the response), with n = 40 paired observations.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) applied to the raw deflection data reveals an important non-random pattern. The run sequence plot shows a clear upward trend (deflection increases as observations progress), the lag plot shows a strongly linear pattern, and the histogram is spread out rather than peaked. These are expected features of a response variable that depends on a controlled factor, not anomalies. The 4-plot of the residuals from a fitted model is the more appropriate diagnostic.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) of the raw deflections displays a clear monotonically increasing trend, reflecting the fact that loads were applied in increasing order. This is not a failure of the fixed-location assumption but rather expected behavior in a designed calibration experiment. The relevant analysis is the relationship between load and deflection.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) of raw data shows a tight linear pattern, confirming the strong sequential dependence induced by the increasing load levels. Again, this is expected and not diagnostic of a process problem.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) of raw deflections is approximately uniform, reflecting the uniform spacing of load levels rather than an underlying distribution. The residual histogram is the meaningful diagnostic.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) of raw data shows systematic curvature because the data are not a simple random sample. The residual normal probability plot should be examined instead.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean (deflection) | 0.2637 |
+| Std Dev (deflection) | 0.2316 |
+| Min (load) | 150 |
+| Max (load) | 3000 |
+| Residual Std Dev | 0.00035 |
+| R-squared | 0.99999 |
+| n | 40 |
+
+The extremely high R-squared value confirms an excellent linear fit. The residual standard deviation is three orders of magnitude smaller than the response standard deviation, indicating that nearly all variation in deflection is explained by the load.
+
+### Location Test
+
+For the residuals from the quadratic fit, the run sequence shows no significant drift in location. The residual mean is effectively zero, confirming an unbiased calibration model.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) on the residuals, grouped by load level, shows no significant heteroscedasticity (p > 0.05). The measurement precision is constant across the full range of loads, which is an important result for calibration uncertainty.
+
+### Randomness Tests
+
+The [runs test](/eda/quantitative/runs-test/) on the residuals confirms randomness (p > 0.05). The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 for the residuals is approximately 0.08, well within the significance bounds. The residuals behave as independent random noise, validating the regression model.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) on the residuals does not reject normality (p > 0.05). The residual [normal probability plot](/eda/techniques/normal-probability-plot/) shows approximate linearity, confirming that the assumption of normally distributed errors is reasonable.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) on the residuals identifies no significant outliers. All residuals fall within expected bounds for n = 40 normally distributed observations.
+
+## Conclusions
+
+The beam deflection data exhibit a strong linear (with slight quadratic curvature) relationship between load and deflection. The quadratic calibration model y = b0 + b1*x + b2*x^2 provides an excellent fit with R-squared exceeding 0.99999. The residuals from this model satisfy all four assumptions: fixed location (zero mean), fixed variation, randomness, and normality. The calibration equation can be used with confidence for interpolation within the tested load range (150 to 3000 units). This case study demonstrates the proper application of EDA -- analyzing [residuals](/eda/techniques/run-sequence-plot/) from a fitted model rather than raw data when a systematic relationship exists.

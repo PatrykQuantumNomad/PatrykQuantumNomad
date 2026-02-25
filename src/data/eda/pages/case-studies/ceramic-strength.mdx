@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.10 Ceramic Strength"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to the NIST JAHANMI2.DAT dataset, which contains flexural strength measurements of ceramic specimens. The data come from a designed experiment investigating the effects of multiple factors (table speed, down feed rate, wheel grit size, and batch) on the strength of silicon nitride ceramic bars. The primary purpose is to demonstrate EDA techniques for a multi-factor designed experiment with potential distributional complications.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.10. With n = 480 observations from a full factorial design, this study is the most complex case study in the NIST collection, combining both DOE (design of experiments) and distributional analysis aspects.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) of the pooled data reveals important features. The run sequence plot shows variation that may contain systematic factor effects. The lag plot shows approximate randomness with possible clustering. The histogram is right-skewed, consistent with ceramic strength data that typically follows a [Weibull distribution](/eda/distributions/weibull/). The normal probability plot confirms non-normality with upward tail curvature.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) of all 480 observations shows data with a stable overall level but considerable variation. The systematic arrangement of factor combinations creates periodic patterns as the experiment cycles through treatment conditions. Within each treatment group, the data appear randomly distributed.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) shows a roughly circular cloud with some internal structure. The structure reflects the multi-factor design: observations within the same treatment combination cluster together, while observations from different treatments create the overall spread.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) of the combined data is right-skewed with a long upper tail. Ceramic strength data characteristically exhibit this pattern because the failure mechanism (brittle fracture from the weakest flaw) produces a distribution with a lower bound and a long right tail. The [Weibull distribution](/eda/distributions/weibull/) is the standard model for such data in reliability engineering.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows systematic curvature, particularly in the upper tail where the highest values fall above the theoretical line. This upward departure is consistent with the right skewness visible in the histogram. A [Weibull plot](/eda/techniques/weibull-plot/) would provide a more appropriate distributional assessment.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Grand Mean | 688.99 |
+| Std Dev | 65.55 |
+| Median | 689.50 |
+| Min | 452.00 |
+| Max | 896.00 |
+| Range | 444.00 |
+| n | 480 |
+
+The mean and median are nearly equal despite the visual skewness in the histogram, because the skewness is moderate. The range of 444 MPa represents substantial variability in ceramic strength, which is typical for brittle materials where flaw size distributions drive strength variation.
+
+### Location Test
+
+For the pooled data, the [runs test](/eda/quantitative/runs-test/) reflects the designed experiment structure rather than process drift. Within individual treatment groups, location is stable. The [DOE mean plots](/eda/techniques/doe-plots/) show significant effects of table speed and down feed rate on average ceramic strength.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) across treatment groups detects significant heterogeneity of variance (p < 0.05). Some factor combinations produce more variable strength measurements than others, suggesting that the machining parameters affect not just the average strength but also the consistency. The [standard deviation plot](/eda/techniques/std-deviation-plot/) visualizes these differences.
+
+### Randomness Tests
+
+Within each treatment group, the [runs test](/eda/quantitative/runs-test/) confirms randomness (p > 0.05). The replicate measurements within each factor combination are independent.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) rejects normality for the pooled data (p < 0.01), consistent with the observed right skewness. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.23 and -0.13, respectively. Within individual treatment groups, normality is less strongly rejected, suggesting that part of the pooled non-normality comes from mixing groups with different means.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) on within-group residuals identifies a few potential outliers at the low end (very weak specimens). In ceramic strength testing, such low outliers often represent specimens with unusually large surface flaws and may warrant separate investigation for quality control purposes.
+
+## Conclusions
+
+The ceramic strength data present a multi-faceted analysis challenge. The designed experiment reveals statistically significant effects of table speed and down feed rate on both the mean and variability of flexural strength. The pooled data are right-skewed and non-normal, consistent with the [Weibull distribution](/eda/distributions/weibull/) expected for brittle fracture data. The recommended analysis approach has two components: first, a [multi-factor ANOVA](/eda/quantitative/multi-factor-anova/) to quantify factor effects and identify optimal machining parameters; second, Weibull distribution fitting within each treatment group for reliability prediction. The [Yates analysis](/eda/quantitative/yates-analysis/) provides a systematic method for estimating main effects and interactions in the full factorial design. Low-strength outliers should be investigated as potential quality control indicators rather than dismissed as statistical artifacts.

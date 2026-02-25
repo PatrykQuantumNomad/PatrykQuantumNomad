@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.6 Filter Transmittance"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to the NIST MAVRO.DAT dataset, which contains measurements of filter transmittance collected as part of an inter-laboratory comparison. The data represent optical density measurements made by different laboratories on the same set of neutral density glass filters. The primary purpose is to demonstrate EDA techniques for detecting systematic differences between groups (laboratories) while assessing within-group variability.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.6. This multi-factor scenario is fundamentally different from single-sample analyses, requiring group-comparison techniques like [one-factor ANOVA](/eda/quantitative/one-factor-anova/) and [mean plots](/eda/techniques/mean-plot/).
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) of the combined data from all laboratories reveals apparent violations of the assumptions. The run sequence plot shows an oscillating pattern reflecting the systematic laboratory-to-laboratory differences. The lag plot shows clusters rather than a single cloud. These patterns are expected in grouped data and signal the need for a multi-factor analysis rather than a single-sample approach.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) of all observations in collection order shows a step-like pattern as the data cycle through different laboratories. Each laboratory cluster occupies a distinct level, indicating systematic differences in the measured transmittance values between laboratories. Within each laboratory block, the data fluctuate randomly around that laboratory's mean.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) shows multiple distinct clusters rather than a single cloud, reflecting the multi-group structure. Each cluster corresponds to within-laboratory variation, and the separation between clusters corresponds to between-laboratory differences.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) of the combined data shows a multi-modal distribution with peaks corresponding to each laboratory's central tendency. This multi-modality is an artifact of combining groups with different means, not a property of the underlying measurement process.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) of the combined data shows departures from linearity due to the mixture of laboratory groups. The residuals from a group-means model should be examined instead.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Grand Mean | 2.0018 |
+| Between-Lab Std Dev | 0.0057 |
+| Within-Lab Std Dev | 0.0014 |
+| Min | 1.9880 |
+| Max | 2.0160 |
+| Range | 0.0280 |
+| n | 120 |
+
+The between-laboratory standard deviation is approximately four times larger than the within-laboratory standard deviation, indicating that laboratory-to-laboratory differences are the dominant source of variability. The within-laboratory precision is excellent.
+
+### Location Test
+
+Within each laboratory group, the [run sequence plot](/eda/techniques/run-sequence-plot/) shows no significant drift. Individual laboratory means are stable across replicate measurements.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) across laboratories yields a marginally significant result, suggesting that some laboratories may have slightly different measurement precision. The [Levene test](/eda/quantitative/levene-test/) (more robust to non-normality) provides a similar conclusion.
+
+### Randomness Tests
+
+Within each laboratory, the [runs test](/eda/quantitative/runs-test/) confirms randomness of successive measurements (p > 0.05 for each group). No laboratory shows systematic drift or autocorrelation in its measurement sequence.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) applied to the within-group residuals does not reject normality (p > 0.05). This confirms that the measurement errors within each laboratory follow a normal distribution, which validates the ANOVA assumptions.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) applied within each laboratory group identifies no significant outliers. All measurements fall within expected bounds given each laboratory's mean and standard deviation.
+
+## Conclusions
+
+The primary finding is that statistically significant differences exist between laboratories. The [one-factor ANOVA](/eda/quantitative/one-factor-anova/) F-test strongly rejects the null hypothesis of equal laboratory means (p < 0.001). The [mean plot](/eda/techniques/mean-plot/) and [standard deviation plot](/eda/techniques/std-deviation-plot/) provide clear visualization of the inter-laboratory differences. Within each laboratory, all four assumptions are satisfied. The recommended action is to investigate the sources of between-laboratory bias, particularly calibration procedures, instrument differences, and environmental conditions. The within-laboratory standard deviation of 0.0014 represents the best achievable measurement precision, while the between-laboratory component of 0.0057 represents the reproducibility limit of the current measurement system.

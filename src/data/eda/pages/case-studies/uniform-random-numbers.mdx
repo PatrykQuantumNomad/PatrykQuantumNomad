@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.2 Uniform Random Numbers"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to 500 observations drawn from a uniform distribution U(0,1), taken from the NIST RANDU.DAT dataset. The purpose is to demonstrate how EDA graphical and quantitative techniques detect a non-normal underlying distribution while the remaining three assumptions -- fixed location, fixed variation, and randomness -- are all satisfied. This is the complementary case to the [normal random numbers](/eda/case-studies/normal-random-numbers/) study.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.2. With n = 500 uniformly distributed observations, the distribution assumption is the only one that fails.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) immediately reveals one anomaly: while the run sequence plot and lag plot appear healthy, the histogram is rectangular rather than bell-shaped, and the normal probability plot shows strong S-shaped curvature. Three of four assumptions hold; the distributional assumption does not.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows data fluctuating randomly in a stable band between 0 and 1. There is no trend, shift, or systematic pattern. Both location and variation remain constant across the run.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a structureless square cloud, consistent with independent, identically distributed observations. The square shape (rather than circular) is characteristic of uniform data with bounded support.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) is approximately flat (rectangular) across the interval [0, 1], which is the signature of a uniform distribution. There is no central peak, no bell shape, and no skewness. This is the clearest graphical signal that the data are not normally distributed.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows a pronounced S-shaped curve rather than the expected straight line. The tails curve away from the theoretical line in opposite directions -- the lower tail curves upward and the upper tail curves downward. This S-shape is the classic indicator of a light-tailed (platykurtic) distribution compared to the normal.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean | 0.5008 |
+| Std Dev | 0.2903 |
+| Median | 0.5032 |
+| Min | 0.0013 |
+| Max | 0.9987 |
+| Range | 0.9974 |
+| n | 500 |
+
+The sample mean is close to the theoretical value of 0.5, and the standard deviation approximates the theoretical value of 1/sqrt(12) = 0.2887.
+
+### Location Test
+
+Regression analysis of the run sequence confirms no significant drift in location (p > 0.05). The process mean is stable at approximately 0.50.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) across four groups yields a non-significant result (p > 0.05). Variation is constant across the run.
+
+### Randomness Tests
+
+The [runs test](/eda/quantitative/runs-test/) confirms randomness (p > 0.05). [Autocorrelation](/eda/quantitative/autocorrelation/) values at all lags through lag 50 fall within the significance bounds. The data are independent.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic of approximately 5.83, far exceeding the 5% critical value of 0.787. The null hypothesis of normality is decisively rejected. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.00 and -1.20, respectively. The negative excess kurtosis confirms a platykurtic (flat-topped) distribution relative to the normal.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) does not identify outliers, which is expected since the uniform distribution has finite support and the observations are well-contained within [0, 1].
+
+## Conclusions
+
+Three of four assumptions hold: fixed location, fixed variation, and randomness are confirmed. The distributional assumption fails -- the data follow a uniform, not normal, distribution. This has practical implications: the sample mean remains a valid location estimate, but confidence intervals based on the normal distribution will be incorrect. A distribution-free confidence interval or bootstrap approach should be used instead. The 95% confidence interval for the mean using the t-statistic gives 0.5008 plus or minus 0.0255, but a nonparametric interval is more appropriate.

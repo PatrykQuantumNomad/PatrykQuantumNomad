@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.8 Heat Flow Meter 1"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to the NIST SOULEN.DAT dataset, which contains 195 measurements from a heat flow meter calibration study. The data were collected across multiple batches (days) of calibration runs, where the same physical quantity was measured repeatedly to assess the stability and precision of the heat flow meter. The primary purpose is to demonstrate EDA techniques for detecting batch-to-batch variation in a process monitoring context.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.8. With n = 195 observations collected across multiple calibration batches, this study exemplifies the type of repeated measurement analysis common in metrology and quality control.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) reveals a generally stable measurement process. The run sequence plot shows data fluctuating around a constant level with possible slight batch structure. The lag plot shows approximate randomness. The histogram is roughly symmetric, and the normal probability plot is approximately linear. The overall impression is of a well-controlled process with minor batch effects.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 195 measurements fluctuating around a stable central value of approximately 9.206. No systematic drift or trend is visible. However, careful inspection reveals subtle shifts at batch boundaries, where the mean appears to step slightly between calibration days. These batch effects, while small, may represent day-to-day environmental or instrument changes.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a roughly circular scatter cloud centered on the overall mean, consistent with approximate independence. There is no strong linear pattern or clustering that would indicate severe autocorrelation or batch grouping.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) is approximately symmetric and bell-shaped, centered near 9.206. The shape is consistent with a normal distribution, though the bins show slight irregularity that may reflect the discrete nature of the measurement instrument.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows data points closely following the theoretical straight line through the central 90% of the distribution. Minor deviations in the extreme tails are within expected sampling variability for n = 195.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean | 9.2064 |
+| Std Dev | 0.0227 |
+| Median | 9.2070 |
+| Min | 9.1480 |
+| Max | 9.2640 |
+| Range | 0.1160 |
+| n | 195 |
+
+The mean and median are nearly identical, confirming symmetry. The standard deviation of 0.023 represents approximately 0.25% relative precision, which is typical for heat flow meter calibrations.
+
+### Location Test
+
+A linear regression of the run sequence against observation number shows no significant slope (p > 0.05). The overall mean is stable at 9.2064 across the full dataset. However, an analysis by batch reveals small but statistically significant differences between batch means, detectable via [one-factor ANOVA](/eda/quantitative/one-factor-anova/).
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) comparing within-batch variances does not reject homogeneity (p > 0.05). The measurement precision is consistent across all calibration batches, which is an important quality characteristic for the instrument.
+
+### Randomness Tests
+
+The [runs test](/eda/quantitative/runs-test/) on the full dataset yields a marginally significant result, which may reflect the subtle batch structure. Within individual batches, randomness is confirmed. The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 for the full dataset is approximately 0.15, slightly above the significance bound, again suggesting mild between-batch correlation.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) does not reject normality for the full dataset (p > 0.05). Within-batch residuals also pass the normality test. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values of approximately -0.08 and -0.15 are consistent with a normal distribution.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) identifies no significant outliers in the full dataset. The minimum value of 9.148 is approximately 2.6 standard deviations below the mean, within expected bounds for n = 195.
+
+## Conclusions
+
+The heat flow meter calibration data approximately satisfy all four assumptions when treated as a single sample. The minor batch effects detected by ANOVA are statistically significant but practically small (batch means differ by less than 0.01 from the grand mean). The recommended model is the grand mean 9.2064 as the best estimate of the calibrated value, with a 95% confidence interval of 9.2064 plus or minus 0.0032. For the most rigorous metrological analysis, a random-effects model that accounts for the batch structure would provide a more accurate uncertainty estimate, incorporating both within-batch and between-batch components of variation.

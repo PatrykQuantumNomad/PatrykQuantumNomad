@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.1 Normal Random Numbers"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis techniques to 500 observations generated from a standard normal distribution N(0,1), taken from the NIST RANDN.DAT dataset. The primary goal is to demonstrate that a well-behaved dataset satisfies all four underlying assumptions of a univariate measurement process: fixed location, fixed variation, randomness, and fixed distribution. This serves as a baseline example -- when the process is operating correctly, the EDA graphical and quantitative outputs should confirm every assumption.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.1. With n = 500 observations, the sample provides sufficient power for detecting moderate departures from assumptions.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) for this dataset is the archetype of a healthy process. All four component plots are consistent with the underlying assumptions: the run sequence plot shows a stable band, the lag plot shows a structureless circular cloud, the histogram is bell-shaped, and the normal probability plot is approximately linear. No remedial action is needed.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) displays 500 observations fluctuating randomly around a stable central location near zero with no discernible trend, shift, or cyclic pattern. Both the location and scale appear constant across the entire run, confirming the fixed-location and fixed-variation assumptions.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a structureless, roughly circular scatter cloud centered at the origin. There is no evidence of serial dependence, autocorrelation, or clustering. This supports the randomness assumption.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) displays the classic symmetric, bell-shaped curve expected from normal data. The distribution is unimodal with no obvious skewness or heavy tails. The peak is centered near zero, consistent with the known mean of the generating distribution.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows data points falling closely along a straight diagonal line with no systematic curvature, S-shapes, or outlier departures. This confirms that the normal distribution is an appropriate model for these data.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean | -0.0036 |
+| Std Dev | 0.9996 |
+| Median | -0.0127 |
+| Min | -3.0436 |
+| Max | 3.2560 |
+| Range | 6.2996 |
+| n | 500 |
+
+The sample mean and standard deviation closely match the theoretical values of 0 and 1, respectively. The range of approximately 6.3 standard deviations is consistent with a sample of size 500 from a standard normal distribution.
+
+### Location Test
+
+A [runs test](/eda/quantitative/runs-test/) for drift in location detects no significant trend. The regression slope of the run sequence is not significantly different from zero (p > 0.05), confirming constant location.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) for homogeneity of variance, applied by splitting the data into four equal groups of 125 observations each, yields a non-significant result (p > 0.05). The variation is constant across the run.
+
+### Randomness Tests
+
+The [runs test](/eda/quantitative/runs-test/) for randomness above and below the median produces a test statistic within the expected range (p > 0.05). The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.003, well within the significance bounds of plus or minus 0.088. No significant autocorrelation is detected at any lag through lag 50.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic of 0.273, well below the critical value of 0.787 at the 5% level. The null hypothesis of normality is not rejected. The [PPCC plot](/eda/techniques/ppcc-plot/) confirms the optimal shape parameter is consistent with a normal distribution.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) identifies no significant outliers. The maximum and minimum values are within expected bounds for a sample of 500 from a standard normal distribution.
+
+## Conclusions
+
+All four assumptions of a univariate measurement process are satisfied for this dataset. The data are random, from a fixed location (mean approximately 0), with fixed variation (standard deviation approximately 1), and follow a normal distribution. The recommended model is the sample mean as the best estimate of location, with a 95% confidence interval of approximately -0.0036 plus or minus 0.0877. This case study serves as the reference standard for comparison with datasets that violate one or more assumptions.

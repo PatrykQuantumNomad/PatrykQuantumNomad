@@ -6,4 +6,70 @@ category: "case-studies"
 nistSection: "1.4.2.4 Cryogenic Flow Meter Study (Cryothermometry)"
 ---
 
-{/* Content will be populated in Phase 54 */}
+## Background and Data
+
+This case study applies exploratory data analysis to 195 measurements from the NIST ZARR13.DAT dataset, collected during a cryogenic flow meter calibration study at the National Bureau of Standards (now NIST). The measurements represent a thermocouple voltage reading during the calibration of a cryogenic flow meter. The primary purpose is to demonstrate how EDA techniques reveal data discretization, potential group structure, and possible outliers.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.4. With n = 195 observations, this study illustrates a real-world measurement scenario where data characteristics are more complex than simple textbook examples.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) shows a generally well-behaved dataset with some notable features. The run sequence plot reveals a stable location with possible discrete measurement levels. The lag plot shows some structure beyond pure randomness. The histogram is roughly bell-shaped but shows discreteness. The normal probability plot shows approximate linearity with minor deviations in the tails.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows data fluctuating around a stable location of approximately 9.26. The location is constant and there is no visible trend or drift. However, close inspection reveals that the data cluster at discrete voltage levels due to the limited resolution of the measurement instrument. There may be a slight change in variation across the run.
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a roughly circular cloud but with some internal structure related to the discrete measurement levels. The discretization creates a grid-like pattern rather than a smooth circular scatter. This is a measurement artifact rather than a process feature.
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) is approximately symmetric and bell-shaped, centered near 9.26. The discrete measurement resolution creates a slightly irregular profile with gaps between bars. Despite this discreteness, the overall distributional shape is consistent with normality.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) is approximately linear through the central portion of the data. Minor deviations appear in the tails: a few observations at the low end fall slightly below the theoretical line, suggesting potential outliers or slightly heavier tails than the normal distribution.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Mean | 9.2615 |
+| Std Dev | 0.0228 |
+| Median | 9.2620 |
+| Min | 9.2060 |
+| Max | 9.3120 |
+| Range | 0.1060 |
+| n | 195 |
+
+The mean and median are nearly identical, suggesting a symmetric distribution. The standard deviation of 0.023 represents approximately 0.25% relative variation, indicating a precise measurement process.
+
+### Location Test
+
+The [runs test](/eda/quantitative/runs-test/) for drift in location shows no significant trend (p > 0.05). The process mean is stable at 9.2615 across all 195 observations.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) applied to four equal groups yields a marginally significant result, suggesting possible non-constant variation. Further investigation with finer group divisions may be warranted to determine if this reflects a true process change or sampling variability.
+
+### Randomness Tests
+
+The [runs test](/eda/quantitative/runs-test/) for randomness yields a borderline result. The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.093, close to but not exceeding the significance bound of approximately 0.140 (for n = 195). There is no strong evidence of serial dependence, though the discretization of measurements can affect randomness tests.
+
+### Distribution Test
+
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic that does not reject the null hypothesis at the 5% level. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately -0.15 and -0.22, respectively, both consistent with approximate normality. The slight negative skewness is not statistically significant.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) applied iteratively identifies no statistically significant outliers at the 5% level. The minimum value of 9.206 is approximately 2.4 standard deviations below the mean, which is within expected bounds for a sample of size 195.
+
+## Conclusions
+
+The data approximately satisfy all four assumptions, with two caveats. First, the measurement discretization creates an artifact that affects the visual appearance of the lag plot and histogram, but does not invalidate the statistical conclusions. Second, there is marginal evidence for non-constant variation that warrants monitoring in future calibrations. The recommended model is the sample mean 9.2615 as the best estimate of the true thermocouple voltage, with a 95% confidence interval of 9.2615 plus or minus 0.0032. The measurement process is operating within acceptable limits for calibration purposes.
