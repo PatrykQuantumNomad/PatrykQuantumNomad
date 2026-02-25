@@ -85,12 +85,12 @@ Plans:
   3. All generated SVGs render with readable labels, axes, and data points in both dark mode and light mode
   4. The composite 4-plot and 6-plot generators correctly compose individual chart generators into multi-panel layouts
   5. Distribution curve generator produces both PDF and CDF curves for at least 3 representative distributions (normal, exponential, chi-square)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 50-01: TBD
-- [ ] 50-02: TBD
-- [ ] 50-03: TBD
+- [ ] 50-01-PLAN.md — Plot base foundation, statistics math module, dark mode CSS, histogram, box plot, and bar plot generators
+- [ ] 50-02-PLAN.md — Scatter plot, line plot, lag plot, probability plot, spectral plot, and star plot generators
+- [ ] 50-03-PLAN.md — Contour plot, distribution curves, composite 4-plot/6-plot layouts, and barrel export index
 
 ### Phase 51: Graphical Technique Pages
 **Goal**: All 29 graphical technique pages are live with build-time SVG plots, interpretation prose, related technique links, and Tier B pages offer interactive SVG variant switching via the PlotVariantSwap component for pattern exploration
