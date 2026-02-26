@@ -264,20 +264,21 @@ const titleTag = (title.length + suffix.length > 65)
     // Back to top button
     const btn = document.getElementById('back-to-top');
     if (btn) {
+      const backToTopBtn = btn; // const captures non-null narrowing for closures
       function toggleVisibility() {
         if (window.scrollY > 400) {
-          btn.style.opacity = '1';
-          btn.style.transform = 'translateY(0)';
-          btn.style.pointerEvents = 'auto';
+          backToTopBtn.style.opacity = '1';
+          backToTopBtn.style.transform = 'translateY(0)';
+          backToTopBtn.style.pointerEvents = 'auto';
         } else {
-          btn.style.opacity = '0';
-          btn.style.transform = 'translateY(1rem)';
-          btn.style.pointerEvents = 'none';
+          backToTopBtn.style.opacity = '0';
+          backToTopBtn.style.transform = 'translateY(1rem)';
+          backToTopBtn.style.pointerEvents = 'none';
         }
       }
       window.addEventListener('scroll', toggleVisibility, { passive: true });
       toggleVisibility();
-      btn.addEventListener('click', () => {
+      backToTopBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }

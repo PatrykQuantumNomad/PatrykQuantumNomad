@@ -100,6 +100,7 @@ const grouped = categories.map((category) => ({
 
   <script>
     import { gsap } from 'gsap';
+    // @ts-ignore - gsap Flip type casing issue on case-insensitive filesystems
     import { Flip } from 'gsap/Flip';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
     gsap.registerPlugin(Flip, ScrollTrigger);
