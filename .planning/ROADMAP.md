@@ -50,11 +50,11 @@ See `.planning/milestones/` for detailed archives.
   1. Hypothesis test functions (runs test, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, location regression t-test) exist in the statistics library and return correct values when called with known NIST dataset arrays
   2. A shared PlotFigure.astro wrapper component renders figure HTML with consistent markup, and at least one existing Plots component uses it instead of inline figure HTML
   3. A canonical section template document exists defining the standard heading structure for case studies, and a URL cross-reference cheat sheet maps all technique/quantitative slugs to prevent broken links
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 56-01: TBD
-- [ ] 56-02: TBD
+- [ ] 56-01-PLAN.md — Hypothesis test functions (TDD: 7 test functions + 6 helpers validated against NIST datasets)
+- [ ] 56-02-PLAN.md — PlotFigure extraction, canonical template, and URL cross-reference cheat sheet
 
 ### Phase 57: Minor-Gap Case Studies
 **Goal**: Four nearly-complete case studies reach full NIST parity with computed quantitative results, individual plot subsections, and interpretation sections
