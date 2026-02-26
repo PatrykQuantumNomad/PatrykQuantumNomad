@@ -192,7 +192,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-<!-- No active requirements. Next milestone to be defined via /gsd:new-milestone -->
+## Current Milestone: v1.9 EDA Case Study Deep Dive
+
+**Goal:** Enhance all EDA case studies to match the NIST/SEMATECH source structure with individual plot subsections, detailed quantitative test results, interpretation sections, and develop/validate model sections — modeled after the completed Random Walk case study.
+
+**Target features:**
+- Enhance 8 existing case studies (Normal Random Numbers, Uniform Random Numbers, Cryothermometry, Beam Deflections, Filter Transmittance, Heat Flow Meter, Fatigue Life, Ceramic Strength) with full NIST-depth content
+- Add Standard Resistor as a new case study (NIST 1.4.2.7)
+- Each case study expanded with individual named plot subsections (run sequence, lag, histogram, probability, autocorrelation, spectral)
+- Detailed quantitative results with summary statistics, location/variation/randomness tests, and test summary tables
+- Interpretation sections synthesizing graphical and quantitative evidence
+- Develop Better Model and Validate New Model sections where the NIST source includes them
+- New SVG plot components per case study for embedded visualizations
 
 ### Out of Scope
 
@@ -329,4 +340,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-25 after v1.8 milestone complete*
+*Last updated: 2026-02-26 after v1.9 milestone started*
