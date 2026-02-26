@@ -7,6 +7,7 @@ import { getTierColor, DIMENSION_COLORS } from './beauty-index/tiers';
 import { DIMENSIONS } from './beauty-index/dimensions';
 import { totalScore, dimensionScores, type Language } from './beauty-index/schema';
 import { computeSpectrumPositions, MODEL_SHORT_LABELS } from './db-compass/spectrum-math';
+import { generateEdaHeroSvg } from './eda/svg-generators/eda-hero';
 import { DIMENSIONS as COMPASS_DIMENSIONS, DIMENSION_COLORS as COMPASS_DIMENSION_COLORS } from './db-compass/dimensions';
 import { dimensionScores as compassDimensionScores, totalScore as compassTotalScore, type DbModel } from './db-compass/schema';
 
@@ -45,7 +46,7 @@ export async function generateOgImage(
   description: string,
   tags: string[] = [],
   coverImage?: string,
-): Promise<Buffer> {
+): Promise<Uint8Array<ArrayBuffer>> {
   await loadFonts();
 
   const displayTitle = truncate(title, 80);
@@ -455,12 +456,12 @@ export async function generateOgImage(
     ],
   });
 
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
-  return png;
+  const buf = await sharp(Buffer.from(svg)).png().toBuffer();
+  return new Uint8Array(buf.buffer as ArrayBuffer, buf.byteOffset, buf.byteLength);
 }
 
 /** Shared Satori render helper — avoids duplicating font config */
-async function renderOgPng(layout: Record<string, unknown>): Promise<Buffer> {
+async function renderOgPng(layout: Record<string, unknown>): Promise<Uint8Array<ArrayBuffer>> {
   await loadFonts();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Satori accepts plain object VNodes at runtime
@@ -473,7 +474,8 @@ async function renderOgPng(layout: Record<string, unknown>): Promise<Buffer> {
     ],
   });
 
-  return sharp(Buffer.from(svg)).png().toBuffer();
+  const buf = await sharp(Buffer.from(svg)).png().toBuffer();
+  return new Uint8Array(buf.buffer as ArrayBuffer, buf.byteOffset, buf.byteLength);
 }
 
 /** Reusable branding row (PG badge + patrykgolabek.dev) */
@@ -535,7 +537,7 @@ function accentBar() {
  * Generates a branded OG image for the Beauty Index overview page.
  * Cover-image layout with golden ratio SVG, title, dimension pills, and PG branding.
  */
-export async function generateOverviewOgImage(): Promise<Buffer> {
+export async function generateOverviewOgImage(): Promise<Uint8Array<ArrayBuffer>> {
   const coverDataUri = await loadCoverImage('/images/beauty-index-golden-ratio-light.svg');
   const dimensionNames = ['Geometry', 'Elegance', 'Clarity', 'Happiness', 'Habitability', 'Integrity'];
 
@@ -672,7 +674,7 @@ export async function generateOverviewOgImage(): Promise<Buffer> {
  * Generates a branded OG image for a single Beauty Index language page.
  * Two-column layout with language details on the left and radar chart on the right.
  */
-export async function generateLanguageOgImage(language: Language): Promise<Buffer> {
+export async function generateLanguageOgImage(language: Language): Promise<Uint8Array<ArrayBuffer>> {
   const tierColor = getTierColor(language.tier);
   const scores = dimensionScores(language);
   const total = totalScore(language);
@@ -841,7 +843,7 @@ export async function generateLanguageOgImage(language: Language): Promise<Buffe
  * Generates a branded OG image for the Docker Compose Validator tool page.
  * Two-column layout: text + category pills on the left, dark YAML code panel on the right.
  */
-export async function generateComposeValidatorOgImage(): Promise<Buffer> {
+export async function generateComposeValidatorOgImage(): Promise<Uint8Array<ArrayBuffer>> {
   const categories = ['Schema', 'Security', 'Semantic', 'Best Practice', 'Style'];
 
   const categoryPills = {
@@ -1126,7 +1128,7 @@ export async function generateComposeValidatorOgImage(): Promise<Buffer> {
  * Generates a branded OG image for the Dockerfile Analyzer tool page.
  * Two-column layout: text + category pills on the left, dark code panel on the right.
  */
-export async function generateDockerfileAnalyzerOgImage(): Promise<Buffer> {
+export async function generateDockerfileAnalyzerOgImage(): Promise<Uint8Array<ArrayBuffer>> {
   const categories = ['Security', 'Efficiency', 'Maintainability', 'Reliability', 'Best Practice'];
 
   const categoryPills = {
@@ -1407,7 +1409,7 @@ export async function generateDockerfileAnalyzerOgImage(): Promise<Buffer> {
  * Generates a branded OG image for the Kubernetes Manifest Analyzer tool page.
  * Two-column layout: text + category pills on the left, dark YAML code panel on the right.
  */
-export async function generateK8sAnalyzerOgImage(): Promise<Buffer> {
+export async function generateK8sAnalyzerOgImage(): Promise<Uint8Array<ArrayBuffer>> {
   const categories = ['Schema', 'Security', 'Reliability', 'Best Practice', 'Cross-Resource'];
 
   const categoryPills = {
@@ -1779,7 +1781,7 @@ function vsLanguageColumn(language: Language, radarDataUri: string) {
 const VS_COLOR_A = '#4A90D9'; // blue
 const VS_COLOR_B = '#E8734A'; // coral
 
-export async function generateVsOgImage(langA: Language, langB: Language): Promise<Buffer> {
+export async function generateVsOgImage(langA: Language, langB: Language): Promise<Uint8Array<ArrayBuffer>> {
   const labels = DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
   const labelColors = DIMENSIONS.map((d) => DIMENSION_COLORS[d.key] ?? '#666');
 
@@ -1935,7 +1937,7 @@ function generateSpectrumMiniatureSvg(
  */
 export async function generateCompassOverviewOgImage(
   models: { id: string; name: string; slug: string; complexityPosition: number }[],
-): Promise<Buffer> {
+): Promise<Uint8Array<ArrayBuffer>> {
   const spectrumSvg = generateSpectrumMiniatureSvg(600, 100, models);
   const spectrumDataUri = `data:image/svg+xml;base64,${Buffer.from(spectrumSvg).toString('base64')}`;
 
@@ -2081,7 +2083,7 @@ export async function generateCompassOverviewOgImage(
  * Generates a branded OG image for a single Database Compass model detail page.
  * Two-column layout with model details on the left and radar chart on the right.
  */
-export async function generateCompassModelOgImage(model: DbModel): Promise<Buffer> {
+export async function generateCompassModelOgImage(model: DbModel): Promise<Uint8Array<ArrayBuffer>> {
   const scores = compassDimensionScores(model);
   const total = compassTotalScore(model);
   const labels = COMPASS_DIMENSIONS.map((d) => d.symbol + ' ' + d.shortName);
@@ -2248,173 +2250,12 @@ export async function generateCompassModelOgImage(model: DbModel): Promise<Buffe
 
 /**
  * Generates a branded OG image for the EDA Visual Encyclopedia landing page (/eda/).
- * Two-column layout with title/subtitle/pill on the left, decorative chart silhouettes on the right.
+ * Two-column layout with title/subtitle/pill on the left, polished hero SVG collage on the right.
  */
-export async function generateEdaOverviewOgImage(): Promise<Buffer> {
-  // EDA accent colors (from Quantum Explorer palette)
+export async function generateEdaOverviewOgImage(): Promise<Uint8Array<ArrayBuffer>> {
   const accentSecondary = '#e8734a';
-  const dataPrimary = '#3b82f6';
-  const dataSecondary = '#8b5cf6';
-  const dataTertiary = '#10b981';
-  const dataQuaternary = '#f59e0b';
-
-  // Mini chart silhouettes as simple satori divs
-
-  // Histogram bars (5 bars of varying height)
-  const histogramBars = {
-    type: 'div',
-    props: {
-      style: {
-        display: 'flex',
-        alignItems: 'flex-end',
-        gap: '6px',
-        height: '100px',
-      },
-      children: [30, 55, 90, 70, 40].map((h, i) => ({
-        type: 'div',
-        props: {
-          style: {
-            width: '24px',
-            height: `${h}px`,
-            backgroundColor: i === 2 ? dataPrimary : `${dataPrimary}99`,
-            borderRadius: '3px 3px 0 0',
-          },
-        },
-      })),
-    },
-  };
-
-  // Scatter dots (6 dots in a rough upward trend)
-  const scatterDots = {
-    type: 'div',
-    props: {
-      style: {
-        display: 'flex',
-        position: 'relative' as const,
-        width: '120px',
-        height: '100px',
-      },
-      children: [
-        { x: 8, y: 70 },
-        { x: 25, y: 55 },
-        { x: 45, y: 48 },
-        { x: 60, y: 30 },
-        { x: 80, y: 22 },
-        { x: 100, y: 10 },
-      ].map((pos) => ({
-        type: 'div',
-        props: {
-          style: {
-            position: 'absolute' as const,
-            left: `${pos.x}px`,
-            top: `${pos.y}px`,
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            backgroundColor: dataSecondary,
-          },
-        },
-      })),
-    },
-  };
-
-  // Box plot whiskers (simplified as rectangles)
-  const boxPlot = {
-    type: 'div',
-    props: {
-      style: {
-        display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center',
-        height: '100px',
-        justifyContent: 'center',
-      },
-      children: [
-        // Upper whisker
-        {
-          type: 'div',
-          props: {
-            style: { width: '2px', height: '20px', backgroundColor: dataTertiary },
-          },
-        },
-        // Box
-        {
-          type: 'div',
-          props: {
-            style: {
-              width: '40px',
-              height: '40px',
-              border: `2px solid ${dataTertiary}`,
-              borderRadius: '3px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            },
-            children: [
-              // Median line
-              {
-                type: 'div',
-                props: {
-                  style: { width: '36px', height: '2px', backgroundColor: dataTertiary },
-                },
-              },
-            ],
-          },
-        },
-        // Lower whisker
-        {
-          type: 'div',
-          props: {
-            style: { width: '2px', height: '25px', backgroundColor: dataTertiary },
-          },
-        },
-      ],
-    },
-  };
-
-  // Bell curve (approximated with a tall rounded rectangle)
-  const bellCurve = {
-    type: 'div',
-    props: {
-      style: {
-        width: '120px',
-        height: '70px',
-        backgroundColor: `${dataQuaternary}33`,
-        borderRadius: '60px 60px 0 0',
-        border: `2px solid ${dataQuaternary}`,
-        borderBottom: 'none',
-        marginTop: '30px',
-      },
-    },
-  };
-
-  // Compose chart grid (2x2)
-  const chartGrid = {
-    type: 'div',
-    props: {
-      style: {
-        display: 'flex',
-        flexDirection: 'column' as const,
-        gap: '24px',
-      },
-      children: [
-        {
-          type: 'div',
-          props: {
-            style: { display: 'flex', gap: '30px', alignItems: 'flex-end' },
-            children: [histogramBars, scatterDots],
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: { display: 'flex', gap: '30px', alignItems: 'flex-end' },
-            children: [bellCurve, boxPlot],
-          },
-        },
-      ],
-    },
-  };
+  const heroSvg = generateEdaHeroSvg({ width: 560, height: 500 });
+  const heroDataUri = `data:image/svg+xml;base64,${Buffer.from(heroSvg).toString('base64')}`;
 
   const categoryPills = {
     type: 'div',
@@ -2521,7 +2362,7 @@ export async function generateEdaOverviewOgImage(): Promise<Buffer> {
             ],
           },
         },
-        // Right column: chart silhouettes
+        // Right column: hero SVG collage
         {
           type: 'div',
           props: {
@@ -2532,7 +2373,16 @@ export async function generateEdaOverviewOgImage(): Promise<Buffer> {
               width: '580px',
               height: '630px',
             },
-            children: [chartGrid],
+            children: [
+              {
+                type: 'img',
+                props: {
+                  src: heroDataUri,
+                  width: 560,
+                  height: 500,
+                },
+              },
+            ],
           },
         },
         // Bottom-left branding
@@ -2565,7 +2415,7 @@ export async function generateEdaSectionOgImage(
   sectionTitle: string,
   sectionDescription: string,
   pageCount: string,
-): Promise<Buffer> {
+): Promise<Uint8Array<ArrayBuffer>> {
   const accentPrimary = '#c44b20';
   const accentSecondary = '#e8734a';
 
@@ -2696,6 +2546,172 @@ export async function generateEdaSectionOgImage(
           },
         },
         // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
+
+/**
+ * Generates a branded OG image for any individual EDA page.
+ * Left column: EDA branding, page title, category pill, description.
+ * Right column: polished hero SVG collage.
+ */
+export async function generateEdaPillarOgImage(
+  pageTitle: string,
+  pageDescription: string,
+  categoryLabel: string,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const accentPrimary = '#c44b20';
+  const accentSecondary = '#e8734a';
+  const heroSvg = generateEdaHeroSvg({ width: 460, height: 420 });
+  const heroDataUri = `data:image/svg+xml;base64,${Buffer.from(heroSvg).toString('base64')}`;
+
+  const categoryColorMap: Record<string, string> = {
+    'Graphical Techniques': '#3b82f6',
+    'Quantitative Techniques': '#8b5cf6',
+    'Distributions': '#f59e0b',
+    'Case Studies': '#10b981',
+    'Foundations': '#6366f1',
+    'Reference': '#888899',
+  };
+  const pillColor = categoryColorMap[categoryLabel] ?? accentSecondary;
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '700px',
+              padding: '40px 0px 60px 56px',
+              gap: '18px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '15px',
+                    color: accentPrimary,
+                    fontWeight: 700,
+                    textTransform: 'uppercase' as const,
+                    letterSpacing: '2px',
+                  },
+                  children: 'EDA Visual Encyclopedia',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '44px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: truncate(pageTitle, 70),
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: { fontSize: '18px', color: '#555566', lineHeight: 1.5 },
+                  children: truncate(pageDescription, 140),
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: { display: 'flex', gap: '10px' },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '14px',
+                          color: pillColor,
+                          backgroundColor: `${pillColor}18`,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: categoryLabel,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '14px',
+                          color: '#888899',
+                          backgroundColor: '#88889918',
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                        },
+                        children: 'NIST Handbook',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Right column: hero SVG collage
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '500px',
+              height: '630px',
+            },
+            children: [
+              {
+                type: 'img',
+                props: {
+                  src: heroDataUri,
+                  width: 460,
+                  height: 420,
+                },
+              },
+            ],
+          },
+        },
         {
           type: 'div',
           props: {
