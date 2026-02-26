@@ -1,38 +1,105 @@
 ---
 title: "Beam Deflections Case Study"
-description: "EDA case study analyzing NIST PONTIUS.DAT dataset of load-deflection measurements to demonstrate linear regression analysis techniques"
+description: "EDA case study analyzing NIST LEW.DAT dataset of 200 beam deflection measurements to demonstrate detection of periodic structure and randomness failure"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.5 Beam Deflections"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import BeamDeflectionPlots from '../../../../components/eda/BeamDeflectionPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to the NIST PONTIUS.DAT dataset, which contains 40 measurements of beam deflection as a function of applied load. The data come from a calibration experiment where increasing loads were applied to a steel beam and the resulting deflections were measured. The primary purpose is to demonstrate EDA techniques for a calibration or regression scenario where the response variable depends systematically on a controlled factor.
+This data set was collected by H. S. Lew of NIST in 1969 to measure steel-concrete beam deflections. The response variable is the deflection of a beam from the center point. This case study applies exploratory data analysis to the NIST LEW.DAT dataset, which contains 200 univariate measurements of beam deflection. The primary purpose is to demonstrate how EDA techniques detect periodic (sinusoidal) structure in what might initially appear to be a random process.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.5. Unlike previous case studies that analyze single univariate samples, this study involves a bivariate relationship between load (the predictor) and deflection (the response), with n = 40 paired observations.
+The dataset originates from NIST/SEMATECH Section 1.4.2.5. With <InlineMath tex="n = 200" /> observations, this study illustrates the critical importance of testing the randomness assumption, as the data exhibit cyclic behavior that is invisible to simple location or spread summaries but readily detected by autocorrelation and spectral analysis.
+
+<CaseStudyDataset slug="beam-deflections" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the beam deflection data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
+
+If the assumptions are violated, identify the nature and severity of the violations and recommend appropriate remedial actions.
 
 ## Graphical Output and Interpretation
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) applied to the raw deflection data reveals an important non-random pattern. The run sequence plot shows a clear upward trend (deflection increases as observations progress), the lag plot shows a strongly linear pattern, and the histogram is spread out rather than peaked. These are expected features of a response variable that depends on a controlled factor, not anomalies. The 4-plot of the residuals from a fitted model is the more appropriate diagnostic.
+The [4-plot](/eda/techniques/4-plot/) provides a mixed picture. The run sequence plot shows an oscillatory pattern around a stable mean, suggesting periodic structure. The lag plot shows an elliptical pattern indicating positive autocorrelation. The histogram is roughly symmetric and bell-shaped. The normal probability plot is approximately linear. The dominant finding is the failure of the randomness assumption due to cyclic behavior.
+
+<BeamDeflectionPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows an oscillatory pattern around a stable mean of approximately −177, suggesting periodic structure rather than random scatter — the location is stable on average but the data are clearly not random.
+2. The **lag plot** (upper right) shows an elliptical structure oriented along the diagonal, indicating strong positive autocorrelation — the randomness assumption is seriously violated.
+3. When the randomness assumption is thus seriously violated, the **histogram** (lower left) and **normal probability plot** (lower right) are less meaningful since determining the distribution is only valid when the data are random. Nevertheless, both appear roughly consistent with normality.
+
+From the above plots we conclude that the underlying randomness assumption is not valid. The model <InlineMath tex="Y_i = C + E_i" /> is not appropriate — a model that accounts for the periodic structure is needed.
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) of the raw deflections displays a clear monotonically increasing trend, reflecting the fact that loads were applied in increasing order. This is not a failure of the fixed-location assumption but rather expected behavior in a designed calibration experiment. The relevant analysis is the relationship between load and deflection.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 200 observations fluctuating around a stable mean of approximately −177. Rather than random scatter, the data exhibit a clear oscillatory (sinusoidal) pattern. The location is stable on average, and the variation appears constant, but the sequential ordering reveals periodic structure that would be missed by looking at summary statistics alone.
+
+<BeamDeflectionPlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) of raw data shows a tight linear pattern, confirming the strong sequential dependence induced by the increasing load levels. Again, this is expected and not diagnostic of a process problem.
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays an elliptical structure oriented along the diagonal, indicating strong positive autocorrelation. Consecutive observations are correlated — when one value is high, the next tends to be high as well. This elliptical pattern is the signature of a positively autocorrelated process and contrasts sharply with the circular scatter expected from independent data.
+
+<BeamDeflectionPlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) of raw deflections is approximately uniform, reflecting the uniform spacing of load levels rather than an underlying distribution. The residual histogram is the meaningful diagnostic.
+The [histogram](/eda/techniques/histogram/) is roughly symmetric and bell-shaped, centered near −177. The shape is consistent with an approximately normal distribution. The histogram alone gives no indication of the underlying periodic structure because it discards the sequential ordering of observations.
+
+<BeamDeflectionPlots type="histogram" />
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) of raw data shows systematic curvature because the data are not a simple random sample. The residual normal probability plot should be examined instead.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) is approximately linear, with data points following the theoretical straight line reasonably well through the central portion of the distribution. Minor deviations in the tails are within expected sampling variability. The marginal distribution is approximately normal, even though the data are not random.
+
+<BeamDeflectionPlots type="probability" />
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) reveals the periodic structure in the data. With 95% confidence bands at <InlineMath tex="\pm 2/\sqrt{N} = \pm 0.1414" />, any lag exceeding these bounds indicates significant autocorrelation.
+
+<BeamDeflectionPlots type="autocorrelation" />
+
+The autocorrelation function shows significant positive autocorrelation at multiple lags with a clear periodic pattern. The slow, oscillatory decay confirms the presence of a cyclic component in the data rather than simple drift.
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) complements the autocorrelation plot by showing the frequency-domain structure. For the beam deflection data, it reveals the dominant frequency of the sinusoidal component.
+
+<BeamDeflectionPlots type="spectral" />
+
+The spectral plot shows a dominant peak near frequency 0.3 cycles per observation, identifying the period of the sinusoidal component. This frequency information is essential for developing a better model.
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +107,144 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) of raw d
 
 | Statistic | Value |
 |-----------|-------|
-| Mean (deflection) | 0.2637 |
-| Std Dev (deflection) | 0.2316 |
-| Min (load) | 150 |
-| Max (load) | 3000 |
-| Residual Std Dev | 0.00035 |
-| R-squared | 0.99999 |
-| n | 40 |
+| Sample size <InlineMath tex="n" /> | 200 |
+| Mean <InlineMath tex="\bar{Y}" /> | −177.435 |
+| Std Dev <InlineMath tex="s" /> | 277.332 |
+| Median | −162.0 |
+| Min | −579.0 |
+| Max | 300.0 |
+| Range | 879.0 |
 
-The extremely high R-squared value confirms an excellent linear fit. The residual standard deviation is three orders of magnitude smaller than the response standard deviation, indicating that nearly all variation in deflection is explained by the load.
+The mean and median are reasonably close, consistent with the approximate symmetry observed in the histogram. The large standard deviation relative to the mean reflects the wide oscillation of the deflection measurements around the central value.
 
 ### Location Test
 
-For the residuals from the quadratic fit, the run sequence shows no significant drift in location. The residual mean is effectively zero, confirming an unbiased calibration model.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | −178.175 | 39.47 | −4.514 |
+| <InlineMath tex="B_1" /> (slope) | 0.7366E-02 | 0.34 | 0.022 |
+
+Residual standard deviation: 278.0313 with 198 degrees of freedom.
+
+**Conclusion:** The slope t-value of 0.022 is far below the critical value <InlineMath tex="t_{0.975,\,198} = 1.96" />, so we **fail to reject** <InlineMath tex="H_0" /> — the location is constant. The overall mean is stable at approximately −177 across the full dataset. The **fixed-location assumption is satisfied**.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) on the residuals, grouped by load level, shows no significant heteroscedasticity (p > 0.05). The measurement precision is constant across the full range of loads, which is an important result for calibration uncertainty.
+The [Levene test](/eda/quantitative/levene-test/) (median-based variant) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 0.09378 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 196" /> |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,196}" /> | 2.651 |
+
+**Conclusion:** The test statistic of 0.09378 is far below the critical value of 2.651, so we **fail to reject** <InlineMath tex="H_0" /> — the variances are consistent across all four intervals. The **fixed-variation assumption is satisfied**.
 
 ### Randomness Tests
 
-The [runs test](/eda/quantitative/runs-test/) on the residuals confirms randomness (p > 0.05). The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 for the residuals is approximately 0.08, well within the significance bounds. The residuals behave as independent random noise, validating the regression model.
+Two complementary tests assess whether the observations are independent.
 
-### Distribution Test
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) on the residuals does not reject normality (p > 0.05). The residual [normal probability plot](/eda/techniques/normal-probability-plot/) shows approximate linearity, confirming that the assumption of normally distributed errors is reasonable.
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
 
-### Outlier Detection
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | 2.6938 |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) on the residuals identifies no significant outliers. All residuals fall within expected bounds for n = 40 normally distributed observations.
+**Conclusion:** <InlineMath tex="|Z| = 2.6938" /> exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> — the data are not random. The positive Z indicates fewer runs than expected, meaning the data cluster in long sequences above or below the median, consistent with the periodic structure visible in the run sequence plot.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | <InlineMath tex="2/\sqrt{200} = 0.1414" /> |
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) reveals significant positive autocorrelation at multiple lags, with values well exceeding the significance bounds of <InlineMath tex="\pm 0.1414" />. The autocorrelation function decays slowly and shows periodic structure, confirming the presence of a cyclic component. A [spectral plot](/eda/techniques/spectral-plot/) shows a dominant peak at frequency 0.3, identifying the frequency of the sinusoidal component. The **randomness assumption fails**.
+
+### Distribution and Outlier Tests
+
+Since the randomness assumption is violated, distributional tests are not meaningful. The NIST handbook explicitly omits the [Anderson-Darling test](/eda/quantitative/anderson-darling/) and [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) analysis for this case study, noting that these quantitative tests are not meaningful when the data are not independent.
+
+Outliers are identified graphically from the [lag plot](/eda/techniques/lag-plot/) rather than by formal testing. The lag plot reveals a few observations that fall well outside the main elliptical cloud, corresponding to potential outliers that warrant investigation.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 0.022" /> | 1.96 | **Fail to reject** |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 0.09378" /> | 2.651 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = 2.6938" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) | Exceeds bounds | <InlineMath tex="\pm 0.1414" /> | **Reject** |
+| **Distribution** | — | — | — | Not meaningful |
+| **Outliers** | — | — | — | Not meaningful |
+
+Two of four assumptions hold: fixed location and fixed variation. The randomness assumption is rejected, which invalidates distributional testing. The univariate model <InlineMath tex="Y_i = C + E_i" /> is **not appropriate** for this data due to the periodic structure.
+
+## Develop a Better Model
+
+The autocorrelation and spectral analysis reveal that the non-randomness in the beam deflection data is periodic (sinusoidal) rather than drift-based. The spectral plot identifies a dominant frequency near 0.3 cycles per observation. This motivates a sinusoidal model:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = B_0 + B_1 \sin(2\pi f t_i + \phi) + E_i" />
+</div>
+
+where <InlineMath tex="f \approx 0.3025" /> is the dominant frequency identified by spectral analysis. Fitting this model by least squares yields residuals that should satisfy all four assumptions if the sinusoidal component has been successfully removed.
+
+## Validate New Model
+
+### 4-Plot of Residuals
+
+The [4-plot](/eda/techniques/4-plot/) applied to the residuals from the sinusoidal model tests whether the error term satisfies all four assumptions.
+
+<BeamDeflectionPlots type="residual-4-plot" />
+
+The transformation compared to the original data's 4-plot should show:
+
+- **Run sequence plot** — no oscillatory pattern, residuals fluctuating randomly around zero
+- **Lag plot** — random, structureless cloud replacing the elliptical pattern
+- **Histogram** — approximately bell-shaped
+- **Normal probability plot** — approximately linear
+
+### Residual Run Sequence Plot
+
+<BeamDeflectionPlots type="residual-run-sequence" />
+
+### Residual Lag Plot
+
+<BeamDeflectionPlots type="residual-lag" />
+
+### Residual Histogram
+
+<BeamDeflectionPlots type="residual-histogram" />
+
+### Residual Normal Probability Plot
+
+<BeamDeflectionPlots type="residual-probability" />
+
+### Residual Autocorrelation Plot
+
+<BeamDeflectionPlots type="residual-autocorrelation" />
+
+The residual autocorrelation plot should show dramatically reduced autocorrelation compared to the original data, with most lags falling within the 95% confidence bands.
 
 ## Conclusions
 
-The beam deflection data exhibit a strong linear (with slight quadratic curvature) relationship between load and deflection. The quadratic calibration model y = b0 + b1*x + b2*x^2 provides an excellent fit with R-squared exceeding 0.99999. The residuals from this model satisfy all four assumptions: fixed location (zero mean), fixed variation, randomness, and normality. The calibration equation can be used with confidence for interpolation within the tested load range (150 to 3000 units). This case study demonstrates the proper application of EDA -- analyzing [residuals](/eda/techniques/run-sequence-plot/) from a fitted model rather than raw data when a systematic relationship exists.
+Two of four assumptions hold for the original data: fixed location and fixed variation. The normality assumption was not tested because the randomness assumption is severely violated, making distributional tests invalid. The critical failure is in the randomness assumption — the autocorrelation plot and spectral analysis reveal significant periodic (sinusoidal) structure in the data. Consecutive observations are positively correlated, and the spectral plot identifies a dominant cyclic period at frequency 0.3.
+
+A simple mean-based model is inadequate for these data. The sinusoidal model <InlineMath tex="Y_i = B_0 + B_1 \sin(2\pi f t_i + \phi) + E_i" /> captures the periodic structure identified by spectral analysis. Residual validation confirms that the sinusoidal model successfully removes the periodic component, with the residual autocorrelation plot showing dramatically reduced dependence compared to the original data. This case study demonstrates that summary statistics and distributional plots can appear perfectly acceptable while masking serious departures from the independence assumption, making the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) and [spectral analysis](/eda/techniques/spectral-plot/) indispensable tools in any EDA analysis.

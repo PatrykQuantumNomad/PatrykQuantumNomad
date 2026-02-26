@@ -1,16 +1,49 @@
 ---
 title: "Uniform Random Numbers Case Study"
-description: "EDA case study analyzing NIST UNIFORM.DAT dataset to demonstrate detection of non-normal underlying distributions"
+description: "EDA case study analyzing NIST RANDU.DAT dataset to demonstrate detection of non-normal underlying distributions"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.2 Uniform Random Numbers"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import UniformRandomPlots from '../../../../components/eda/UniformRandomPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to 500 observations drawn from a uniform distribution U(0,1), taken from the NIST RANDU.DAT dataset. The purpose is to demonstrate how EDA graphical and quantitative techniques detect a non-normal underlying distribution while the remaining three assumptions -- fixed location, fixed variation, and randomness -- are all satisfied. This is the complementary case to the [normal random numbers](/eda/case-studies/normal-random-numbers/) study.
+This case study applies exploratory data analysis to 500 observations drawn from a uniform distribution U(0,1), taken from a Rand Corporation publication. The purpose is to demonstrate how EDA graphical and quantitative techniques detect a non-normal underlying distribution while the remaining three assumptions -- fixed location, fixed variation, and randomness -- are all satisfied. This is the complementary case to the [normal random numbers](/eda/case-studies/normal-random-numbers/) study.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.2. With n = 500 uniformly distributed observations, the distribution assumption is the only one that fails.
+The dataset originates from NIST/SEMATECH Section 1.4.2.2. With n = 500 uniformly distributed observations, the distribution assumption is the only one that fails. This case study is critically important because it illustrates the effects of a known underlying non-normal distribution and validates whether EDA techniques correctly identify departure from normality when the true distribution is known in advance.
+
+<CaseStudyDataset slug="uniform-random-numbers" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** -- assess whether the univariate model is an appropriate fit for the uniform random number data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** -- evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** -- the data are uncorrelated
+   - **Fixed distribution** -- the data come from a fixed distribution
+   - **Fixed location** -- the distribution location (mean) is constant
+   - **Fixed variation** -- the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** -- determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if the distributional assumption is violated, the confidence interval may not have the correct coverage probability.
+
+If any assumptions are violated, identify the nature of the violations and recommend appropriate remedial actions.
 
 ## Graphical Output and Interpretation
 
@@ -18,21 +51,60 @@ The dataset originates from NIST/SEMATECH Section 1.4.2.2. With n = 500 uniforml
 
 The [4-plot](/eda/techniques/4-plot/) immediately reveals one anomaly: while the run sequence plot and lag plot appear healthy, the histogram is rectangular rather than bell-shaped, and the normal probability plot shows strong S-shaped curvature. Three of four assumptions hold; the distributional assumption does not.
 
+<UniformRandomPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows data fluctuating randomly in a stable band between 0 and 1 with no trend or shifts — the fixed-location and fixed-variation assumptions appear satisfied.
+2. The **lag plot** (upper right) displays a structureless square cloud (the square shape, rather than circular, is characteristic of uniform data with bounded support) — the randomness assumption appears satisfied.
+3. The **histogram** (lower left) is approximately flat (rectangular) across [0, 1] rather than bell-shaped — this is the clearest signal that the data are not normally distributed. The flat shape is the signature of a uniform distribution.
+4. The **normal probability plot** (lower right) shows a pronounced S-shaped curve — the classic indicator of a light-tailed (platykurtic) distribution compared to the normal.
+
+Three of four assumptions hold; the distributional assumption does not. The data are random, from a fixed location, with fixed variation, but the underlying distribution is uniform rather than normal.
+
 ### Run Sequence Plot
 
 The [run sequence plot](/eda/techniques/run-sequence-plot/) shows data fluctuating randomly in a stable band between 0 and 1. There is no trend, shift, or systematic pattern. Both location and variation remain constant across the run.
+
+<UniformRandomPlots type="run-sequence" />
 
 ### Lag Plot
 
 The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a structureless square cloud, consistent with independent, identically distributed observations. The square shape (rather than circular) is characteristic of uniform data with bounded support.
 
+<UniformRandomPlots type="lag" />
+
 ### Histogram
 
 The [histogram](/eda/techniques/histogram/) is approximately flat (rectangular) across the interval [0, 1], which is the signature of a uniform distribution. There is no central peak, no bell shape, and no skewness. This is the clearest graphical signal that the data are not normally distributed.
 
+<UniformRandomPlots type="histogram" />
+
 ### Normal Probability Plot
 
 The [normal probability plot](/eda/techniques/normal-probability-plot/) shows a pronounced S-shaped curve rather than the expected straight line. The tails curve away from the theoretical line in opposite directions -- the lower tail curves upward and the upper tail curves downward. This S-shape is the classic indicator of a light-tailed (platykurtic) distribution compared to the normal.
+
+<UniformRandomPlots type="normal-probability" />
+
+### Uniform Probability Plot
+
+The [uniform probability plot](/eda/techniques/probability-plot/) provides the definitive distributional test for these data. When the data truly follow a uniform distribution, the plot should be nearly linear.
+
+<UniformRandomPlots type="uniform-probability" />
+
+The nearly linear pattern confirms that the uniform distribution is an excellent model for these data, contrasting sharply with the S-shaped curvature in the normal probability plot above.
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) confirms the randomness assumption. All autocorrelation coefficients at lags 1 through 50 fall within the 95% confidence bands at ±2/√N, consistent with independent observations.
+
+<UniformRandomPlots type="autocorrelation" />
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows a flat power spectrum with no dominant peaks, consistent with white noise. This confirms that the data have no periodic structure or frequency-domain dependence.
+
+<UniformRandomPlots type="spectral" />
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +112,127 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) shows a 
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | 0.5008 |
-| Std Dev | 0.2903 |
-| Median | 0.5032 |
-| Min | 0.0013 |
-| Max | 0.9987 |
-| Range | 0.9974 |
-| n | 500 |
+| Sample size <InlineMath tex="n" /> | 500 |
+| Mean <InlineMath tex="\bar{Y}" /> | 0.5078 |
+| Std Dev <InlineMath tex="s" /> | 0.2943 |
+| Median | 0.5184 |
+| Min | 0.0025 |
+| Max | 0.9971 |
+| Range | 0.9946 |
 
-The sample mean is close to the theoretical value of 0.5, and the standard deviation approximates the theoretical value of 1/sqrt(12) = 0.2887.
+The sample mean of 0.5078 is close to the theoretical value of 0.5, and the sample standard deviation of 0.2943 approximates the theoretical value of <InlineMath tex="1/\sqrt{12} = 0.2887" />.
 
 ### Location Test
 
-Regression analysis of the run sequence confirms no significant drift in location (p > 0.05). The process mean is stable at approximately 0.50.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 0.522923 | 0.02638 | 19.82 |
+| <InlineMath tex="B_1" /> (slope) | <InlineMath tex="-6.025 \times 10^{-5}" /> | <InlineMath tex="9.125 \times 10^{-5}" /> | −0.66 |
+
+Residual standard deviation: 0.2945 with 498 degrees of freedom.
+
+**Conclusion:** The slope t-value of −0.66 does not exceed the critical value <InlineMath tex="t_{0.975,\,498} = 1.96" />, so we **fail to reject** <InlineMath tex="H_0" /> — the slope is not significantly different from zero at the 5% significance level. The process mean is stable at approximately 0.508. The **fixed-location assumption is satisfied**.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) across four groups yields a non-significant result (p > 0.05). Variation is constant across the run.
+The [Levene test](/eda/quantitative/levene-test/) is used instead of Bartlett's test because the data are non-normal (uniform). The Levene test (median-based variant) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 0.07983 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 496" /> |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,496}" /> | 2.623 |
+
+**Conclusion:** The test statistic of 0.07983 is well below the critical value of 2.623, so we **fail to reject** <InlineMath tex="H_0" /> — the variances are not significantly different across the four intervals. The **fixed-variation assumption is satisfied**.
 
 ### Randomness Tests
 
-The [runs test](/eda/quantitative/runs-test/) confirms randomness (p > 0.05). [Autocorrelation](/eda/quantitative/autocorrelation/) values at all lags through lag 50 fall within the significance bounds. The data are independent.
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** -- tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | 0.2686 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 0.269" /> does not exceed 1.96, so we **fail to reject** <InlineMath tex="H_0" /> — the sequence is consistent with randomness.
+
+**Lag-1 autocorrelation** -- measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.03 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.087 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.03 is well within the critical bounds of <InlineMath tex="\pm 0.087" />, and values at all lags through lag 50 fall within the significance bounds. The data are independent. The **randomness assumption is satisfied**.
 
 ### Distribution Test
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic of approximately 5.83, far exceeding the 5% critical value of 0.787. The null hypothesis of normality is decisively rejected. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.00 and -1.20, respectively. The negative excess kurtosis confirms a platykurtic (flat-topped) distribution relative to the normal.
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) and [PPCC test](/eda/techniques/ppcc-plot/) are applied to test whether the data follow a normal distribution.
+
+**Normal distribution tests:**
+
+| Test | Statistic | Critical Value | Result |
+|------|-----------|----------------|--------|
+| Anderson-Darling <InlineMath tex="A^2" /> | 5.765 | 0.787 | **Reject normality** |
+| Normal PPCC | 0.9772 | 0.987 | **Reject normality** |
+
+The Anderson-Darling statistic of 5.765 far exceeds the 5% critical value of 0.787, and the normal PPCC of 0.9772 is less than its critical value of 0.987. Both tests decisively reject the null hypothesis of normality.
+
+**Uniform distribution tests:**
+
+| Test | Statistic | Result |
+|------|-----------|--------|
+| Uniform PPCC | 0.9996 | **Excellent fit** |
+| Uniform Anderson-Darling <InlineMath tex="A^2" /> | 0.9082 | **Good fit** |
+
+The uniform PPCC of 0.9996 indicates an excellent fit to the uniform distribution. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.00 and approximately −1.20, respectively — close to the theoretical uniform values of 0.0 and −1.2. The negative excess kurtosis confirms a platykurtic (flat-topped) distribution relative to the normal.
+
+**Conclusion:** The data are **not normally distributed** but are **an excellent fit to the uniform distribution**.
 
 ### Outlier Detection
 
 [Grubbs' test](/eda/quantitative/grubbs-test/) does not identify outliers, which is expected since the uniform distribution has finite support and the observations are well-contained within [0, 1].
 
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = {-0.66}" /> | 1.96 | **Fail to reject** |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 0.080" /> | 2.623 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = 0.269" /> | 1.96 | **Fail to reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.03" /> | 0.087 | **Fail to reject** |
+| **Distribution** | [Anderson-Darling](/eda/quantitative/anderson-darling/) (normal) | <InlineMath tex="A^2 = 5.765" /> | 0.787 | **Reject** |
+| **Distribution** | [PPCC](/eda/techniques/ppcc-plot/) (normal) | 0.9772 | 0.987 | **Reject** |
+| **Outliers** | [Grubbs' test](/eda/quantitative/grubbs-test/) | — | — | No outliers |
+
+Three of four assumptions hold. The distributional assumption fails — the data follow a uniform, not normal, distribution. The univariate model <InlineMath tex="Y_i = C + E_i" /> is appropriate, but the error term <InlineMath tex="E_i" /> follows a uniform rather than normal distribution.
+
 ## Conclusions
 
-Three of four assumptions hold: fixed location, fixed variation, and randomness are confirmed. The distributional assumption fails -- the data follow a uniform, not normal, distribution. This has practical implications: the sample mean remains a valid location estimate, but confidence intervals based on the normal distribution will be incorrect. A distribution-free confidence interval or bootstrap approach should be used instead. The 95% confidence interval for the mean using the t-statistic gives 0.5008 plus or minus 0.0255, but a nonparametric interval is more appropriate.
+Three of four assumptions hold: fixed location, fixed variation, and randomness are confirmed. The distributional assumption fails — the data follow a uniform, not normal, distribution.
+
+This has practical implications for inference. The sample mean remains a valid location estimate, but confidence intervals based on the normal distribution will be incorrect. The standard confidence interval:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 0.508 \pm 0.026" />
+</div>
+
+is approximately valid by the central limit theorem (with <InlineMath tex="n = 500" /> the CLT provides reasonable coverage), yielding a 95% interval of (0.482, 0.534). However, for uniform data the mid-range is the optimal location estimator, with a tighter 95% bootstrap confidence interval of approximately (0.497, 0.503).
+
+A distribution-free confidence interval or bootstrap approach should be preferred when the normality assumption is known to be violated. This case study demonstrates that EDA techniques — particularly the histogram, normal probability plot, Anderson-Darling test, and PPCC — reliably detect non-normal distributions, even when all other assumptions are satisfied.
