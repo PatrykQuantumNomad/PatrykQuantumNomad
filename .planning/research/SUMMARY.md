@@ -1,244 +1,164 @@
 # Project Research Summary
 
-**Project:** patrykgolabek.dev — v1.8 EDA Visual Encyclopedia
-**Domain:** Interactive statistics education pillar — modernizing NIST/SEMATECH e-Handbook of Statistical Methods, Chapter 1
-**Researched:** 2026-02-24
+**Project:** EDA Case Study Deep Dive (v1.9)
+**Domain:** Statistical content enhancement — deepening 8 existing NIST case studies + adding 1 new case study (Standard Resistor) to an existing Astro 5 static site
+**Researched:** 2026-02-26
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The EDA Visual Encyclopedia is a 90+ page statistics reference pillar added to an existing Astro 5 site (857 pages, Lighthouse 90+). The project modernizes the NIST/SEMATECH e-Handbook Chapter 1 — covering 6 foundation pages, 30 graphical techniques, 18 quantitative techniques, 19 probability distributions, 9 case studies, and 4 reference pages — from 1990s static HTML with obsolete Dataplot examples into a visual-first, Python-code-equipped reference encyclopedia. The core architectural decision is a 3-tier interactivity model: build-time TypeScript SVG generation for ~70% of pages (zero client JS), pre-rendered SVG swapping for ~20% of pages (minimal vanilla JS), and D3 micro-bundle React islands for the 19 distribution pages (~10%). No Python build dependency, no heavy charting libraries — all static plot generation happens in TypeScript at build time using DOM-independent D3 modules, following the proven pattern of `RadarChart.astro` and `CompassRadarChart.astro` already in the codebase.
+This milestone enhances an existing, fully functional EDA encyclopedia (90+ pages, 13 SVG generators, 9 case studies) to match the depth of the NIST/SEMATECH e-Handbook source material. The Random Walk case study is already the gold standard reference at 339 lines with 16 plot types, full quantitative test results, and model development/validation sections. The remaining 8 case studies range from substantially complete (Normal Random, Cryothermometry, Filter Transmittance, Heat Flow Meter) to needing significant new visualizations (Beam Deflections, Fatigue Life, Ceramic Strength). One entirely new case study (Standard Resistor, NIST Section 1.4.2.7) must be built from scratch. All research confirms this can be accomplished with zero new npm dependencies — existing SVG generators and the statistics.ts library cover every required plot type.
 
-The recommended approach reuses maximum existing infrastructure: Astro 5 Content Layer with JSON `file()` loader (proven from Beauty Index and Database Compass), `@astrojs/react` islands with `client:visible` (same as existing tool pages), `astro-expressive-code` for Python code blocks (zero new config), `satori`/`sharp` for OG images, and `nanostores` for filter state. New dependencies are minimal: `remark-math` + `rehype-katex` for build-time formula rendering (zero client JS, CSS+fonts only), and 6 D3 micro-modules totaling ~17KB gzipped for the distribution explorer. This keeps the total new production dependency count to 8 packages with a measured bundle impact of 17KB gzipped on only the 19 distribution pages.
+The recommended approach is infrastructure-first: create a new `hypothesis-tests.ts` module with 7-11 statistical test functions (runs test, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, F-test), extract a shared `PlotFigure.astro` wrapper to reduce duplication across 9 components, define a canonical section template, and establish a URL cheat sheet before writing any content. Content work then proceeds in priority order — easy wins (4 nearly-complete case studies) before the new Standard Resistor build, before complex enhancements (Beam Deflections sinusoidal model, Fatigue Life distribution comparison, Ceramic Strength DOE plots). Total estimated scope: ~2,500-3,500 lines across ~13 files.
 
-The two highest-risk areas are content accuracy and SEO publication strategy. The NIST source material is peer-reviewed statistical reference; any paraphrasing or LLM-assisted generation introduces credibility-destroying errors that are expensive to remediate. Publishing 90+ template-similar pages simultaneously risks Google SpamBrain classification, which can suppress the entire `/eda/` subdirectory and drag down existing page rankings. Both risks are preventable with upfront policy (accuracy checklist per page) and publication pacing (10-15 pages per week). Infrastructure pitfalls — KaTeX parser conflicts, D3 bundle leakage, DOM bloat, build time regression — are all well-understood and solvable in Phase 1 before any content is authored.
+The primary risks are statistical value transcription errors (270+ numeric values must exactly match NIST source), build time regression from 100+ SVG renders across 9 case studies, and cross-reference link errors that multiply as content expands. All three are preventable with upfront tooling: programmatic computation of test statistics from dataset arrays (not hardcoding), build time monitoring with a set budget, and a cross-reference URL cheat sheet. Quick task 011 already found 5 real broken links in the existing case studies, confirming this is an active risk.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing Astro 5 stack requires no framework changes. Eight new production dependencies cover all new functionality: `remark-math@^6.0.0` and `rehype-katex@^7.0.1` for build-time LaTeX rendering, and six D3 micro-modules (`d3-scale`, `d3-shape`, `d3-axis`, `d3-selection`, `d3-array`, `d3-path`) for both build-time SVG math (DOM-independent) and client-side distribution explorers. The critical insight is that `d3-scale` and `d3-shape` are DOM-independent and can run in Astro component frontmatter (Node.js) at build time — exactly how `RadarChart.astro` already works. The full `d3` package (280KB) is explicitly rejected in favor of micro-modules (~48KB minified / 17KB gzipped for the needed exports).
-
-See `.planning/research/STACK.md` for full details.
+The existing stack is entirely sufficient. Zero new npm packages are required. The 13 existing SVG generators cover every plot type referenced in NIST case studies, including residual variants (which are existing generators applied to computed residual arrays). The `statistics.ts` library covers all descriptive statistics; the only additions needed are formal hypothesis test functions in a new `hypothesis-tests.ts` module.
 
 **Core technologies:**
-- `remark-math` + `rehype-katex`: Build-time LaTeX rendering — zero client JS, only CSS+fonts ship (24KB CSS, on-demand woff2 fonts)
-- `d3-scale` + `d3-shape` + `d3-array` + `d3-path`: DOM-independent SVG math at build time — same pattern as existing RadarChart.astro
-- `d3-axis` + `d3-selection`: Client-side D3 for Tier C distribution explorers only — loaded via `client:visible` on 19 pages
-- JSON `file()` loader: Content collection for 90+ technique metadata entries — proven pattern from Beauty Index (25 entries) and Database Compass (12 entries)
-- `astro-expressive-code` (existing): Python syntax highlighting — zero new configuration, already works with Python out of the box
-- `satori` + `sharp` (existing): OG image generation — extend with `generateEdaOgImage()` function, add OG caching to control build time
-
-**Critical version requirements:**
-- `remark-math@^6.0.0` requires unified v11 (matches Astro 5's internal dependency)
-- `rehype-katex@^7.0.1` requires rehype v4+ (matches Astro 5's internal dependency)
-- KaTeX CSS must be self-hosted (not CDN) for production — eliminates external dependency and CSP complications
-- PITFALLS.md notes version conflict risk: if Astro GitHub issue #8650 resurfaces, fall back to `remark-math@5.1.1` + `rehype-katex@6.0.3`
+- `statistics.ts` (existing, unchanged): descriptive stats, FFT, ACF, OLS regression — handles all model fitting including the AR(1) already in Random Walk
+- `hypothesis-tests.ts` (new module, ~300-400 lines): formal tests (runs, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, F-test) — pure arithmetic on number arrays, no dependencies
+- `*Plots.astro` components (9 existing + 1 new): per-case-study build-time computation + SVG generator dispatch — proven with 16 plot types in Random Walk
+- `datasets.ts` (existing, +1 append): 10 dataset arrays at 93KB; Standard Resistor (DZIUBA1.DAT, 1000 values) adds ~15KB
 
 ### Expected Features
 
-See `.planning/research/FEATURES.md` for the full feature matrix and competitor analysis.
+**Must have (table stakes):**
+- Complete NIST quantitative test statistics with exact values for all 8 existing case studies — source parity is the core goal
+- All NIST graphical outputs reproduced for the 3 significantly-gapped case studies (Beam Deflections, Fatigue Life, Ceramic Strength)
+- Standard Resistor case study: DZIUBA1.DAT dataset + `StandardResistorPlots.astro` + `standard-resistor.mdx` + routing registration + CaseStudyDataset.astro mapping
+- Test Summary table in every case study showing all assumption results (location, variation, randomness, distribution, outlier)
+- Quantitative results section with hypothesis, test statistic, critical value, and conclusion for each test
 
-**Must have (table stakes — v1 launch):**
-- Filterable card grid landing page at `/eda/` — reuse `UseCaseFilter.tsx` / `LanguageFilter.tsx` pattern; filter by section (Foundations, Graphical, Quantitative, Distributions, Case Studies)
-- Build-time SVG plot for every technique page — 30+ chart types including histogram, box plot, scatter, run-sequence, lag, autocorrelation, probability, Q-Q; the visual foundation of the encyclopedia
-- KaTeX formula rendering — every quantitative technique and distribution page requires properly typeset formulas; no competing reference provides this alongside visual plots
-- Python code examples (static, copy-button) — replaces obsolete NIST Dataplot examples; actionable reference for modern practitioners
-- Category taxonomy + technique data model — foundation for all routing, filtering, cross-linking, and OG image generation
-- Breadcrumbs + cross-linking between related techniques — orientation and discovery in 90+ page hierarchy
-- Consistent `TechniquePage.astro` layout — single source of truth for technique page structure
-- SEO metadata per page — unique title, description, OG image, JSON-LD `TechArticle` for 86+ individually indexed pages
+**Should have (competitive differentiators):**
+- Test statistics computed at build time from dataset arrays (not just hardcoded) — enables programmatic verification and prevents silent errors
+- Shared `PlotFigure.astro` component — reduces duplication across 9 components
+- Cross-references between related case studies at page bottom (e.g., "Also see: Random Walk for severe violations")
+- Unique, dataset-specific captions for every plot (not generic "Histogram with KDE overlay")
+- "Develop Better Model" and "Validate New Model" sections for Beam Deflections, matching NIST structure
 
-**Should have (v1.x, add incrementally after validation):**
-- SVG swap interactivity (Tier B) — preset data-scenario buttons on histogram, scatter, normal probability plots (~11 pages); no D3 needed
-- Annotated plot variants — arrows, callouts, highlighted regions that explain "this peak means X"; moderate design effort, low code effort
-- Interactive parameter explorers for all 19 distributions (Tier C) — the headline differentiator; lets users adjust mu/sigma/lambda and see PDF+CDF update live; requires static SVG fallbacks first
-- Expandable formula tooltips — hover/click on Greek symbols to see plain-English definition; reduces notation barrier
-- Technique comparison tables — filterable matrix of techniques x problem categories (location, scale, normality, randomness); one page, high SEO value
-
-**Defer (v2+, after content is complete and traffic validated):**
-- 4-Plot interactive diagnostic tool — requires histogram, lag, normal probability, run-sequence generators all production-ready; add CSV paste + URL state; the "bring your own data" differentiator
-- 9 Case study walkthrough pages — highest per-page effort; step-based progression with scroll reveals; build after all technique pages prove the format
-- Distribution relationship diagram — all 19 distribution pages must exist before this capstone visualization makes sense
-
-**Anti-features (explicitly rejected):**
-- In-browser Python/R execution — Pyodide is 14MB+ WASM; destroys performance; code examples are illustrative, not computational
-- User data upload for all 30+ techniques — scope explosion; 4-Plot tool covers the valuable use case
-- Multi-language i18n — 90 pages x N languages; defer indefinitely unless validated demand emerges
-- Animated plot transitions on all 80+ SVGs — enormous scope; reserve D3 animation budget for 19 distribution explorers only
+**Defer (v2+):**
+- Bootstrap comparison plots for Uniform Random location estimators — NIST-specific but not core to the EDA narrative
+- Complex demodulation plots for Beam Deflections — highly specialized, NIST treats it as supplementary
+- CI for standard deviation in Normal Random and Heat Flow Meter — minor gap, low user value
+- Chi-square goodness-of-fit and Kolmogorov-Smirnov for Normal Random — mentioned in NIST but not central
+- `datasets.ts` split into per-case-study files — not needed until 15+ datasets
 
 ### Architecture Approach
 
-The EDA pillar follows the additive extension pattern established by every prior v1.x feature: new directories under `src/data/eda/`, `src/lib/eda/`, `src/components/eda/`, and `src/pages/eda/` with zero coupling to existing pillars. Eight existing files are modified (additive only): `content.config.ts`, `Header.astro`, `og-image.ts`, `astro.config.mjs`, `pages/index.astro`, `llms.txt.ts`, `llms-full.txt.ts`, and `package.json`. The dual content collection strategy (JSON `file()` loader for structured technique metadata, MDX `glob()` loader for prose-heavy foundations/case-studies/reference pages) matches the existing codebase split between Beauty Index/DB Compass (JSON) and blog (MDX).
-
-See `.planning/research/ARCHITECTURE.md` for full file tree, component API, data flow diagrams, and integration point details.
+The per-case-study `*Plots.astro` component architecture is correct and should not be refactored into a generic component. Each case study has fundamentally different model computations (AR(1), sinusoidal OLS, batch splitting, distribution fitting) that cannot be generalized without losing type safety. What can be shared is the figure wrapper HTML and plot dimension constants — extract these into `PlotFigure.astro` and `plot-configs.ts`. All computation follows a strict downward data flow: datasets.ts → statistics modules → Plots component frontmatter → SVG generators → MDX presentation. MDX files are presentation-only; they never contain computation logic.
 
 **Major components:**
-1. `src/lib/eda/schema.ts` — Zod schemas for `EdaTechnique` and `EdaDistribution` types; drives type safety across all generators and templates
-2. `src/lib/eda/svg-generators/` — 7 TypeScript files generating SVG strings from data: `plot-base.ts` (shared axes/grid), `line-plot.ts`, `scatter-plot.ts`, `bar-plot.ts`, `box-plot.ts`, `contour-plot.ts`, `distribution-curve.ts`, `composite-plot.ts` (4-plot, 6-plot)
-3. `src/lib/eda/math/` — 3 pure math files (`statistics.ts`, `distributions.ts`, `datasets.ts`); no DOM dependencies; used by both SVG generators (build time) and D3 explorer (client side)
-4. `src/components/eda/TechniquePage.astro` — shared layout for all 48 technique/quantitative pages; renders plot, formulas, Python code, interpretation, related links from structured data props
-5. `src/components/eda/PlotVariantSwap.astro` — Tier B pre-rendered SVG variants with vanilla JS tab switcher (~3KB); no framework JS
-6. `src/components/eda/DistributionExplorer.tsx` — Tier C React island loaded with `client:visible`; imports D3 micro-modules; covers all 19 distribution pages
-7. `src/components/eda/CategoryFilter.tsx` — React island for landing page filtering; mirrors `LanguageFilter.tsx` pattern exactly
-8. `src/pages/eda/` — 6 sub-directories with dynamic `[slug].astro` routes; each uses `getStaticPaths()` from content collections
-
-**Key patterns to follow:**
-- Build-time SVG generation: same as `radar-math.ts` and `spectrum-math.ts` — pure TypeScript functions returning SVG strings, called in Astro component frontmatter
-- Three-tier JS budget: Tier A = ~0KB, Tier B = ~3KB vanilla, Tier C = ~17KB D3 gzipped (only on 19 pages)
-- `client:visible` for all D3 islands — blocks nothing, loads only when chart is in viewport
-- Separate `EDALayout.astro` extending base `Layout.astro` — isolates GSAP animation lifecycle from D3 components
+1. `hypothesis-tests.ts` (new) — formal statistical tests; feeds test statistic values computed from dataset arrays into Plots components and MDX tables
+2. `*Plots.astro` components (9 existing, 1 new for Standard Resistor) — case-study-specific frontmatter computes models and residuals; dispatches to SVG generators by plot type
+3. `PlotFigure.astro` (new, shared) — shared figure wrapper eliminating the 70-80% duplicated HTML across all 9 components
+4. MDX case study pages (8 expanded, 1 new) — prose, InlineMath formulas, quantitative tables with verified values, plot component invocations
 
 ### Critical Pitfalls
 
-See `.planning/research/PITFALLS.md` for full pitfall analysis with warning signs, recovery strategies, and phase mappings.
+1. **Statistical value transcription errors** — 270+ numeric values across 9 case studies must match NIST exactly; a single wrong digit changes whether a hypothesis test rejects or fails to reject. Compute test statistics from `datasets.ts` arrays programmatically rather than hardcoding; cross-reference every critical value against the NIST source page character-by-character.
 
-1. **KaTeX + MDX formula parsing version conflicts** (Phase 48) — Astro GitHub issue #8650: `remark-math` and `rehype-katex` version mismatches cause `mathFlowInside` build failures; MDX's JSX parser conflicts with LaTeX `{}` braces in complex formulas. Prevention: test 10+ representative NIST formulas on a dedicated `/eda/test-formulas/` page before any content authoring; fall back to `remark-math@5.1.1` / `rehype-katex@6.0.3` if needed; create a `<Math>` component as escape hatch for problematic formulas.
+2. **Build time regression from 100+ SVG renders** — each `*Plots.astro` component recomputes its full model (regression, FFT, autocorrelation) on every render; with 16 invocations per page the AR(1) computation runs 16 times for Random Walk alone. Monitor with `time npx astro build`; budget less than 2 seconds regression per case study added; memoize expensive computations.
 
-2. **D3 bundle leaking to all 90+ pages** (Phase 48) — If D3 is imported in a shared layout or any non-island component, the ~48KB minified bundle ships to every EDA page, collapsing Lighthouse scores from 90+ to the 70s on mobile. Prevention: D3 lives exclusively in `DistributionExplorer.tsx` (a React island) loaded with `client:visible`; verify with Vite bundle analysis that D3 modules appear only in the Tier C page chunk; set a hard per-page JS budget (Tier A/B: +0-5KB; Tier C: +17KB gzipped max).
+3. **Cross-reference link errors multiply during expansion** — quick task 011 already found 5 broken links from technique/quantitative URL prefix confusion. Create a URL cheat sheet for the 20-30 most commonly referenced pages; run link validation after every case study expansion; technique-vs-quantitative ambiguity is the root cause (e.g., `/eda/techniques/autocorrelation-plot/` vs. `/eda/quantitative/autocorrelation/`).
 
-3. **Build time explosion from OG image generation at scale** (Phase 48) — 90+ new Satori+Sharp OG image renders add 9-27 seconds to build time; combined with SVG generation this risks hitting GitHub Pages' 10-minute deploy timeout. Prevention: implement content-hash-based OG image caching (skip regeneration if cached PNG exists); track build time after every 10 pages added; budget: no more than 20% regression from pre-EDA baseline.
+4. **Structural inconsistency across 9 case studies** — section names and depth drift when writing sequentially. Define a canonical section template before any content writing; apply headers-first across all 9 studies before filling content; document intentional deviations (Fatigue Life and Ceramic Strength have genuinely different NIST structures).
 
-4. **Content accuracy drift from NIST source material** (Phase 50+) — The NIST Handbook is peer-reviewed reference material; paraphrasing definitions, renaming formula variables, or using LLM-assisted content generation introduces subtle errors that destroy credibility with the target audience. Prevention is 10x cheaper than remediation. Policy: every formula verified character-by-character against NIST source; every page cites specific NIST section (e.g., "1.3.3.14"); review checklist completed before any content batch merges; never ship LLM-generated statistical content without manual verification.
-
-5. **SEO penalty from bulk publishing 90+ template-similar pages** (Phase 53) — Google SpamBrain 2025 detects mass-produced template content; publishing all 90 pages simultaneously can suppress the entire `/eda/` subdirectory and drag down existing page rankings. Recovery takes 3-6 months. Prevention: publish 10-15 pages per week over 6-8 weeks; ensure 200+ words of unique plain-English explanation per page; hand-write unique meta descriptions (never auto-generate from template); structure URL hierarchy with content silo internal linking from day one.
-
-6. **GSAP/D3 animation lifecycle conflicts** (Phase 48) — The existing site's GSAP ScrollTrigger uses `window.__*` globals documented as fragile in `CONCERNS.md`; EDA pages with D3 islands introduce competing scroll/resize listeners that can leak across view transitions. Prevention: `EDALayout.astro` overrides or omits content-area GSAP animations; D3 components manage their own lifecycle with `data-initialized` guard against view-transition re-mount duplication; test `Home->EDA->Blog->EDA->Home` navigation sequence (5+ times) for memory stability.
+5. **KaTeX formula errors silently degrade** — `throwOnError: false` means malformed LaTeX renders as raw text rather than failing the build. Temporarily switch to `throwOnError: true` during development; copy formula patterns verbatim from Random Walk reference implementation; standardize notation conventions for hypothesis tests, confidence intervals, and test statistics in tables.
 
 ## Implications for Roadmap
 
-Research identifies a clear phase structure driven by hard dependencies: infrastructure must validate the 3-tier architecture before content is authored, content must be batched and quality-gated, and publication must be paced for SEO safety. Phase numbering starts at 48 (continuing from v1.7 which ended at phase 47).
+Based on research, the architecture dependency graph and feature priority matrix clearly suggest a 5-phase structure:
 
-### Phase 48: Infrastructure Foundation
-**Rationale:** All 6 critical pitfalls require Phase 1 interventions. No content can be safely authored until the KaTeX pipeline, D3 bundle isolation, 3-tier component architecture, OG caching, and GSAP animation isolation are validated. Build infrastructure failure discovered at page 50 is far more expensive than at page 0.
-**Delivers:** Complete EDA infrastructure with zero content pages — a working proof of each of the 3 tiers; `content.config.ts` with 3 validated Zod schemas; all SVG generator function stubs; `EDALayout.astro` with isolated animation lifecycle; OG caching implemented; build time baseline measured; KaTeX test page with 10+ NIST formula categories passing; Vite bundle analysis confirming D3 isolated to Tier C chunks; navigation integration (single "EDA Encyclopedia" link in Header)
-**Addresses features:** Category taxonomy + technique data model, technique page template, breadcrumbs, site navigation integration, SEO metadata pipeline
-**Avoids pitfalls:** All 6 critical pitfalls must be addressed here before content creation begins
-**Research flag:** Standard patterns — skip `research-phase`
+### Phase 1: Infrastructure Foundation
+**Rationale:** All content phases depend on the hypothesis-tests module, the canonical template, and the shared PlotFigure component. Building infrastructure first prevents doing content work twice and eliminates the primary technical debt pitfall (component duplication). Baseline build time must be measured before any content changes.
+**Delivers:** `hypothesis-tests.ts` with 7-11 test functions tested against known NIST values; `PlotFigure.astro` shared wrapper; `plot-configs.ts` shared constants; canonical section template document; URL cross-reference cheat sheet; baseline build time measurement.
+**Addresses:** FEATURES — "computed test statistics" differentiator; ARCHITECTURE — Decision 4 (new module), Decision 1 (shared wrapper)
+**Avoids:** Pitfall 2 (build regression — establish baseline), Pitfall 3 (structural inconsistency — template first), Pitfall 5 (component duplication — extract before scaling)
 
-### Phase 49: Data Model + Content Schema Population
-**Rationale:** The JSON data files (`techniques.json`, `distributions.json`) must be complete before any page generation can be validated. This is a content architecture phase — no page rendering, no interactivity — just defining the full 90+ entry data model with all required fields. Doing this before content authoring catches schema design errors when fixing them is cheap (one JSON file change vs 90 MDX files).
-**Delivers:** Complete `techniques.json` (30 graphical + 18 quantitative entries), complete `distributions.json` (19 entries), MDX stubs for 6 foundations + 9 case studies + 4 reference pages, all with NIST section references; validated against Zod schema; all cross-linking slugs pre-populated; sample data generators in `datasets.ts`; each technique tagged with its interactivity tier (A/B/C)
-**Uses:** JSON `file()` loader, Zod schemas from Phase 48, `categories.ts`
-**Implements:** Dual content collection strategy
-**Research flag:** Standard patterns — skip `research-phase`
+### Phase 2: Minor-Gap Case Studies (Quick Wins)
+**Rationale:** Four case studies are already 90%+ complete (Normal Random, Cryothermometry, Filter Transmittance, Heat Flow Meter). Completing them first builds momentum, validates the canonical template in practice, and establishes the enhanced format before tackling complex studies. These studies have no model development sections and need only content deepening and test statistic verification — the lowest risk content work.
+**Delivers:** Normal Random Numbers, Cryothermometry, Filter Transmittance, and Heat Flow Meter at full NIST parity — verified test statistics computed from dataset arrays, complete quantitative sections following canonical template, unique plot captions, cross-study links at page bottom.
+**Uses:** `hypothesis-tests.ts` from Phase 1; existing SVG generators; no new components or plot types needed
+**Avoids:** Pitfall 1 (transcription errors — use computed values), Pitfall 4 (link errors — use cheat sheet), Pitfall 7 (formula errors — follow Random Walk patterns)
 
-### Phase 50: SVG Generator Library
-**Rationale:** The SVG generator functions are the core technical challenge with no existing analog at the required variety (histogram, box plot, scatter, probability plot, run-sequence, lag, autocorrelation, Q-Q, contour, composite 4-plot/6-plot, distribution curves). All 30 graphical technique pages depend on these generators. Building the full library first with unit-testable pure functions enables confident content authoring; building generators one-at-a-time with content would create confusing partial states.
-**Delivers:** All SVG generator functions in `src/lib/eda/svg-generators/` and `src/lib/eda/math/` (statistics.ts, distributions.ts, datasets.ts); each generator tested with sample NIST data; palette matching site's Quantum Explorer theme; all plots responsive via viewBox with no fixed width/height; dark mode contrast verified
-**Uses:** `d3-scale`, `d3-shape`, `d3-array`, `d3-path` (build-time DOM-independent)
-**Implements:** Build-time SVG generation pattern (Tier A + Tier B base)
-**Research flag:** TypeScript SVG generation of varied statistical chart types — consider `research-phase` for complex plot types (probability plots, star plots, contour plots, Q-Q plots)
+### Phase 3: Standard Resistor — New Case Study
+**Rationale:** Building one complete new case study before tackling complex enhancements of existing studies tests the full pipeline (dataset → component → MDX → routing → OG image). Standard Resistor follows the standard 4-section NIST pattern (same as Phase 2 studies), making it achievable without new SVG generators. Placing it before the complex enhancements allows the full new-case-study workflow to be validated on a simpler study.
+**Delivers:** Complete Standard Resistor case study — DZIUBA1.DAT dataset (1000 values, programmatically parsed from NIST) verified in datasets.ts; `StandardResistorPlots.astro` following RandomWalkPlots.astro pattern; `standard-resistor.mdx` with full NIST-parity content; CaseStudyDataset.astro CASE_STUDY_MAP update; OG image generation.
+**Uses:** All infrastructure from Phase 1; follows the same component pattern as Phase 2
+**Avoids:** Pitfall 5 (dataset growth — verify 1000-element array count before proceeding); integration gotcha (CaseStudyDataset.astro mapping, MDX relative import path, OG cache clear after finalizing title/description)
 
-### Phase 51: Graphical Technique Pages (Tier A + Tier B)
-**Rationale:** Graphical techniques are the visual centerpiece and highest-value table-stakes feature. 10 priority techniques (histogram, box plot, scatter, normal probability, run-sequence, lag, autocorrelation, 4-plot, 6-plot, probability plot) enable the MVP to be evaluated as a working encyclopedia before committing to all 30. Tier B SVG swap interactivity is included here because it shares the same SVG generators and adding it later would require revisiting every page.
-**Delivers:** 10 MVP graphical technique pages (Tier A) + 20 remaining graphical pages; ~11 Tier B pages with SVG swap (histogram interpretations, scatter patterns, normal probability shapes); `PlotVariantSwap.astro` component; annotated plot variants for the highest-value techniques; filterable card grid landing page (first real content to test the filter)
-**Uses:** SVG generators from Phase 50, `TechniquePage.astro` from Phase 48
-**Implements:** Tier A and Tier B interactivity patterns at full scale
-**Research flag:** Standard patterns — skip `research-phase`
+### Phase 4: Complex Enhancements — Beam Deflections and Fatigue Life
+**Rationale:** These two case studies have NIST Develop/Validate sections requiring model fitting and specialized visualizations. Beam Deflections needs sinusoidal model computation and residual analysis (16+ plot types matching Random Walk depth); Fatigue Life needs Weibull probability plot and distribution comparison visualization. Both share the "model-based residual analysis" architecture pattern. Tackling them together allows the residual analysis pattern established in Random Walk to be extended to two more studies while the pattern is fresh.
+**Delivers:** Beam Deflections with sinusoidal model fit, all residual plots populated with computed data (residual-4-plot, residual-run-sequence, residual-lag, residual-autocorrelation), and parameter estimates table (C=-178.786, AMP=-361.766, FREQ=0.302596, PHASE=1.46536 verified against NIST). Fatigue Life with Weibull probability plot, distribution comparison discussion, verified AIC/BIC/posterior values, and one-sided prediction interval.
+**Uses:** Existing `generateProbabilityPlot({ type: 'weibull' })` for Fatigue Life; existing scatter/line/lag/histogram/autocorrelation generators for Beam Deflections residuals; linearized sinusoidal OLS from existing BeamDeflectionPlots.astro frontmatter
+**Avoids:** Pitfall 1 (parameter estimates verified against NIST source table before building residual plots on top of them); Pitfall 2 (Beam Deflections residual computation runs on every render — memoize in Phase 1 infrastructure)
 
-### Phase 52: Quantitative Technique Pages + Foundations
-**Rationale:** Quantitative technique pages depend heavily on KaTeX (validated in Phase 48) and Python code blocks. 18 quantitative techniques plus 6 foundation pages complete the non-distribution content. Foundations (EDA philosophy, assumptions, problem categories) provide the conceptual framing that makes technique pages meaningful. This phase validates the pillar at ~60% complete before tackling the technically distinct distribution pages.
-**Delivers:** 18 quantitative technique pages (measures of location, scale, t-test, ANOVA, chi-square, Anderson-Darling, etc.) with KaTeX formulas, Python code, and build-time plots; 6 foundation pages (MDX from `edaPages` collection); technique comparison tables; cross-linking complete across all published pages
-**Uses:** `rehype-katex`, MDX `glob()` loader, `FormulaBlock.astro`, `PythonCode.astro`
-**Implements:** Dual content collection strategy (both JSON and MDX paths exercised in production)
-**Research flag:** Standard patterns — skip `research-phase`
-
-### Phase 53: Distribution Pages (Tier C — D3 Interactive Explorers)
-**Rationale:** All 19 distribution pages require both a static SVG fallback (via `distribution-curve.ts` from Phase 50) and a D3 interactive parameter explorer. This is architecturally distinct from all other pages: React island with D3 micro-bundle, parameter sliders, live PDF+CDF redraw, resize handling, view-transition cleanup. Grouping all 19 into one phase ensures the `DistributionExplorer.tsx` component is built once with full polish rather than incrementally, and the D3 bundle footprint is validated across all 19 pages before publication.
-**Delivers:** 19 distribution pages (Normal, Uniform, Exponential, t, Chi-squared, F, Beta, Gamma, Weibull, Poisson, Binomial, Geometric, Hypergeometric, Negative Binomial, Lognormal, Cauchy, Laplace, Logistic, Pareto); `DistributionExplorer.tsx` with parameter sliders (mu, sigma, n, p, lambda, etc.), dual PDF+CDF display, touch-friendly sliders; static build-time SVG fallback for no-JS users; `client:visible` loading verified to not ship D3 to non-distribution pages
-**Uses:** `d3-selection`, `d3-axis` (client-side); `distribution-curve.ts`, `distributions.ts` (shared math)
-**Implements:** Tier C interactivity pattern at full scale
-**Research flag:** D3 component lifecycle with Astro view transitions is a known pitfall area — run `research-phase` to document D3 mount/unmount patterns and resize handling before implementation
-
-### Phase 54: SEO, Polish, and Staged Publication
-**Rationale:** The PITFALLS research is unambiguous: bulk-publishing 90 template-similar pages simultaneously triggers SpamBrain. Staged publication (10-15 pages/week) must be planned and executed as a distinct phase with Google Search Console monitoring between batches. This phase also addresses all remaining "looks done but isn't" checklist items: accessibility audit, mobile SVG validation, RSS feed isolation, llms.txt update, 4 reference pages, and sitemap configuration.
-**Delivers:** Staged publication over 6-8 weeks with Search Console monitoring; 4 reference pages (analysis questions, techniques by category, distribution tables, related distributions); JSON-LD `TechArticle` / `LearningResource` structured data on all pages; `role="img"` + `aria-label` on all SVG plots; mobile 320px viewport validation; RSS feed confirmed to exclude EDA pages; `llms.txt` updated; Lighthouse 90+ verified on one page from each tier
-**Addresses pitfalls:** SEO publication strategy (Pitfall 6), accessibility, final integration checks
-**Research flag:** Standard patterns — skip `research-phase`
-
-### Phase 55: v2 Features (Post-Validation)
-**Rationale:** The 4-Plot interactive diagnostic tool and 9 case study walkthrough pages are the highest per-page effort features and depend on all preceding content being production-ready. Explicitly scoped to a post-launch phase triggered by traffic validation. The distribution relationship diagram capstone also belongs here.
-**Delivers:** 4-Plot interactive diagnostic (histogram + lag + normal probability + run-sequence generators composited with CSV input, URL state via `lz-string`); 9 case study pages with step-based walkthrough progression; distribution relationship diagram (all 19 distribution nodes + mathematical relationship edges)
-**Research flag:** 4-Plot tool architecture and case study interaction design are both novel patterns for this codebase — run `research-phase` before this milestone
+### Phase 5: Ceramic Strength — DOE Case Study
+**Rationale:** Ceramic Strength requires the most new visualization variants of any case study: bihistogram, block plots, DOE mean/SD plots, interaction plots, and multi-group box plots. These extend existing generators (generateBarPlot, generateLinePlot, generateBoxPlot) rather than requiring entirely new generator files. Placed last because it is the most complex, its DOE structure is genuinely different from all other case studies, and it benefits from all infrastructure and patterns being proven in Phases 2-4.
+**Delivers:** Ceramic Strength at full NIST parity — batch comparison deepening (bihistogram variant, QQ plot batch comparison), lab effect analysis (box plots by lab overall and per batch), DOE primary factors analysis (mean plots per factor, SD plots per factor, interaction effects), all quantitative DOE effects computed, F-test and two-sample t-test results verified.
+**Uses:** Extended `generateBoxPlot` (multi-group); `generateBarPlot` or `generateLinePlot` extended for DOE means/interaction; existing histogram for bihistogram variant
+**Avoids:** Pitfall 3 (structural inconsistency — Ceramic Strength's 6-section NIST structure is an intentional deviation from the canonical template; document explicitly at top of MDX file)
 
 ### Phase Ordering Rationale
 
-- **Infrastructure first (Phase 48):** All 6 critical pitfalls are infrastructure problems. Content authored on broken infrastructure creates cleanup debt that scales with page count.
-- **Data model before content (Phase 49):** Schema design errors cost 1 hour at Phase 49, 100 hours at Phase 54. The JSON data files drive everything downstream.
-- **SVG generators before pages (Phase 50):** All 30 graphical technique pages are blocked on the chart generator library. Building generators with isolated unit tests enables parallel content authoring in Phases 51-52.
-- **Graphical before quantitative (Phase 51 before 52):** Graphical techniques are the headline visual feature; early validation of the visual pillar concept is higher value than quantitative completeness.
-- **Distributions last in content (Phase 53):** Tier C architecture is distinct and requires all static SVG infrastructure to be proven first (static fallback = Tier A pattern, which must be stable before adding the D3 layer on top).
-- **Staged publication separate (Phase 54):** Publication pacing is a non-negotiable SEO risk mitigation; it requires dedicated phase ownership and monitoring cadence, not an afterthought.
+- Infrastructure before content: `hypothesis-tests.ts` is referenced by all content phases; building it once with verified outputs prevents 9 independent implementations of the same tests
+- Easy wins before complex: validates the canonical template and enhanced format on low-risk studies before high-stakes model-development sections; Quick confidence checkpoints before committing to Beam Deflections nonlinear regression
+- New case study in the middle: tests the full new-case-study pipeline without the complexity of model fitting; natural checkpoint between "content deepening" and "content plus model development"
+- Most complex last: Ceramic Strength's DOE plots are the highest-effort items and benefit from all prior phases being complete and stable; its unique 6-section structure is less confusing to handle after the standard template is fully internalized
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 50 (SVG Generator Library):** Complex statistical plot types (probability plots, star plots, contour plots, Q-Q plots) have non-trivial SVG generation logic. Run `/gsd:research-phase` to document the D3 scale/shape function combinations and data transformations for each chart type.
-- **Phase 53 (Distribution Pages — Tier C):** D3 component lifecycle with Astro view transitions is the documented fragile area (GSAP conflicts, duplicate chart instances on re-navigation). Run `/gsd:research-phase` to document `useEffect` cleanup patterns, resize observer teardown, and the `data-initialized` guard approach before implementation.
-- **Phase 55 (v2 Features):** 4-Plot interactive tool architecture (CSV parsing, URL state, multi-panel D3 layout) and case study step-based interaction design are both novel patterns for this codebase. Run `/gsd:research-phase` before starting either.
+Phases requiring careful implementation attention (known risks, not missing research):
+- **Phase 4 (Beam Deflections sinusoidal model):** The linearized OLS approach in BeamDeflectionPlots.astro must produce values matching NIST (C, AMP, FREQ, PHASE) within rounding before residual plots are built on top of it. Verify parameter match before proceeding to residual analysis.
+- **Phase 5 (Ceramic Strength DOE plots):** Whether existing generators (generateBarPlot, generateLinePlot) can be extended for DOE mean/SD/interaction plots without new generator files should be re-evaluated at implementation time. Research leans toward extension being sufficient, but assess hands-on.
 
-Phases with well-documented standard patterns (skip research-phase):
-- **Phase 48 (Infrastructure):** All components follow documented Astro patterns (KaTeX integration, content collections, layout slots, island directives). Recovery strategies well-documented in PITFALLS.md.
-- **Phase 49 (Data Model):** JSON `file()` loader with Zod schemas is a proven codebase pattern with two working examples.
-- **Phase 51 (Graphical Technique Pages):** Reuses `TechniquePage.astro` template and SVG generators from Phase 50; same routing pattern as Beauty Index and Database Compass.
-- **Phase 52 (Quantitative + Foundations):** Follows established dual content collection patterns; KaTeX already validated in Phase 48.
-- **Phase 54 (SEO + Publication):** Standard Astro sitemap/JSON-LD/accessibility patterns, plus documented staged publication strategy from PITFALLS.md.
+Phases with well-documented patterns (straightforward execution):
+- **Phase 1 (Infrastructure):** All functions are pure arithmetic on number arrays; no external dependencies; RandomWalkPlots.astro is the complete reference pattern
+- **Phase 2 (Minor Gaps):** All existing generators used as-is; content writing + test statistic verification only
+- **Phase 3 (Standard Resistor):** Standard 4-section NIST pattern; copy RandomWalkPlots.astro as template; follow integration checklist from PITFALLS.md
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Official docs, local measurements (D3 bundle size measured with esbuild: 48KB minified / 17KB gzipped), first-party codebase patterns (RadarChart.astro, beauty-index JSON loader, CompassRadarChart.astro). Version compatibility matrix fully verified. |
-| Features | HIGH | NIST Handbook is public domain and fully enumerable (33 graphical, 18 quantitative, 19 distributions, 9 case studies). Competitor analysis (Seeing Theory, R Psychologist, Stat Trek, Khan Academy) is direct observation. Feature dependencies are logically derived from FEATURES.md dependency graph. |
-| Architecture | HIGH | Based on direct codebase analysis of 3 existing parallel pillars (Beauty Index, Database Compass, Dockerfile/Compose/K8s tool pages). All architectural patterns proven in first-party code. Astro 5 Content Layer, D3 modular imports, and `client:visible` island loading are officially documented. |
-| Pitfalls | HIGH | Sourced from Astro GitHub issues (verified), KaTeX GitHub issues (verified), Lighthouse issue tracker (verified), GSAP forum posts (verified against `CONCERNS.md`), Google spam update reports (multiple sources), first-party codebase `CONCERNS.md`. Recovery strategies are researched, not speculative. |
+| Stack | HIGH | Verified by direct codebase analysis of all 13 SVG generators, statistics.ts, package.json; zero new packages required; confirmed no plot type gaps |
+| Features | HIGH | Sourced directly from NIST handbook pages; gap analysis done per-case-study with plot-by-plot and test-by-test comparison against NIST source |
+| Architecture | HIGH | Based on codebase analysis of all 9 existing components; Random Walk 339-line gold standard is a fully working reference; patterns are proven |
+| Pitfalls | HIGH | Based on existing codebase analysis, quick task 011 audit findings (5 real broken links found), and v1.8 pitfalls experience; risks are concrete not speculative |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **KaTeX version compatibility at execution time:** PITFALLS.md and STACK.md give slightly different version recommendations (STACK recommends `remark-math@^6.0.0`, PITFALLS recommends pinning to `5.1.1` if issues arise). Resolve by attempting `^6.0.0` first in Phase 48 with the test-formulas page; fall back to `5.1.1` only if `mathFlowInside` errors appear. Document the actual working version in Phase 48 milestone notes.
-
-- **OG image caching implementation specifics:** Both STACK.md and PITFALLS.md recommend OG caching but neither specifies the exact implementation (hash function, cache location, CI invalidation). Concrete decision needed in Phase 48: use content hash of `(title + description)`, store cached PNGs in `public/open-graph/eda/` committed to git, skip Satori render if file already exists with matching hash.
-
-- **KaTeX CDN vs self-hosting final decision:** ARCHITECTURE.md initially suggests CDN for simplicity, but STACK.md and PITFALLS.md both recommend self-hosting for CSP safety and reliability. Self-hosting is the correct production choice. The `scripts/copy-katex-assets.mjs` script should be implemented in Phase 48 and assets committed before any content phases begin.
-
-- **Dark mode SVG color palette validation:** PITFALLS.md flags dark mode SVG readability as a "looks done but isn't" item. The `QUANTUM_PALETTE` color values from ARCHITECTURE.md need to be tested against the site's dark theme before any content SVGs are generated. Validate in Phase 50 as the first SVG generator functions are built.
-
-- **Tier B page count discrepancy:** FEATURES.md and ARCHITECTURE.md differ slightly on the number of pages needing SVG swap interactivity (FEATURES says ~15, ARCHITECTURE says ~12). Resolve definitively during Phase 49 data model population by tagging each technique with its interactivity tier; the count will be authoritative from the data.
+- **Standard Resistor dataset values:** The DZIUBA1.DAT file with 1000 values must be downloaded from NIST and parsed programmatically. Handle during Phase 3 by programmatic download and parse rather than manual entry; verify array length === 1000 before committing.
+- **Ceramic Strength DOE generator strategy:** Whether existing generators (generateBarPlot, generateLinePlot) can be extended for DOE mean/SD/interaction plots without new generator files is an implementation-time decision. Research suggests extension is sufficient but assess hands-on during Phase 5 execution.
+- **Beam Deflections sinusoidal regression match:** NIST used DATAPLOT nonlinear least squares; the codebase uses a linearized OLS approximation. Verify the linearized approach produces NIST-matching parameter values (C=-178.786, AMP=-361.766, FREQ=0.302596, PHASE=1.46536) before building the residual analysis layer in Phase 4.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [NIST/SEMATECH e-Handbook Chapter 1](https://www.itl.nist.gov/div898/handbook/eda/eda.htm) — Complete EDA section structure, technique list, all formulas and methodology
-- [Astro 5 Content Layer Docs](https://docs.astro.build/en/guides/content-collections/) — `file()` and `glob()` loaders, caching behavior, `getStaticPaths()` patterns
-- [Astro MDX Integration Docs](https://docs.astro.build/en/guides/integrations-guide/mdx/) — `extendMarkdownConfig: true`, remark/rehype plugin inheritance
-- [D3 Official Docs](https://d3js.org/getting-started) — Sub-module imports, DOM independence of `d3-scale` / `d3-shape`, tree-shaking approach
-- [KaTeX Font Documentation](https://katex.org/docs/font) — 20 woff2 font files, on-demand loading, self-hosting instructions
-- [Astro GitHub Issue #8650](https://github.com/withastro/astro/issues/8650) — remark-math + Astro MDX version conflict, `mathFlowInside` error
-- [KaTeX GitHub Issue #4096](https://github.com/KaTeX/KaTeX/issues/4096) — CSP `unsafe-inline` requirement for style-src
-- [Lighthouse Issue #6807](https://github.com/GoogleChrome/lighthouse/issues/6807) — SVG child nodes counted in DOM size audit
-- Existing codebase: `RadarChart.astro`, `CompassRadarChart.astro`, `radar-math.ts`, `spectrum-math.ts` — proven build-time SVG generation pattern
-- Existing codebase: `src/content.config.ts` — Beauty Index (25 entries) and Database Compass (12 entries) JSON `file()` loader pattern
-- Existing codebase: `.planning/codebase/CONCERNS.md` — animation lifecycle fragility, documented `window.__*` global state pattern
-- D3 micro-bundle size: measured locally with esbuild — 48KB minified / 17KB gzipped for the needed imports
-- [Seeing Theory (Brown University)](https://seeing-theory.brown.edu/) — Distribution parameter explorer design; dual PDF/CDF display pattern
+- NIST/SEMATECH e-Handbook Section 1.4.2 (all 10 case study subsections, fetched directly via WebFetch) — complete feature gap analysis per case study with plot-by-plot and test-by-test comparison
+- Existing codebase: `src/lib/eda/math/statistics.ts` — 248 lines, 9 functions; baseline math library verified
+- Existing codebase: `src/lib/eda/svg-generators/index.ts` — 13 generators + 2 composite; all verified against case study plot requirements
+- Existing codebase: `src/components/eda/RandomWalkPlots.astro` — 339-line reference implementation, 16 plot types, AR(1) model, full quantitative results
+- Existing codebase: `src/components/eda/BeamDeflectionPlots.astro` — sinusoidal model via OLS normal equations, 13 plot types
+- Existing codebase: `src/data/eda/datasets.ts` — 93KB, 10 dataset arrays
+- Quick task 011 audit — `.planning/quick/011-eda-content-correctness-validation/011-SUMMARY.md` — found 5 broken cross-reference links; verified all existing statistical values correct against NIST
 
 ### Secondary (MEDIUM confidence)
-- [R Psychologist](https://rpsychologist.com/viz/) — Depth-over-breadth principle for interactive statistics visualizations
-- [Distill.pub: Communicating with Interactive Articles](https://distill.pub/2020/communicating-with-interactive-articles/) — Five affordances framework; surgical interactivity principle
-- [Astro OGP Build Cache](https://ainoya.dev/posts/astro-ogp-build-cache/) — Content-hash OG caching pattern
-- [Google 2025 Spam Update](https://news.designrush.com/google-2025-spam-update-complete-seo-penalties) — SpamBrain cross-page pattern stitching
-- [GSAP + Astro View Transitions](https://www.launchfa.st/blog/gsap-astro-view-transitions) — Lifecycle cleanup patterns for GSAP + Astro
-- [Programmatic SEO at Scale](https://guptadeepak.com/the-programmatic-seo-paradox-why-your-fear-of-creating-thousands-of-pages-is-both-valid-and-obsolete/) — Gradual publication strategy rationale
-- [Byteli: Math Typesetting in Astro MDX](https://www.byteli.com/blog/2024/math_in_astro/) — remark-math + rehype-katex practical configuration in Astro
-- [MDX Discussion #1329](https://github.com/orgs/mdx-js/discussions/1329) — Custom Math component workaround for JSX/LaTeX brace conflicts
+- NIST Quantitative Output pages for each case study (eda4213, eda4223, eda4233, eda4243, eda4253, eda4263, eda4273, eda4283, eda42a3) — exact test statistic values used for gap analysis
+- Existing 9 case study MDX files — current state baseline for each study; line count and section structure assessed
+- NIST Standard Resistor case study (eda427) — DZIUBA1.DAT metadata, quantitative test values (regression slope t=100.2, Levene W=140.85, autocorrelation r1=0.97, runs Z=-30.56)
 
 ### Tertiary (LOW confidence, needs validation)
-- D3 micro-bundle size estimate from ARCHITECTURE.md (~20KB minified / ~8KB gzipped) differs from STACK.md measurement (~48KB minified / ~17KB gzipped) — the STACK.md figure was explicitly measured with esbuild and should be treated as authoritative; use 17KB gzipped as the planning budget for Tier C pages
+- Beam Deflections linearized OLS vs. NIST nonlinear least squares match — assumed from the existing BeamDeflectionPlots.astro implementation but not verified end-to-end; validate parameter estimates in Phase 4 before building residual plots
 
 ---
-*Research completed: 2026-02-24*
+*Research completed: 2026-02-26*
 *Ready for roadmap: yes*
-*Phases: 48-55 (continuing from v1.7 milestone ending at phase 47)*
+*Supersedes: v1.8 SUMMARY.md (2026-02-24)*

@@ -1,1082 +1,443 @@
-# Architecture Research: EDA Visual Encyclopedia
+# Architecture Patterns
 
-**Domain:** 90+ page EDA Visual Encyclopedia pillar integrated into an existing Astro 5 portfolio site
-**Researched:** 2026-02-24
-**Confidence:** HIGH -- based on direct codebase analysis of existing Beauty Index (v1.3), Database Compass (v1.5), and tool patterns (v1.4/v1.6/v1.7), verified Astro 5 Content Layer API patterns, confirmed D3 modular architecture, KaTeX/remark-math integration documented
+**Domain:** EDA Case Study Deep Dive -- enhancing 8 existing case studies + 1 new case study to match NIST/SEMATECH source depth
+**Researched:** 2026-02-26
+**Confidence:** HIGH (based on direct codebase analysis of all 9 existing components, 13 SVG generators, statistics library, and MDX content)
 
+## Current Architecture Inventory
+
+### What Exists Today
+
+| Component Type | Count | Location | Pattern |
+|---|---|---|---|
+| Plot Components | 9 | `src/components/eda/*Plots.astro` | Per-case-study Astro component with `type` prop |
+| SVG Generators | 13+2 | `src/lib/eda/svg-generators/*.ts` | Pure functions returning SVG strings |
+| Math Functions | 8 | `src/lib/eda/math/statistics.ts` | Pure arithmetic, no DOM/D3 |
+| Datasets | 9 case-study + 6 technique | `src/data/eda/datasets.ts` | Named exports of `number[]` or typed arrays |
+| Case Study MDX | 9 | `src/data/eda/pages/case-studies/*.mdx` | MDX importing plot component + InlineMath |
+| Dynamic Route | 1 | `src/pages/eda/case-studies/[...slug].astro` | Astro content collection rendering |
+
+### Case Study Maturity Matrix
+
+Each case study was assessed against the Random Walk gold standard for completeness.
+
+| Case Study | Plots Component | Has Residuals | Has Model | Quantitative Tests | Enhancement Needed |
+|---|---|---|---|---|---|
+| **Random Walk** | RandomWalkPlots | Yes (AR(1)) | Yes (AR(1)) | Full (location, variation, runs, autocorrelation) | NONE -- gold standard |
+| **Normal Random** | NormalRandomPlots | No | No (not needed) | Full | Minor -- already comprehensive |
+| **Uniform Random** | UniformRandomPlots | No | No (not needed) | Full | Minor -- already comprehensive |
+| **Beam Deflections** | BeamDeflectionPlots | Yes (sinusoidal) | Yes (sinusoidal) | Full | Moderate -- residual interpretation sparse |
+| **Cryothermometry** | CryothermometryPlots | No | No (but NIST discusses "no model needed") | Full | Moderate -- consider discrete-data discussion depth |
+| **Filter Transmittance** | FilterTransmittancePlots | No | No (NIST recommends re-run) | Full | Moderate -- root cause section could expand |
+| **Heat Flow Meter** | HeatFlowMeterPlots | No | No (not needed) | Partial | Significant -- needs deeper quantitative section |
+| **Fatigue Life** | FatigueLifePlots | No | No (distribution focus) | Partial | Significant -- needs distribution comparison plots |
+| **Ceramic Strength** | CeramicStrengthPlots | No (batch comparison) | Partial (ANOVA discussed) | Partial | Significant -- needs factor effects plots |
+
+## Recommended Architecture
+
+### Decision 1: Keep Per-Case-Study Components (NOT a Generic Component)
+
+**Recommendation: Keep individual `*Plots.astro` components per case study.**
+
+**Rationale:**
+
+1. **Each case study has unique data transformations.** Random Walk computes AR(1) residuals via `linearRegression`. Beam Deflections computes sinusoidal model residuals via OLS normal equations with `sin`/`cos` basis. Ceramic Strength splits data by batch. These are fundamentally different computations that cannot be genericized without creating a configuration object more complex than the component itself.
+
+2. **Type safety per component.** Each `PlotType` union is specific to its case study. RandomWalkPlots has 16 types including `'residual-uniform-probability'`. NormalRandomPlots has 7 types. CeramicStrengthPlots has 8 types including `'batch-box-plot'`. A generic component would need a superset type that sacrifices compile-time safety.
+
+3. **The existing pattern scales linearly.** Each component is ~100-200 lines of self-contained code. With 9 case studies, that is ~1,800 lines total -- well within maintainability bounds. A generic component would save perhaps 30% of that but add indirection.
+
+4. **Default captions are case-study-specific.** Each component has a `Record<PlotType, string>` of default captions. These are domain-specific descriptions that cannot be generated.
+
+**What CAN be shared (and already is):**
+- The `<figure>` wrapper template is identical across all 9 components. Extract to a `PlotFigure.astro` helper:
+
+```astro
+<!-- src/components/eda/PlotFigure.astro -->
 ---
-
-## System Overview
-
-```
-Existing Site Layer (MODIFY: extend, do not replace)
-  +-- Layout.astro (ADD: KaTeX CSS via <slot name="head">)
-  +-- Header.astro (MODIFY: add "EDA" nav link)
-  +-- content.config.ts (MODIFY: add edaTechniques + edaDistributions collections)
-  +-- og-image.ts (MODIFY: add EDA OG image generators)
-  +-- Existing Collections: blog, languages, dbModels (UNCHANGED)
-  +-- Existing Stores: all existing stores (UNCHANGED)
-
-NEW: EDA Visual Encyclopedia Layer
-  +-- Content Data: src/data/eda/
-  |   +-- techniques.json          (90+ technique metadata entries)
-  |   +-- distributions.json       (19 distribution parameter configs)
-  |   +-- datasets/                (CSV/JSON sample datasets for case studies)
-  +-- Core Lib: src/lib/eda/
-  |   +-- schema.ts                (Zod schemas for technique + distribution data)
-  |   +-- svg-generators/          (TypeScript functions generating SVG strings)
-  |   |   +-- plot-base.ts         (shared SVG primitives: axes, grid, labels, palette)
-  |   |   +-- line-plot.ts         (run-sequence, autocorrelation, spectral)
-  |   |   +-- scatter-plot.ts      (scatter, lag, Q-Q, probability)
-  |   |   +-- bar-plot.ts          (histogram, bar chart, bihistogram)
-  |   |   +-- box-plot.ts          (box plot, star plot, block plot)
-  |   |   +-- contour-plot.ts      (contour, DOE contour)
-  |   |   +-- distribution-curve.ts(PDF/CDF curve rendering for distributions)
-  |   |   +-- composite-plot.ts    (4-plot, 6-plot: multi-panel layouts)
-  |   +-- math/
-  |   |   +-- statistics.ts        (mean, std, quantiles, correlation, autocorrelation)
-  |   |   +-- distributions.ts     (PDF/CDF formulas for 19 distributions)
-  |   |   +-- datasets.ts          (sample data generators: random, uniform, etc.)
-  |   +-- categories.ts            (section hierarchy, slugs, ordering)
-  |   +-- related-techniques.ts    (cross-linking logic between techniques)
-  +-- Components: src/components/eda/
-  |   +-- TechniquePage.astro      (shared layout for all technique pages)
-  |   +-- PlotContainer.astro      (responsive SVG wrapper with a11y)
-  |   +-- PlotSvg.astro            (build-time SVG renderer -- Tier A)
-  |   +-- PlotVariantSwap.astro    (pre-rendered SVG variants + vanilla JS -- Tier B)
-  |   +-- FormulaBlock.astro       (KaTeX formula display wrapper)
-  |   +-- PythonCode.astro         (Python code block with expressive-code)
-  |   +-- InterpretationPanel.astro(interpretation guide for plot variants)
-  |   +-- TechniqueCard.astro      (card for landing page grid)
-  |   +-- SectionNav.astro         (section-aware prev/next navigation)
-  |   +-- CategoryFilter.tsx       (React island for technique filtering)
-  |   +-- DistributionExplorer.tsx  (D3 micro-bundle -- Tier C, 19 pages only)
-  |   +-- EdaJsonLd.astro          (JSON-LD for EDA pages)
-  |   +-- EdaShareControls.astro   (share + download SVG-to-PNG)
-  +-- Pages: src/pages/eda/
-  |   +-- index.astro              (landing page with filterable grid)
-  |   +-- foundations/
-  |   |   +-- [slug].astro         (6 foundation pages from MDX)
-  |   +-- techniques/
-  |   |   +-- [slug].astro         (30 graphical technique pages)
-  |   +-- quantitative/
-  |   |   +-- [slug].astro         (18 quantitative technique pages)
-  |   +-- distributions/
-  |   |   +-- [slug].astro         (19 distribution pages with D3 explorer)
-  |   +-- case-studies/
-  |   |   +-- [slug].astro         (9 case study pages)
-  |   +-- reference/
-  |       +-- [slug].astro         (4 reference pages)
-  +-- OG Images: src/pages/open-graph/eda/
-      +-- index.png.ts             (EDA overview OG image)
-      +-- [slug].png.ts            (per-technique OG images)
-```
-
+interface Props {
+  svg: string;
+  caption?: string;
+  maxWidth?: string;
+}
+const { svg, caption, maxWidth = '720px' } = Astro.props;
 ---
+<figure class="my-8 not-prose">
+  <div class="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-white dark:bg-[#1a1a2e] p-3">
+    <div class="mx-auto" style={`max-width: ${maxWidth}`} set:html={svg} />
+  </div>
+  {caption && (
+    <figcaption class="mt-2 text-center text-sm text-[var(--color-text-secondary)] italic">
+      {caption}
+    </figcaption>
+  )}
+</figure>
+```
 
-## Key Architectural Decisions
-
-### Decision 1: Dual Content Collection Strategy (JSON data + MDX content)
-
-**Pattern:** Use `file()` loader for structured technique metadata (JSON) and `glob()` loader for prose-heavy pages (MDX).
-
-**Why:** The 90+ EDA pages have two fundamentally different content types:
-
-1. **Structured metadata** (technique name, category, section ref, plot config, related techniques, parameter ranges, formulas) -- this is best stored as JSON with Zod validation, matching the proven Beauty Index `languages.json` and DB Compass `models.json` patterns.
-
-2. **Prose content** (interpretation text, step-by-step analysis, case study narratives) -- this is best stored as MDX files, matching the existing blog collection pattern, allowing rich Markdown with embedded Astro components.
-
-**Implementation in `content.config.ts`:**
+- The `singleConfig` and `compositeConfig` objects are identical across all 9 components. Extract to a shared constant:
 
 ```typescript
-import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
-import { edaTechniqueSchema, edaDistributionSchema } from './lib/eda/schema';
+// src/lib/eda/plot-configs.ts
+export const SINGLE_PLOT_CONFIG = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
 
-// Structured metadata for all EDA techniques (JSON)
-const edaTechniques = defineCollection({
-  loader: file('src/data/eda/techniques.json'),
-  schema: edaTechniqueSchema,
-});
-
-// Distribution parameter configs (JSON)
-const edaDistributions = defineCollection({
-  loader: file('src/data/eda/distributions.json'),
-  schema: edaDistributionSchema,
-});
-
-// Prose-heavy pages: foundations, case studies (MDX)
-const edaPages = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/eda/pages' }),
-  schema: z.object({
-    title: z.string(),
-    section: z.string(),
-    category: z.enum(['foundations', 'case-studies', 'reference']),
-    description: z.string(),
-    order: z.number(),
-    nistRef: z.string().optional(),
-  }),
-});
-
-export const collections = {
-  blog, languages, dbModels,  // existing
-  edaTechniques, edaDistributions, edaPages,  // new
+export const COMPOSITE_PLOT_CONFIG = {
+  width: 720,
+  height: 540,
 };
 ```
 
-**Why not put everything in JSON?** The foundation pages (6) and case study pages (9) have multi-paragraph interpretive prose that would be unwieldy as JSON string fields. MDX gives them proper authoring ergonomics with embedded components. The technique pages (30 graphical + 18 quantitative) are structured data with generated plots -- JSON metadata is the right format.
+**Estimated savings from extraction:** ~40 lines per component (figure wrapper + config). Not a massive win, but reduces the "copy-paste" surface for bugs.
 
-**Why not put everything in MDX?** The technique metadata (plot configs, formula data, parameter ranges, related links) is structured data that needs programmatic access for build-time SVG generation, landing page filtering, cross-linking, and OG image generation. Embedding this in MDX frontmatter would work but is harder to validate, query, and cross-reference compared to a typed JSON collection.
+### Decision 2: SVG Generator Strategy for New Plot Types
 
-**Confidence:** HIGH -- this dual pattern is proven in the codebase (blog uses glob/MDX, Beauty Index and DB Compass use file/JSON).
+**Current generators cover most needs.** The 13 existing generators handle:
+- `generateLinePlot` -- run sequence, time series
+- `generateLagPlot` -- lag-k scatter
+- `generateHistogram` -- with KDE
+- `generateProbabilityPlot` -- normal, uniform, Weibull, QQ, PPCC
+- `generateAutocorrelationPlot` -- ACF with confidence bands
+- `generateSpectralPlot` -- Blackman-Tukey PSD
+- `generateScatterPlot` -- bivariate with optional regression
+- `generateBoxPlot` -- single/multi-group
+- `generate4Plot` / `generate6Plot` -- composite diagnostics
+- `generateBarPlot`, `generateStarPlot`, `generateContourPlot`, `generateDistributionCurve` -- technique-level
 
----
+**New generators potentially needed:**
 
-### Decision 2: Build-Time SVG Generation in TypeScript (Not Python)
+| Plot Type | Needed By | Existing Generator | New Generator? |
+|---|---|---|---|
+| Predicted vs. Original scatter | Random Walk, Beam Deflections | `generateScatterPlot` -- already used | No |
+| Residual run-sequence | Random Walk, Beam Deflections | `generateLinePlot` -- already used | No |
+| Residual lag plot | Random Walk, Beam Deflections | `generateLagPlot` -- already used | No |
+| Residual histogram | Random Walk, Beam Deflections | `generateHistogram` -- already used | No |
+| Residual probability plot | Random Walk, Beam Deflections | `generateProbabilityPlot` -- already used | No |
+| Residual autocorrelation | Random Walk, Beam Deflections | `generateAutocorrelationPlot` -- already used | No |
+| Residual spectral | Random Walk | `generateSpectralPlot` -- already used | No |
+| Uniform probability plot | Random Walk, Uniform Random | `generateProbabilityPlot({ type: 'uniform' })` -- already supported | No |
+| Weibull probability plot | Fatigue Life | `generateProbabilityPlot({ type: 'weibull' })` -- already supported | No |
+| Multi-distribution overlay | Fatigue Life | None | **Maybe** |
+| DOE main effects / interaction | Ceramic Strength | None | **Maybe** |
+| DEX means plot | Ceramic Strength | None | **Maybe** |
 
-**Pattern:** Generate all plot SVGs at build time using TypeScript functions that produce SVG strings, rendered directly in Astro components. No Python build scripts.
+**Recommendation:** The existing SVG generator library is sufficient for all standard EDA plot types. Two case-study-specific visualization needs may arise:
 
-**Why:** The existing site already has a proven pattern for build-time SVG generation:
+1. **Fatigue Life** -- if NIST-depth requires overlaying multiple fitted distributions (normal, Weibull, lognormal) on the same histogram, this could be handled by calling `generateHistogram` with a custom KDE overlay or by extending `generateProbabilityPlot` to accept multiple distribution types for comparison. Assess during implementation -- likely achievable with existing generators plus frontmatter computation.
 
-- `radar-math.ts` generates SVG polygon points and full SVG strings for radar charts
-- `spectrum-math.ts` generates complexity spectrum SVGs for DB Compass
-- `RankingBarChart.astro` generates bar chart SVGs at build time
-- `og-image.ts` uses Satori to render complex layouts as PNGs from SVG-like JSX trees
+2. **Ceramic Strength** -- if NIST-depth requires DOE main-effects plots or interaction plots, these are essentially bar charts or line charts that can be built from `generateBarPlot` or `generateLinePlot` with pre-computed factor-level means. No new generator needed.
 
-Python SVG generation would require:
-- A Python runtime in the build environment (GitHub Actions needs extra setup)
-- A build step coordination layer (run Python scripts before Astro build)
-- File system coordination between Python output and Astro input
-- Two languages for the same concern
+**Conclusion: No new SVG generators are required.** All case-study-specific plot variants (residuals, predicted-vs-original, batch comparisons) are produced by computing transformed data in the Astro component frontmatter and passing it to existing generators.
 
-TypeScript SVG generation keeps everything in one language, runs in the same build process, and the data flows directly from content collections through TypeScript functions to Astro components -- zero file system coordination needed.
+### Decision 3: Quantitative Test Results -- Hybrid Approach
 
-**SVG generator architecture:**
+**Recommendation: Use a hybrid approach for quantitative results.**
+
+**Rationale:**
+
+1. **The gold standard (Random Walk) already computes in frontmatter.** The AR(1) model coefficients are computed in `RandomWalkPlots.astro` frontmatter via `linearRegression()`. The residuals are computed in real-time from the dataset.
+
+2. **MDX tables cannot call TypeScript functions inline.** Values in Markdown table cells wrapped in `<InlineMath>` are static text. Attempting to inject computed values into MDX table cells would require custom components for every table row.
+
+3. **NIST source values are fixed.** The datasets are verbatim from NIST .DAT files. The test results are deterministic. Hardcoding verified values in MDX tables is acceptable.
+
+**Implementation pattern:**
+
+- **Values that drive visualizations** (regression coefficients, residuals, predicted values) -- computed in the `*Plots.astro` component frontmatter at build time. Already established pattern.
+- **Values that appear in MDX prose tables** (test statistics, critical values, conclusions) -- hardcoded in MDX. Acceptable because NIST source values are fixed and well-documented.
+- **Optional verification** -- a build-time assertion module could compute expected values from datasets.ts and compare against MDX-stated values. Catches staleness without restructuring the MDX. Implement only if drift becomes a concern.
+
+### Decision 4: Statistical Test Functions -- New hypothesis-tests.ts Module
+
+**Recommendation: Create `src/lib/eda/math/hypothesis-tests.ts` for formal statistical tests. Keep `statistics.ts` for descriptive statistics and core computations.**
+
+**Rationale:**
+
+1. **Separation of concerns.** `statistics.ts` contains descriptive statistics and signal processing (mean, std dev, KDE, ACF, FFT). Hypothesis tests are "compute test statistic + compare to critical value" -- conceptually different.
+
+2. **Current file is ~250 lines and focused.** Adding 7+ test functions would double it.
+
+3. **Some functions stay in statistics.ts.** `linearRegression` is already there and is used for both computation (AR(1) model) and the location test. Keep it.
+
+**New module structure:**
+
+```
+src/lib/eda/math/
+  statistics.ts          -- descriptive stats, KDE, FFT, ACF, OLS (existing, unchanged)
+  hypothesis-tests.ts    -- formal tests (NEW)
+```
+
+**Functions needed in `hypothesis-tests.ts`:**
+
+| Function | Used By | Complexity | Notes |
+|---|---|---|---|
+| `runsTest(data)` | 7/9 case studies | Low | Count runs above/below median, compute Z-statistic |
+| `leveneTest(data, k)` | 6/9 case studies | Medium | Median-based variant, F-statistic |
+| `bartlettTest(data, k)` | Normal Random | Medium | Chi-squared test for equal variances |
+| `locationTest(data)` | All 9 | Low | Linear regression slope t-test (wraps existing `linearRegression`) |
+| `andersonDarlingTest(data)` | 4/9 case studies | Medium | Goodness-of-fit test |
+| `grubbsTest(data)` | 3/9 case studies | Low | Outlier detection |
+| `ppcc(data)` | 3/9 case studies | Medium | Probability plot correlation coefficient |
+
+**Critical values approach:** For this static site where all test parameters are known at build time, hardcode common critical values (e.g., `t_{0.975, 498} = 1.96`) in a lookup table rather than implementing full CDF inversions. The NIST source provides the critical values for each test. A lookup table is simpler and more reliable than implementing incomplete beta function inversions.
+
+**Note:** These functions are primarily useful if we want build-time verification of the MDX-hardcoded values, or if future interactive features need live computation. For the current static MDX tables, they are a "nice to have" rather than a strict dependency.
+
+### Decision 5: Component Boundaries and Data Flow
+
+```
+                    datasets.ts
+                        |
+           +------------+-------------+
+           |                          |
+    statistics.ts              hypothesis-tests.ts
+    (descriptive,               (formal tests)
+     regression,                 [NEW]
+     ACF, FFT)
+           |                          |
+           +-------+------------------+
+                   |
+           *Plots.astro components
+           (case-study-specific frontmatter
+            computes residuals, predicted
+            values, test results)
+                   |
+           +-------+-------+
+           |               |
+    SVG generators    PlotFigure.astro
+    (generic,         (shared wrapper)
+     reusable)          [NEW]
+                   |
+           case-study MDX pages
+           (import *Plots component,
+            embed as <XxxPlots type="..." />)
+                   |
+           [...slug].astro
+           (Astro content collection
+            dynamic routing)
+```
+
+**Key data flow principles:**
+
+1. **Data flows DOWN.** datasets.ts -> statistics/hypothesis-tests -> Plots.astro -> SVG generators. Never upward.
+2. **Computation in frontmatter.** All build-time computation happens in Astro component frontmatter (the `---` block). This is server-side TypeScript at build time.
+3. **SVG generators are stateless.** They receive data + config, return SVG strings. They never import from datasets.ts directly.
+4. **MDX is presentation only.** MDX files contain prose, InlineMath, and component invocations. They do not contain computation logic.
+
+## Patterns to Follow
+
+### Pattern 1: The "Residual Analysis" Extension Pattern
+
+When a case study requires model validation (residual analysis), the pattern established by RandomWalkPlots.astro is:
+
+**What:** Compute the model and residuals in the Astro component frontmatter, then use existing SVG generators with the residuals array.
+
+**When:** Case study where the univariate model fails and a better model is developed (Random Walk, Beam Deflections, potentially others).
+
+**Example (established pattern in RandomWalkPlots.astro):**
 
 ```typescript
-// src/lib/eda/svg-generators/plot-base.ts
-export interface PlotConfig {
-  width: number;
-  height: number;
-  padding: { top: number; right: number; bottom: number; left: number };
-  palette: typeof QUANTUM_PALETTE;
-}
+// In Astro frontmatter:
+import { randomWalk } from '../../data/eda/datasets';
+import { linearRegression } from '../../lib/eda/math/statistics';
 
-export const QUANTUM_PALETTE = {
-  primary: '#c44b20',      // accent color
-  secondary: '#6366f1',    // accent-secondary
-  grid: '#e5ddd5',         // same as radar chart grid
-  text: '#5a5a5a',
-  background: 'transparent',
-  series: ['#c44b20', '#6366f1', '#22c55e', '#f59e0b', '#ec4899'],
-} as const;
+// 1. Compute model
+const xLag = randomWalk.slice(0, -1);
+const yNext = randomWalk.slice(1);
+const reg = linearRegression(xLag, yNext);
 
-export function svgAxis(config: PlotConfig, xLabel: string, yLabel: string): string {
-  // Returns SVG <g> elements for X and Y axes with labels
-}
+// 2. Compute residuals
+const predicted = xLag.map((x) => reg.intercept + reg.slope * x);
+const residuals = yNext.map((y, i) => y - predicted[i]);
 
-export function svgGridLines(config: PlotConfig, xTicks: number[], yTicks: number[]): string {
-  // Returns SVG <g> with grid lines
-}
-
-// src/lib/eda/svg-generators/line-plot.ts
-export function generateRunSequencePlot(
-  data: number[],
-  config: Partial<PlotConfig>,
-  options?: { showMean?: boolean; showBounds?: boolean }
-): string {
-  // Returns complete <svg> string
-}
-
-export function generateAutocorrelationPlot(
-  data: number[],
-  maxLag: number,
-  config: Partial<PlotConfig>
-): string {
-  // Returns complete <svg> string with correlation bars
-}
+// 3. Pass residuals to EXISTING generators
+case 'residual-run-sequence':
+  svg = generateLinePlot({ data: residuals, mode: 'run-sequence', ... });
 ```
 
-**This mirrors `radar-math.ts` exactly**: pure TypeScript functions, zero DOM dependencies, usable in both Astro components and Satori/OG image contexts.
+**Key insight:** The "residual" variants are not new generator types. They are the same generators called with transformed data. The transformation logic lives in the component, not the generator.
 
-**Confidence:** HIGH -- proven pattern in this codebase across 3 features.
+### Pattern 2: The "Multi-Data" Extension Pattern
 
----
+When a case study requires comparing subsets of the data (e.g., batch comparison in Ceramic Strength):
 
-### Decision 3: Three-Tier Interactivity Architecture
+**What:** Split the dataset in the Astro component frontmatter, then pass subsets to existing generators.
 
-**Pattern:** Categorize all 90+ pages into three tiers based on interactivity needs. Each tier uses the lightest possible technology.
-
-| Tier | Pages | Technology | JS Budget | Pattern |
-|------|-------|-----------|-----------|---------|
-| **A: Static SVG** | ~60 (70%) | Build-time SVG + ~2KB vanilla JS for hover tooltips | ~2KB | Astro component renders SVG at build time; optional inline `<script>` for mouseover data display |
-| **B: Variant Swap** | ~12 (14%) | Pre-rendered SVG variants + vanilla JS selector | ~3KB | Multiple SVGs generated at build time (e.g., histogram with different bin counts); vanilla JS swaps `display: none/block` |
-| **C: D3 Explorer** | 19 (22%) | D3 micro-bundle | ~30KB | React island with D3 for distribution parameter sliders; `client:visible` loading |
-
-**Tier A -- Static SVG (foundations, most graphical techniques, quantitative techniques, reference):**
-
-```astro
----
-// [slug].astro for a graphical technique
-import { getCollection, getEntry } from 'astro:content';
-import { generateRunSequencePlot } from '../../lib/eda/svg-generators/line-plot';
-import PlotContainer from '../../components/eda/PlotContainer.astro';
-
-const technique = Astro.props.technique;
-const svgString = generateRunSequencePlot(technique.sampleData, {
-  width: 600, height: 400
-});
----
-<PlotContainer
-  svg={svgString}
-  caption={technique.plotCaption}
-  altText={technique.plotAltText}
-/>
-```
-
-Vanilla JS hover (not React, not D3) via inline `<script>`:
-
-```astro
-<script>
-  document.querySelectorAll('[data-plot-point]').forEach(el => {
-    el.addEventListener('mouseenter', (e) => {
-      const tooltip = document.getElementById('plot-tooltip');
-      tooltip.textContent = el.dataset.value;
-      tooltip.style.display = 'block';
-      // Position near cursor
-    });
-  });
-</script>
-```
-
-**Tier B -- Variant Swap (histogram interpretations, scatter plot patterns, normal probability plot shapes):**
-
-These pages show the SAME plot type with DIFFERENT data patterns. All variants are pre-rendered at build time. A vanilla JS selector toggles which one is visible.
-
-```astro
----
-const variants = technique.variants.map(v => ({
-  id: v.id,
-  label: v.label,
-  svg: generateHistogramPlot(v.data, { bins: v.bins }),
-}));
----
-<div class="variant-tabs">
-  {variants.map((v, i) => (
-    <button
-      data-variant={v.id}
-      class:list={['variant-tab', { active: i === 0 }]}
-    >
-      {v.label}
-    </button>
-  ))}
-</div>
-{variants.map((v, i) => (
-  <div
-    id={`variant-${v.id}`}
-    class:list={['variant-panel', { hidden: i !== 0 }]}
-    set:html={v.svg}
-  />
-))}
-
-<script>
-  document.querySelectorAll('[data-variant]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.variant-panel').forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`variant-${btn.dataset.variant}`).classList.remove('hidden');
-    });
-  });
-</script>
-```
-
-**Tier C -- D3 Distribution Explorer (19 distribution pages only):**
-
-```tsx
-// src/components/eda/DistributionExplorer.tsx
-// React island loaded via client:visible for viewport-triggered loading
-import { useState, useRef, useEffect } from 'react';
-import * as d3Scale from 'd3-scale';
-import * as d3Shape from 'd3-shape';
-import * as d3Axis from 'd3-axis';
-import * as d3Selection from 'd3-selection';
-
-interface Props {
-  distribution: string;
-  defaultParams: Record<string, number>;
-  paramRanges: Record<string, { min: number; max: number; step: number }>;
-  pdfFn: string; // function name key into math/distributions.ts
-}
-```
-
-**D3 bundle strategy:** Import ONLY `d3-scale`, `d3-shape`, `d3-axis`, `d3-selection`. Estimated sizes (minified):
-- `d3-selection`: ~8KB
-- `d3-scale`: ~5KB
-- `d3-shape`: ~5KB
-- `d3-axis`: ~2KB
-- Total: ~20KB minified, ~8KB gzipped
-
-Do NOT import the full `d3` package (93KB minified). Use individual sub-modules. Astro's Vite bundler will tree-shake unused exports within each sub-module.
-
-**Loading strategy:** Use `client:visible` directive so the D3 bundle only loads when the distribution explorer scrolls into view. This keeps Lighthouse scores high even on distribution pages.
-
-```astro
-<!-- In distributions/[slug].astro -->
-<DistributionExplorer
-  client:visible
-  distribution={distribution.id}
-  defaultParams={distribution.defaultParams}
-  paramRanges={distribution.paramRanges}
-  pdfFn={distribution.pdfFunction}
-/>
-```
-
-**Confidence:** HIGH -- `client:visible` is a proven Astro directive, D3 sub-module imports are the documented approach for bundle optimization.
-
----
-
-### Decision 4: KaTeX Integration via remark-math + rehype-katex
-
-**Pattern:** Use `remark-math` and `rehype-katex` as Astro markdown/MDX plugins for server-side math rendering. KaTeX CSS loaded conditionally.
-
-**Configuration:**
-
-```javascript
-// astro.config.mjs
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-
-export default defineConfig({
-  markdown: {
-    remarkPlugins: [remarkReadingTime, remarkMath],
-    rehypePlugins: [rehypeKatex],
-  },
-  // ... rest of config
-});
-```
-
-**CSS loading strategy:** KaTeX CSS (~28KB minified) and fonts (~1.2MB total, ~200KB used subset) should NOT be loaded on every page. Load them conditionally:
-
-Option A -- Via Layout slot (recommended):
-
-```astro
-<!-- In quantitative/[slug].astro or any page needing math -->
-<Layout title={...}>
-  <link
-    slot="head"
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css"
-    integrity="sha384-..."
-    crossorigin="anonymous"
-  />
-  <!-- page content -->
-</Layout>
-```
-
-Option B -- Self-host KaTeX CSS and fonts:
-
-```astro
-<!-- Copy katex.min.css to public/css/ and font files to public/fonts/katex/ -->
-<link slot="head" rel="stylesheet" href="/css/katex.min.css" />
-```
-
-**Recommendation:** Use Option A (CDN) initially for simplicity. The CDN has worldwide edge caching and the CSS is likely already cached in users' browsers from other math-heavy sites. Switch to self-hosted only if CSP restrictions or Lighthouse audits require it.
-
-**Where KaTeX is needed:**
-- Quantitative technique pages (18 pages) -- formulas for t-test, ANOVA, chi-square, etc.
-- Distribution pages (19 pages) -- PDF/CDF formulas
-- Some foundation pages (2-3 pages) -- basic statistical notation
-- Total: ~40 pages need KaTeX, ~50 pages do not
-
-**Confidence:** HIGH -- `remark-math` + `rehype-katex` is the standard Astro math integration, documented in MDX official guides and multiple Astro community tutorials.
-
----
-
-### Decision 5: Content Collection Schema Design
-
-**Pattern:** Rich Zod schemas that encode technique metadata, plot configuration, formula data, and cross-linking in a single validated JSON collection.
+**Example (established pattern in CeramicStrengthPlots.astro):**
 
 ```typescript
-// src/lib/eda/schema.ts
-import { z } from 'astro/zod';
+// In Astro frontmatter:
+import { ceramicStrength } from '../../data/eda/datasets';
 
-/** Section categories matching URL structure */
-export const edaSectionSchema = z.enum([
-  'foundations',
-  'techniques',
-  'quantitative',
-  'distributions',
-  'case-studies',
-  'reference',
-]);
+const strengths = ceramicStrength.map(d => d.strength);
+const batch1 = ceramicStrength.filter(d => d.batch === 1).map(d => d.strength);
+const batch2 = ceramicStrength.filter(d => d.batch === 2).map(d => d.strength);
 
-/** Interactivity tier */
-export const tierSchema = z.enum(['A', 'B', 'C']);
-
-/** Plot type classification */
-export const plotTypeSchema = z.enum([
-  'line', 'scatter', 'histogram', 'box', 'bar',
-  'contour', 'probability', 'radar', 'composite', 'none',
-]);
-
-/** Plot variant configuration for Tier B pages */
-export const plotVariantSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  description: z.string(),
-  dataGenerator: z.string(), // function name in datasets.ts
-  dataParams: z.record(z.number()).optional(),
-});
-
-/** Formula entry (rendered by KaTeX) */
-export const formulaSchema = z.object({
-  label: z.string(),
-  latex: z.string(),
-  description: z.string().optional(),
-});
-
-/** Complete technique metadata schema */
-export const edaTechniqueSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  slug: z.string(),
-  section: edaSectionSchema,
-  nistRef: z.string(), // e.g., "1.3.3.14" for Histogram
-  category: z.string(), // e.g., "graphical", "quantitative"
-  subcategory: z.string().optional(), // e.g., "location", "scale", "distribution"
-  tier: tierSchema,
-  order: z.number(), // display order within section
-  description: z.string(),
-  shortDescription: z.string(), // for card grid
-  plotType: plotTypeSchema,
-  plotConfig: z.object({
-    dataGenerator: z.string(),
-    dataParams: z.record(z.number()).optional(),
-    showMean: z.boolean().optional(),
-    showBounds: z.boolean().optional(),
-    xLabel: z.string().optional(),
-    yLabel: z.string().optional(),
-  }).optional(),
-  variants: z.array(plotVariantSchema).optional(), // Tier B only
-  formulas: z.array(formulaSchema).optional(),
-  pythonImports: z.array(z.string()).optional(), // e.g., ["numpy", "scipy.stats"]
-  pythonCode: z.string().optional(), // Python code example
-  interpretation: z.string(), // interpretation guidance prose
-  whenToUse: z.string(),
-  relatedTechniques: z.array(z.string()), // IDs of related techniques
-  tags: z.array(z.string()),
-});
-
-/** Distribution schema (for Tier C pages) */
-export const edaDistributionSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  nistRef: z.string(),
-  order: z.number(),
-  family: z.enum(['continuous', 'discrete']),
-  description: z.string(),
-  parameters: z.array(z.object({
-    name: z.string(),
-    symbol: z.string(), // LaTeX symbol
-    default: z.number(),
-    min: z.number(),
-    max: z.number(),
-    step: z.number(),
-  })),
-  pdfFormula: z.string(), // LaTeX
-  cdfFormula: z.string().optional(),
-  meanFormula: z.string().optional(),
-  varianceFormula: z.string().optional(),
-  pdfFunction: z.string(), // function name in math/distributions.ts
-  relatedDistributions: z.array(z.string()),
-  pythonCode: z.string(),
-  tags: z.array(z.string()),
-});
-
-export type EdaTechnique = z.infer<typeof edaTechniqueSchema>;
-export type EdaDistribution = z.infer<typeof edaDistributionSchema>;
+case 'batch-box-plot':
+  svg = generateBoxPlot({
+    groups: [
+      { label: 'Batch 1', values: batch1 },
+      { label: 'Batch 2', values: batch2 },
+    ],
+    ...
+  });
 ```
 
-**Why this schema structure?**
+### Pattern 3: Adding New PlotTypes to an Existing Component
 
-1. **`dataGenerator` string key** instead of inline data arrays: Keeps the JSON file manageable. The actual data generation happens in TypeScript functions (`datasets.ts`) that are called at build time. A 200-point dataset would bloat the JSON; a function name like `"normalRandom"` with `{ n: 200, mean: 0, sd: 1 }` params is compact.
+When enhancing a case study, new plot types are added by:
 
-2. **`variants` array for Tier B**: Pre-defines all plot variants (e.g., 8 histogram interpretations) so the page generator knows exactly how many SVGs to pre-render.
+1. Extending the `PlotType` union type
+2. Adding a new `case` to the `switch` statement
+3. Adding a new entry to `defaultCaptions`
+4. Adding the corresponding `<XxxPlots type="new-type" />` invocation in the MDX
 
-3. **`relatedTechniques` as ID array**: Enables bidirectional cross-linking computed at build time via a simple lookup.
+**No other files need to change.** This is the strength of the per-component architecture.
 
-4. **`formulas` array**: Separates formula data from prose. Each formula gets its own KaTeX rendering block with label and description.
+## Anti-Patterns to Avoid
 
-5. **`pythonCode` as string**: Python code examples are stored in the JSON (short enough for inline storage) and rendered via astro-expressive-code's `<Code>` component.
+### Anti-Pattern 1: Generic CaseStudyPlots Component
 
-**Confidence:** HIGH -- follows exact pattern of existing `languageSchema` and `dbModelSchema`.
+**What:** A single `CaseStudyPlots.astro` that takes a `caseStudy` prop and dispatches to the right data/computation.
 
----
+**Why bad:** The component would need to import ALL datasets, implement ALL model computations (AR(1), sinusoidal, batch splitting, distribution fitting), and have a PlotType union of 50+ members. The switch statement would be enormous. TypeScript would lose the ability to verify that a specific MDX file only uses valid plot types for its case study. Changes to one case study would risk regressions in others.
 
-## Component Architecture
+**Instead:** Keep per-case-study components. Share the figure wrapper and config constants.
 
-### Component Responsibilities
+### Anti-Pattern 2: Computing Test Statistics Inside SVG Generators
 
-| Component | Responsibility | Existing Analog | New/Modify |
-|-----------|---------------|-----------------|------------|
-| `TechniquePage.astro` | Shared layout for technique/quantitative pages: title, breadcrumbs, plot, interpretation, formulas, Python code, related links | Beauty Index `[slug].astro` | NEW |
-| `PlotContainer.astro` | Responsive SVG wrapper, `role="img"`, alt text, caption | Beauty Index `RadarChart.astro` wrapper pattern | NEW |
-| `PlotSvg.astro` | Renders a build-time SVG string into a container (Tier A) | `RadarChart.astro` | NEW |
-| `PlotVariantSwap.astro` | Pre-renders multiple SVG variants with tab switcher (Tier B) | None (new pattern) | NEW |
-| `FormulaBlock.astro` | Wraps KaTeX-rendered formula with label | None | NEW |
-| `PythonCode.astro` | Wraps expressive-code `<Code>` for Python with copy button | Blog code blocks | NEW (thin wrapper) |
-| `InterpretationPanel.astro` | Collapsible interpretation guide per plot variant | None | NEW |
-| `TechniqueCard.astro` | Card for landing page grid: icon, title, section badge | Beauty Index `LanguageGrid.astro` | NEW |
-| `SectionNav.astro` | Prev/next within section with section breadcrumb | `LanguageNav.astro` | NEW |
-| `CategoryFilter.tsx` | React island for landing page filtering | `LanguageFilter.tsx` | NEW (mirrors pattern) |
-| `DistributionExplorer.tsx` | D3 interactive parameter explorer | None (new island type) | NEW |
-| `EdaJsonLd.astro` | JSON-LD structured data for EDA pages | `BeautyIndexJsonLd.astro` | NEW |
-| `EdaShareControls.astro` | Share URL + download SVG as PNG | `ShareControls.astro` | NEW (mirrors pattern) |
+**What:** Extending the SVG generators to compute and display test statistics alongside the plot.
 
-### Page Template Patterns
+**Why bad:** Violates the single-responsibility principle. SVG generators produce visual output. Test statistics are textual results that belong in the MDX prose. Mixing them creates generators that are both visualization and analysis tools, making them harder to test and reuse.
 
-**Pattern A: Technique Page (getStaticPaths from JSON collection)**
+**Instead:** Compute test statistics in the Astro component frontmatter or a dedicated stats module. Display them in MDX tables via hardcoded values verified against computed values.
 
-```astro
----
-// src/pages/eda/techniques/[slug].astro
-import { getCollection } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
-import TechniquePage from '../../../components/eda/TechniquePage.astro';
+### Anti-Pattern 3: Putting Model Computation in statistics.ts
 
-export async function getStaticPaths() {
-  const techniques = await getCollection('edaTechniques');
-  const graphical = techniques
-    .map(t => t.data)
-    .filter(t => t.section === 'techniques')
-    .sort((a, b) => a.order - b.order);
+**What:** Adding case-study-specific model fitting functions (e.g., `fitAR1Model`, `fitSinusoidalModel`) to the shared statistics.ts.
 
-  return graphical.map((tech, i) => ({
-    params: { slug: tech.slug },
-    props: {
-      technique: tech,
-      prev: i > 0 ? graphical[i - 1] : null,
-      next: i < graphical.length - 1 ? graphical[i + 1] : null,
-    },
-  }));
-}
+**Why bad:** These functions are only used by one case study each. They pollute the shared module with single-use code. The computations are already compact enough to live in the component frontmatter (Random Walk AR(1) is 4 lines, Beam Deflections sinusoidal is 15 lines).
 
-const { technique, prev, next } = Astro.props;
----
-<Layout title={`${technique.title} | EDA Visual Encyclopedia`}>
-  <TechniquePage technique={technique} prev={prev} next={next} />
-</Layout>
-```
+**Instead:** Keep model computations in the component frontmatter where they are used. Only general-purpose functions (linearRegression, mean, etc.) belong in statistics.ts.
 
-**Pattern B: Foundation Page (getStaticPaths from MDX collection)**
+### Anti-Pattern 4: Dynamic Imports or Lazy Loading for Build-Time Components
 
-```astro
----
-// src/pages/eda/foundations/[slug].astro
-import { getCollection, render } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
+**What:** Using dynamic imports or conditional loading to avoid importing all datasets at build time.
 
-export async function getStaticPaths() {
-  const pages = await getCollection('edaPages');
-  const foundations = pages
-    .filter(p => p.data.category === 'foundations')
-    .sort((a, b) => a.data.order - b.data.order);
+**Why bad:** Astro already handles this. Each MDX page imports only its own Plots component, which imports only its own dataset. No bundle-size concern because everything runs at build time. Dynamic imports add complexity without benefit in SSG.
 
-  return foundations.map((page, i) => ({
-    params: { slug: page.id },
-    props: {
-      page,
-      prev: i > 0 ? foundations[i - 1] : null,
-      next: i < foundations.length - 1 ? foundations[i + 1] : null,
-    },
-  }));
-}
+## Integration Points: New vs. Modified
 
-const { page, prev, next } = Astro.props;
-const { Content } = await render(page);
----
-<Layout title={`${page.data.title} | EDA Visual Encyclopedia`}>
-  <Content />
-</Layout>
-```
+### New Files
 
-**Pattern C: Distribution Page (JSON metadata + D3 island)**
+| File | Purpose | Depends On |
+|---|---|---|
+| `src/lib/eda/math/hypothesis-tests.ts` | Formal statistical tests (runs, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, location) | `statistics.ts` (for `mean`, `standardDeviation`, `linearRegression`, `normalQuantile`) |
+| `src/components/eda/PlotFigure.astro` | Shared figure wrapper (optional, reduces duplication) | None |
+| `src/lib/eda/plot-configs.ts` | Shared plot dimension constants (optional, reduces duplication) | None |
 
-```astro
----
-// src/pages/eda/distributions/[slug].astro
-import { getCollection } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
-import DistributionExplorer from '../../../components/eda/DistributionExplorer.tsx';
+### Modified Files (Enhancements)
 
-export async function getStaticPaths() {
-  const distributions = await getCollection('edaDistributions');
-  const sorted = [...distributions].map(d => d.data).sort((a, b) => a.order - b.order);
+| File | Change | Scope |
+|---|---|---|
+| `src/components/eda/HeatFlowMeterPlots.astro` | Add deeper quantitative test computation | Extend PlotType, add cases |
+| `src/components/eda/FatigueLifePlots.astro` | Add Weibull/lognormal probability plot types | Extend PlotType, add cases |
+| `src/components/eda/CeramicStrengthPlots.astro` | Add factor-effects plots, interaction plots, within-batch analysis | Extend PlotType, add cases, more data splitting |
+| `src/components/eda/CryothermometryPlots.astro` | Minor -- may add caption updates | Minimal |
+| `src/components/eda/FilterTransmittancePlots.astro` | Minor -- possibly add decimated-data analysis | Moderate |
+| `src/components/eda/BeamDeflectionPlots.astro` | Deepen residual interpretation, add residual spectral if missing | Moderate -- add captions |
+| `src/components/eda/NormalRandomPlots.astro` | Minor -- already comprehensive | Minimal |
+| `src/components/eda/UniformRandomPlots.astro` | Minor -- already comprehensive | Minimal |
+| `src/data/eda/pages/case-studies/*.mdx` (8 files) | All 8 enhanced MDX files -- deeper prose, quantitative sections, test summaries | Major content work |
+| `src/lib/eda/svg-generators/probability-plot.ts` | May need Weibull quantile function refinement for Fatigue Life | Low risk |
 
-  return sorted.map((dist, i) => ({
-    params: { slug: dist.slug },
-    props: {
-      distribution: dist,
-      prev: i > 0 ? sorted[i - 1] : null,
-      next: i < sorted.length - 1 ? sorted[i + 1] : null,
-    },
-  }));
-}
+### Unchanged Files
 
-const { distribution, prev, next } = Astro.props;
----
-<Layout title={`${distribution.name} | EDA Visual Encyclopedia`}>
-  <link
-    slot="head"
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css"
-    crossorigin="anonymous"
-  />
-  <!-- Static build-time content -->
-  <section class="prose">
-    <h1>{distribution.name}</h1>
-    <p>{distribution.description}</p>
-    <!-- KaTeX formula rendered at build time via rehype-katex -->
-  </section>
+| File | Why Unchanged |
+|---|---|
+| `src/lib/eda/svg-generators/index.ts` | No new generators needed |
+| `src/data/eda/datasets.ts` | All 9 datasets already present (new case study would add to it) |
+| `src/pages/eda/case-studies/[...slug].astro` | Dynamic routing unchanged |
+| `src/components/eda/CaseStudyDataset.astro` | All 9 case studies already mapped |
+| `src/lib/eda/svg-generators/*.ts` (all 13 generators) | Used as-is with different data |
 
-  <!-- D3 interactive explorer (loads on scroll into view) -->
-  <DistributionExplorer
-    client:visible
-    distribution={distribution.id}
-    defaultParams={Object.fromEntries(distribution.parameters.map(p => [p.name, p.default]))}
-    paramRanges={Object.fromEntries(distribution.parameters.map(p => [p.name, { min: p.min, max: p.max, step: p.step }]))}
-    pdfFn={distribution.pdfFunction}
-  />
-</Layout>
-```
+## Build Order and Dependencies
 
----
-
-## Data Flow
-
-### Build-Time Flow (Tier A/B -- 80% of pages)
+### Dependency Graph
 
 ```
-techniques.json
-    |
-    v
-content.config.ts (Zod validation)
-    |
-    v
-getStaticPaths() -- filters by section, sorts by order
-    |
-    v
-[slug].astro -- receives technique data as props
-    |
-    v
-svg-generators/*.ts -- pure functions: data -> SVG string
-    |
-    v
-PlotContainer.astro -- wraps SVG with a11y, responsive container
-    |
-    v
-Static HTML with inline SVG (zero JS for Tier A, ~2KB for Tier B)
+Layer 0 (no dependencies):
+  datasets.ts (already complete)
+  plot-configs.ts (new, trivial)
+
+Layer 1 (depends on Layer 0):
+  statistics.ts (already complete)
+  PlotFigure.astro (new, trivial)
+
+Layer 2 (depends on Layer 1):
+  hypothesis-tests.ts (new, depends on statistics.ts)
+
+Layer 3 (depends on Layers 0-2):
+  *Plots.astro components (enhanced, depend on datasets + statistics + hypothesis-tests + SVG generators)
+
+Layer 4 (depends on Layer 3):
+  *.mdx case study pages (enhanced, import *Plots components)
 ```
 
-### Client-Side Flow (Tier C -- 19 distribution pages)
-
-```
-distributions.json
-    |
-    v
-content.config.ts (Zod validation)
-    |
-    v
-getStaticPaths() -- generates 19 pages
-    |
-    v
-[slug].astro -- renders static shell + distribution metadata
-    |
-    v
-<DistributionExplorer client:visible />
-    |
-    v (when scrolled into view)
-D3 micro-bundle loads (~8KB gzipped)
-    |
-    v
-User adjusts parameter sliders
-    |
-    v
-distributions.ts recalculates PDF/CDF
-    |
-    v
-D3 redraws SVG curve in-place
-```
-
-### OG Image Flow
-
-```
-techniques.json / distributions.json
-    |
-    v
-open-graph/eda/[slug].png.ts -- getStaticPaths from collection
-    |
-    v
-og-image.ts -- generateEdaOgImage(technique)
-    |
-    v
-Satori renders JSX tree with mini SVG plot thumbnail
-    |
-    v
-Sharp converts to PNG (1200x630)
-    |
-    v
-Static PNG at /open-graph/eda/{slug}.png
-```
-
----
-
-## Recommended Project Structure
-
-```
-src/
-├── content.config.ts           # ADD: edaTechniques, edaDistributions, edaPages
-├── data/
-│   ├── eda/
-│   │   ├── techniques.json     # 90+ technique metadata entries
-│   │   ├── distributions.json  # 19 distribution configs
-│   │   ├── datasets/           # Sample CSV/JSON data for case studies
-│   │   │   ├── normal-random.json
-│   │   │   ├── uniform-random.json
-│   │   │   ├── ceramic-strength.json
-│   │   │   └── ...
-│   │   └── pages/              # MDX content for prose-heavy pages
-│   │       ├── foundations/
-│   │       │   ├── what-is-eda.mdx
-│   │       │   ├── eda-vs-classical.mdx
-│   │       │   ├── assumptions.mdx
-│   │       │   ├── four-plot.mdx
-│   │       │   ├── role-of-graphics.mdx
-│   │       │   └── problem-categories.mdx
-│   │       ├── case-studies/
-│   │       │   ├── normal-random-numbers.mdx
-│   │       │   ├── uniform-random-numbers.mdx
-│   │       │   └── ...
-│   │       └── reference/
-│   │           ├── analysis-questions.mdx
-│   │           ├── techniques-by-category.mdx
-│   │           ├── distribution-tables.mdx
-│   │           └── related-distributions.mdx
-│   ├── beauty-index/           # UNCHANGED
-│   ├── blog/                   # UNCHANGED
-│   └── db-compass/             # UNCHANGED
-├── lib/
-│   ├── eda/
-│   │   ├── schema.ts           # Zod schemas + type exports
-│   │   ├── categories.ts       # Section hierarchy, slugs, icons
-│   │   ├── related-techniques.ts # Cross-link resolution
-│   │   ├── svg-generators/
-│   │   │   ├── plot-base.ts    # Shared: axes, grid, labels, palette, scaling
-│   │   │   ├── line-plot.ts    # Run sequence, autocorrelation, spectral
-│   │   │   ├── scatter-plot.ts # Scatter, lag, Q-Q, probability, conditioning
-│   │   │   ├── bar-plot.ts     # Histogram, bihistogram, bar
-│   │   │   ├── box-plot.ts     # Box plot, star plot, block plot
-│   │   │   ├── contour-plot.ts # Contour, DOE contour
-│   │   │   ├── distribution-curve.ts # PDF/CDF static curves
-│   │   │   └── composite-plot.ts     # 4-plot, 6-plot multi-panel
-│   │   └── math/
-│   │       ├── statistics.ts   # Mean, std, quantiles, correlation, runs test
-│   │       ├── distributions.ts # PDF/CDF formulas for 19 distributions
-│   │       └── datasets.ts     # Sample data generators (normal, uniform, etc.)
-│   ├── beauty-index/           # UNCHANGED
-│   ├── db-compass/             # UNCHANGED
-│   └── og-image.ts             # MODIFY: add generateEdaOgImage()
-├── components/
-│   ├── eda/
-│   │   ├── TechniquePage.astro
-│   │   ├── PlotContainer.astro
-│   │   ├── PlotSvg.astro
-│   │   ├── PlotVariantSwap.astro
-│   │   ├── FormulaBlock.astro
-│   │   ├── PythonCode.astro
-│   │   ├── InterpretationPanel.astro
-│   │   ├── TechniqueCard.astro
-│   │   ├── SectionNav.astro
-│   │   ├── CategoryFilter.tsx
-│   │   ├── DistributionExplorer.tsx
-│   │   ├── EdaJsonLd.astro
-│   │   └── EdaShareControls.astro
-│   ├── beauty-index/           # UNCHANGED
-│   ├── db-compass/             # UNCHANGED
-│   └── tools/                  # UNCHANGED
-├── pages/
-│   ├── eda/
-│   │   ├── index.astro         # Landing page
-│   │   ├── foundations/
-│   │   │   └── [slug].astro    # 6 pages
-│   │   ├── techniques/
-│   │   │   └── [slug].astro    # 30 pages
-│   │   ├── quantitative/
-│   │   │   └── [slug].astro    # 18 pages
-│   │   ├── distributions/
-│   │   │   └── [slug].astro    # 19 pages
-│   │   ├── case-studies/
-│   │   │   └── [slug].astro    # 9 pages
-│   │   └── reference/
-│   │       └── [slug].astro    # 4 pages
-│   ├── open-graph/
-│   │   └── eda/
-│   │       ├── index.png.ts
-│   │       └── [slug].png.ts
-│   ├── beauty-index/           # UNCHANGED
-│   ├── blog/                   # UNCHANGED
-│   └── tools/                  # UNCHANGED
-└── stores/
-    └── edaFilterStore.ts       # Landing page filter state (nanostores)
-```
-
-### Structure Rationale
-
-- **`data/eda/`**: Follows the established pattern of `data/beauty-index/` and `data/db-compass/`. Data files separate from code.
-- **`data/eda/pages/`**: MDX files for prose-heavy content. Glob loader reads from here.
-- **`lib/eda/svg-generators/`**: SVG generation is the core technical challenge. Organized by plot family rather than by page, because many pages share plot types (e.g., run-sequence plots appear in multiple technique pages AND case studies).
-- **`lib/eda/math/`**: Statistical computation functions separate from rendering. These are pure math -- no SVG, no DOM, no framework dependencies. Usable in both SVG generators and D3 explorer.
-- **`components/eda/`**: Follows the established pattern of `components/beauty-index/` and `components/db-compass/`. One directory per pillar.
-- **`pages/eda/`**: Six sub-directories matching the six sections. Each has a single `[slug].astro` dynamic route file.
-
----
-
-## Integration Points with Existing Architecture
-
-### Files Modified (Existing)
-
-| File | Change | Risk |
-|------|--------|------|
-| `src/content.config.ts` | Add 3 new collections (edaTechniques, edaDistributions, edaPages) | LOW -- additive, no breaking changes |
-| `src/components/Header.astro` | Add "EDA" navigation link | LOW -- same as v1.3/v1.4/v1.5 pattern |
-| `src/lib/og-image.ts` | Add `generateEdaOgImage()` and `generateEdaOverviewOgImage()` functions | LOW -- additive, follows existing multi-feature pattern |
-| `src/pages/index.astro` | Add EDA callout section (same pattern as Beauty Index and tools callouts) | LOW -- additive |
-| `src/pages/llms.txt.ts` | Add EDA section descriptions | LOW -- additive |
-| `src/pages/llms-full.txt.ts` | Add EDA full content | LOW -- additive |
-| `astro.config.mjs` | Add `remarkMath` and `rehypeKatex` plugins | MEDIUM -- affects all Markdown/MDX processing globally |
-| `package.json` | Add `remark-math`, `rehype-katex`, `d3-scale`, `d3-shape`, `d3-axis`, `d3-selection` | LOW -- new dependencies only |
-
-### Risk Mitigation for astro.config.mjs Change
-
-Adding `remarkMath` and `rehypeKatex` to the global Markdown pipeline means ALL existing MDX/Markdown content gets processed through these plugins. This is generally safe because:
-
-1. `remark-math` only activates on `$...$` and `$$...$$` delimited content. Existing blog posts and tool pages do not use dollar-sign delimiters.
-2. `rehype-katex` only processes nodes created by `remark-math`. No existing content is affected.
-
-**But verify:** Search existing MDX files for `$` characters that could be accidentally interpreted as math delimiters. Dollar signs in code blocks are safe (code blocks are excluded from remark processing). Dollar signs in inline prose are the risk.
-
-### Files Created (New)
-
-~25 new source files:
-- 1 schema file
-- 7 SVG generator files
-- 3 math utility files
-- 2 data JSON files
-- 13 Astro/React components
-- 7 page route files
-- 2 OG image generators
-- 1 nanostore
-
-Plus ~15 MDX files for foundations/case-studies/reference content.
-
-### Existing Files Unchanged
-
-All existing pillars (Beauty Index, DB Compass, Dockerfile Analyzer, Compose Validator, K8s Analyzer) are completely unaffected. The EDA pillar is a parallel namespace with zero coupling to existing features.
-
----
-
-## Scaling Considerations
-
-| Concern | At 90 pages (v1.8) | At 200+ pages (future expansion) |
-|---------|---------------------|----------------------------------|
-| Build time | ~90 SVG generations + 90 OG images. Estimate: +30-60s build time. Acceptable. | Pre-compute SVGs once, cache in .astro/. Consider parallel SVG generation. |
-| JSON collection size | `techniques.json` ~50-80KB for 90 entries. Well within memory limits. | At 500+ entries, consider splitting into per-section JSON files with multiple `file()` loaders. |
-| Page count | ~90 new pages on top of 857 existing = ~950 total. Astro handles this fine. | 125K+ pages is where static Astro breaks (per FreeDevTools case study). Not a concern at 200. |
-| D3 bundle | Single ~8KB gzipped chunk shared across 19 distribution pages. | Same bundle for any number of distributions. |
-| KaTeX fonts | CDN-loaded, cached after first page visit. | Same CDN strategy works at any scale. |
-
-### Build Time Budget
-
-The site currently has 857 pages. Adding ~90 more is a ~10% increase. The primary build time cost is OG image generation (Satori + Sharp), which for 90 images at ~0.5s each = ~45s. This is the same cost structure as the existing 67 K8s rule pages.
-
-**Mitigation:** OG images can be generated in a single `getStaticPaths` endpoint that processes all 90+ techniques in one pass, sharing the font loading cost.
-
----
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Python SVG Generation Pipeline
-
-**What people do:** Use Python (matplotlib, seaborn) to generate SVG files as a pre-build step, then reference them as static assets in Astro pages.
-**Why it's wrong:** Adds a build dependency (Python runtime), file system coordination (write SVGs to disk, reference from Astro), two-language maintenance burden, and breaks the "one build command" pattern. Cannot integrate with Astro's build-time data flow (content collections, OG images, getStaticPaths).
-**Do this instead:** TypeScript SVG generators that produce SVG strings directly consumed by Astro components at build time. Same language, same build process, zero file coordination.
-
-### Anti-Pattern 2: Full D3 on Every Page
-
-**What people do:** Import the complete `d3` package and use it for all visualizations, even static ones.
-**Why it's wrong:** `d3` is 93KB minified. Most EDA plots are static and need zero client-side JavaScript. Using D3 for a static run-sequence plot is a 93KB tax for zero interactivity.
-**Do this instead:** Build-time SVG generation for static plots (Tier A/B). D3 micro-bundle (4 sub-modules, ~8KB gzipped) only on the 19 distribution pages (Tier C).
-
-### Anti-Pattern 3: One Mega JSON File for Everything
-
-**What people do:** Put all technique metadata, distribution configs, case study data, sample datasets, and interpretation prose into a single massive JSON file.
-**Why it's wrong:** Astro loads the entire file into memory for the collection. A single file with 90+ entries, each containing sample datasets (200+ data points), Python code strings, and interpretation prose, could be 500KB+ and slow to parse.
-**Do this instead:** Separate concerns: metadata JSON (compact, ~80KB), MDX for prose, `datasets.ts` functions for data generation (zero-cost until invoked), Python code as strings in the JSON (they're short).
-
-### Anti-Pattern 4: Client-Side Math Rendering
-
-**What people do:** Load KaTeX or MathJax at runtime to render `$...$` expressions in the browser.
-**Why it's wrong:** KaTeX JS is ~120KB and requires fonts. Runtime rendering causes layout shift and delays interactive elements.
-**Do this instead:** `rehype-katex` renders all math to HTML+CSS at build time. The browser receives pre-rendered math. Only the KaTeX CSS (~28KB) is needed for styling, and it's cached after the first load.
-
-### Anti-Pattern 5: React Islands for Tier A/B Interactivity
-
-**What people do:** Wrap every plot in a React component with `client:load` for tooltip/hover behavior.
-**Why it's wrong:** React's hydration cost (~40KB for React + ReactDOM) is unjustified for simple hover tooltips. 70% of pages need zero or minimal JS.
-**Do this instead:** Vanilla JS inline `<script>` for Tier A tooltips (~2KB). DOM manipulation for Tier B variant swapping (~3KB). React island only for Tier C D3 explorers where component state management justifies the React overhead.
-
----
-
-## Build Order Considering Dependencies
-
-### Phase 1: Foundation (schema + SVG base + data structure)
-
-**Must come first** -- everything else depends on these.
-
-1. `lib/eda/schema.ts` -- Zod schemas (all pages depend on types)
-2. `lib/eda/categories.ts` -- section hierarchy (navigation depends on this)
-3. `lib/eda/math/statistics.ts` -- basic stat functions (SVG generators need these)
-4. `lib/eda/math/datasets.ts` -- sample data generators (SVG generators need data)
-5. `lib/eda/svg-generators/plot-base.ts` -- shared SVG primitives (all plot generators depend on this)
-6. `data/eda/techniques.json` -- initial 5-10 entries for validation
-7. `content.config.ts` -- add collections
-8. Verify: `getCollection('edaTechniques')` returns validated data
-
-### Phase 2: Core Components + First Technique Pages
-
-**Depends on Phase 1** -- needs schema, SVG base, and data.
-
-1. `components/eda/PlotContainer.astro` -- responsive SVG wrapper
-2. `components/eda/PlotSvg.astro` -- build-time SVG renderer
-3. `components/eda/TechniquePage.astro` -- shared technique layout
-4. `components/eda/SectionNav.astro` -- prev/next navigation
-5. `svg-generators/line-plot.ts` -- first plot family
-6. `pages/eda/techniques/[slug].astro` -- first dynamic route
-7. Build and verify: 2-3 technique pages render correctly
-
-### Phase 3: All SVG Generators + Remaining Technique Pages
-
-**Depends on Phase 2** -- pattern proven, now scale out.
-
-1. `svg-generators/scatter-plot.ts`
-2. `svg-generators/bar-plot.ts`
-3. `svg-generators/box-plot.ts`
-4. `svg-generators/contour-plot.ts`
-5. `svg-generators/composite-plot.ts`
-6. Complete `techniques.json` with all 30 graphical techniques
-7. Add quantitative techniques data + pages
-8. `components/eda/PlotVariantSwap.astro` -- Tier B component
-9. `components/eda/FormulaBlock.astro` -- KaTeX wrapper
-10. `components/eda/PythonCode.astro` -- Python code display
-
-### Phase 4: KaTeX + Quantitative Techniques
-
-**Depends on Phase 3** (component patterns) + Phase 1 (data).
-
-1. `astro.config.mjs` -- add remarkMath + rehypeKatex
-2. Verify existing MDX content unaffected
-3. `pages/eda/quantitative/[slug].astro`
-4. Complete quantitative technique data (18 entries)
-5. KaTeX CSS conditional loading via slot
-
-### Phase 5: D3 Distribution Explorer
-
-**Depends on Phase 1** (schema) but can parallel Phase 3/4.
-
-1. Install D3 sub-modules: `d3-scale`, `d3-shape`, `d3-axis`, `d3-selection`
-2. `lib/eda/math/distributions.ts` -- PDF/CDF formulas
-3. `lib/eda/svg-generators/distribution-curve.ts` -- static curve for non-interactive content
-4. `components/eda/DistributionExplorer.tsx` -- React island with D3
-5. `data/eda/distributions.json` -- all 19 distributions
-6. `pages/eda/distributions/[slug].astro`
-7. Verify: `client:visible` lazy loading works, D3 bundle size < 30KB
-
-### Phase 6: Foundations + Case Studies (MDX)
-
-**Depends on Phase 4** (KaTeX) + Phase 2 (components).
-
-1. `data/eda/pages/foundations/*.mdx` -- 6 foundation pages
-2. `data/eda/pages/case-studies/*.mdx` -- 9 case studies
-3. `data/eda/pages/reference/*.mdx` -- 4 reference pages
-4. `pages/eda/foundations/[slug].astro`
-5. `pages/eda/case-studies/[slug].astro`
-6. `pages/eda/reference/[slug].astro`
-7. Sample datasets in `data/eda/datasets/`
-
-### Phase 7: Landing Page + Filtering
-
-**Depends on Phases 2-6** (all pages exist for cross-linking).
-
-1. `components/eda/TechniqueCard.astro`
-2. `components/eda/CategoryFilter.tsx` -- React island
-3. `stores/edaFilterStore.ts` -- nanostores
-4. `pages/eda/index.astro` -- landing page with grid
-
-### Phase 8: Site Integration + Polish
-
-**Depends on all previous phases.**
-
-1. `Header.astro` -- add EDA nav link
-2. `index.astro` -- add homepage callout
-3. OG images: `open-graph/eda/index.png.ts` + `[slug].png.ts`
-4. JSON-LD structured data
-5. Breadcrumb navigation
-6. Sitemap inclusion
-7. LLMs.txt updates
-8. Companion blog post
-9. Lighthouse audit
-10. Accessibility audit
-
----
-
-## New npm Dependencies Required
-
-| Package | Version | Purpose | Size (gzipped) |
-|---------|---------|---------|----------------|
-| `remark-math` | ^6.0 | Parse `$...$` math delimiters in Markdown/MDX | ~2KB |
-| `rehype-katex` | ^7.0 | Render math to HTML with KaTeX at build time | ~300KB (build only, not shipped to browser) |
-| `d3-scale` | ^4.0 | Scale functions for D3 explorer | ~5KB |
-| `d3-shape` | ^3.0 | Line/area generators for D3 explorer | ~5KB |
-| `d3-axis` | ^3.0 | Axis rendering for D3 explorer | ~2KB |
-| `d3-selection` | ^3.0 | DOM manipulation for D3 explorer | ~8KB |
-
-**Total new client-side JS shipped:** ~8KB gzipped (D3 sub-modules), loaded only on 19 distribution pages via `client:visible`.
-
-**KaTeX CSS:** ~28KB from CDN (cached), loaded only on ~40 pages that use math formulas.
-
----
+### Recommended Build Order
+
+**Phase 1: Foundation (no external dependencies)**
+1. Create `src/lib/eda/plot-configs.ts` -- shared constants
+2. Create `src/components/eda/PlotFigure.astro` -- shared figure wrapper
+3. Create `src/lib/eda/math/hypothesis-tests.ts` -- formal test functions
+4. Write tests for hypothesis-tests.ts against known NIST values
+
+**Phase 2: "Already Deep" Case Studies (minimal new work)**
+5. Enhance Normal Random Numbers MDX -- verify completeness against NIST
+6. Enhance Uniform Random Numbers MDX -- verify completeness against NIST
+7. Verify Random Walk -- already gold standard, no changes expected
+
+**Phase 3: "Has Residuals" Case Studies (moderate new work)**
+8. Enhance Beam Deflections -- deepen residual interpretation prose, add quantitative model validation results
+9. Refactor existing components to use PlotFigure.astro (optional, can batch)
+
+**Phase 4: "Needs Significant Enhancement" Case Studies**
+10. Enhance Cryothermometry -- discrete-data discussion depth
+11. Enhance Filter Transmittance -- root cause expansion, possibly decimated analysis
+12. Enhance Heat Flow Meter -- deeper quantitative section
+13. Enhance Fatigue Life -- distribution comparison plots (Weibull probability)
+14. Enhance Ceramic Strength -- factor-effects analysis, batch comparison deepening
+
+**Phase 5: New Case Study (if adding 1 new)**
+15. Add dataset to datasets.ts
+16. Create new *Plots.astro component
+17. Create new MDX case study page
+18. Register in CaseStudyDataset.astro
+
+### Why This Order
+
+1. **Foundation first** -- hypothesis-tests.ts is needed by all enhanced case studies. Build and test it once.
+2. **Easy wins second** -- Normal Random and Uniform Random are already near-complete. Quick confidence builders that establish the enhanced format.
+3. **Incremental complexity** -- Beam Deflections already has residuals, just needs deepening. Fatigue Life and Ceramic Strength need the most new plot types.
+4. **New case study last** -- requires all infrastructure to be in place.
+
+## Scalability Considerations
+
+| Concern | At 9 case studies (current) | At 15 case studies | At 25+ case studies |
+|---|---|---|---|
+| Per-component approach | 9 files, ~1,800 lines total | 15 files, ~3,000 lines | Consider generic component |
+| datasets.ts size | ~48,000 tokens (already large) | Split into per-case-study files | Definitely split |
+| Build time | Fast (SSG, parallel) | Still fast | Monitor, Astro parallelizes well |
+| statistics.ts | 250 lines, focused | Unchanged | Unchanged |
+| hypothesis-tests.ts | ~200-300 lines (new) | Same | Same |
+
+**The per-component pattern is correct for 9 case studies.** It would need revisiting at ~20+, but that is outside the scope of this milestone.
 
 ## Sources
 
-- [Astro 5 Content Collections Documentation](https://docs.astro.build/en/guides/content-collections/)
-- [Astro Content Layer API Reference](https://docs.astro.build/en/reference/content-loader-reference/)
-- [Astro Zod API Reference](https://docs.astro.build/en/reference/modules/astro-zod/)
-- [Content Layer Deep Dive](https://astro.build/blog/content-layer-deep-dive/)
-- [remark-math + rehype-katex MDX Guide](https://mdxjs.com/guides/math/)
-- [Math Typesetting in Astro MDX](https://www.byteli.com/blog/2024/math_in_astro/)
-- [KaTeX Font Documentation](https://katex.org/docs/font)
-- [D3 Modular Architecture](https://github.com/d3/d3/issues/3076)
-- [D3 Bundle Size Analysis (Bundlephobia)](https://bundlephobia.com/package/d3)
-- [Astro D3 Compatibility Discussion](https://github.com/withastro/astro/issues/3987)
-- [Astro Experimental SVG Optimization](https://docs.astro.build/en/reference/experimental-flags/svg-optimization/)
-- [Large-Scale Static Astro Site Case Study (FreeDevTools 125K pages)](https://dev.to/lovestaco/when-static-sites-stop-scaling-migrating-freedevtools-125k-pages-from-static-astro-to-ssr-1hf5)
-- Existing codebase: `src/lib/beauty-index/radar-math.ts` (build-time SVG pattern)
-- Existing codebase: `src/content.config.ts` (dual loader pattern)
-- Existing codebase: `src/components/beauty-index/RadarChart.astro` (Astro SVG component pattern)
-- Existing codebase: `src/lib/og-image.ts` (Satori + Sharp OG generation pattern)
-
----
-*Architecture research for: EDA Visual Encyclopedia (v1.8 milestone)*
-*Researched: 2026-02-24*
+- Direct codebase analysis of all files listed in the research question
+- NIST/SEMATECH e-Handbook of Statistical Methods (https://www.itl.nist.gov/div898/handbook/) -- Section 1.4.2 case study structure
+- Astro component architecture: build-time frontmatter computation model
+- Existing gold-standard implementation: `RandomWalkPlots.astro` + `random-walk.mdx`
