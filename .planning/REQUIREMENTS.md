@@ -102,53 +102,53 @@ Deferred to future release.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| NRN-01 | TBD | Pending |
-| NRN-02 | TBD | Pending |
-| NRN-03 | TBD | Pending |
-| URN-01 | TBD | Pending |
-| URN-02 | TBD | Pending |
-| URN-03 | TBD | Pending |
-| URN-04 | TBD | Pending |
-| CRYO-01 | TBD | Pending |
-| CRYO-02 | TBD | Pending |
-| CRYO-03 | TBD | Pending |
-| BEAM-01 | TBD | Pending |
-| BEAM-02 | TBD | Pending |
-| BEAM-03 | TBD | Pending |
-| BEAM-04 | TBD | Pending |
-| BEAM-05 | TBD | Pending |
-| FILT-01 | TBD | Pending |
-| FILT-02 | TBD | Pending |
-| FILT-03 | TBD | Pending |
-| RSTR-01 | TBD | Pending |
-| RSTR-02 | TBD | Pending |
-| RSTR-03 | TBD | Pending |
-| RSTR-04 | TBD | Pending |
-| HFM-01 | TBD | Pending |
-| HFM-02 | TBD | Pending |
-| HFM-03 | TBD | Pending |
-| FAT-01 | TBD | Pending |
-| FAT-02 | TBD | Pending |
-| FAT-03 | TBD | Pending |
-| FAT-04 | TBD | Pending |
-| CER-01 | TBD | Pending |
-| CER-02 | TBD | Pending |
-| CER-03 | TBD | Pending |
-| CER-04 | TBD | Pending |
-| CER-05 | TBD | Pending |
-| VAL-01 | TBD | Pending |
-| VAL-02 | TBD | Pending |
-| VAL-03 | TBD | Pending |
+| INFRA-01 | Phase 56 | Pending |
+| INFRA-02 | Phase 56 | Pending |
+| INFRA-03 | Phase 56 | Pending |
+| INFRA-04 | Phase 56 | Pending |
+| NRN-01 | Phase 57 | Pending |
+| NRN-02 | Phase 57 | Pending |
+| NRN-03 | Phase 57 | Pending |
+| CRYO-01 | Phase 57 | Pending |
+| CRYO-02 | Phase 57 | Pending |
+| CRYO-03 | Phase 57 | Pending |
+| FILT-01 | Phase 57 | Pending |
+| FILT-02 | Phase 57 | Pending |
+| FILT-03 | Phase 57 | Pending |
+| HFM-01 | Phase 57 | Pending |
+| HFM-02 | Phase 57 | Pending |
+| HFM-03 | Phase 57 | Pending |
+| RSTR-01 | Phase 58 | Pending |
+| RSTR-02 | Phase 58 | Pending |
+| RSTR-03 | Phase 58 | Pending |
+| RSTR-04 | Phase 58 | Pending |
+| URN-01 | Phase 59 | Pending |
+| URN-02 | Phase 59 | Pending |
+| URN-03 | Phase 59 | Pending |
+| URN-04 | Phase 59 | Pending |
+| BEAM-01 | Phase 60 | Pending |
+| BEAM-02 | Phase 60 | Pending |
+| BEAM-03 | Phase 60 | Pending |
+| BEAM-04 | Phase 60 | Pending |
+| BEAM-05 | Phase 60 | Pending |
+| FAT-01 | Phase 61 | Pending |
+| FAT-02 | Phase 61 | Pending |
+| FAT-03 | Phase 61 | Pending |
+| FAT-04 | Phase 61 | Pending |
+| CER-01 | Phase 62 | Pending |
+| CER-02 | Phase 62 | Pending |
+| CER-03 | Phase 62 | Pending |
+| CER-04 | Phase 62 | Pending |
+| CER-05 | Phase 62 | Pending |
+| VAL-01 | Phase 63 | Pending |
+| VAL-02 | Phase 63 | Pending |
+| VAL-03 | Phase 63 | Pending |
 
 **Coverage:**
 - v1.9 requirements: 41 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 41
+- Mapped to phases: 41/41
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation*
