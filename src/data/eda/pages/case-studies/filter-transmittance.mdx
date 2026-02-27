@@ -122,7 +122,7 @@ The spectral plot shows dominant low-frequency content, consistent with the slow
 | Max | 2.0027 |
 | Range | 0.0014 |
 | Std Dev <InlineMath tex="s" /> | 0.0004 |
-| Autocorrelation <InlineMath tex="r_1" /> | 0.93 |
+| Autocorrelation <InlineMath tex="r_1" /> | 0.94 |
 
 The mean and median are close, but the summary statistics mask the location shift visible in the run sequence plot. The small standard deviation of 0.0004 reflects within-measurement-level variation combined with the drift across measurements. The standard confidence interval is suspect:
 
@@ -130,7 +130,7 @@ The mean and median are close, but the summary statistics mask the location shif
   <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 2.0019 \pm 0.0001" />
 </div>
 
-This interval dramatically understates the true uncertainty because it assumes independent observations. With autocorrelation of 0.93, the effective sample size is far smaller than 50, and any confidence interval computed from the standard formula has no statistical justification.
+This interval dramatically understates the true uncertainty because it assumes independent observations. With autocorrelation of 0.94, the effective sample size is far smaller than 50, and any confidence interval computed from the standard formula has no statistical justification.
 
 ### Location Test
 
@@ -186,10 +186,10 @@ Two complementary tests assess whether the observations are independent.
 
 | Statistic | Value |
 |-----------|-------|
-| <InlineMath tex="r_1" /> | 0.93 |
+| <InlineMath tex="r_1" /> | 0.94 |
 | Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.277 |
 
-**Conclusion:** The lag-1 autocorrelation of 0.93 vastly exceeds the critical value of 0.277. Consecutive observations are nearly identical — the **randomness assumption is severely violated**. For <InlineMath tex="n = 50" />, the 95% critical value is <InlineMath tex="1.96/\sqrt{50} \approx 0.277" />, and the observed autocorrelation exceeds this bound by more than a factor of three.
+**Conclusion:** The lag-1 autocorrelation of 0.94 vastly exceeds the critical value of 0.277. Consecutive observations are nearly identical — the **randomness assumption is severely violated**. For <InlineMath tex="n = 50" />, the 95% critical value is <InlineMath tex="1.96/\sqrt{50} \approx 0.277" />, and the observed autocorrelation exceeds this bound by more than a factor of three.
 
 ### Distribution and Outlier Tests
 
@@ -202,11 +202,19 @@ Since the randomness assumption is rejected, the distributional tests are not me
 | **Fixed location** | Regression on run order | <InlineMath tex="t = 5.582" /> | 2.01 | **Reject** |
 | **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 0.971" /> | 2.806 | **Fail to reject** |
 | **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-5.3246}" /> | 1.96 | **Reject** |
-| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.93" /> | 0.277 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.94" /> | 0.277 | **Reject** |
 | **Distribution** | — | — | — | Not meaningful |
 | **Outliers** | — | — | — | Not meaningful |
 
 Two of the four assumptions are violated: the location is not fixed (significant drift) and the data are severely non-random (extreme autocorrelation). Only the variation assumption passes. The univariate model <InlineMath tex="Y_i = C + E_i" /> is not appropriate for this data.
+
+## Interpretation
+
+Two of the four assumptions fail: the location drift is statistically significant (<InlineMath tex="t = 5.582" />, well above the critical value of 2.01) and the randomness violation is extreme (<InlineMath tex="r_1 = 0.94" />, [runs test](/eda/quantitative/runs-test/) <InlineMath tex="Z = {-5.3246}" />). Only the variation assumption passes ([Levene test](/eda/quantitative/levene-test/) <InlineMath tex="W = 0.971 < 2.806" />). The distribution and outlier tests are not meaningful given the severity of the autocorrelation. The [lag plot](/eda/techniques/lag-plot/) showed the problem immediately -- a tight linear cluster along <InlineMath tex="y = x" /> that is the unmistakable signature of strongly correlated consecutive observations.
+
+The severity of the randomness violation is extreme. The lag-1 autocorrelation of 0.94 means each measurement explains approximately 88% of the variance of the next (<InlineMath tex="r_1^2 \approx 0.88" />). The [run sequence plot](/eda/techniques/run-sequence-plot/) shows both a gradual drift and a distinct shift around observation 35. The [spectral plot](/eda/techniques/spectral-plot/) confirms low-frequency dominance without periodic peaks -- the non-randomness is drift-based, not cyclic. The standard confidence interval of <InlineMath tex="2.0019 \pm 0.0001" /> dramatically understates the true uncertainty because it assumes independent observations; with an effective sample size far smaller than 50, the real uncertainty is substantially larger.
+
+The univariate model <InlineMath tex="Y_i = C + E_i" /> is not appropriate for this data. The observations violate independence so severely that no standard statistical inference is valid. However, the resolution is not a more complex statistical model but rather an investigation of the experimental process. The graphical and quantitative analysis successfully identified the problem; the [root cause investigation](#root-cause-investigation) below reveals that the data acquisition system was sampling too fast, contaminating each measurement with the previous reading.
 
 ## Root Cause Investigation
 
@@ -216,7 +224,7 @@ This illustrates a key principle of exploratory data analysis: when statistical 
 
 ## Conclusions
 
-The filter transmittance data fail the randomness assumption due to extreme positive autocorrelation (<InlineMath tex="r_1 = 0.93" />) caused by an instrumentation problem. The data acquisition system was sampling too fast, causing each measurement to be contaminated by the previous reading. The location test also reveals a significant upward drift (<InlineMath tex="t = 5.582" />), with a visible shift around observation 35. Only the variation assumption is satisfied (<InlineMath tex="W = 0.971 < 2.806" />).
+The filter transmittance data fail the randomness assumption due to extreme positive autocorrelation (<InlineMath tex="r_1 = 0.94" />) caused by an instrumentation problem. The data acquisition system was sampling too fast, causing each measurement to be contaminated by the previous reading. The location test also reveals a significant upward drift (<InlineMath tex="t = 5.582" />), with a visible shift around observation 35. Only the variation assumption is satisfied (<InlineMath tex="W = 0.971 < 2.806" />).
 
 The standard confidence interval:
 

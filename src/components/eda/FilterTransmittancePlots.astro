@@ -102,7 +102,7 @@ switch (type) {
 const defaultCaptions: Record<PlotType, string> = {
   '4-plot': 'Four-plot diagnostic layout for the filter transmittance dataset (run sequence, lag, histogram, normal probability). The run sequence plot reveals a location shift around observation 35 and the lag plot shows severe autocorrelation.',
   'run-sequence': 'Run sequence plot of filter transmittance data showing an upward shift in location around observation 35 — the first portion fluctuates near 2.001-2.002 while the later portion shifts to 2.002-2.003.',
-  'lag': 'Lag-1 plot showing a tight linear cluster along the diagonal (r1 = 0.93), indicating severe non-randomness caused by a sampling rate that was too fast.',
+  'lag': 'Lag-1 plot showing a tight linear cluster along the diagonal (r1 = 0.94), indicating severe non-randomness caused by a sampling rate that was too fast.',
   'histogram': 'Histogram with KDE overlay of the filter transmittance data. Because the data are severely autocorrelated, the shape reflects dependence structure rather than a meaningful distribution.',
   'probability': 'Normal probability plot of the filter transmittance data. Interpretation is not meaningful because the randomness assumption is violated.',
   'autocorrelation': 'Autocorrelation plot showing extreme positive autocorrelation at all lags — consistent with a data acquisition system sampling too fast, where each measurement is contaminated by the previous reading.',
