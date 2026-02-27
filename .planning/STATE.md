@@ -58,6 +58,9 @@ Full decision log in PROJECT.md Key Decisions table.
 v1.0-v1.8 decisions archived in respective milestone files.
 
 **v1.9 Decisions:**
+- [Phase 56] NIST case studies use lag-4 (k=4) for Bartlett/Levene, not k=10
+- [Phase 56] Cornish-Fisher tQuantile without df-threshold for accuracy across all df
+- [Phase 56] Runs test ties inherit previous observation classification
 - [Phase 56] Simplified always-720px ternary to constant default maxWidth prop in PlotFigure.astro
 - [Phase 56] Used `caption` prop name (not `figCaption`) for cleaner external API while preserving internal variable names
 
@@ -81,6 +84,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 56-02-PLAN.md (Phase 56 Infrastructure Foundation complete)
+Stopped at: Completed 56-01-PLAN.md and 56-02-PLAN.md (Phase 56 Infrastructure Foundation complete)
 Resume file: None
 Next: `/gsd:plan-phase 57` to plan Minor-Gap Case Studies

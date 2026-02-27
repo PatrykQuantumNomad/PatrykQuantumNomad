@@ -9,7 +9,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Hypothesis test functions added to statistics library (runs test, Levene test, Bartlett test, Anderson-Darling, Grubbs test, PPCC, location regression t-test)
+- [x] **INFRA-01**: Hypothesis test functions added to statistics library (runs test, Levene test, Bartlett test, Anderson-Darling, Grubbs test, PPCC, location regression t-test)
 - [x] **INFRA-02**: Shared PlotFigure.astro wrapper component extracted from existing *Plots.astro pattern to reduce duplication
 - [x] **INFRA-03**: Canonical case study section template defined and documented for consistent structure across all 9 case studies
 - [x] **INFRA-04**: Cross-reference URL cheat sheet created mapping technique/quantitative slugs to prevent broken links
@@ -102,7 +102,7 @@ Deferred to future release.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 56 | Pending |
+| INFRA-01 | Phase 56 | Complete |
 | INFRA-02 | Phase 56 | Complete |
 | INFRA-03 | Phase 56 | Complete |
 | INFRA-04 | Phase 56 | Complete |
