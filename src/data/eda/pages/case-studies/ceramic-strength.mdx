@@ -228,17 +228,55 @@ The designed experiment analysis examines the effects of three primary machining
 
 Because the batch effect dominates, factor effects are analyzed separately by batch. DOE mean plots, standard deviation plots, and interaction plots for each batch will be presented in the following subsections.
 
-### DOE Mean Plots
+### DOE Mean Plot
 
-DOE mean plots show the average response at each factor level, with a dashed line at the grand mean. Steeper lines indicate larger effects. These plots are the primary tool for ranking factor importance and determining optimal settings.
+[DOE mean plots](/eda/techniques/doe-plots/) show the mean response at each factor level. The steeper the line connecting the two levels, the larger the effect of that factor on ceramic strength. The dashed horizontal reference line marks the batch grand mean.
 
-{/* DOE mean and SD plots will be wired in Plan 02 */}
+#### Batch 1
 
-### Interaction Plots
+<CeramicStrengthPlots type="doe-mean-batch1" />
 
-Interaction plots show whether the effect of one factor depends on the level of another factor. Non-parallel lines indicate interaction. The <InlineMath tex="X_1 \times X_3" /> interaction (table speed by wheel grit) is the most important interaction in both batches.
+For Batch 1, table speed (<InlineMath tex="X_1" />) produces the steepest slope, confirming its dominant effect of <InlineMath tex="-30.77" /> units. The negative sign indicates that lower table speed (level <InlineMath tex="-1" />) yields higher strength. Wheel grit (<InlineMath tex="X_3" />) shows a moderate effect of <InlineMath tex="-7.18" /> units, while down feed rate (<InlineMath tex="X_2" />) has essentially no effect (near-horizontal line).
 
-{/* Interaction plots will be wired in Plan 02 */}
+#### Batch 2
+
+<CeramicStrengthPlots type="doe-mean-batch2" />
+
+For Batch 2, the pattern is markedly different. Down feed rate (<InlineMath tex="X_2" />) now produces the steepest slope with an effect of <InlineMath tex="+18.22" /> units -- the positive sign indicates that higher down feed rate yields higher strength. Wheel grit (<InlineMath tex="X_3" />) is the second most important factor at <InlineMath tex="-14.71" /> units. Table speed (<InlineMath tex="X_1" />) has essentially no effect (near-horizontal line), in stark contrast to Batch 1.
+
+### DOE Standard Deviation Plot
+
+DOE standard deviation plots show the within-level standard deviation at each factor level. Large differences between levels indicate that the factor affects not only the mean response but also its variability.
+
+#### Batch 1
+
+<CeramicStrengthPlots type="doe-sd-batch1" />
+
+For Batch 1, table speed (<InlineMath tex="X_1" />) shows a substantial difference in variability between levels -- the standard deviation at the high level is approximately 20 units larger than at the low level. This variability effect is important for process optimization because it means slower table speed not only produces stronger ceramics but also more consistent ones.
+
+#### Batch 2
+
+<CeramicStrengthPlots type="doe-sd-batch2" />
+
+For Batch 2, the standard deviation differences across factor levels are roughly comparable for all three factors, with no single factor dominating the variability structure. This contrasts with Batch 1 where table speed had a pronounced variability effect.
+
+### Interaction Effects
+
+[Interaction plots](/eda/techniques/doe-plots/) show the mean response at each level of one factor, with separate lines for each level of a second factor. Non-parallel lines indicate an interaction -- the effect of one factor depends on the level of the other.
+
+The <InlineMath tex="X_1 \times X_3" /> (table speed by wheel grit) interaction is the most important interaction in both batches, ranked second in the effect tables for both Batch 1 (<InlineMath tex="-20.25" />) and Batch 2 (<InlineMath tex="-16.71" />).
+
+#### Batch 1: Table Speed x Wheel Grit
+
+<CeramicStrengthPlots type="interaction-batch1-x1x3" />
+
+The non-parallel lines confirm the <InlineMath tex="X_1 \times X_3" /> interaction in Batch 1. At low table speed, the wheel grit effect is modest, but at high table speed, the wheel grit effect becomes much larger. The interaction magnitude of <InlineMath tex="-20.25" /> units is second only to the table speed main effect.
+
+#### Batch 2: Table Speed x Wheel Grit
+
+<CeramicStrengthPlots type="interaction-batch2-x1x3" />
+
+The <InlineMath tex="X_1 \times X_3" /> interaction in Batch 2 has a similar pattern but with different magnitudes. This interaction effect of <InlineMath tex="-16.71" /> units is more important in Batch 2 (where table speed has no main effect) than in Batch 1, making it the second-ranked effect after down feed rate.
 
 ### Batch 1 — Ranked Effects
 
