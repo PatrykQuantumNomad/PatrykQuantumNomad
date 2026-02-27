@@ -43,9 +43,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Filter Transmittance
 
-- [ ] **FILT-01**: Individual named plot subsections with per-plot interpretation
-- [ ] **FILT-02**: Quantitative results with full test suite and test summary table
-- [ ] **FILT-03**: Interpretation section synthesizing evidence
+- [x] **FILT-01**: Individual named plot subsections with per-plot interpretation
+- [x] **FILT-02**: Quantitative results with full test suite and test summary table
+- [x] **FILT-03**: Interpretation section synthesizing evidence
 
 ### Case Study — Standard Resistor (New)
 
@@ -112,9 +112,9 @@ Deferred to future release.
 | CRYO-01 | Phase 57 | Complete |
 | CRYO-02 | Phase 57 | Complete |
 | CRYO-03 | Phase 57 | Complete |
-| FILT-01 | Phase 57 | Pending |
-| FILT-02 | Phase 57 | Pending |
-| FILT-03 | Phase 57 | Pending |
+| FILT-01 | Phase 57 | Complete |
+| FILT-02 | Phase 57 | Complete |
+| FILT-03 | Phase 57 | Complete |
 | HFM-01 | Phase 57 | Complete |
 | HFM-02 | Phase 57 | Complete |
 | HFM-03 | Phase 57 | Complete |
