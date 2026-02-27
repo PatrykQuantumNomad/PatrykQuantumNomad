@@ -81,11 +81,11 @@ Plans:
   2. StandardResistorPlots.astro component renders all required plot types (run sequence, lag, histogram, normal probability, autocorrelation, spectral) with computed data from the dataset array
   3. Standard Resistor MDX page is accessible at its case study URL with Background and Data, individual named plot subsections, quantitative results, interpretation, and conclusions sections
   4. Standard Resistor appears in case study navigation, CaseStudyDataset.astro mapping, and is cross-referenced from relevant technique pages
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 58-01: TBD
-- [ ] 58-02: TBD
+- [ ] 58-01-PLAN.md — Dataset array (1000 values) + StandardResistorPlots.astro + CaseStudyDataset registration
+- [ ] 58-02-PLAN.md — Full MDX page with all sections, NIST-verified statistics, and cross-references
 
 ### Phase 59: Uniform Random Numbers Enhancement
 **Goal**: Uniform Random Numbers case study reaches full NIST parity including the uniform PDF overlay that distinguishes it from the standard-pattern studies
