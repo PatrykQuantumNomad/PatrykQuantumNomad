@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: EDA Case Study Deep Dive
 status: executing
-last_updated: "2026-02-27T11:15:51Z"
+last_updated: "2026-02-27T11:23:00Z"
 progress:
   total_phases: 63
-  completed_phases: 57
+  completed_phases: 58
   total_plans: 141
-  completed_plans: 133
+  completed_plans: 134
 ---
 
 # Project State
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.9 EDA Case Study Deep Dive — Phase 58 in progress
+**Current focus:** v1.9 EDA Case Study Deep Dive — Phase 58 complete, ready for Phase 59
 
 ## Current Position
 
-Phase: 58 of 63 (Standard Resistor Case Study)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-27 — Standard Resistor data infrastructure and plot component
+Phase: 58 of 63 (Standard Resistor Case Study) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-27 — Standard Resistor MDX content page
 
-Progress: ████░░░░░░ 43% (v1.9 — 6/14 plans)
+Progress: █████░░░░░ 50% (v1.9 — 7/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 133 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 6 v1.9)
+- Total plans completed: 134 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 7 v1.9)
 
 **Cumulative Stats:**
 
@@ -67,6 +67,8 @@ v1.0-v1.8 decisions archived in respective milestone files.
 - [Phase 57] Heat Flow Meter PPCC corrected from 0.996 to 0.999 (matches NIST source and ppccNormal computation)
 - [Phase 57] Filter Transmittance r1 corrected from 0.93 to 0.94 (computed 0.9380 from dataset, matches NIST)
 - [Phase 58] Omitted date columns from DZIUBA1.DAT; stored only resistance values as number[] to match established single-column pattern
+- [Phase 58] Standard Resistor follows Filter Transmittance pattern for omitting distribution/outlier tests when randomness is violated
+- [Phase 58] Used ~1.962 as critical t-value for df=998 (vs Filter Transmittance's ~2.01 for df=48)
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 58-01-PLAN.md (Standard Resistor data infrastructure)
+Stopped at: Completed 58-02-PLAN.md (Standard Resistor MDX content page)
 Resume file: None
-Next: Execute 58-02-PLAN.md (Standard Resistor MDX content page)
+Next: Execute Phase 59 (Semiconductor case study)

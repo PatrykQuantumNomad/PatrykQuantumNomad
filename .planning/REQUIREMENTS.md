@@ -51,8 +51,8 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 - [ ] **RSTR-01**: Dataset entry added to datasets.ts with NIST DZIUBA1.DAT data (1000 observations)
 - [ ] **RSTR-02**: StandardResistorPlots.astro component created with all required plot types
-- [ ] **RSTR-03**: Full MDX page with Background and Data, individual named plot subsections, quantitative results, interpretation, and conclusions
-- [ ] **RSTR-04**: Registered in case study navigation and cross-referenced from technique pages
+- [x] **RSTR-03**: Full MDX page with Background and Data, individual named plot subsections, quantitative results, interpretation, and conclusions
+- [x] **RSTR-04**: Registered in case study navigation and cross-referenced from technique pages
 
 ### Case Study — Heat Flow Meter
 
@@ -120,8 +120,8 @@ Deferred to future release.
 | HFM-03 | Phase 57 | Complete |
 | RSTR-01 | Phase 58 | Pending |
 | RSTR-02 | Phase 58 | Pending |
-| RSTR-03 | Phase 58 | Pending |
-| RSTR-04 | Phase 58 | Pending |
+| RSTR-03 | Phase 58 | Complete |
+| RSTR-04 | Phase 58 | Complete |
 | URN-01 | Phase 59 | Pending |
 | URN-02 | Phase 59 | Pending |
 | URN-03 | Phase 59 | Pending |
