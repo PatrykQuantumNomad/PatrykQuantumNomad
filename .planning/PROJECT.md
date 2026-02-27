@@ -201,7 +201,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — planning next milestone)
+## Current Milestone: v1.10 EDA Graphical Techniques — NIST Parity & Validation
+
+**Goal:** Validate all 29 graphical technique SVG plots and bring every page to full NIST/SEMATECH section depth with Questions, Importance, expanded Definitions, Python code examples, and case study cross-links.
+
+**Target features:**
+- Audit and fix all 29 graphical technique SVGs (visual accuracy and data patterns vs NIST originals)
+- Add "Questions Answered" section to all 29 technique pages (numbered list of what the plot reveals)
+- Add "Importance" section to all 29 technique pages (why this technique matters for analysis)
+- Expand Definition sections with formulas where NIST provides them (KaTeX rendering)
+- Add Python code examples (matplotlib/seaborn) for generating each of the 29 plots
+- Add Case Study cross-links connecting techniques to relevant existing 9 case studies
+- Add Examples section referencing variant patterns and interpretation guidance
 
 ### Out of Scope
 
@@ -230,6 +241,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
+Shipped v1.9 EDA Case Study Deep Dive on top of v1.8 EDA Visual Encyclopedia. Now working on v1.10 to bring all 29 graphical technique pages to full NIST/SEMATECH parity — adding missing sections (Questions, Importance, expanded Definitions with formulas), Python code examples, case study cross-links, and auditing all SVG plots for correctness.
 Shipped v1.9 EDA Case Study Deep Dive on top of v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
@@ -345,4 +357,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-27 after v1.9 milestone complete*
+*Last updated: 2026-02-27 after v1.10 milestone started*
