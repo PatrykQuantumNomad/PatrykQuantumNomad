@@ -26,7 +26,7 @@ See `.planning/milestones/` for detailed archives.
 
 ### v1.10 EDA Graphical Techniques — NIST Parity & Validation
 
-- [ ] **Phase 64: Infrastructure Foundation** - Split technique-content.ts, extend TechniqueContent interface, update graphical template with new sections and code slot
+- [x] **Phase 64: Infrastructure Foundation** - Split technique-content.ts, extend TechniqueContent interface, update graphical template with new sections and code slot (completed 2026-02-27)
 - [ ] **Phase 65: SVG Audit & Fixes** - Audit all 29 graphical technique SVGs against NIST originals and fix visual/data pattern issues
 - [ ] **Phase 66: Content Depth** - Add Questions, Importance, expanded Definitions, Case Study cross-links, and Examples sections to all 29 technique pages
 - [ ] **Phase 67: Technical Depth** - Add KaTeX formulas for 12 techniques and Python code examples for all 29 techniques
@@ -47,8 +47,8 @@ See `.planning/milestones/` for detailed archives.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 64-01-PLAN.md — Split technique-content.ts into per-category modules and extend TechniqueContent interface
-- [ ] 64-02-PLAN.md — Update graphical [slug].astro template with new sections, KaTeX formula slot, Code slot, and case study resolution
+- [x] 64-01-PLAN.md — Split technique-content.ts into per-category modules and extend TechniqueContent interface
+- [x] 64-02-PLAN.md — Update graphical [slug].astro template with new sections, KaTeX formula slot, Code slot, and case study resolution
 
 ### Phase 65: SVG Audit & Fixes
 **Goal**: Every graphical technique SVG is visually accurate and statistically correct relative to its NIST original
@@ -130,7 +130,7 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
-| 64. Infrastructure Foundation | 1/2 | In Progress|  | - |
+| 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
 | 65. SVG Audit & Fixes | v1.10 | 0/TBD | Not started | - |
 | 66. Content Depth | v1.10 | 0/TBD | Not started | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |

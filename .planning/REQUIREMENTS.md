@@ -11,10 +11,10 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 - [x] **INFRA-01**: technique-content.ts is split into manageable modules (per-category or per-group) to prevent 200KB+ monolith
 - [x] **INFRA-02**: TechniqueContent interface is extended with optional fields: questions, importance, definitionExpanded, formulas, pythonCode, caseStudySlugs, examples
-- [ ] **INFRA-03**: Graphical [slug].astro template renders new sections (Questions Answered, Importance, expanded Definition, Examples, Case Studies) in the description slot
-- [ ] **INFRA-04**: Graphical [slug].astro template activates the code slot for Python examples using astro-expressive-code Code component
-- [ ] **INFRA-05**: Graphical [slug].astro template renders KaTeX formulas at build time using katex.renderToString() for techniques that have formulas
-- [ ] **INFRA-06**: Case study cross-link resolution works at build time (technique slug → case study title + URL)
+- [x] **INFRA-03**: Graphical [slug].astro template renders new sections (Questions Answered, Importance, expanded Definition, Examples, Case Studies) in the description slot
+- [x] **INFRA-04**: Graphical [slug].astro template activates the code slot for Python examples using astro-expressive-code Code component
+- [x] **INFRA-05**: Graphical [slug].astro template renders KaTeX formulas at build time using katex.renderToString() for techniques that have formulas
+- [x] **INFRA-06**: Case study cross-link resolution works at build time (technique slug → case study title + URL)
 
 ### SVG Validation
 
@@ -95,10 +95,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | INFRA-01 | Phase 64 | Complete |
 | INFRA-02 | Phase 64 | Complete |
-| INFRA-03 | Phase 64 | Pending |
-| INFRA-04 | Phase 64 | Pending |
-| INFRA-05 | Phase 64 | Pending |
-| INFRA-06 | Phase 64 | Pending |
+| INFRA-03 | Phase 64 | Complete |
+| INFRA-04 | Phase 64 | Complete |
+| INFRA-05 | Phase 64 | Complete |
+| INFRA-06 | Phase 64 | Complete |
 | SVG-01 | Phase 65 | Pending |
 | SVG-02 | Phase 65 | Pending |
 | SVG-03 | Phase 65 | Pending |
