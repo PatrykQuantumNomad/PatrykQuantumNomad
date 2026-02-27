@@ -36,7 +36,7 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 ### Content — Expanded Definitions
 
 - [x] **DEFN-01**: All 29 graphical technique pages have expanded definitions covering axis meanings, construction method, and mathematical formulation where applicable
-- [ ] **DEFN-02**: 12 techniques with NIST formulas have KaTeX-rendered formulas (autocorrelation, spectral, probability plot, normal probability, PPCC, Box-Cox linearity, Box-Cox normality, Weibull, Q-Q, bootstrap, mean plot, std deviation plot)
+- [x] **DEFN-02**: 12 techniques with NIST formulas have KaTeX-rendered formulas (autocorrelation, spectral, probability plot, normal probability, PPCC, Box-Cox linearity, Box-Cox normality, Weibull, Q-Q, bootstrap, mean plot, std deviation plot)
 
 ### Content — Case Study Cross-Links
 
@@ -51,10 +51,10 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 ### Python Code
 
-- [ ] **PYTH-01**: All 29 graphical technique pages have a Python code example section
-- [ ] **PYTH-02**: Python examples use current matplotlib/seaborn/scipy APIs (no deprecated functions like distplot or vert=True)
-- [ ] **PYTH-03**: Python examples include sample data generation so they are self-contained and runnable
-- [ ] **PYTH-04**: Python examples render with syntax highlighting via astro-expressive-code
+- [x] **PYTH-01**: All 29 graphical technique pages have a Python code example section
+- [x] **PYTH-02**: Python examples use current matplotlib/seaborn/scipy APIs (no deprecated functions like distplot or vert=True)
+- [x] **PYTH-03**: Python examples include sample data generation so they are self-contained and runnable
+- [x] **PYTH-04**: Python examples render with syntax highlighting via astro-expressive-code
 
 ### Verification
 
@@ -113,11 +113,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CASE-03 | Phase 66 | Pending |
 | EXMP-01 | Phase 66 | Complete |
 | EXMP-02 | Phase 66 | Complete |
-| DEFN-02 | Phase 67 | Pending |
-| PYTH-01 | Phase 67 | Pending |
-| PYTH-02 | Phase 67 | Pending |
-| PYTH-03 | Phase 67 | Pending |
-| PYTH-04 | Phase 67 | Pending |
+| DEFN-02 | Phase 67 | Complete |
+| PYTH-01 | Phase 67 | Complete |
+| PYTH-02 | Phase 67 | Complete |
+| PYTH-03 | Phase 67 | Complete |
+| PYTH-04 | Phase 67 | Complete |
 | VRFY-01 | Phase 68 | Pending |
 | VRFY-02 | Phase 68 | Pending |
 | VRFY-03 | Phase 68 | Pending |
