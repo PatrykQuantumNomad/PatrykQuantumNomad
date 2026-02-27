@@ -159,10 +159,11 @@ Plans:
   1. All cross-reference links across all 9 case studies resolve correctly with zero 404s (technique, quantitative, distribution, and inter-case-study links)
   2. `npx astro check` reports 0 errors and `npx astro build` completes successfully with no regressions
   3. Statistical values in all quantitative tables have been verified against NIST source data with zero discrepancies in test statistics, critical values, and conclusions
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 63-01: TBD
+- [ ] 63-01-PLAN.md — Cross-reference link integrity and statistical value audit against NIST sources
+- [ ] 63-02-PLAN.md — Astro build validation and REQUIREMENTS.md checkbox cleanup
 
 ## Progress
 
@@ -188,5 +189,5 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 60. Beam Deflections Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
 | 61. Fatigue Life Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
 | 62. Ceramic Strength DOE | v1.9 | 2/2 | Complete | 2026-02-27 |
-| 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **144/145** | **99%** | |
+| 63. Validation | v1.9 | 0/2 | Not started | - |
+| **Total** | **v1.0-v1.9** | **144/146** | **99%** | |
