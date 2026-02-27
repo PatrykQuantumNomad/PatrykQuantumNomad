@@ -109,10 +109,10 @@ Plans:
   3. Every case study cross-link on all 29 technique pages resolves to a valid page (no 404s)
   4. All KaTeX formulas across 12 technique pages render as styled math (no raw LaTeX strings visible)
   5. Zero deprecated Python API patterns (distplot, vert=True, plt.acorr without bounds) found via grep across all 29 code examples
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 68-01: TBD
+- [ ] 68-01-PLAN.md — Full-sweep verification: clean build, deprecated API scan, cross-link validation, KaTeX rendering audit, Lighthouse performance scoring
 
 ## Progress
 
@@ -135,4 +135,4 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 66. Content Depth | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 67. Technical Depth | 3/3 | Complete   | 2026-02-27 | - |
-| 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |
+| 68. Verification & Audit | v1.10 | 0/1 | Not started | - |
