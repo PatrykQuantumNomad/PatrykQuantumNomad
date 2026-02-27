@@ -31,6 +31,32 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The vertical axis shows the autocorrelation coefficient R_h = C_h / C_0, where C_h is the autocovariance at lag h and C_0 is the variance. Horizontal reference lines at plus or minus 2/sqrt(N) mark the 95% significance bounds under the null hypothesis of white noise. The autocorrelation at lag 0 is always 1 by definition.',
     caseStudySlugs: ['beam-deflections'],
+    examples: [
+      {
+        label: 'White Noise',
+        description:
+          'All autocorrelation values fall within the 95% confidence bands, with no significant spikes at any lag. This is the signature of purely random data where each observation is independent of all others. The constant-plus-error model Y = c + e is appropriate.',
+        variantLabel: 'White Noise',
+      },
+      {
+        label: 'AR(1) Process',
+        description:
+          'A large positive spike at lag 1 followed by exponentially decaying values indicates a first-order autoregressive process. Each observation depends primarily on its immediate predecessor. The decay rate reflects the strength of the serial dependence.',
+        variantLabel: 'AR(1)',
+      },
+      {
+        label: 'MA(1) Process',
+        description:
+          'A single significant spike at lag 1 that cuts off sharply to zero at lag 2 and beyond is the hallmark of a first-order moving average process. The data have short-range dependence limited to adjacent observations.',
+        variantLabel: 'MA(1)',
+      },
+      {
+        label: 'Seasonal Pattern',
+        description:
+          'Oscillating autocorrelation values that repeat at regular lag intervals indicate periodic behavior in the time series. The spacing of the peaks reveals the seasonal period, and the amplitude of the oscillation indicates the strength of the cyclic component.',
+        variantLabel: 'Seasonal',
+      },
+    ],
   },
 
   'complex-demodulation': {
@@ -76,6 +102,32 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The plot shows Y_i on the horizontal axis vs Y_{i+k} on the vertical axis, where k is the lag (default k=1). Each point represents two successive observations. The plot exploits the human eye\'s pattern recognition: random data produce a structureless cloud, while any departure from randomness produces a recognizable geometric shape.',
     caseStudySlugs: ['beam-deflections'],
+    examples: [
+      {
+        label: 'Random Data',
+        description:
+          'A structureless, circular cloud of points centered on the plot with no discernible pattern. This indicates that knowing the value at time i provides no information about the value at time i+1. The data satisfy the randomness assumption.',
+        variantLabel: 'Random',
+      },
+      {
+        label: 'Autoregressive',
+        description:
+          'Points form a tight ellipse aligned along the diagonal, indicating strong positive autocorrelation. High values tend to follow high values and low values follow low values. The tighter the ellipse, the stronger the serial dependence.',
+        variantLabel: 'Autoregressive',
+      },
+      {
+        label: 'Seasonal',
+        description:
+          'Points form a structured elliptical or circular loop pattern rather than a random cloud. The cyclic structure in the data creates a recognizable geometric shape in the lag plot that is distinct from both random scatter and linear autocorrelation.',
+        variantLabel: 'Seasonal',
+      },
+      {
+        label: 'Trend',
+        description:
+          'Points cluster tightly along the diagonal with the cloud displaced from the center, indicating a strong trend in the data. The linear structure arises because successive values in a trending series are nearly identical, differing only by the trend increment plus noise.',
+        variantLabel: 'Trend',
+      },
+    ],
   },
 
   'run-sequence-plot': {
@@ -98,6 +150,23 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The horizontal axis shows run order index (1, 2, ..., N) and the vertical axis shows the measured response value. No smoothing or modeling is applied. The plot is intentionally raw so that any patterns -- trends, shifts, cycles, or outliers -- are visible without being obscured by statistical processing. A horizontal reference line at the overall mean is often included.',
     caseStudySlugs: ['filter-transmittance'],
+    examples: [
+      {
+        label: 'Stable Process',
+        description:
+          'Data points scatter randomly within a horizontal band of constant width around the mean, with no visible trends, shifts, or patterns. This indicates a process with fixed location and fixed variation, suitable for standard statistical analysis.',
+      },
+      {
+        label: 'Location Shift',
+        description:
+          'An abrupt jump in the level of the data partway through the sequence, where the mean before and after the shift are visibly different. Common causes include tool changes, batch changes, or environmental disturbances.',
+      },
+      {
+        label: 'Trend',
+        description:
+          'A gradual upward or downward drift in the data over the observation period, indicating that the process mean is not constant. This can result from tool wear, temperature drift, or material degradation.',
+      },
+    ],
   },
 
   'spectral-plot': {
@@ -120,5 +189,25 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The power spectral density is computed via the Fourier transform of the autocovariance function (or equivalently, the squared magnitude of the discrete Fourier transform of the data, suitably normalized). The horizontal axis shows frequency in cycles per observation interval, and the vertical axis shows power spectral density. Sharp peaks indicate periodic components; the frequency resolution is 1/N where N is the series length.',
     caseStudySlugs: ['beam-deflections'],
+    examples: [
+      {
+        label: 'Single Frequency',
+        description:
+          'A single sharp peak rises prominently above a flat noise floor, identifying one dominant periodic component in the data. The frequency of the peak can be converted to a period by taking its reciprocal. This pattern is typical of data driven by a single cyclic mechanism.',
+        variantLabel: 'Single Frequency',
+      },
+      {
+        label: 'Multiple Frequencies',
+        description:
+          'Two or more distinct peaks appear at different frequencies, indicating that the time series contains multiple periodic components. Each peak represents an independent cyclic mechanism. The relative heights indicate which frequency contributes most to the total variance.',
+        variantLabel: 'Multiple Frequencies',
+      },
+      {
+        label: 'White Noise',
+        description:
+          'A flat, featureless spectrum with roughly equal power at all frequencies. This is the spectral signature of purely random data with no periodic structure. The absence of peaks confirms that no cyclic model is needed.',
+        variantLabel: 'White Noise',
+      },
+    ],
   },
 } as const;
