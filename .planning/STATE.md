@@ -6,7 +6,7 @@ status: active
 last_updated: "2026-02-27T20:20:36Z"
 progress:
   total_phases: 68
-  completed_phases: 66
+  completed_phases: 67
   total_plans: 158
   completed_plans: 158
 ---
@@ -111,7 +111,7 @@ None.
 
 - [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification (monitor post-deploy)
 - [v1.10]: ~~technique-content.ts must be split BEFORE adding content~~ RESOLVED in 64-01 (split into 9 modules)
-- [v1.10]: Python examples must avoid deprecated APIs (distplot, vert=True, plt.acorr) -- grep validation required
+- [v1.10]: ~~Python examples must avoid deprecated APIs (distplot, vert=True, plt.acorr)~~ RESOLVED in 67 — verified zero matches across all 29 techniques
 
 ### Quick Tasks Completed
 
