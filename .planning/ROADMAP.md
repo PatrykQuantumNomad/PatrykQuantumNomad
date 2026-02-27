@@ -65,12 +65,12 @@ Plans:
   2. Each of the 4 case studies has a Quantitative Results section with summary statistics table, hypothesis test results (location, variation, randomness, distribution, outlier), and a Test Summary table showing pass/fail for each assumption
   3. Each of the 4 case studies has an Interpretation section that synthesizes graphical and quantitative evidence into conclusions about the dataset assumptions
   4. All test statistic values in quantitative tables are computed from dataset arrays and match NIST source values
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 57-01: TBD
-- [ ] 57-02: TBD
-- [ ] 57-03: TBD
+- [ ] 57-01-PLAN.md — Add Interpretation sections to Normal Random Numbers and Heat Flow Meter, verify NIST values, resolve HFM PPCC discrepancy
+- [ ] 57-02-PLAN.md — Fix Cryothermometry heading structure to canonical format and add Interpretation section
+- [ ] 57-03-PLAN.md — Restructure Filter Transmittance with canonical headings, add missing Histogram/Probability Plot subsections, add Interpretation section
 
 ### Phase 58: Standard Resistor Case Study
 **Goal**: A complete new case study for NIST Section 1.4.2.7 (Standard Resistor) exists with the same depth and structure as the enhanced Phase 57 studies
