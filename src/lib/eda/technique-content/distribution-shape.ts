@@ -85,6 +85,11 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'The box plot is the most widely used graphical tool for comparing groups in designed experiments and process analysis. It provides a compact, standardized five-number summary that enables rapid comparison of location, spread, and symmetry across many groups simultaneously, making it indispensable for factorial analysis and quality control.',
     definitionExpanded: 'The box spans from Q1 (25th percentile) to Q3 (75th percentile), with the median marked as a line within the box. The interquartile range (IQR) = Q3 \u2212 Q1 measures the spread of the middle 50% of the data. Whiskers extend to the most extreme observations within 1.5 \u00D7 IQR from the box edges. Observations beyond the whiskers are plotted individually as potential outliers. The 1.5 \u00D7 IQR rule identifies approximately 0.7% of observations as outliers under a normal distribution.',
     caseStudySlugs: ['ceramic-strength'],
+    examples: [
+      { label: 'Equal Groups', description: 'All box plots have similar medians, similar IQR heights, and similar whisker lengths. This indicates no significant difference between groups — the factor does not affect either the location or the spread of the response.' },
+      { label: 'Location Shift', description: 'Box plots have similar heights and whisker lengths but different median positions. This indicates the factor affects the average response without changing the variability, a classic location effect.' },
+      { label: 'Spread Difference', description: 'Box plots have similar medians but markedly different heights. Taller boxes indicate groups with greater variability. This dispersion effect is important for process optimization and robust parameter design.' },
+    ],
   },
 
   'histogram': {
@@ -101,6 +106,16 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'The histogram is the foundational graphical technique in exploratory data analysis. It provides the most direct visual answer to the question "what does my data look like?" and is the prerequisite for choosing appropriate statistical methods, since nearly every statistical procedure depends on distributional shape assumptions.',
     definitionExpanded: 'The data range is divided into k contiguous, non-overlapping intervals (bins) of equal width. The height of each bar represents the count (or relative frequency) of observations falling in that bin. The number of bins affects the visual impression: too few bins over-smooth and hide structure, too many bins create noise. The Freedman-Diaconis rule (bin width = 2 \u00D7 IQR \u00D7 N^{\u22121/3}) and Sturges\u2019 rule (k = 1 + log\u2082(N)) provide automatic defaults. An optional kernel density estimate (KDE) overlay provides a smooth probability density curve.',
     caseStudySlugs: ['heat-flow-meter'],
+    examples: [
+      { label: 'Symmetric (Normal)', description: 'A bell-shaped histogram centered on the mean with symmetric tails tapering smoothly on both sides. This is the signature of normally distributed data and confirms that standard statistical methods (t-tests, confidence intervals, capability indices) are appropriate.', variantLabel: 'Symmetric' },
+      { label: 'Right Skewed', description: 'The histogram peaks on the left side and has a long tail extending to the right. This indicates positively skewed data where a few large values pull the mean above the median. Common in reliability data (time-to-failure), income distributions, and measurements with a natural lower bound.', variantLabel: 'Right Skewed' },
+      { label: 'Left Skewed', description: 'The histogram peaks on the right side and has a long tail extending to the left. This indicates negatively skewed data where a few small values pull the mean below the median. Less common than right skew, but occurs in failure-time data with wear-out mechanisms.', variantLabel: 'Left Skewed' },
+      { label: 'Bimodal', description: 'Two distinct peaks separated by a valley, indicating that the data come from a mixture of two populations or processes. Investigation should identify the source of the two modes, such as two machines, two operators, or two material batches.', variantLabel: 'Bimodal' },
+      { label: 'Uniform', description: 'A flat histogram with roughly equal bar heights across the range, indicating that all values are equally likely. This pattern suggests data from a uniform distribution or a process with no central tendency, and is sometimes seen in rounded or discretized data.', variantLabel: 'Uniform' },
+      { label: 'Heavy Tailed', description: 'A histogram with more observations in the extreme tails than expected for a normal distribution. The center may appear somewhat peaked. Heavy tails inflate the standard deviation and make normal-theory confidence intervals unreliable. Robust methods or a heavy-tailed model (e.g., t-distribution) may be needed.', variantLabel: 'Heavy Tailed' },
+      { label: 'Peaked (Leptokurtic)', description: 'A histogram with a sharp central peak and thin tails, indicating a distribution more concentrated around the center than the normal. The excess kurtosis is positive. This can occur when measurement precision is very high relative to process variation.', variantLabel: 'Peaked' },
+      { label: 'With Outlier', description: 'The main body of the histogram follows a recognizable pattern, but one or more bars appear isolated far from the bulk of the data. These outlying observations may indicate measurement errors, data entry mistakes, or genuine extreme events that require investigation.', variantLabel: 'With Outlier' },
+    ],
   },
 
   'normal-probability-plot': {
@@ -117,6 +132,12 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'Normality is the most frequently tested distributional assumption in statistics. The normal probability plot is more sensitive than the histogram for detecting departures from normality because it magnifies tail behavior, which is exactly where non-normality has the greatest impact on statistical inference (confidence intervals, hypothesis tests, capability indices).',
     definitionExpanded: 'The ordered data values Y_{(1)} \u2264 Y_{(2)} \u2264 ... \u2264 Y_{(N)} are plotted against the corresponding expected normal order statistics (theoretical quantiles). If the data are normal, the points fall on a straight line whose slope estimates the standard deviation and whose intercept estimates the mean. The theoretical quantiles are computed using a plotting position formula such as Filliben\u2019s.',
     caseStudySlugs: ['heat-flow-meter'],
+    examples: [
+      { label: 'Normal Data', description: 'Points follow the reference line closely from end to end with only minor random scatter. This confirms that the data are consistent with a normal distribution, and standard normal-theory methods are appropriate.', variantLabel: 'Normal' },
+      { label: 'Right Skewed', description: 'Points curve below the reference line on the left and above it on the right, forming a concave-up shape. This indicates right (positive) skewness — the upper tail is heavier than expected for a normal distribution. A log or square root transformation may normalize the data.', variantLabel: 'Right Skewed' },
+      { label: 'Heavy Tailed', description: 'Points curve away from the reference line at BOTH ends: below the line on the left and above the line on the right, forming an S-shape. This indicates a distribution with heavier tails than the normal (leptokurtic). A t-distribution or similar heavy-tailed model may be more appropriate.', variantLabel: 'Heavy Tailed' },
+      { label: 'Bimodal', description: 'Points show a step or plateau pattern with a flat region in the middle of the plot. This indicates the data come from a mixture of two populations. The flat region corresponds to the valley between the two modes. The two populations should be separated and analyzed individually.', variantLabel: 'Bimodal' },
+    ],
   },
 
   'probability-plot': {
@@ -133,6 +154,11 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'Choosing the correct distributional model is essential for reliability prediction, process capability analysis, and simulation. The probability plot provides a visual goodness-of-fit assessment for any hypothesized distribution, making it the most versatile single tool for distribution identification. The slope and intercept of the fitted line directly estimate the distribution parameters.',
     definitionExpanded: 'The ordered data are plotted against the quantiles of the hypothesized distribution, with the axis scales chosen so that data from that distribution appear as a straight line. For location-scale families, the intercept estimates the location parameter and the slope estimates the scale parameter. Different distributions require different probability scales: normal scale for the normal, Weibull scale for the Weibull, exponential scale for the exponential, etc. Comparing probability plots for several candidate distributions identifies the best fit.',
     caseStudySlugs: ['uniform-random-numbers'],
+    examples: [
+      { label: 'Good Fit', description: 'Points follow the fitted line closely across the entire range, with only minor random scatter. The probability plot correlation coefficient is close to 1.0. The hypothesized distribution provides a good model for the data.' },
+      { label: 'S-Shaped Departure', description: 'Points form an S-curve around the reference line, with systematic departures at both tails. This indicates the data have a different tail weight than the hypothesized distribution. Try a distribution with heavier or lighter tails.' },
+      { label: 'Concave Departure', description: 'Points show a consistent concave curvature, bowing away from the reference line. This indicates a skewness mismatch — the data are more skewed than the hypothesized distribution. Try a more skewed distributional family.' },
+    ],
   },
 
   'qq-plot': {
