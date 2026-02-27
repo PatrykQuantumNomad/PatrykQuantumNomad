@@ -93,42 +93,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase TBD | Pending |
-| INFRA-02 | Phase TBD | Pending |
-| INFRA-03 | Phase TBD | Pending |
-| INFRA-04 | Phase TBD | Pending |
-| INFRA-05 | Phase TBD | Pending |
-| INFRA-06 | Phase TBD | Pending |
-| SVG-01 | Phase TBD | Pending |
-| SVG-02 | Phase TBD | Pending |
-| SVG-03 | Phase TBD | Pending |
-| SVG-04 | Phase TBD | Pending |
-| QUES-01 | Phase TBD | Pending |
-| QUES-02 | Phase TBD | Pending |
-| IMPT-01 | Phase TBD | Pending |
-| IMPT-02 | Phase TBD | Pending |
-| DEFN-01 | Phase TBD | Pending |
-| DEFN-02 | Phase TBD | Pending |
-| CASE-01 | Phase TBD | Pending |
-| CASE-02 | Phase TBD | Pending |
-| CASE-03 | Phase TBD | Pending |
-| EXMP-01 | Phase TBD | Pending |
-| EXMP-02 | Phase TBD | Pending |
-| PYTH-01 | Phase TBD | Pending |
-| PYTH-02 | Phase TBD | Pending |
-| PYTH-03 | Phase TBD | Pending |
-| PYTH-04 | Phase TBD | Pending |
-| VRFY-01 | Phase TBD | Pending |
-| VRFY-02 | Phase TBD | Pending |
-| VRFY-03 | Phase TBD | Pending |
-| VRFY-04 | Phase TBD | Pending |
-| VRFY-05 | Phase TBD | Pending |
+| INFRA-01 | Phase 64 | Pending |
+| INFRA-02 | Phase 64 | Pending |
+| INFRA-03 | Phase 64 | Pending |
+| INFRA-04 | Phase 64 | Pending |
+| INFRA-05 | Phase 64 | Pending |
+| INFRA-06 | Phase 64 | Pending |
+| SVG-01 | Phase 65 | Pending |
+| SVG-02 | Phase 65 | Pending |
+| SVG-03 | Phase 65 | Pending |
+| SVG-04 | Phase 65 | Pending |
+| QUES-01 | Phase 66 | Pending |
+| QUES-02 | Phase 66 | Pending |
+| IMPT-01 | Phase 66 | Pending |
+| IMPT-02 | Phase 66 | Pending |
+| DEFN-01 | Phase 66 | Pending |
+| CASE-01 | Phase 66 | Pending |
+| CASE-02 | Phase 66 | Pending |
+| CASE-03 | Phase 66 | Pending |
+| EXMP-01 | Phase 66 | Pending |
+| EXMP-02 | Phase 66 | Pending |
+| DEFN-02 | Phase 67 | Pending |
+| PYTH-01 | Phase 67 | Pending |
+| PYTH-02 | Phase 67 | Pending |
+| PYTH-03 | Phase 67 | Pending |
+| PYTH-04 | Phase 67 | Pending |
+| VRFY-01 | Phase 68 | Pending |
+| VRFY-02 | Phase 68 | Pending |
+| VRFY-03 | Phase 68 | Pending |
+| VRFY-04 | Phase 68 | Pending |
+| VRFY-05 | Phase 68 | Pending |
 
 **Coverage:**
 - v1.10 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30 ⚠️
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after initial definition*
+*Last updated: 2026-02-27 after roadmap creation*
