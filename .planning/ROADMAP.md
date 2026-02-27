@@ -80,7 +80,7 @@ Plans:
 
 Plans:
 - [ ] 66-01-PLAN.md — Populate time-series, designed-experiments, and multivariate content (10 techniques + Tier B captions)
-- [ ] 66-02-PLAN.md — Populate distribution-shape content (9 techniques + Tier B captions for histogram and normal-probability-plot)
+- [x] 66-02-PLAN.md — Populate distribution-shape content (9 techniques + Tier B captions for histogram and normal-probability-plot)
 - [ ] 66-03-PLAN.md — Populate comparison, regression, and combined-diagnostic content (10 techniques + Tier B captions for scatter-plot)
 
 ### Phase 67: Technical Depth
@@ -133,6 +133,6 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
-| 66. Content Depth | 1/3 | In Progress|  | - |
+| 66. Content Depth | v1.10 | 2/3 | In Progress | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |

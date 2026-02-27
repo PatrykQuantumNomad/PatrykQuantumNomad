@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 66 of 68 (Content Depth)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing Phase 66 plans
-Last activity: 2026-02-27 — Completed 66-01-PLAN.md
+Last activity: 2026-02-27 — Completed 66-02 (distribution-shape content)
 
 Progress: ████████░░ 40% (v1.10: 2/5 phases complete)
 
@@ -87,6 +87,7 @@ v1.0-v1.9 decisions archived in respective milestone files.
 - [65-03] Star plot and scatterplot matrix marked MINOR (cosmetic), not requiring fixes
 - [65-03] 35/35 Tier B variant datasets validated as producing correct statistical patterns
 - [Phase 66]: Omitted caseStudySlugs entirely for techniques with no matching case study (not empty array)
+- [66-02] Unicode symbols for math notation in prose fields to avoid KaTeX dependency in definitionExpanded
 
 ### Pending Todos
 
@@ -108,6 +109,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 66-01-PLAN.md
+Stopped at: Completed 66-02-PLAN.md (distribution-shape content)
 Resume file: None
-Next: Execute 66-02-PLAN.md
+Next: Execute 66-03-PLAN.md
