@@ -39,7 +39,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 - [ ] **BEAM-02**: Quantitative results with full test suite and test summary table
 - [x] **BEAM-03**: Develop Better Model section with sinusoidal/polynomial model fitting and regression results
 - [x] **BEAM-04**: Validate New Model section with residual diagnostics (4-plot, run sequence, lag, histogram, probability, autocorrelation, spectral) and validation summary table
-- [ ] **BEAM-05**: Interpretation section synthesizing evidence
+- [x] **BEAM-05**: Interpretation section synthesizing evidence
 
 ### Case Study — Filter Transmittance
 
@@ -130,7 +130,7 @@ Deferred to future release.
 | BEAM-02 | Phase 60 | Pending |
 | BEAM-03 | Phase 60 | Complete |
 | BEAM-04 | Phase 60 | Complete |
-| BEAM-05 | Phase 60 | Pending |
+| BEAM-05 | Phase 60 | Complete |
 | FAT-01 | Phase 61 | Pending |
 | FAT-02 | Phase 61 | Pending |
 | FAT-03 | Phase 61 | Pending |
