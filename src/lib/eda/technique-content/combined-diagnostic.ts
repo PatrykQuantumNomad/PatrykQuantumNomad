@@ -28,6 +28,36 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'For each candidate shape parameter \u03bb, a probability plot is constructed and the correlation between the ordered data and the theoretical quantiles is computed. The resulting (\u03bb, correlation) pairs are plotted to form the PPCC curve. The \u03bb at the peak gives the best-fit shape parameter, and the height of the peak gives the goodness-of-fit measure. For the Tukey-Lambda family: \u03bb near 0.14 corresponds to normal, \u03bb near \u22121 corresponds to Cauchy (heavy-tailed), and large positive \u03bb corresponds to short-tailed (approaching uniform).',
     caseStudySlugs: ['normal-random-numbers'],
+    formulas: [
+      {
+        label: 'Probability Plot Correlation Coefficient',
+        tex: String.raw`\text{PPCC}(\lambda) = \text{Corr}\!\bigl(X_{(i)},\; M_{(i)}(\lambda)\bigr)`,
+        explanation:
+          'The PPCC at shape parameter lambda is the Pearson correlation between the ordered data X_(i) and the theoretical quantiles M_(i) from the candidate distribution. A value close to 1 indicates an excellent fit.',
+      },
+      {
+        label: 'PPCC as Function of Shape Parameter',
+        tex: String.raw`\hat{\lambda} = \arg\max_{\lambda}\;\text{PPCC}(\lambda)`,
+        explanation:
+          'The optimal shape parameter is the value of lambda that maximizes the probability plot correlation coefficient. The PPCC curve is plotted across a range of lambda values to visually identify this peak.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import ppcc_plot, tukey_lambda
+
+# Generate right-skewed data via Tukey-Lambda quantile function
+rng = np.random.default_rng(42)
+uniform_samples = rng.uniform(0.005, 0.995, size=200)
+data = tukey_lambda.ppf(uniform_samples, -0.5)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ppcc_plot(data, -2, 2, plot=ax)
+ax.set_xlabel("Shape Parameter (lambda)")
+ax.set_ylabel("Correlation Coefficient")
+ax.set_title("PPCC Plot (Tukey-Lambda Family)")
+plt.tight_layout()
+plt.show()`,
   },
 
   'weibull-plot': {
@@ -50,6 +80,36 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The axes are linearized for the Weibull distribution using the transformation: horizontal axis = ln(t) where t is the data value, vertical axis = ln(\u2212ln(1 \u2212 F(t))) where F(t) is the cumulative distribution function estimated by the plotting position. On these axes, data from a Weibull distribution fall on a straight line. The slope equals the shape parameter \u03b2 (\u03b2 < 1: infant mortality, \u03b2 = 1: exponential/constant hazard, \u03b2 > 1: wear-out). The scale parameter \u03b7 is read at the 63.2nd percentile (where ln(\u2212ln(1 \u2212 0.632)) = 0).',
     caseStudySlugs: ['fatigue-life'],
+    formulas: [
+      {
+        label: 'Weibull CDF Linearization',
+        tex: String.raw`\ln\!\bigl(-\ln(1 - F(t))\bigr) = \beta\,\ln(t) - \beta\,\ln(\eta)`,
+        explanation:
+          'Taking the double logarithm of the Weibull CDF linearizes the relationship. On the Weibull plot, the slope gives the shape parameter beta and the intercept gives beta times the log of the scale parameter eta.',
+      },
+      {
+        label: 'Plotting Position (Benard\'s Approximation)',
+        tex: String.raw`\hat{F}_i = \frac{i - 0.3}{N + 0.4}`,
+        explanation:
+          'Benard\'s median rank approximation estimates the cumulative probability for the i-th ordered observation out of N total. It provides a less biased estimate than the simple i/N formula.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import probplot, weibull_min
+
+# Generate Weibull-distributed failure times (shape=1.5, scale=100)
+rng = np.random.default_rng(42)
+shape = 1.5
+data = weibull_min.ppf(rng.uniform(0.01, 0.99, size=50), shape, scale=100)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+res = probplot(data, dist=weibull_min, sparams=(shape,), plot=ax)
+ax.set_xlabel("Theoretical Quantiles (Weibull)")
+ax.set_ylabel("Ordered Data")
+ax.set_title("Weibull Probability Plot")
+plt.tight_layout()
+plt.show()`,
   },
 
   '4-plot': {
@@ -104,5 +164,50 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
           'Run-sequence plot and lag plot appear normal (stable, random), but the histogram is skewed and the normal probability plot curves away from the reference line. The process is in control but a normal-theory analysis would give incorrect confidence intervals.',
       },
     ],
+    formulas: [
+      {
+        label: '4-Plot Diagnostic Ensemble',
+        tex: String.raw`\text{4-Plot} = \begin{bmatrix} Y_i \text{ vs } i & Y_i \text{ vs } Y_{i-1} \\ \text{Histogram}(Y) & \text{Normal Prob. Plot}(Y) \end{bmatrix}`,
+        explanation:
+          'The 4-plot combines four panels in a 2x2 grid: run-sequence plot (tests fixed location and variation), lag plot (tests randomness), histogram (shows distributional shape), and normal probability plot (tests normality).',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import probplot
+
+# Generate sample data from a normal process
+rng = np.random.default_rng(42)
+n = 200
+data = rng.normal(loc=10, scale=2, size=n)
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+# Panel 1: Run sequence plot
+axes[0, 0].plot(range(1, n + 1), data, "o", markersize=2)
+axes[0, 0].axhline(y=np.mean(data), color="r", linestyle="--")
+axes[0, 0].set_xlabel("Run Order")
+axes[0, 0].set_ylabel("Response")
+axes[0, 0].set_title("Run Sequence Plot")
+
+# Panel 2: Lag plot
+axes[0, 1].scatter(data[:-1], data[1:], alpha=0.5, s=10)
+axes[0, 1].set_xlabel("Y(t)")
+axes[0, 1].set_ylabel("Y(t+1)")
+axes[0, 1].set_title("Lag Plot")
+
+# Panel 3: Histogram
+axes[1, 0].hist(data, bins=20, density=True, edgecolor="black")
+axes[1, 0].set_xlabel("Value")
+axes[1, 0].set_ylabel("Density")
+axes[1, 0].set_title("Histogram")
+
+# Panel 4: Normal probability plot
+probplot(data, plot=axes[1, 1])
+axes[1, 1].set_title("Normal Probability Plot")
+
+fig.suptitle("4-Plot Diagnostic", fontsize=14)
+plt.tight_layout()
+plt.show()`,
   },
 } as const;
