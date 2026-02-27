@@ -22,7 +22,8 @@ type PlotType =
   | 'autocorrelation' | 'spectral'
   | 'residual-4-plot'
   | 'residual-run-sequence' | 'residual-lag' | 'residual-histogram'
-  | 'residual-probability' | 'residual-autocorrelation';
+  | 'residual-probability' | 'residual-autocorrelation'
+  | 'residual-spectral';
 
 interface Props {
   type: PlotType;
@@ -184,6 +185,13 @@ switch (type) {
       yLabel: 'Autocorrelation',
     });
     break;
+  case 'residual-spectral':
+    svg = generateSpectralPlot({
+      data: residuals,
+      config: singleConfig,
+      title: 'Residual Spectral Plot',
+    });
+    break;
 }
 
 const defaultCaptions: Record<PlotType, string> = {
@@ -200,6 +208,7 @@ const defaultCaptions: Record<PlotType, string> = {
   'residual-histogram': 'Histogram of sinusoidal model residuals showing an approximately symmetric, bell-shaped distribution.',
   'residual-probability': 'Normal probability plot of sinusoidal model residuals. Approximate linearity indicates the residuals are consistent with normality.',
   'residual-autocorrelation': 'Autocorrelation plot of sinusoidal model residuals — dramatically reduced autocorrelation compared to the original data, with most lags within the 95% confidence bands.',
+  'residual-spectral': 'Spectral plot of sinusoidal model residuals -- a flat spectrum with no dominant peaks confirms the periodic structure has been successfully removed.',
 };
 
 const figCaption = caption ?? defaultCaptions[type];
