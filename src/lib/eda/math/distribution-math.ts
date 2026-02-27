@@ -112,6 +112,35 @@ function lowerIncompleteGammaRatio(a: number, x: number): number {
 }
 
 /**
+ * Inverse CDF of the gamma distribution via bisection on lowerIncompleteGammaRatio.
+ * Returns x such that P(X <= x) = p for Gamma(shape, scale).
+ * Uses scale parameterization: mean = shape * scale.
+ */
+export function gammaQuantile(p: number, shape: number, scale: number = 1): number {
+  if (p <= 0) return 0;
+  if (p >= 1) return Infinity;
+
+  // Initial bracket: [0, generous_upper]
+  let lo = 0;
+  let hi = Math.max(shape * scale * 5, 100);
+
+  // Ensure upper bracket is high enough
+  while (lowerIncompleteGammaRatio(shape, hi / scale) < p) {
+    hi *= 2;
+  }
+
+  // Bisection search
+  for (let iter = 0; iter < 100; iter++) {
+    const mid = (lo + hi) / 2;
+    const cdf = lowerIncompleteGammaRatio(shape, mid / scale);
+    if (cdf < p) lo = mid;
+    else hi = mid;
+    if ((hi - lo) / Math.max(1, lo) < 1e-10) break;
+  }
+  return (lo + hi) / 2;
+}
+
+/**
  * Regularized incomplete beta function I_x(a, b).
  * Series for x < (a+1)/(a+b+2), continued fraction (Lentz) otherwise.
  */

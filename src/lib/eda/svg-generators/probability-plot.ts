@@ -18,10 +18,13 @@ import {
   type PlotConfig,
 } from './plot-base';
 import { normalQuantile, linearRegression, mean, standardDeviation } from '../math/statistics';
+import { gammaQuantile } from '../math/distribution-math';
 
 export interface ProbabilityPlotOptions {
   data: number[];
-  type?: 'normal' | 'qq' | 'weibull' | 'ppcc';
+  type?: 'normal' | 'qq' | 'weibull' | 'ppcc' | 'uniform' | 'gamma';
+  gammaShape?: number;  // required when type = 'gamma'
+  gammaScale?: number;  // required when type = 'gamma'
   config?: Partial<PlotConfig>;
   title?: string;
   xLabel?: string;
@@ -50,6 +53,10 @@ export function generateProbabilityPlot(options: ProbabilityPlotOptions): string
       return renderWeibull(data, options, config);
     case 'ppcc':
       return renderPPCC(data, options, config);
+    case 'uniform':
+      return renderUniformProbability(data, options, config);
+    case 'gamma':
+      return renderGamma(data, options, config);
     default:
       return renderNormalProbability(data, options, config);
   }
@@ -368,6 +375,150 @@ function renderPPCC(
     linePath + '\n' +
     maxCircle + '\n' +
     maxLabel + '\n' +
+    xAxis(xTicks, xScale, margin.top + innerHeight, xLabel, config) + '\n' +
+    yAxis(yTicks, yScale, margin.left, yLabel, config) + '\n' +
+    (options.title ? titleText(config, options.title) : '') +
+    '</svg>'
+  );
+}
+
+function renderUniformProbability(
+  data: number[],
+  options: ProbabilityPlotOptions,
+  config: PlotConfig,
+): string {
+  const { innerWidth, innerHeight } = innerDimensions(config);
+  const { margin } = config;
+  const sorted = [...data].sort((a, b) => a - b);
+  const n = sorted.length;
+
+  // Uniform theoretical quantiles using Blom plotting position
+  // For U(a,b): Q(p) = a + p*(b-a); estimate a,b from sample range
+  const dataMin = sorted[0];
+  const dataMax = sorted[n - 1];
+  const theoretical: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const p = (i + 1 - 0.375) / (n + 0.25);
+    theoretical.push(dataMin + p * (dataMax - dataMin));
+  }
+
+  // Scales
+  let [xMin, xMax] = extent(theoretical) as [number, number];
+  if (xMin === xMax) { xMin -= 1; xMax += 1; }
+  let [yMin, yMax] = extent(sorted) as [number, number];
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+
+  const xScale = scaleLinear()
+    .domain([xMin, xMax])
+    .range([margin.left, margin.left + innerWidth])
+    .nice();
+  const yScale = scaleLinear()
+    .domain([yMin, yMax])
+    .range([margin.top + innerHeight, margin.top])
+    .nice();
+
+  // Grid
+  const xTicks = xScale.ticks(7);
+  const yTicks = yScale.ticks(5);
+  const grid =
+    gridLinesH(yTicks, yScale, margin.left, margin.left + innerWidth) +
+    '\n' +
+    gridLinesV(xTicks, xScale, margin.top, margin.top + innerHeight);
+
+  // Data points
+  const points = sorted
+    .map(
+      (v, i) =>
+        `<circle cx="${xScale(theoretical[i]).toFixed(2)}" cy="${yScale(v).toFixed(2)}" r="3" fill="${PALETTE.dataPrimary}" fill-opacity="0.6" />`,
+    )
+    .join('\n');
+
+  // Perfect-fit reference line (y = x)
+  const xDomMin = xScale.domain()[0];
+  const xDomMax = xScale.domain()[1];
+  const fitLine = `<line x1="${xScale(xDomMin).toFixed(2)}" y1="${yScale(xDomMin).toFixed(2)}" x2="${xScale(xDomMax).toFixed(2)}" y2="${yScale(xDomMax).toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="1.5" />`;
+
+  const xLabel = options.xLabel ?? 'Uniform Theoretical Quantiles';
+  const yLabel = options.yLabel ?? 'Sample Quantiles';
+
+  return (
+    svgOpen(config, `Uniform probability plot${options.title ? ': ' + options.title : ''}`) +
+    grid + '\n' +
+    points + '\n' +
+    fitLine + '\n' +
+    xAxis(xTicks, xScale, margin.top + innerHeight, xLabel, config) + '\n' +
+    yAxis(yTicks, yScale, margin.left, yLabel, config) + '\n' +
+    (options.title ? titleText(config, options.title) : '') +
+    '</svg>'
+  );
+}
+
+function renderGamma(
+  data: number[],
+  options: ProbabilityPlotOptions,
+  config: PlotConfig,
+): string {
+  const { innerWidth, innerHeight } = innerDimensions(config);
+  const { margin } = config;
+  const shape = options.gammaShape ?? 2;
+  const scale = options.gammaScale ?? 1;
+
+  const sorted = [...data].sort((a, b) => a - b);
+  const n = sorted.length;
+
+  // Theoretical quantiles via Blom plotting position
+  const theoretical: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const p = (i + 1 - 0.375) / (n + 0.25);
+    theoretical.push(gammaQuantile(p, shape, scale));
+  }
+
+  // Scales
+  let [xMin, xMax] = extent(theoretical) as [number, number];
+  if (xMin === xMax) { xMin -= 1; xMax += 1; }
+  let [yMin, yMax] = extent(sorted) as [number, number];
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+
+  const xScale = scaleLinear()
+    .domain([xMin, xMax])
+    .range([margin.left, margin.left + innerWidth])
+    .nice();
+  const yScale = scaleLinear()
+    .domain([yMin, yMax])
+    .range([margin.top + innerHeight, margin.top])
+    .nice();
+
+  // Grid
+  const xTicks = xScale.ticks(7);
+  const yTicks = yScale.ticks(5);
+  const grid =
+    gridLinesH(yTicks, yScale, margin.left, margin.left + innerWidth) +
+    '\n' +
+    gridLinesV(xTicks, xScale, margin.top, margin.top + innerHeight);
+
+  // Data points
+  const points = sorted
+    .map(
+      (v, i) =>
+        `<circle cx="${xScale(theoretical[i]).toFixed(2)}" cy="${yScale(v).toFixed(2)}" r="3" fill="${PALETTE.dataPrimary}" fill-opacity="0.6" />`,
+    )
+    .join('\n');
+
+  // Best-fit line
+  const reg = linearRegression(theoretical, sorted);
+  const f = (x: number) => reg.slope * x + reg.intercept;
+  const xDomMin = xScale.domain()[0];
+  const xDomMax = xScale.domain()[1];
+  const fitLine = `<line x1="${xScale(xDomMin).toFixed(2)}" y1="${yScale(f(xDomMin)).toFixed(2)}" x2="${xScale(xDomMax).toFixed(2)}" y2="${yScale(f(xDomMax)).toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="1.5" />`;
+
+  const xLabel = options.xLabel ?? 'Gamma Theoretical Quantiles';
+  const yLabel = options.yLabel ?? 'Sample Quantiles';
+
+  return (
+    svgOpen(config, `Gamma probability plot${options.title ? ': ' + options.title : ''}`) +
+    grid + '\n' +
+    points + '\n' +
+    fitLine + '\n' +
     xAxis(xTicks, xScale, margin.top + innerHeight, xLabel, config) + '\n' +
     yAxis(yTicks, yScale, margin.left, yLabel, config) + '\n' +
     (options.title ? titleText(config, options.title) : '') +
