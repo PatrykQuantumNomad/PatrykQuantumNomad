@@ -92,12 +92,12 @@ Plans:
   2. All 29 technique pages have a Python code example section with syntax-highlighted code via astro-expressive-code
   3. Every Python example is self-contained (includes sample data generation) and uses only current, non-deprecated matplotlib/seaborn/scipy APIs
   4. KaTeX CSS loads conditionally only on the 12 pages with formulas (Lighthouse performance score unaffected on the other 17)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 67-01: TBD
-- [ ] 67-02: TBD
-- [ ] 67-03: TBD
+- [ ] 67-01-PLAN.md — Add KaTeX formulas and Python code to time-series (5) and combined-diagnostic (3) techniques
+- [ ] 67-02-PLAN.md — Add KaTeX formulas and Python code to distribution-shape (9) techniques
+- [ ] 67-03-PLAN.md — Add KaTeX formulas and Python code to comparison (4), designed-experiments (2), regression (3), and multivariate (3) techniques
 
 ### Phase 68: Verification & Audit
 **Goal**: The entire v1.10 milestone is validated with zero regressions, all cross-links resolving, and Lighthouse scores maintained
@@ -134,5 +134,5 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 66. Content Depth | v1.10 | 3/3 | Complete | 2026-02-27 |
-| 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
+| 67. Technical Depth | v1.10 | 0/3 | Not started | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |
