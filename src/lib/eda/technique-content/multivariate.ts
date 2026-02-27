@@ -24,6 +24,31 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
       'Contour plots are the primary tool for finding optimal operating conditions in two-factor response surface studies. They answer the central question of process optimization: what combination of settings produces the best response, and how sensitive is the response to deviations from those settings.',
     definitionExpanded:
       'A mathematical model (typically a quadratic polynomial from response surface methodology) is evaluated on a grid of (X, Y) points. Points with equal predicted response are connected by contour lines. The spacing of contour lines indicates the gradient: closely spaced lines mean steep change, widely spaced lines mean a flat region. Color fills between contours are optional but common. The contour plot is a 2D projection of a 3D response surface.',
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate 2D bivariate normal density surface
+x = np.linspace(-3, 3, 200)
+y = np.linspace(-3, 3, 200)
+X, Y = np.meshgrid(x, y)
+
+# Bivariate normal with correlation rho = 0.5
+rho = 0.5
+Z = (1 / (2 * np.pi * np.sqrt(1 - rho**2))) * np.exp(
+    -1 / (2 * (1 - rho**2)) * (X**2 - 2 * rho * X * Y + Y**2)
+)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+cf = ax.contourf(X, Y, Z, levels=15, cmap='viridis')
+ax.contour(X, Y, Z, levels=15, colors='white',
+           linewidths=0.5, alpha=0.4)
+plt.colorbar(cf, ax=ax, label='Density')
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_title("Contour Plot — Bivariate Normal Density (rho=0.5)")
+ax.set_aspect('equal')
+plt.tight_layout()
+plt.show()`,
   },
 
   'scatterplot-matrix': {
@@ -45,6 +70,29 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
       'The scatterplot matrix provides a comprehensive bivariate overview of multivariate data in a single display. It is the standard first step in multivariate analysis, revealing correlation structure, non-linear relationships, clusters, and outliers that inform variable selection and modeling decisions.',
     definitionExpanded:
       'For p variables, a p x p grid is created where cell (i,j) contains the scatter plot of variable i vs variable j. The diagonal cells show variable names or univariate summaries. The matrix is symmetric: cell (i,j) mirrors cell (j,i). The number of panels grows as p*(p-1)/2 unique pairs.',
+    pythonCode: `import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Generate 4 correlated variables
+rng = np.random.default_rng(42)
+n = 150
+z1 = rng.standard_normal(n)
+z2 = rng.standard_normal(n)
+z3 = rng.standard_normal(n)
+
+df = pd.DataFrame({
+    'Strength': 50 + 5 * z1,
+    'Hardness': 30 + 3 * z1 + 2 * z2,
+    'Density': 7.5 + 0.5 * z1 + 0.8 * z3,
+    'Elasticity': 200 + 20 * z2 + 10 * z3,
+})
+
+g = sns.pairplot(df, diag_kind='hist', plot_kws={'alpha': 0.5, 's': 20})
+g.figure.suptitle("Scatterplot Matrix — 4 Material Properties", y=1.02)
+plt.tight_layout()
+plt.show()`,
   },
 
   'conditioning-plot': {
@@ -66,5 +114,39 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
       'The conditioning plot is the most direct graphical method for detecting interactions in continuous data. It answers whether a two-variable relationship is the same everywhere or changes depending on a third variable, which is fundamental for regression modeling and process understanding.',
     definitionExpanded:
       'The conditioning variable is divided into overlapping intervals (shingles). For each interval, a separate scatter plot of the two primary variables is drawn using only observations within that interval. Panels are arranged in a trellis grid ordered by the conditioning variable. The overlapping intervals ensure smooth transitions between panels.',
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate data with an interaction effect
+rng = np.random.default_rng(42)
+n = 200
+x = rng.uniform(0, 10, n)
+z = rng.uniform(0, 30, n)  # conditioning variable
+# Slope of Y vs X changes with Z
+y = (1 + 0.2 * z) * x + 10 + rng.normal(0, 3, n)
+
+# Split Z into 3 conditioning intervals
+z_cuts = np.percentile(z, [0, 33, 67, 100])
+labels = [f'Z: {z_cuts[i]:.0f}-{z_cuts[i+1]:.0f}'
+          for i in range(3)]
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 4),
+                         sharey=True)
+for i in range(3):
+    mask = (z >= z_cuts[i]) & (z <= z_cuts[i + 1])
+    axes[i].scatter(x[mask], y[mask], alpha=0.6, s=30)
+    # Fit local trend
+    coeffs = np.polyfit(x[mask], y[mask], 1)
+    x_line = np.linspace(0, 10, 50)
+    axes[i].plot(x_line, np.polyval(coeffs, x_line),
+                 'r-', linewidth=2)
+    axes[i].set_title(labels[i])
+    axes[i].set_xlabel("X")
+    axes[i].grid(True, alpha=0.3)
+
+axes[0].set_ylabel("Y")
+plt.suptitle("Conditioning Plot — Y vs X | Z", y=1.02)
+plt.tight_layout()
+plt.show()`,
   },
 } as const;

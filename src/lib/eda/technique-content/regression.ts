@@ -25,6 +25,53 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
       'Linear plots assess the stability of a linear fit across different regions of the data. A regression can have a high overall correlation but be driven by different relationships in different subsets. Detecting this instability prevents incorrect extrapolation and identifies subgroups that may require separate models.',
     definitionExpanded:
       'The data are divided into sequential subsets (windows), and four statistics are computed for each subset: the correlation coefficient, the intercept, the slope, and the residual standard deviation. Each statistic is plotted against the subset index, creating four companion panels. Stable (flat) lines across all four panels confirm a globally consistent linear relationship. Trends or jumps in any panel indicate local departures from the global model.',
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate bivariate data with positive correlation
+rng = np.random.default_rng(42)
+n = 80
+x = rng.uniform(10, 50, n)
+y = 2.5 * x + 10 + rng.normal(0, 8, n)
+
+# Fit linear model
+result = stats.linregress(x, y)
+y_fit = result.slope * x + result.intercept
+residuals = y - y_fit
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+# Panel 1: scatter + fitted line
+axes[0, 0].scatter(x, y, alpha=0.6, s=30)
+x_line = np.linspace(x.min(), x.max(), 100)
+axes[0, 0].plot(x_line, result.slope * x_line + result.intercept,
+                'r-', linewidth=2)
+axes[0, 0].set_title("Scatter + Fitted Line")
+axes[0, 0].set_xlabel("X")
+axes[0, 0].set_ylabel("Y")
+
+# Panel 2: residuals vs fitted
+axes[0, 1].scatter(y_fit, residuals, alpha=0.6, s=30)
+axes[0, 1].axhline(0, color='red', linestyle='--')
+axes[0, 1].set_title("Residuals vs Fitted")
+axes[0, 1].set_xlabel("Fitted Values")
+axes[0, 1].set_ylabel("Residuals")
+
+# Panel 3: residual histogram
+axes[1, 0].hist(residuals, bins=15, density=True,
+                alpha=0.7, color='steelblue', edgecolor='white')
+axes[1, 0].set_title("Residual Histogram")
+axes[1, 0].set_xlabel("Residuals")
+axes[1, 0].set_ylabel("Density")
+
+# Panel 4: residual normal probability plot
+stats.probplot(residuals, dist="norm", plot=axes[1, 1])
+axes[1, 1].set_title("Residual Normal Probability Plot")
+
+plt.suptitle("Linear Regression Diagnostic Plots", y=1.02)
+plt.tight_layout()
+plt.show()`,
   },
 
   'scatter-plot': {
@@ -49,6 +96,24 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'Each observation is plotted as a point at coordinates (X_i, Y_i). An optional fitted regression line or LOWESS smoother highlights the central trend. The vertical scatter of points around the trend line indicates the strength of the relationship \u2014 tight scatter means strong association, wide scatter means weak association. The shape of the point cloud reveals the functional form: an elliptical cloud suggests linearity, a curved band suggests a non-linear relationship.',
     caseStudySlugs: ['beam-deflections'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate bivariate data with positive correlation
+rng = np.random.default_rng(42)
+n = 100
+x = rng.uniform(0, 10, n)
+y = 1.8 * x + 5 + rng.normal(0, 3, n)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.scatter(x, y, alpha=0.6, s=40, edgecolors='white',
+           linewidth=0.5)
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_title("Scatter Plot — Bivariate Relationship")
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
     examples: [
       {
         label: 'Strong Positive Correlation',
@@ -146,6 +211,69 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The six panels are arranged in a 2\u00d73 grid. Top row: (1) Y and \u0176 vs X showing the fit overlay, (2) residuals vs X checking for non-linearity, (3) residuals vs \u0176 checking for heteroscedasticity. Bottom row: (4) lag plot of residuals checking for serial correlation, (5) histogram of residuals checking for symmetry and normality, (6) normal probability plot of residuals providing a sensitive normality test. Each panel tests a specific regression assumption.',
     caseStudySlugs: ['standard-resistor'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate bivariate data with linear relationship
+rng = np.random.default_rng(42)
+n = 100
+x = np.linspace(5, 50, n) + rng.normal(0, 1, n)
+y = 3.2 * x + 15 + rng.normal(0, 6, n)
+
+# Fit linear model
+result = stats.linregress(x, y)
+y_fit = result.slope * x + result.intercept
+residuals = y - y_fit
+
+fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+
+# Panel 1: Y and Y-hat vs X
+axes[0, 0].scatter(x, y, alpha=0.5, s=20, label='Data')
+x_line = np.linspace(x.min(), x.max(), 100)
+axes[0, 0].plot(x_line, result.slope * x_line + result.intercept,
+                'r-', linewidth=2, label='Fit')
+axes[0, 0].set_title("Y and Predicted vs X")
+axes[0, 0].legend(fontsize=8)
+
+# Panel 2: Residuals vs X (sequence plot)
+axes[0, 1].scatter(x, residuals, alpha=0.5, s=20)
+axes[0, 1].axhline(0, color='red', linestyle='--')
+axes[0, 1].set_title("Residuals vs X")
+
+# Panel 3: Residual lag plot
+axes[0, 2].scatter(residuals[:-1], residuals[1:], alpha=0.5, s=20)
+axes[0, 2].set_xlabel("Residual(i)")
+axes[0, 2].set_ylabel("Residual(i+1)")
+axes[0, 2].set_title("Residual Lag Plot")
+
+# Panel 4: Residual histogram
+axes[1, 0].hist(residuals, bins=15, density=True,
+                alpha=0.7, color='steelblue', edgecolor='white')
+axes[1, 0].set_title("Residual Histogram")
+
+# Panel 5: Residual normal probability plot
+stats.probplot(residuals, dist="norm", plot=axes[1, 1])
+axes[1, 1].set_title("Normal Probability Plot")
+
+# Panel 6: Residual autocorrelation (manual computation)
+max_lag = 20
+r_mean = residuals.mean()
+c0 = np.sum((residuals - r_mean) ** 2) / len(residuals)
+acf = [np.sum((residuals[:n - k] - r_mean) *
+              (residuals[k:] - r_mean)) / (n * c0)
+       for k in range(max_lag + 1)]
+axes[1, 2].bar(range(max_lag + 1), acf, color='steelblue',
+               width=0.4)
+bound = 2 / np.sqrt(n)
+axes[1, 2].axhline(bound, color='red', linestyle='--', alpha=0.7)
+axes[1, 2].axhline(-bound, color='red', linestyle='--', alpha=0.7)
+axes[1, 2].set_title("Residual Autocorrelation")
+axes[1, 2].set_xlabel("Lag")
+
+plt.suptitle("6-Plot — Regression Diagnostic", y=1.02)
+plt.tight_layout()
+plt.show()`,
     examples: [
       {
         label: 'Good Fit',
