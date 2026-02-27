@@ -42,7 +42,7 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 - [x] **CASE-01**: All techniques with matching case studies display a "See It In Action" section with links to relevant case studies
 - [x] **CASE-02**: At least 14 of 29 techniques have at least one case study cross-link (based on research mapping)
-- [ ] **CASE-03**: Case study links render as styled pill buttons matching the existing Related Techniques pattern
+- [x] **CASE-03**: Case study links render as styled pill buttons matching the existing Related Techniques pattern
 
 ### Content — Examples
 
@@ -58,11 +58,11 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 ### Verification
 
-- [ ] **VRFY-01**: Build completes cleanly with zero errors after all changes
-- [ ] **VRFY-02**: Lighthouse performance score remains 90+ on graphical technique pages
-- [ ] **VRFY-03**: All case study cross-links resolve to valid pages (no broken links)
-- [ ] **VRFY-04**: All KaTeX formulas render correctly (no raw LaTeX visible on page)
-- [ ] **VRFY-05**: Python code examples use no deprecated API calls (verified via grep)
+- [x] **VRFY-01**: Build completes cleanly with zero errors after all changes
+- [x] **VRFY-02**: Lighthouse performance score remains 90+ on graphical technique pages
+- [x] **VRFY-03**: All case study cross-links resolve to valid pages (no broken links)
+- [x] **VRFY-04**: All KaTeX formulas render correctly (no raw LaTeX visible on page)
+- [x] **VRFY-05**: Python code examples use no deprecated API calls (verified via grep)
 
 ## Future Requirements
 
@@ -110,7 +110,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEFN-01 | Phase 66 | Complete |
 | CASE-01 | Phase 66 | Complete |
 | CASE-02 | Phase 66 | Complete |
-| CASE-03 | Phase 66 | Pending |
+| CASE-03 | Phase 66 | Complete |
 | EXMP-01 | Phase 66 | Complete |
 | EXMP-02 | Phase 66 | Complete |
 | DEFN-02 | Phase 67 | Complete |
@@ -118,11 +118,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PYTH-02 | Phase 67 | Complete |
 | PYTH-03 | Phase 67 | Complete |
 | PYTH-04 | Phase 67 | Complete |
-| VRFY-01 | Phase 68 | Pending |
-| VRFY-02 | Phase 68 | Pending |
-| VRFY-03 | Phase 68 | Pending |
-| VRFY-04 | Phase 68 | Pending |
-| VRFY-05 | Phase 68 | Pending |
+| VRFY-01 | Phase 68 | Complete |
+| VRFY-02 | Phase 68 | Complete |
+| VRFY-03 | Phase 68 | Complete |
+| VRFY-04 | Phase 68 | Complete |
+| VRFY-05 | Phase 68 | Complete |
 
 **Coverage:**
 - v1.10 requirements: 30 total

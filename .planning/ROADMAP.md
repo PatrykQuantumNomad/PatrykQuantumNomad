@@ -12,7 +12,7 @@
 - ~~v1.7 Kubernetes Manifest Analyzer~~ - Phases 41-47 (shipped 2026-02-23)
 - ~~v1.8 EDA Visual Encyclopedia~~ - Phases 48-55 (shipped 2026-02-25)
 - ~~v1.9 EDA Case Study Deep Dive~~ - Phases 56-63 (shipped 2026-02-27)
-- **v1.10 EDA Graphical Techniques — NIST Parity & Validation** - Phases 64-68 (in progress)
+- ~~v1.10 EDA Graphical Techniques — NIST Parity & Validation~~ - Phases 64-68 (shipped 2026-02-27)
 
 ## Phases
 
@@ -30,7 +30,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 65: SVG Audit & Fixes** - Audit all 29 graphical technique SVGs against NIST originals and fix visual/data pattern issues (completed 2026-02-27)
 - [x] **Phase 66: Content Depth** - Add Questions, Importance, expanded Definitions, Case Study cross-links, and Examples sections to all 29 technique pages (completed 2026-02-27)
 - [x] **Phase 67: Technical Depth** - Add KaTeX formulas for 12 techniques and Python code examples for all 29 techniques (completed 2026-02-27)
-- [ ] **Phase 68: Verification & Audit** - Full-sweep verification of build, Lighthouse, cross-links, formulas, and Python API correctness
+- [x] **Phase 68: Verification & Audit** - Full-sweep verification of build, Lighthouse, cross-links, formulas, and Python API correctness (completed 2026-02-27)
 
 ## Phase Details
 
@@ -112,7 +112,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 68-01-PLAN.md — Full-sweep verification: clean build, deprecated API scan, cross-link validation, KaTeX rendering audit, Lighthouse performance scoring
+- [x] 68-01-PLAN.md — Full-sweep verification: clean build, deprecated API scan, cross-link validation, KaTeX rendering audit, Lighthouse performance scoring
 
 ## Progress
 
@@ -135,4 +135,4 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 66. Content Depth | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 67. Technical Depth | 3/3 | Complete   | 2026-02-27 | - |
-| 68. Verification & Audit | v1.10 | 0/1 | Not started | - |
+| 68. Verification & Audit | v1.10 | 1/1 | Complete | 2026-02-27 |
