@@ -5,11 +5,13 @@
  * and PlotVariantSwap (Tier B tab switching) into TechniquePage layout.
  */
 import { getCollection } from 'astro:content';
+import { Code } from 'astro-expressive-code/components';
+import katex from 'katex';
 import TechniquePage from '../../../components/eda/TechniquePage.astro';
 import PlotVariantSwap from '../../../components/eda/PlotVariantSwap.astro';
 import { renderTechniquePlot, renderVariants } from '../../../lib/eda/technique-renderer';
 import { getTechniqueContent } from '../../../lib/eda/technique-content';
-import { techniqueUrl } from '../../../lib/eda/routes';
+import { techniqueUrl, caseStudyUrl } from '../../../lib/eda/routes';
 
 export async function getStaticPaths() {
   const allTechniques = await getCollection('edaTechniques');
@@ -18,29 +20,56 @@ export async function getStaticPaths() {
     .filter(t => t.data.category === 'graphical')
     .map(t => t.data);
 
-  return graphical.map(technique => ({
-    params: { slug: technique.slug },
-    props: {
-      technique,
-      relatedTechniques: technique.relatedTechniques
-        .filter(slug => allTechMap.has(slug))
-        .map(slug => {
-          const related = allTechMap.get(slug)!;
-          return {
-            slug,
-            name: related.title,
-            url: techniqueUrl(slug, related.category),
-          };
-        }),
-    },
-  }));
+  // Resolve case study pages for cross-linking
+  const caseStudyPages = await getCollection('edaPages');
+  const caseStudyMap = new Map(
+    caseStudyPages
+      .filter(p => p.data.category === 'case-studies')
+      .map(p => [p.id.replace('case-studies/', ''), p.data])
+  );
+
+  return graphical.map(technique => {
+    const content = getTechniqueContent(technique.slug);
+    const caseStudyLinks = (content?.caseStudySlugs ?? [])
+      .filter(slug => caseStudyMap.has(slug))
+      .map(slug => ({
+        slug,
+        title: caseStudyMap.get(slug)!.title,
+        url: caseStudyUrl(slug),
+      }));
+
+    return {
+      params: { slug: technique.slug },
+      props: {
+        technique,
+        caseStudyLinks,
+        relatedTechniques: technique.relatedTechniques
+          .filter((slug: string) => allTechMap.has(slug))
+          .map((slug: string) => {
+            const related = allTechMap.get(slug)!;
+            return {
+              slug,
+              name: related.title,
+              url: techniqueUrl(slug, related.category),
+            };
+          }),
+      },
+    };
+  });
 }
 
-const { technique, relatedTechniques } = Astro.props;
+const { technique, relatedTechniques, caseStudyLinks } = Astro.props;
 const plotSvg = renderTechniquePlot(technique.slug);
 const content = getTechniqueContent(technique.slug);
 const isTierB = technique.tier === 'B';
 const variants = isTierB ? renderVariants(technique.slug) : [];
+
+// Pre-render KaTeX formulas at build time (pattern from quantitative/[slug].astro)
+const renderedFormulas = content?.formulas?.map(f => ({
+  ...f,
+  html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
+})) ?? [];
+const hasFormulas = renderedFormulas.length > 0;
 ---
 
 <TechniquePage
@@ -50,6 +79,7 @@ const variants = isTierB ? renderVariants(technique.slug) : [];
   nistSection={technique.nistSection}
   slug={technique.slug}
   relatedTechniques={relatedTechniques}
+  useKatex={hasFormulas}
 >
   <Fragment slot="plot">
     {isTierB ? (
