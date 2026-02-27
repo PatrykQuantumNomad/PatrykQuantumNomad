@@ -95,9 +95,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 67-01-PLAN.md — Add KaTeX formulas and Python code to time-series (5) and combined-diagnostic (3) techniques
-- [ ] 67-02-PLAN.md — Add KaTeX formulas and Python code to distribution-shape (9) techniques
-- [ ] 67-03-PLAN.md — Add KaTeX formulas and Python code to comparison (4), designed-experiments (2), regression (3), and multivariate (3) techniques
+- [x] 67-01-PLAN.md — Add KaTeX formulas and Python code to time-series (5) and combined-diagnostic (3) techniques
+- [x] 67-02-PLAN.md — Add KaTeX formulas and Python code to distribution-shape (9) techniques
+- [x] 67-03-PLAN.md — Add KaTeX formulas and Python code to comparison (4), designed-experiments (2), regression (3), and multivariate (3) techniques
 
 ### Phase 68: Verification & Audit
 **Goal**: The entire v1.10 milestone is validated with zero regressions, all cross-links resolving, and Lighthouse scores maintained

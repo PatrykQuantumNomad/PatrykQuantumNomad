@@ -68,6 +68,7 @@ Progress: █████████░ 80% (v1.10: 4/5 phases complete)
 | Phase 66 P01 | 4min | 2 tasks | 3 files |
 | Phase 66 P02 | 5min | 2 tasks | 2 files |
 | Phase 66 P03 | 5min | 2 tasks | 3 files |
+| Phase 67 P01 | 5min | 2 tasks | 2 files |
 | Phase 67 P02 | 6min | 2 tasks | 1 files |
 | Phase 67 P03 | 5min | 2 tasks | 4 files |
 
@@ -93,6 +94,8 @@ v1.0-v1.9 decisions archived in respective milestone files.
 - [Phase 66]: Omitted caseStudySlugs entirely for techniques with no matching case study (not empty array)
 - [66-02] Unicode symbols for math notation in prose fields to avoid KaTeX dependency in definitionExpanded
 - [66-03] Unicode characters for mathematical symbols in definitionExpanded (lambda, beta, eta, em-dash)
+- [67-01] Tukey-Lambda ppf() with seeded RNG for PPCC example (avoids scipy rvs random_state parameter)
+- [67-01] 4-plot formula uses LaTeX bmatrix for 2x2 diagnostic ensemble definition
 - [67-02] Filliben approximation for normal order statistic medians formula (matches NIST convention)
 - [67-02] Bootstrap pythonCode uses both scipy.stats.bootstrap for CI and manual loop for histogram visualization
 - [67-02] QQ-plot uses manual two-sample quantile matching with np.quantile for pedagogical clarity
