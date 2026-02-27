@@ -145,11 +145,11 @@ Plans:
   3. Lab effect analysis section includes lab-specific plots and statistical tests comparing labs
   4. Primary factors analysis section includes DOE-specific visualizations (bihistogram, block plots, interaction plots) showing factor effects
   5. Interpretation section synthesizes multi-factor evidence into conclusions about which factors significantly affect ceramic strength
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 62-01: TBD
-- [ ] 62-02: TBD
+- [ ] 62-01-PLAN.md — DOE SVG generators (bihistogram, DOE mean, block plot, interaction), MDX restructure to DOE template, Batch/Lab effect subsections
+- [ ] 62-02-PLAN.md — Primary Factors DOE visualizations, Interpretation section, and Conclusions update
 
 ### Phase 63: Validation
 **Goal**: All 9 enhanced case studies are verified for link integrity, build correctness, and statistical accuracy
@@ -189,4 +189,4 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 61. Fatigue Life Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
 | 62. Ceramic Strength DOE | v1.9 | 0/2 | Not started | - |
 | 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **140/145** | **97%** | |
+| **Total** | **v1.0-v1.9** | **142/145** | **98%** | |
