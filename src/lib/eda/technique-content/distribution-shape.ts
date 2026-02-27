@@ -23,6 +23,34 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'The bihistogram reveals the full distributional impact of a two-level factor, not just a shift in means. It detects changes in location, spread, and shape simultaneously, catching effects that a simple t-test would miss. This comprehensive comparison is critical in manufacturing process changes where a shift in variability matters as much as a shift in average.',
     definitionExpanded: 'The upper histogram displays the frequency distribution of one group (e.g., before treatment) and the lower histogram displays the other group (e.g., after treatment) reflected downward on a shared horizontal axis. Both histograms use identical bin widths and bin boundaries so that visual comparison is valid. The back-to-back layout eliminates the alignment ambiguity of overlaid histograms.',
     caseStudySlugs: ['ceramic-strength'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate two groups of data (before/after treatment)
+rng = np.random.default_rng(42)
+before = rng.normal(loc=50, scale=8, size=200)
+after = rng.normal(loc=55, scale=6, size=200)
+
+# Create bihistogram with shared x-axis
+bins = np.linspace(25, 80, 35)
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
+                                figsize=(10, 6))
+
+ax1.hist(before, bins=bins, density=True, alpha=0.7,
+         color='steelblue', edgecolor='white')
+ax1.set_ylabel("Density")
+ax1.set_title("Before Treatment")
+
+ax2.hist(after, bins=bins, density=True, alpha=0.7,
+         color='coral', edgecolor='white')
+ax2.invert_yaxis()
+ax2.set_ylabel("Density")
+ax2.set_xlabel("Measurement Value")
+ax2.set_title("After Treatment")
+
+fig.suptitle("Bihistogram: Before vs After", y=1.02)
+plt.tight_layout()
+plt.show()`,
   },
 
   'bootstrap-plot': {
@@ -212,6 +240,26 @@ plt.show()`,
     importance: 'The box plot is the most widely used graphical tool for comparing groups in designed experiments and process analysis. It provides a compact, standardized five-number summary that enables rapid comparison of location, spread, and symmetry across many groups simultaneously, making it indispensable for factorial analysis and quality control.',
     definitionExpanded: 'The box spans from Q1 (25th percentile) to Q3 (75th percentile), with the median marked as a line within the box. The interquartile range (IQR) = Q3 \u2212 Q1 measures the spread of the middle 50% of the data. Whiskers extend to the most extreme observations within 1.5 \u00D7 IQR from the box edges. Observations beyond the whiskers are plotted individually as potential outliers. The 1.5 \u00D7 IQR rule identifies approximately 0.7% of observations as outliers under a normal distribution.',
     caseStudySlugs: ['ceramic-strength'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate data for 4 groups with different characteristics
+rng = np.random.default_rng(42)
+group_a = rng.normal(loc=50, scale=5, size=30)
+group_b = rng.normal(loc=55, scale=8, size=30)
+group_c = rng.normal(loc=45, scale=5, size=30)
+group_d = rng.normal(loc=50, scale=12, size=30)
+
+# Create box plot
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.boxplot([group_a, group_b, group_c, group_d],
+           labels=['Group A', 'Group B', 'Group C', 'Group D'],
+           orientation='vertical', patch_artist=True,
+           boxprops=dict(facecolor='steelblue', alpha=0.7))
+ax.set_ylabel("Measurement Value")
+ax.set_title("Box Plot: Comparison of Four Groups")
+plt.tight_layout()
+plt.show()`,
     examples: [
       { label: 'Equal Groups', description: 'All box plots have similar medians, similar IQR heights, and similar whisker lengths. This indicates no significant difference between groups — the factor does not affect either the location or the spread of the response.' },
       { label: 'Location Shift', description: 'Box plots have similar heights and whisker lengths but different median positions. This indicates the factor affects the average response without changing the variability, a classic location effect.' },
@@ -233,6 +281,25 @@ plt.show()`,
     importance: 'The histogram is the foundational graphical technique in exploratory data analysis. It provides the most direct visual answer to the question "what does my data look like?" and is the prerequisite for choosing appropriate statistical methods, since nearly every statistical procedure depends on distributional shape assumptions.',
     definitionExpanded: 'The data range is divided into k contiguous, non-overlapping intervals (bins) of equal width. The height of each bar represents the count (or relative frequency) of observations falling in that bin. The number of bins affects the visual impression: too few bins over-smooth and hide structure, too many bins create noise. The Freedman-Diaconis rule (bin width = 2 \u00D7 IQR \u00D7 N^{\u22121/3}) and Sturges\u2019 rule (k = 1 + log\u2082(N)) provide automatic defaults. An optional kernel density estimate (KDE) overlay provides a smooth probability density curve.',
     caseStudySlugs: ['heat-flow-meter'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate bimodal data: mixture of two normals
+rng = np.random.default_rng(42)
+data = np.concatenate([
+    rng.normal(loc=50, scale=5, size=300),
+    rng.normal(loc=70, scale=8, size=200)
+])
+
+# Create histogram with density overlay
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(data, bins=30, density=True, alpha=0.7,
+        color='steelblue', edgecolor='white')
+ax.set_xlabel("Value")
+ax.set_ylabel("Density")
+ax.set_title("Histogram with Bimodal Data")
+plt.tight_layout()
+plt.show()`,
     examples: [
       { label: 'Symmetric (Normal)', description: 'A bell-shaped histogram centered on the mean with symmetric tails tapering smoothly on both sides. This is the signature of normally distributed data and confirms that standard statistical methods (t-tests, confidence intervals, capability indices) are appropriate.', variantLabel: 'Symmetric' },
       { label: 'Right Skewed', description: 'The histogram peaks on the left side and has a long tail extending to the right. This indicates positively skewed data where a few large values pull the mean above the median. Common in reliability data (time-to-failure), income distributions, and measurements with a natural lower bound.', variantLabel: 'Right Skewed' },
