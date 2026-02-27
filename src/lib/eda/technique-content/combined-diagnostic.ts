@@ -17,6 +17,17 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The PPCC plot assumes that the data are a random sample from a continuous distribution. It requires a distribution family parameterized by a shape parameter, which limits its applicability to families with such structure. The correlation coefficient as a goodness-of-fit measure is most sensitive to departures in the center of the distribution and somewhat less sensitive to tail behavior compared to formal tests like Anderson-Darling.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.23',
+    questions: [
+      'What is the best-fit member within a distributional family?',
+      'Does the best-fit member provide a good fit?',
+      'Does this distributional family provide a good fit compared to other distributions?',
+      'How sensitive is the choice of the shape parameter?',
+    ],
+    importance:
+      'The PPCC plot provides a systematic, quantitative method for selecting the best distribution from a parametric family. Rather than subjectively comparing multiple probability plots, the PPCC plot reduces distribution selection to finding a single peak, making the process both more efficient and more reproducible.',
+    definitionExpanded:
+      'For each candidate shape parameter \u03bb, a probability plot is constructed and the correlation between the ordered data and the theoretical quantiles is computed. The resulting (\u03bb, correlation) pairs are plotted to form the PPCC curve. The \u03bb at the peak gives the best-fit shape parameter, and the height of the peak gives the goodness-of-fit measure. For the Tukey-Lambda family: \u03bb near 0.14 corresponds to normal, \u03bb near \u22121 corresponds to Cauchy (heavy-tailed), and large positive \u03bb corresponds to short-tailed (approaching uniform).',
+    caseStudySlugs: ['normal-random-numbers'],
   },
 
   'weibull-plot': {
@@ -29,6 +40,16 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The Weibull plot assumes that all failure times are observed and come from a single failure mode. Censored data, where some units have not yet failed, require modified plotting positions. Mixed failure modes, where different components fail by different mechanisms, produce a curved or kinked Weibull plot and should be analyzed separately by failure mode. The visual parameter estimates from the plot are useful starting values but are less efficient than maximum likelihood estimates for formal inference.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.30',
+    questions: [
+      'Do the data follow a 2-parameter Weibull distribution?',
+      'What is the best estimate of the shape parameter?',
+      'What is the best estimate of the scale parameter?',
+    ],
+    importance:
+      'The Weibull distribution is the standard model for reliability and failure analysis because it can represent decreasing, constant, or increasing failure rates through a single shape parameter. The Weibull plot provides simultaneous fit assessment and parameter estimation, making it the most important single tool in reliability engineering.',
+    definitionExpanded:
+      'The axes are linearized for the Weibull distribution using the transformation: horizontal axis = ln(t) where t is the data value, vertical axis = ln(\u2212ln(1 \u2212 F(t))) where F(t) is the cumulative distribution function estimated by the plotting position. On these axes, data from a Weibull distribution fall on a straight line. The slope equals the shape parameter \u03b2 (\u03b2 < 1: infant mortality, \u03b2 = 1: exponential/constant hazard, \u03b2 > 1: wear-out). The scale parameter \u03b7 is read at the 63.2nd percentile (where ln(\u2212ln(1 \u2212 0.632)) = 0).',
+    caseStudySlugs: ['fatigue-life'],
   },
 
   '4-plot': {
@@ -41,5 +62,30 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The 4-plot requires time-ordered data for the run-sequence and lag plot panels to be meaningful. If the data do not have a natural time ordering, only the histogram and probability plot panels are interpretable. The 4-plot is a screening tool, not a definitive test, and unusual patterns should be investigated with more specialized techniques.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.32',
+    questions: [
+      'Is the process in control (statistically stable)?',
+      'Are there any shifts in location?',
+      'Are there any shifts in variation?',
+      'Are the data random?',
+      'Is there serial correlation?',
+      'What is a good model for the data?',
+      'Is the data distribution symmetric or skewed?',
+      'Are the data normally distributed?',
+      'Are there any outliers?',
+    ],
+    importance:
+      'The 4-plot is the universal first-step diagnostic for any univariate measurement process. It simultaneously tests all four foundational assumptions (fixed location, fixed variation, randomness, and distributional form) in a single display. If any panel shows a problem, the analyst knows immediately which assumption is violated and can choose appropriate corrective methods before proceeding with analysis.',
+    definitionExpanded:
+      'The four panels occupy a 2\u00d72 grid. Upper-left: run-sequence plot (Y vs run order) tests fixed location and fixed variation. Upper-right: lag plot (Y_i vs Y_{i\u22121}) tests randomness and detects serial correlation. Lower-left: histogram tests distributional shape, modality, and symmetry. Lower-right: normal probability plot specifically tests for normality. Together, these four panels answer: is the process stable, is it random, and what does the distribution look like?',
+    caseStudySlugs: [
+      'normal-random-numbers',
+      'uniform-random-numbers',
+      'random-walk',
+      'cryothermometry',
+      'beam-deflections',
+      'filter-transmittance',
+      'standard-resistor',
+      'heat-flow-meter',
+    ],
   },
 } as const;

@@ -17,6 +17,14 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'Linear plots require enough data to form meaningful subsets, typically at least 10 observations per subset. The choice of subset size involves a trade-off between stability of the local estimates and sensitivity to local changes. These plots assume the analyst has already established that a linear model is a reasonable starting point, and they serve to diagnose whether that model holds uniformly.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Sections 1.3.3.16-19',
+    questions: [
+      'Are there linear relationships across groups?',
+      'Are the strength of the linear relationships relatively constant across the groups?',
+    ],
+    importance:
+      'Linear plots assess the stability of a linear fit across different regions of the data. A regression can have a high overall correlation but be driven by different relationships in different subsets. Detecting this instability prevents incorrect extrapolation and identifies subgroups that may require separate models.',
+    definitionExpanded:
+      'The data are divided into sequential subsets (windows), and four statistics are computed for each subset: the correlation coefficient, the intercept, the slope, and the residual standard deviation. Each statistic is plotted against the subset index, creating four companion panels. Stable (flat) lines across all four panels confirm a globally consistent linear relationship. Trends or jumps in any panel indicate local departures from the global model.',
   },
 
   'scatter-plot': {
@@ -29,6 +37,18 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The scatter plot makes no distributional assumptions and is valid for any pair of continuous variables. However, it shows only the marginal bivariate relationship and cannot account for confounding by additional variables. For datasets with many observations, overplotting can obscure patterns, and techniques such as transparency, jittering, or hexagonal binning may be needed.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.26',
+    questions: [
+      'Are variables X and Y related?',
+      'Are variables X and Y linearly related?',
+      'Are variables X and Y non-linearly related?',
+      'Does the variation in Y change depending on X?',
+      'Are there outliers?',
+    ],
+    importance:
+      'The scatter plot is the single most important graphical tool for bivariate analysis. It provides a direct, assumption-free view of the relationship between two variables, revealing the form (linear, curved, none), direction (positive, negative), strength, and any anomalies (outliers, clusters, heteroscedasticity). No regression model should be fit without first examining the scatter plot.',
+    definitionExpanded:
+      'Each observation is plotted as a point at coordinates (X_i, Y_i). An optional fitted regression line or LOWESS smoother highlights the central trend. The vertical scatter of points around the trend line indicates the strength of the relationship \u2014 tight scatter means strong association, wide scatter means weak association. The shape of the point cloud reveals the functional form: an elliptical cloud suggests linearity, a curved band suggests a non-linear relationship.',
+    caseStudySlugs: ['beam-deflections'],
   },
 
   '6-plot': {
@@ -41,5 +61,16 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The 6-plot assumes a regression model has been fit to bivariate (X, Y) data. The residual-based panels (4 through 6) assume the model has been correctly specified in terms of the response-predictor relationship. The lag plot panel is most informative when the data have a natural ordering (e.g., time of collection). The 6-plot is a screening tool for model validation, not a formal hypothesis test.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.33',
+    questions: [
+      'Are the residuals approximately normally distributed with a fixed location and scale?',
+      'Are there outliers?',
+      'Is the fit adequate?',
+      'Do the residuals suggest a better fit?',
+    ],
+    importance:
+      'The 6-plot is the comprehensive regression diagnostic: if any of the six panels shows a problem (non-linearity, non-constant variance, non-independence, non-normality), the regression model needs revision. It prevents the common mistake of reporting regression results without validating the assumptions that make those results meaningful.',
+    definitionExpanded:
+      'The six panels are arranged in a 2\u00d73 grid. Top row: (1) Y and \u0176 vs X showing the fit overlay, (2) residuals vs X checking for non-linearity, (3) residuals vs \u0176 checking for heteroscedasticity. Bottom row: (4) lag plot of residuals checking for serial correlation, (5) histogram of residuals checking for symmetry and normality, (6) normal probability plot of residuals providing a sensitive normality test. Each panel tests a specific regression assumption.',
+    caseStudySlugs: ['standard-resistor'],
   },
 } as const;

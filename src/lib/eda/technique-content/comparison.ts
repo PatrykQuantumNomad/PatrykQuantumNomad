@@ -17,6 +17,22 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The block plot assumes a balanced or near-balanced design where each treatment appears in every block. It is most effective when the number of blocks and treatments is moderate, as very large designs produce cluttered displays. The plot provides visual guidance rather than formal significance tests and should be used alongside ANOVA to quantify the observed effects.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.3',
+    questions: [
+      'Is the factor of interest significant?',
+      'Does the factor of interest have an effect?',
+      'Does the location change between levels of the primary factor?',
+      'Has the process improved?',
+      'What is the best setting (level) of the primary factor?',
+      'How much of an average improvement can we expect with this best setting?',
+      'Is there an interaction between the primary factor and one or more nuisance factors?',
+      'Does the effect of the primary factor change depending on the setting of some nuisance factor?',
+      'Are there any outliers?',
+    ],
+    importance:
+      'The block plot is the most information-rich graphical display for randomized block designs. It simultaneously shows treatment effects, blocking effectiveness, and potential interactions in a single figure, providing more insight than the ANOVA table alone because it reveals the pattern and consistency of effects rather than just their statistical significance.',
+    definitionExpanded:
+      'Each block is represented as a vertical cluster of observations on the horizontal axis. Within each block, individual data points are plotted and connected by lines to the block mean. Treatment levels may be distinguished by color or symbol. The vertical axis shows the response. Parallel connecting lines across blocks indicate consistent treatment effects (no interaction), while crossing lines indicate block-by-treatment interaction.',
+    caseStudySlugs: ['ceramic-strength'],
   },
 
   'mean-plot': {
@@ -29,6 +45,15 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The mean plot assumes that the sample means are reasonable estimators of the population means, which requires that within-group sample sizes are not too small. It does not account for variability within each group, so it should be interpreted in conjunction with the standard deviation plot or box plots. Equal sample sizes across groups are not required but simplify interpretation.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.20',
+    questions: [
+      'Are there any shifts in location?',
+      'What is the magnitude of the shifts in location?',
+      'Is there a distinct pattern in the shifts in location?',
+    ],
+    importance:
+      'The mean plot is the most direct visual tool for detecting location effects in designed experiments. It provides immediate visual answers to the central DOE question: does changing the factor setting change the average response? The magnitude of the shift relative to the grand mean indicates practical significance.',
+    definitionExpanded:
+      'The horizontal axis shows factor levels (categorical or ordered). The vertical axis shows the group mean for each level. A horizontal reference line at the grand mean (mean of all observations) provides a baseline for comparison. The deviation of each group mean from the grand mean line indicates the size and direction of the factor effect at that level.',
   },
 
   'star-plot': {
@@ -41,6 +66,15 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The star plot requires that all variables be measured on comparable scales or that the data be standardized before plotting. The visual impression depends on the ordering of variables around the perimeter, and different orderings can produce different visual patterns for the same data. The technique works best with 5 to 12 variables; fewer than 5 does not justify the radial layout, and more than 12 makes individual spokes difficult to distinguish.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.29',
+    questions: [
+      'What variables are dominant for a given observation?',
+      'Which observations are most similar (are there clusters)?',
+      'Are there outliers?',
+    ],
+    importance:
+      'The star plot enables the comparison of multivariate profiles across observations in a compact, visually intuitive format. It answers the question "which variables differentiate these observations?" at a glance, making it valuable for benchmarking, quality profiling, and competitive analysis where many attributes must be compared simultaneously.',
+    definitionExpanded:
+      'Each observation is represented as a separate star (polygon) with p spokes radiating from a center point at equal angles (360/p degrees apart). Each spoke represents one variable, and the spoke length is proportional to the variable\'s value (typically scaled to 0\u20131 range). The tips of the spokes are connected to form a polygon. Large, regular polygons indicate uniformly high values; small polygons indicate uniformly low values; irregular shapes highlight dominant variables.',
   },
 
   'youden-plot': {
@@ -53,5 +87,15 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The Youden plot requires paired measurements from each laboratory, typically two runs or two samples. It assumes that the two conditions are measured on the same scale. The plot is most informative when the number of laboratories is moderate to large, typically 10 or more. The median reference lines are used instead of means because they are robust to outlying laboratories.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.31',
+    questions: [
+      'Are all labs equivalent?',
+      'What labs have between-lab problems (reproducibility)?',
+      'What labs have within-lab problems (repeatability)?',
+      'What labs are outliers?',
+    ],
+    importance:
+      'The Youden plot is the standard graphical tool for interlaboratory studies and proficiency testing. It uniquely separates between-lab systematic bias (points along the diagonal) from within-lab random variability (scatter perpendicular to the diagonal), providing targeted diagnostic information that summary statistics cannot reveal.',
+    definitionExpanded:
+      'Each laboratory is plotted as a single point with horizontal coordinate = result from run/sample 1 and vertical coordinate = result from run/sample 2. Vertical and horizontal reference lines are drawn at the medians of each run, dividing the plot into four quadrants. A 45-degree reference line through the median intersection highlights systematic bias. Points near this diagonal have high between-lab bias; points far from the diagonal have high within-lab variability.',
   },
 } as const;
