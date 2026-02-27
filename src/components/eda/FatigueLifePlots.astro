@@ -17,11 +17,22 @@ import {
   generateAutocorrelationPlot,
   generateSpectralPlot,
 } from '../../lib/eda/svg-generators/index';
+import {
+  locationTest,
+  bartlettTest,
+  runsTest,
+  autocorrelation,
+  andersonDarlingNormal,
+  ppccNormal,
+  grubbsTest,
+} from '../../lib/eda/math/statistics';
 
 type PlotType =
   | '4-plot' | 'run-sequence' | 'lag' | 'histogram'
   | 'normal-probability' | 'box-plot'
-  | 'autocorrelation' | 'spectral';
+  | 'autocorrelation' | 'spectral'
+  | 'weibull-probability'
+  | 'gamma-probability';
 
 interface Props {
   type: PlotType;
@@ -40,6 +51,16 @@ const compositeConfig = {
   width: 720,
   height: 540,
 };
+
+// Quantitative test battery
+const locTest = locationTest(fatigueLife);
+const bartTest = bartlettTest(fatigueLife, 4);
+const runs = runsTest(fatigueLife);
+const acf = autocorrelation(fatigueLife, 1);
+const r1 = acf[1];
+const adTest = andersonDarlingNormal(fatigueLife);
+const ppcc = ppccNormal(fatigueLife);
+const grubbs = grubbsTest(fatigueLife);
 
 let svg = '';
 
@@ -110,6 +131,27 @@ switch (type) {
       title: 'Spectral Plot',
     });
     break;
+  case 'weibull-probability':
+    // 3-parameter Weibull: subtract location=181 from data before plotting
+    svg = generateProbabilityPlot({
+      data: fatigueLife.map(v => v - 181),
+      type: 'weibull',
+      config: singleConfig,
+      title: 'Weibull Probability Plot',
+      xLabel: 'ln(-ln(1-p))',
+      yLabel: 'ln(Fatigue Life - 181)',
+    });
+    break;
+  case 'gamma-probability':
+    svg = generateProbabilityPlot({
+      data: fatigueLife,
+      type: 'gamma',
+      gammaShape: 11.85,
+      gammaScale: 118.2,
+      config: singleConfig,
+      title: 'Gamma Probability Plot',
+    });
+    break;
 }
 
 const defaultCaptions: Record<PlotType, string> = {
@@ -121,6 +163,8 @@ const defaultCaptions: Record<PlotType, string> = {
   'box-plot': 'Box plot of fatigue life measurements showing the interquartile range, median, whiskers, and a potential outlier at the high end near 2,440 thousand cycles.',
   'autocorrelation': 'Autocorrelation plot confirming that the fatigue life measurements are independent — all coefficients fall within the 95% confidence bands.',
   'spectral': 'Spectral plot showing a flat spectrum with no dominant peaks, consistent with independent observations.',
+  'weibull-probability': 'Weibull probability plot of location-shifted fatigue life data (x - 181). The 3-parameter Weibull model with location=181, shape=3.43, scale=1357 uses the NIST MLE estimates. Points near the reference line indicate a reasonable Weibull fit.',
+  'gamma-probability': 'Gamma probability plot of fatigue life data with shape=11.85, scale=118.2 (NIST MLE estimates). Points near the reference line indicate a good gamma fit.',
 };
 
 const figCaption = caption ?? defaultCaptions[type];

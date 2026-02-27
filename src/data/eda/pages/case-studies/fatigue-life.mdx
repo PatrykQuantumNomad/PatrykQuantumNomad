@@ -90,6 +90,22 @@ The [spectral plot](/eda/techniques/spectral-plot/) shows a flat spectrum with n
 
 ### Distribution Comparison
 
+#### Weibull Probability Plot
+
+The [Weibull probability plot](/eda/techniques/probability-plot/) tests the fit of the 3-parameter Weibull model (location=181, shape=3.43, scale=1357) by subtracting the location parameter from the data before plotting. If the shifted data follow a 2-parameter Weibull distribution, the points should fall near a straight line.
+
+<FatigueLifePlots type="weibull-probability" />
+
+The points follow the reference line reasonably well, with some deviation in the upper tail. The Weibull model captures the general shape of the distribution but the AIC/BIC analysis (below) shows it does not outperform the simpler Gaussian model for this dataset.
+
+#### Gamma Probability Plot
+
+The [gamma probability plot](/eda/techniques/probability-plot/) compares sorted data values against theoretical quantiles from a Gamma distribution with shape <InlineMath tex="\alpha = 11.85" /> and scale <InlineMath tex="\beta = 118.2" /> (NIST MLE estimates, rate parameterization converted: <InlineMath tex="\beta = 1/0.00846" />).
+
+<FatigueLifePlots type="gamma-probability" />
+
+The gamma probability plot shows a good fit with points closely following the reference line across the full range of the data. The gamma distribution provides a reasonable model for this right-skewed dataset, though the formal AIC/BIC comparison determines whether it outperforms the Gaussian model.
+
 Four candidate distributions are compared by overlaying their fitted probability densities on a non-parametric kernel density estimate of the data:
 
 - **Normal (Gaussian)**: mean 1401, standard deviation 389
@@ -114,6 +130,100 @@ All four fitted densities approximate the non-parametric estimate reasonably wel
 | n | 101 |
 
 The mean exceeds the median, consistent with the right-skewed shape visible in the histogram. All values are positive, representing thousands of cycles to failure for the aluminum coupons.
+
+### Location Test
+
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="t" /> | 2.5628 |
+| Critical value <InlineMath tex="t_{0.975,\,99}" /> | 1.984 |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+
+**Conclusion:** The test statistic <InlineMath tex="t = 2.563" /> slightly exceeds the critical value of 1.984, formally rejecting the null hypothesis of constant location. However, the run sequence plot shows no visually apparent trend or shift. The marginal rejection likely reflects the influence of a few extreme values in the right tail on the regression slope rather than a genuine systematic drift. Given the primary focus on distribution fitting rather than process monitoring, the location is treated as approximately fixed for practical purposes.
+
+### Variation Test
+
+[Bartlett's test](/eda/quantitative/bartletts-test/) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="T" /> | 0.9490 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> |
+| Critical value <InlineMath tex="\chi^2_{0.95,\,3}" /> | 7.775 |
+
+**Conclusion:** The test statistic of 0.949 is well below the critical value of 7.775, so we **fail to reject** <InlineMath tex="H_0" /> — the variances are not significantly different across the four quarters. The **constant-variation assumption is satisfied**.
+
+### Randomness Tests
+
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | -3.4995 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 3.50" /> exceeds 1.96, so the runs test **rejects** <InlineMath tex="H_0" />. The negative Z indicates fewer runs than expected, suggesting some clustering of values above and below the median.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.108 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.199 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.108 is within the critical bounds of <InlineMath tex="\pm 0.199" />, and the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) confirms all coefficients fall within the 95% confidence bands. The runs test rejection with non-significant lag-1 autocorrelation suggests the clustering is mild — driven by the skewed distribution rather than genuine temporal dependence. The **randomness assumption is approximately satisfied** given the consistent graphical evidence.
+
+### Distribution Tests
+
+The probability plot correlation coefficient (PPCC) and [Anderson-Darling test](/eda/quantitative/anderson-darling/) assess whether the data follow a normal distribution.
+
+| Test | Statistic | Critical Value | Result |
+|------|-----------|----------------|--------|
+| PPCC (normal) | 0.997 | 0.987 | Fail to reject |
+| [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 0.2068" /> | 0.787 | Fail to reject |
+
+**Conclusion:** Both tests fail to reject normality. The PPCC of 0.997 exceeds the critical value of 0.987, and the Anderson-Darling statistic of <InlineMath tex="A^2 = 0.207" /> is well below the critical value of 0.787. Despite the visual right-skewness in the histogram, the formal tests do not reject the Gaussian model at the 5% level. This result is consistent with the AIC/BIC model comparison below, which also favors the Gaussian.
+
+### Outlier Detection
+
+[Grubbs' test](/eda/quantitative/grubbs-test/) tests whether the most extreme observation is a statistical outlier.
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="G" /> | 2.6553 |
+| Critical value (<InlineMath tex="n = 101" />, <InlineMath tex="\alpha = 0.05" />) | 3.388 |
+
+**Conclusion:** <InlineMath tex="G = 2.655" /> is below the critical value of 3.388, so we **fail to reject** — **no significant outliers are detected** at the 5% level. The extreme value of 2,440 thousand cycles, flagged as a potential outlier in the box plot, does not reach statistical significance.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 2.563" /> | 1.984 | **Marginal reject** |
+| **Fixed variation** | [Bartlett's test](/eda/quantitative/bartletts-test/) | <InlineMath tex="T = 0.949" /> | 7.775 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-3.500}" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.108" /> | 0.199 | **Fail to reject** |
+| **Normality** | [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 0.207" /> | 0.787 | **Fail to reject** |
+| **Normality** | PPCC | <InlineMath tex="r = 0.997" /> | 0.987 | **Fail to reject** |
+| **Outliers** | [Grubbs' test](/eda/quantitative/grubbs-test/) | <InlineMath tex="G = 2.655" /> | 3.388 | **Fail to reject** |
+
+The variation, normality, and outlier assumptions are clearly satisfied. The location test marginally rejects and the runs test rejects, though the lag-1 autocorrelation does not. The graphical evidence from the run sequence and autocorrelation plots supports approximate stability and independence. As this case study focuses primarily on distribution identification rather than process control, the distributional assumption — supported by both the Anderson-Darling and PPCC tests — is the central quantitative finding and motivates the AIC/BIC model comparison below.
 
 ### Model Selection
 
