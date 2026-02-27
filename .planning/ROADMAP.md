@@ -44,11 +44,11 @@ See `.planning/milestones/` for detailed archives.
   3. A technique with formulas renders KaTeX math at build time and loads KaTeX CSS only on that page (not on formula-free pages)
   4. A technique with caseStudySlugs renders linked pill buttons that resolve to real case study page titles and URLs
   5. A technique with pythonCode renders a syntax-highlighted Python code block via astro-expressive-code
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 64-01: TBD
-- [ ] 64-02: TBD
+- [ ] 64-01-PLAN.md — Split technique-content.ts into per-category modules and extend TechniqueContent interface
+- [ ] 64-02-PLAN.md — Update graphical [slug].astro template with new sections, KaTeX formula slot, Code slot, and case study resolution
 
 ### Phase 65: SVG Audit & Fixes
 **Goal**: Every graphical technique SVG is visually accurate and statistically correct relative to its NIST original
@@ -130,7 +130,7 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
-| 64. Infrastructure Foundation | v1.10 | 0/TBD | Not started | - |
+| 64. Infrastructure Foundation | v1.10 | 0/2 | Not started | - |
 | 65. SVG Audit & Fixes | v1.10 | 0/TBD | Not started | - |
 | 66. Content Depth | v1.10 | 0/TBD | Not started | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
