@@ -639,7 +639,7 @@ const TECHNIQUE_RENDERERS: Record<string, () => string> = {
     title: 'Autocorrelation Plot',
   }),
   '4-plot': () => generate4Plot(timeSeries),
-  '6-plot': () => generate6Plot(timeSeries),
+  '6-plot': () => generate6Plot(scatterData),
   'normal-probability-plot': () => generateProbabilityPlot({
     data: normalRandom,
     type: 'normal',

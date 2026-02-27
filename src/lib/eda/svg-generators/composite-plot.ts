@@ -1,7 +1,8 @@
 /**
  * Composite plot SVG generators for multi-panel diagnostic layouts.
  * generate4Plot: 2x2 grid (run-sequence, lag, histogram, normal probability)
- * generate6Plot: 3x2 grid (adds ACF and spectral to the 4-plot)
+ * generate6Plot: 3x2 regression diagnostic grid (Y vs X, residuals vs X,
+ *   residuals vs predicted, lag of residuals, residual histogram, residual normal prob)
  *
  * Sub-generators are imported from individual files (NOT from index.ts)
  * to avoid circular imports.
@@ -10,12 +11,13 @@ import { generateLinePlot } from './line-plot';
 import { generateLagPlot } from './lag-plot';
 import { generateHistogram } from './histogram';
 import { generateProbabilityPlot } from './probability-plot';
-import { generateSpectralPlot } from './spectral-plot';
+import { generateScatterPlot } from './scatter-plot';
 import {
   DEFAULT_CONFIG,
   svgOpen,
   type PlotConfig,
 } from './plot-base';
+import { linearRegression } from '../math/statistics';
 
 /**
  * Strip the outer <svg ...> wrapper and closing </svg> from generated SVG,
@@ -100,13 +102,16 @@ export function generate4Plot(
 }
 
 /**
- * Generate a 3x2 composite diagnostic plot.
- * - Row 1: Run sequence (left), Lag plot (right)
- * - Row 2: Histogram with KDE (left), Normal probability plot (right)
- * - Row 3: Autocorrelation (left), Spectral plot (right)
+ * Generate a 3x2 regression diagnostic plot (NIST Section 1.3.3.33).
+ * - Top-left: Response vs Predictor (scatter with regression line)
+ * - Top-right: Residuals vs Predictor
+ * - Mid-left: Residuals vs Predicted
+ * - Mid-right: Lag plot of residuals
+ * - Bottom-left: Histogram of residuals
+ * - Bottom-right: Normal probability plot of residuals
  */
 export function generate6Plot(
-  data: number[],
+  data: { x: number; y: number }[],
   config?: Partial<PlotConfig>,
 ): string {
   const width = config?.width ?? 800;
@@ -126,51 +131,75 @@ export function generate6Plot(
     margin: { top: 30, right: 15, bottom: 35, left: 50 },
   };
 
-  // Generate sub-plots
-  const runSeq = generateLinePlot({
+  // Compute regression
+  const xs = data.map((d) => d.x);
+  const ys = data.map((d) => d.y);
+  const reg = linearRegression(xs, ys);
+  const residuals = data.map((d) => d.y - (reg.slope * d.x + reg.intercept));
+  const predicted = data.map((d) => reg.slope * d.x + reg.intercept);
+
+  // Panel 1: Y vs X (scatter with regression line)
+  const yVsX = generateScatterPlot({
     data,
-    mode: 'run-sequence',
+    showRegression: true,
     config: subConfig,
-    title: 'Run Sequence',
-  });
-  const lag = generateLagPlot({
-    data,
-    lag: 1,
-    config: subConfig,
-    title: 'Lag Plot',
-  });
-  const hist = generateHistogram({
-    data,
-    showKDE: true,
-    config: subConfig,
-    title: 'Histogram',
-  });
-  const prob = generateProbabilityPlot({
-    data,
-    type: 'normal',
-    config: subConfig,
-    title: 'Normal Probability',
-  });
-  const acf = generateLinePlot({
-    data,
-    mode: 'autocorrelation',
-    config: subConfig,
-    title: 'Autocorrelation',
-  });
-  const spectral = generateSpectralPlot({
-    data,
-    config: subConfig,
-    title: 'Spectral',
+    title: 'Y vs X',
+    xLabel: 'X',
+    yLabel: 'Y',
   });
 
-  // Strip wrappers and place in 3x2 grid
+  // Panel 2: Residuals vs Predictor
+  const residVsX = generateScatterPlot({
+    data: data.map((d, i) => ({ x: d.x, y: residuals[i] })),
+    config: subConfig,
+    title: 'Residuals vs X',
+    xLabel: 'X',
+    yLabel: 'Residual',
+  });
+
+  // Panel 3: Residuals vs Predicted
+  const residVsPred = generateScatterPlot({
+    data: predicted.map((p, i) => ({ x: p, y: residuals[i] })),
+    config: subConfig,
+    title: 'Residuals vs Predicted',
+    xLabel: 'Predicted',
+    yLabel: 'Residual',
+  });
+
+  // Panel 4: Lag plot of residuals
+  const residLag = generateLagPlot({
+    data: residuals,
+    lag: 1,
+    config: subConfig,
+    title: 'Lag of Residuals',
+  });
+
+  // Panel 5: Histogram of residuals
+  const residHist = generateHistogram({
+    data: residuals,
+    showKDE: true,
+    config: subConfig,
+    title: 'Residual Histogram',
+    xLabel: 'Residual',
+    yLabel: 'Frequency',
+  });
+
+  // Panel 6: Normal probability plot of residuals
+  const residProb = generateProbabilityPlot({
+    data: residuals,
+    type: 'normal',
+    config: subConfig,
+    title: 'Residual Normal Prob',
+  });
+
+  // 3x2 grid layout
   const panels = [
-    { svg: runSeq, x: 0, y: 0 },
-    { svg: lag, x: halfW + 10, y: 0 },
-    { svg: hist, x: 0, y: thirdH + 10 },
-    { svg: prob, x: halfW + 10, y: thirdH + 10 },
-    { svg: acf, x: 0, y: 2 * (thirdH + 10) },
-    { svg: spectral, x: halfW + 10, y: 2 * (thirdH + 10) },
+    { svg: yVsX, x: 0, y: 0 },
+    { svg: residVsX, x: halfW + 10, y: 0 },
+    { svg: residVsPred, x: 0, y: thirdH + 10 },
+    { svg: residLag, x: halfW + 10, y: thirdH + 10 },
+    { svg: residHist, x: 0, y: 2 * (thirdH + 10) },
+    { svg: residProb, x: halfW + 10, y: 2 * (thirdH + 10) },
   ];
 
   const groups = panels
@@ -180,5 +209,5 @@ export function generate6Plot(
     )
     .join('\n');
 
-  return svgOpen(fullConfig, '6-Plot diagnostic layout') + '\n' + groups + '\n</svg>';
+  return svgOpen(fullConfig, '6-Plot regression diagnostic layout') + '\n' + groups + '\n</svg>';
 }
