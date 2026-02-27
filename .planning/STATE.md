@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: EDA Graphical Techniques — NIST Parity & Validation
 status: active
-last_updated: "2026-02-27T18:33:28.331Z"
+last_updated: "2026-02-27T18:36:24Z"
 progress:
   total_phases: 68
   completed_phases: 64
-  total_plans: 150
-  completed_plans: 150
+  total_plans: 151
+  completed_plans: 151
 ---
 
 # Project State
@@ -25,14 +25,14 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 Phase: 65 of 68 (SVG Audit & Fixes)
 Plan: 2 of 3 in current phase
 Status: Executing Phase 65 plans
-Last activity: 2026-02-27 — Completed 65-02 (MEDIUM-priority SVG fixes)
+Last activity: 2026-02-27 — Completed 65-01 (dedicated SVG generator wiring)
 
-Progress: ████░░░░░░ 40% (v1.10: 1/5 phases, 65-02 of 65-03)
+Progress: ████░░░░░░ 40% (v1.10: 1/5 phases, 65-01 + 65-02 of 65-03)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 148 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 2 v1.10)
+- Total plans completed: 151 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 5 v1.10)
 
 **Cumulative Stats:**
 
@@ -48,8 +48,8 @@ Progress: ████░░░░░░ 40% (v1.10: 1/5 phases, 65-02 of 65-03)
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
 | v1.8 EDA Encyclopedia | 48-55 | 24 | 145 | 2026-02-25 |
 | v1.9 Case Study Deep Dive | 56-63 | 19 | 41 | 2026-02-27 |
-| v1.10 (in progress) | 64-65 | 4 | 6 | - |
-| **Total** | **64** | **150** | **595** | |
+| v1.10 (in progress) | 64-65 | 5 | 8 | - |
+| **Total** | **64** | **151** | **595** | |
 
 **Phase 64 Metrics:**
 
@@ -62,6 +62,7 @@ Progress: ████░░░░░░ 40% (v1.10: 1/5 phases, 65-02 of 65-03)
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
+| 65-01 | 11min | 2 | 2 |
 | 65-02 | 6min | 2 | 2 |
 
 ## Accumulated Context
@@ -75,6 +76,9 @@ v1.0-v1.9 decisions archived in respective milestone files.
 - [64-01] Extended existing TechniqueContent interface in place (no V2 migration)
 - [64-02] Data-driven useKatex from content.formulas (never hardcoded)
 - [64-02] Case study resolution in getStaticPaths for build-time validation
+- [65-01] Removed generateBarPlot import entirely since all bar-chart usages replaced by dedicated generators
+- [65-01] 6-plot accepts bivariate scatterData and computes regression internally
+- [65-01] DOE plots composition kept but inner panels switched to generateDoeMeanPlot
 - [Phase 65]: Used 2/sqrt(N) for NIST consistency over 1.96/sqrt(N) statistical precision
 - [Phase 65]: Polyline injection over generateLinePlot for Box-Cox (preserves scatter dots + adds connecting line)
 
@@ -98,6 +102,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 65-02-PLAN.md (MEDIUM-priority SVG fixes)
+Stopped at: Completed 65-01-PLAN.md (dedicated SVG generator wiring)
 Resume file: None
 Next: Execute 65-03-PLAN.md (audit checklist and build verification)
