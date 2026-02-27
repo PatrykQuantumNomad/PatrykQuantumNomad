@@ -29,9 +29,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Cryothermometry
 
-- [ ] **CRYO-01**: Individual named plot subsections (4-plot, run sequence, lag, histogram, normal probability, autocorrelation, spectral) with per-plot interpretation
-- [ ] **CRYO-02**: Quantitative results with full test suite and test summary table
-- [ ] **CRYO-03**: Interpretation section synthesizing evidence
+- [x] **CRYO-01**: Individual named plot subsections (4-plot, run sequence, lag, histogram, normal probability, autocorrelation, spectral) with per-plot interpretation
+- [x] **CRYO-02**: Quantitative results with full test suite and test summary table
+- [x] **CRYO-03**: Interpretation section synthesizing evidence
 
 ### Case Study — Beam Deflections
 
@@ -109,9 +109,9 @@ Deferred to future release.
 | NRN-01 | Phase 57 | Pending |
 | NRN-02 | Phase 57 | Pending |
 | NRN-03 | Phase 57 | Pending |
-| CRYO-01 | Phase 57 | Pending |
-| CRYO-02 | Phase 57 | Pending |
-| CRYO-03 | Phase 57 | Pending |
+| CRYO-01 | Phase 57 | Complete |
+| CRYO-02 | Phase 57 | Complete |
+| CRYO-03 | Phase 57 | Complete |
 | FILT-01 | Phase 57 | Pending |
 | FILT-02 | Phase 57 | Pending |
 | FILT-03 | Phase 57 | Pending |
