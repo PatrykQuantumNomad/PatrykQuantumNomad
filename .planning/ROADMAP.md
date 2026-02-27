@@ -128,10 +128,12 @@ Plans:
   2. Quantitative results section includes distribution fitting tests and Test Summary table
   3. Distribution comparison plots show Weibull and gamma probability plots with fitted overlays, demonstrating which distribution best fits the data
   4. Interpretation section synthesizes graphical and quantitative evidence including distribution selection reasoning
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 61-01: TBD
+- [ ] 61-01-PLAN.md — Restructure MDX to canonical Distribution Focus Variation template with named plot subsections
+- [ ] 61-02-PLAN.md — Gamma probability plot engineering, Weibull/gamma distribution comparison plots, and full quantitative test battery
+- [ ] 61-03-PLAN.md — Interpretation section synthesizing distribution selection evidence and Conclusions update
 
 ### Phase 62: Ceramic Strength DOE
 **Goal**: Ceramic Strength case study includes full multi-factor DOE analysis with batch effects, lab effects, and primary factors analysis matching the unique NIST 6-section structure
@@ -184,7 +186,7 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 58. Standard Resistor Case Study | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 59. Uniform Random Numbers Enhancement | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 60. Beam Deflections Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
-| 61. Fatigue Life Deep Dive | v1.9 | 0/1 | Not started | - |
+| 61. Fatigue Life Deep Dive | v1.9 | 0/3 | Not started | - |
 | 62. Ceramic Strength DOE | v1.9 | 0/2 | Not started | - |
 | 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **139/143** | **97%** | |
+| **Total** | **v1.0-v1.9** | **139/145** | **96%** | |
