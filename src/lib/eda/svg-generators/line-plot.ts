@@ -158,8 +158,8 @@ function renderAutocorrelation(
   const zeroY = yScale(0).toFixed(2);
   const zeroLine = `<line x1="${margin.left.toFixed(2)}" y1="${zeroY}" x2="${(margin.left + innerWidth).toFixed(2)}" y2="${zeroY}" stroke="${PALETTE.axis}" stroke-width="1" />`;
 
-  // Significance bounds at +/- 1.96/sqrt(n)
-  const bound = 1.96 / Math.sqrt(n);
+  // Significance bounds at +/- 2/sqrt(n) per NIST convention
+  const bound = 2 / Math.sqrt(n);
   const upperY = yScale(bound).toFixed(2);
   const lowerY = yScale(-bound).toFixed(2);
   const sigBounds =
