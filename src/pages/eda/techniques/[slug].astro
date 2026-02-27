@@ -92,25 +92,112 @@ const hasFormulas = renderedFormulas.length > 0;
   {content && (
     <Fragment slot="description">
       <section class="prose-section mt-8 space-y-6">
+        {/* 1. What It Is (definition + optional definitionExpanded) */}
         <div>
           <h2 class="text-xl font-heading font-bold mb-3">What It Is</h2>
           <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.definition}</p>
+          {content.definitionExpanded && (
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mt-3">{content.definitionExpanded}</p>
+          )}
         </div>
+
+        {/* 2. Questions This Plot Answers */}
+        {content.questions && content.questions.length > 0 && (
+          <div>
+            <h2 class="text-xl font-heading font-bold mb-3">Questions This Plot Answers</h2>
+            <ul class="list-disc list-inside space-y-1 text-[var(--color-text-secondary)]">
+              {content.questions.map(q => (
+                <li>{q}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* 3. Why It Matters */}
+        {content.importance && (
+          <div>
+            <h2 class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.importance}</p>
+          </div>
+        )}
+
+        {/* 4. When to Use It */}
         <div>
           <h2 class="text-xl font-heading font-bold mb-3">When to Use It</h2>
           <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.purpose}</p>
         </div>
+
+        {/* 5. How to Interpret */}
         <div>
           <h2 class="text-xl font-heading font-bold mb-3">How to Interpret</h2>
           <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.interpretation}</p>
         </div>
+
+        {/* 6. Examples */}
+        {content.examples && content.examples.length > 0 && (
+          <div>
+            <h2 class="text-xl font-heading font-bold mb-3">Examples</h2>
+            {content.examples.map(ex => (
+              <div class="mb-4">
+                <h3 class="text-lg font-semibold mb-1">{ex.label}</h3>
+                <p class="text-[var(--color-text-secondary)] leading-relaxed">{ex.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 7. Assumptions and Limitations */}
         <div>
           <h2 class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
           <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.assumptions}</p>
         </div>
+
+        {/* 8. See It In Action (case study cross-links) */}
+        {caseStudyLinks.length > 0 && (
+          <div>
+            <h2 class="text-xl font-heading font-bold mb-3">See It In Action</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mb-3">This technique is demonstrated in the following case studies:</p>
+            <div class="flex flex-wrap gap-3">
+              {caseStudyLinks.map(cs => (
+                <a href={cs.url}
+                   class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors">
+                  {cs.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 9. Reference */}
         <p class="text-sm text-[var(--color-text-secondary)] italic mt-4">
           Reference: {content.nistReference}
         </p>
+      </section>
+    </Fragment>
+  )}
+
+  {/* Formula slot: KaTeX pre-rendered at build time */}
+  {renderedFormulas.length > 0 && (
+    <Fragment slot="formula">
+      <section class="prose-section mt-8 space-y-6">
+        <h2 class="text-xl font-heading font-bold mb-3">Formulas</h2>
+        {renderedFormulas.map(f => (
+          <div class="formula-block mb-6">
+            <h3 class="text-lg font-semibold mb-2">{f.label}</h3>
+            <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={f.html} />
+            <p class="text-[var(--color-text-secondary)]">{f.explanation}</p>
+          </div>
+        ))}
+      </section>
+    </Fragment>
+  )}
+
+  {/* Code slot: Python syntax-highlighted via astro-expressive-code */}
+  {content?.pythonCode && (
+    <Fragment slot="code">
+      <section class="prose-section mt-8">
+        <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+        <Code code={content.pythonCode} lang="python" />
       </section>
     </Fragment>
   )}
