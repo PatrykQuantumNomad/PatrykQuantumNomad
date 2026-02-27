@@ -1,0 +1,230 @@
+---
+title: "Standard Resistor Case Study"
+description: "EDA case study analyzing NIST standard resistor data to demonstrate detection of drift in location, non-constant variation, and non-randomness caused by seasonal humidity effects on measurement equipment"
+section: "1.4.2"
+category: "case-studies"
+nistSection: "1.4.2.7 Standard Resistor"
+---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import StandardResistorPlots from '../../../../components/eda/StandardResistorPlots.astro';
+
+## Background and Data
+
+This case study applies exploratory data analysis to 1000 standard resistor measurements collected by Ron Dziuba at NIST over a five-year period (1980--1985). The response variable is resistance in ohms. The primary purpose is to demonstrate how EDA techniques detect drift in location, non-constant variation, and non-randomness caused by seasonal humidity effects on measurement equipment.
+
+The dataset originates from NIST/SEMATECH Section 1.4.2.7. With <InlineMath tex="n = 1000" /> observations ranging from approximately 27.828 to 28.119, this study illustrates a case where three of the four standard assumptions are violated simultaneously --- making it one of the most severely non-conforming datasets in the case study collection.
+
+<CaseStudyDataset slug="standard-resistor" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** --- assess whether the univariate model is an appropriate fit for the standard resistor data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** --- evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** --- the data are uncorrelated
+   - **Fixed distribution** --- the data come from a fixed distribution
+   - **Fixed location** --- the distribution location (mean) is constant
+   - **Fixed variation** --- the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** --- determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
+
+If the assumptions are violated, identify the nature and severity of the violations and recommend appropriate remedial actions.
+
+## Graphical Output and Interpretation
+
+### 4-Plot Overview
+
+The [4-plot](/eda/techniques/4-plot/) is the primary graphical tool for testing all four assumptions simultaneously.
+
+<StandardResistorPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows a persistent upward drift over the 1000-observation period, with superimposed seasonal fluctuations. The fixed-location assumption is clearly violated.
+2. The **lag plot** (upper right) displays an extremely tight linear cluster along the diagonal, indicating that consecutive observations are almost identical --- the randomness assumption is severely violated (<InlineMath tex="r_1 = 0.97" />).
+3. Since the lag plot indicates the most extreme autocorrelation in the case study collection, the **histogram** (lower left) and **normal probability plot** (lower right) are not meaningful for distributional interpretation.
+
+The severe violation of the randomness assumption means that the univariate model <InlineMath tex="Y_i = C + E_i" /> is not valid. The long-term drift and seasonal periodicity indicate that time-series or seasonal adjustment models would be needed if continued monitoring were required.
+
+### Run Sequence Plot
+
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 1000 observations with a persistent upward drift over the five-year measurement period (1980--1985). Seasonal variation is visible as periodic fluctuations superimposed on the trend. The drift is consistent with physical aging of the resistor, while the periodic fluctuations correspond to seasonal humidity effects on the measurement equipment.
+
+**Conclusion:** The persistent upward drift and seasonal fluctuations demonstrate that the **fixed-location assumption is violated**.
+
+<StandardResistorPlots type="run-sequence" />
+
+### Lag Plot
+
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays an extremely tight linear cluster along the diagonal, indicating that consecutive observations are nearly identical. The lag-1 autocorrelation is <InlineMath tex="r_1 = 0.97" />, more extreme than the [Filter Transmittance](/eda/case-studies/filter-transmittance/) case study (<InlineMath tex="r_1 = 0.94" />) and the most extreme autocorrelation in the entire case study collection.
+
+**Conclusion:** The tight linear cluster along <InlineMath tex="y = x" /> indicates each measurement is almost completely determined by the previous measurement. The **randomness assumption is severely violated**.
+
+<StandardResistorPlots type="lag" />
+
+### Histogram
+
+The [histogram](/eda/techniques/histogram/) shows the distribution of the 1000 resistance values. However, because the randomness assumption is severely violated (lag-1 autocorrelation <InlineMath tex="r_1 = 0.97" />), the histogram does not represent the distribution of independent errors. Instead, it reflects the combined effects of the long-term drift and seasonal fluctuation visible in the run sequence plot.
+
+<StandardResistorPlots type="histogram" />
+
+The histogram shape is determined by the drift structure and seasonal pattern rather than the underlying error distribution alone. Any distributional assessment is deferred until the randomness issue is resolved.
+
+### Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) assesses whether the data follow a normal distribution. As with the histogram, interpretation is limited because the severe autocorrelation (<InlineMath tex="r_1 = 0.97" />) violates the independence assumption required for distributional tests.
+
+<StandardResistorPlots type="probability" />
+
+The probability plot cannot be reliably interpreted as evidence for or against normality when the observations are not independent. The distributional assessment is deferred until the randomness issue is resolved.
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) quantifies the serial dependence detected by the lag plot. With <InlineMath tex="n = 1000" />, the 95% confidence bands are at <InlineMath tex="\pm 2/\sqrt{1000} = \pm 0.063" />.
+
+<StandardResistorPlots type="autocorrelation" />
+
+The autocorrelation plot shows extreme positive autocorrelation persisting to very high lags. This is consistent with the long-term drift and seasonal patterns visible in the run sequence plot. The slow decay of the autocorrelation function reflects the gradual upward trend, while any periodic structure corresponds to the seasonal humidity effects.
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows the frequency-domain structure of the data.
+
+<StandardResistorPlots type="spectral" />
+
+The spectral plot shows dominant low-frequency content from the long-term drift. Periodic components from the seasonal humidity effects may also be visible as peaks at frequencies corresponding to the yearly cycle. The overwhelming low-frequency dominance is characteristic of a process with a strong trend component.
+
+## Quantitative Output and Interpretation
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Sample size <InlineMath tex="n" /> | 1000 |
+| Mean <InlineMath tex="\bar{Y}" /> | 28.01634 |
+| Median | 28.02910 |
+| Min | 27.82800 |
+| Max | 28.11850 |
+| Range | 0.29050 |
+| Std Dev <InlineMath tex="s" /> | 0.06349 |
+| Autocorrelation <InlineMath tex="r_1" /> | 0.97 |
+
+The mean and median differ by about 0.013, with the median slightly higher, reflecting the asymmetry introduced by the upward drift (later observations are higher). The standard deviation of 0.06349 reflects the combined effects of measurement variation, drift, and seasonal fluctuation. The standard confidence interval is suspect:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 28.01634 \pm 0.00401" />
+</div>
+
+This interval dramatically understates the true uncertainty because it assumes independent observations. With autocorrelation of 0.97, the effective sample size is far smaller than 1000, and any confidence interval computed from the standard formula has no statistical justification.
+
+### Location Test
+
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+The slope estimate is numerically tiny (approximately 0.00021 ohms per observation), but the t-value is enormous because the residual variation relative to the trend is very small.
+
+**Conclusion:** The slope t-value of <InlineMath tex="t = 100.2" /> far exceeds the critical value <InlineMath tex="t_{0.975,\,998} \approx 1.962" />, so we **reject** <InlineMath tex="H_0" /> --- the location is not constant. The data exhibit a significant upward drift over the five-year measurement period, consistent with physical aging of the standard resistor.
+
+### Variation Test
+
+The [Levene test](/eda/quantitative/levene-test/) (median-based variant) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 140.85 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 996" /> |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,996}" /> | 2.614 |
+
+**Conclusion:** The test statistic of <InlineMath tex="W = 140.85" /> vastly exceeds the critical value of 2.614, so we **reject** <InlineMath tex="H_0" /> --- the variation is not constant. The seasonal humidity pattern causes different measurement variability in different portions of the five-year period, with some seasons producing tighter measurements than others.
+
+### Randomness Tests
+
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** --- tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | <InlineMath tex="-30.5629" /> |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 30.5629" /> far exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> --- the data are not random. The negative Z indicates far fewer runs than expected, meaning the data cluster in extremely long sequences above or below the median. This is the most extreme runs test result in the case study collection.
+
+**Lag-1 autocorrelation** --- measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.97 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.063 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.97 vastly exceeds the critical value of 0.063. Each measurement explains approximately 94% of the variance of the next (<InlineMath tex="r_1^2 \approx 0.94" />). This is the **most extreme autocorrelation in the case study collection**, indicating that consecutive measurements are almost identical due to the slowly varying drift and seasonal effects.
+
+### Distribution and Outlier Tests
+
+Since the randomness assumption is rejected (<InlineMath tex="r_1 = 0.97" />), the distributional tests are not meaningful and are omitted. When data are severely autocorrelated, the histogram and normal probability plot reflect the dependence structure rather than the underlying distribution of independent errors. The [Grubbs' test](/eda/quantitative/grubbs-test/) for outliers is also omitted because it assumes approximately normally distributed, independent data.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 100.2" /> | 1.962 | **Reject** |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 140.85" /> | 2.614 | **Reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-30.5629}" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.97" /> | 0.063 | **Reject** |
+| **Distribution** | --- | --- | --- | Not meaningful |
+| **Outliers** | --- | --- | --- | Not meaningful |
+
+Three of the four assumptions are violated: the location drifts upward (massive <InlineMath tex="t = 100.2" />), the variation changes across the measurement period (<InlineMath tex="W = 140.85" />), and the data are severely non-random (<InlineMath tex="r_1 = 0.97" />, <InlineMath tex="Z = {-30.5629}" />). Only the distribution assumption is not directly testable because the randomness assumption must hold first. The univariate model <InlineMath tex="Y_i = C + E_i" /> is not appropriate for this data.
+
+## Interpretation
+
+Three of the four assumptions fail simultaneously, making the standard resistor dataset one of the most severely non-conforming in the case study collection. The location drift is massive (<InlineMath tex="t = 100.2" />, far beyond the critical value of 1.962), the variation changes significantly across the measurement period ([Levene test](/eda/quantitative/levene-test/) <InlineMath tex="W = 140.85" />, critical value 2.614), and the randomness violation is the most extreme encountered (<InlineMath tex="r_1 = 0.97" />, [runs test](/eda/quantitative/runs-test/) <InlineMath tex="Z = {-30.5629}" />). This contrasts with the [Filter Transmittance](/eda/case-studies/filter-transmittance/) case study, where only two assumptions failed (location and randomness, with constant variation).
+
+The graphical evidence tells a cohesive story. The [run sequence plot](/eda/techniques/run-sequence-plot/) reveals the dual structure: a persistent upward trend from physical aging of the resistor, overlaid with periodic fluctuations from seasonal humidity effects. The [lag plot](/eda/techniques/lag-plot/) immediately exposes the extreme autocorrelation --- a tighter linear cluster than any other case study. The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) confirms that the serial dependence persists to very high lags, decaying slowly as expected for a trending process. The [spectral plot](/eda/techniques/spectral-plot/) shows dominant low-frequency content consistent with the long-term drift.
+
+The severity of these violations has practical consequences. With <InlineMath tex="r_1 = 0.97" />, each measurement explains approximately 94% of the variance of the next (<InlineMath tex="r_1^2 \approx 0.94" />). The effective sample size is drastically smaller than 1000, rendering the standard confidence interval of <InlineMath tex="28.01634 \pm 0.00401" /> completely invalid. No standard statistical inference --- confidence intervals, hypothesis tests, or prediction intervals --- can be trusted when the independence assumption is violated this severely.
+
+The root cause is physical and environmental rather than statistical. The five-year measurement period (1980--1985) is long enough for both the physical aging of the resistor (upward drift in resistance) and the annual humidity cycle (seasonal fluctuations in measurement conditions) to manifest clearly. The role of the graphical and statistical analysis is to detect these problems; resolving them requires understanding of the measurement process itself.
+
+## Conclusions
+
+The standard resistor data fail three of the four assumptions: location is not constant (upward drift with <InlineMath tex="t = 100.2" />), variation is not constant (seasonal effects with <InlineMath tex="W = 140.85" />), and the data are not random (extreme autocorrelation with <InlineMath tex="r_1 = 0.97" /> and [runs test](/eda/quantitative/runs-test/) <InlineMath tex="Z = {-30.5629}" />). Only the distribution assumption is not directly testable because it requires independence.
+
+The standard confidence interval:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 28.01634 \pm 0.00401" />
+</div>
+
+is not valid because the independence assumption is catastrophically violated.
+
+The root cause is twofold: seasonal humidity effects on the measurement equipment caused non-constant variation and contributed to the extreme autocorrelation, while physical aging of the resistor caused the persistent upward drift in location. Measurements close in time were taken under similar environmental conditions, leading to the most extreme serial dependence in the case study collection.
+
+Recommended actions include accounting for environmental factors (temperature, humidity) in the measurement process, applying time-series or seasonal adjustment models if continued monitoring is needed, and calibrating more frequently to track the physical drift. Simple graphical techniques --- particularly the [lag plot](/eda/techniques/lag-plot/), [run sequence plot](/eda/techniques/run-sequence-plot/), and [spectral plot](/eda/techniques/spectral-plot/) --- efficiently detected all three violations. This case study demonstrates that severe assumption violations are not merely academic concerns; they invalidate the entire inferential framework and demand process-level investigation.
