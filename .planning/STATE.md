@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: EDA Case Study Deep Dive
 status: in-progress
-last_updated: "2026-02-27T13:49:15Z"
+last_updated: "2026-02-27T13:59:01Z"
 progress:
   total_phases: 63
   completed_phases: 60
   total_plans: 142
-  completed_plans: 140
+  completed_plans: 141
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 61 of 63 (Fatigue Life Deep Dive)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-02-27 — Plan 01 complete (Fatigue Life MDX Restructure)
+Last activity: 2026-02-27 — Plan 02 complete (Fatigue Life Quantitative Tests and Distribution Plots)
 
-Progress: █████████░ 93% (v1.9 — 13/14 plans)
+Progress: █████████░ 93% (v1.9 — 14/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 140 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 13 v1.9)
+- Total plans completed: 141 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 14 v1.9)
 
 **Cumulative Stats:**
 
@@ -78,6 +78,9 @@ v1.0-v1.8 decisions archived in respective milestone files.
 - [Phase 60] Followed Phase 57 Interpretation pattern with 3 paragraphs: overall assessment, model development finding, practical implications
 - [Phase 60] Used qualitative assessments for residual Validation Summary column matching NIST's graphical assessment approach
 - [Phase 61] Split Initial Plots paragraph: histogram gets data range and skewness text, box plot gets outlier mention and introductory context
+- [Phase 61] gammaQuantile uses bisection on lowerIncompleteGammaRatio for guaranteed convergence
+- [Phase 61] Location test marginal rejection (t=2.563) reported accurately with skewed-distribution influence explanation
+- [Phase 61] Runs test rejection paired with non-significant lag-1 autocorrelation interpreted as mild clustering from skewness
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 61-01-PLAN.md (Fatigue Life MDX Restructure)
+Stopped at: Completed 61-02-PLAN.md (Fatigue Life Quantitative Tests and Distribution Plots)
 Resume file: None
-Next: Execute 61-02-PLAN.md (Fatigue Life quantitative tests and distribution plots)
+Next: Execute 61-03-PLAN.md (Fatigue Life Interpretation and Conclusions)

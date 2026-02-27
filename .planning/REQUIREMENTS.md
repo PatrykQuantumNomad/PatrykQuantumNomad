@@ -63,8 +63,8 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 ### Case Study — Fatigue Life
 
 - [x] **FAT-01**: Individual named plot subsections with per-plot interpretation
-- [ ] **FAT-02**: Quantitative results with distribution fitting tests and test summary table
-- [ ] **FAT-03**: Distribution comparison plots (Weibull, gamma probability plots with fitted overlays)
+- [x] **FAT-02**: Quantitative results with distribution fitting tests and test summary table
+- [x] **FAT-03**: Distribution comparison plots (Weibull, gamma probability plots with fitted overlays)
 - [ ] **FAT-04**: Interpretation section synthesizing evidence
 
 ### Case Study — Ceramic Strength
@@ -132,8 +132,8 @@ Deferred to future release.
 | BEAM-04 | Phase 60 | Complete |
 | BEAM-05 | Phase 60 | Complete |
 | FAT-01 | Phase 61 | Complete |
-| FAT-02 | Phase 61 | Pending |
-| FAT-03 | Phase 61 | Pending |
+| FAT-02 | Phase 61 | Complete |
+| FAT-03 | Phase 61 | Complete |
 | FAT-04 | Phase 61 | Pending |
 | CER-01 | Phase 62 | Pending |
 | CER-02 | Phase 62 | Pending |
