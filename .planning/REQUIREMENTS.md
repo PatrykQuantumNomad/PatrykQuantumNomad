@@ -77,9 +77,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Validation
 
-- [ ] **VAL-01**: All cross-reference links verified working across all 9 enhanced case studies
+- [x] **VAL-01**: All cross-reference links verified working across all 9 enhanced case studies
 - [ ] **VAL-02**: npx astro check reports 0 errors and npx astro build completes successfully
-- [ ] **VAL-03**: Statistical values in quantitative tables verified against NIST source data
+- [x] **VAL-03**: Statistical values in quantitative tables verified against NIST source data
 
 ## v2 Requirements
 
@@ -140,9 +140,9 @@ Deferred to future release.
 | CER-03 | Phase 62 | Complete |
 | CER-04 | Phase 62 | Complete |
 | CER-05 | Phase 62 | Complete |
-| VAL-01 | Phase 63 | Pending |
+| VAL-01 | Phase 63 | Complete |
 | VAL-02 | Phase 63 | Pending |
-| VAL-03 | Phase 63 | Pending |
+| VAL-03 | Phase 63 | Complete |
 
 **Coverage:**
 - v1.9 requirements: 41 total
