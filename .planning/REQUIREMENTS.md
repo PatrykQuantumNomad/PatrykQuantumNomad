@@ -72,8 +72,8 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 - [x] **CER-01**: Response variable analysis with individual plot subsections
 - [x] **CER-02**: Batch effect analysis with batch-specific plots and tests
 - [x] **CER-03**: Lab effect analysis with lab-specific plots and tests
-- [ ] **CER-04**: Primary factors analysis with DOE-specific visualizations (bihistogram, block plots, interaction plots)
-- [ ] **CER-05**: Interpretation section synthesizing multi-factor evidence
+- [x] **CER-04**: Primary factors analysis with DOE-specific visualizations (bihistogram, block plots, interaction plots)
+- [x] **CER-05**: Interpretation section synthesizing multi-factor evidence
 
 ### Validation
 
@@ -138,8 +138,8 @@ Deferred to future release.
 | CER-01 | Phase 62 | Complete |
 | CER-02 | Phase 62 | Complete |
 | CER-03 | Phase 62 | Complete |
-| CER-04 | Phase 62 | Pending |
-| CER-05 | Phase 62 | Pending |
+| CER-04 | Phase 62 | Complete |
+| CER-05 | Phase 62 | Complete |
 | VAL-01 | Phase 63 | Pending |
 | VAL-02 | Phase 63 | Pending |
 | VAL-03 | Phase 63 | Pending |
