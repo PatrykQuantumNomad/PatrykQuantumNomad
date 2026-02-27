@@ -39,6 +39,52 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'When theoretical confidence interval formulas are unavailable or unreliable (small samples, complex estimators, non-normal data), the bootstrap provides a purely empirical alternative. It answers the fundamental question "how much would my estimate change if I collected new data?" without requiring distributional assumptions.',
     definitionExpanded: 'The bootstrap procedure draws B random samples of size N with replacement from the original dataset, computes the statistic of interest for each resample, and plots the resulting B values as a histogram or density. The 2.5th and 97.5th percentiles of the bootstrap distribution form a 95% nonparametric confidence interval. Standard practice uses B \u2265 1000 for stable percentile intervals.',
     caseStudySlugs: ['uniform-random-numbers'],
+    formulas: [
+      {
+        label: 'Bootstrap Resample',
+        tex: String.raw`X^{*}_b = \{X^{*}_{b,1}, X^{*}_{b,2}, \ldots, X^{*}_{b,N}\} \quad \text{drawn with replacement from } \{X_1, \ldots, X_N\}`,
+        explanation:
+          'Each bootstrap sample draws N observations with replacement from the original dataset, so some observations may appear multiple times and others not at all.',
+      },
+      {
+        label: 'Percentile Confidence Interval',
+        tex: String.raw`CI_{1-\alpha} = \left(\hat{\theta}^{*}_{(\alpha/2)},\; \hat{\theta}^{*}_{(1-\alpha/2)}\right)`,
+        explanation:
+          'The bootstrap percentile interval uses the alpha/2 and 1-alpha/2 quantiles of the B bootstrap statistic values as the confidence bounds.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate sample data
+rng = np.random.default_rng(42)
+data = rng.normal(loc=50, scale=10, size=30)
+
+# Bootstrap the mean using scipy.stats.bootstrap
+result = stats.bootstrap(
+    (data,), np.mean, n_resamples=9999,
+    confidence_level=0.95,
+    rng=np.random.default_rng(42)
+)
+
+# Compute bootstrap distribution for plotting
+boot_means = [np.mean(rng.choice(data, size=len(data)))
+              for _ in range(9999)]
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.hist(boot_means, bins=50, density=True,
+        alpha=0.7, color='steelblue', edgecolor='white')
+ax.axvline(result.confidence_interval.low, color='r',
+           linestyle='--', label='95% CI')
+ax.axvline(result.confidence_interval.high, color='r',
+           linestyle='--')
+ax.set_xlabel("Bootstrap Mean")
+ax.set_ylabel("Density")
+ax.set_title("Bootstrap Distribution of the Sample Mean")
+ax.legend()
+plt.tight_layout()
+plt.show()`,
   },
 
   'box-cox-linearity': {
@@ -54,6 +100,53 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     questions: ['Would a suitable transformation improve my linear fit?', 'What is the optimal value of the transformation parameter?'],
     importance: 'Many bivariate relationships are non-linear in their original scale but become linear after a power transformation of the predictor. The Box-Cox linearity plot automates the search for this transformation, turning a difficult non-linear modeling problem into a simple linear regression.',
     definitionExpanded: 'The procedure evaluates X^\u03BB for a range of \u03BB values (typically \u22122 to +2) and computes the Pearson correlation between Y and X^\u03BB at each \u03BB. The \u03BB = 0 case uses log(X) by convention. The plot displays correlation vs. \u03BB, and the peak identifies the optimal transformation. Common special cases: \u03BB = 1 (no transform), 0.5 (square root), 0 (log), \u22121 (reciprocal).',
+    formulas: [
+      {
+        label: 'Box-Cox Transformation',
+        tex: String.raw`T(X) = \begin{cases} \dfrac{X^{\lambda} - 1}{\lambda} & \lambda \neq 0 \\[6pt] \ln(X) & \lambda = 0 \end{cases}`,
+        explanation:
+          'The Box-Cox family of power transformations applied to the predictor variable X. The lambda = 0 case uses the natural logarithm by convention as the limiting case.',
+      },
+      {
+        label: 'Linearity Measure',
+        tex: String.raw`r(\lambda) = \text{corr}\!\left(Y,\; T_{\lambda}(X)\right)`,
+        explanation:
+          'The Pearson correlation between the response Y and the transformed predictor is computed for each lambda value. The lambda that maximizes r(lambda) yields the most linear relationship.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate nonlinear relationship: Y = sqrt(X) + noise
+rng = np.random.default_rng(42)
+X = rng.uniform(1, 50, size=100)
+Y = np.sqrt(X) + rng.normal(0, 0.5, size=100)
+
+# Evaluate correlation for a range of lambda values
+lambdas = np.linspace(-2, 2, 201)
+correlations = []
+for lam in lambdas:
+    if abs(lam) < 1e-10:
+        T = np.log(X)
+    else:
+        T = (X**lam - 1) / lam
+    r, _ = stats.pearsonr(Y, T)
+    correlations.append(r)
+
+optimal_idx = np.argmax(correlations)
+optimal_lambda = lambdas[optimal_idx]
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(lambdas, correlations, 'b-', linewidth=2)
+ax.axvline(optimal_lambda, color='r', linestyle='--',
+           label=f'Optimal lambda = {optimal_lambda:.2f}')
+ax.set_xlabel("Lambda")
+ax.set_ylabel("Correlation r(lambda)")
+ax.set_title("Box-Cox Linearity Plot")
+ax.legend()
+plt.tight_layout()
+plt.show()`,
   },
 
   'box-cox-normality': {
@@ -69,6 +162,40 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     questions: ['Is there a transformation that will normalize my data?', 'What is the optimal value of the transformation parameter?'],
     importance: 'Many statistical procedures (t-tests, ANOVA, capability indices) assume normally distributed data. When the raw data are skewed, the Box-Cox normality plot identifies the power transformation that best achieves normality, providing a systematic, data-driven alternative to ad hoc log or square root transforms.',
     definitionExpanded: 'The procedure transforms the data as Y^\u03BB for a range of \u03BB values and evaluates the normality of each transformed dataset using the probability plot correlation coefficient (PPCC) or a similar metric. The optimal \u03BB maximizes normality. The plot typically includes a confidence interval around the peak to indicate the range of \u03BB values that produce comparable normality. If the interval includes \u03BB = 1, no transformation is necessary.',
+    formulas: [
+      {
+        label: 'Box-Cox Transformation for Normality',
+        tex: String.raw`T(Y) = \begin{cases} \dfrac{Y^{\lambda} - 1}{\lambda} & \lambda \neq 0 \\[6pt] \ln(Y) & \lambda = 0 \end{cases}`,
+        explanation:
+          'The Box-Cox power transformation applied to the response variable Y. The optimal lambda is the value that makes the transformed data most closely approximate a normal distribution.',
+      },
+      {
+        label: 'PPCC vs Lambda Curve',
+        tex: String.raw`\text{PPCC}(\lambda) = \text{corr}\!\left(T_{\lambda}(Y_{(i)}),\; M_i\right)`,
+        explanation:
+          'The probability plot correlation coefficient measures the linearity of the normal probability plot for the transformed data. M_i are the expected normal order statistics. The lambda that maximizes PPCC yields the best normality.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate right-skewed sample data
+rng = np.random.default_rng(42)
+data = rng.lognormal(mean=2, sigma=0.8, size=200)
+
+# Box-Cox normality plot
+fig, ax = plt.subplots(figsize=(10, 5))
+lmbdas, ppcc = stats.boxcox_normplot(data, la=-2, lb=2, plot=ax)
+
+# Find and mark the optimal lambda
+optimal_lambda = lmbdas[np.argmax(ppcc)]
+ax.axvline(optimal_lambda, color='r', linestyle='--',
+           label=f'Optimal lambda = {optimal_lambda:.2f}')
+ax.set_title("Box-Cox Normality Plot")
+ax.legend()
+plt.tight_layout()
+plt.show()`,
   },
 
   'box-plot': {
@@ -132,6 +259,39 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'Normality is the most frequently tested distributional assumption in statistics. The normal probability plot is more sensitive than the histogram for detecting departures from normality because it magnifies tail behavior, which is exactly where non-normality has the greatest impact on statistical inference (confidence intervals, hypothesis tests, capability indices).',
     definitionExpanded: 'The ordered data values Y_{(1)} \u2264 Y_{(2)} \u2264 ... \u2264 Y_{(N)} are plotted against the corresponding expected normal order statistics (theoretical quantiles). If the data are normal, the points fall on a straight line whose slope estimates the standard deviation and whose intercept estimates the mean. The theoretical quantiles are computed using a plotting position formula such as Filliben\u2019s.',
     caseStudySlugs: ['heat-flow-meter'],
+    formulas: [
+      {
+        label: 'Normal Order Statistic Medians',
+        tex: String.raw`M_i = \Phi^{-1}\!\left(\frac{i - 0.3175}{N + 0.365}\right)`,
+        explanation:
+          'The theoretical quantiles (normal order statistic medians) are computed using the Filliben approximation, where Phi^{-1} is the inverse standard normal CDF. These serve as the horizontal axis values.',
+      },
+      {
+        label: 'Parameter Estimates from Fitted Line',
+        tex: String.raw`\hat{\sigma} = \text{slope}, \quad \hat{\mu} = \text{intercept}`,
+        explanation:
+          'When the data are normally distributed and the points fall on a straight line, the slope of the fitted line estimates the standard deviation and the intercept estimates the mean.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate normally distributed sample data
+rng = np.random.default_rng(42)
+data = rng.normal(loc=50, scale=10, size=100)
+
+# Create normal probability plot
+fig, ax = plt.subplots(figsize=(10, 5))
+res = stats.probplot(data, dist='norm', plot=ax)
+
+ax.set_title("Normal Probability Plot")
+ax.set_xlabel("Theoretical Quantiles")
+ax.set_ylabel("Ordered Values")
+ax.get_lines()[0].set_markerfacecolor('steelblue')
+ax.get_lines()[0].set_markeredgecolor('steelblue')
+plt.tight_layout()
+plt.show()`,
     examples: [
       { label: 'Normal Data', description: 'Points follow the reference line closely from end to end with only minor random scatter. This confirms that the data are consistent with a normal distribution, and standard normal-theory methods are appropriate.', variantLabel: 'Normal' },
       { label: 'Right Skewed', description: 'Points curve below the reference line on the left and above it on the right, forming a concave-up shape. This indicates right (positive) skewness — the upper tail is heavier than expected for a normal distribution. A log or square root transformation may normalize the data.', variantLabel: 'Right Skewed' },
@@ -154,6 +314,39 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'Choosing the correct distributional model is essential for reliability prediction, process capability analysis, and simulation. The probability plot provides a visual goodness-of-fit assessment for any hypothesized distribution, making it the most versatile single tool for distribution identification. The slope and intercept of the fitted line directly estimate the distribution parameters.',
     definitionExpanded: 'The ordered data are plotted against the quantiles of the hypothesized distribution, with the axis scales chosen so that data from that distribution appear as a straight line. For location-scale families, the intercept estimates the location parameter and the slope estimates the scale parameter. Different distributions require different probability scales: normal scale for the normal, Weibull scale for the Weibull, exponential scale for the exponential, etc. Comparing probability plots for several candidate distributions identifies the best fit.',
     caseStudySlugs: ['uniform-random-numbers'],
+    formulas: [
+      {
+        label: 'Plotting Positions',
+        tex: String.raw`m_i = \frac{i - a}{N + 1 - 2a}`,
+        explanation:
+          'The plotting positions map each ordered observation to a cumulative probability. The constant a depends on the distribution: a = 0.3175 for normal (Filliben), a = 0 for uniform, and other values for other distributions.',
+      },
+      {
+        label: 'Probability Plot Correlation Coefficient',
+        tex: String.raw`\text{PPCC} = \text{corr}\!\left(Y_{(i)},\; Q(m_i)\right)`,
+        explanation:
+          'The correlation between the ordered data values and the theoretical quantiles Q(m_i) of the hypothesized distribution. A PPCC close to 1.0 indicates a good fit.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Generate exponentially distributed sample data
+rng = np.random.default_rng(42)
+data = rng.exponential(scale=5.0, size=100)
+
+# Create probability plot against exponential distribution
+fig, ax = plt.subplots(figsize=(10, 5))
+res = stats.probplot(data, dist='expon', plot=ax)
+
+ax.set_title("Probability Plot (Exponential Distribution)")
+ax.set_xlabel("Theoretical Quantiles")
+ax.set_ylabel("Ordered Values")
+ax.get_lines()[0].set_markerfacecolor('steelblue')
+ax.get_lines()[0].set_markeredgecolor('steelblue')
+plt.tight_layout()
+plt.show()`,
     examples: [
       { label: 'Good Fit', description: 'Points follow the fitted line closely across the entire range, with only minor random scatter. The probability plot correlation coefficient is close to 1.0. The hypothesized distribution provides a good model for the data.' },
       { label: 'S-Shaped Departure', description: 'Points form an S-curve around the reference line, with systematic departures at both tails. This indicates the data have a different tail weight than the hypothesized distribution. Try a distribution with heavier or lighter tails.' },
@@ -175,5 +368,45 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     importance: 'The Q-Q plot is the most powerful graphical tool for comparing two distributions because it is sensitive to differences in location, scale, and shape simultaneously. It is particularly effective at detecting subtle tail differences that histograms and summary statistics miss, making it essential for two-sample comparison and model validation.',
     definitionExpanded: 'For two-sample comparison, the quantiles of dataset 1 are plotted against the quantiles of dataset 2. If sample sizes differ, the quantiles of the smaller sample are plotted against linearly interpolated quantiles of the larger sample. If the distributions are identical, points fall on the y = x identity line. A linear pattern with slope \u2260 1 indicates a scale difference; a linear pattern shifted from y = x indicates a location difference. Curvature indicates a shape difference.',
     caseStudySlugs: ['ceramic-strength'],
+    formulas: [
+      {
+        label: 'Quantile Matching',
+        tex: String.raw`\text{Plot } Q_1(p_i) \text{ vs } Q_2(p_i) \text{ for percentiles } p_i`,
+        explanation:
+          'For two-sample comparison, the quantiles of both datasets at matching cumulative probabilities are plotted against each other. If the distributions are identical, points fall on the y = x identity line.',
+      },
+      {
+        label: 'Plotting Positions',
+        tex: String.raw`p_i = \frac{i - 0.5}{N}`,
+        explanation:
+          'The Hazen plotting position assigns cumulative probabilities to the ordered observations. This symmetric formula avoids probabilities of exactly 0 or 1.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate two samples from different distributions
+rng = np.random.default_rng(42)
+sample1 = rng.normal(loc=50, scale=10, size=200)
+sample2 = rng.normal(loc=55, scale=15, size=150)
+
+# Compute quantiles at matching percentiles
+n_quantiles = min(len(sample1), len(sample2))
+probs = np.linspace(0, 1, n_quantiles + 2)[1:-1]
+q1 = np.quantile(sample1, probs)
+q2 = np.quantile(sample2, probs)
+
+# Create Q-Q plot
+fig, ax = plt.subplots(figsize=(8, 8))
+ax.scatter(q1, q2, alpha=0.5, color='steelblue', s=15)
+lims = [min(q1.min(), q2.min()), max(q1.max(), q2.max())]
+ax.plot(lims, lims, 'r--', linewidth=1, label='y = x')
+ax.set_xlabel("Sample 1 Quantiles")
+ax.set_ylabel("Sample 2 Quantiles")
+ax.set_title("Two-Sample Q-Q Plot")
+ax.legend()
+ax.set_aspect('equal')
+plt.tight_layout()
+plt.show()`,
   },
 } as const;
