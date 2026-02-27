@@ -1,38 +1,103 @@
 ---
 title: "Fatigue Life of Aluminum Alloy Specimens"
-description: "EDA case study analyzing NIST LEW.DAT fatigue life data to demonstrate analysis of heavily skewed non-normal distributions"
+description: "EDA case study analyzing NIST BIRNSAUN.DAT fatigue life data to demonstrate probabilistic model selection for reliability engineering"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.9 Fatigue Life of Aluminum Alloy Specimens"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import FatigueLifePlots from '../../../../components/eda/FatigueLifePlots.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to 200 observations from the NIST LEW.DAT dataset, which contains measurements of the fatigue life (in thousands of cycles to failure) of aluminum alloy specimens under constant-amplitude cyclic loading. The primary purpose is to demonstrate how EDA techniques detect a heavily skewed, non-normal distribution while providing guidance on appropriate distributional models and statistical methods.
+This case study applies exploratory data analysis to 101 measurements of fatigue life (thousands of cycles until rupture) of rectangular strips of 6061-T6 aluminum sheeting, subjected to periodic loading with maximum stress of 21,000 psi, as reported by Birnbaum and Saunders (1958). The dataset is referred to as BIRNSAUN.DAT in the NIST archive.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.9. Fatigue life data are notoriously skewed, as most specimens fail near the median lifetime while a few specimens survive much longer. Understanding this skewness is essential for reliability engineering and setting warranty periods.
+The dataset originates from NIST/SEMATECH Section 1.4.2.9. Unlike the other case studies in this collection, the fatigue life study focuses specifically on probabilistic model selection: determining which probability distribution best describes the dispersion of measured lifetimes for reliability prediction and warranty estimation.
+
+<CaseStudyDataset slug="fatigue-life" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The goals of this analysis are:
+
+1. Determine if the fatigue life data can be adequately modeled with a known probability distribution for reliability prediction
+2. Assess the fixed-location assumption: is the process mean stable over the run?
+3. Assess the fixed-variation assumption: is the process variability constant?
+4. Assess the randomness assumption: are the observations independent?
+5. Determine which probability distribution (Normal, Gamma, Weibull, or Birnbaum-Saunders) best describes the fatigue life dispersion
 
 ## Graphical Output and Interpretation
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) provides a clear picture of skewed but otherwise well-behaved data. The run sequence plot shows a stable process with occasional high values. The lag plot shows approximate randomness. The histogram is strongly right-skewed. The normal probability plot curves away from linearity. The dominant finding is distributional: the data are not normal.
+The [4-plot](/eda/techniques/4-plot/) provides a comprehensive view of the fatigue life data. The run sequence plot should show stable location and variation, the lag plot should show no dependence, and the histogram reveals the right-skewed distribution.
+
+<FatigueLifePlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows 101 observations fluctuating around a stable mean with no systematic drift or shifts — the fixed-location and fixed-variation assumptions appear satisfied.
+2. The **lag plot** (upper right) shows a structureless scatter cloud, consistent with independent observations — the randomness assumption appears satisfied.
+3. The **histogram** (lower left) is right-skewed, with most observations clustering between 800 and 1,600 thousand cycles and a long upper tail extending past 2,000 — the distribution is not symmetric and not bell-shaped.
+4. The **normal probability plot** (lower right) shows deviations from the theoretical straight line, particularly in the tails — the normality assumption is questionable.
+
+Three of four assumptions hold: fixed location, fixed variation, and randomness. The distributional assumption requires further investigation — the right-skewed shape suggests that alternative distributions (Gamma, Weibull, Birnbaum-Saunders) may provide a better fit than the normal.
+
+### Box Plot
+
+The initial graphical analysis uses dot charts, [box plots](/eda/techniques/box-plot/), [histograms](/eda/techniques/histogram/), and kernel density estimates to characterize the distribution. The [box plot](/eda/techniques/box-plot/) suggests the largest measured value may be an outlier.
+
+<FatigueLifePlots type="box-plot" />
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 200 observations fluctuating around a stable location with occasional high-valued spikes corresponding to long-lived specimens. There is no systematic trend, drift, or shift in location over the observation sequence. The fixed-location and fixed-variation assumptions appear to hold, despite the visual impression created by the outlying high values.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 101 observations fluctuating around the mean of approximately 1401 thousand cycles. The location and variation appear stable across the run, with no systematic drift or shifts.
+
+<FatigueLifePlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a roughly circular cloud (somewhat elongated in the upper-right direction due to the skewness) with no evidence of serial dependence. The randomness assumption is supported.
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a structureless scatter cloud, consistent with independent observations. The slight elongation in the scatter reflects the skewed distribution rather than serial dependence.
+
+<FatigueLifePlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) displays a strongly right-skewed distribution with a long upper tail. Most values cluster in the lower portion of the range, with a peak near the mode. The right tail extends far beyond the central mass, creating the classic shape seen in lifetime and reliability data. This is clearly not a normal distribution.
+The data range from slightly above 350 to slightly below 2,500 thousand cycles. The [histogram](/eda/techniques/histogram/) is right-skewed, with most observations clustering between 800 and 1,600 thousand cycles and a long upper tail extending past 2,000.
+
+<FatigueLifePlots type="histogram" />
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) shows pronounced upward curvature in the upper tail, with the highest values falling well above the theoretical straight line. This convex departure is the signature pattern of a right-skewed distribution on a normal probability plot. A [Weibull plot](/eda/techniques/weibull-plot/) or lognormal probability plot would be more appropriate.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) (Q-Q plot) shows the data deviating from the theoretical straight line, particularly in the tails. When compared against an envelope of 99 simulated Gaussian samples of the same size, the data Q-Q plot falls within the envelope, suggesting the Gaussian model cannot be firmly rejected on graphical grounds alone.
+
+<FatigueLifePlots type="normal-probability" />
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) confirms that the fatigue life measurements are independent. All autocorrelation coefficients fall within the 95% confidence bands.
+
+<FatigueLifePlots type="autocorrelation" />
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows a flat spectrum with no dominant peaks, consistent with independent observations.
+
+<FatigueLifePlots type="spectral" />
+
+### Distribution Comparison
+
+Four candidate distributions are compared by overlaying their fitted probability densities on a non-parametric kernel density estimate of the data:
+
+- **Normal (Gaussian)**: mean 1401, standard deviation 389
+- **Gamma**: shape 11.85, rate 0.00846
+- **Birnbaum-Saunders**: shape 0.310, scale 1337
+- **3-parameter Weibull**: location 181, shape 3.43, scale 1357
+
+All four fitted densities approximate the non-parametric estimate reasonably well, though the comparison is limited by the sample size of 101.
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +105,33 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) shows pr
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | -563.0 |
-| Std Dev | 456.3 |
-| Median | -601.5 |
-| Min | -1632.0 |
-| Max | 789.0 |
-| Range | 2421.0 |
-| n | 200 |
+| Mean | 1401 |
+| Std Dev | 389 |
+| Median | 1340 |
+| Min | 370 |
+| Max | 2440 |
+| Range | 2070 |
+| n | 101 |
 
-The mean exceeds the median, consistent with right-skewed data (the LEW.DAT values are coded as deviations from a reference, resulting in negative central values). The coefficient of variation is large, reflecting the wide spread of fatigue life data.
+The mean exceeds the median, consistent with the right-skewed shape visible in the histogram. All values are positive, representing thousands of cycles to failure for the aluminum coupons.
 
-### Location Test
+### Model Selection
 
-The [runs test](/eda/quantitative/runs-test/) for drift shows no significant trend (p > 0.05). Despite the skewness, the location is stable across the observation sequence. The process generating these fatigue specimens is consistent over time.
+Model comparison using Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC) yields:
 
-### Variation Test
+| Model | AIC | BIC |
+|-------|-----|-----|
+| Gaussian | 1495 | 1501 |
+| Weibull (3-param) | 1498 | 1505 |
+| Gamma | 1499 | 1504 |
+| Birnbaum-Saunders | 1507 | 1512 |
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) across four equal groups does not reject constant variance (p > 0.05). The measurement variability is consistent, even though the data are non-normally distributed. Note that Bartlett's test is sensitive to non-normality, so the [Levene test](/eda/quantitative/levene-test/) provides a more robust confirmation.
+The Gaussian model has the lowest AIC and BIC. Converting to posterior probabilities (assuming equal prior probabilities), the Gaussian model has 76% probability, Gamma 16%, Weibull 7.4%, and Birnbaum-Saunders 0.27%.
 
-### Randomness Tests
+### Prediction Intervals
 
-The [runs test](/eda/quantitative/runs-test/) confirms randomness (p > 0.05). [Autocorrelation](/eda/quantitative/autocorrelation/) values at all tested lags fall within the significance bounds. The specimens are independent and show no serial correlation in their fatigue lives.
-
-### Distribution Test
-
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) decisively rejects normality (p < 0.001). The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.82 and 0.69, respectively. The positive skewness confirms the right-skewed distribution observed in the histogram. A Weibull or lognormal distribution may provide a better fit for these data.
-
-### Outlier Detection
-
-[Grubbs' test](/eda/quantitative/grubbs-test/) based on the normal distribution flags several high values as potential outliers. However, these are not true outliers -- they are expected extreme values from a skewed distribution. Using the Grubbs test on non-normal data produces false positives because the test assumes normality.
+Using the selected Gaussian model, the 0.1st percentile of the fitted distribution (the value exceeded with probability 99.9%) is approximately 198 thousand cycles. Bootstrap analysis based on 5,000 resamples yields a 95% confidence interval for this percentile ranging from 40 to 366 thousand cycles, reflecting the substantial uncertainty inherent in estimating extreme percentiles from 101 observations.
 
 ## Conclusions
 
-Three of four assumptions are satisfied: fixed location, fixed variation, and randomness. The distributional assumption fails -- the data are strongly right-skewed and not normally distributed. The practical implications are significant: the sample mean is not the most efficient location estimator, and normal-theory confidence intervals will be inaccurate. A [Weibull distribution](/eda/distributions/weibull/) or [lognormal distribution](/eda/distributions/lognormal/) should be fitted to these data. For reliability applications, the lower percentiles of the fitted distribution (B1, B10 life estimates) are more relevant than the mean. This case study demonstrates why the distributional assumption must be verified before applying standard parametric methods.
+Despite the visual right-skewness in the histogram, formal model comparison via AIC and BIC favors the Gaussian distribution over the Gamma, Birnbaum-Saunders, and 3-parameter [Weibull](/eda/distributions/weibull/) alternatives for this specific dataset. The key lesson is that visual impressions of non-normality should be confirmed by quantitative model selection criteria before choosing an alternative distribution. For reliability applications, the lower percentiles of the fitted distribution are most relevant (B1, B10 life estimates), and the wide bootstrap confidence intervals emphasize the uncertainty in extreme-tail estimation from moderate sample sizes. This case study demonstrates the value of comparing multiple candidate models rather than assuming a particular distributional form based solely on the application domain.
