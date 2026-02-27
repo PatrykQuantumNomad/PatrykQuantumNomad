@@ -76,12 +76,12 @@ Plans:
   3. All 29 technique pages have expanded definitions covering axis meanings, construction method, and mathematical formulation where applicable
   4. At least 14 of 29 techniques display a "See It In Action" section with styled pill-button links to relevant case studies, and all linked case study URLs resolve to valid pages
   5. All 6 Tier B techniques have interpretive captions on their variant plots explaining what each pattern means, and Tier A techniques with NIST examples have an Examples section describing common patterns
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 66-01: TBD
-- [ ] 66-02: TBD
-- [ ] 66-03: TBD
+- [ ] 66-01-PLAN.md — Populate time-series, designed-experiments, and multivariate content (10 techniques + Tier B captions)
+- [ ] 66-02-PLAN.md — Populate distribution-shape content (9 techniques + Tier B captions for histogram and normal-probability-plot)
+- [ ] 66-03-PLAN.md — Populate comparison, regression, and combined-diagnostic content (10 techniques + Tier B captions for scatter-plot)
 
 ### Phase 67: Technical Depth
 **Goal**: Every graphical technique page has a self-contained Python code example, and the 12 techniques with NIST formulas have KaTeX-rendered math
@@ -133,6 +133,6 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
-| 66. Content Depth | v1.10 | 0/TBD | Not started | - |
+| 66. Content Depth | v1.10 | 0/3 | Not started | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |
