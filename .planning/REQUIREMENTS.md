@@ -65,7 +65,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 - [x] **FAT-01**: Individual named plot subsections with per-plot interpretation
 - [x] **FAT-02**: Quantitative results with distribution fitting tests and test summary table
 - [x] **FAT-03**: Distribution comparison plots (Weibull, gamma probability plots with fitted overlays)
-- [ ] **FAT-04**: Interpretation section synthesizing evidence
+- [x] **FAT-04**: Interpretation section synthesizing evidence
 
 ### Case Study — Ceramic Strength
 
@@ -134,7 +134,7 @@ Deferred to future release.
 | FAT-01 | Phase 61 | Complete |
 | FAT-02 | Phase 61 | Complete |
 | FAT-03 | Phase 61 | Complete |
-| FAT-04 | Phase 61 | Pending |
+| FAT-04 | Phase 61 | Complete |
 | CER-01 | Phase 62 | Pending |
 | CER-02 | Phase 62 | Pending |
 | CER-03 | Phase 62 | Pending |
