@@ -1,38 +1,114 @@
 ---
-title: "Cryogenic Flow Meter Study"
-description: "EDA case study analyzing NIST ZARR13.DAT cryothermometry data to demonstrate detection of non-constant variation and outlier identification"
+title: "Josephson Junction Cryothermometry"
+description: "EDA case study analyzing NIST SOULEN.DAT voltage count data to demonstrate univariate analysis with discrete integer measurements and mild assumption violations"
 section: "1.4.2"
 category: "case-studies"
-nistSection: "1.4.2.4 Cryogenic Flow Meter Study (Cryothermometry)"
+nistSection: "1.4.2.4 Josephson Junction Cryothermometry"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import CryothermometryPlots from '../../../../components/eda/CryothermometryPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to 195 measurements from the NIST ZARR13.DAT dataset, collected during a cryogenic flow meter calibration study at the National Bureau of Standards (now NIST). The measurements represent a thermocouple voltage reading during the calibration of a cryogenic flow meter. The primary purpose is to demonstrate how EDA techniques reveal data discretization, potential group structure, and possible outliers.
+This case study applies exploratory data analysis to the NIST SOULEN.DAT dataset, which contains 700 voltage count measurements from a Josephson junction cryothermometry (low temperature) experiment. The data were collected by Bob Soulen of NIST in October 1971 as a sequence of observations collected equi-spaced in time from a volt meter to ascertain the process temperature. The response variable is voltage counts, recorded as integers.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.4. With n = 195 observations, this study illustrates a real-world measurement scenario where data characteristics are more complex than simple textbook examples.
+The dataset originates from NIST/SEMATECH Section 1.4.2.4. With n = 700 observations, this study illustrates the case where there is discreteness in the measurements (the data are integers with only a few distinct values and many repeats), but the underlying assumptions approximately hold. The discrete nature of the data creates artifacts in several plots and affects the interpretation of normality tests.
+
+<CaseStudyDataset slug="cryothermometry" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the cryothermometry data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval may not have the intended coverage.
+
+If any assumptions are violated, identify the nature and severity of the violations and determine whether the violations are serious enough to invalidate the model.
 
 ## Graphical Output and Interpretation
 
+The graphical analysis uses the standard suite of EDA plots to assess the four underlying assumptions. The discrete integer nature of the cryothermometry data creates visual artifacts in several plots that must be interpreted carefully.
+
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) shows a generally well-behaved dataset with some notable features. The run sequence plot reveals a stable location with possible discrete measurement levels. The lag plot shows some structure beyond pure randomness. The histogram is roughly bell-shaped but shows discreteness. The normal probability plot shows approximate linearity with minor deviations in the tails.
+The [4-plot](/eda/techniques/4-plot/) is the primary graphical tool for testing all four assumptions simultaneously. For the cryothermometry data, it reveals a dataset that approximately satisfies the assumptions, with some caveats due to data discreteness.
+
+The run sequence plot (upper left) shows 700 voltage count measurements fluctuating around a stable location of approximately 2899 with no visible shifts. The lag plot (upper right) does not indicate any significant non-random patterns, though the discrete integer values create a grid-like appearance. The histogram (lower left) is approximately symmetric and bell-shaped. The normal probability plot (lower right) shows a staircase-like pattern due to discrete integer values, but the overall trend is consistent with approximate normality.
+
+<CryothermometryPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows 700 voltage counts fluctuating around a stable location of approximately 2899 with no visible shifts in location or scale — the fixed-location and fixed-variation assumptions appear satisfied.
+2. The **lag plot** (upper right) does not indicate significant non-random patterns, though the discrete integer values create a grid-like appearance rather than a smooth scatter — this is a measurement artifact rather than a process feature.
+3. The **histogram** (lower left) is approximately symmetric and bell-shaped, consistent with a normal distribution, though the discrete measurement resolution creates a slightly irregular profile.
+4. The **normal probability plot** (lower right) shows a staircase-like pattern due to discrete integer values, but the overall trend is consistent with approximate normality.
+
+The integer data with only a few distinct values and many repeats accounts for the discrete appearance of several plots. The underlying assumptions appear approximately satisfied, with caveats due to data discreteness that will be further examined quantitatively.
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) shows data fluctuating around a stable location of approximately 9.26. The location is constant and there is no visible trend or drift. However, close inspection reveals that the data cluster at discrete voltage levels due to the limited resolution of the measurement instrument. There may be a slight change in variation across the run.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) tests whether the location is constant over time. The data range from 2895 to 2902, fluctuating around a stable center near 2899. There are no visible shifts in location or scale over the course of the experiment.
+
+**Conclusion:** The run sequence plot shows stable location and variation. The **fixed-location assumption appears satisfied** from graphical inspection.
+
+<CryothermometryPlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a roughly circular cloud but with some internal structure related to the discrete measurement levels. The discretization creates a grid-like pattern rather than a smooth circular scatter. This is a measurement artifact rather than a process feature.
+The [lag plot](/eda/techniques/lag-plot/) tests whether the data are random by plotting <InlineMath tex="Y_i" /> versus <InlineMath tex="Y_{i-1}" />. If the data are random, the lag plot should show a structureless cloud.
+
+The lag plot at lag 1 does not indicate any significant non-random patterns. The discrete integer nature of the data creates a grid-like appearance rather than a smooth scatter, but this is a measurement artifact rather than a process feature.
+
+**Conclusion:** No strong non-random structure is visible, though the grid pattern from discrete data makes subtle patterns harder to detect.
+
+<CryothermometryPlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) is approximately symmetric and bell-shaped, centered near 9.26. The discrete measurement resolution creates a slightly irregular profile with gaps between bars. Despite this discreteness, the overall distributional shape is consistent with normality.
+The [histogram](/eda/techniques/histogram/) assesses the shape of the underlying distribution. The histogram is approximately symmetric and bell-shaped, centered near 2899. The discrete measurement resolution (integer values) creates a slightly irregular profile, but the overall distributional shape is consistent with a normal distribution. An overlaid normal PDF with mean 2898.562 and standard deviation 1.305 fits the data reasonably well.
+
+<CryothermometryPlots type="histogram" />
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) is approximately linear through the central portion of the data. Minor deviations appear in the tails: a few observations at the low end fall slightly below the theoretical line, suggesting potential outliers or slightly heavier tails than the normal distribution.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows an approximately linear pattern (fitted intercept 2898.562, slope 1.276), but the discrete integer values create a staircase-like appearance that makes interpretation more difficult than with continuous data. The overall shape is consistent with approximate normality.
+
+<CryothermometryPlots type="probability" />
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) provides quantitative detail on the serial dependence detected by the lag plot. With 95% confidence bands at ±2/√N = ±0.076, any lag exceeding these bounds indicates significant autocorrelation.
+
+<CryothermometryPlots type="autocorrelation" />
+
+The autocorrelation at lag 1 is 0.31, exceeding the significance bound. The autocorrelation decays relatively quickly, suggesting the non-randomness is mild and partially attributable to the discrete nature of the integer-valued measurements.
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows the frequency-domain structure. For the cryothermometry data, the spectrum should show modest low-frequency content consistent with the mild autocorrelation.
+
+<CryothermometryPlots type="spectral" />
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +116,137 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) is appro
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | 9.2615 |
-| Std Dev | 0.0228 |
-| Median | 9.2620 |
-| Min | 9.2060 |
-| Max | 9.3120 |
-| Range | 0.1060 |
-| n | 195 |
+| Sample size <InlineMath tex="n" /> | 700 |
+| Mean <InlineMath tex="\bar{Y}" /> | 2898.562 |
+| Std Dev <InlineMath tex="s" /> | 1.305 |
+| Median | 2899.0 |
+| Min | 2895.0 |
+| Max | 2902.0 |
+| Range | 7.0 |
+| Normal PPCC | 0.975 |
 
-The mean and median are nearly identical, suggesting a symmetric distribution. The standard deviation of 0.023 represents approximately 0.25% relative variation, indicating a precise measurement process.
+The mean and median are close, consistent with the approximate symmetry seen in the histogram. The small range of 7 units reflects the precision of the voltage counting process.
 
 ### Location Test
 
-The [runs test](/eda/quantitative/runs-test/) for drift in location shows no significant trend (p > 0.05). The process mean is stable at 9.2615 across all 195 observations.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 2.898E+03 | 9.745E-02 | 29739.288 |
+| <InlineMath tex="B_1" /> (slope) | 1.071E-03 | 2.409E-04 | 4.445 |
+
+Residual standard deviation: 1.288 with 698 degrees of freedom.
+
+**Conclusion:** The slope t-value of 4.445 exceeds the critical value <InlineMath tex="t_{0.975,\,698} = 1.96" />, so we **reject** <InlineMath tex="H_0" /> — the slope is statistically significant. However, the slope value of 0.001071 is practically negligible — over the full 700 observations, the predicted drift is only about 0.75 voltage counts. The assumption of constant location is **not seriously violated** even though the test is statistically significant. This is a classic example of a statistically significant but practically unimportant effect.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) applied to four equal groups yields a marginally significant result, suggesting possible non-constant variation. Further investigation with finer group divisions may be warranted to determine if this reflects a true process change or sampling variability.
+The [Levene test](/eda/quantitative/levene-test/) (median-based variant, used instead of [Bartlett's test](/eda/quantitative/bartletts-test/) because the discrete nature of the data makes the normality assumption questionable) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 1.43 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 696" /> |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,696}" /> | 2.618 |
+
+**Conclusion:** The test statistic of 1.43 is less than the critical value of 2.618, so we **fail to reject** <InlineMath tex="H_0" /> — the variances are not significantly different across the four intervals. The **constant-variation assumption is satisfied**.
 
 ### Randomness Tests
 
-The [runs test](/eda/quantitative/runs-test/) for randomness yields a borderline result. The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.093, close to but not exceeding the significance bound of approximately 0.140 (for n = 195). There is no strong evidence of serial dependence, though the discretization of measurements can affect randomness tests.
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | −13.4162 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 13.4162" /> far exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> — the data are not random. The negative Z indicates far fewer runs than expected, meaning consecutive observations tend to cluster at the same integer value.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.31 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.087 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.31 exceeds the critical value of 0.087. There is statistically significant autocorrelation, indicating mild non-randomness. However, the non-randomness can at least partially be explained by the discrete nature of the data — when measurements are restricted to a few integer values, consecutive readings tend to repeat, inflating autocorrelation and reducing the number of runs. The **randomness assumption is mildly violated**.
 
 ### Distribution Test
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic that does not reject the null hypothesis at the 5% level. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately -0.15 and -0.22, respectively, both consistent with approximate normality. The slight negative skewness is not statistically significant.
+The distributional assumption is tested with two complementary methods.
+
+**Probability Plot Correlation Coefficient (PPCC)** — measures the linearity of the normal probability plot.
+
+| Statistic | Value |
+|-----------|-------|
+| Normal PPCC | 0.975 |
+| Critical value (5%) | 0.987 |
+
+**Conclusion:** The PPCC of 0.975 is less than the critical value of 0.987, so we **reject** normality at the 5% level.
+
+**Anderson-Darling test** — a weighted goodness-of-fit test that is particularly sensitive to deviations in the tails.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="A^2" /> | 16.858 |
+| Critical value (5%) | 0.787 |
+
+**Conclusion:** The Anderson-Darling statistic of 16.858 far exceeds the critical value of 0.787, also **rejecting** normality. However, the violation of the normality assumption is not severe enough to conclude that the univariate model is unreasonable. At least part of the non-normality can be explained by the discrete nature of the data — when measurements can only take a few integer values, the resulting distribution cannot be perfectly normal.
 
 ### Outlier Detection
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) applied iteratively identifies no statistically significant outliers at the 5% level. The minimum value of 9.206 is approximately 2.4 standard deviations below the mean, which is within expected bounds for a sample of size 195.
+[Grubbs' test](/eda/quantitative/grubbs-test/) tests whether the most extreme observation is a statistical outlier.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="G" /> | 2.729 |
+| Critical value (5%, one-tailed) | 3.951 |
+
+**Conclusion:** The Grubbs statistic of 2.729 is less than the critical value of 3.951, so we **fail to reject** — **no outliers are detected**.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 4.445" /> | 1.96 | Reject (but practically negligible) |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 1.43" /> | 2.618 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-13.4162}" /> | 1.96 | Reject (mild) |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.31" /> | 0.087 | Reject (mild) |
+| **Distribution** | Normal PPCC | 0.975 | 0.987 | Reject (mild) |
+| **Distribution** | [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 16.858" /> | 0.787 | Reject (mild) |
+| **Outliers** | [Grubbs' test](/eda/quantitative/grubbs-test/) | <InlineMath tex="G = 2.729" /> | 3.951 | **No outliers** |
+
+The randomness, normality, and (technically) location assumptions are violated, but all violations are mild and at least partially attributable to the discrete integer nature of the data. The variation assumption is satisfied and no outliers are present.
 
 ## Conclusions
 
-The data approximately satisfy all four assumptions, with two caveats. First, the measurement discretization creates an artifact that affects the visual appearance of the lag plot and histogram, but does not invalidate the statistical conclusions. Second, there is marginal evidence for non-constant variation that warrants monitoring in future calibrations. The recommended model is the sample mean 9.2615 as the best estimate of the true thermocouple voltage, with a 95% confidence interval of 9.2615 plus or minus 0.0032. The measurement process is operating within acceptable limits for calibration purposes.
+Although the randomness and normality assumptions are mildly violated, the violations are mild enough and at least partially explained by the discrete nature of the data, so the data may be modeled as if the process were in statistical control. The recommended univariate model is:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = 2898.562 + E_i" />
+</div>
+
+Since the randomness assumption is mildly violated (lag-1 autocorrelation <InlineMath tex="r_1 = 0.31" />), the standard 95% confidence interval for the mean is:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 2898.562 \pm \frac{2 \times 1.305}{\sqrt{700}} = (2898.463,\; 2898.661)" />
+</div>
+
+However, this interval assumes independent observations. With autocorrelation present, the effective sample size is smaller than 700, and the true confidence interval is wider. The autocorrelation-adjusted 95% confidence interval is (2898.515, 2898.928), which accounts for the reduced effective degrees of freedom due to serial correlation.
+
+This case study demonstrates that discrete integer data can create artifacts in graphical plots (particularly the lag plot and normal probability plot) and can affect the results of formal statistical tests, but careful interpretation considering the nature of the data supports valid conclusions about the measurement process. The key insight is distinguishing between statistically significant violations and practically important ones — the location drift is real but negligible, and the non-randomness is at least partly a consequence of measurement discreteness rather than a genuine process deficiency.
