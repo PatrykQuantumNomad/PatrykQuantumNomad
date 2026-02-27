@@ -206,6 +206,25 @@ The autocorrelation and spectral analysis reveal that the non-randomness in the 
 
 where <InlineMath tex="f \approx 0.3025" /> is the dominant frequency identified by spectral analysis. Fitting this model by least squares yields residuals that should satisfy all four assumptions if the sinusoidal component has been successfully removed.
 
+The dominant frequency <InlineMath tex="f \approx 0.3025" /> was determined from the [spectral plot](/eda/techniques/spectral-plot/), which shows a single prominent peak. NIST used [complex demodulation](/eda/techniques/complex-demodulation/) to refine the starting frequency estimate before applying nonlinear least squares regression to fit the four-parameter sinusoidal model simultaneously.
+
+### Model Parameters
+
+The nonlinear regression produces the following parameter estimates:
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="C" /> (constant) | <InlineMath tex="-178.786" /> | 11.02 | <InlineMath tex="-16.22" /> |
+| <InlineMath tex="\alpha" /> (amplitude) | <InlineMath tex="-361.766" /> | 26.19 | <InlineMath tex="-13.81" /> |
+| <InlineMath tex="\omega" /> (frequency) | <InlineMath tex="0.302596" /> | 0.0001510 | <InlineMath tex="2005" /> |
+| <InlineMath tex="\phi" /> (phase) | <InlineMath tex="1.46536" /> | 0.04909 | <InlineMath tex="29.85" /> |
+
+Residual standard deviation: <InlineMath tex="s_e = 155.8484" /> with 196 degrees of freedom.
+
+All four parameters are highly significant. The frequency t-value of <InlineMath tex="2005" /> reflects the fact that the sinusoidal period is very precisely determined by the 200 observations. The residual standard deviation of <InlineMath tex="155.8" /> represents a **44% reduction** from the original data's standard deviation of <InlineMath tex="277.3" />, confirming that the sinusoidal model captures a substantial portion of the data's variability.
+
+NIST notes that three potential outliers are present in the residuals and that removing them would reduce the residual standard deviation by approximately 5% (from 155.8 to 148.3). However, they conclude that retaining or removing the outliers is "a judgment call" -- the full-data fit is presented here as the primary result.
+
 ## Validate New Model
 
 ### 4-Plot of Residuals
@@ -214,34 +233,48 @@ The [4-plot](/eda/techniques/4-plot/) applied to the residuals from the sinusoid
 
 <BeamDeflectionPlots type="residual-4-plot" />
 
-The transformation compared to the original data's 4-plot should show:
+The transformation compared to the original data's 4-plot is dramatic:
 
-- **Run sequence plot** — no oscillatory pattern, residuals fluctuating randomly around zero
-- **Lag plot** — random, structureless cloud replacing the elliptical pattern
-- **Histogram** — approximately bell-shaped
-- **Normal probability plot** — approximately linear
+- **Run sequence plot** (upper left) -- the oscillatory pattern is gone; residuals fluctuate randomly around zero with no systematic structure
+- **Lag plot** (upper right) -- the elliptical dependence structure is replaced by a random, structureless cloud
+- **Histogram** (lower left) -- approximately symmetric and bell-shaped, consistent with normality
+- **Normal probability plot** (lower right) -- approximately linear with minor curvature in the left tail, suggesting the residuals are close to but not perfectly normal
 
 ### Residual Run Sequence Plot
 
 <BeamDeflectionPlots type="residual-run-sequence" />
 
+The residuals fluctuate randomly around zero with no oscillatory pattern, no trend, and no visible shifts in variability -- the **fixed-location and fixed-variation assumptions are satisfied**.
+
 ### Residual Lag Plot
 
 <BeamDeflectionPlots type="residual-lag" />
+
+The residual lag plot shows a random, structureless cloud replacing the tight elliptical pattern of the original data -- the **randomness assumption is satisfied**. The sinusoidal model has successfully removed the periodic dependence.
 
 ### Residual Histogram
 
 <BeamDeflectionPlots type="residual-histogram" />
 
+The residual histogram is approximately symmetric and bell-shaped, centered near zero. The shape is consistent with a normal distribution, though a slight leftward tail asymmetry is visible.
+
 ### Residual Normal Probability Plot
 
 <BeamDeflectionPlots type="residual-probability" />
+
+The normal probability plot of residuals is approximately linear through the central portion. A bend in the left tail suggests some departure from normality -- NIST notes this as "some cause for concern" but concludes the fit is "reasonably good." The **distribution is approximately normal**.
 
 ### Residual Autocorrelation Plot
 
 <BeamDeflectionPlots type="residual-autocorrelation" />
 
-The residual autocorrelation plot should show dramatically reduced autocorrelation compared to the original data, with most lags falling within the 95% confidence bands.
+The residual autocorrelation is dramatically reduced compared to the original data. Most lags fall within the 95% confidence bands of <InlineMath tex="\pm 0.1414" />, confirming that the sinusoidal model has successfully removed the periodic dependence structure. The **randomness assumption is satisfied**.
+
+### Residual Spectral Plot
+
+<BeamDeflectionPlots type="residual-spectral" />
+
+The residual spectral plot shows a relatively flat spectrum with no dominant peaks. The prominent peak near frequency 0.3 in the original data's [spectral plot](/eda/techniques/spectral-plot/) has been eliminated, confirming that the sinusoidal model has captured the periodic component.
 
 ## Conclusions
 
