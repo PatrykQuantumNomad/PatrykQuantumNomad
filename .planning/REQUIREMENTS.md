@@ -18,8 +18,8 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 ### SVG Validation
 
-- [ ] **SVG-01**: All 29 graphical technique SVGs are audited against NIST original plots for visual accuracy (axes, shapes, labels, scales)
-- [ ] **SVG-02**: All 29 graphical technique SVGs are audited for data pattern correctness (statistical patterns match what NIST describes)
+- [x] **SVG-01**: All 29 graphical technique SVGs are audited against NIST original plots for visual accuracy (axes, shapes, labels, scales)
+- [x] **SVG-02**: All 29 graphical technique SVGs are audited for data pattern correctness (statistical patterns match what NIST describes)
 - [x] **SVG-03**: All identified SVG visual issues are fixed (incorrect shapes, axes, labels, scales)
 - [x] **SVG-04**: All identified SVG data pattern issues are fixed (datasets generating incorrect statistical patterns)
 
@@ -99,8 +99,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 64 | Complete |
 | INFRA-05 | Phase 64 | Complete |
 | INFRA-06 | Phase 64 | Complete |
-| SVG-01 | Phase 65 | Pending |
-| SVG-02 | Phase 65 | Pending |
+| SVG-01 | Phase 65 | Complete |
+| SVG-02 | Phase 65 | Complete |
 | SVG-03 | Phase 65 | Complete |
 | SVG-04 | Phase 65 | Complete |
 | QUES-01 | Phase 66 | Pending |

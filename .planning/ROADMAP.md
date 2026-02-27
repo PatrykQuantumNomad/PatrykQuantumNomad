@@ -27,7 +27,7 @@ See `.planning/milestones/` for detailed archives.
 ### v1.10 EDA Graphical Techniques — NIST Parity & Validation
 
 - [x] **Phase 64: Infrastructure Foundation** - Split technique-content.ts, extend TechniqueContent interface, update graphical template with new sections and code slot (completed 2026-02-27)
-- [ ] **Phase 65: SVG Audit & Fixes** - Audit all 29 graphical technique SVGs against NIST originals and fix visual/data pattern issues
+- [x] **Phase 65: SVG Audit & Fixes** - Audit all 29 graphical technique SVGs against NIST originals and fix visual/data pattern issues (completed 2026-02-27)
 - [ ] **Phase 66: Content Depth** - Add Questions, Importance, expanded Definitions, Case Study cross-links, and Examples sections to all 29 technique pages
 - [ ] **Phase 67: Technical Depth** - Add KaTeX formulas for 12 techniques and Python code examples for all 29 techniques
 - [ ] **Phase 68: Verification & Audit** - Full-sweep verification of build, Lighthouse, cross-links, formulas, and Python API correctness
@@ -62,9 +62,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 65-01-PLAN.md — Wire dedicated generators for bihistogram, block-plot, mean-plot, std-deviation-plot, doe-plots, and restructure 6-plot as regression diagnostic
+- [x] 65-01-PLAN.md — Wire dedicated generators for bihistogram, block-plot, mean-plot, std-deviation-plot, doe-plots, and restructure 6-plot as regression diagnostic
 - [x] 65-02-PLAN.md — Fix autocorrelation confidence band, Box-Cox line rendering, Youden reference lines, and probability-plot differentiation
-- [ ] 65-03-PLAN.md — Build audit checklist, run full build verification, document final status of all 29 techniques
+- [x] 65-03-PLAN.md — Build audit checklist, run full build verification, document final status of all 29 techniques
 
 ### Phase 66: Content Depth
 **Goal**: Every graphical technique page has full NIST-parity prose sections: what questions the plot answers, why it matters, expanded definitions, relevant case study links, and interpretation examples
@@ -132,7 +132,7 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
-| 65. SVG Audit & Fixes | 2/3 | In Progress|  | - |
+| 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 66. Content Depth | v1.10 | 0/TBD | Not started | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |
