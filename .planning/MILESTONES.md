@@ -1,5 +1,31 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.9 EDA Case Study Deep Dive (Shipped: 2026-02-27)
+
+**Delivered:** Enhanced all 9 EDA case studies to full NIST/SEMATECH source depth with individual named plot subsections, detailed quantitative test batteries, interpretation sections, and develop/validate model sections — plus a new Standard Resistor case study, 4 new DOE-specific SVG generators, gamma probability plot engineering, and uniform PDF histogram overlay
+
+**Phases completed:** 56-63 (19 plans total)
+
+**Key accomplishments:**
+- Built hypothesis test statistics library (7 tests + 6 helpers) with NIST-validated accuracy for runs, Bartlett, Levene, Anderson-Darling, Grubbs, PPCC, and location tests
+- Enhanced 8 existing case studies to full NIST/SEMATECH parity with individual named plot subsections, quantitative test batteries, and interpretation sections
+- Created Standard Resistor as a new case study from scratch (1000-observation DZIUBA1.DAT dataset) with complete analysis pipeline
+- Developed 4 new DOE-specific SVG generators (bihistogram, DOE mean plot, block plot, interaction plot) for Ceramic Strength multi-factor analysis
+- Added gamma probability plot engineering and uniform PDF histogram overlay for distribution-specific case study variations
+- Validated all 9 case studies: zero broken cross-reference links, clean 951-page build, and all statistical values verified against NIST source data
+
+**Stats:**
+- 96 files created/modified (+20,307 / -2,034 lines)
+- 58,446 total LOC (TypeScript/Astro/MDX)
+- 8 phases, 19 plans, 78 commits
+- 2 days from start to ship (2026-02-26 → 2026-02-27)
+
+**Git range:** `feat(56-01)` → `docs(phase-63)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.8 EDA Visual Encyclopedia (Shipped: 2026-02-25)
 
 **Delivered:** Complete interactive EDA Visual Encyclopedia with 90+ pages modernizing the NIST/SEMATECH Engineering Statistics Handbook Chapter 1 — featuring 29 graphical technique pages with SVG variant switching, 18 quantitative technique pages with KaTeX formulas and Python code, 19 distribution pages with D3 interactive parameter explorers, 9 case study walkthroughs, 6 foundation pages, 4 reference pages, filterable landing page, 13 build-time SVG generators, companion blog post, and full site integration

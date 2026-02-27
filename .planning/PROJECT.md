@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, and Python code examples).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
 
 ## Core Value
 
@@ -189,21 +189,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Full EDA site integration: header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt — v1.8
 - ✓ Companion blog post with 28 bidirectional cross-links to EDA pages — v1.8
 - ✓ Lighthouse 99/96 (performance/accessibility) across all EDA tiers, WCAG 2.1 AA — v1.8
+- ✓ Hypothesis test statistics library (runs, Bartlett, Levene, Anderson-Darling, Grubbs, PPCC, location test) with NIST validation — v1.9
+- ✓ PlotFigure.astro shared wrapper and canonical case study section template — v1.9
+- ✓ 8 existing case studies enhanced to full NIST/SEMATECH parity with named plot subsections, quantitative test batteries, and interpretation sections — v1.9
+- ✓ Standard Resistor new case study (1000-observation DZIUBA1.DAT dataset) with complete analysis pipeline — v1.9
+- ✓ Uniform PDF histogram overlay and gamma probability plot engineering for distribution-specific variations — v1.9
+- ✓ Beam Deflections sinusoidal model development and residual validation with NIST regression parameters — v1.9
+- ✓ Fatigue Life distribution comparison (Weibull/gamma probability plots, AIC/BIC model selection) — v1.9
+- ✓ 4 DOE-specific SVG generators (bihistogram, DOE mean plot, block plot, interaction plot) for Ceramic Strength — v1.9
+- ✓ All 9 case studies validated: zero broken links, clean 951-page build, all statistical values verified against NIST — v1.9
 
 ### Active
 
-## Current Milestone: v1.9 EDA Case Study Deep Dive
-
-**Goal:** Enhance all EDA case studies to match the NIST/SEMATECH source structure with individual plot subsections, detailed quantitative test results, interpretation sections, and develop/validate model sections — modeled after the completed Random Walk case study.
-
-**Target features:**
-- Enhance 8 existing case studies (Normal Random Numbers, Uniform Random Numbers, Cryothermometry, Beam Deflections, Filter Transmittance, Heat Flow Meter, Fatigue Life, Ceramic Strength) with full NIST-depth content
-- Add Standard Resistor as a new case study (NIST 1.4.2.7)
-- Each case study expanded with individual named plot subsections (run sequence, lag, histogram, probability, autocorrelation, spectral)
-- Detailed quantitative results with summary statistics, location/variation/randomness tests, and test summary tables
-- Interpretation sections synthesizing graphical and quantitative evidence
-- Develop Better Model and Validate New Model sections where the NIST source includes them
-- New SVG plot components per case study for embedded visualizations
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -232,10 +230,10 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.8 EDA Visual Encyclopedia on top of v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers.
+Shipped v1.9 EDA Case Study Deep Dive on top of v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 requirements delivered (548 total). 90+ new EDA pages. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 requirements delivered (589 total). 951 pages total. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
@@ -244,7 +242,7 @@ Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 exp
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
 Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
-EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies, 6 foundations, 4 reference pages, filterable landing page, 13 build-time SVG generators, and companion blog post.
+EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies at full NIST depth with quantitative test batteries and interpretation sections, 6 foundations, 4 reference pages, filterable landing page, 17 build-time SVG generators, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -326,6 +324,13 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | katex.renderToString() for .astro pages | remark-math only processes MDX, not Astro | ✓ Good — formula rendering in both contexts |
 | CSS :has() for D3 explorer fallback hiding | Static SVG hidden when React island mounts | ✓ Good — progressive enhancement |
 | Seeded PRNG for variant datasets | Reproducible chart output across builds | ✓ Good — deterministic SVGs |
+| Cornish-Fisher tQuantile without df-threshold | Accuracy across all df values without cutoff logic | ✓ Good — matches NIST for all test datasets |
+| Lag-4 (k=4) for Bartlett/Levene group splits | Matches NIST case study convention, not arbitrary k=10 | ✓ Good — consistent with source material |
+| 3-paragraph Interpretation pattern | Synthesize overall assessment, key finding, practical implications | ✓ Good — consistent across all 9 case studies |
+| Hardcode NIST regression parameters | Avoid implementing nonlinear least squares solver | ✓ Good — accurate values without heavy math library |
+| DOE Variation template (6 H2 sections) | Unique structure for multi-factor DOE case studies | ✓ Good — clean separation of batch/lab/factor analysis |
+| Bisection-based gammaQuantile | Guaranteed convergence for inverse gamma CDF | ✓ Good — reliable for gamma probability plots |
+| Definitive interpretation language | Replace hedging ("should show") with definitive statements | ✓ Good — authoritative pedagogical tone |
 
 ## Constraints
 
@@ -340,4 +345,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-26 after v1.9 milestone started*
+*Last updated: 2026-02-27 after v1.9 milestone complete*

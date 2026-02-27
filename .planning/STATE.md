@@ -3,36 +3,36 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: EDA Case Study Deep Dive
 status: complete
-last_updated: "2026-02-27T15:51:19Z"
+last_updated: "2026-02-27T16:00:00Z"
 progress:
   total_phases: 63
   completed_phases: 63
-  total_plans: 145
-  completed_plans: 145
+  total_plans: 146
+  completed_plans: 146
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-26)
+See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.9 EDA Case Study Deep Dive — Phase 63 complete, all phases done
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 63 of 63 (Validation)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: Phase 63 Complete
-Last activity: 2026-02-27 — Completed 63-02-PLAN.md (Build validation and requirements tracking)
+Phase: 63 of 63 (all complete)
+Plan: N/A
+Status: v1.9 milestone complete — ready for next milestone
+Last activity: 2026-02-27 — v1.9 EDA Case Study Deep Dive milestone archived
 
-Progress: ██████████ 100% (v1.9 — 19/19 plans [Phase 63 Plan 2 of 2 complete])
+Progress: ██████████ 100% (v1.0-v1.9 — 146/146 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 145 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 18 v1.9)
+- Total plans completed: 146 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9)
 
 **Cumulative Stats:**
 
@@ -47,51 +47,15 @@ Progress: ██████████ 100% (v1.9 — 19/19 plans [Phase 63 Pl
 | v1.6 Compose Validator | 33-40 | 14 | 100 | 2026-02-23 |
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
 | v1.8 EDA Encyclopedia | 48-55 | 24 | 145 | 2026-02-25 |
-| v1.9 Case Study Deep Dive | 56-63 | 18 | 41 | 2026-02-27 |
-| **Total** | **63** | **145** | **589** | |
+| v1.9 Case Study Deep Dive | 56-63 | 19 | 41 | 2026-02-27 |
+| **Total** | **63** | **146** | **589** | |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-v1.0-v1.8 decisions archived in respective milestone files.
-
-**v1.9 Decisions:**
-- [Phase 56] NIST case studies use lag-4 (k=4) for Bartlett/Levene, not k=10
-- [Phase 56] Cornish-Fisher tQuantile without df-threshold for accuracy across all df
-- [Phase 56] Runs test ties inherit previous observation classification
-- [Phase 56] Simplified always-720px ternary to constant default maxWidth prop in PlotFigure.astro
-- [Phase 56] Used `caption` prop name (not `figCaption`) for cleaner external API while preserving internal variable names
-- [Phase 57] Interpretation section synthesizes discrete-data artifacts rather than simply restating test results
-- [Phase 57] Heat Flow Meter PPCC corrected from 0.996 to 0.999 (matches NIST source and ppccNormal computation)
-- [Phase 57] Filter Transmittance r1 corrected from 0.93 to 0.94 (computed 0.9380 from dataset, matches NIST)
-- [Phase 58] Omitted date columns from DZIUBA1.DAT; stored only resistance values as number[] to match established single-column pattern
-- [Phase 58] Standard Resistor follows Filter Transmittance pattern for omitting distribution/outlier tests when randomness is violated
-- [Phase 58] Used ~1.962 as critical t-value for df=998 (vs Filter Transmittance's ~2.01 for df=48)
-- [Phase 59] Used dashed horizontal line (stroke-dasharray 6,4) for uniform PDF overlay to visually distinguish from histogram bars
-- [Phase 59] Computed expected frequency as n * binWidth / rangeWidth for correct uniform overlay height
-- [Phase 59] Followed Phase 57 Interpretation pattern with 3 paragraphs: overall assessment, distributional finding, practical implications
-- [Phase 60] Used definitive interpretation language replacing 'should show' hedging in all residual subsections
-- [Phase 60] Residual spectral plot placed after autocorrelation and before Conclusions to follow frequency-domain analysis order
-- [Phase 60] Content already committed in 60-01 (62fbbb6) -- plan verified rather than duplicated
-- [Phase 60] Followed Phase 57 Interpretation pattern with 3 paragraphs: overall assessment, model development finding, practical implications
-- [Phase 60] Used qualitative assessments for residual Validation Summary column matching NIST's graphical assessment approach
-- [Phase 61] Split Initial Plots paragraph: histogram gets data range and skewness text, box plot gets outlier mention and introductory context
-- [Phase 61] gammaQuantile uses bisection on lowerIncompleteGammaRatio for guaranteed convergence
-- [Phase 61] Location test marginal rejection (t=2.563) reported accurately with skewed-distribution influence explanation
-- [Phase 61] Runs test rejection paired with non-significant lag-1 autocorrelation interpreted as mild clustering from skewness
-- [Phase 61] Interpretation acknowledges mixed results rather than claiming all assumptions hold
-- [Phase 61] Pedagogical lesson stated definitively: visual impressions must be confirmed by formal model selection criteria
-- [Phase 62] Lab ANOVA F=1.837 < Fcrit=2.082 confirms labs homogeneous at alpha=0.05
-- [Phase 62] DOE mean plot uses focused y-domain (extent of means + 15% padding) not full data range
-- [Phase 62] DOE Variation template: 6 H2 sections (Background, Response Variable, Batch Effect, Lab Effect, Primary Factors, Conclusions)
-- [Phase 62] Interpretation uses definitive language per Phase 60 decision -- no hedging on factor rankings
-- [Phase 62] Interaction Effects subsection focuses on X1*X3 only (ranked 2nd in both batches)
-- [Phase 62] DOE case study Interpretation pattern: 3 paragraphs (response screening, factor decomposition, engineering implications)
-- [Phase 63] Fixed batch-block-plot -> block-plot in ceramic-strength.mdx (4 broken cross-reference links)
-- [Phase 63] All 9 case study statistical values verified against NIST source data with zero genuine discrepancies
-- [Phase 63] Full site builds cleanly (951 pages, 0 errors) -- all 41 v1.9 requirements marked complete
+v1.0-v1.9 decisions archived in respective milestone files.
 
 ### Pending Todos
 
@@ -100,7 +64,6 @@ None.
 ### Blockers/Concerns
 
 - [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification (monitor post-deploy)
-- [Phase 62]: RESOLVED — 4 new DOE-specific SVG generators created (bihistogram, doe-mean-plot, block-plot, interaction-plot), all under 150 lines
 
 ### Quick Tasks Completed
 
@@ -112,6 +75,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Phase 63 execution complete, verification passed, ROADMAP.md updated. Started /gsd:complete-milestone but need fresh context.
+Stopped at: v1.9 milestone complete and archived
 Resume file: None
-Next: /gsd:complete-milestone (no audit exists -- either run /gsd:audit-milestone first or proceed directly with completion)
+Next: /gsd:new-milestone — start next milestone (questioning → research → requirements → roadmap)
