@@ -17,6 +17,13 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'Contour plots require a mathematical model or dense grid of data points to interpolate the response surface between observed data. The smoothness and accuracy of the contour lines depend on the quality of the underlying model fit. Extrapolation beyond the range of the experimental data should be avoided, as the contour shape may change dramatically outside the observed region.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.10',
+    questions: [
+      'How does the response Z change as a function of X and Y?',
+    ],
+    importance:
+      'Contour plots are the primary tool for finding optimal operating conditions in two-factor response surface studies. They answer the central question of process optimization: what combination of settings produces the best response, and how sensitive is the response to deviations from those settings.',
+    definitionExpanded:
+      'A mathematical model (typically a quadratic polynomial from response surface methodology) is evaluated on a grid of (X, Y) points. Points with equal predicted response are connected by contour lines. The spacing of contour lines indicates the gradient: closely spaced lines mean steep change, widely spaced lines mean a flat region. Color fills between contours are optional but common. The contour plot is a 2D projection of a 3D response surface.',
   },
 
   'scatterplot-matrix': {
@@ -29,6 +36,15 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The scatterplot matrix grows quadratically with the number of variables, so it is most practical for datasets with 3 to 8 variables. Beyond that, the individual panels become too small to interpret effectively. The display only reveals pairwise relationships and cannot capture higher-order interactions or conditional dependencies. Large datasets may require transparency or sampling to manage overplotting in each panel.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.26.11',
+    questions: [
+      'Which variable pairs exhibit strong correlations?',
+      'Are there non-linear relationships between variable pairs?',
+      'Are there multivariate outliers?',
+    ],
+    importance:
+      'The scatterplot matrix provides a comprehensive bivariate overview of multivariate data in a single display. It is the standard first step in multivariate analysis, revealing correlation structure, non-linear relationships, clusters, and outliers that inform variable selection and modeling decisions.',
+    definitionExpanded:
+      'For p variables, a p x p grid is created where cell (i,j) contains the scatter plot of variable i vs variable j. The diagonal cells show variable names or univariate summaries. The matrix is symmetric: cell (i,j) mirrors cell (j,i). The number of panels grows as p*(p-1)/2 unique pairs.',
   },
 
   'conditioning-plot': {
@@ -41,5 +57,14 @@ export const MULTIVARIATE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The conditioning plot requires that the conditioning variable be continuous or ordinal with enough distinct values to form meaningful intervals. The overlapping interval approach introduces some smoothing but can be sensitive to the number of conditioning intervals chosen. With high-dimensional data, conditioning on multiple variables simultaneously can produce many panels, making the display difficult to interpret.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.26.12',
+    questions: [
+      'Does the bivariate relationship change across levels of the conditioning variable?',
+      'Is there an interaction between the primary variables and the conditioning variable?',
+      'Does the slope or spread change across conditioning levels?',
+    ],
+    importance:
+      'The conditioning plot is the most direct graphical method for detecting interactions in continuous data. It answers whether a two-variable relationship is the same everywhere or changes depending on a third variable, which is fundamental for regression modeling and process understanding.',
+    definitionExpanded:
+      'The conditioning variable is divided into overlapping intervals (shingles). For each interval, a separate scatter plot of the two primary variables is drawn using only observations within that interval. Panels are arranged in a trellis grid ordered by the conditioning variable. The overlapping intervals ensure smooth transitions between panels.',
   },
 } as const;

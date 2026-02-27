@@ -17,6 +17,15 @@ export const DESIGNED_EXPERIMENTS_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'DOE plots assume that the experiment was conducted according to the planned design with proper randomization. They are most effective for two-level or low-level factorial designs. The visual assessment should be confirmed with formal ANOVA or effect significance tests, as visual impressions can be misleading when sample sizes are small.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Sections 1.3.3.11-13',
+    questions: [
+      'Which factors are important with respect to location and scale?',
+      'Are there outliers?',
+    ],
+    importance:
+      'In designed experiments, quickly identifying which factors affect the response (and whether they affect the mean, the variability, or both) is the first analytical step. DOE plots provide this visual screening before formal ANOVA, catching issues like non-constant variance and outliers that could invalidate the analysis.',
+    definitionExpanded:
+      'The display consists of three panels: (1) DOE scatter plot showing all raw data points by factor level, (2) DOE mean plot showing group means vs. factor level with a grand mean reference line, (3) DOE standard deviation plot showing group standard deviations vs. factor level with an overall standard deviation reference line. Each panel addresses a different aspect of factor effects.',
+    caseStudySlugs: ['ceramic-strength'],
   },
 
   'std-deviation-plot': {
@@ -29,5 +38,14 @@ export const DESIGNED_EXPERIMENTS_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The standard deviation plot requires multiple observations per factor level to compute meaningful within-group standard deviations. The sample standard deviation is a less robust measure of spread than the interquartile range, so it can be sensitive to outliers within a group. For very small within-group sample sizes, the standard deviation estimates have high uncertainty and visual differences between factor levels may not be statistically significant.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.28',
+    questions: [
+      'Are there any shifts in variation?',
+      'What is the magnitude of the shifts in variation?',
+      'Is there a distinct pattern in the shifts in variation?',
+    ],
+    importance:
+      'Dispersion effects (factors that change process variability) are as important as location effects in quality engineering. A factor that reduces variability without shifting the mean is ideal for robust parameter design. The standard deviation plot is the primary graphical tool for detecting these dispersion effects.',
+    definitionExpanded:
+      'The horizontal axis shows factor levels (categorical), and the vertical axis shows within-group sample standard deviations. A horizontal reference line is drawn at the pooled (overall) standard deviation. Factor levels whose standard deviations differ markedly from the reference line indicate dispersion effects.',
   },
 } as const;
