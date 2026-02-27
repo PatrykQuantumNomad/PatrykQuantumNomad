@@ -1,38 +1,104 @@
 ---
 title: "Heat Flow Meter 1 Case Study"
-description: "EDA case study analyzing NIST SOULEN.DAT heat flow meter calibration data to demonstrate multi-batch comparison techniques"
+description: "EDA case study analyzing NIST ZARR13.DAT heat flow meter calibration data to demonstrate a well-behaved univariate measurement process"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.8 Heat Flow Meter 1"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import HeatFlowMeterPlots from '../../../../components/eda/HeatFlowMeterPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to the NIST SOULEN.DAT dataset, which contains 195 measurements from a heat flow meter calibration study. The data were collected across multiple batches (days) of calibration runs, where the same physical quantity was measured repeatedly to assess the stability and precision of the heat flow meter. The primary purpose is to demonstrate EDA techniques for detecting batch-to-batch variation in a process monitoring context.
+This case study applies exploratory data analysis to the NIST ZARR13.DAT dataset, which contains 195 calibration factor measurements from a heat flow meter calibration and stability analysis. The data were collected by Bob Zarr of NIST in January 1990. The response variable is a calibration factor, and the motivation for studying this dataset is to illustrate a well-behaved process where the underlying assumptions hold and the process is in statistical control.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.8. With n = 195 observations collected across multiple calibration batches, this study exemplifies the type of repeated measurement analysis common in metrology and quality control.
+The dataset originates from NIST/SEMATECH Section 1.4.2.8. With <InlineMath tex="n = 195" /> observations, this study demonstrates how the standard EDA methodology confirms that a univariate measurement process meets the assumptions required for valid statistical inference.
+
+<CaseStudyDataset slug="heat-flow-meter" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the heat flow meter calibration data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
 
 ## Graphical Output and Interpretation
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) reveals a generally stable measurement process. The run sequence plot shows data fluctuating around a constant level with possible slight batch structure. The lag plot shows approximate randomness. The histogram is roughly symmetric, and the normal probability plot is approximately linear. The overall impression is of a well-controlled process with minor batch effects.
+The [4-plot](/eda/techniques/4-plot/) is the primary graphical tool for testing all four assumptions simultaneously. For the heat flow meter data, it reveals a well-behaved dataset. The run sequence plot indicates no significant shifts in location or scale over time. The lag plot does not indicate any non-random pattern. The histogram shows the data are reasonably symmetric and consistent with a normal distribution. The normal probability plot verifies that the normality assumption is reasonable.
+
+<HeatFlowMeterPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows 195 measurements fluctuating around a stable central value of approximately 9.261 with no systematic drift — the fixed-location and fixed-variation assumptions appear satisfied.
+2. The **lag plot** (upper right) displays a roughly circular scatter cloud, consistent with approximately independent observations — no strong evidence of non-randomness.
+3. The **histogram** (lower left) is approximately symmetric and bell-shaped, centered near 9.261 — consistent with a normal distribution.
+4. The **normal probability plot** (lower right) shows data points closely following the theoretical straight line — confirming that the normality assumption is reasonable.
+
+From the above plots, we conclude that the underlying assumptions are valid and the data follow approximately a normal distribution. The standard confidence interval is appropriate for quantifying the uncertainty of the calibration factor.
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 195 measurements fluctuating around a stable central value of approximately 9.206. No systematic drift or trend is visible. However, careful inspection reveals subtle shifts at batch boundaries, where the mean appears to step slightly between calibration days. These batch effects, while small, may represent day-to-day environmental or instrument changes.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 195 measurements fluctuating around a stable central value of approximately 9.261. No systematic drift or trend is visible. The data are consistent with a stable measurement process.
+
+<HeatFlowMeterPlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a roughly circular scatter cloud centered on the overall mean, consistent with approximate independence. There is no strong linear pattern or clustering that would indicate severe autocorrelation or batch grouping.
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a roughly circular scatter cloud, consistent with approximately independent observations. There is no strong linear or curvilinear pattern that would indicate severe autocorrelation.
+
+<HeatFlowMeterPlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) is approximately symmetric and bell-shaped, centered near 9.206. The shape is consistent with a normal distribution, though the bins show slight irregularity that may reflect the discrete nature of the measurement instrument.
+The [histogram](/eda/techniques/histogram/) is approximately symmetric and bell-shaped, centered near 9.261. The shape is consistent with a normal distribution. An overlaid normal PDF with mean 9.261 and standard deviation 0.023 fits the data well.
+
+<HeatFlowMeterPlots type="histogram" />
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) shows data points closely following the theoretical straight line through the central 90% of the distribution. Minor deviations in the extreme tails are within expected sampling variability for n = 195.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows data points closely following the theoretical straight line (fitted intercept 9.261, slope 0.023). The linearity confirms that the normality assumption is reasonable for these data.
+
+<HeatFlowMeterPlots type="probability" />
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) quantifies the serial dependence in the data. With 95% confidence bands at <InlineMath tex="\pm 2/\sqrt{195} = \pm 0.143" />, autocorrelation coefficients exceeding these bounds indicate significant non-randomness.
+
+<HeatFlowMeterPlots type="autocorrelation" />
+
+The lag-1 autocorrelation of 0.281 exceeds the significance bounds, confirming the mild non-randomness detected by the runs test. However, the autocorrelation decays quickly, and the departure from independence is not severe enough to warrant a more complex model.
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows the frequency-domain structure of the calibration data.
+
+<HeatFlowMeterPlots type="spectral" />
+
+The spectrum shows modest low-frequency content consistent with the mild autocorrelation, but no sharp peaks that would indicate periodic structure. The process is essentially well-behaved with a minor departure from strict independence.
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +106,139 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) shows da
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | 9.2064 |
-| Std Dev | 0.0227 |
-| Median | 9.2070 |
-| Min | 9.1480 |
-| Max | 9.2640 |
-| Range | 0.1160 |
-| n | 195 |
+| Sample size <InlineMath tex="n" /> | 195 |
+| Mean <InlineMath tex="\bar{Y}" /> | 9.261460 |
+| Std Dev <InlineMath tex="s" /> | 0.022789 |
+| Median | 9.261952 |
+| Min | 9.196848 |
+| Max | 9.327973 |
+| Range | 0.131126 |
 
-The mean and median are nearly identical, confirming symmetry. The standard deviation of 0.023 represents approximately 0.25% relative precision, which is typical for heat flow meter calibrations.
+The mean and median are nearly identical (9.261460 vs. 9.261952), confirming symmetry. The standard deviation of 0.023 represents approximately 0.25% relative precision, typical for heat flow meter calibrations.
 
 ### Location Test
 
-A linear regression of the run sequence against observation number shows no significant slope (p > 0.05). The overall mean is stable at 9.2064 across the full dataset. However, an analysis by batch reveals small but statistically significant differences between batch means, detectable via [one-factor ANOVA](/eda/quantitative/one-factor-anova/).
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 9.26699 | 0.003253 | 2849 |
+| <InlineMath tex="B_1" /> (slope) | −0.000056412 | 0.00002878 | −1.960 |
+
+Residual standard deviation: 0.022624 with 193 degrees of freedom.
+
+**Conclusion:** The slope t-value of −1.960 is at the boundary of the critical value <InlineMath tex="t_{0.975,\,193} = 1.96" />. While technically borderline, the slope estimate of −0.000056 is so small that it can essentially be considered zero — the estimated drift over the entire 195-observation run is only <InlineMath tex="195 \times 0.000056 = 0.011" />, less than half a standard deviation. The **fixed-location assumption is satisfied**.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) comparing within-batch variances does not reject homogeneity (p > 0.05). The measurement precision is consistent across all calibration batches, which is an important quality characteristic for the instrument.
+[Bartlett's test](/eda/quantitative/bartletts-test/) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="T" /> | 3.147 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> |
+| Critical value <InlineMath tex="\chi^2_{0.05,\,3}" /> | 7.815 |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+
+**Conclusion:** The test statistic of 3.147 is well below the critical value of 7.815, so we **do not reject** <InlineMath tex="H_0" /> — the variances are not significantly different across the four quarters of the dataset. The **constant-variation assumption is satisfied**.
 
 ### Randomness Tests
 
-The [runs test](/eda/quantitative/runs-test/) on the full dataset yields a marginally significant result, which may reflect the subtle batch structure. Within individual batches, randomness is confirmed. The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 for the full dataset is approximately 0.15, slightly above the significance bound, again suggesting mild between-batch correlation.
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | −3.2306 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 3.23" /> exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> — the data show statistically significant non-randomness. The negative Z indicates fewer runs than expected, meaning the data tend to cluster in sequences above or below the median.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.281 |
+| Critical value <InlineMath tex="1.96/\sqrt{N}" /> | 0.140 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.281 exceeds the critical value of 0.140, confirming the non-randomness detected by the runs test. The **randomness assumption is violated**, but the violation is mild — the autocorrelation is modest compared to cases like a [random walk](/eda/case-studies/random-walk/) where <InlineMath tex="r_1 \approx 0.99" />.
+
+However, as the NIST handbook notes, the violation of the randomness assumption is mild and "not serious enough to warrant developing a more sophisticated model." In practice, mild non-randomness is common in calibration data and requires a judgment call about whether the violation warrants a more complex model.
 
 ### Distribution Test
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) does not reject normality for the full dataset (p > 0.05). Within-batch residuals also pass the normality test. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values of approximately -0.08 and -0.15 are consistent with a normal distribution.
+The probability plot correlation coefficient is 0.999, exceeding the critical value of 0.987. The [Anderson-Darling test](/eda/quantitative/anderson-darling/) provides a more sensitive formal test.
+
+| Statistic | Value |
+|-----------|-------|
+| PPCC | 0.999 |
+| PPCC critical value | 0.987 |
+| Anderson-Darling <InlineMath tex="A^2" /> | 0.129 |
+| Critical value (<InlineMath tex="\alpha = 0.05" />) | 0.787 |
+
+**Conclusion:** Both the PPCC (0.999 > 0.987) and Anderson-Darling (<InlineMath tex="A^2 = 0.129" /> well below 0.787) support the normality assumption. The **normal distribution is a good model** for this data.
 
 ### Outlier Detection
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) identifies no significant outliers in the full dataset. The minimum value of 9.148 is approximately 2.6 standard deviations below the mean, within expected bounds for n = 195.
+[Grubbs' test](/eda/quantitative/grubbs-test/) tests whether the most extreme observation is a statistical outlier.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="G" /> | 2.918673 |
+| Critical value (upper one-tailed, <InlineMath tex="\alpha = 0.05" />) | 3.597898 |
+
+**Conclusion:** <InlineMath tex="G = 2.919" /> is less than the critical value of 3.598, so we **do not reject** the null hypothesis — **no outliers are detected**.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = {-1.960}" /> | 1.96 | **Borderline — do not reject** |
+| **Fixed variation** | [Bartlett's test](/eda/quantitative/bartletts-test/) | <InlineMath tex="T = 3.147" /> | 7.815 | **Do not reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-3.231}" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.281" /> | 0.140 | **Reject** |
+| **Normality** | [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 0.129" /> | 0.787 | **Do not reject** |
+| **Outliers** | [Grubbs' test](/eda/quantitative/grubbs-test/) | <InlineMath tex="G = 2.919" /> | 3.598 | **Do not reject** |
+
+The assumptions of fixed location, fixed variation, and normality are satisfied. The randomness assumption shows a mild violation (lag-1 autocorrelation of 0.281 is statistically significant), but the departure is not severe enough to require a more complex model.
+
+## Interpretation
+
+The graphical and quantitative analyses are largely consistent: three of the four underlying assumptions are clearly satisfied, and the sole violation is mild. The [run sequence plot](/eda/techniques/run-sequence-plot/) shows a stable process with no visible trend, confirmed by the borderline location test (<InlineMath tex="t = -1.960" />, with estimated drift of only 0.011 over the full run -- less than half a standard deviation). [Bartlett's test](/eda/quantitative/bartletts-test/) confirms constant variation (<InlineMath tex="T = 3.147" />, well below the critical value of 7.815). The [normal probability plot](/eda/techniques/normal-probability-plot/) is closely linear, and both the [Anderson-Darling test](/eda/quantitative/anderson-darling/) (<InlineMath tex="A^2 = 0.129" />, well below 0.787) and PPCC (0.999, well above 0.987) strongly support normality. [Grubbs' test](/eda/quantitative/grubbs-test/) (<InlineMath tex="G = 2.919" />, below 3.598) confirms no outliers.
+
+The only departure from the ideal is a mild violation of the randomness assumption. The [runs test](/eda/quantitative/runs-test/) (<InlineMath tex="Z = -3.231" />) and lag-1 [autocorrelation](/eda/quantitative/autocorrelation/) (<InlineMath tex="r_1 = 0.281" />) both reject independence at the 5% level. However, the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) shows that the dependence decays quickly beyond lag 1, and the [spectral plot](/eda/techniques/spectral-plot/) reveals no periodic structure -- the modest low-frequency content is consistent with mild short-range correlation rather than a systematic pattern. As the NIST handbook notes, the departure "is not serious enough to warrant developing a more sophisticated model."
+
+The univariate model <InlineMath tex="Y_i = 9.26146 + E_i" /> is appropriate for this dataset. The standard 95% [confidence interval](/eda/quantitative/confidence-limits/) is approximately valid, though the true uncertainty is somewhat larger than <InlineMath tex="\bar{Y} \pm 2s/\sqrt{N}" /> suggests due to the mild autocorrelation. The process is considered to be in statistical control -- the calibration factor is stable, the variation is consistent, and the data are well-described by a [normal distribution](/eda/distributions/normal/).
 
 ## Conclusions
 
-The heat flow meter calibration data approximately satisfy all four assumptions when treated as a single sample. The minor batch effects detected by ANOVA are statistically significant but practically small (batch means differ by less than 0.01 from the grand mean). The recommended model is the grand mean 9.2064 as the best estimate of the calibrated value, with a 95% confidence interval of 9.2064 plus or minus 0.0032. For the most rigorous metrological analysis, a random-effects model that accounts for the batch structure would provide a more accurate uncertainty estimate, incorporating both within-batch and between-batch components of variation.
+The heat flow meter calibration data satisfy three of the four assumptions. The location is stable, the variation is constant across quarters of the dataset, and the data follow a normal distribution with no outliers. The randomness assumption shows a mild violation — the lag-1 autocorrelation of 0.281 and runs test statistic of −3.23 both reject the null hypothesis of independence at the 5% level. However, this violation is not severe enough to invalidate the univariate model.
+
+The recommended model is:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = 9.26146 + E_i" />
+</div>
+
+The 95% confidence interval for the calibration factor is:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 9.26146 \pm 2 \times \frac{0.02279}{\sqrt{195}} = (9.2582,\; 9.2647)" />
+</div>
+
+The standard deviation of the mean is <InlineMath tex="s/\sqrt{N} = 0.001632" />, and the 95% confidence interval for the standard deviation is (0.02073, 0.02531).
+
+Because the randomness assumption has a mild violation, the true uncertainty is somewhat larger than the standard confidence interval suggests. Nevertheless, the NIST handbook considers this process to be **in statistical control** — the departure from randomness is not serious enough to warrant developing a more sophisticated model. This case study illustrates a well-behaved measurement process where the standard EDA methodology confirms that simple statistical inference based on the sample mean is appropriate.
