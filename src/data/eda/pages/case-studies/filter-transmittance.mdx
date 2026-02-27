@@ -1,38 +1,113 @@
 ---
 title: "Filter Transmittance Case Study"
-description: "EDA case study analyzing NIST SPLETT2.DAT filter transmittance data to demonstrate multi-factor comparison analysis"
+description: "EDA case study analyzing NIST filter transmittance data to demonstrate detection of non-randomness caused by a too-fast sampling rate in data acquisition"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.6 Filter Transmittance"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import FilterTransmittancePlots from '../../../../components/eda/FilterTransmittancePlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to the NIST MAVRO.DAT dataset, which contains measurements of filter transmittance collected as part of an inter-laboratory comparison. The data represent optical density measurements made by different laboratories on the same set of neutral density glass filters. The primary purpose is to demonstrate EDA techniques for detecting systematic differences between groups (laboratories) while assessing within-group variability.
+This case study applies exploratory data analysis to 50 filter transmittance measurements from a NIST optical filter calibration experiment. The response variable is the transmittance value of a glass filter. The data were collected by NIST chemist Radu Mavrodineaunu during the 1970s using an automatic data acquisition system. The primary purpose is to demonstrate how EDA techniques detect non-randomness and a shift in location, and how the root cause turned out to be an instrumentation problem rather than a real process change.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.6. This multi-factor scenario is fundamentally different from single-sample analyses, requiring group-comparison techniques like [one-factor ANOVA](/eda/quantitative/one-factor-anova/) and [mean plots](/eda/techniques/mean-plot/).
+The dataset originates from NIST/SEMATECH Section 1.4.2.6. With <InlineMath tex="n = 50" /> observations ranging from approximately 2.00130 to 2.00270, this study illustrates a case where the data acquisition system was sampling too fast, causing measurements to be contaminated by the previous reading.
+
+<CaseStudyDataset slug="filter-transmittance" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the filter transmittance data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
+
+If the assumptions are violated, identify the nature and severity of the violations and recommend appropriate remedial actions.
 
 ## Graphical Output and Interpretation
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) of the combined data from all laboratories reveals apparent violations of the assumptions. The run sequence plot shows an oscillating pattern reflecting the systematic laboratory-to-laboratory differences. The lag plot shows clusters rather than a single cloud. These patterns are expected in grouped data and signal the need for a multi-factor analysis rather than a single-sample approach.
+The [4-plot](/eda/techniques/4-plot/) is the primary graphical tool for testing all four assumptions simultaneously.
+
+<FilterTransmittancePlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) indicates a significant shift in location around observation 35 — the first portion fluctuates around approximately 2.001–2.002, while the later portion shifts upward to 2.002–2.003. The fixed-location assumption is violated.
+2. The **lag plot** (upper right) displays a strong linear pattern along the diagonal, indicating that consecutive observations are highly correlated — the randomness assumption is severely violated.
+3. Since the lag plot indicates significant non-randomness, the **histogram** (lower left) and **normal probability plot** (lower right) are not meaningful for interpretation.
+
+The serious violation of the randomness assumption means that the univariate model <InlineMath tex="Y_i = C + E_i" /> is not valid. Given the linear appearance of the lag plot, an autoregressive model might seem appropriate, but as the root cause investigation below reveals, the solution was to fix the instrumentation rather than fit a more complex statistical model.
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) of all observations in collection order shows a step-like pattern as the data cycle through different laboratories. Each laboratory cluster occupies a distinct level, indicating systematic differences in the measured transmittance values between laboratories. Within each laboratory block, the data fluctuate randomly around that laboratory's mean.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) shows 50 observations with a clear shift in location around observation 35. The first portion of the data fluctuates around approximately 2.001 to 2.002, while the later portion shifts upward to approximately 2.002 to 2.003. This shift indicates the fixed-location assumption is violated.
+
+**Conclusion:** The visible upward shift around <InlineMath tex="x = 35" /> demonstrates that the **fixed-location assumption is violated**.
+
+<FilterTransmittancePlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) shows multiple distinct clusters rather than a single cloud, reflecting the multi-group structure. Each cluster corresponds to within-laboratory variation, and the separation between clusters corresponds to between-laboratory differences.
+The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a strong linear pattern along the diagonal, indicating that consecutive observations are highly correlated. This is the hallmark of severe non-randomness. The linear appearance means that each measurement is heavily influenced by the previous measurement, which is inconsistent with independent sampling.
+
+**Conclusion:** The tight linear cluster along <InlineMath tex="y = x" /> indicates consecutive observations are nearly identical. The **randomness assumption is severely violated**.
+
+<FilterTransmittancePlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) of the combined data shows a multi-modal distribution with peaks corresponding to each laboratory's central tendency. This multi-modality is an artifact of combining groups with different means, not a property of the underlying measurement process.
+The [histogram](/eda/techniques/histogram/) shows the distribution of the 50 transmittance values. However, because the randomness assumption is severely violated (lag-1 autocorrelation <InlineMath tex="r_1 = 0.94" />), the histogram does not represent the distribution of independent errors. Instead, it reflects the combined effects of the autocorrelation structure and the location shift visible in the run sequence plot.
+
+<FilterTransmittancePlots type="histogram" />
+
+The histogram appears roughly symmetric, but this graphical assessment has limited interpretive value when the data are strongly autocorrelated. The shape is influenced by the drift and serial dependence rather than the underlying error distribution alone.
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) of the combined data shows departures from linearity due to the mixture of laboratory groups. The residuals from a group-means model should be examined instead.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) assesses whether the data follow a normal distribution. As with the histogram, interpretation is limited because the severe autocorrelation violates the independence assumption required for distributional tests.
+
+<FilterTransmittancePlots type="probability" />
+
+The probability plot shows some curvature, but this cannot be reliably interpreted as evidence for or against normality when the observations are not independent. The distributional assessment is deferred until the randomness issue is resolved.
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) quantifies the serial dependence detected by the lag plot. With <InlineMath tex="n = 50" />, the 95% confidence bands are at <InlineMath tex="\pm 2/\sqrt{50} = \pm 0.283" />.
+
+<FilterTransmittancePlots type="autocorrelation" />
+
+The autocorrelation plot confirms extreme positive autocorrelation, consistent with a data acquisition system that was sampling too fast — each measurement was contaminated by the previous reading.
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows the frequency-domain structure of the data.
+
+<FilterTransmittancePlots type="spectral" />
+
+The spectral plot shows dominant low-frequency content, consistent with the slow drift and location shift visible in the run sequence plot. The lack of a sharp spectral peak distinguishes this from periodic data (like the [beam deflections](/eda/case-studies/beam-deflections/) case study) — the non-randomness here is drift-based rather than cyclic.
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +115,115 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) of the c
 
 | Statistic | Value |
 |-----------|-------|
-| Grand Mean | 2.0018 |
-| Between-Lab Std Dev | 0.0057 |
-| Within-Lab Std Dev | 0.0014 |
-| Min | 1.9880 |
-| Max | 2.0160 |
-| Range | 0.0280 |
-| n | 120 |
+| Sample size <InlineMath tex="n" /> | 50 |
+| Mean <InlineMath tex="\bar{Y}" /> | 2.0019 |
+| Median | 2.0018 |
+| Min | 2.0013 |
+| Max | 2.0027 |
+| Range | 0.0014 |
+| Std Dev <InlineMath tex="s" /> | 0.0004 |
+| Autocorrelation <InlineMath tex="r_1" /> | 0.93 |
 
-The between-laboratory standard deviation is approximately four times larger than the within-laboratory standard deviation, indicating that laboratory-to-laboratory differences are the dominant source of variability. The within-laboratory precision is excellent.
+The mean and median are close, but the summary statistics mask the location shift visible in the run sequence plot. The small standard deviation of 0.0004 reflects within-measurement-level variation combined with the drift across measurements. The standard confidence interval is suspect:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 2.0019 \pm 0.0001" />
+</div>
+
+This interval dramatically understates the true uncertainty because it assumes independent observations. With autocorrelation of 0.93, the effective sample size is far smaller than 50, and any confidence interval computed from the standard formula has no statistical justification.
 
 ### Location Test
 
-Within each laboratory group, the [run sequence plot](/eda/techniques/run-sequence-plot/) shows no significant drift. Individual laboratory means are stable across replicate measurements.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 2.001428 | 0.000104 | 19244.8 |
+| <InlineMath tex="B_1" /> (slope) | 1.85E-05 | 3.31E-06 | 5.582 |
+
+Residual standard deviation: 0.000260 with 48 degrees of freedom.
+
+**Conclusion:** The slope t-value of 5.582 exceeds the critical value <InlineMath tex="t_{0.975,\,48} \approx 2.01" />, so we **reject** <InlineMath tex="H_0" /> — the location is not constant. Although the estimated slope of 1.85E-05 is nearly zero in absolute terms, the data range is also very small (2.0013 to 2.0027), so the drift is relatively meaningful within the scale of the measurements.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) across laboratories yields a marginally significant result, suggesting that some laboratories may have slightly different measurement precision. The [Levene test](/eda/quantitative/levene-test/) (more robust to non-normality) provides a similar conclusion.
+The [Levene test](/eda/quantitative/levene-test/) (median-based variant) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 0.971 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 46" /> |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,46}" /> | 2.806 |
+
+**Conclusion:** The test statistic of 0.971 does not exceed the critical value of 2.806, so we **fail to reject** <InlineMath tex="H_0" /> — there is no evidence of a change in variation across the run. The **constant-variation assumption is satisfied**.
 
 ### Randomness Tests
 
-Within each laboratory, the [runs test](/eda/quantitative/runs-test/) confirms randomness of successive measurements (p > 0.05 for each group). No laboratory shows systematic drift or autocorrelation in its measurement sequence.
+Two complementary tests assess whether the observations are independent.
 
-### Distribution Test
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) applied to the within-group residuals does not reject normality (p > 0.05). This confirms that the measurement errors within each laboratory follow a normal distribution, which validates the ANOVA assumptions.
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
 
-### Outlier Detection
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | −5.3246 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) applied within each laboratory group identifies no significant outliers. All measurements fall within expected bounds given each laboratory's mean and standard deviation.
+**Conclusion:** <InlineMath tex="|Z| = 5.3246" /> far exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> — the data are not random. The negative Z indicates far fewer runs than expected, meaning the data cluster in long sequences above or below the median.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.93 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.277 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.93 vastly exceeds the critical value of 0.277. Consecutive observations are nearly identical — the **randomness assumption is severely violated**. For <InlineMath tex="n = 50" />, the 95% critical value is <InlineMath tex="1.96/\sqrt{50} \approx 0.277" />, and the observed autocorrelation exceeds this bound by more than a factor of three.
+
+### Distribution and Outlier Tests
+
+Since the randomness assumption is rejected, the distributional tests are not meaningful and are omitted. When data are autocorrelated, the histogram and normal probability plot reflect the dependence structure rather than the underlying distribution of independent errors. The [Grubbs' test](/eda/quantitative/grubbs-test/) for outliers is also omitted because it assumes approximately normally distributed, independent data.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 5.582" /> | 2.01 | **Reject** |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 0.971" /> | 2.806 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-5.3246}" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.93" /> | 0.277 | **Reject** |
+| **Distribution** | — | — | — | Not meaningful |
+| **Outliers** | — | — | — | Not meaningful |
+
+Two of the four assumptions are violated: the location is not fixed (significant drift) and the data are severely non-random (extreme autocorrelation). Only the variation assumption passes. The univariate model <InlineMath tex="Y_i = C + E_i" /> is not appropriate for this data.
+
+## Root Cause Investigation
+
+In discussions with the scientist, the non-randomness was entirely unexpected. An examination of the experimental process revealed that the sampling rate for the automatic data acquisition system was too fast. The equipment did not have sufficient time to reset before the next sample started, resulting in the current measurement being contaminated by the previous measurement. The solution was to rerun the experiment allowing more time between samples.
+
+This illustrates a key principle of exploratory data analysis: when statistical tests reveal unexpected patterns, the root cause is often found in the instrumentation or experimental process — not in the data themselves. The lag plot and autocorrelation test pointed directly to the mechanism (consecutive readings correlated), and the scientist's domain knowledge identified the specific cause (insufficient reset time between samples).
 
 ## Conclusions
 
-The primary finding is that statistically significant differences exist between laboratories. The [one-factor ANOVA](/eda/quantitative/one-factor-anova/) F-test strongly rejects the null hypothesis of equal laboratory means (p < 0.001). The [mean plot](/eda/techniques/mean-plot/) and [standard deviation plot](/eda/techniques/std-deviation-plot/) provide clear visualization of the inter-laboratory differences. Within each laboratory, all four assumptions are satisfied. The recommended action is to investigate the sources of between-laboratory bias, particularly calibration procedures, instrument differences, and environmental conditions. The within-laboratory standard deviation of 0.0014 represents the best achievable measurement precision, while the between-laboratory component of 0.0057 represents the reproducibility limit of the current measurement system.
+The filter transmittance data fail the randomness assumption due to extreme positive autocorrelation (<InlineMath tex="r_1 = 0.93" />) caused by an instrumentation problem. The data acquisition system was sampling too fast, causing each measurement to be contaminated by the previous reading. The location test also reveals a significant upward drift (<InlineMath tex="t = 5.582" />), with a visible shift around observation 35. Only the variation assumption is satisfied (<InlineMath tex="W = 0.971 < 2.806" />).
+
+The standard confidence interval:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 2.0019 \pm 0.0001" />
+</div>
+
+is not valid because the independence assumption is catastrophically violated.
+
+Simple graphical techniques, particularly the [lag plot](/eda/techniques/lag-plot/) and [run sequence plot](/eda/techniques/run-sequence-plot/), efficiently detected this problem. The recommended action was to rerun the experiment with a slower sampling rate. This case study demonstrates that unexpected results in EDA should prompt investigation of the experimental process itself, not just application of more complex statistical models. The role of graphical and statistical analysis is to detect problems; resolving the issues requires the knowledge of the scientist or engineer.
