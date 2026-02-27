@@ -1,0 +1,115 @@
+---
+/**
+ * StandardResistorPlots — Build-time SVG plot generator for the Standard Resistor case study.
+ * Accepts a `type` prop to select which plot to render.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { standardResistor } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
+  | 'autocorrelation' | 'spectral';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+let svg = '';
+
+switch (type) {
+  case '4-plot':
+    svg = generate4Plot(standardResistor, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: standardResistor,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Resistance (ohms)',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: standardResistor,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: standardResistor,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Resistance (ohms)',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'probability':
+    svg = generateProbabilityPlot({
+      data: standardResistor,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: standardResistor,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: standardResistor,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the standard resistor dataset. Run sequence shows upward drift over 1000 observations, lag plot shows extreme linear correlation.',
+  'run-sequence': 'Run sequence plot of 1000 resistor measurements showing persistent upward drift over the 5-year measurement period (1980-1985), with seasonal variation visible as periodic fluctuations.',
+  'lag': 'Lag-1 plot showing a tight linear cluster along the diagonal (r\u2081 = 0.97), indicating extreme autocorrelation from slowly drifting measurements.',
+  'histogram': 'Histogram with KDE overlay. Because the data are severely autocorrelated, the shape reflects drift structure rather than a meaningful distribution.',
+  'probability': 'Normal probability plot. Interpretation is not meaningful because the randomness assumption is violated.',
+  'autocorrelation': 'Autocorrelation plot showing extreme positive autocorrelation persisting to high lags \u2014 consistent with long-term drift and seasonal effects in the measurement process.',
+  'spectral': 'Spectral plot showing dominant low-frequency content, consistent with the long-term drift and seasonal variation visible in the run sequence plot.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

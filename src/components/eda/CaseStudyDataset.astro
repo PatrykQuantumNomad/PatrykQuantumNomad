@@ -1,0 +1,320 @@
+---
+/**
+ * Renders a dataset access panel for EDA case study pages.
+ * Shows NIST source info, preview of values, and CSV download.
+ * Supports single-column (number[]) and multi-column (CeramicStrengthObs[]) datasets.
+ */
+import {
+  normalRandom,
+  uniformRandom,
+  timeSeries,
+  beamDeflections,
+  randomWalk,
+  cryothermometry,
+  filterTransmittance,
+  fatigueLife,
+  ceramicStrength,
+  standardResistor,
+  DATASET_SOURCES,
+  type CeramicStrengthObs,
+} from '../../data/eda/datasets';
+
+interface SingleColumnDataset {
+  kind: 'single';
+  key: keyof typeof DATASET_SOURCES;
+  values: number[];
+  responseVariable: string;
+}
+
+interface MultiColumnDataset {
+  kind: 'multi';
+  key: keyof typeof DATASET_SOURCES;
+  rows: CeramicStrengthObs[];
+  columns: { key: keyof CeramicStrengthObs; label: string; align: 'left' | 'right' }[];
+}
+
+type DatasetInfo = SingleColumnDataset | MultiColumnDataset;
+
+const ceramicColumns: MultiColumnDataset['columns'] = [
+  { key: 'id', label: 'ID', align: 'right' },
+  { key: 'lab', label: 'Lab', align: 'right' },
+  { key: 'strength', label: 'Strength (MPa)', align: 'right' },
+  { key: 'tableSpeed', label: 'Table Speed', align: 'right' },
+  { key: 'downFeed', label: 'Down Feed', align: 'right' },
+  { key: 'wheelGrit', label: 'Wheel Grit', align: 'right' },
+  { key: 'batch', label: 'Batch', align: 'right' },
+  { key: 'rep', label: 'Rep', align: 'right' },
+];
+
+/**
+ * Map case-study slug -> dataset key + response variable label.
+ */
+const CASE_STUDY_MAP: Record<string, DatasetInfo> = {
+  'normal-random-numbers': {
+    kind: 'single',
+    key: 'normalRandom',
+    values: normalRandom,
+    responseVariable: 'Random normal value',
+  },
+  'uniform-random-numbers': {
+    kind: 'single',
+    key: 'uniformRandom',
+    values: uniformRandom,
+    responseVariable: 'Random uniform value',
+  },
+  'random-walk': {
+    kind: 'single',
+    key: 'randomWalk',
+    values: randomWalk,
+    responseVariable: 'Cumulative sum',
+  },
+  'cryothermometry': {
+    kind: 'single',
+    key: 'cryothermometry',
+    values: cryothermometry,
+    responseVariable: 'Voltage counts',
+  },
+  'beam-deflections': {
+    kind: 'single',
+    key: 'beamDeflections',
+    values: beamDeflections,
+    responseVariable: 'Beam deflection',
+  },
+  'filter-transmittance': {
+    kind: 'single',
+    key: 'filterTransmittance',
+    values: filterTransmittance,
+    responseVariable: 'Transmittance',
+  },
+  'heat-flow-meter': {
+    kind: 'single',
+    key: 'timeSeries',
+    values: timeSeries,
+    responseVariable: 'Calibration factor',
+  },
+  'fatigue-life': {
+    kind: 'single',
+    key: 'fatigueLife',
+    values: fatigueLife,
+    responseVariable: 'Fatigue life (thousands of cycles)',
+  },
+  'ceramic-strength': {
+    kind: 'multi',
+    key: 'ceramicStrength',
+    rows: ceramicStrength,
+    columns: ceramicColumns,
+  },
+  'standard-resistor': {
+    kind: 'single',
+    key: 'standardResistor',
+    values: standardResistor,
+    responseVariable: 'Resistance (ohms)',
+  },
+};
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+const dataset = CASE_STUDY_MAP[slug];
+
+if (!dataset) {
+  // No dataset for this slug — render nothing
+  return;
+}
+
+const source = DATASET_SOURCES[dataset.key];
+const nistDesc = 'nistDescription' in source ? (source as { nistDescription: string }).nistDescription : undefined;
+const isSingle = dataset.kind === 'single';
+const rowCount = isSingle ? dataset.values.length : dataset.rows.length;
+
+// Build preview and CSV based on dataset kind
+const previewCount = 10;
+let csvContent: string;
+let variableLabel: string;
+
+if (isSingle) {
+  variableLabel = dataset.responseVariable;
+
+  const csvHeader = `observation,${variableLabel.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+  const csvRows = dataset.values.map((v, i) => `${i + 1},${v}`);
+  csvContent = [csvHeader, ...csvRows].join('\n');
+} else {
+  variableLabel = `${dataset.columns.length} variables`;
+
+  const csvHeader = dataset.columns.map(c => c.key).join(',');
+  const csvRows = dataset.rows.map(row =>
+    dataset.columns.map(c => row[c.key]).join(',')
+  );
+  csvContent = [csvHeader, ...csvRows].join('\n');
+}
+
+const csvDataUri = `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`;
+const csvFilename = `${source.name.replace('.DAT', '').toLowerCase()}.csv`;
+
+// For template: precompute preview data
+const singlePreview = isSingle ? dataset.values.slice(0, previewCount) : [];
+const singleHasMore = isSingle && dataset.values.length > previewCount;
+const multiPreview = !isSingle ? dataset.rows.slice(0, previewCount) : [];
+const multiHasMore = !isSingle && dataset.rows.length > previewCount;
+const multiColumns = !isSingle ? dataset.columns : [];
+const multiTotalCols = !isSingle ? dataset.columns.length : 0;
+---
+
+<section class="mt-12 mb-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary,var(--color-bg-secondary))] overflow-hidden">
+  <div class="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+      </svg>
+      <h2 class="text-lg font-heading font-bold text-[var(--color-text-primary)] m-0">Dataset</h2>
+    </div>
+    <span class="text-xs font-mono text-[var(--color-text-secondary)] bg-[var(--color-bg-primary)] px-2 py-1 rounded">
+      {source.name}
+    </span>
+  </div>
+
+  <div class="px-5 py-4 space-y-4">
+    {/* Metadata row */}
+    <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+      <div>
+        <span class="text-[var(--color-text-secondary)]">Observations:</span>
+        <span class="font-medium text-[var(--color-text-primary)] ml-1">{rowCount.toLocaleString()}</span>
+      </div>
+      <div>
+        <span class="text-[var(--color-text-secondary)]">{isSingle ? 'Variable:' : 'Variables:'}</span>
+        <span class="font-medium text-[var(--color-text-primary)] ml-1">{variableLabel}</span>
+      </div>
+    </div>
+
+    <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed m-0">
+      {source.description}
+    </p>
+
+    {nistDesc && (
+      <details class="group">
+        <summary class="cursor-pointer text-sm font-medium text-[var(--color-accent)] hover:underline select-none list-none flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+          NIST source description
+        </summary>
+        <blockquote class="mt-2 pl-4 border-l-2 border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] leading-relaxed italic m-0">
+          {nistDesc}
+        </blockquote>
+      </details>
+    )}
+
+    {/* Single-column data preview */}
+    {isSingle && singlePreview.length > 0 && (
+      <details class="group">
+        <summary class="cursor-pointer text-sm font-medium text-[var(--color-accent)] hover:underline select-none list-none flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+          Preview data
+        </summary>
+        <div class="mt-3 overflow-x-auto rounded border border-[var(--color-border)]">
+          <table class="w-full text-xs font-mono border-collapse">
+            <thead>
+              <tr class="bg-[var(--color-bg-primary)]">
+                <th class="text-left px-3 py-2 text-[var(--color-text-secondary)] font-medium border-b border-[var(--color-border)]">#</th>
+                <th class="text-right px-3 py-2 text-[var(--color-text-secondary)] font-medium border-b border-[var(--color-border)]">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {singlePreview.map((val, i) => (
+                <tr class="border-b border-[var(--color-border)] last:border-0">
+                  <td class="px-3 py-1.5 text-[var(--color-text-secondary)]">{i + 1}</td>
+                  <td class="px-3 py-1.5 text-right text-[var(--color-text-primary)]">{val}</td>
+                </tr>
+              ))}
+              {singleHasMore && (
+                <tr>
+                  <td colspan="2" class="px-3 py-1.5 text-center text-[var(--color-text-secondary)] italic">
+                    ... {rowCount - previewCount} more rows
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    )}
+
+    {/* Multi-column data preview */}
+    {!isSingle && multiPreview.length > 0 && (
+      <details class="group">
+        <summary class="cursor-pointer text-sm font-medium text-[var(--color-accent)] hover:underline select-none list-none flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+          Preview data
+        </summary>
+        <div class="mt-3 overflow-x-auto rounded border border-[var(--color-border)]">
+          <table class="w-full text-xs font-mono border-collapse">
+            <thead>
+              <tr class="bg-[var(--color-bg-primary)]">
+                {multiColumns.map((col) => (
+                  <th class={`${col.align === 'right' ? 'text-right' : 'text-left'} px-3 py-2 text-[var(--color-text-secondary)] font-medium border-b border-[var(--color-border)] whitespace-nowrap`}>
+                    {col.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {multiPreview.map((row) => (
+                <tr class="border-b border-[var(--color-border)] last:border-0">
+                  {multiColumns.map((col) => (
+                    <td class={`px-3 py-1.5 ${col.align === 'right' ? 'text-right' : 'text-left'} text-[var(--color-text-primary)]`}>
+                      {row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              {multiHasMore && (
+                <tr>
+                  <td colspan={multiTotalCols} class="px-3 py-1.5 text-center text-[var(--color-text-secondary)] italic">
+                    ... {rowCount - previewCount} more rows
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    )}
+
+    {/* Action buttons */}
+    <div class="flex flex-wrap gap-3 pt-1">
+      {rowCount > 0 && (
+        <a
+          href={csvDataUri}
+          download={csvFilename}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
+                 bg-[var(--color-accent)] !text-white hover:opacity-90 transition-opacity !no-underline"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Download CSV
+        </a>
+      )}
+      <a
+        href={source.nistUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
+               border border-[var(--color-border)] !text-[var(--color-text-secondary)]
+               hover:!text-[var(--color-accent)] hover:border-[var(--color-accent)] transition-colors !no-underline"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+        </svg>
+        NIST Source
+      </a>
+    </div>
+  </div>
+</section>
