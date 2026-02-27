@@ -19,6 +19,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The bihistogram requires that both datasets share a common measurement scale and that the bin widths are identical for both groups. Results can be sensitive to the choice of bin width, so it is advisable to experiment with different numbers of bins. The technique does not provide a formal statistical test and should be complemented with quantitative two-sample tests when a decision threshold is needed.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.2',
+    questions: ['Is a (2-level) factor significant?', 'Does a (2-level) factor have an effect?', 'Does the location change between the 2 subgroups?', 'Does the variation change between the 2 subgroups?', 'Does the distributional shape change between subgroups?', 'Are there any outliers?'],
+    importance: 'The bihistogram reveals the full distributional impact of a two-level factor, not just a shift in means. It detects changes in location, spread, and shape simultaneously, catching effects that a simple t-test would miss. This comprehensive comparison is critical in manufacturing process changes where a shift in variability matters as much as a shift in average.',
+    definitionExpanded: 'The upper histogram displays the frequency distribution of one group (e.g., before treatment) and the lower histogram displays the other group (e.g., after treatment) reflected downward on a shared horizontal axis. Both histograms use identical bin widths and bin boundaries so that visual comparison is valid. The back-to-back layout eliminates the alignment ambiguity of overlaid histograms.',
+    caseStudySlugs: ['ceramic-strength'],
   },
 
   'bootstrap-plot': {
@@ -31,6 +35,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The bootstrap assumes that the observed sample is representative of the population and that observations are independent. It may perform poorly with very small samples where the original data do not adequately capture the population structure. The number of bootstrap replications should be at least 1,000 and preferably 10,000 or more for reliable percentile intervals.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.4',
+    questions: ['What does the sampling distribution for the statistic look like?', 'What is a 95% confidence interval for the statistic?', 'Which statistic has a sampling distribution with the smallest variance?'],
+    importance: 'When theoretical confidence interval formulas are unavailable or unreliable (small samples, complex estimators, non-normal data), the bootstrap provides a purely empirical alternative. It answers the fundamental question "how much would my estimate change if I collected new data?" without requiring distributional assumptions.',
+    definitionExpanded: 'The bootstrap procedure draws B random samples of size N with replacement from the original dataset, computes the statistic of interest for each resample, and plots the resulting B values as a histogram or density. The 2.5th and 97.5th percentiles of the bootstrap distribution form a 95% nonparametric confidence interval. Standard practice uses B \u2265 1000 for stable percentile intervals.',
+    caseStudySlugs: ['uniform-random-numbers'],
   },
 
   'box-cox-linearity': {
@@ -43,6 +51,9 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The Box-Cox linearity plot requires that the predictor values be strictly positive for most values of lambda, since raising negative numbers to fractional powers is undefined. It assumes a monotonic relationship between the predictor and response; if the relationship is not monotonic, no power transformation will produce linearity. The method targets linearity only and does not address heteroscedasticity or non-normality of residuals.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.5',
+    questions: ['Would a suitable transformation improve my linear fit?', 'What is the optimal value of the transformation parameter?'],
+    importance: 'Many bivariate relationships are non-linear in their original scale but become linear after a power transformation of the predictor. The Box-Cox linearity plot automates the search for this transformation, turning a difficult non-linear modeling problem into a simple linear regression.',
+    definitionExpanded: 'The procedure evaluates X^\u03BB for a range of \u03BB values (typically \u22122 to +2) and computes the Pearson correlation between Y and X^\u03BB at each \u03BB. The \u03BB = 0 case uses log(X) by convention. The plot displays correlation vs. \u03BB, and the peak identifies the optimal transformation. Common special cases: \u03BB = 1 (no transform), 0.5 (square root), 0 (log), \u22121 (reciprocal).',
   },
 
   'box-cox-normality': {
@@ -55,6 +66,9 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The data must be strictly positive for the Box-Cox family of transformations to be applied over the full range of lambda. Outliers can strongly influence the optimal lambda and should be investigated before relying on the transformation. The Box-Cox approach finds the best power transformation for normality but cannot make fundamentally multi-modal data normal, since no power transformation can split a bimodal distribution into a unimodal one.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.6',
+    questions: ['Is there a transformation that will normalize my data?', 'What is the optimal value of the transformation parameter?'],
+    importance: 'Many statistical procedures (t-tests, ANOVA, capability indices) assume normally distributed data. When the raw data are skewed, the Box-Cox normality plot identifies the power transformation that best achieves normality, providing a systematic, data-driven alternative to ad hoc log or square root transforms.',
+    definitionExpanded: 'The procedure transforms the data as Y^\u03BB for a range of \u03BB values and evaluates the normality of each transformed dataset using the probability plot correlation coefficient (PPCC) or a similar metric. The optimal \u03BB maximizes normality. The plot typically includes a confidence interval around the peak to indicate the range of \u03BB values that produce comparable normality. If the interval includes \u03BB = 1, no transformation is necessary.',
   },
 
   'box-plot': {
@@ -67,6 +81,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'Box plots make no distributional assumptions and are appropriate for any continuous or ordinal data. However, they can be misleading for very small samples where quartile estimates are unreliable, and they do not reveal multi-modality within a group. For small datasets, supplementing the box plot with a dot plot or jitter plot provides additional context about the underlying data density.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.7',
+    questions: ['Is a factor significant?', 'Does the location differ between subgroups?', 'Does the variation differ between subgroups?', 'Are there any outliers?'],
+    importance: 'The box plot is the most widely used graphical tool for comparing groups in designed experiments and process analysis. It provides a compact, standardized five-number summary that enables rapid comparison of location, spread, and symmetry across many groups simultaneously, making it indispensable for factorial analysis and quality control.',
+    definitionExpanded: 'The box spans from Q1 (25th percentile) to Q3 (75th percentile), with the median marked as a line within the box. The interquartile range (IQR) = Q3 \u2212 Q1 measures the spread of the middle 50% of the data. Whiskers extend to the most extreme observations within 1.5 \u00D7 IQR from the box edges. Observations beyond the whiskers are plotted individually as potential outliers. The 1.5 \u00D7 IQR rule identifies approximately 0.7% of observations as outliers under a normal distribution.',
+    caseStudySlugs: ['ceramic-strength'],
   },
 
   'histogram': {
@@ -79,6 +97,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The appearance of a histogram depends on the choice of bin width and starting point. Too few bins obscure detail, while too many bins produce a noisy display that is hard to interpret. Rules of thumb such as the Sturges, Freedman-Diaconis, or Scott rules provide reasonable defaults, but the analyst should experiment with several bin widths. The histogram does not perform well for very small samples, where a dot plot or stem-and-leaf display may be more informative.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.14',
+    questions: ['What kind of population distribution do the data come from?', 'Where are the data located (center)?', 'How spread out are the data?', 'Are the data symmetric or skewed?', 'Are there outliers in the data?'],
+    importance: 'The histogram is the foundational graphical technique in exploratory data analysis. It provides the most direct visual answer to the question "what does my data look like?" and is the prerequisite for choosing appropriate statistical methods, since nearly every statistical procedure depends on distributional shape assumptions.',
+    definitionExpanded: 'The data range is divided into k contiguous, non-overlapping intervals (bins) of equal width. The height of each bar represents the count (or relative frequency) of observations falling in that bin. The number of bins affects the visual impression: too few bins over-smooth and hide structure, too many bins create noise. The Freedman-Diaconis rule (bin width = 2 \u00D7 IQR \u00D7 N^{\u22121/3}) and Sturges\u2019 rule (k = 1 + log\u2082(N)) provide automatic defaults. An optional kernel density estimate (KDE) overlay provides a smooth probability density curve.',
+    caseStudySlugs: ['heat-flow-meter'],
   },
 
   'normal-probability-plot': {
@@ -91,6 +113,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The normal probability plot is a graphical technique and does not yield a formal p-value for normality. It is most effective for moderate to large sample sizes, as small samples may not produce a clear linear pattern even when drawn from a normal distribution. The plotting positions (theoretical quantiles) are typically computed using the Blom, Hazen, or Filliben formula, and the choice can slightly affect the visual impression for small samples.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.21',
+    questions: ['Are the data normally distributed?', 'What is the nature of the departure from normality (skewed, short tails, long tails)?'],
+    importance: 'Normality is the most frequently tested distributional assumption in statistics. The normal probability plot is more sensitive than the histogram for detecting departures from normality because it magnifies tail behavior, which is exactly where non-normality has the greatest impact on statistical inference (confidence intervals, hypothesis tests, capability indices).',
+    definitionExpanded: 'The ordered data values Y_{(1)} \u2264 Y_{(2)} \u2264 ... \u2264 Y_{(N)} are plotted against the corresponding expected normal order statistics (theoretical quantiles). If the data are normal, the points fall on a straight line whose slope estimates the standard deviation and whose intercept estimates the mean. The theoretical quantiles are computed using a plotting position formula such as Filliben\u2019s.',
+    caseStudySlugs: ['heat-flow-meter'],
   },
 
   'probability-plot': {
@@ -103,6 +129,10 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The probability plot requires that the analyst specify the family of distributions to evaluate. If the family is incorrect, the plot will show systematic departures regardless of parameter choices. Multiple probability plots for different families can be compared to find the best fit. The visual assessment should be supplemented with a quantitative goodness-of-fit test such as the Anderson-Darling test when a formal decision is needed.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.22',
+    questions: ['Does a given distribution provide a good fit to the data?', 'What distribution best fits the data?', 'What are good estimates of the location and scale parameters?'],
+    importance: 'Choosing the correct distributional model is essential for reliability prediction, process capability analysis, and simulation. The probability plot provides a visual goodness-of-fit assessment for any hypothesized distribution, making it the most versatile single tool for distribution identification. The slope and intercept of the fitted line directly estimate the distribution parameters.',
+    definitionExpanded: 'The ordered data are plotted against the quantiles of the hypothesized distribution, with the axis scales chosen so that data from that distribution appear as a straight line. For location-scale families, the intercept estimates the location parameter and the slope estimates the scale parameter. Different distributions require different probability scales: normal scale for the normal, Weibull scale for the Weibull, exponential scale for the exponential, etc. Comparing probability plots for several candidate distributions identifies the best fit.',
+    caseStudySlugs: ['uniform-random-numbers'],
   },
 
   'qq-plot': {
@@ -115,5 +145,9 @@ export const DISTRIBUTION_SHAPE_CONTENT: Record<string, TechniqueContent> = {
     assumptions:
       'The Q-Q plot assumes both datasets are drawn from continuous distributions. When comparing two samples, the sample sizes need not be equal; linear interpolation is used to match quantiles. The visual assessment is inherently subjective and should be accompanied by quantitative tests when formal decisions are required. For very small samples, the plot may show scatter around the reference line even when the distributions match.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.24',
+    questions: ['Do two data sets come from populations with a common distribution?', 'Do two data sets have common location and scale?', 'Do two data sets have similar distributional shapes?', 'Do two data sets have similar tail behavior?'],
+    importance: 'The Q-Q plot is the most powerful graphical tool for comparing two distributions because it is sensitive to differences in location, scale, and shape simultaneously. It is particularly effective at detecting subtle tail differences that histograms and summary statistics miss, making it essential for two-sample comparison and model validation.',
+    definitionExpanded: 'For two-sample comparison, the quantiles of dataset 1 are plotted against the quantiles of dataset 2. If sample sizes differ, the quantiles of the smaller sample are plotted against linearly interpolated quantiles of the larger sample. If the distributions are identical, points fall on the y = x identity line. A linear pattern with slope \u2260 1 indicates a scale difference; a linear pattern shifted from y = x indicates a location difference. Curvature indicates a shape difference.',
+    caseStudySlugs: ['ceramic-strength'],
   },
 } as const;
