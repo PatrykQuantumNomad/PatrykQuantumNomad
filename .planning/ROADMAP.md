@@ -63,7 +63,7 @@ Plans:
 
 Plans:
 - [ ] 65-01-PLAN.md — Wire dedicated generators for bihistogram, block-plot, mean-plot, std-deviation-plot, doe-plots, and restructure 6-plot as regression diagnostic
-- [ ] 65-02-PLAN.md — Fix autocorrelation confidence band, Box-Cox line rendering, Youden reference lines, and probability-plot differentiation
+- [x] 65-02-PLAN.md — Fix autocorrelation confidence band, Box-Cox line rendering, Youden reference lines, and probability-plot differentiation
 - [ ] 65-03-PLAN.md — Build audit checklist, run full build verification, document final status of all 29 techniques
 
 ### Phase 66: Content Depth
@@ -132,7 +132,7 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
-| 65. SVG Audit & Fixes | v1.10 | 0/TBD | Not started | - |
+| 65. SVG Audit & Fixes | 1/3 | In Progress|  | - |
 | 66. Content Depth | v1.10 | 0/TBD | Not started | - |
 | 67. Technical Depth | v1.10 | 0/TBD | Not started | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |

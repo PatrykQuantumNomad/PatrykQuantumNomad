@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: EDA Graphical Techniques — NIST Parity & Validation
 status: active
-last_updated: "2026-02-27T17:49:54Z"
+last_updated: "2026-02-27T18:33:28.331Z"
 progress:
   total_phases: 68
   completed_phases: 64
-  total_plans: 148
-  completed_plans: 148
+  total_plans: 150
+  completed_plans: 150
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 65 of 68 (SVG Audit & Fixes)
-Plan: 0 of TBD in current phase
-Status: Phase 64 complete, advancing to Phase 65
-Last activity: 2026-02-27 — Completed 64-02 (Graphical Template Sections)
+Plan: 2 of 3 in current phase
+Status: Executing Phase 65 plans
+Last activity: 2026-02-27 — Completed 65-02 (MEDIUM-priority SVG fixes)
 
-Progress: ████░░░░░░ 40% (v1.10: 1/5 phases complete)
+Progress: ████░░░░░░ 40% (v1.10: 1/5 phases, 65-02 of 65-03)
 
 ## Performance Metrics
 
@@ -48,8 +48,8 @@ Progress: ████░░░░░░ 40% (v1.10: 1/5 phases complete)
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
 | v1.8 EDA Encyclopedia | 48-55 | 24 | 145 | 2026-02-25 |
 | v1.9 Case Study Deep Dive | 56-63 | 19 | 41 | 2026-02-27 |
-| v1.10 (in progress) | 64 | 2 | 6 | - |
-| **Total** | **64** | **148** | **595** | |
+| v1.10 (in progress) | 64-65 | 4 | 6 | - |
+| **Total** | **64** | **150** | **595** | |
 
 **Phase 64 Metrics:**
 
@@ -57,6 +57,12 @@ Progress: ████░░░░░░ 40% (v1.10: 1/5 phases complete)
 |------|----------|-------|-------|
 | 64-01 | 7min | 2 | 10 |
 | 64-02 | 3min | 2 | 1 |
+
+**Phase 65 Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| 65-02 | 6min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -69,6 +75,8 @@ v1.0-v1.9 decisions archived in respective milestone files.
 - [64-01] Extended existing TechniqueContent interface in place (no V2 migration)
 - [64-02] Data-driven useKatex from content.formulas (never hardcoded)
 - [64-02] Case study resolution in getStaticPaths for build-time validation
+- [Phase 65]: Used 2/sqrt(N) for NIST consistency over 1.96/sqrt(N) statistical precision
+- [Phase 65]: Polyline injection over generateLinePlot for Box-Cox (preserves scatter dots + adds connecting line)
 
 ### Pending Todos
 
@@ -90,6 +98,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 64-02-PLAN.md (Graphical Template Sections) -- Phase 64 complete
+Stopped at: Completed 65-02-PLAN.md (MEDIUM-priority SVG fixes)
 Resume file: None
-Next: Plan and execute Phase 65 (SVG Audit & Fixes)
+Next: Execute 65-03-PLAN.md (audit checklist and build verification)
