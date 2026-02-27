@@ -26,6 +26,60 @@ export const DESIGNED_EXPERIMENTS_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The display consists of three panels: (1) DOE scatter plot showing all raw data points by factor level, (2) DOE mean plot showing group means vs. factor level with a grand mean reference line, (3) DOE standard deviation plot showing group standard deviations vs. factor level with an overall standard deviation reference line. Each panel addresses a different aspect of factor effects.',
     caseStudySlugs: ['ceramic-strength'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate factorial experiment data: 3 factor levels, 10 reps each
+rng = np.random.default_rng(42)
+levels = ['Low', 'Medium', 'High']
+data = {
+    'Low': rng.normal(20, 2, 10),
+    'Medium': rng.normal(25, 3, 10),
+    'High': rng.normal(30, 2.5, 10),
+}
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+# Panel 1: DOE scatter plot (raw data by factor level)
+for i, (lbl, vals) in enumerate(data.items()):
+    axes[0].scatter([i] * len(vals), vals, alpha=0.7, s=40)
+axes[0].set_xticks(range(len(levels)))
+axes[0].set_xticklabels(levels)
+axes[0].set_ylabel("Response")
+axes[0].set_title("DOE Scatter Plot")
+axes[0].grid(True, alpha=0.3)
+
+# Panel 2: Mean plot
+means = [v.mean() for v in data.values()]
+grand_mean = np.mean(means)
+axes[1].plot(range(len(levels)), means, 'o-', markersize=10,
+             color='steelblue', linewidth=2)
+axes[1].axhline(grand_mean, color='red', linestyle='--',
+                label=f'Grand Mean = {grand_mean:.1f}')
+axes[1].set_xticks(range(len(levels)))
+axes[1].set_xticklabels(levels)
+axes[1].set_ylabel("Mean")
+axes[1].set_title("DOE Mean Plot")
+axes[1].legend(fontsize=9)
+axes[1].grid(True, alpha=0.3)
+
+# Panel 3: Standard deviation plot
+stds = [v.std(ddof=1) for v in data.values()]
+pooled_std = np.sqrt(np.mean([s**2 for s in stds]))
+axes[2].plot(range(len(levels)), stds, 's-', markersize=10,
+             color='darkorange', linewidth=2)
+axes[2].axhline(pooled_std, color='red', linestyle='--',
+                label=f'Pooled SD = {pooled_std:.2f}')
+axes[2].set_xticks(range(len(levels)))
+axes[2].set_xticklabels(levels)
+axes[2].set_ylabel("Std Deviation")
+axes[2].set_title("DOE Std Deviation Plot")
+axes[2].legend(fontsize=9)
+axes[2].grid(True, alpha=0.3)
+
+plt.suptitle("DOE Plots — Factorial Experiment Diagnostics", y=1.02)
+plt.tight_layout()
+plt.show()`,
   },
 
   'std-deviation-plot': {
@@ -47,5 +101,46 @@ export const DESIGNED_EXPERIMENTS_CONTENT: Record<string, TechniqueContent> = {
       'Dispersion effects (factors that change process variability) are as important as location effects in quality engineering. A factor that reduces variability without shifting the mean is ideal for robust parameter design. The standard deviation plot is the primary graphical tool for detecting these dispersion effects.',
     definitionExpanded:
       'The horizontal axis shows factor levels (categorical), and the vertical axis shows within-group sample standard deviations. A horizontal reference line is drawn at the pooled (overall) standard deviation. Factor levels whose standard deviations differ markedly from the reference line indicate dispersion effects.',
+    formulas: [
+      {
+        label: 'Group Standard Deviation',
+        tex: String.raw`s_j = \sqrt{\frac{1}{n_j - 1}\sum_{i=1}^{n_j}\left(x_{ij} - \bar{x}_j\right)^2}`,
+        explanation:
+          'The sample standard deviation within the j-th group, measuring the spread of observations around the group mean.',
+      },
+      {
+        label: 'Pooled Standard Deviation',
+        tex: String.raw`s_p = \sqrt{\frac{1}{k}\sum_{j=1}^{k} s_j^2}`,
+        explanation:
+          'The root-mean-square of the k group standard deviations, serving as the overall reference line on the standard deviation plot. Assumes equal group sizes.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate grouped data: 5 factor levels, 12 observations each
+rng = np.random.default_rng(42)
+levels = ['L1', 'L2', 'L3', 'L4', 'L5']
+spreads = [2.0, 3.5, 1.8, 4.2, 2.5]
+groups = [rng.normal(50, s, 12) for s in spreads]
+
+# Compute group standard deviations and pooled SD
+stds = [g.std(ddof=1) for g in groups]
+pooled_sd = np.sqrt(np.mean([s**2 for s in stds]))
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(range(len(levels)), stds, 's-', color='darkorange',
+        markersize=10, linewidth=2, label='Group Std Dev')
+ax.axhline(pooled_sd, color='red', linestyle='--', linewidth=1.5,
+           label=f'Pooled SD = {pooled_sd:.2f}')
+ax.set_xticks(range(len(levels)))
+ax.set_xticklabels(levels)
+ax.set_xlabel("Factor Level")
+ax.set_ylabel("Standard Deviation")
+ax.set_title("Standard Deviation Plot — Dispersion Effects")
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
   },
 } as const;

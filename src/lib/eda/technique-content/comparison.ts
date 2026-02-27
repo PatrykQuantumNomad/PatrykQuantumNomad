@@ -50,6 +50,31 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
           'Large vertical separation between block means confirms that blocking captured meaningful nuisance variability. Without blocking, this variability would inflate the error term and reduce the ability to detect treatment effects.',
       },
     ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate blocked experiment: 3 treatments x 4 blocks
+rng = np.random.default_rng(42)
+treatments = ['A', 'B', 'C']
+n_blocks = 4
+base_block = rng.normal(0, 2, n_blocks)  # block effects
+effects = [0, 3, 6]  # treatment effects
+
+fig, ax = plt.subplots(figsize=(8, 5))
+for i, (trt, eff) in enumerate(zip(treatments, effects)):
+    values = base_block + eff + rng.normal(0, 0.5, n_blocks)
+    blocks = np.arange(1, n_blocks + 1)
+    ax.plot(blocks, values, 'o-', label=f'Treatment {trt}',
+            markersize=8)
+
+ax.set_xlabel("Block")
+ax.set_ylabel("Response")
+ax.set_title("Block Plot — Randomized Complete Block Design")
+ax.set_xticks(np.arange(1, n_blocks + 1))
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
   },
 
   'mean-plot': {
@@ -71,6 +96,48 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
       'The mean plot is the most direct visual tool for detecting location effects in designed experiments. It provides immediate visual answers to the central DOE question: does changing the factor setting change the average response? The magnitude of the shift relative to the grand mean indicates practical significance.',
     definitionExpanded:
       'The horizontal axis shows factor levels (categorical or ordered). The vertical axis shows the group mean for each level. A horizontal reference line at the grand mean (mean of all observations) provides a baseline for comparison. The deviation of each group mean from the grand mean line indicates the size and direction of the factor effect at that level.',
+    formulas: [
+      {
+        label: 'Group Mean',
+        tex: String.raw`\bar{x}_j = \frac{1}{n_j}\sum_{i=1}^{n_j} x_{ij}`,
+        explanation:
+          'The mean of all observations within the j-th group, where n_j is the number of observations in that group.',
+      },
+      {
+        label: 'Grand Mean',
+        tex: String.raw`\bar{x} = \frac{1}{k}\sum_{j=1}^{k} \bar{x}_j`,
+        explanation:
+          'The mean of the k group means, serving as the overall reference line on the mean plot.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate grouped data: 6 groups with different means
+rng = np.random.default_rng(42)
+group_means = [20, 22, 18, 25, 21, 23]
+n_per_group = 15
+groups = []
+for mu in group_means:
+    groups.append(rng.normal(mu, 3, n_per_group))
+
+# Compute group means and grand mean
+means = [g.mean() for g in groups]
+grand_mean = np.mean(means)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(range(1, len(means) + 1), means, 'o-', color='steelblue',
+        markersize=10, linewidth=2, label='Group Mean')
+ax.axhline(grand_mean, color='red', linestyle='--',
+           linewidth=1.5, label=f'Grand Mean = {grand_mean:.1f}')
+ax.set_xlabel("Group")
+ax.set_ylabel("Mean Response")
+ax.set_title("Mean Plot — Group Means with Grand Mean Reference")
+ax.set_xticks(range(1, len(means) + 1))
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
   },
 
   'star-plot': {
@@ -92,6 +159,37 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
       'The star plot enables the comparison of multivariate profiles across observations in a compact, visually intuitive format. It answers the question "which variables differentiate these observations?" at a glance, making it valuable for benchmarking, quality profiling, and competitive analysis where many attributes must be compared simultaneously.',
     definitionExpanded:
       'Each observation is represented as a separate star (polygon) with p spokes radiating from a center point at equal angles (360/p degrees apart). Each spoke represents one variable, and the spoke length is proportional to the variable\'s value (typically scaled to 0\u20131 range). The tips of the spokes are connected to form a polygon. Large, regular polygons indicate uniformly high values; small polygons indicate uniformly low values; irregular shapes highlight dominant variables.',
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate data for 3 items across 6 variables
+rng = np.random.default_rng(42)
+categories = ['Speed', 'Accuracy', 'Cost', 'Reliability',
+              'Ease of Use', 'Scalability']
+items = {
+    'Product A': rng.uniform(0.5, 1.0, 6),
+    'Product B': rng.uniform(0.3, 0.9, 6),
+    'Product C': rng.uniform(0.4, 0.95, 6),
+}
+
+n_vars = len(categories)
+angles = np.linspace(0, 2 * np.pi, n_vars, endpoint=False)
+
+fig, ax = plt.subplots(figsize=(7, 7),
+                       subplot_kw=dict(polar=True))
+for label, values in items.items():
+    vals = np.concatenate([values, [values[0]]])
+    angs = np.concatenate([angles, [angles[0]]])
+    ax.plot(angs, vals, 'o-', linewidth=2, label=label)
+    ax.fill(angs, vals, alpha=0.1)
+
+ax.set_thetagrids(np.degrees(angles), categories)
+ax.set_ylim(0, 1.1)
+ax.set_title("Star Plot — Multivariate Profile Comparison",
+             y=1.08)
+ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+plt.tight_layout()
+plt.show()`,
   },
 
   'youden-plot': {
@@ -114,5 +212,35 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
       'The Youden plot is the standard graphical tool for interlaboratory studies and proficiency testing. It uniquely separates between-lab systematic bias (points along the diagonal) from within-lab random variability (scatter perpendicular to the diagonal), providing targeted diagnostic information that summary statistics cannot reveal.',
     definitionExpanded:
       'Each laboratory is plotted as a single point with horizontal coordinate = result from run/sample 1 and vertical coordinate = result from run/sample 2. Vertical and horizontal reference lines are drawn at the medians of each run, dividing the plot into four quadrants. A 45-degree reference line through the median intersection highlights systematic bias. Points near this diagonal have high between-lab bias; points far from the diagonal have high within-lab variability.',
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate paired lab comparison data (15 labs, 2 runs)
+rng = np.random.default_rng(42)
+lab_bias = rng.normal(0, 2, 15)  # between-lab systematic bias
+run1 = 50 + lab_bias + rng.normal(0, 0.8, 15)
+run2 = 50 + lab_bias + rng.normal(0, 0.8, 15)
+
+med_x, med_y = np.median(run1), np.median(run2)
+
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.scatter(run1, run2, s=60, zorder=3)
+ax.axvline(med_x, color='grey', linestyle='--', alpha=0.7,
+           label=f'Median Run 1 = {med_x:.1f}')
+ax.axhline(med_y, color='grey', linestyle='-.', alpha=0.7,
+           label=f'Median Run 2 = {med_y:.1f}')
+lims = [min(run1.min(), run2.min()) - 1,
+        max(run1.max(), run2.max()) + 1]
+ax.plot(lims, lims, 'r-', alpha=0.5, label='45-degree line')
+ax.set_xlim(lims)
+ax.set_ylim(lims)
+ax.set_xlabel("Run 1 Result")
+ax.set_ylabel("Run 2 Result")
+ax.set_title("Youden Plot — Interlaboratory Comparison")
+ax.legend(fontsize=9)
+ax.set_aspect('equal')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
   },
 } as const;
