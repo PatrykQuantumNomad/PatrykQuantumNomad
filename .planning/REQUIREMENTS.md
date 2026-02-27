@@ -36,7 +36,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 ### Case Study — Beam Deflections
 
 - [x] **BEAM-01**: Individual named plot subsections with per-plot interpretation for both original data and residuals
-- [ ] **BEAM-02**: Quantitative results with full test suite and test summary table
+- [x] **BEAM-02**: Quantitative results with full test suite and test summary table
 - [x] **BEAM-03**: Develop Better Model section with sinusoidal/polynomial model fitting and regression results
 - [x] **BEAM-04**: Validate New Model section with residual diagnostics (4-plot, run sequence, lag, histogram, probability, autocorrelation, spectral) and validation summary table
 - [x] **BEAM-05**: Interpretation section synthesizing evidence
@@ -49,8 +49,8 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Standard Resistor (New)
 
-- [ ] **RSTR-01**: Dataset entry added to datasets.ts with NIST DZIUBA1.DAT data (1000 observations)
-- [ ] **RSTR-02**: StandardResistorPlots.astro component created with all required plot types
+- [x] **RSTR-01**: Dataset entry added to datasets.ts with NIST DZIUBA1.DAT data (1000 observations)
+- [x] **RSTR-02**: StandardResistorPlots.astro component created with all required plot types
 - [x] **RSTR-03**: Full MDX page with Background and Data, individual named plot subsections, quantitative results, interpretation, and conclusions
 - [x] **RSTR-04**: Registered in case study navigation and cross-referenced from technique pages
 
@@ -78,7 +78,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 ### Validation
 
 - [x] **VAL-01**: All cross-reference links verified working across all 9 enhanced case studies
-- [ ] **VAL-02**: npx astro check reports 0 errors and npx astro build completes successfully
+- [x] **VAL-02**: npx astro check reports 0 errors and npx astro build completes successfully
 - [x] **VAL-03**: Statistical values in quantitative tables verified against NIST source data
 
 ## v2 Requirements
@@ -118,8 +118,8 @@ Deferred to future release.
 | HFM-01 | Phase 57 | Complete |
 | HFM-02 | Phase 57 | Complete |
 | HFM-03 | Phase 57 | Complete |
-| RSTR-01 | Phase 58 | Pending |
-| RSTR-02 | Phase 58 | Pending |
+| RSTR-01 | Phase 58 | Complete |
+| RSTR-02 | Phase 58 | Complete |
 | RSTR-03 | Phase 58 | Complete |
 | RSTR-04 | Phase 58 | Complete |
 | URN-01 | Phase 59 | Complete |
@@ -127,7 +127,7 @@ Deferred to future release.
 | URN-03 | Phase 59 | Complete |
 | URN-04 | Phase 59 | Complete |
 | BEAM-01 | Phase 60 | Complete |
-| BEAM-02 | Phase 60 | Pending |
+| BEAM-02 | Phase 60 | Complete |
 | BEAM-03 | Phase 60 | Complete |
 | BEAM-04 | Phase 60 | Complete |
 | BEAM-05 | Phase 60 | Complete |
@@ -141,7 +141,7 @@ Deferred to future release.
 | CER-04 | Phase 62 | Complete |
 | CER-05 | Phase 62 | Complete |
 | VAL-01 | Phase 63 | Complete |
-| VAL-02 | Phase 63 | Pending |
+| VAL-02 | Phase 63 | Complete |
 | VAL-03 | Phase 63 | Complete |
 
 **Coverage:**
@@ -151,4 +151,4 @@ Deferred to future release.
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Last updated: 2026-02-27 after Phase 63 validation complete*
