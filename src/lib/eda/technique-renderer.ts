@@ -16,9 +16,11 @@ import {
   generateSpectralPlot,
   generateStarPlot,
   generateContourPlot,
-  generateBarPlot,
   generate4Plot,
   generate6Plot,
+  generateBihistogram,
+  generateBlockPlot,
+  generateDoeMeanPlot,
   PALETTE,
   type PlotConfig,
 } from './svg-generators';
@@ -31,6 +33,8 @@ import {
   doeFactors,
   boxPlotData,
   responseSurface,
+  boxCoxLinearityData,
+  conditioningData,
 } from '../../data/eda/datasets';
 import { mean, linearRegression } from './math/statistics';
 
@@ -58,72 +62,6 @@ function seededRandom(seed: number): () => number {
 // Composition helpers for the 11 non-dedicated techniques
 // ---------------------------------------------------------------------------
 
-function composeBihistogram(): string {
-  const width = 600;
-  const height = 500;
-  const halfH = 220;
-  const subConfig: Partial<PlotConfig> = {
-    width,
-    height: halfH,
-    margin: { top: 30, right: 20, bottom: 35, left: 60 },
-  };
-
-  const top = generateHistogram({
-    data: normalRandom,
-    showKDE: true,
-    config: subConfig,
-    title: 'Group A (Normal)',
-    xLabel: '',
-    yLabel: 'Frequency',
-  });
-
-  const bottom = generateHistogram({
-    data: uniformRandom.map((v) => v * 4 - 2),
-    showKDE: true,
-    config: subConfig,
-    title: 'Group B (Uniform)',
-    xLabel: 'Value',
-    yLabel: 'Frequency',
-  });
-
-  const cfg: PlotConfig = {
-    width,
-    height,
-    margin: { top: 10, right: 20, bottom: 10, left: 60 },
-    fontFamily: "'DM Sans', sans-serif",
-  };
-
-  return (
-    svgOpen(cfg, 'Bihistogram comparison') +
-    `<g transform="translate(0, 0)">${stripSvgWrapper(top)}</g>` +
-    `<g transform="translate(0, ${halfH + 10})">${stripSvgWrapper(bottom)}</g>` +
-    '</svg>'
-  );
-}
-
-function composeBlockPlot(): string {
-  // Arrange DOE factors into block means
-  const blockA = doeFactors.filter((f) => f.factor === 'Catalyst' && f.level === 'A');
-  const blockB = doeFactors.filter((f) => f.factor === 'Catalyst' && f.level === 'B');
-  const meanA = mean(blockA.map((f) => f.response));
-  const meanB = mean(blockB.map((f) => f.response));
-
-  const tempLow = doeFactors.filter((f) => f.factor === 'Temperature' && f.level === 'Low');
-  const tempHigh = doeFactors.filter((f) => f.factor === 'Temperature' && f.level === 'High');
-  const meanTL = mean(tempLow.map((f) => f.response));
-  const meanTH = mean(tempHigh.map((f) => f.response));
-
-  return generateBarPlot({
-    categories: [
-      { label: 'Block A', value: meanA, group: 'Block' },
-      { label: 'Block B', value: meanB, group: 'Block' },
-      { label: 'Temp Low', value: meanTL, group: 'Temperature' },
-      { label: 'Temp High', value: meanTH, group: 'Temperature' },
-    ],
-    title: 'Block Plot',
-    yLabel: 'Mean Response',
-  });
-}
 
 function composeBootstrapPlot(): string {
   // Generate 200 bootstrap resampled means
@@ -148,28 +86,53 @@ function composeBootstrapPlot(): string {
 }
 
 function composeBoxCoxLinearity(): string {
-  // Sweep lambda values, compute correlation of Box-Cox transformed Y with X
-  const lambdas = [-2, -1, -0.5, 0, 0.5, 1, 2];
-  const xVals = scatterData.map((d) => d.x);
-  const yVals = scatterData.map((d) => d.y);
-  const yPositive = yVals.map((v) => Math.max(v, 0.01));
+  // Sweep lambda values, compute correlation of Y with Box-Cox transformed X
+  // Per NIST Section 1.3.3.5: transform X to maximize linearity with Y
+  // Use 21 points (step 0.2) for a smooth connected line matching NIST convention
+  const lambdas: number[] = [];
+  for (let lam = -2; lam <= 2; lam += 0.2) {
+    lambdas.push(parseFloat(lam.toFixed(1)));
+  }
+  const xVals = boxCoxLinearityData.map((d) => d.x);
+  const yVals = boxCoxLinearityData.map((d) => d.y);
+  const xPositive = xVals.map((v) => Math.max(v, 0.01));
 
   const correlations: { x: number; y: number }[] = lambdas.map((lam) => {
-    const transformed = yPositive.map((y) => {
-      if (Math.abs(lam) < 0.001) return Math.log(y);
-      return (Math.pow(y, lam) - 1) / lam;
+    const transformed = xPositive.map((x) => {
+      if (Math.abs(lam) < 0.001) return Math.log(x);
+      return (Math.pow(x, lam) - 1) / lam;
     });
-    const reg = linearRegression(xVals, transformed);
+    const reg = linearRegression(transformed, yVals);
     return { x: lam, y: Math.sqrt(Math.max(0, reg.r2)) };
   });
 
-  return generateScatterPlot({
-    data: correlations,
+  const sorted = correlations.sort((a, b) => a.x - b.x);
+
+  const baseSvg = generateScatterPlot({
+    data: sorted,
     showRegression: false,
     title: 'Box-Cox Linearity Plot',
     xLabel: 'Lambda',
     yLabel: 'Correlation',
   });
+
+  // Add connecting polyline through the sorted points (NIST shows connected line, not discrete dots)
+  const config = { width: 600, height: 400, margin: { top: 40, right: 20, bottom: 50, left: 60 } };
+  const innerW = config.width - config.margin.left - config.margin.right;
+  const innerH = config.height - config.margin.top - config.margin.bottom;
+
+  const xExtent = [Math.min(...sorted.map((d) => d.x)), Math.max(...sorted.map((d) => d.x))];
+  const yExtent = [Math.min(...sorted.map((d) => d.y)), Math.max(...sorted.map((d) => d.y))];
+  const xPad = (xExtent[1] - xExtent[0]) * 0.05;
+  const yPad = (yExtent[1] - yExtent[0]) * 0.05;
+
+  const xScale = (v: number) => config.margin.left + ((v - (xExtent[0] - xPad)) / ((xExtent[1] + xPad) - (xExtent[0] - xPad))) * innerW;
+  const yScale = (v: number) => config.margin.top + innerH - ((v - (yExtent[0] - yPad)) / ((yExtent[1] + yPad) - (yExtent[0] - yPad))) * innerH;
+
+  const polyPoints = sorted.map((d) => `${xScale(d.x).toFixed(2)},${yScale(d.y).toFixed(2)}`).join(' ');
+  const polyline = `<polyline points="${polyPoints}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="2" />`;
+
+  return baseSvg.replace('</svg>', polyline + '</svg>');
 }
 
 function composeBoxCoxNormality(): string {
@@ -185,8 +148,8 @@ function composeBoxCoxNormality(): string {
       if (Math.abs(lam) < 0.001) return Math.log(y);
       return (Math.pow(y, lam) - 1) / lam;
     });
-    const sorted = [...transformed].sort((a, b) => a - b);
-    const n = sorted.length;
+    const sortedTrans = [...transformed].sort((a, b) => a - b);
+    const n = sortedTrans.length;
     const theoretical: number[] = [];
     for (let i = 0; i < n; i++) {
       const p = (i + 1 - 0.375) / (n + 0.25);
@@ -196,17 +159,37 @@ function composeBoxCoxNormality(): string {
         (1 + 1.432788 * t + 0.189269 * t * t + 0.001308 * t * t * t);
       theoretical.push(p < 0.5 ? -q : q);
     }
-    const reg = linearRegression(theoretical, sorted);
+    const reg = linearRegression(theoretical, sortedTrans);
     return { x: lam, y: Math.sqrt(Math.max(0, reg.r2)) };
   });
 
-  return generateScatterPlot({
-    data: pairs,
+  const sorted = [...pairs].sort((a, b) => a.x - b.x);
+
+  const baseSvg = generateScatterPlot({
+    data: sorted,
     showRegression: false,
     title: 'Box-Cox Normality Plot',
     xLabel: 'Lambda',
     yLabel: 'Normality Correlation',
   });
+
+  // Add connecting polyline through the sorted points (NIST shows connected line, not discrete dots)
+  const config = { width: 600, height: 400, margin: { top: 40, right: 20, bottom: 50, left: 60 } };
+  const innerW = config.width - config.margin.left - config.margin.right;
+  const innerH = config.height - config.margin.top - config.margin.bottom;
+
+  const xExtent = [Math.min(...sorted.map((d) => d.x)), Math.max(...sorted.map((d) => d.x))];
+  const yExtent = [Math.min(...sorted.map((d) => d.y)), Math.max(...sorted.map((d) => d.y))];
+  const xPad = (xExtent[1] - xExtent[0]) * 0.05;
+  const yPad = (yExtent[1] - yExtent[0]) * 0.05;
+
+  const xScale = (v: number) => config.margin.left + ((v - (xExtent[0] - xPad)) / ((xExtent[1] + xPad) - (xExtent[0] - xPad))) * innerW;
+  const yScale = (v: number) => config.margin.top + innerH - ((v - (yExtent[0] - yPad)) / ((yExtent[1] + yPad) - (yExtent[0] - yPad))) * innerH;
+
+  const polyPoints = sorted.map((d) => `${xScale(d.x).toFixed(2)},${yScale(d.y).toFixed(2)}`).join(' ');
+  const polyline = `<polyline points="${polyPoints}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="2" />`;
+
+  return baseSvg.replace('</svg>', polyline + '</svg>');
 }
 
 function composeComplexDemodulation(): string {
@@ -424,27 +407,25 @@ function composeDoePlots(): string {
     yLabel: 'Response',
   });
 
-  // DOE mean plot
-  const doeMean = generateBarPlot({
-    categories: [
-      { label: 'T Low', value: 73.5, group: 'Temperature' },
-      { label: 'T High', value: 85.9, group: 'Temperature' },
-      { label: 'P Low', value: 76.5, group: 'Pressure' },
-      { label: 'P High', value: 82.9, group: 'Pressure' },
+  // DOE mean plot (connected-dot style via dedicated generator)
+  const doeMean = generateDoeMeanPlot({
+    factors: [
+      { name: 'Temperature', levels: [{ label: 'Low', value: 73.5 }, { label: 'High', value: 85.9 }] },
+      { name: 'Pressure', levels: [{ label: 'Low', value: 76.5 }, { label: 'High', value: 82.9 }] },
     ],
+    grandMean: (73.5 + 85.9 + 76.5 + 82.9) / 4,
     config: subConfig,
     title: 'Mean Plot',
     yLabel: 'Mean',
   });
 
-  // DOE SD plot
-  const doeSd = generateBarPlot({
-    categories: [
-      { label: 'T Low', value: 3.9, group: 'Temperature' },
-      { label: 'T High', value: 4.7, group: 'Temperature' },
-      { label: 'P Low', value: 6.8, group: 'Pressure' },
-      { label: 'P High', value: 7.2, group: 'Pressure' },
+  // DOE SD plot (connected-dot style via dedicated generator)
+  const doeSd = generateDoeMeanPlot({
+    factors: [
+      { name: 'Temperature', levels: [{ label: 'Low', value: 3.9 }, { label: 'High', value: 4.7 }] },
+      { name: 'Pressure', levels: [{ label: 'Low', value: 6.8 }, { label: 'High', value: 7.2 }] },
     ],
+    grandMean: (3.9 + 4.7 + 6.8 + 7.2) / 4,
     config: subConfig,
     title: 'SD Plot',
     yLabel: 'Std Dev',
@@ -544,35 +525,37 @@ function composeScatterplotMatrix(): string {
 }
 
 function composeConditioningPlot(): string {
-  // Split scatterData into 3 bins by X value
-  const sorted = [...scatterData].sort((a, b) => a.x - b.x);
-  const n = sorted.length;
-  const binSize = Math.floor(n / 3);
-  const bins = [
-    { label: 'Low X', data: sorted.slice(0, binSize) },
-    { label: 'Mid X', data: sorted.slice(binSize, 2 * binSize) },
-    { label: 'High X', data: sorted.slice(2 * binSize) },
-  ];
+  // NIST PR1.DAT: Torque vs Time conditioned on Temperature (6 levels)
+  // Per NIST Section 1.3.3.26.12: each panel shows Y vs X for one level of Z
+  const temps = [...new Set(conditioningData.map((d) => d.temp))].sort((a, b) => a - b);
 
   const width = 800;
-  const height = 300;
-  const thirdW = (width - 30) / 3;
+  const height = 580;
+  const cols = 3;
+  const rows = 2;
+  const cellW = (width - 30) / cols;
+  const cellH = (height - 20) / rows;
   const subConfig: Partial<PlotConfig> = {
-    width: thirdW,
-    height: height - 20,
+    width: cellW,
+    height: cellH,
     margin: { top: 30, right: 15, bottom: 35, left: 50 },
   };
 
-  const panels = bins.map((bin, i) => {
+  const panels = temps.map((t, i) => {
+    const subset = conditioningData
+      .filter((d) => d.temp === t)
+      .map((d) => ({ x: d.time, y: d.torque }));
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     const scatter = generateScatterPlot({
-      data: bin.data,
-      showRegression: true,
+      data: subset,
+      showRegression: false,
       config: subConfig,
-      title: bin.label,
-      xLabel: 'Load (kN)',
-      yLabel: 'Deflection (mm)',
+      title: `Temp = ${t}°C`,
+      xLabel: 'Time',
+      yLabel: 'Torque',
     });
-    return { svg: scatter, x: i * (thirdW + 10), y: 0 };
+    return { svg: scatter, x: col * (cellW + 10), y: row * (cellH + 10) };
   });
 
   const cfg: PlotConfig = {
@@ -589,7 +572,7 @@ function composeConditioningPlot(): string {
     )
     .join('\n');
 
-  return svgOpen(cfg, 'Conditioning plot: scatter by X value bins') + '\n' + groups + '\n</svg>';
+  return svgOpen(cfg, 'Conditioning plot: Torque vs Time by Temperature') + '\n' + groups + '\n</svg>';
 }
 
 // ---------------------------------------------------------------------------
@@ -681,30 +664,51 @@ const TECHNIQUE_RENDERERS: Record<string, () => string> = {
     type: 'ppcc',
     title: 'PPCC Plot',
   }),
-  'mean-plot': () => generateBarPlot({
-    categories: [
-      { label: 'Temp Low', value: 73.3, group: 'Temperature' },
-      { label: 'Temp High', value: 85.9, group: 'Temperature' },
-      { label: 'Press Low', value: 76.5, group: 'Pressure' },
-      { label: 'Press High', value: 82.7, group: 'Pressure' },
+  'mean-plot': () => generateDoeMeanPlot({
+    factors: [
+      { name: 'Temperature', levels: [{ label: 'Low', value: 73.5 }, { label: 'High', value: 85.9 }] },
+      { name: 'Pressure', levels: [{ label: 'Low', value: 76.5 }, { label: 'High', value: 82.9 }] },
     ],
+    grandMean: (73.5 + 85.9 + 76.5 + 82.9) / 4,
     title: 'Mean Plot',
     yLabel: 'Mean Response',
   }),
-  'std-deviation-plot': () => generateBarPlot({
-    categories: [
-      { label: 'Temp Low', value: 4.2, group: 'Temperature' },
-      { label: 'Temp High', value: 5.1, group: 'Temperature' },
-      { label: 'Press Low', value: 3.8, group: 'Pressure' },
-      { label: 'Press High', value: 4.5, group: 'Pressure' },
+  'std-deviation-plot': () => generateDoeMeanPlot({
+    factors: [
+      { name: 'Temperature', levels: [{ label: 'Low', value: 3.9 }, { label: 'High', value: 4.7 }] },
+      { name: 'Pressure', levels: [{ label: 'Low', value: 7.2 }, { label: 'High', value: 7.9 }] },
     ],
+    grandMean: (3.9 + 4.7 + 7.2 + 7.9) / 4,
     title: 'Standard Deviation Plot',
     yLabel: 'Std Dev',
   }),
 
-  // 11 composition-based techniques
-  'bihistogram': composeBihistogram,
-  'block-plot': composeBlockPlot,
+  // 11 composition-based techniques (5 now use dedicated generators)
+  'bihistogram': () => generateBihistogram({
+    topData: normalRandom,
+    bottomData: uniformRandom.map((v) => v * 4 - 2),
+    topLabel: 'Group A (Normal)',
+    bottomLabel: 'Group B (Uniform)',
+    title: 'Bihistogram',
+    xLabel: 'Value',
+  }),
+  'block-plot': () => {
+    return generateBlockPlot({
+      blocks: [
+        { label: 'Block 1', values: [
+          { group: 'Catalyst A', mean: mean(doeFactors.filter((f) => f.factor === 'Catalyst' && f.level === 'A').map((f) => f.response)) },
+          { group: 'Catalyst B', mean: mean(doeFactors.filter((f) => f.factor === 'Catalyst' && f.level === 'B').map((f) => f.response)) },
+        ]},
+        { label: 'Block 2', values: [
+          { group: 'Catalyst A', mean: mean(doeFactors.filter((f) => f.factor === 'Temperature' && f.level === 'Low').map((f) => f.response)) },
+          { group: 'Catalyst B', mean: mean(doeFactors.filter((f) => f.factor === 'Temperature' && f.level === 'High').map((f) => f.response)) },
+        ]},
+      ],
+      title: 'Block Plot',
+      yLabel: 'Mean Response',
+      xLabel: 'Block',
+    });
+  },
   'bootstrap-plot': composeBootstrapPlot,
   'box-cox-linearity': composeBoxCoxLinearity,
   'box-cox-normality': composeBoxCoxNormality,
