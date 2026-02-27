@@ -25,29 +25,29 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 ### Content — Questions Answered
 
-- [ ] **QUES-01**: All 29 graphical technique pages have a "Questions This Plot Answers" section with 2-9 numbered questions sourced from NIST
-- [ ] **QUES-02**: Questions are specific and actionable (e.g., "Are the data random?" not "What does this show?")
+- [x] **QUES-01**: All 29 graphical technique pages have a "Questions This Plot Answers" section with 2-9 numbered questions sourced from NIST
+- [x] **QUES-02**: Questions are specific and actionable (e.g., "Are the data random?" not "What does this show?")
 
 ### Content — Importance
 
-- [ ] **IMPT-01**: All 29 graphical technique pages have a "Why It Matters" section explaining statistical/engineering significance
-- [ ] **IMPT-02**: Importance sections connect to practical consequences (e.g., "invalid if assumption violated")
+- [x] **IMPT-01**: All 29 graphical technique pages have a "Why It Matters" section explaining statistical/engineering significance
+- [x] **IMPT-02**: Importance sections connect to practical consequences (e.g., "invalid if assumption violated")
 
 ### Content — Expanded Definitions
 
-- [ ] **DEFN-01**: All 29 graphical technique pages have expanded definitions covering axis meanings, construction method, and mathematical formulation where applicable
+- [x] **DEFN-01**: All 29 graphical technique pages have expanded definitions covering axis meanings, construction method, and mathematical formulation where applicable
 - [ ] **DEFN-02**: 12 techniques with NIST formulas have KaTeX-rendered formulas (autocorrelation, spectral, probability plot, normal probability, PPCC, Box-Cox linearity, Box-Cox normality, Weibull, Q-Q, bootstrap, mean plot, std deviation plot)
 
 ### Content — Case Study Cross-Links
 
-- [ ] **CASE-01**: All techniques with matching case studies display a "See It In Action" section with links to relevant case studies
-- [ ] **CASE-02**: At least 14 of 29 techniques have at least one case study cross-link (based on research mapping)
+- [x] **CASE-01**: All techniques with matching case studies display a "See It In Action" section with links to relevant case studies
+- [x] **CASE-02**: At least 14 of 29 techniques have at least one case study cross-link (based on research mapping)
 - [ ] **CASE-03**: Case study links render as styled pill buttons matching the existing Related Techniques pattern
 
 ### Content — Examples
 
-- [ ] **EXMP-01**: All 6 Tier B techniques have interpretive captions on their variant plots explaining what each pattern means
-- [ ] **EXMP-02**: Tier A techniques with NIST examples have an Examples section describing common patterns the technique reveals
+- [x] **EXMP-01**: All 6 Tier B techniques have interpretive captions on their variant plots explaining what each pattern means
+- [x] **EXMP-02**: Tier A techniques with NIST examples have an Examples section describing common patterns the technique reveals
 
 ### Python Code
 
@@ -103,16 +103,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SVG-02 | Phase 65 | Complete |
 | SVG-03 | Phase 65 | Complete |
 | SVG-04 | Phase 65 | Complete |
-| QUES-01 | Phase 66 | Pending |
-| QUES-02 | Phase 66 | Pending |
-| IMPT-01 | Phase 66 | Pending |
-| IMPT-02 | Phase 66 | Pending |
-| DEFN-01 | Phase 66 | Pending |
-| CASE-01 | Phase 66 | Pending |
-| CASE-02 | Phase 66 | Pending |
+| QUES-01 | Phase 66 | Complete |
+| QUES-02 | Phase 66 | Complete |
+| IMPT-01 | Phase 66 | Complete |
+| IMPT-02 | Phase 66 | Complete |
+| DEFN-01 | Phase 66 | Complete |
+| CASE-01 | Phase 66 | Complete |
+| CASE-02 | Phase 66 | Complete |
 | CASE-03 | Phase 66 | Pending |
-| EXMP-01 | Phase 66 | Pending |
-| EXMP-02 | Phase 66 | Pending |
+| EXMP-01 | Phase 66 | Complete |
+| EXMP-02 | Phase 66 | Complete |
 | DEFN-02 | Phase 67 | Pending |
 | PYTH-01 | Phase 67 | Pending |
 | PYTH-02 | Phase 67 | Pending |
