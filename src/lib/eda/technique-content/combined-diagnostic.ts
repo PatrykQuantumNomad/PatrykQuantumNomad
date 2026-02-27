@@ -87,5 +87,22 @@ export const COMBINED_DIAGNOSTIC_CONTENT: Record<string, TechniqueContent> = {
       'standard-resistor',
       'heat-flow-meter',
     ],
+    examples: [
+      {
+        label: 'Ideal Process',
+        description:
+          'Run-sequence plot shows a stable horizontal band. Lag plot shows a structureless cloud. Histogram is bell-shaped. Normal probability plot follows the reference line. All four assumptions are satisfied \u2014 the process is stable, random, and normally distributed.',
+      },
+      {
+        label: 'Trending Process',
+        description:
+          'Run-sequence plot shows a clear upward or downward drift. Lag plot shows a tight diagonal band. Histogram may appear normal but the time-dependence makes summary statistics misleading. The trend must be modeled or removed before further analysis.',
+      },
+      {
+        label: 'Non-Normal Process',
+        description:
+          'Run-sequence plot and lag plot appear normal (stable, random), but the histogram is skewed and the normal probability plot curves away from the reference line. The process is in control but a normal-theory analysis would give incorrect confidence intervals.',
+      },
+    ],
   },
 } as const;

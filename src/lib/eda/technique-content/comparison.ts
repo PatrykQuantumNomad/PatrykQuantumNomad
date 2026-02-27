@@ -33,6 +33,23 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'Each block is represented as a vertical cluster of observations on the horizontal axis. Within each block, individual data points are plotted and connected by lines to the block mean. Treatment levels may be distinguished by color or symbol. The vertical axis shows the response. Parallel connecting lines across blocks indicate consistent treatment effects (no interaction), while crossing lines indicate block-by-treatment interaction.',
     caseStudySlugs: ['ceramic-strength'],
+    examples: [
+      {
+        label: 'Consistent Treatment Effect',
+        description:
+          'Connecting lines across blocks are roughly parallel, indicating the treatment effect is the same regardless of the block. The factor of interest has a main effect with no interaction.',
+      },
+      {
+        label: 'Block-by-Treatment Interaction',
+        description:
+          'Connecting lines cross between blocks, indicating the treatment effect depends on the block. The factor of interest behaves differently under different blocking conditions, and the interaction must be modeled.',
+      },
+      {
+        label: 'Effective Blocking',
+        description:
+          'Large vertical separation between block means confirms that blocking captured meaningful nuisance variability. Without blocking, this variability would inflate the error term and reduce the ability to detect treatment effects.',
+      },
+    ],
   },
 
   'mean-plot': {

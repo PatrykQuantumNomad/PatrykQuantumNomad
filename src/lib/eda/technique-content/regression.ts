@@ -49,6 +49,80 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'Each observation is plotted as a point at coordinates (X_i, Y_i). An optional fitted regression line or LOWESS smoother highlights the central trend. The vertical scatter of points around the trend line indicates the strength of the relationship \u2014 tight scatter means strong association, wide scatter means weak association. The shape of the point cloud reveals the functional form: an elliptical cloud suggests linearity, a curved band suggests a non-linear relationship.',
     caseStudySlugs: ['beam-deflections'],
+    examples: [
+      {
+        label: 'Strong Positive Correlation',
+        description:
+          'Points form a tight band rising from lower-left to upper-right. As X increases, Y increases proportionally. The correlation coefficient is close to +1. A linear model is appropriate.',
+        variantLabel: 'Strong Positive',
+      },
+      {
+        label: 'Strong Negative Correlation',
+        description:
+          'Points form a tight band falling from upper-left to lower-right. As X increases, Y decreases proportionally. The correlation coefficient is close to -1. A linear model with negative slope is appropriate.',
+        variantLabel: 'Strong Negative',
+      },
+      {
+        label: 'Weak Positive Correlation',
+        description:
+          'Points show a general upward trend but with considerable scatter around the trend line. The correlation coefficient is moderate (0.3-0.6). The relationship exists but other factors contribute substantially to the variability in Y.',
+        variantLabel: 'Weak Positive',
+      },
+      {
+        label: 'No Correlation',
+        description:
+          'Points form a structureless circular or rectangular cloud with no discernible trend. The correlation coefficient is near zero. X provides no information about Y, and a regression model would not be useful.',
+        variantLabel: 'No Correlation',
+      },
+      {
+        label: 'Quadratic Relationship',
+        description:
+          'Points follow a U-shaped or inverted-U curve. The linear correlation may be near zero despite a strong relationship existing. A quadratic model (Y = a + bX + cX\u00b2) or polynomial regression is needed.',
+        variantLabel: 'Quadratic',
+      },
+      {
+        label: 'Exponential Relationship',
+        description:
+          'Points follow an exponential curve with Y increasing (or decreasing) at an accelerating rate. A log transformation of Y or an exponential model is needed. The linear correlation underestimates the true strength of the relationship.',
+        variantLabel: 'Exponential',
+      },
+      {
+        label: 'Heteroscedastic',
+        description:
+          'The vertical spread of points increases (or decreases) systematically as X increases, forming a fan or trumpet shape. This non-constant variance violates a key regression assumption and may require weighted regression or a variance-stabilizing transformation.',
+        variantLabel: 'Heteroscedastic',
+      },
+      {
+        label: 'Clustered',
+        description:
+          'Points form two or more distinct groups separated by gaps, rather than a continuous distribution. This suggests the data come from different subpopulations or operating conditions. Each cluster may have its own regression relationship.',
+        variantLabel: 'Clustered',
+      },
+      {
+        label: 'With Outliers',
+        description:
+          'Most points follow a clear pattern, but one or more points lie far from the main body. These outliers may be influential observations that distort the regression fit. They should be investigated for measurement errors or genuine extreme conditions.',
+        variantLabel: 'With Outliers',
+      },
+      {
+        label: 'Fan-Shaped',
+        description:
+          'Points spread out in a fan pattern with variability increasing proportionally to the mean. This is a specific form of heteroscedasticity common in measurement data where the standard deviation is proportional to the magnitude. A log-log transformation often stabilizes the variance.',
+        variantLabel: 'Fan-shaped',
+      },
+      {
+        label: 'Sinusoidal',
+        description:
+          'Points follow a sine-wave pattern, indicating a periodic relationship between X and Y. A linear or polynomial model is inadequate; a trigonometric model (Y = a + b\u00d7sin(cX + d)) or Fourier decomposition is needed.',
+        variantLabel: 'Sinusoidal',
+      },
+      {
+        label: 'Step Function',
+        description:
+          'Points cluster at discrete Y levels with abrupt transitions, creating a staircase pattern. This suggests a threshold or categorical mechanism underlying the relationship. A regression model is inappropriate; a classification or segmented model is needed.',
+        variantLabel: 'Step Function',
+      },
+    ],
   },
 
   '6-plot': {
@@ -72,5 +146,22 @@ export const REGRESSION_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The six panels are arranged in a 2\u00d73 grid. Top row: (1) Y and \u0176 vs X showing the fit overlay, (2) residuals vs X checking for non-linearity, (3) residuals vs \u0176 checking for heteroscedasticity. Bottom row: (4) lag plot of residuals checking for serial correlation, (5) histogram of residuals checking for symmetry and normality, (6) normal probability plot of residuals providing a sensitive normality test. Each panel tests a specific regression assumption.',
     caseStudySlugs: ['standard-resistor'],
+    examples: [
+      {
+        label: 'Good Fit',
+        description:
+          'Panel 1 shows the fit tracking the data closely. Panels 2-3 show residuals scattered randomly with no pattern. Panel 4 shows a structureless cloud. Panels 5-6 confirm approximately normal residuals. All regression assumptions are satisfied.',
+      },
+      {
+        label: 'Non-Linear Misspecification',
+        description:
+          'Panel 1 shows the linear fit missing a curved pattern in the data. Panels 2-3 show systematic curvature in the residuals. The model form needs to include a quadratic or higher-order term.',
+      },
+      {
+        label: 'Non-Constant Variance',
+        description:
+          'Panels 2-3 show a fan shape in the residuals with spread increasing for larger fitted values. This heteroscedasticity invalidates standard error estimates. A variance-stabilizing transformation or weighted regression is needed.',
+      },
+    ],
   },
 } as const;
