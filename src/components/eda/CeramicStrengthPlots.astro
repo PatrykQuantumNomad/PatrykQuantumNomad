@@ -1,0 +1,139 @@
+---
+/**
+ * CeramicStrengthPlots — Build-time SVG plot generator for the Ceramic Strength case study.
+ * Accepts a `type` prop to select which plot to render.
+ * Supports pooled data plots and batch-comparison plots.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { ceramicStrength } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateBoxPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
+  | 'batch-box-plot' | 'batch1-histogram' | 'batch2-histogram';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+// Extract pooled strength values
+const strengths = ceramicStrength.map(d => d.strength);
+
+// Extract batch-specific values
+const batch1 = ceramicStrength.filter(d => d.batch === 1).map(d => d.strength);
+const batch2 = ceramicStrength.filter(d => d.batch === 2).map(d => d.strength);
+
+let svg = '';
+
+switch (type) {
+  case '4-plot':
+    svg = generate4Plot(strengths, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: strengths,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Flexural Strength',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: strengths,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: strengths,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Flexural Strength',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'probability':
+    svg = generateProbabilityPlot({
+      data: strengths,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'batch-box-plot':
+    svg = generateBoxPlot({
+      groups: [
+        { label: 'Batch 1', values: batch1 },
+        { label: 'Batch 2', values: batch2 },
+      ],
+      showOutliers: true,
+      config: singleConfig,
+      title: 'Box Plot by Batch',
+      xLabel: 'Batch',
+      yLabel: 'Flexural Strength',
+    });
+    break;
+  case 'batch1-histogram':
+    svg = generateHistogram({
+      data: batch1,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Batch 1 Histogram',
+      xLabel: 'Flexural Strength',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'batch2-histogram':
+    svg = generateHistogram({
+      data: batch2,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Batch 2 Histogram',
+      xLabel: 'Flexural Strength',
+      yLabel: 'Frequency',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for pooled ceramic strength data (run sequence, lag, histogram, normal probability).',
+  'run-sequence': 'Run sequence plot of pooled flexural strength showing relatively constant location and scale across 480 observations.',
+  'lag': 'Lag-1 plot of pooled ceramic strength data showing no significant temporal dependence in measurement order.',
+  'histogram': 'Histogram with KDE overlay of pooled ceramic strength data revealing a bimodal distribution from the batch effect.',
+  'probability': 'Normal probability plot of pooled ceramic strength data. The S-shaped curvature reflects the bimodal mixture of two batch sub-populations.',
+  'batch-box-plot': 'Box plot comparing Batch 1 and Batch 2 flexural strength. Batch 1 is centered approximately 78 units higher, with both batches showing low-side outliers.',
+  'batch1-histogram': 'Histogram of Batch 1 ceramic strength data showing a roughly symmetric distribution centered near 689.',
+  'batch2-histogram': 'Histogram of Batch 2 ceramic strength data showing a roughly symmetric distribution centered near 611.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

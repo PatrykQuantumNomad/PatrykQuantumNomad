@@ -1,0 +1,208 @@
+---
+/**
+ * BeamDeflectionPlots — Build-time SVG plot generator for the Beam Deflections case study.
+ * Accepts a `type` prop to select which plot to render.
+ * Supports both raw data plots and sinusoidal-model residual plots for model validation.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { beamDeflections } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
+  | 'autocorrelation' | 'spectral'
+  | 'residual-4-plot'
+  | 'residual-run-sequence' | 'residual-lag' | 'residual-histogram'
+  | 'residual-probability' | 'residual-autocorrelation';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+// ---------------------------------------------------------------------------
+// Sinusoidal model: Y = B0 + A*sin(2*pi*f*t) + B*cos(2*pi*f*t) + E
+// NIST identifies dominant frequency f = 0.3025 cycles/observation.
+// Fit via OLS for the sin/cos coefficients.
+// ---------------------------------------------------------------------------
+const n = beamDeflections.length;
+const freq = 0.3025;
+const mean = beamDeflections.reduce((a, b) => a + b, 0) / n;
+
+// Build sin and cos basis vectors (1-indexed time as in NIST)
+const sinTerms = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * freq * (i + 1)));
+const cosTerms = Array.from({ length: n }, (_, i) => Math.cos(2 * Math.PI * freq * (i + 1)));
+const centered = beamDeflections.map(y => y - mean);
+
+// OLS normal equations for A and B:
+//   [sumSS  sumSC] [A]   [sumYS]
+//   [sumSC  sumCC] [B] = [sumYC]
+const sumSS = sinTerms.reduce((a, s) => a + s * s, 0);
+const sumCC = cosTerms.reduce((a, c) => a + c * c, 0);
+const sumSC = sinTerms.reduce((a, s, i) => a + s * cosTerms[i], 0);
+const sumYS = centered.reduce((a, y, i) => a + y * sinTerms[i], 0);
+const sumYC = centered.reduce((a, y, i) => a + y * cosTerms[i], 0);
+
+// Solve 2x2 system via Cramer's rule
+const det = sumSS * sumCC - sumSC * sumSC;
+const A = (sumCC * sumYS - sumSC * sumYC) / det;
+const B = (sumSS * sumYC - sumSC * sumYS) / det;
+
+const predicted = beamDeflections.map((_, i) => mean + A * sinTerms[i] + B * cosTerms[i]);
+const residuals = beamDeflections.map((y, i) => y - predicted[i]);
+
+let svg = '';
+
+switch (type) {
+  // --- Original data plots ---
+  case '4-plot':
+    svg = generate4Plot(beamDeflections, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: beamDeflections,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Deflection',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: beamDeflections,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: beamDeflections,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Deflection',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'probability':
+    svg = generateProbabilityPlot({
+      data: beamDeflections,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: beamDeflections,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: beamDeflections,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+
+  // --- Sinusoidal model residual plots ---
+  case 'residual-4-plot':
+    svg = generate4Plot(residuals, compositeConfig);
+    break;
+  case 'residual-run-sequence':
+    svg = generateLinePlot({
+      data: residuals,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Residual Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Residual',
+    });
+    break;
+  case 'residual-lag':
+    svg = generateLagPlot({
+      data: residuals,
+      lag: 1,
+      config: singleConfig,
+      title: 'Residual Lag Plot (k = 1)',
+    });
+    break;
+  case 'residual-histogram':
+    svg = generateHistogram({
+      data: residuals,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Residual Histogram',
+      xLabel: 'Residual',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'residual-probability':
+    svg = generateProbabilityPlot({
+      data: residuals,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot of Residuals',
+    });
+    break;
+  case 'residual-autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: residuals,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Residual Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the beam deflection dataset (run sequence, lag, histogram, normal probability).',
+  'run-sequence': 'Run sequence plot of beam deflection data showing an oscillatory pattern around a mean of approximately -177 over 200 observations.',
+  'lag': 'Lag-1 plot showing an elliptical structure oriented along the diagonal, indicating strong positive autocorrelation from periodic structure.',
+  'histogram': 'Histogram with KDE overlay of beam deflection data. The roughly symmetric, bell-shaped distribution masks the underlying periodic structure.',
+  'probability': 'Normal probability plot of beam deflection data. The approximately linear pattern indicates the marginal distribution is close to normal despite the violated randomness assumption.',
+  'autocorrelation': 'Autocorrelation plot showing significant positive autocorrelation at multiple lags with clear periodic structure — the slow oscillatory decay confirms a cyclic component.',
+  'spectral': 'Spectral plot showing a dominant peak near frequency 0.3 cycles per observation, identifying the period of the sinusoidal component in the beam deflection data.',
+  'residual-4-plot': 'Four-plot diagnostic layout for sinusoidal model residuals — all four assumptions should be satisfied after removing the periodic structure.',
+  'residual-run-sequence': 'Run sequence plot of sinusoidal model residuals showing random scatter around zero with no oscillatory pattern.',
+  'residual-lag': 'Lag-1 plot of sinusoidal model residuals showing a random, structureless cloud — the periodic dependence has been removed.',
+  'residual-histogram': 'Histogram of sinusoidal model residuals showing an approximately symmetric, bell-shaped distribution.',
+  'residual-probability': 'Normal probability plot of sinusoidal model residuals. Approximate linearity indicates the residuals are consistent with normality.',
+  'residual-autocorrelation': 'Autocorrelation plot of sinusoidal model residuals — dramatically reduced autocorrelation compared to the original data, with most lags within the 95% confidence bands.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

@@ -1,0 +1,129 @@
+---
+/**
+ * FatigueLifePlots — Build-time SVG plot generator for the Fatigue Life case study.
+ * Accepts a `type` prop to select which plot to render.
+ * Covers standard EDA diagnostics for the BIRNSAUN.DAT fatigue life dataset.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { fatigueLife } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateBoxPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram'
+  | 'normal-probability' | 'box-plot'
+  | 'autocorrelation' | 'spectral';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+let svg = '';
+
+switch (type) {
+  case '4-plot':
+    svg = generate4Plot(fatigueLife, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: fatigueLife,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Fatigue Life (×1000 cycles)',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: fatigueLife,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: fatigueLife,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Fatigue Life (×1000 cycles)',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'normal-probability':
+    svg = generateProbabilityPlot({
+      data: fatigueLife,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'box-plot':
+    svg = generateBoxPlot({
+      groups: [{ label: 'Fatigue Life', values: fatigueLife }],
+      config: singleConfig,
+      title: 'Box Plot',
+      xLabel: '',
+      yLabel: 'Fatigue Life (×1000 cycles)',
+      showOutliers: true,
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: fatigueLife,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: fatigueLife,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the fatigue life dataset (run sequence, lag, histogram, normal probability).',
+  'run-sequence': 'Run sequence plot of 101 fatigue life measurements showing stable location and variation around a mean of approximately 1401 thousand cycles.',
+  'lag': 'Lag-1 plot showing a structureless scatter cloud, consistent with independent observations. The elongation reflects the right-skewed distribution rather than serial dependence.',
+  'histogram': 'Histogram with KDE overlay revealing a right-skewed distribution. Most observations cluster between 800 and 1,600 thousand cycles with a long upper tail past 2,000.',
+  'normal-probability': 'Normal probability plot of the fatigue life data. Deviation from linearity in the tails suggests departure from a Gaussian model, though the effect is moderate.',
+  'box-plot': 'Box plot of fatigue life measurements showing the interquartile range, median, whiskers, and a potential outlier at the high end near 2,440 thousand cycles.',
+  'autocorrelation': 'Autocorrelation plot confirming that the fatigue life measurements are independent — all coefficients fall within the 95% confidence bands.',
+  'spectral': 'Spectral plot showing a flat spectrum with no dominant peaks, consistent with independent observations.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

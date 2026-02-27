@@ -1,0 +1,218 @@
+---
+/**
+ * RandomWalkPlots — Build-time SVG plot generator for the Random Walk case study.
+ * Accepts a `type` prop to select which plot to render.
+ * Supports both raw data plots and AR(1) residual plots for model validation.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { randomWalk } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+  generateScatterPlot,
+} from '../../lib/eda/svg-generators/index';
+import { linearRegression } from '../../lib/eda/math/statistics';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
+  | 'autocorrelation' | 'spectral'
+  | 'predicted-vs-original' | 'residual-4-plot'
+  | 'residual-run-sequence' | 'residual-lag' | 'residual-histogram'
+  | 'residual-probability' | 'residual-uniform-probability'
+  | 'residual-autocorrelation' | 'residual-spectral';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+// Compute AR(1) model: Y_i = A0 + A1*Y_{i-1} + E_i
+// Fit via OLS regression of Y[1..n-1] on Y[0..n-2]
+const xLag = randomWalk.slice(0, -1);         // Y_{i-1}
+const yNext = randomWalk.slice(1);             // Y_i
+const reg = linearRegression(xLag, yNext);     // slope=A1, intercept=A0
+
+// Predicted values and residuals
+const predicted = xLag.map((x) => reg.intercept + reg.slope * x);
+const residuals = yNext.map((y, i) => y - predicted[i]);
+
+let svg = '';
+
+switch (type) {
+  // --- Original data plots ---
+  case '4-plot':
+    svg = generate4Plot(randomWalk, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: randomWalk,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Value',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: randomWalk,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: randomWalk,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Value',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'probability':
+    svg = generateProbabilityPlot({
+      data: randomWalk,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: randomWalk,
+      maxLag: 100,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: randomWalk,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+
+  // --- Model validation plots ---
+  case 'predicted-vs-original':
+    svg = generateScatterPlot({
+      data: xLag.map((x, i) => ({ x: yNext[i], y: predicted[i] })),
+      showRegression: false,
+      config: singleConfig,
+      title: 'Predicted vs. Original Data',
+      xLabel: 'Original Y_i',
+      yLabel: 'Predicted Y_i',
+    });
+    break;
+  case 'residual-4-plot':
+    svg = generate4Plot(residuals, compositeConfig);
+    break;
+  case 'residual-run-sequence':
+    svg = generateLinePlot({
+      data: residuals,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Residual Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Residual',
+    });
+    break;
+  case 'residual-lag':
+    svg = generateLagPlot({
+      data: residuals,
+      lag: 1,
+      config: singleConfig,
+      title: 'Residual Lag Plot (k = 1)',
+    });
+    break;
+  case 'residual-histogram':
+    svg = generateHistogram({
+      data: residuals,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Residual Histogram',
+      xLabel: 'Residual',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'residual-probability':
+    svg = generateProbabilityPlot({
+      data: residuals,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot of Residuals',
+    });
+    break;
+  case 'residual-uniform-probability':
+    svg = generateProbabilityPlot({
+      data: residuals,
+      type: 'uniform',
+      config: singleConfig,
+      title: 'Uniform Probability Plot of Residuals',
+    });
+    break;
+  case 'residual-autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: residuals,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Residual Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'residual-spectral':
+    svg = generateSpectralPlot({
+      data: residuals,
+      config: singleConfig,
+      title: 'Residual Spectral Plot',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the random walk dataset (run sequence, lag, histogram, normal probability).',
+  'run-sequence': 'Run sequence plot of the random walk data showing non-stationary drift over 500 observations.',
+  'lag': 'Lag-1 plot showing extreme autocorrelation — consecutive values cluster tightly along the y = x diagonal.',
+  'histogram': 'Histogram with KDE overlay of the random walk data. The irregular shape reflects the non-stationary path, not a meaningful distribution.',
+  'probability': 'Normal probability plot of the random walk data. Curvature indicates departure from normality, though the test is invalid for non-stationary data.',
+  'autocorrelation': 'Autocorrelation plot showing significant positive autocorrelation at lags 1 through 100, decreasing linearly — characteristic of a random walk process.',
+  'spectral': 'Spectral plot showing a single dominant low-frequency peak, confirming the non-stationary, drift-dominated character of the random walk.',
+  'predicted-vs-original': 'Predicted values from the AR(1) model versus original data, showing a reasonably good fit along the diagonal.',
+  'residual-4-plot': 'Four-plot diagnostic layout for AR(1) residuals — all four assumptions appear satisfied after removing the autoregressive structure.',
+  'residual-run-sequence': 'Run sequence plot of AR(1) residuals showing no significant shifts in location or scale.',
+  'residual-lag': 'Lag-1 plot of AR(1) residuals showing a random, structureless cloud — the autoregressive dependence has been removed.',
+  'residual-histogram': 'Histogram of AR(1) residuals showing a relatively flat, uniform-like shape.',
+  'residual-probability': 'Normal probability plot of AR(1) residuals. The S-shaped departure from linearity indicates the residuals are not normally distributed.',
+  'residual-uniform-probability': 'Uniform probability plot of AR(1) residuals. The nearly linear pattern confirms a uniform distribution is a good model for the error component.',
+  'residual-autocorrelation': 'Autocorrelation plot of AR(1) residuals — no significant autocorrelation at any lag, confirming independence.',
+  'residual-spectral': 'Spectral plot of AR(1) residuals showing a flat spectrum with no dominant peaks — consistent with white noise.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

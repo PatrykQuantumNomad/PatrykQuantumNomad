@@ -1,0 +1,125 @@
+---
+/**
+ * UniformRandomPlots — Build-time SVG plot generator for the Uniform Random Numbers case study.
+ * Accepts a `type` prop to select which plot to render.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { uniformRandom } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram'
+  | 'normal-probability' | 'uniform-probability'
+  | 'autocorrelation' | 'spectral';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+let svg = '';
+
+switch (type) {
+  case '4-plot':
+    svg = generate4Plot(uniformRandom, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: uniformRandom,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Value',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: uniformRandom,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: uniformRandom,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Value',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'normal-probability':
+    svg = generateProbabilityPlot({
+      data: uniformRandom,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'uniform-probability':
+    svg = generateProbabilityPlot({
+      data: uniformRandom,
+      type: 'uniform',
+      config: singleConfig,
+      title: 'Uniform Probability Plot',
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: uniformRandom,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: uniformRandom,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the uniform random numbers dataset (run sequence, lag, histogram, normal probability).',
+  'run-sequence': 'Run sequence plot of the uniform random numbers showing a stable band between 0 and 1 with no trend or shift.',
+  'lag': 'Lag-1 plot showing a structureless square cloud — characteristic of independent, uniformly distributed observations.',
+  'histogram': 'Histogram with KDE overlay showing the flat, rectangular shape characteristic of a uniform distribution.',
+  'normal-probability': 'Normal probability plot showing a pronounced S-shaped curve, indicating departure from normality (light-tailed, platykurtic distribution).',
+  'uniform-probability': 'Uniform probability plot showing a nearly linear pattern, confirming an excellent fit to the uniform distribution.',
+  'autocorrelation': 'Autocorrelation plot with all coefficients at lags 1 through 50 within the 95% confidence bands, confirming independence.',
+  'spectral': 'Spectral plot showing a flat power spectrum with no dominant peaks, consistent with white noise.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />

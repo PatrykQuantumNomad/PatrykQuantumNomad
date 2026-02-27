@@ -1,0 +1,115 @@
+---
+/**
+ * NormalRandomPlots — Build-time SVG plot generator for the Normal Random Numbers case study.
+ * Accepts a `type` prop to select which plot to render.
+ * All SVG is generated at build time — zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { normalRandom } from '../../data/eda/datasets';
+import {
+  generate4Plot,
+  generateLinePlot,
+  generateLagPlot,
+  generateHistogram,
+  generateProbabilityPlot,
+  generateAutocorrelationPlot,
+  generateSpectralPlot,
+} from '../../lib/eda/svg-generators/index';
+
+type PlotType =
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
+  | 'autocorrelation' | 'spectral';
+
+interface Props {
+  type: PlotType;
+  caption?: string;
+}
+
+const { type, caption } = Astro.props;
+
+const singleConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 20, bottom: 45, left: 55 },
+};
+
+const compositeConfig = {
+  width: 720,
+  height: 540,
+};
+
+let svg = '';
+
+switch (type) {
+  case '4-plot':
+    svg = generate4Plot(normalRandom, compositeConfig);
+    break;
+  case 'run-sequence':
+    svg = generateLinePlot({
+      data: normalRandom,
+      mode: 'run-sequence',
+      config: singleConfig,
+      title: 'Run Sequence Plot',
+      xLabel: 'Observation',
+      yLabel: 'Value',
+    });
+    break;
+  case 'lag':
+    svg = generateLagPlot({
+      data: normalRandom,
+      lag: 1,
+      config: singleConfig,
+      title: 'Lag Plot (k = 1)',
+    });
+    break;
+  case 'histogram':
+    svg = generateHistogram({
+      data: normalRandom,
+      showKDE: true,
+      config: singleConfig,
+      title: 'Histogram',
+      xLabel: 'Value',
+      yLabel: 'Frequency',
+    });
+    break;
+  case 'probability':
+    svg = generateProbabilityPlot({
+      data: normalRandom,
+      type: 'normal',
+      config: singleConfig,
+      title: 'Normal Probability Plot',
+    });
+    break;
+  case 'autocorrelation':
+    svg = generateAutocorrelationPlot({
+      data: normalRandom,
+      maxLag: 50,
+      config: singleConfig,
+      title: 'Autocorrelation Plot',
+      xLabel: 'Lag',
+      yLabel: 'Autocorrelation',
+    });
+    break;
+  case 'spectral':
+    svg = generateSpectralPlot({
+      data: normalRandom,
+      config: singleConfig,
+      title: 'Spectral Plot',
+    });
+    break;
+}
+
+const defaultCaptions: Record<PlotType, string> = {
+  '4-plot': 'Four-plot diagnostic layout for the normal random numbers dataset (run sequence, lag, histogram, normal probability). All four assumptions are satisfied.',
+  'run-sequence': 'Run sequence plot of 500 normal random numbers showing stable location near zero and constant variation — no trend, shift, or cyclic pattern.',
+  'lag': 'Lag-1 plot showing a structureless circular cloud centered at the origin, confirming the randomness assumption.',
+  'histogram': 'Histogram with KDE overlay displaying the classic symmetric bell-shaped curve expected from normal data, centered near zero.',
+  'probability': 'Normal probability plot with data points falling closely along a straight diagonal line, confirming the normal distribution assumption.',
+  'autocorrelation': 'Autocorrelation plot showing all coefficients at lags 1 through 50 within the 95% confidence bands, consistent with white noise.',
+  'spectral': 'Spectral plot showing an approximately flat spectrum with no dominant peaks, confirming independent random data.',
+};
+
+const figCaption = caption ?? defaultCaptions[type];
+---
+
+<PlotFigure svg={svg} caption={figCaption} />
