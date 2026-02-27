@@ -59,11 +59,12 @@ Plans:
   2. All SVGs that had visual inaccuracies (wrong axis labels, missing gridlines, incorrect shapes) are fixed and match NIST originals
   3. All SVGs that had data pattern issues (datasets generating statistically incorrect patterns) are fixed with correct seeded PRNG datasets
   4. All 29 technique pages render their SVGs without console errors or layout shifts
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 65-01: TBD
-- [ ] 65-02: TBD
+- [ ] 65-01-PLAN.md — Wire dedicated generators for bihistogram, block-plot, mean-plot, std-deviation-plot, doe-plots, and restructure 6-plot as regression diagnostic
+- [ ] 65-02-PLAN.md — Fix autocorrelation confidence band, Box-Cox line rendering, Youden reference lines, and probability-plot differentiation
+- [ ] 65-03-PLAN.md — Build audit checklist, run full build verification, document final status of all 29 techniques
 
 ### Phase 66: Content Depth
 **Goal**: Every graphical technique page has full NIST-parity prose sections: what questions the plot answers, why it matters, expanded definitions, relevant case study links, and interpretation examples
