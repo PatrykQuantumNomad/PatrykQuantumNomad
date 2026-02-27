@@ -16,9 +16,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Normal Random Numbers
 
-- [ ] **NRN-01**: Individual named plot subsections (4-plot, run sequence, lag, histogram, normal probability, autocorrelation, spectral) with per-plot interpretation
-- [ ] **NRN-02**: Quantitative results with summary statistics table, location test, variation test (Bartlett), randomness tests (runs + autocorrelation), normality test (Anderson-Darling), outlier test (Grubbs), and test summary table
-- [ ] **NRN-03**: Interpretation section synthesizing graphical and quantitative evidence
+- [x] **NRN-01**: Individual named plot subsections (4-plot, run sequence, lag, histogram, normal probability, autocorrelation, spectral) with per-plot interpretation
+- [x] **NRN-02**: Quantitative results with summary statistics table, location test, variation test (Bartlett), randomness tests (runs + autocorrelation), normality test (Anderson-Darling), outlier test (Grubbs), and test summary table
+- [x] **NRN-03**: Interpretation section synthesizing graphical and quantitative evidence
 
 ### Case Study — Uniform Random Numbers
 
@@ -56,9 +56,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Heat Flow Meter
 
-- [ ] **HFM-01**: Individual named plot subsections with per-plot interpretation
-- [ ] **HFM-02**: Quantitative results with full test suite and test summary table
-- [ ] **HFM-03**: Interpretation section synthesizing evidence
+- [x] **HFM-01**: Individual named plot subsections with per-plot interpretation
+- [x] **HFM-02**: Quantitative results with full test suite and test summary table
+- [x] **HFM-03**: Interpretation section synthesizing evidence
 
 ### Case Study — Fatigue Life
 
@@ -106,18 +106,18 @@ Deferred to future release.
 | INFRA-02 | Phase 56 | Complete |
 | INFRA-03 | Phase 56 | Complete |
 | INFRA-04 | Phase 56 | Complete |
-| NRN-01 | Phase 57 | Pending |
-| NRN-02 | Phase 57 | Pending |
-| NRN-03 | Phase 57 | Pending |
+| NRN-01 | Phase 57 | Complete |
+| NRN-02 | Phase 57 | Complete |
+| NRN-03 | Phase 57 | Complete |
 | CRYO-01 | Phase 57 | Complete |
 | CRYO-02 | Phase 57 | Complete |
 | CRYO-03 | Phase 57 | Complete |
 | FILT-01 | Phase 57 | Pending |
 | FILT-02 | Phase 57 | Pending |
 | FILT-03 | Phase 57 | Pending |
-| HFM-01 | Phase 57 | Pending |
-| HFM-02 | Phase 57 | Pending |
-| HFM-03 | Phase 57 | Pending |
+| HFM-01 | Phase 57 | Complete |
+| HFM-02 | Phase 57 | Complete |
+| HFM-03 | Phase 57 | Complete |
 | RSTR-01 | Phase 58 | Pending |
 | RSTR-02 | Phase 58 | Pending |
 | RSTR-03 | Phase 58 | Pending |
