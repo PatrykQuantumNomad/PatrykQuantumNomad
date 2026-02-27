@@ -24,7 +24,7 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 - [ ] **URN-01**: Individual named plot subsections with per-plot interpretation
 - [ ] **URN-02**: Quantitative results with full test suite and test summary table
-- [ ] **URN-03**: Histogram with uniform PDF overlay showing distributional fit
+- [x] **URN-03**: Histogram with uniform PDF overlay showing distributional fit
 - [ ] **URN-04**: Interpretation section synthesizing evidence
 
 ### Case Study — Cryothermometry
@@ -124,7 +124,7 @@ Deferred to future release.
 | RSTR-04 | Phase 58 | Complete |
 | URN-01 | Phase 59 | Pending |
 | URN-02 | Phase 59 | Pending |
-| URN-03 | Phase 59 | Pending |
+| URN-03 | Phase 59 | Complete |
 | URN-04 | Phase 59 | Pending |
 | BEAM-01 | Phase 60 | Pending |
 | BEAM-02 | Phase 60 | Pending |
