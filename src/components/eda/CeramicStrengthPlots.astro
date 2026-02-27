@@ -2,7 +2,8 @@
 /**
  * CeramicStrengthPlots — Build-time SVG plot generator for the Ceramic Strength case study.
  * Accepts a `type` prop to select which plot to render.
- * Supports pooled data plots and batch-comparison plots.
+ * Supports pooled data plots, batch-comparison plots, lab-comparison plots,
+ * DOE mean/SD plots, block plots, and interaction plots.
  * All SVG is generated at build time — zero client-side JS.
  */
 import PlotFigure from './PlotFigure.astro';
@@ -14,11 +15,32 @@ import {
   generateHistogram,
   generateProbabilityPlot,
   generateBoxPlot,
+  generateBihistogram,
+  generateBlockPlot,
+  generateDoeMeanPlot,
+  generateInteractionPlot,
 } from '../../lib/eda/svg-generators/index';
+import { mean, standardDeviation } from '../../lib/eda/math/statistics';
 
 type PlotType =
+  // Existing — Response Variable Analysis
   | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'probability'
-  | 'batch-box-plot' | 'batch1-histogram' | 'batch2-histogram';
+  // Existing — Batch Effect
+  | 'batch-box-plot' | 'batch1-histogram' | 'batch2-histogram'
+  // New — Batch Effect (CER-02)
+  | 'batch-bihistogram'
+  | 'batch-block-plot'
+  // New — Lab Effect (CER-03)
+  | 'lab-box-plot'
+  | 'lab-box-plot-batch1'
+  | 'lab-box-plot-batch2'
+  // New — Primary Factors (CER-04, wired here, MDX subsections in Plan 02)
+  | 'doe-mean-batch1'
+  | 'doe-mean-batch2'
+  | 'doe-sd-batch1'
+  | 'doe-sd-batch2'
+  | 'interaction-batch1-x1x3'
+  | 'interaction-batch2-x1x3';
 
 interface Props {
   type: PlotType;
@@ -33,6 +55,12 @@ const singleConfig = {
   margin: { top: 35, right: 20, bottom: 45, left: 55 },
 };
 
+const wideConfig = {
+  width: 720,
+  height: 450,
+  margin: { top: 35, right: 60, bottom: 55, left: 55 },
+};
+
 const compositeConfig = {
   width: 720,
   height: 540,
@@ -41,9 +69,79 @@ const compositeConfig = {
 // Extract pooled strength values
 const strengths = ceramicStrength.map(d => d.strength);
 
-// Extract batch-specific values
-const batch1 = ceramicStrength.filter(d => d.batch === 1).map(d => d.strength);
-const batch2 = ceramicStrength.filter(d => d.batch === 2).map(d => d.strength);
+// Extract batch-specific data (full objects and strength arrays)
+const batch1Data = ceramicStrength.filter(d => d.batch === 1);
+const batch2Data = ceramicStrength.filter(d => d.batch === 2);
+const batch1 = batch1Data.map(d => d.strength);
+const batch2 = batch2Data.map(d => d.strength);
+
+// Lab groups for box plots
+const labs = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+const labGroups = labs.map(lab => ({
+  label: `Lab ${lab}`,
+  values: ceramicStrength.filter(d => d.lab === lab).map(d => d.strength),
+}));
+const labGroupsBatch1 = labs.map(lab => ({
+  label: `Lab ${lab}`,
+  values: batch1Data.filter(d => d.lab === lab).map(d => d.strength),
+}));
+const labGroupsBatch2 = labs.map(lab => ({
+  label: `Lab ${lab}`,
+  values: batch2Data.filter(d => d.lab === lab).map(d => d.strength),
+}));
+
+// Block plot data: batch means by lab
+const blockData = labs.map(lab => ({
+  label: `Lab ${lab}`,
+  values: [
+    { group: 'Batch 1', mean: mean(batch1Data.filter(d => d.lab === lab).map(d => d.strength)) },
+    { group: 'Batch 2', mean: mean(batch2Data.filter(d => d.lab === lab).map(d => d.strength)) },
+  ],
+}));
+
+// Factor means by batch for DOE mean plots
+type FactorKey = 'tableSpeed' | 'downFeed' | 'wheelGrit';
+const factorNames: Record<FactorKey, string> = {
+  tableSpeed: 'Table Speed (X1)',
+  downFeed: 'Down Feed (X2)',
+  wheelGrit: 'Wheel Grit (X3)',
+};
+const factorKeys: FactorKey[] = ['tableSpeed', 'downFeed', 'wheelGrit'];
+
+function computeFactorMeans(data: typeof ceramicStrength) {
+  return factorKeys.map(key => ({
+    name: factorNames[key],
+    levels: ([-1, 1] as const).map(level => ({
+      label: level === -1 ? '-1' : '+1',
+      value: mean(data.filter(d => d[key] === level).map(d => d.strength)),
+    })),
+  }));
+}
+
+function computeFactorSDs(data: typeof ceramicStrength) {
+  return factorKeys.map(key => ({
+    name: factorNames[key],
+    levels: ([-1, 1] as const).map(level => ({
+      label: level === -1 ? '-1' : '+1',
+      value: standardDeviation(data.filter(d => d[key] === level).map(d => d.strength)),
+    })),
+  }));
+}
+
+// Interaction means for X1*X3 by batch
+function computeInteractionMeans(data: typeof ceramicStrength) {
+  const means: { aLevel: string; bLevel: string; mean: number }[] = [];
+  for (const x1 of [-1, 1] as const) {
+    for (const x3 of [-1, 1] as const) {
+      means.push({
+        aLevel: x1 === -1 ? '-1' : '+1',
+        bLevel: x3 === -1 ? '-1' : '+1',
+        mean: mean(data.filter(d => d.tableSpeed === x1 && d.wheelGrit === x3).map(d => d.strength)),
+      });
+    }
+  }
+  return means;
+}
 
 let svg = '';
 
@@ -120,6 +218,112 @@ switch (type) {
       yLabel: 'Frequency',
     });
     break;
+  case 'batch-bihistogram':
+    svg = generateBihistogram({
+      topData: batch1,
+      bottomData: batch2,
+      topLabel: 'Batch 1',
+      bottomLabel: 'Batch 2',
+      config: singleConfig,
+      title: 'Bihistogram: Batch 1 vs Batch 2',
+      xLabel: 'Flexural Strength',
+    });
+    break;
+  case 'batch-block-plot':
+    svg = generateBlockPlot({
+      blocks: blockData,
+      config: singleConfig,
+      title: 'Batch Means by Lab',
+      xLabel: 'Lab',
+      yLabel: 'Mean Flexural Strength',
+    });
+    break;
+  case 'lab-box-plot':
+    svg = generateBoxPlot({
+      groups: labGroups,
+      showOutliers: true,
+      config: singleConfig,
+      title: 'Box Plot by Lab (All Data)',
+      xLabel: 'Lab',
+      yLabel: 'Flexural Strength',
+    });
+    break;
+  case 'lab-box-plot-batch1':
+    svg = generateBoxPlot({
+      groups: labGroupsBatch1,
+      showOutliers: true,
+      config: singleConfig,
+      title: 'Box Plot by Lab (Batch 1)',
+      xLabel: 'Lab',
+      yLabel: 'Flexural Strength',
+    });
+    break;
+  case 'lab-box-plot-batch2':
+    svg = generateBoxPlot({
+      groups: labGroupsBatch2,
+      showOutliers: true,
+      config: singleConfig,
+      title: 'Box Plot by Lab (Batch 2)',
+      xLabel: 'Lab',
+      yLabel: 'Flexural Strength',
+    });
+    break;
+  case 'doe-mean-batch1':
+    svg = generateDoeMeanPlot({
+      factors: computeFactorMeans(batch1Data),
+      grandMean: mean(batch1),
+      config: wideConfig,
+      title: 'DOE Mean Plot (Batch 1)',
+      yLabel: 'Mean Strength',
+    });
+    break;
+  case 'doe-mean-batch2':
+    svg = generateDoeMeanPlot({
+      factors: computeFactorMeans(batch2Data),
+      grandMean: mean(batch2),
+      config: wideConfig,
+      title: 'DOE Mean Plot (Batch 2)',
+      yLabel: 'Mean Strength',
+    });
+    break;
+  case 'doe-sd-batch1':
+    svg = generateDoeMeanPlot({
+      factors: computeFactorSDs(batch1Data),
+      grandMean: standardDeviation(batch1),
+      config: wideConfig,
+      title: 'DOE SD Plot (Batch 1)',
+      yLabel: 'Std Dev',
+    });
+    break;
+  case 'doe-sd-batch2':
+    svg = generateDoeMeanPlot({
+      factors: computeFactorSDs(batch2Data),
+      grandMean: standardDeviation(batch2),
+      config: wideConfig,
+      title: 'DOE SD Plot (Batch 2)',
+      yLabel: 'Std Dev',
+    });
+    break;
+  case 'interaction-batch1-x1x3':
+    svg = generateInteractionPlot({
+      factorA: { label: 'Table Speed (X1)', levels: ['-1', '+1'] },
+      factorB: { label: 'Wheel Grit (X3)', levels: ['-1', '+1'] },
+      means: computeInteractionMeans(batch1Data),
+      config: singleConfig,
+      title: 'X1 x X3 Interaction (Batch 1)',
+      yLabel: 'Mean Strength',
+    });
+    break;
+  case 'interaction-batch2-x1x3':
+    svg = generateInteractionPlot({
+      factorA: { label: 'Table Speed (X1)', levels: ['-1', '+1'] },
+      factorB: { label: 'Wheel Grit (X3)', levels: ['-1', '+1'] },
+      means: computeInteractionMeans(batch2Data),
+      config: singleConfig,
+      title: 'X1 x X3 Interaction (Batch 2)',
+      yLabel: 'Mean Strength',
+    });
+    break;
 }
 
 const defaultCaptions: Record<PlotType, string> = {
@@ -131,6 +335,17 @@ const defaultCaptions: Record<PlotType, string> = {
   'batch-box-plot': 'Box plot comparing Batch 1 and Batch 2 flexural strength. Batch 1 is centered approximately 78 units higher, with both batches showing low-side outliers.',
   'batch1-histogram': 'Histogram of Batch 1 ceramic strength data showing a roughly symmetric distribution centered near 689.',
   'batch2-histogram': 'Histogram of Batch 2 ceramic strength data showing a roughly symmetric distribution centered near 611.',
+  'batch-bihistogram': 'Bihistogram comparing Batch 1 (top) and Batch 2 (bottom) flexural strength distributions on a shared x-axis. The clear separation confirms the approximately 78-unit batch effect.',
+  'batch-block-plot': 'Block plot of batch means by lab showing Batch 1 consistently exceeds Batch 2 across all 8 labs, confirming the batch effect is not lab-specific.',
+  'lab-box-plot': 'Box plots of flexural strength by lab (pooled data). Medians vary slightly across labs with relatively constant scales. Labs 3 and 5 show low-side outliers.',
+  'lab-box-plot-batch1': 'Box plots by lab for Batch 1. Median strength ranges from 650 to 700 across labs with relatively constant variability.',
+  'lab-box-plot-batch2': 'Box plots by lab for Batch 2. Median strength ranges from 550 to 600 with somewhat more cross-lab variability than Batch 1.',
+  'doe-mean-batch1': 'DOE mean plot for Batch 1 showing factor level means. Table speed (X1) has the steepest slope, indicating the dominant effect.',
+  'doe-mean-batch2': 'DOE mean plot for Batch 2 showing factor level means. Down feed (X2) has the steepest slope, indicating the dominant effect.',
+  'doe-sd-batch1': 'DOE standard deviation plot for Batch 1. Table speed shows the largest variability effect between factor levels.',
+  'doe-sd-batch2': 'DOE standard deviation plot for Batch 2. Variability differences are roughly comparable across all three factors.',
+  'interaction-batch1-x1x3': 'Interaction plot for X1 (table speed) by X3 (wheel grit) in Batch 1. Non-parallel lines indicate a substantial interaction effect of -20.25 units.',
+  'interaction-batch2-x1x3': 'Interaction plot for X1 (table speed) by X3 (wheel grit) in Batch 2. Non-parallel lines indicate an interaction effect of -16.71 units.',
 };
 
 const figCaption = caption ?? defaultCaptions[type];

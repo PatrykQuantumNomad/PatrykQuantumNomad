@@ -1,38 +1,281 @@
 ---
 title: "Ceramic Strength Case Study"
-description: "EDA case study analyzing NIST JAHANMI2.DAT ceramic strength data to demonstrate Weibull distribution fitting and reliability analysis"
+description: "EDA case study analyzing NIST JAHANMI2.DAT ceramic strength data to demonstrate analysis of a designed experiment with batch, lab, and machining factor effects"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.10 Ceramic Strength"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import CeramicStrengthPlots from '../../../../components/eda/CeramicStrengthPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to the NIST JAHANMI2.DAT dataset, which contains flexural strength measurements of ceramic specimens. The data come from a designed experiment investigating the effects of multiple factors (table speed, down feed rate, wheel grit size, and batch) on the strength of silicon nitride ceramic bars. The primary purpose is to demonstrate EDA techniques for a multi-factor designed experiment with potential distributional complications.
+This case study applies exploratory data analysis to the NIST JAHANMI2.DAT dataset, which contains flexural strength measurements of bonded silicon nitride ceramic specimens. The data come from a designed experiment investigating the effects of three primary machining factors (table speed, down feed rate, and wheel grit size) and two nuisance factors (lab and batch) on ceramic strength. The data were collected by Said Jahanmir of the NIST Ceramics Division in 1996.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.10. With n = 480 observations from a full factorial design, this study is the most complex case study in the NIST collection, combining both DOE (design of experiments) and distributional analysis aspects.
+The full dataset contains 960 observations across 8 labs, 2 batches, 2 replications, and 16 treatment combinations. For this case study, only the longitudinal direction data are used, resulting in <InlineMath tex="n = 480" /> observations with three primary factors (table speed, down feed rate, wheel grit size) each at 2 levels. The dataset originates from NIST/SEMATECH Section 1.4.2.10.
 
-## Graphical Output and Interpretation
+### Study Design
+
+This is a **multi-factor designed experiment** with the following structure:
+
+- **Response variable** <InlineMath tex="Y" /> — flexural strength of bonded silicon nitride (ceramic)
+- **Primary factors** — table speed (<InlineMath tex="X_1" />), down feed rate (<InlineMath tex="X_2" />), wheel grit size (<InlineMath tex="X_3" />), each at 2 levels
+- **Nuisance factors** — lab (8 levels) and batch (2 levels)
+- **Replications** — 2 per treatment combination
+
+The goals of the analysis are to:
+
+1. Determine which of the primary factors has the strongest effect on ceramic strength
+2. Estimate the magnitude of the effects
+3. Determine the optimal settings for the primary factors
+4. Determine if the nuisance factors (lab and batch) have an effect on ceramic strength
+
+The general ANOVA model for this designed experiment includes main effects, interactions, and blocking factors:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_{ijklm} = \mu + B_i + L_j + \tau_k + (\tau\tau)_{kl} + \varepsilon_{ijklm}" />
+</div>
+
+where <InlineMath tex="\mu" /> is the grand mean, <InlineMath tex="B_i" /> is the batch effect, <InlineMath tex="L_j" /> is the lab effect, <InlineMath tex="\tau_k" /> represents the primary factor main effects, <InlineMath tex="(\tau\tau)_{kl}" /> represents the interaction effects, and <InlineMath tex="\varepsilon_{ijklm}" /> is the random error.
+
+<CaseStudyDataset slug="ceramic-strength" />
+
+## Response Variable Analysis
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) of the pooled data reveals important features. The run sequence plot shows variation that may contain systematic factor effects. The lag plot shows approximate randomness with possible clustering. The histogram is right-skewed, consistent with ceramic strength data that typically follows a [Weibull distribution](/eda/distributions/weibull/). The normal probability plot confirms non-normality with upward tail curvature.
+The [4-plot](/eda/techniques/4-plot/) of the response variable reveals important features of the pooled data:
+
+- **Run sequence plot** (upper left) — the location and scale are relatively constant, though about half a dozen points in the 300 to 450 range may require attention as potential outliers. Most points cluster between 500 and 750. The run sequence plot can reveal time effects, which are typically undesirable nuisance factors in designed experiments.
+- **Lag plot** (upper right) — does not show significant structure, indicating no strong temporal dependence in the run order
+- **Histogram** (lower left) — appears reasonably symmetric but with a **bimodal distribution**, showing two distinct peaks rather than a single centered peak
+- **Normal probability plot** (lower right) — shows some curvature indicating that distributions other than the normal may provide a better fit
+
+The bimodal histogram is the most important finding from the 4-plot — it immediately suggests that a major grouping factor (batch, lab, or treatment) is creating two distinct sub-populations.
+
+<CeramicStrengthPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows location and scale are relatively constant, though about half a dozen points in the 300-450 range may require attention as potential outliers.
+2. The **lag plot** (upper right) does not show significant temporal structure, indicating no strong time-based dependence in the run order.
+3. The **histogram** (lower left) reveals a **bimodal distribution** — two distinct peaks rather than a single centered peak. This is the most important finding and immediately suggests a major grouping factor (batch, lab, or treatment) is creating two distinct sub-populations.
+4. The **normal probability plot** (lower right) shows curvature indicating that the pooled data are not well-described by a single normal distribution — consistent with the bimodal structure in the histogram.
+
+The bimodal histogram is the dominant finding. Before proceeding with standard assumption tests, the source of the bimodality must be identified and addressed.
 
 ### Run Sequence Plot
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) of all 480 observations shows data with a stable overall level but considerable variation. The systematic arrangement of factor combinations creates periodic patterns as the experiment cycles through treatment conditions. Within each treatment group, the data appear randomly distributed.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) of the pooled response shows location and scale are relatively constant over time, though the spread of the data reflects both within-treatment variability and the substantial batch effect.
+
+<CeramicStrengthPlots type="run-sequence" />
 
 ### Lag Plot
 
-The [lag plot](/eda/techniques/lag-plot/) shows a roughly circular cloud with some internal structure. The structure reflects the multi-factor design: observations within the same treatment combination cluster together, while observations from different treatments create the overall spread.
+The [lag plot](/eda/techniques/lag-plot/) does not show significant temporal structure, indicating no strong time-based dependence in the measurement order.
+
+<CeramicStrengthPlots type="lag" />
 
 ### Histogram
 
-The [histogram](/eda/techniques/histogram/) of the combined data is right-skewed with a long upper tail. Ceramic strength data characteristically exhibit this pattern because the failure mechanism (brittle fracture from the weakest flaw) produces a distribution with a lower bound and a long right tail. The [Weibull distribution](/eda/distributions/weibull/) is the standard model for such data in reliability engineering.
+The [histogram](/eda/techniques/histogram/) of the pooled response reveals the **bimodal distribution** — two distinct peaks corresponding to the two batches. This is the most important finding from the initial graphical analysis.
+
+<CeramicStrengthPlots type="histogram" />
 
 ### Normal Probability Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) shows systematic curvature, particularly in the upper tail where the highest values fall above the theoretical line. This upward departure is consistent with the right skewness visible in the histogram. A [Weibull plot](/eda/techniques/weibull-plot/) would provide a more appropriate distributional assessment.
+The [normal probability plot](/eda/techniques/normal-probability-plot/) shows curvature — specifically an S-shape consistent with a bimodal mixture distribution from pooling two batch sub-populations with different means.
+
+<CeramicStrengthPlots type="probability" />
+
+## Batch Effect Analysis
+
+The batch effect is the dominant finding in this dataset. This section examines the batch difference using multiple graphical and statistical approaches.
+
+### Bihistogram
+
+The [bihistogram](/eda/techniques/bihistogram/) compares the distributions of Batch 1 and Batch 2 on a shared x-axis. Batch 1 responses are centered at approximately 689, while Batch 2 responses are centered at approximately 611, a difference of approximately 78 units. This batch effect was **completely unexpected** by the scientific investigators. The variability is comparable for both batches, though Batch 1 exhibits lower-tail skewness while Batch 2 shows central skewness. Both batches contain low-lying outlier points.
+
+<CeramicStrengthPlots type="batch-bihistogram" />
+
+### Batch Box Plot
+
+[Box plots](/eda/techniques/box-plot/) by batch confirm the location difference and show multiple outliers on the low side for both batches, with Batch 2 also showing high-side outliers. The quantile-quantile plot comparing batches is not linear — Batch 1 quantiles consistently exceed Batch 2 (except in the right tail), indicating the batch difference involves more than a simple location shift. There are also differences in variation and skewness between the two batches.
+
+<CeramicStrengthPlots type="batch-box-plot" />
+
+### Batch Block Plots
+
+Block plots showing batch means by lab confirm that the batch effect is consistent across all 8 laboratories. In every lab, Batch 1 means exceed Batch 2 means. The parallel nature of the two lines indicates that the batch effect is additive — approximately the same magnitude regardless of which lab performed the measurements. This consistency across labs strengthens the conclusion that the batch difference reflects a genuine material property difference rather than a lab-specific artifact.
+
+<CeramicStrengthPlots type="batch-block-plot" />
+
+### Batch Statistical Tests
+
+The batch comparison is the central quantitative finding of this case study.
+
+| Statistic | Batch 1 | Batch 2 |
+|-----------|---------|---------|
+| <InlineMath tex="n" /> | 240 | 240 |
+| Mean <InlineMath tex="\bar{Y}" /> | 688.9987 | 611.1559 |
+| Std Dev <InlineMath tex="s" /> | 65.5491 | 61.8543 |
+| Variance <InlineMath tex="s^2" /> | 4296.6845 | 3825.9544 |
+
+#### F-Test for Equal Variances
+
+Before comparing means, we first test whether the two batches have equal variances using the [F-test](/eda/quantitative/f-test/).
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 \quad \text{vs.} \quad H_a\!: \sigma_1^2 \neq \sigma_2^2" />
+</div>
+
+The F-test statistic is:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="F = \frac{s_1^2}{s_2^2} = \frac{4296.6845}{3825.9544} = 1.123" />
+</div>
+
+| Parameter | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="F" /> | 1.123 |
+| Numerator df <InlineMath tex="\nu_1" /> | 239 |
+| Denominator df <InlineMath tex="\nu_2" /> | 239 |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+| Acceptance region | (0.845, 1.289) |
+
+**Conclusion:** <InlineMath tex="F = 1.123" /> falls within the acceptance region <InlineMath tex="(0.845,\; 1.289)" />, so we **fail to reject** <InlineMath tex="H_0" /> — the batch variances are not significantly different at the 5% level. This justifies using a pooled variance in the subsequent t-test.
+
+#### Two-Sample t-Test for Equal Means
+
+With equal variances established, the [two-sample t-test](/eda/quantitative/two-sample-t-test/) tests whether the batch means are significantly different.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \mu_1 = \mu_2 \quad \text{vs.} \quad H_a\!: \mu_1 \neq \mu_2" />
+</div>
+
+The pooled standard deviation and test statistic are:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="s_p = 63.7285, \qquad T = \frac{\bar{Y}_1 - \bar{Y}_2}{s_p \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} = 13.3806" />
+</div>
+
+| Parameter | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="T" /> | 13.3806 |
+| Pooled std dev <InlineMath tex="s_p" /> | 63.7285 |
+| Degrees of freedom <InlineMath tex="\nu" /> | 478 |
+| Critical value <InlineMath tex="t_{0.975,\,478}" /> | 1.965 |
+
+**Conclusion:** <InlineMath tex="T = 13.38" /> vastly exceeds the critical value of 1.965, so we **reject** <InlineMath tex="H_0" /> — the batch means are highly significantly different. Batch 1 is on average <InlineMath tex="689.00 - 611.16 = 77.84" /> units stronger than Batch 2, and this difference is consistent across all labs and all primary factor levels.
+
+## Lab Effect Analysis
+
+This section examines whether the 8 laboratories that performed the measurements have systematically different results.
+
+### Lab Box Plot
+
+[Box plots](/eda/techniques/box-plot/) by lab show minor variation in medians across the 8 labs, with relatively constant scales. Two labs (3 and 5) show outliers on the low side. The overall pattern suggests that lab-to-lab differences are small compared to the batch effect.
+
+<CeramicStrengthPlots type="lab-box-plot" />
+
+### Lab Box Plot by Batch
+
+When analyzed separately by batch, the lab-to-lab variation becomes clearer:
+
+- **Batch 1** — median strength ranges from 650 to 700 across labs; variability is relatively constant; all labs contain at least one low-side outlier
+- **Batch 2** — median strength ranges from 550 to 600 across labs; there is somewhat more variability across labs compared to Batch 1; six labs show high-side outliers and three show low-side outliers
+
+<CeramicStrengthPlots type="lab-box-plot-batch1" />
+
+<CeramicStrengthPlots type="lab-box-plot-batch2" />
+
+The batch effect of approximately 75 to 100 units on location dominates any lab effects within either batch.
+
+### Lab Statistical Tests
+
+To formally test whether the labs differ, we perform a one-way ANOVA comparing the 8 lab means.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \mu_1 = \mu_2 = \cdots = \mu_8 \quad \text{vs.} \quad H_a\!: \text{at least one } \mu_i \text{ differs}" />
+</div>
+
+| Source | SS | df | MS | F |
+|--------|----|----|----|----|
+| Between labs | 70,754.64 | 7 | 10,107.81 | 1.837 |
+| Within labs | 2,597,691.93 | 472 | 5,503.58 | |
+| Total | 2,668,446.57 | 479 | | |
+
+| Parameter | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="F" /> | 1.837 |
+| Between-groups df <InlineMath tex="\nu_1" /> | 7 |
+| Within-groups df <InlineMath tex="\nu_2" /> | 472 |
+| Critical value <InlineMath tex="F_{0.95,\,7,\,472}" /> | 2.082 |
+| Significance level <InlineMath tex="\alpha" /> | 0.05 |
+
+**Conclusion:** <InlineMath tex="F = 1.837" /> is less than the critical value <InlineMath tex="F_{0.95,\,7,\,472} = 2.082" />, so we **fail to reject** <InlineMath tex="H_0" /> — the lab means are not significantly different at the 5% level. This confirms that the 8 laboratories are homogeneous and that any apparent lab-to-lab differences in the box plots are within the range of normal sampling variation. The labs can be treated as equivalent for purposes of analyzing the primary machining factors.
+
+## Primary Factors Analysis
+
+The designed experiment analysis examines the effects of three primary machining factors, analyzed separately by batch because of the dominant batch effect:
+
+| Factor | Symbol | Level <InlineMath tex="-1" /> | Level <InlineMath tex="+1" /> |
+|--------|--------|---------|---------|
+| Table speed | <InlineMath tex="X_1" /> | 0.025 | 0.125 |
+| Down feed rate | <InlineMath tex="X_2" /> | 0.050 | 0.125 |
+| Wheel grit size | <InlineMath tex="X_3" /> | 150 | 80 |
+
+Because the batch effect dominates, factor effects are analyzed separately by batch. DOE mean plots, standard deviation plots, and interaction plots for each batch will be presented in the following subsections.
+
+### DOE Mean Plots
+
+DOE mean plots show the average response at each factor level, with a dashed line at the grand mean. Steeper lines indicate larger effects. These plots are the primary tool for ranking factor importance and determining optimal settings.
+
+{/* DOE mean and SD plots will be wired in Plan 02 */}
+
+### Interaction Plots
+
+Interaction plots show whether the effect of one factor depends on the level of another factor. Non-parallel lines indicate interaction. The <InlineMath tex="X_1 \times X_3" /> interaction (table speed by wheel grit) is the most important interaction in both batches.
+
+{/* Interaction plots will be wired in Plan 02 */}
+
+### Batch 1 — Ranked Effects
+
+DOE mean plots and interaction effects analysis for Batch 1 yield the following ranked effect estimates:
+
+| Rank | Effect | Estimate |
+|------|--------|----------|
+| 1 | Table speed <InlineMath tex="X_1" /> | <InlineMath tex="-30.77" /> |
+| 2 | <InlineMath tex="X_1 \times X_3" /> interaction | <InlineMath tex="-20.25" /> |
+| 3 | <InlineMath tex="X_1 \times X_2" /> interaction | <InlineMath tex="+9.70" /> |
+| 4 | Wheel grit <InlineMath tex="X_3" /> | <InlineMath tex="-7.18" /> |
+| 5 | Down feed <InlineMath tex="X_2" /> | <InlineMath tex="\approx 0" /> |
+| 6 | <InlineMath tex="X_2 \times X_3" /> interaction | <InlineMath tex="\approx 0" /> |
+
+For Batch 1, table speed (<InlineMath tex="X_1" />) is the dominant factor with an effect of <InlineMath tex="-30.77" /> units, meaning slower table speed produces stronger ceramics. The <InlineMath tex="X_1 \times X_3" /> interaction is also substantial at <InlineMath tex="-20.25" /> units. The standard deviation plot shows table speed also has a significant variability effect of approximately 20 units between levels.
+
+### Batch 2 — Ranked Effects
+
+| Rank | Effect | Estimate |
+|------|--------|----------|
+| 1 | Down feed <InlineMath tex="X_2" /> | <InlineMath tex="+18.22" /> |
+| 2 | <InlineMath tex="X_1 \times X_3" /> interaction | <InlineMath tex="-16.71" /> |
+| 3 | Wheel grit <InlineMath tex="X_3" /> | <InlineMath tex="-14.71" /> |
+| 4 | Table speed <InlineMath tex="X_1" /> | <InlineMath tex="\approx 0" /> |
+| 5 | <InlineMath tex="X_1 \times X_2" /> interaction | <InlineMath tex="\approx 0" /> |
+| 6 | <InlineMath tex="X_2 \times X_3" /> interaction | <InlineMath tex="\approx 0" /> |
+
+For Batch 2, the ranking is markedly different: down feed rate (<InlineMath tex="X_2" />) is the dominant factor at <InlineMath tex="+18.22" /> units, while table speed (<InlineMath tex="X_1" />) has essentially no effect. The <InlineMath tex="X_1 \times X_3" /> interaction remains important in both batches. The standard deviation differences are roughly comparable across all three factors for Batch 2.
+
+### Batch Comparison of Factor Effects
+
+The most important finding from the factor effects analysis is that **the factor rankings are not consistent across batches**:
+
+- In **Batch 1**, table speed (<InlineMath tex="X_1" />) dominates with a <InlineMath tex="-30.77" /> effect; down feed (<InlineMath tex="X_2" />) is negligible
+- In **Batch 2**, down feed (<InlineMath tex="X_2" />) dominates with a <InlineMath tex="+18.22" /> effect; table speed (<InlineMath tex="X_1" />) is negligible
+
+This batch-by-factor interaction makes it impossible to give a single set of optimal machining parameters that apply to both batches. The batch effect of approximately 75 units remains the dominant primary factor in the overall analysis.
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +283,46 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) shows sy
 
 | Statistic | Value |
 |-----------|-------|
-| Grand Mean | 688.99 |
-| Std Dev | 65.55 |
-| Median | 689.50 |
-| Min | 452.00 |
-| Max | 896.00 |
-| Range | 444.00 |
-| n | 480 |
+| Sample size <InlineMath tex="n" /> | 480 |
+| Mean <InlineMath tex="\bar{Y}" /> | 650.0773 |
+| Std Dev <InlineMath tex="s" /> | 74.6383 |
+| Median | 646.6275 |
+| Minimum | 345.2940 |
+| Maximum | 821.6540 |
+| Range | 476.3600 |
 
-The mean and median are nearly equal despite the visual skewness in the histogram, because the skewness is moderate. The range of 444 MPa represents substantial variability in ceramic strength, which is typical for brittle materials where flaw size distributions drive strength variation.
-
-### Location Test
-
-For the pooled data, the [runs test](/eda/quantitative/runs-test/) reflects the designed experiment structure rather than process drift. Within individual treatment groups, location is stable. The [DOE mean plots](/eda/techniques/doe-plots/) show significant effects of table speed and down feed rate on average ceramic strength.
-
-### Variation Test
-
-[Bartlett's test](/eda/quantitative/bartletts-test/) across treatment groups detects significant heterogeneity of variance (p < 0.05). Some factor combinations produce more variable strength measurements than others, suggesting that the machining parameters affect not just the average strength but also the consistency. The [standard deviation plot](/eda/techniques/std-deviation-plot/) visualizes these differences.
-
-### Randomness Tests
-
-Within each treatment group, the [runs test](/eda/quantitative/runs-test/) confirms randomness (p > 0.05). The replicate measurements within each factor combination are independent.
+The mean and median are reasonably close (<InlineMath tex="\bar{Y} = 650.08" /> vs. median = 646.63), suggesting approximate symmetry in the pooled data. The large standard deviation of <InlineMath tex="s = 74.64" /> reflects both within-treatment variability and the substantial batch effect. The minimum of 345.29 is far below the bulk of the data (most points fall between 500 and 750), flagging potential outlier specimens.
 
 ### Distribution Test
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) rejects normality for the pooled data (p < 0.01), consistent with the observed right skewness. The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) values are approximately 0.23 and -0.13, respectively. Within individual treatment groups, normality is less strongly rejected, suggesting that part of the pooled non-normality comes from mixing groups with different means.
+The [Anderson-Darling test](/eda/quantitative/anderson-darling/) on the pooled data rejects normality, but this reflects the mixture of batch effects rather than true non-normality within treatment groups. The bimodal structure visible in the histogram is an artifact of pooling two populations with different means.
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) of pooled data shows curvature — specifically an S-shape consistent with a bimodal mixture distribution. Within individual treatment groups (controlling for batch, lab, and factor levels), the data are more consistent with normality.
+
+The [skewness and kurtosis](/eda/quantitative/skewness-kurtosis/) of the pooled data also reflect the bimodal structure: the distribution has lighter tails than a normal distribution but with a flattened central region due to the two batch sub-populations.
 
 ### Outlier Detection
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) on within-group residuals identifies a few potential outliers at the low end (very weak specimens). In ceramic strength testing, such low outliers often represent specimens with unusually large surface flaws and may warrant separate investigation for quality control purposes.
+[Grubbs' test](/eda/quantitative/grubbs-test/) on within-group residuals identifies a few potential outliers at the low end — specimens with strength values in the 300 to 450 range, well below the bulk of the data (500 to 750). Specifically:
+
+- Approximately half a dozen low-lying points appear across the full dataset
+- Both batches contain low-side outliers; Batch 2 also shows some high-side outliers
+- Labs 3 and 5 show the most pronounced low-side outliers
+
+In ceramic strength testing, such low outliers often represent specimens with unusually large surface flaws or micro-cracks introduced during machining. These specimens may warrant separate investigation for quality control purposes, as they reflect real (if rare) failure modes rather than measurement errors.
 
 ## Conclusions
 
-The ceramic strength data present a multi-faceted analysis challenge. The designed experiment reveals statistically significant effects of table speed and down feed rate on both the mean and variability of flexural strength. The pooled data are right-skewed and non-normal, consistent with the [Weibull distribution](/eda/distributions/weibull/) expected for brittle fracture data. The recommended analysis approach has two components: first, a [multi-factor ANOVA](/eda/quantitative/multi-factor-anova/) to quantify factor effects and identify optimal machining parameters; second, Weibull distribution fitting within each treatment group for reliability prediction. The [Yates analysis](/eda/quantitative/yates-analysis/) provides a systematic method for estimating main effects and interactions in the full factorial design. Low-strength outliers should be investigated as potential quality control indicators rather than dismissed as statistical artifacts.
+The ceramic strength data present a multi-faceted analysis challenge. The key findings, in order of importance, are:
+
+1. **Dominant batch effect** — Batch 1 specimens are on average <InlineMath tex="77.84" /> units stronger than Batch 2 (<InlineMath tex="T = 13.38" />, <InlineMath tex="p \ll 0.001" />), a difference that is consistent across all 8 labs and all 16 treatment combinations. This effect was completely unexpected by the scientific investigators.
+
+2. **Equal batch variances** — Despite the large location difference, the batch variances are not significantly different (<InlineMath tex="F = 1.123" />, within the acceptance region), indicating the batch effect is primarily a shift in location.
+
+3. **Inconsistent factor rankings** — The primary factor effects differ between batches: table speed (<InlineMath tex="X_1" />) dominates in Batch 1 (<InlineMath tex="-30.77" />), while down feed rate (<InlineMath tex="X_2" />) dominates in Batch 2 (<InlineMath tex="+18.22" />). This batch-by-factor interaction complicates the determination of optimal machining parameters.
+
+4. **Negligible lab effect** — The lab effect is small relative to the batch effect, and the one-way ANOVA confirms the 8 labs are homogeneous (<InlineMath tex="F = 1.837 < F_{crit} = 2.082" />).
+
+5. **Low-side outliers** — A few specimens in the 300 to 450 range represent unusually weak specimens, likely due to surface flaws, and warrant quality control investigation.
+
+The recommended analysis approach is a [multi-factor ANOVA](/eda/quantitative/multi-factor-anova/) that includes batch as a blocking factor, followed by examination of main effects and interactions among the primary machining factors — analyzed separately by batch given the inconsistent factor rankings. This case study demonstrates how graphical techniques (bihistograms, block plots, box plots by group) efficiently reveal batch and lab effects that would be difficult to detect from summary statistics alone, and how designed experiment plots (DOE mean plots, interaction effects) identify the key machining factors within each batch.
