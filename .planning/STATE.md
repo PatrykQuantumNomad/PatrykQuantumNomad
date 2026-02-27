@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: EDA Graphical Techniques — NIST Parity & Validation
 status: active
-last_updated: "2026-02-27T19:44:22Z"
+last_updated: "2026-02-27T20:20:36Z"
 progress:
   total_phases: 68
   completed_phases: 66
-  total_plans: 155
-  completed_plans: 155
+  total_plans: 158
+  completed_plans: 158
 ---
 
 # Project State
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 66 — Content Depth (v1.10)
+**Current focus:** Phase 67 — Technical Depth (v1.10)
 
 ## Current Position
 
-Phase: 66 of 68 (Content Depth)
+Phase: 67 of 68 (Technical Depth)
 Plan: 3 of 3 in current phase
-Status: Phase 66 complete, ready for Phase 67
-Last activity: 2026-02-27 — Completed Phase 66 (Content Depth)
+Status: Phase 67 complete, ready for Phase 68
+Last activity: 2026-02-27 — Completed Phase 67 (Technical Depth)
 
-Progress: █████████░ 60% (v1.10: 3/5 phases complete)
+Progress: █████████░ 80% (v1.10: 4/5 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 155 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 9 v1.10)
+- Total plans completed: 158 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 12 v1.10)
 
 **Cumulative Stats:**
 
@@ -48,8 +48,8 @@ Progress: █████████░ 60% (v1.10: 3/5 phases complete)
 | v1.7 K8s Analyzer | 41-47 | 23 | 123 | 2026-02-23 |
 | v1.8 EDA Encyclopedia | 48-55 | 24 | 145 | 2026-02-25 |
 | v1.9 Case Study Deep Dive | 56-63 | 19 | 41 | 2026-02-27 |
-| v1.10 (in progress) | 64-66 | 9 | 10 | - |
-| **Total** | **66** | **155** | **597** | |
+| v1.10 (in progress) | 64-67 | 12 | 15 | - |
+| **Total** | **67** | **158** | **597** | |
 
 **Phase 64 Metrics:**
 
@@ -68,6 +68,8 @@ Progress: █████████░ 60% (v1.10: 3/5 phases complete)
 | Phase 66 P01 | 4min | 2 tasks | 3 files |
 | Phase 66 P02 | 5min | 2 tasks | 2 files |
 | Phase 66 P03 | 5min | 2 tasks | 3 files |
+| Phase 67 P02 | 6min | 2 tasks | 1 files |
+| Phase 67 P03 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -91,6 +93,12 @@ v1.0-v1.9 decisions archived in respective milestone files.
 - [Phase 66]: Omitted caseStudySlugs entirely for techniques with no matching case study (not empty array)
 - [66-02] Unicode symbols for math notation in prose fields to avoid KaTeX dependency in definitionExpanded
 - [66-03] Unicode characters for mathematical symbols in definitionExpanded (lambda, beta, eta, em-dash)
+- [67-02] Filliben approximation for normal order statistic medians formula (matches NIST convention)
+- [67-02] Bootstrap pythonCode uses both scipy.stats.bootstrap for CI and manual loop for histogram visualization
+- [67-02] QQ-plot uses manual two-sample quantile matching with np.quantile for pedagogical clarity
+- [67-02] Hazen plotting positions (p_i = (i-0.5)/N) for QQ-plot formula per NIST 1.3.3.24
+- [67-03] 6-plot autocorrelation panel uses manual computation (not plt.acorr) per NIST requirements
+- [67-03] scatterplot-matrix uses sns.pairplot with pandas DataFrame for idiomatic Python
 
 ### Pending Todos
 
@@ -112,6 +120,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed Phase 66 (66-03-PLAN.md - comparison/regression/combined-diagnostic content)
+Stopped at: Completed 67-02-PLAN.md (distribution-shape KaTeX formulas + Python code examples)
 Resume file: None
-Next: Plan Phase 67 (Technical Depth)
+Next: Phase 67 fully complete, ready for Phase 68

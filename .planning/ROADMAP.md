@@ -29,7 +29,7 @@ See `.planning/milestones/` for detailed archives.
 - [x] **Phase 64: Infrastructure Foundation** - Split technique-content.ts, extend TechniqueContent interface, update graphical template with new sections and code slot (completed 2026-02-27)
 - [x] **Phase 65: SVG Audit & Fixes** - Audit all 29 graphical technique SVGs against NIST originals and fix visual/data pattern issues (completed 2026-02-27)
 - [x] **Phase 66: Content Depth** - Add Questions, Importance, expanded Definitions, Case Study cross-links, and Examples sections to all 29 technique pages (completed 2026-02-27)
-- [ ] **Phase 67: Technical Depth** - Add KaTeX formulas for 12 techniques and Python code examples for all 29 techniques
+- [x] **Phase 67: Technical Depth** - Add KaTeX formulas for 12 techniques and Python code examples for all 29 techniques (completed 2026-02-27)
 - [ ] **Phase 68: Verification & Audit** - Full-sweep verification of build, Lighthouse, cross-links, formulas, and Python API correctness
 
 ## Phase Details
@@ -134,5 +134,5 @@ Phases execute in numeric order: 64 -> 65 -> 66 -> 67 -> 68
 | 64. Infrastructure Foundation | v1.10 | 2/2 | Complete | 2026-02-27 |
 | 65. SVG Audit & Fixes | v1.10 | 3/3 | Complete | 2026-02-27 |
 | 66. Content Depth | v1.10 | 3/3 | Complete | 2026-02-27 |
-| 67. Technical Depth | v1.10 | 0/3 | Not started | - |
+| 67. Technical Depth | 3/3 | Complete   | 2026-02-27 | - |
 | 68. Verification & Audit | v1.10 | 0/TBD | Not started | - |
