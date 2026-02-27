@@ -277,10 +277,31 @@ function composeYoudenPlot(): string {
   const medianX = (xValues[9] + xValues[10]) / 2;
   const medianY = (yValues[9] + yValues[10]) / 2;
 
-  // Insert reference lines before the closing </svg>
+  // Insert reference lines using scale-based positioning (not hardcoded pixel math)
+  const margin = { top: 40, right: 20, bottom: 50, left: 60 };
+  const plotWidth = 600;
+  const plotHeight = 400;
+  const innerW = plotWidth - margin.left - margin.right;
+  const innerH = plotHeight - margin.top - margin.bottom;
+
+  const allX = labData.map((d) => d.x);
+  const allY = labData.map((d) => d.y);
+  const xMin = Math.min(...allX);
+  const xMax = Math.max(...allX);
+  const yMin = Math.min(...allY);
+  const yMax = Math.max(...allY);
+
+  const xPad = (xMax - xMin) * 0.08;
+  const yPad = (yMax - yMin) * 0.08;
+  const xDomain = [xMin - xPad, xMax + xPad];
+  const yDomain = [yMin - yPad, yMax + yPad];
+
+  const xScale = (v: number) => margin.left + ((v - xDomain[0]) / (xDomain[1] - xDomain[0])) * innerW;
+  const yScaleFn = (v: number) => margin.top + innerH - ((v - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
+
   const refLines =
-    `<line x1="60" y1="${((1 - (medianY - 45) / 45) * 310 + 40).toFixed(2)}" x2="580" y2="${((1 - (medianY - 45) / 45) * 310 + 40).toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="1" stroke-dasharray="6,4" />` +
-    `<line x1="${((medianX - 45) / 45 * 520 + 60).toFixed(2)}" y1="40" x2="${((medianX - 45) / 45 * 520 + 60).toFixed(2)}" y2="350" stroke="${PALETTE.dataSecondary}" stroke-width="1" stroke-dasharray="6,4" />`;
+    `<line x1="${margin.left}" y1="${yScaleFn(medianY).toFixed(2)}" x2="${margin.left + innerW}" y2="${yScaleFn(medianY).toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="1" stroke-dasharray="6,4" />` +
+    `<line x1="${xScale(medianX).toFixed(2)}" y1="${margin.top}" x2="${xScale(medianX).toFixed(2)}" y2="${margin.top + innerH}" stroke="${PALETTE.dataSecondary}" stroke-width="1" stroke-dasharray="6,4" />`;
 
   return baseSvg.replace('</svg>', refLines + '</svg>');
 }
@@ -625,9 +646,9 @@ const TECHNIQUE_RENDERERS: Record<string, () => string> = {
     title: 'Normal Probability Plot',
   }),
   'probability-plot': () => generateProbabilityPlot({
-    data: normalRandom,
+    data: uniformRandom,
     type: 'normal',
-    title: 'Probability Plot',
+    title: 'Probability Plot (Uniform Data)',
   }),
   'qq-plot': () => generateProbabilityPlot({
     data: normalRandom,
