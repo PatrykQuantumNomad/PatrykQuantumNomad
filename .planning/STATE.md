@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: EDA Case Study Deep Dive
-status: ready-to-plan
-last_updated: "2026-02-26T00:00:00.000Z"
+status: executing
+last_updated: "2026-02-27T00:09:26.000Z"
 progress:
   total_phases: 63
-  completed_phases: 55
+  completed_phases: 56
   total_plans: 141
-  completed_plans: 127
+  completed_plans: 129
 ---
 
 # Project State
@@ -22,17 +22,17 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 56 of 63 (Infrastructure Foundation)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Roadmap created for v1.9 (8 phases, 14 plans, 41 requirements)
+Phase: 56 of 63 (Infrastructure Foundation) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Executing
+Last activity: 2026-02-27 — Phase 56 complete (PlotFigure extraction, templates, URL cheat sheet)
 
-Progress: ░░░░░░░░░░ 0% (v1.9 — 0/14 plans)
+Progress: █░░░░░░░░░ 14% (v1.9 — 2/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 127 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8)
+- Total plans completed: 129 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 2 v1.9)
 
 **Cumulative Stats:**
 
@@ -57,6 +57,10 @@ Progress: ░░░░░░░░░░ 0% (v1.9 — 0/14 plans)
 Full decision log in PROJECT.md Key Decisions table.
 v1.0-v1.8 decisions archived in respective milestone files.
 
+**v1.9 Decisions:**
+- [Phase 56] Simplified always-720px ternary to constant default maxWidth prop in PlotFigure.astro
+- [Phase 56] Used `caption` prop name (not `figCaption`) for cleaner external API while preserving internal variable names
+
 ### Pending Todos
 
 None.
@@ -76,7 +80,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Roadmap created for v1.9 with 8 phases (56-63), 14 plans, 41 requirements
+Last session: 2026-02-27
+Stopped at: Completed 56-02-PLAN.md (Phase 56 Infrastructure Foundation complete)
 Resume file: None
-Next: `/gsd:plan-phase 56` to plan Infrastructure Foundation
+Next: `/gsd:plan-phase 57` to plan Minor-Gap Case Studies

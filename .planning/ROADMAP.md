@@ -31,7 +31,7 @@ See `.planning/milestones/` for detailed archives.
 - Integer phases (56, 57, 58...): Planned milestone work
 - Decimal phases (57.1, 57.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 56: Infrastructure Foundation** - Hypothesis test library, shared components, canonical template, and cross-reference cheat sheet
+- [x] **Phase 56: Infrastructure Foundation** - Hypothesis test library, shared components, canonical template, and cross-reference cheat sheet
 - [ ] **Phase 57: Minor-Gap Case Studies** - Complete Normal Random Numbers, Cryothermometry, Filter Transmittance, and Heat Flow Meter to full NIST parity
 - [ ] **Phase 58: Standard Resistor Case Study** - Build new case study from scratch with DZIUBA1.DAT dataset
 - [ ] **Phase 59: Uniform Random Numbers Enhancement** - Complete with uniform PDF overlay and full quantitative results
@@ -53,8 +53,8 @@ See `.planning/milestones/` for detailed archives.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 56-01-PLAN.md — Hypothesis test functions (TDD: 7 test functions + 6 helpers validated against NIST datasets)
-- [ ] 56-02-PLAN.md — PlotFigure extraction, canonical template, and URL cross-reference cheat sheet
+- [x] 56-01-PLAN.md — Hypothesis test functions (TDD: 7 test functions + 6 helpers validated against NIST datasets)
+- [x] 56-02-PLAN.md — PlotFigure extraction, canonical template, and URL cross-reference cheat sheet
 
 ### Phase 57: Minor-Gap Case Studies
 **Goal**: Four nearly-complete case studies reach full NIST parity with computed quantitative results, individual plot subsections, and interpretation sections
@@ -177,7 +177,7 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 33-40 | v1.6 Docker Compose Validator | 14/14 | Complete | 2026-02-23 |
 | 41-47 | v1.7 Kubernetes Manifest Analyzer | 23/23 | Complete | 2026-02-23 |
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
-| 56. Infrastructure Foundation | v1.9 | 0/2 | Not started | - |
+| 56. Infrastructure Foundation | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 57. Minor-Gap Case Studies | v1.9 | 0/3 | Not started | - |
 | 58. Standard Resistor Case Study | v1.9 | 0/2 | Not started | - |
 | 59. Uniform Random Numbers Enhancement | v1.9 | 0/1 | Not started | - |
@@ -185,4 +185,4 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 61. Fatigue Life Deep Dive | v1.9 | 0/1 | Not started | - |
 | 62. Ceramic Strength DOE | v1.9 | 0/2 | Not started | - |
 | 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **127/141** | **90%** | |
+| **Total** | **v1.0-v1.9** | **129/141** | **91%** | |
