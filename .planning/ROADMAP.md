@@ -11,7 +11,7 @@
 - ~~v1.6 Docker Compose Validator~~ - Phases 33-40 (shipped 2026-02-23)
 - ~~v1.7 Kubernetes Manifest Analyzer~~ - Phases 41-47 (shipped 2026-02-23)
 - ~~v1.8 EDA Visual Encyclopedia~~ - Phases 48-55 (shipped 2026-02-25)
-- 🚧 **v1.9 EDA Case Study Deep Dive** - Phases 56-63 (in progress)
+- ~~v1.9 EDA Case Study Deep Dive~~ - Phases 56-63 (shipped 2026-02-27)
 
 ## Phases
 
@@ -23,7 +23,7 @@ See `.planning/milestones/` for detailed archives.
 
 </details>
 
-### 🚧 v1.9 EDA Case Study Deep Dive (In Progress)
+### v1.9 EDA Case Study Deep Dive (Shipped 2026-02-27)
 
 **Milestone Goal:** Enhance all EDA case studies to match NIST/SEMATECH source depth with individual plot subsections, detailed quantitative test results, interpretation sections, and develop/validate model sections. Add Standard Resistor as a new case study.
 
@@ -162,8 +162,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 63-01-PLAN.md — Cross-reference link integrity and statistical value audit against NIST sources
-- [ ] 63-02-PLAN.md — Astro build validation and REQUIREMENTS.md checkbox cleanup
+- [x] 63-01-PLAN.md — Cross-reference link integrity and statistical value audit against NIST sources
+- [x] 63-02-PLAN.md — Astro build validation and REQUIREMENTS.md checkbox cleanup
 
 ## Progress
 
@@ -189,5 +189,5 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 60. Beam Deflections Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
 | 61. Fatigue Life Deep Dive | v1.9 | 3/3 | Complete | 2026-02-27 |
 | 62. Ceramic Strength DOE | v1.9 | 2/2 | Complete | 2026-02-27 |
-| 63. Validation | 2/2 | Complete   | 2026-02-27 | - |
-| **Total** | **v1.0-v1.9** | **144/146** | **99%** | |
+| 63. Validation | v1.9 | 2/2 | Complete | 2026-02-27 |
+| **Total** | **v1.0-v1.9** | **146/146** | **100%** | |
