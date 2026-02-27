@@ -187,4 +187,4 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 61. Fatigue Life Deep Dive | v1.9 | 0/1 | Not started | - |
 | 62. Ceramic Strength DOE | v1.9 | 0/2 | Not started | - |
 | 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **137/143** | **96%** | |
+| **Total** | **v1.0-v1.9** | **139/143** | **97%** | |
