@@ -57,6 +57,43 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
         variantLabel: 'Seasonal',
       },
     ],
+    formulas: [
+      {
+        label: 'Autocovariance Function',
+        tex: String.raw`C_h = \frac{1}{N}\sum_{t=1}^{N-h}(Y_t - \bar{Y})(Y_{t+h} - \bar{Y})`,
+        explanation:
+          'The autocovariance at lag h measures the average product of deviations from the mean for observations separated by h time steps.',
+      },
+      {
+        label: 'Autocorrelation Coefficient',
+        tex: String.raw`R_h = \frac{C_h}{C_0}`,
+        explanation:
+          'The autocorrelation at lag h is the autocovariance at lag h divided by the variance (autocovariance at lag 0), giving a value between -1 and +1.',
+      },
+      {
+        label: '95% Significance Bounds',
+        tex: String.raw`\pm\,\frac{2}{\sqrt{N}}`,
+        explanation:
+          'Under the null hypothesis of white noise, approximately 95% of autocorrelation values should fall within these bounds. Uses 2/sqrt(N) per NIST convention.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.graphics.tsaplots import plot_acf
+
+# Generate AR(1) data: Y_t = 0.7 * Y_{t-1} + e_t
+rng = np.random.default_rng(42)
+n = 200
+y = np.zeros(n)
+for t in range(1, n):
+    y[t] = 0.7 * y[t - 1] + rng.standard_normal()
+
+fig, ax = plt.subplots(figsize=(8, 4))
+plot_acf(y, lags=40, ax=ax, title="Autocorrelation Plot (AR(1) Process)")
+ax.set_xlabel("Lag")
+ax.set_ylabel("Autocorrelation")
+plt.tight_layout()
+plt.show()`,
   },
 
   'complex-demodulation': {
@@ -79,6 +116,36 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definitionExpanded:
       'The display consists of two panels: an amplitude plot (vertical axis = estimated amplitude of the sinusoidal component vs. time) and a phase plot (vertical axis = phase angle in degrees vs. time). The demodulation process multiplies the signal by a complex exponential at the target frequency, then applies a low-pass filter to extract the slowly varying envelope. The filter bandwidth controls the trade-off between time resolution and noise suppression.',
     caseStudySlugs: ['beam-deflections'],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import hilbert
+
+# Generate sinusoidal signal with time-varying amplitude
+rng = np.random.default_rng(42)
+n = 500
+t = np.linspace(0, 10, n)
+freq = 2.0  # target frequency in Hz
+amplitude_envelope = 1.0 + 0.5 * np.sin(2 * np.pi * 0.2 * t)
+signal = amplitude_envelope * np.sin(2 * np.pi * freq * t)
+signal += 0.3 * rng.standard_normal(n)
+
+# Complex demodulation via analytic signal
+analytic = hilbert(signal)
+envelope = np.abs(analytic)
+phase = np.unwrap(np.angle(analytic))
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+axes[0].plot(t, envelope, label="Amplitude envelope")
+axes[0].plot(t, amplitude_envelope, "--", alpha=0.7, label="True envelope")
+axes[0].set_ylabel("Amplitude")
+axes[0].set_title("Complex Demodulation")
+axes[0].legend()
+
+axes[1].plot(t, np.degrees(phase))
+axes[1].set_xlabel("Time")
+axes[1].set_ylabel("Phase (degrees)")
+plt.tight_layout()
+plt.show()`,
   },
 
   'lag-plot': {
@@ -128,6 +195,24 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
         variantLabel: 'Trend',
       },
     ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate AR(1) data to show serial dependence
+rng = np.random.default_rng(42)
+n = 200
+y = np.zeros(n)
+for t in range(1, n):
+    y[t] = 0.7 * y[t - 1] + rng.standard_normal()
+
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.scatter(y[:-1], y[1:], alpha=0.5, edgecolors="k", linewidths=0.5)
+ax.set_xlabel("Y(t)")
+ax.set_ylabel("Y(t+1)")
+ax.set_title("Lag Plot (lag = 1)")
+ax.set_aspect("equal")
+plt.tight_layout()
+plt.show()`,
   },
 
   'run-sequence-plot': {
@@ -167,6 +252,23 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
           'A gradual upward or downward drift in the data over the observation period, indicating that the process mean is not constant. This can result from tool wear, temperature drift, or material degradation.',
       },
     ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate normal data with constant mean and variance
+rng = np.random.default_rng(42)
+n = 100
+data = rng.normal(loc=50, scale=5, size=n)
+
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(range(1, n + 1), data, "o-", markersize=3, linewidth=0.8)
+ax.axhline(y=np.mean(data), color="r", linestyle="--", label="Mean")
+ax.set_xlabel("Run Order")
+ax.set_ylabel("Response")
+ax.set_title("Run Sequence Plot")
+ax.legend()
+plt.tight_layout()
+plt.show()`,
   },
 
   'spectral-plot': {
@@ -209,5 +311,39 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
         variantLabel: 'White Noise',
       },
     ],
+    formulas: [
+      {
+        label: 'Power Spectral Density (Periodogram)',
+        tex: String.raw`S(f_k) = \frac{1}{N}\left|\sum_{t=0}^{N-1} Y_t\, e^{-i\,2\pi f_k t}\right|^2`,
+        explanation:
+          'The periodogram estimates the power spectral density at frequency f_k as the squared magnitude of the discrete Fourier transform of the data, divided by the number of observations.',
+      },
+      {
+        label: 'Frequency Range',
+        tex: String.raw`f_k = \frac{k}{N}, \quad k = 0, 1, \ldots, \left\lfloor\frac{N}{2}\right\rfloor`,
+        explanation:
+          'The frequencies range from 0 to the Nyquist frequency (0.5 cycles per observation interval). The frequency resolution is 1/N, determined by the series length.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import periodogram
+
+# Generate sinusoidal signal at 0.1 Hz plus noise
+rng = np.random.default_rng(42)
+n = 500
+fs = 1.0  # sampling frequency
+t = np.arange(n) / fs
+signal = 2.0 * np.sin(2 * np.pi * 0.1 * t) + rng.standard_normal(n)
+
+freqs, psd = periodogram(signal, fs=fs)
+
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.semilogy(freqs, psd)
+ax.set_xlabel("Frequency (Hz)")
+ax.set_ylabel("Power Spectral Density")
+ax.set_title("Spectral Plot")
+plt.tight_layout()
+plt.show()`,
   },
 } as const;
