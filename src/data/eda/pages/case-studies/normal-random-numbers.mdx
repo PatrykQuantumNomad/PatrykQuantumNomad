@@ -1,16 +1,47 @@
 ---
 title: "Normal Random Numbers Case Study"
-description: "EDA case study analyzing NIST RANDN.DAT dataset of 500 normal random numbers to demonstrate assumption verification techniques"
+description: "EDA case study analyzing 500 normal random numbers from a Rand Corporation publication to demonstrate assumption verification techniques"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.1 Normal Random Numbers"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import NormalRandomPlots from '../../../../components/eda/NormalRandomPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis techniques to 500 observations generated from a standard normal distribution N(0,1), taken from the NIST RANDN.DAT dataset. The primary goal is to demonstrate that a well-behaved dataset satisfies all four underlying assumptions of a univariate measurement process: fixed location, fixed variation, randomness, and fixed distribution. This serves as a baseline example -- when the process is operating correctly, the EDA graphical and quantitative outputs should confirm every assumption.
+This case study applies exploratory data analysis techniques to 500 observations generated from a standard normal distribution <InlineMath tex="N(0,1)" />, taken from a Rand Corporation publication. The primary goal is to demonstrate the ideal case where a well-behaved dataset satisfies all four underlying assumptions of a univariate measurement process: fixed location, fixed variation, randomness, and fixed distribution. This serves as a baseline example -- when the process is operating correctly, the EDA graphical and quantitative outputs should confirm every assumption.
 
-The dataset originates from NIST/SEMATECH Section 1.4.2.1. With n = 500 observations, the sample provides sufficient power for detecting moderate departures from assumptions.
+The dataset originates from NIST/SEMATECH Section 1.4.2.1. With <InlineMath tex="n = 500" /> observations, the sample provides sufficient power for detecting moderate departures from assumptions.
+
+<CaseStudyDataset slug="normal-random-numbers" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the normal random numbers:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
 
 ## Graphical Output and Interpretation
 
@@ -18,21 +49,52 @@ The dataset originates from NIST/SEMATECH Section 1.4.2.1. With n = 500 observat
 
 The [4-plot](/eda/techniques/4-plot/) for this dataset is the archetype of a healthy process. All four component plots are consistent with the underlying assumptions: the run sequence plot shows a stable band, the lag plot shows a structureless circular cloud, the histogram is bell-shaped, and the normal probability plot is approximately linear. No remedial action is needed.
 
+<NormalRandomPlots type="4-plot" />
+
+The assumptions are addressed by the four diagnostic plots:
+
+1. The **run sequence plot** (upper left) shows 500 observations fluctuating randomly around a stable central location near zero with no trend, shift, or outliers — the fixed-location and fixed-variation assumptions appear satisfied.
+2. The **lag plot** (upper right) shows a structureless, roughly circular scatter cloud centered at the origin — no evidence of serial dependence, supporting the randomness assumption.
+3. The **histogram** (lower left) displays the classic symmetric, bell-shaped curve expected from normal data, centered near zero with no obvious skewness or heavy tails.
+4. The **normal probability plot** (lower right) shows data points falling closely along a straight diagonal line with no systematic curvature — confirming that a normal distribution is a reasonable model.
+
+All four assumptions appear satisfied. The univariate model is appropriate and the standard confidence interval is valid. No remedial action is needed.
+
 ### Run Sequence Plot
 
 The [run sequence plot](/eda/techniques/run-sequence-plot/) displays 500 observations fluctuating randomly around a stable central location near zero with no discernible trend, shift, or cyclic pattern. Both the location and scale appear constant across the entire run, confirming the fixed-location and fixed-variation assumptions.
+
+<NormalRandomPlots type="run-sequence" />
 
 ### Lag Plot
 
 The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows a structureless, roughly circular scatter cloud centered at the origin. There is no evidence of serial dependence, autocorrelation, or clustering. This supports the randomness assumption.
 
+<NormalRandomPlots type="lag" />
+
 ### Histogram
 
 The [histogram](/eda/techniques/histogram/) displays the classic symmetric, bell-shaped curve expected from normal data. The distribution is unimodal with no obvious skewness or heavy tails. The peak is centered near zero, consistent with the known mean of the generating distribution.
 
+<NormalRandomPlots type="histogram" />
+
 ### Normal Probability Plot
 
 The [normal probability plot](/eda/techniques/normal-probability-plot/) shows data points falling closely along a straight diagonal line with no systematic curvature, S-shapes, or outlier departures. This confirms that the normal distribution is an appropriate model for these data.
+
+<NormalRandomPlots type="probability" />
+
+### Autocorrelation Plot
+
+The [autocorrelation plot](/eda/techniques/autocorrelation-plot/) confirms the randomness assumption. All autocorrelation coefficients at lags 1 through 50 fall within the 95% confidence bands at ±2/√N, consistent with white noise.
+
+<NormalRandomPlots type="autocorrelation" />
+
+### Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) shows the frequency-domain structure. For independent random data, the spectrum should be approximately flat with no dominant peaks.
+
+<NormalRandomPlots type="spectral" />
 
 ## Quantitative Output and Interpretation
 
@@ -40,36 +102,133 @@ The [normal probability plot](/eda/techniques/normal-probability-plot/) shows da
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | -0.0036 |
-| Std Dev | 0.9996 |
-| Median | -0.0127 |
-| Min | -3.0436 |
-| Max | 3.2560 |
-| Range | 6.2996 |
-| n | 500 |
+| Sample size <InlineMath tex="n" /> | 500 |
+| Mean <InlineMath tex="\bar{Y}" /> | -0.0029 |
+| Std Dev <InlineMath tex="s" /> | 1.0210 |
+| Median | -0.0930 |
+| Min | -2.6470 |
+| Max | 3.4360 |
+| Range | 6.0830 |
 
-The sample mean and standard deviation closely match the theoretical values of 0 and 1, respectively. The range of approximately 6.3 standard deviations is consistent with a sample of size 500 from a standard normal distribution.
+The sample mean and standard deviation are close to the theoretical values of 0 and 1, respectively. The range of approximately 6.1 standard deviations is consistent with a sample of size 500 from a standard normal distribution.
 
 ### Location Test
 
-A [runs test](/eda/quantitative/runs-test/) for drift in location detects no significant trend. The regression slope of the run sequence is not significantly different from zero (p > 0.05), confirming constant location.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 0.006991 | 0.09155 | 0.0764 |
+| <InlineMath tex="B_1" /> (slope) | -0.00003963 | 0.0003167 | -0.1251 |
+
+Residual standard deviation: 1.02205 with 498 degrees of freedom.
+
+**Conclusion:** The slope t-value of -0.1251 is well within the critical bounds <InlineMath tex="\pm t_{0.975,\,498} = \pm 1.96" />, so we **fail to reject** <InlineMath tex="H_0" /> — the location is constant. There is no detectable drift in the data over the 500 observations.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) for homogeneity of variance, applied by splitting the data into four equal groups of 125 observations each, yields a non-significant result (p > 0.05). The variation is constant across the run.
+[Bartlett's test](/eda/quantitative/bartletts-test/) for homogeneity of variance divides the data into <InlineMath tex="k = 4" /> equal-length intervals of 125 observations each and tests whether their variances are equal.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="T" /> | 2.3737 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> |
+| Critical value <InlineMath tex="\chi^2_{0.95,\,3}" /> | 7.8147 |
+
+**Conclusion:** The test statistic of 2.3737 is well below the critical value of 7.8147, so we **fail to reject** <InlineMath tex="H_0" /> — the variances are not significantly different across the four intervals. The variation is constant across the run.
 
 ### Randomness Tests
 
-The [runs test](/eda/quantitative/runs-test/) for randomness above and below the median produces a test statistic within the expected range (p > 0.05). The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.003, well within the significance bounds of plus or minus 0.088. No significant autocorrelation is detected at any lag through lag 50.
+Two complementary tests assess whether the observations are independent.
+
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | -1.0744 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
+
+**Conclusion:** <InlineMath tex="|Z| = 1.0744" /> is within the critical bounds of <InlineMath tex="\pm 1.96" />, so we **fail to reject** <InlineMath tex="H_0" /> — the data are consistent with a random sequence.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.045 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.087 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.045 is well within the critical bounds of <InlineMath tex="\pm 0.087" />. No significant autocorrelation is detected at lag 1 or at any lag through lag 50. The **randomness assumption is satisfied**.
 
 ### Distribution Test
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality yields a test statistic of 0.273, well below the critical value of 0.787 at the 5% level. The null hypothesis of normality is not rejected. The [PPCC plot](/eda/techniques/ppcc-plot/) confirms the optimal shape parameter is consistent with a normal distribution.
+The probability plot correlation coefficient (PPCC) for a normal distribution is 0.996, slightly below the critical value of 0.997 for <InlineMath tex="n = 500" />, so the PPCC test technically rejects normality at the 5% level. The [Anderson-Darling test](/eda/quantitative/anderson-darling/) yields a test statistic of <InlineMath tex="A^2 = 1.0612" />, which exceeds the critical value of 0.787 and also rejects normality at the 5% level.
+
+| Test | Statistic | Critical Value | Result |
+|------|-----------|----------------|--------|
+| PPCC (normal) | 0.996 | 0.997 | Marginally rejects |
+| [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 1.0612" /> | 0.787 | Rejects |
+
+However, both rejections are marginal, and the graphical evidence from the normal probability plot -- which shows data closely following the theoretical straight line -- supports the conclusion that the data are reasonably well-modeled by a normal distribution. With <InlineMath tex="n = 500" />, these tests have very high power and can detect trivially small departures from exact normality. A normal model remains appropriate for practical purposes.
 
 ### Outlier Detection
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) identifies no significant outliers. The maximum and minimum values are within expected bounds for a sample of 500 from a standard normal distribution.
+[Grubbs' test](/eda/quantitative/grubbs-test/) identifies the observation farthest from the mean and tests whether it is a statistical outlier.
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="G" /> | 3.3681 |
+| Critical value (n = 500, <InlineMath tex="\alpha = 0.05" />) | 3.8631 |
+
+**Conclusion:** The test statistic of 3.3681 is below the critical value of 3.8631, so we **fail to reject** — no significant outliers are identified at the 5% level.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = {-0.1251}" /> | 1.96 | **Fail to reject** |
+| **Fixed variation** | [Bartlett's test](/eda/quantitative/bartletts-test/) | <InlineMath tex="T = 2.3737" /> | 7.8147 | **Fail to reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-1.0744}" /> | 1.96 | **Fail to reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.045" /> | 0.087 | **Fail to reject** |
+| **Normality** | [Anderson-Darling](/eda/quantitative/anderson-darling/) | <InlineMath tex="A^2 = 1.0612" /> | 0.787 | Marginally rejects |
+| **Outliers** | [Grubbs' test](/eda/quantitative/grubbs-test/) | <InlineMath tex="G = 3.3681" /> | 3.8631 | **Fail to reject** |
+
+All four assumptions are satisfied. The univariate model <InlineMath tex="Y_i = C + E_i" /> is appropriate for this data.
+
+## Interpretation
+
+The graphical and quantitative analyses converge on a consistent conclusion: the normal random numbers dataset satisfies all four underlying assumptions of a univariate measurement process. The [run sequence plot](/eda/techniques/run-sequence-plot/) shows a stable band with no visible trend or shift, confirmed by the location test (<InlineMath tex="t = -0.1251" />, well within <InlineMath tex="\pm 1.96" />). [Bartlett's test](/eda/quantitative/bartletts-test/) confirms constant variation (<InlineMath tex="T = 2.3737" />, well below the critical value of 7.8147). The randomness assumption is supported by both the structureless [lag plot](/eda/techniques/lag-plot/) and the quantitative tests: the [runs test](/eda/quantitative/runs-test/) (<InlineMath tex="Z = -1.0744" />) and lag-1 [autocorrelation](/eda/quantitative/autocorrelation/) (<InlineMath tex="r_1 = 0.045" />) are both non-significant, and the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) shows all coefficients within the 95% confidence bands.
+
+The only nuance is the formal normality assessment. The [Anderson-Darling test](/eda/quantitative/anderson-darling/) (<InlineMath tex="A^2 = 1.0612" />) marginally rejects normality at the 5% level, and the PPCC of 0.996 falls just below the critical value of 0.997. However, the [normal probability plot](/eda/techniques/normal-probability-plot/) shows excellent linearity with no systematic curvature, and [Grubbs' test](/eda/quantitative/grubbs-test/) (<InlineMath tex="G = 3.3681" />, below the critical value of 3.8631) confirms no outliers. The apparent rejection is a power artifact at <InlineMath tex="n = 500" /> -- with this sample size, formal tests can detect trivially small departures from exact normality that have no practical significance. The data are well-modeled by a [normal distribution](/eda/distributions/normal/).
+
+The univariate model <InlineMath tex="Y_i = C + E_i" /> is appropriate for this dataset. Because all four assumptions hold, the standard 95% [confidence interval](/eda/quantitative/confidence-limits/) <InlineMath tex="\bar{Y} \pm 2s/\sqrt{N}" /> is statistically valid. This case study serves as the reference baseline -- the ideal outcome when a process is operating correctly and the standard methodology applies without qualification.
 
 ## Conclusions
 
-All four assumptions of a univariate measurement process are satisfied for this dataset. The data are random, from a fixed location (mean approximately 0), with fixed variation (standard deviation approximately 1), and follow a normal distribution. The recommended model is the sample mean as the best estimate of location, with a 95% confidence interval of approximately -0.0036 plus or minus 0.0877. This case study serves as the reference standard for comparison with datasets that violate one or more assumptions.
+All four assumptions of a univariate measurement process are satisfied for this dataset:
+
+1. **Fixed location** — confirmed; no significant drift (regression slope <InlineMath tex="t = -0.1251" />)
+2. **Fixed variation** — confirmed; Bartlett's test shows homogeneous variance (<InlineMath tex="T = 2.3737" />)
+3. **Randomness** — confirmed; no significant autocorrelation (<InlineMath tex="r_1 = 0.045" />) and runs test passes (<InlineMath tex="Z = -1.0744" />)
+4. **Distribution** — the normal distribution is a reasonable model despite marginal formal rejections
+
+The data are random, from a fixed location (mean approximately 0), with fixed variation (standard deviation approximately 1), and follow a normal distribution. The recommended model is the sample mean as the best estimate of location, with the standard 95% confidence interval:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = -0.0029 \pm \frac{2(1.0210)}{\sqrt{500}} = -0.0029 \pm 0.0913" />
+</div>
+
+This gives a 95% confidence interval of approximately <InlineMath tex="(-0.094,\; 0.089)" /> for the true mean. Because all four assumptions hold, this confidence interval is statistically valid.
+
+This case study serves as the reference standard for comparison with datasets that violate one or more assumptions, such as the [random walk](/eda/case-studies/random-walk/) case study where the fixed-location and randomness assumptions are catastrophically violated.
