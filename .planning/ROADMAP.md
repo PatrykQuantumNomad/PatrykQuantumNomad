@@ -84,8 +84,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 58-01-PLAN.md — Dataset array (1000 values) + StandardResistorPlots.astro + CaseStudyDataset registration
-- [ ] 58-02-PLAN.md — Full MDX page with all sections, NIST-verified statistics, and cross-references
+- [x] 58-01-PLAN.md — Dataset array (1000 values) + StandardResistorPlots.astro + CaseStudyDataset registration
+- [x] 58-02-PLAN.md — Full MDX page with all sections, NIST-verified statistics, and cross-references
 
 ### Phase 59: Uniform Random Numbers Enhancement
 **Goal**: Uniform Random Numbers case study reaches full NIST parity including the uniform PDF overlay that distinguishes it from the standard-pattern studies
@@ -179,10 +179,10 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56. Infrastructure Foundation | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 57. Minor-Gap Case Studies | v1.9 | 3/3 | Complete | 2026-02-27 |
-| 58. Standard Resistor Case Study | 2/2 | Complete   | 2026-02-27 | - |
+| 58. Standard Resistor Case Study | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 59. Uniform Random Numbers Enhancement | v1.9 | 0/1 | Not started | - |
 | 60. Beam Deflections Deep Dive | v1.9 | 0/2 | Not started | - |
 | 61. Fatigue Life Deep Dive | v1.9 | 0/1 | Not started | - |
 | 62. Ceramic Strength DOE | v1.9 | 0/2 | Not started | - |
 | 63. Validation | v1.9 | 0/1 | Not started | - |
-| **Total** | **v1.0-v1.9** | **132/141** | **94%** | |
+| **Total** | **v1.0-v1.9** | **134/141** | **95%** | |
