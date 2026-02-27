@@ -9,8 +9,8 @@ Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each map
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: technique-content.ts is split into manageable modules (per-category or per-group) to prevent 200KB+ monolith
-- [ ] **INFRA-02**: TechniqueContent interface is extended with optional fields: questions, importance, definitionExpanded, formulas, pythonCode, caseStudySlugs, examples
+- [x] **INFRA-01**: technique-content.ts is split into manageable modules (per-category or per-group) to prevent 200KB+ monolith
+- [x] **INFRA-02**: TechniqueContent interface is extended with optional fields: questions, importance, definitionExpanded, formulas, pythonCode, caseStudySlugs, examples
 - [ ] **INFRA-03**: Graphical [slug].astro template renders new sections (Questions Answered, Importance, expanded Definition, Examples, Case Studies) in the description slot
 - [ ] **INFRA-04**: Graphical [slug].astro template activates the code slot for Python examples using astro-expressive-code Code component
 - [ ] **INFRA-05**: Graphical [slug].astro template renders KaTeX formulas at build time using katex.renderToString() for techniques that have formulas
@@ -93,8 +93,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 64 | Pending |
-| INFRA-02 | Phase 64 | Pending |
+| INFRA-01 | Phase 64 | Complete |
+| INFRA-02 | Phase 64 | Complete |
 | INFRA-03 | Phase 64 | Pending |
 | INFRA-04 | Phase 64 | Pending |
 | INFRA-05 | Phase 64 | Pending |
