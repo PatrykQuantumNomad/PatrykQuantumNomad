@@ -81,7 +81,7 @@ Plans:
   2. StandardResistorPlots.astro component renders all required plot types (run sequence, lag, histogram, normal probability, autocorrelation, spectral) with computed data from the dataset array
   3. Standard Resistor MDX page is accessible at its case study URL with Background and Data, individual named plot subsections, quantitative results, interpretation, and conclusions sections
   4. Standard Resistor appears in case study navigation, CaseStudyDataset.astro mapping, and is cross-referenced from relevant technique pages
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 58-01-PLAN.md — Dataset array (1000 values) + StandardResistorPlots.astro + CaseStudyDataset registration
@@ -179,7 +179,7 @@ Note: Phases 59-62 all depend only on Phase 56 (not on each other), but execute 
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56. Infrastructure Foundation | v1.9 | 2/2 | Complete | 2026-02-27 |
 | 57. Minor-Gap Case Studies | v1.9 | 3/3 | Complete | 2026-02-27 |
-| 58. Standard Resistor Case Study | v1.9 | 0/2 | Not started | - |
+| 58. Standard Resistor Case Study | 1/2 | In Progress|  | - |
 | 59. Uniform Random Numbers Enhancement | v1.9 | 0/1 | Not started | - |
 | 60. Beam Deflections Deep Dive | v1.9 | 0/2 | Not started | - |
 | 61. Fatigue Life Deep Dive | v1.9 | 0/1 | Not started | - |
