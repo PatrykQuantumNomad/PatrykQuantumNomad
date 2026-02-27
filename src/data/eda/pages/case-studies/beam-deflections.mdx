@@ -276,6 +276,18 @@ The residual autocorrelation is dramatically reduced compared to the original da
 
 The residual spectral plot shows a relatively flat spectrum with no dominant peaks. The prominent peak near frequency 0.3 in the original data's [spectral plot](/eda/techniques/spectral-plot/) has been eliminated, confirming that the sinusoidal model has captured the periodic component.
 
+### Validation Summary
+
+| Assumption | Original Data | Residuals | Improvement |
+|-----------|--------------|-----------|-------------|
+| **Fixed location** | Satisfied (<InlineMath tex="t = 0.022" />) | Satisfied -- no shifts in residual location | Maintained |
+| **Fixed variation** | Satisfied (<InlineMath tex="W = 0.09378" />) | Satisfied -- stable residual spread | Maintained |
+| **Randomness** | **Rejected** (<InlineMath tex="Z = 2.6938" />) | Satisfied -- no significant autocorrelation | **Restored** |
+| **Distribution** | Not tested (randomness violated) | Approximately normal (minor left-tail departure) | Now testable |
+| **Outliers** | Not tested (randomness violated) | 3 potential outliers (NIST) | Now assessable |
+
+The sinusoidal model restores the randomness assumption while maintaining the satisfied location and variation assumptions. Distribution testing, which was not meaningful for the original data due to the randomness violation, now shows the residuals are approximately normally distributed. The overall fit is "reasonably good" per NIST's assessment, with the caveat that a slight left-tail departure from normality and three potential outliers warrant consideration.
+
 ## Conclusions
 
 Two of four assumptions hold for the original data: fixed location and fixed variation. The normality assumption was not tested because the randomness assumption is severely violated, making distributional tests invalid. The critical failure is in the randomness assumption — the autocorrelation plot and spectral analysis reveal significant periodic (sinusoidal) structure in the data. Consecutive observations are positively correlated, and the spectral plot identifies a dominant cyclic period at frequency 0.3.
