@@ -1,275 +1,329 @@
-# Stack Research: EDA Case Study Deep Dive
+# Stack Research: EDA Graphical Techniques NIST Parity
 
-**Domain:** Enhancing 8 existing EDA case studies + adding 1 new case study (Standard Resistor) to match NIST/SEMATECH source depth in an existing Astro 5 static site
-**Researched:** 2026-02-26
+**Domain:** Expanding 29 existing EDA graphical technique pages to full NIST/SEMATECH section depth with Python code examples, KaTeX formulas, and expanded prose content
+**Researched:** 2026-02-27
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The existing 13 SVG generators and math library cover all plot types needed. No new npm packages are required. The scope of work is entirely additive within the existing TypeScript codebase: new statistical functions in `statistics.ts`, expanded plot type support in per-case-study `*Plots.astro` components, and a new `StandardResistorPlots.astro` component. The RandomWalkPlots.astro pattern (340 lines, 16 plot types, inline model computation) scales well to all 9 case studies.
+Zero new npm packages are required. Every capability needed -- Python syntax highlighting, KaTeX formula rendering, expanded content fields -- already exists in the codebase and is proven on the quantitative technique pages and distribution pages. The work is a TypeScript interface expansion in `technique-content.ts`, a template update in `[slug].astro`, and content authoring for 29 techniques. The quantitative page `[slug].astro` serves as the exact blueprint: it imports `Code` from `astro-expressive-code/components`, calls `katex.renderToString()` at build time, and renders both formula and code slots that already exist in TechniquePage.astro.
 
-## Existing Stack (Fully Sufficient -- Zero New npm Dependencies)
+## Existing Stack (Zero New npm Dependencies)
 
-The current technology stack handles everything needed for the case study deep dive. Every analysis from the NIST source material can be implemented with existing tools.
+Every technology needed is already installed, configured, and proven in production on other page types.
 
-### Existing SVG Generators -- All 13 Cover the Need
+### Python Code Rendering -- Already Solved
 
-| Generator | Used By Case Studies | For Deep Dive |
-|-----------|---------------------|---------------|
-| `generateLinePlot` (run-sequence mode) | All 9 | Raw data + residual run sequence |
-| `generateLagPlot` | All 9 | Raw data + residual lag |
-| `generateHistogram` | All 9 | Raw data + residual histograms |
-| `generateProbabilityPlot` (normal, uniform, weibull) | All 9 | Distribution assessment + residual normality |
-| `generateAutocorrelationPlot` | 7 of 9 | Randomness verification + residual independence |
-| `generateSpectralPlot` | 7 of 9 | Frequency analysis + residual white noise verification |
-| `generateScatterPlot` | Random Walk (predicted vs original) | Predicted vs. original for all modeled cases |
-| `generateBoxPlot` | Ceramic Strength, Fatigue Life | Batch comparisons, group comparisons |
-| `generate4Plot` / `generate6Plot` | All 9 | Summary diagnostics + residual diagnostics |
+| Component | Version | Location | How It Works |
+|-----------|---------|----------|--------------|
+| `astro-expressive-code` | 0.41.6 | `package.json` dependency | Astro integration for syntax highlighting with themes, line numbers, copy button |
+| `Code` component | (part of above) | `import { Code } from 'astro-expressive-code/components'` | Build-time syntax highlighting -- zero JS shipped to client |
+| TechniquePage `code` slot | -- | `src/components/eda/TechniquePage.astro` line 57 | Named slot already exists, ready for `<Fragment slot="code">` |
 
-**No new SVG generator types are needed.** Every plot type referenced in the NIST case studies maps to an existing generator. The "predicted vs. original" plot uses `generateScatterPlot`. Residual plots use the same generators applied to computed residual arrays.
+**Proven pattern** in `src/pages/eda/quantitative/[slug].astro` lines 100-107:
+```astro
+{content?.pythonCode && (
+  <Fragment slot="code">
+    <section class="prose-section mt-8">
+      <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+      <Code code={content.pythonCode} lang="python" />
+    </section>
+  </Fragment>
+)}
+```
 
-### Existing Math Functions -- What We Have
+This exact pattern copies directly into `src/pages/eda/techniques/[slug].astro`. No modifications to `Code` component, no new configuration, no new CSS.
 
-| Function | Location | Used For |
-|----------|----------|----------|
-| `mean()` | statistics.ts | Summary statistics, model fitting |
-| `standardDeviation()` | statistics.ts | Summary statistics, confidence intervals |
-| `linearRegression()` | statistics.ts | Location drift test, AR(1) model fitting |
-| `autocorrelation()` | statistics.ts | Randomness assessment, lag-k autocorrelation |
-| `normalQuantile()` | statistics.ts | Probability plots |
-| `kde()` | statistics.ts | Histogram overlays |
-| `silvermanBandwidth()` | statistics.ts | KDE bandwidth selection |
-| `fft()` | statistics.ts | Spectral analysis |
-| `powerSpectrum()` | statistics.ts | Spectral plots |
+### KaTeX Formula Rendering -- Already Solved
 
-## New Statistical Functions Required in statistics.ts
+| Component | Version | Source | How It Works |
+|-----------|---------|--------|--------------|
+| `katex` | 0.16.33 | Transitive dependency of `rehype-katex@^7.0.1` | Programmatic API via `import katex from 'katex'` |
+| `katex.renderToString()` | (part of above) | Called in Astro frontmatter at build time | Produces static HTML+CSS, zero client JS |
+| `katex.min.css` | (part of above) | `/public/styles/katex.min.css` | Loaded conditionally via `useKatex` prop |
+| TechniquePage `useKatex` prop | -- | `src/components/eda/TechniquePage.astro` line 14 | Already wired to EDALayout for conditional CSS loading |
+| TechniquePage `formula` slot | -- | `src/components/eda/TechniquePage.astro` line 56 | Named slot already exists, ready for formula content |
+| `InlineMath.astro` | -- | `src/components/eda/InlineMath.astro` | Renders inline KaTeX within prose text at build time |
 
-These functions must be added to `src/lib/eda/math/statistics.ts` to support the quantitative test result tables that every NIST case study includes. All are pure math -- no dependencies, no npm packages.
+**Proven pattern** in `src/pages/eda/quantitative/[slug].astro` lines 43-47 and 85-98:
+```astro
+// Frontmatter: pre-render at build time
+const renderedFormulas = content?.formulas.map(f => ({
+  ...f,
+  html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
+})) ?? [];
 
-### Critical: Required by All Case Studies
+// Template: render into formula slot
+{renderedFormulas.length > 0 && (
+  <Fragment slot="formula">
+    <section class="prose-section mt-8 space-y-6">
+      <h2 class="text-xl font-heading font-bold mb-3">Formulas</h2>
+      {renderedFormulas.map(f => (
+        <div class="formula-block mb-6">
+          <h3 class="text-lg font-semibold mb-2">{f.label}</h3>
+          <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={f.html} />
+          <p class="text-[var(--color-text-secondary)]">{f.explanation}</p>
+        </div>
+      ))}
+    </section>
+  </Fragment>
+)}
+```
 
-| Function | Purpose | NIST Case Studies Using It | Complexity |
-|----------|---------|---------------------------|------------|
-| `runsTest(data)` | Runs test for randomness (Z-statistic) | Normal Random, Uniform Random, Random Walk, Cryothermometry, Filter Transmittance, Standard Resistor, Heat Flow Meter | Low |
-| `leveneTest(data, k)` | Median-based Levene test for variance homogeneity (W-statistic) | Random Walk, Cryothermometry, Filter Transmittance, Standard Resistor, Uniform Random | Medium |
-| `bartlettTest(data, k)` | Bartlett test for variance equality (T-statistic, chi-squared) | Normal Random, Heat Flow Meter | Medium |
-| `andersonDarlingNormal(data)` | Anderson-Darling normality test (A-squared statistic) | Normal Random, Uniform Random, Cryothermometry, Heat Flow Meter | Medium |
-| `grubbsTest(data)` | Grubbs outlier test (G-statistic) | Normal Random, Uniform Random, Heat Flow Meter | Low |
-| `median(data)` | Sample median | Used by Levene test, summary statistics | Trivial |
-| `tStatistic(slope, slopeStdErr)` | t-statistic for regression slope | All case studies with location drift test | Trivial |
+**Important:** `katex` is NOT listed as a direct dependency in `package.json`. It is resolved as a dependency of `rehype-katex@^7.0.1`. This works because npm hoists it to `node_modules/katex/`. This is the existing pattern used by three files (`InlineMath.astro`, `distributions/[slug].astro`, `quantitative/[slug].astro`). Adding it as a direct dependency is optional but recommended for explicitness -- see Recommendations below.
 
-### Required by Specific Case Studies
+### TechniqueContent Interface Expansion -- Pure TypeScript
 
-| Function | Purpose | Case Studies | Complexity |
-|----------|---------|-------------|------------|
-| `ppcc(data)` | Probability Plot Correlation Coefficient | Normal Random, Uniform Random, Cryothermometry | Low |
-| `fTest(var1, var2, n1, n2)` | F-test for variance equality | Ceramic Strength (batch comparison) | Low |
-| `twoSampleTTest(group1, group2)` | Two-sample pooled t-test | Ceramic Strength (batch mean comparison) | Low |
-| `uniformQuantile(p)` | Uniform distribution quantile function | Uniform Random (uniform PPCC), Random Walk residuals | Trivial |
-
-### Implementation Details
-
-All functions are pure arithmetic operating on `number[]` arrays. None require matrix operations, numerical optimization, or external libraries. The most complex is `andersonDarlingNormal`, which requires sorting the data, computing the normal CDF (via the error function), and summing a weighted series. The normal CDF can be derived from the existing `normalQuantile` inverse using a rational approximation.
+The current `TechniqueContent` interface in `src/lib/eda/technique-content.ts` has 5 fields:
 
 ```typescript
-// Example: Runs test implementation (complete)
-export function runsTest(data: number[]): { z: number; runs: number } {
-  const n = data.length;
-  if (n < 2) return { z: 0, runs: 1 };
-  const med = median(data);
-  // Count runs (consecutive sequences above/below median)
-  let runs = 1;
-  let nAbove = 0;
-  let nBelow = 0;
-  const above = data.map(v => v > med);
-  above.forEach((a, i) => {
-    if (a) nAbove++; else nBelow++;
-    if (i > 0 && above[i] !== above[i - 1]) runs++;
-  });
-  // Expected runs and standard deviation
-  const expectedRuns = 1 + (2 * nAbove * nBelow) / n;
-  const stdRuns = Math.sqrt(
-    (2 * nAbove * nBelow * (2 * nAbove * nBelow - n)) / (n * n * (n - 1))
-  );
-  const z = stdRuns > 0 ? (runs - expectedRuns) / stdRuns : 0;
-  return { z, runs };
+export interface TechniqueContent {
+  definition: string;    // "What It Is"
+  purpose: string;       // "When to Use It"
+  interpretation: string; // "How to Interpret"
+  assumptions: string;   // "Assumptions and Limitations"
+  nistReference: string;  // NIST section reference
 }
 ```
 
-**Estimated total: ~300-400 lines of TypeScript** for all new statistical functions.
+Expanding this requires zero dependencies. It is a TypeScript interface change plus content authoring.
 
-### What Does NOT Need to Be Added
+## Recommended Stack Changes
 
-| Function | Why Not Needed |
-|----------|---------------|
-| Non-linear least squares (Levenberg-Marquardt) | Beam Deflections uses a linearized sinusoidal model (OLS on sin/cos basis) -- already implemented inline in BeamDeflectionPlots.astro |
-| Chi-squared distribution CDF | Critical values are hard-coded constants from standard tables (3 df at alpha=0.05 = 7.815) |
-| F-distribution CDF | Critical values for Levene/Bartlett/F-tests are known constants at standard significance levels |
-| t-distribution CDF | Critical value at alpha=0.05 is 1.96 for large samples; exact values can be hard-coded per case |
-| Gamma/Weibull/Birnbaum-Saunders PDF | Fatigue Life candidate distributions are described textually + existing probability plot types suffice |
-| Complex demodulation | Beam Deflections uses spectral plot to identify frequency; complex demodulation is supplementary, not required |
+### 1. Expand TechniqueContent Interface
 
-**Rationale for hard-coded critical values:** Every NIST case study uses a fixed significance level (alpha = 0.05) with known degrees of freedom. The critical values are mathematical constants (e.g., Z_0.975 = 1.96, chi-squared_0.95(3) = 7.815, F_0.05(3,496) = 2.623). Computing these from scratch requires the incomplete gamma function or beta function -- far more complexity than they're worth when the values are known constants. Hard-code them per test, matching NIST exactly.
-
-## New Astro Components Required
-
-### New: StandardResistorPlots.astro
-
-A new plot component following the exact RandomWalkPlots.astro pattern for the Standard Resistor case study (NIST Section 1.4.2.7, dataset PONTIUS.DAT with 1000 observations).
-
-**Model type:** Linear regression on run order (drift detection), no autoregressive model. The NIST conclusion is that the non-constant variation stems from seasonal humidity effects -- the resolution is equipment modification, not statistical modeling.
-
-**Estimated plot types:** 7-10 (4-plot, run-sequence, lag, histogram, probability, autocorrelation, spectral, plus potential residual plots from linear detrending).
-
-### Existing Components to Expand
-
-Each existing `*Plots.astro` component needs its `PlotType` union and `switch` statement expanded. The pattern is proven (RandomWalkPlots = 340 lines, 16 types; BeamDeflectionPlots already has residual plots).
-
-| Component | Current Plot Types | New Plot Types to Add | Model Type |
-|-----------|-------------------|----------------------|------------|
-| `NormalRandomPlots.astro` | 7 (basic EDA) | 0 new plots, but quantitative results table data computed in frontmatter | None (satisfies all assumptions) |
-| `UniformRandomPlots.astro` | 8 (basic EDA + uniform prob) | 0 new plots, quantitative results computed | None (satisfies all assumptions) |
-| `RandomWalkPlots.astro` | 16 (complete with residuals) | **Already complete** -- serves as template | AR(1) |
-| `CryothermometryPlots.astro` | 7 (basic EDA) | 0 new plots, quantitative results computed | None (mild autocorrelation noted but not modeled by NIST) |
-| `BeamDeflectionPlots.astro` | 13 (EDA + residuals) | +2: `predicted-vs-original`, `residual-spectral` | Sinusoidal (already implemented) |
-| `FilterTransmittancePlots.astro` | 7 (basic EDA) | 0 new plots, quantitative results computed | None (fix is instrumentation, not modeling) |
-| `HeatFlowMeterPlots.astro` | 7 (basic EDA) | 0 new plots, quantitative results computed | None (well-behaved process) |
-| `FatigueLifePlots.astro` | 8 (EDA + box plot) | +1: `weibull-probability` (Weibull prob plot for reliability) | None (distribution selection study) |
-| `CeramicStrengthPlots.astro` | 8 (EDA + batch plots) | 0 new plots, quantitative results computed | None (batch effect, not time series model) |
-
-### Component Pattern Scalability Assessment
-
-**The RandomWalkPlots.astro pattern scales well to all 9 case studies.** Key architectural features:
-
-1. **Single dataset import** -- each component imports its dataset from `datasets.ts`
-2. **Inline model computation** -- regression, residual calculation happen in Astro frontmatter (build time)
-3. **Type-safe plot selection** -- `PlotType` union ensures compile-time checking
-4. **Default captions** -- `Record<PlotType, string>` maps each type to a descriptive caption
-5. **Shared figure wrapper** -- identical `<figure>` HTML structure across all components
-
-**Pattern does NOT need refactoring.** While a generic `CaseStudyPlots.astro` component could theoretically reduce duplication, it would require:
-- A complex discriminated union of all possible model types (AR, sinusoidal, linear, none)
-- Runtime branching for model computation that varies radically per case study
-- Loss of type safety (PlotType would need to be a superset of all possibilities)
-
-The per-case-study component approach is better because:
-- Each case study has a unique model (or none) with different fitting logic
-- The plot type set varies per case study
-- Default captions are case-study-specific
-- 200-350 lines per component is manageable
-- Adding a new case study means copying a template and customizing
-
-## New Data Required
-
-### Standard Resistor Dataset
-
-A new export in `src/data/eda/datasets.ts` for the PONTIUS.DAT dataset (1000 observations of standard resistor values, ~27.8-28.1 ohms). This follows the exact pattern of existing dataset exports.
+Add new optional fields to avoid breaking existing content while enabling incremental enrichment:
 
 ```typescript
-// In datasets.ts
-export const standardResistor: number[] = [
-  // 1000 values from NIST PONTIUS.DAT
-  27.97, 28.01, ...
-];
+export interface TechniqueContent {
+  // Existing fields (unchanged)
+  definition: string;
+  purpose: string;
+  interpretation: string;
+  assumptions: string;
+  nistReference: string;
+
+  // NEW: Key questions this technique answers (NIST "Questions" section)
+  questions?: string[];
+
+  // NEW: Why this technique matters in practice
+  importance?: string;
+
+  // NEW: Worked example narrative (dataset description + walkthrough)
+  examples?: Array<{
+    title: string;
+    description: string;
+  }>;
+
+  // NEW: Links to related EDA case studies
+  caseStudies?: Array<{
+    slug: string;
+    relevance: string;
+  }>;
+
+  // NEW: KaTeX formulas (same structure as QuantitativeContent)
+  formulas?: Array<{
+    label: string;
+    tex: string;
+    explanation: string;
+  }>;
+
+  // NEW: Python code example
+  pythonCode?: string;
+}
 ```
 
-### Standard Resistor MDX
+**Why optional fields:** 29 techniques already have content for the 5 existing fields. Making new fields optional means existing content continues to compile and render unchanged. Techniques can be enriched incrementally -- one at a time, across multiple phases if needed.
 
-A new file at `src/data/eda/pages/case-studies/standard-resistor.mdx` following the established pattern.
+**Why match QuantitativeContent's formula structure:** The `formulas` array with `{ label, tex, explanation }` is identical to the proven `QuantitativeContent` interface. Using the same shape means the same rendering logic works in both page templates. Code review is simpler when patterns are consistent.
 
-## Quantitative Test Results Table Component
+### 2. Update Graphical Technique Page Template
 
-Each enhanced case study needs a "Quantitative Results" section with formatted test result tables. This does NOT require a new Astro component -- the existing MDX table syntax with `InlineMath` components handles this perfectly, as demonstrated in the Random Walk case study:
+`src/pages/eda/techniques/[slug].astro` needs these additions (modeled after `quantitative/[slug].astro`):
 
-```mdx
-| Assumption | Test | Statistic | Critical Value | Result |
-|---|---|---|---|---|
-| **Fixed location** | Regression on run order | <InlineMath tex="t = 9.275" /> | 1.96 | **Reject** |
-| **Fixed variation** | Levene test | <InlineMath tex="W = 10.459" /> | 2.623 | **Reject** |
+```astro
+---
+import { Code } from 'astro-expressive-code/components';
+import katex from 'katex';
+// ... existing imports
+
+const content = getTechniqueContent(technique.slug);
+
+// Pre-render KaTeX formulas at build time
+const renderedFormulas = content?.formulas?.map(f => ({
+  ...f,
+  html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
+})) ?? [];
+
+const hasFormulas = renderedFormulas.length > 0;
+---
+
+<TechniquePage
+  title={technique.title}
+  description={technique.description}
+  category="Graphical Techniques"
+  nistSection={technique.nistSection}
+  slug={technique.slug}
+  relatedTechniques={relatedTechniques}
+  useKatex={hasFormulas}
+>
+  {/* ... existing plot slot ... */}
+  {/* ... existing description slot (expanded with new sections) ... */}
+
+  {hasFormulas && (
+    <Fragment slot="formula">
+      {/* Same rendering as quantitative/[slug].astro */}
+    </Fragment>
+  )}
+
+  {content?.pythonCode && (
+    <Fragment slot="code">
+      <section class="prose-section mt-8">
+        <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+        <Code code={content.pythonCode} lang="python" />
+      </section>
+    </Fragment>
+  )}
+</TechniquePage>
 ```
 
-**The computations happen in the `*Plots.astro` frontmatter** (which runs at build time), and the results are passed as props or hard-coded in the MDX. Since these are deterministic computations on fixed datasets, the values never change -- they can be computed once and written directly into MDX.
+### 3. Expand Description Slot Rendering
 
-**Recommended approach:** Compute all test statistics in the Astro component frontmatter and expose them as a `results` prop, OR compute them in a shared utility function and hard-code the results in MDX (since datasets are fixed). The latter is simpler and matches the current pattern.
+The existing description slot renders 4 sections. Expand to include new fields:
+
+```astro
+<Fragment slot="description">
+  <section class="prose-section mt-8 space-y-6">
+    {/* Existing: What It Is, When to Use It, How to Interpret, Assumptions */}
+
+    {content.questions && content.questions.length > 0 && (
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">Questions Answered</h2>
+        <ul class="list-disc pl-6 space-y-1 text-[var(--color-text-secondary)]">
+          {content.questions.map(q => <li>{q}</li>)}
+        </ul>
+      </div>
+    )}
+
+    {content.importance && (
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.importance}</p>
+      </div>
+    )}
+
+    {content.examples && content.examples.length > 0 && (
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">Worked Examples</h2>
+        {content.examples.map(ex => (
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-1">{ex.title}</h3>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">{ex.description}</p>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {content.caseStudies && content.caseStudies.length > 0 && (
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">Related Case Studies</h2>
+        {/* Render links to case study pages */}
+      </div>
+    )}
+  </section>
+</Fragment>
+```
+
+## What Already Exists and Must NOT Be Re-Added
+
+| Technology | Status | Do NOT |
+|------------|--------|--------|
+| `astro-expressive-code@0.41.6` | Installed, configured in Astro config | Do not add a second syntax highlighter (Shiki, Prism, highlight.js) |
+| `katex@0.16.33` | Installed as dep of rehype-katex | Do not add MathJax or any other math renderer |
+| `rehype-katex@^7.0.1` | Installed, configured for MDX pipeline | Do not reconfigure; it handles MDX math, while `katex.renderToString()` handles Astro components |
+| `remark-math@^6.0.0` | Installed, configured for MDX pipeline | Do not add remark-directive or other MDX plugins |
+| TechniquePage.astro slots (`plot`, `description`, `formula`, `code`, `interpretation`) | All 5 named slots exist | Do not add new slots; use existing ones |
+| `InlineMath.astro` | Build-time inline KaTeX component | Do not create a duplicate inline math component |
+| `/public/styles/katex.min.css` | KaTeX stylesheet served from public dir | Do not CDN-link katex CSS; it is already self-hosted |
 
 ## What NOT to Add
 
 ### No New npm Packages
 
-| Tempting Addition | Why NOT to Add | What to Do Instead |
-|-------------------|----------------|-------------------|
-| `jstat` or `simple-statistics` | These npm packages provide statistical test functions but add 50-200KB of unused code. Our needs are narrow (6-8 specific functions) and the implementations are straightforward. | Implement the ~300 lines of TypeScript in statistics.ts. Pure functions, no dependencies, fully tested. |
-| `mathjs` | 700KB+ general-purpose math library. Massive overkill for computing a runs test Z-statistic. | Hand-written functions in statistics.ts. |
-| `@stdlib/stats` | Modular but still pulls in infrastructure packages. Each test function imports a dependency chain. | Direct implementations are smaller and have zero dependency risk. |
-| `d3-contour` (already installed but unused for case studies) | Contour plots are not part of any NIST case study analysis. | Already available if ever needed; no action required. |
-| Any charting library (Chart.js, Plotly, Nivo) | All 13 SVG generators already handle every needed plot type. These would add hundreds of KB for zero benefit. | Use existing generators. |
-
-### No New SVG Generator Files
-
-| Considered Generator | Why NOT Needed |
-|---------------------|----------------|
-| `predicted-vs-original.ts` | `generateScatterPlot` already does this -- Random Walk's predicted-vs-original uses it with `showRegression: false` |
-| `residual-plot.ts` | Residual plots use existing generators (line, lag, histogram, probability, autocorrelation, spectral) applied to a residual array -- no special rendering logic needed |
-| `comparison-plot.ts` | NIST case studies don't use side-by-side comparison plots; batch comparisons use box plots (already have `generateBoxPlot`) |
-| `complex-demodulation.ts` | Only Beam Deflections mentions complex demodulation, and even NIST treats it as supplementary. The spectral plot already identifies the dominant frequency. |
-| `dot-plot.ts` | Fatigue Life mentions dot charts but histograms serve the same analytical purpose and are already implemented |
+| Tempting Addition | Why NOT | Use Instead |
+|-------------------|---------|-------------|
+| `katex` as direct dependency | Already resolved via rehype-katex. Adding it creates version conflict risk if rehype-katex upgrades. Three existing files import it successfully. | Continue using transitive dep. Optionally add as direct dep at same version (0.16.33) for explicitness. |
+| `shiki` or `prism` for Python highlighting | astro-expressive-code already provides this with theme support, line numbers, copy button, title bars | `import { Code } from 'astro-expressive-code/components'` |
+| `mdx-js/mdx` for technique content | Technique content is in TypeScript objects, not MDX files. Converting to MDX would require migrating 29 content entries and changing the rendering pipeline. | Keep TypeScript content objects; render formulas with `katex.renderToString()` at build time |
+| `marked` or `remark` for rendering markdown in TS strings | Content fields are plain strings rendered as `<p>` text. Adding markdown parsing adds complexity for marginal formatting gains. | Use plain strings for paragraphs. Use `set:html` with manually crafted HTML only if needed for inline formatting. |
+| Any React math component | KaTeX build-time rendering produces static HTML. No hydration needed. Adding a React math component ships unnecessary JS. | `katex.renderToString()` in Astro frontmatter |
 
 ### No Architecture Changes
 
-| Tempting Refactor | Why NOT to Do |
-|-------------------|---------------|
-| Generic `CaseStudyPlots.astro` component | Model computation logic varies radically per case study (AR(1), sinusoidal, linear detrend, batch split, none). A generic component would require complex discriminated unions and lose type safety. Per-case-study components are more maintainable at 9 components. |
-| Move model computation to statistics.ts | Model computation is tightly coupled to case-study-specific data transformations (e.g., Beam Deflections needs sin/cos basis vectors at a specific frequency). Keeping it in the Astro frontmatter co-locates the computation with its visualization. |
-| Create a "test runner" framework | Over-engineering for 9 case studies with fixed datasets. Each test computation is 5-15 lines of arithmetic. A framework adds abstraction without value. |
+| Tempting Refactor | Why NOT | Impact |
+|-------------------|---------|--------|
+| Convert technique-content.ts to MDX files | Would require 29 new MDX files, a new content collection, different rendering pipeline, and lose the type-safe interface. Current TS objects are simpler and faster to build. | High risk, zero benefit for this milestone |
+| Create shared `TechniqueFormulas.astro` component | Only 2-3 lines of rendering logic (map + set:html). Extracting to a component adds a file and an import for trivial code. | Over-abstraction |
+| Add client-side formula rendering | All formulas are static (they never change based on user input). Build-time rendering is faster, smaller, and more accessible. | Ships unnecessary JS |
+| Merge graphical and quantitative page templates | The two templates share TechniquePage.astro layout but differ in content source (technique-content.ts vs quantitative-content.ts) and plot rendering (SVG generators vs none). Merging adds complexity. | Unnecessary coupling |
 
-## Installation
+## Recommended Optional Improvement
+
+### Add `katex` as Direct Dependency
+
+Currently `katex` is a transitive dependency of `rehype-katex`. Three source files import it directly (`import katex from 'katex'`). Adding it as a direct dependency makes this explicit and protects against breakage if `rehype-katex` ever changes its dependency structure.
 
 ```bash
-# No new packages required. Zero npm install commands.
+npm install katex@^0.16.33
 ```
 
-## Summary of Required Work
-
-| Category | What | Estimated Lines | Files Touched |
-|----------|------|----------------|---------------|
-| **statistics.ts** | Add 7-11 new statistical test functions | ~300-400 new lines | 1 file |
-| **StandardResistorPlots.astro** | New plot component | ~200-250 lines | 1 new file |
-| **datasets.ts** | Add Standard Resistor dataset | ~100-150 lines | 1 file (append) |
-| **standard-resistor.mdx** | New case study content | ~300-400 lines | 1 new file |
-| **BeamDeflectionPlots.astro** | Add 2 plot types | ~30 lines | 1 file (modify) |
-| **FatigueLifePlots.astro** | Add 1 plot type | ~15 lines | 1 file (modify) |
-| **8 existing .mdx files** | Add quantitative results tables + deeper analysis | ~200-300 lines each | 8 files (expand) |
-| **Total** | | ~2500-3500 lines | ~13 files |
-
-## Sources
-
-- [NIST/SEMATECH e-Handbook Section 1.4.2](https://www.itl.nist.gov/div898/handbook/eda/section4/eda42.htm) -- Case study index listing all 10 case studies. HIGH confidence (official NIST source).
-- [NIST Normal Random Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4213.htm) -- Tests: regression slope, Bartlett, runs, autocorrelation, PPCC, Anderson-Darling, Grubbs. HIGH confidence.
-- [NIST Uniform Random Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4223.htm) -- Tests: regression slope, Levene, runs, autocorrelation, PPCC, Anderson-Darling. HIGH confidence.
-- [NIST Random Walk Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4233.htm) -- AR(1) model fitting. HIGH confidence.
-- [NIST Cryothermometry Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4243.htm) -- Tests: regression slope, Levene, runs, autocorrelation, PPCC, Anderson-Darling, Grubbs. HIGH confidence.
-- [NIST Beam Deflections Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4253.htm) -- Non-linear regression, spectral analysis. HIGH confidence.
-- [NIST Filter Transmittance Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4263.htm) -- Tests: regression slope, Levene, runs, autocorrelation. HIGH confidence.
-- [NIST Standard Resistor Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4273.htm) -- Tests: regression slope, Levene, runs, autocorrelation. HIGH confidence.
-- [NIST Heat Flow Meter Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda4283.htm) -- Tests: regression slope, Bartlett, runs, autocorrelation, Anderson-Darling, Grubbs. HIGH confidence.
-- [NIST Ceramic Strength Quantitative Output](https://www.itl.nist.gov/div898/handbook/eda/section4/eda42a3.htm) -- Tests: F-test, two-sample t-test. HIGH confidence.
-- Existing codebase: `src/lib/eda/math/statistics.ts` -- 248 lines, 9 functions covering mean, stddev, linear regression, autocorrelation, FFT, KDE, power spectrum, normal quantile. Verified by reading source. HIGH confidence.
-- Existing codebase: `src/lib/eda/svg-generators/index.ts` -- 13 generators + 2 composite generators, all verified. HIGH confidence.
-- Existing codebase: `src/components/eda/RandomWalkPlots.astro` -- 227 lines, 16 plot types, inline AR(1) model computation. Proven pattern. HIGH confidence.
-- Existing codebase: `src/components/eda/BeamDeflectionPlots.astro` -- 217 lines, 13 plot types, inline sinusoidal model computation. Already has residual analysis. HIGH confidence.
-- Existing codebase: `package.json` -- 52 production dependencies, 7 dev dependencies. All D3 micro-modules and KaTeX already installed. HIGH confidence.
+**Priority:** Low. This is a hygiene improvement, not a blocker. The current setup works and has been stable across multiple milestones.
 
 ## Version Compatibility
 
-No new packages means no new compatibility concerns. All existing versions remain unchanged.
+No new packages means no new compatibility concerns. All versions verified from `node_modules`:
 
-| Existing Package | Relevance to Deep Dive |
-|------------------|----------------------|
-| `d3-scale@^4.0.2` | Used by existing SVG generators; no changes needed |
-| `d3-shape@^3.2.0` | Used by existing SVG generators; no changes needed |
-| `katex@0.16.33` (peer of rehype-katex) | InlineMath component for test result tables; no changes needed |
-| `typescript@^5.9.3` | Type-safe statistical function implementations; no changes needed |
+| Package | Installed Version | Relevance to This Milestone |
+|---------|-------------------|---------------------------|
+| `astro-expressive-code` | 0.41.6 | `Code` component for Python examples on graphical pages |
+| `katex` | 0.16.33 (via rehype-katex) | `katex.renderToString()` for build-time formula rendering |
+| `rehype-katex` | ^7.0.1 | Peer dependency that provides katex; no changes needed |
+| `typescript` | ^5.9.3 | TechniqueContent interface expansion; no version sensitivity |
+| `astro` | ^5.3.0 | Named slots, `set:html`, static paths; all features used by existing pages |
+
+## Integration Points Summary
+
+The graphical technique page template (`[slug].astro`) needs exactly 3 additions:
+
+| Addition | Import | Existing Proof |
+|----------|--------|----------------|
+| `Code` component | `import { Code } from 'astro-expressive-code/components'` | Used in `quantitative/[slug].astro`, `beauty-index/[slug].astro` |
+| `katex` API | `import katex from 'katex'` | Used in `quantitative/[slug].astro`, `distributions/[slug].astro`, `InlineMath.astro` |
+| `useKatex={true}` prop | Already a TechniquePage prop | Used in `quantitative/[slug].astro` |
+
+All three are single-line additions to an existing file, using proven imports from the same codebase.
+
+## Estimated Scope of Changes
+
+| File | Change Type | Estimated Lines | Notes |
+|------|-------------|----------------|-------|
+| `src/lib/eda/technique-content.ts` | Expand interface + 29 content entries | +2000-3000 | New fields for all 29 techniques (questions, importance, examples, caseStudies, formulas, pythonCode) |
+| `src/pages/eda/techniques/[slug].astro` | Add imports + formula/code rendering | +25-35 | Copy pattern from quantitative/[slug].astro |
+| `src/components/eda/TechniquePage.astro` | No changes needed | 0 | All required slots already exist |
+| `src/layouts/EDALayout.astro` | No changes needed | 0 | useKatex conditional loading already works |
+
+## Sources
+
+- Existing codebase: `src/pages/eda/quantitative/[slug].astro` -- Proven pattern for Code + KaTeX on technique pages. 108 lines. Imports `Code` from astro-expressive-code and `katex` for build-time rendering. HIGH confidence.
+- Existing codebase: `src/lib/eda/quantitative-content.ts` -- `QuantitativeContent` interface with `formulas` and `pythonCode` fields. Exact model for expanded `TechniqueContent`. HIGH confidence.
+- Existing codebase: `src/lib/eda/technique-content.ts` -- Current 5-field `TechniqueContent` interface, 29 entries keyed by slug. HIGH confidence.
+- Existing codebase: `src/pages/eda/techniques/[slug].astro` -- Current graphical page template, 87 lines. Uses TechniquePage with `plot` and `description` slots. HIGH confidence.
+- Existing codebase: `src/components/eda/TechniquePage.astro` -- Layout component with 5 named slots (plot, description, formula, code, interpretation). `useKatex` prop already wired. HIGH confidence.
+- Existing codebase: `src/components/eda/InlineMath.astro` -- Build-time inline KaTeX component. Available for use in expanded description content if needed. HIGH confidence.
+- Existing codebase: `package.json` -- astro-expressive-code@^0.41.6, rehype-katex@^7.0.1 confirmed installed. HIGH confidence.
+- Installed `node_modules/katex/package.json` -- Version 0.16.33 confirmed. HIGH confidence.
+- Installed `node_modules/astro-expressive-code/package.json` -- Version 0.41.6 confirmed. HIGH confidence.
 
 ---
-*Stack research for: EDA Case Study Deep Dive*
-*Researched: 2026-02-26*
+*Stack research for: EDA Graphical Techniques NIST Parity*
+*Researched: 2026-02-27*

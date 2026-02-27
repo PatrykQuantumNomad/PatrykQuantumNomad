@@ -1,164 +1,188 @@
 # Project Research Summary
 
-**Project:** EDA Case Study Deep Dive (v1.9)
-**Domain:** Statistical content enhancement — deepening 8 existing NIST case studies + adding 1 new case study (Standard Resistor) to an existing Astro 5 static site
-**Researched:** 2026-02-26
+**Project:** EDA Graphical Techniques NIST Parity
+**Domain:** Static site content expansion — Astro + TypeScript content enrichment
+**Researched:** 2026-02-27
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone enhances an existing, fully functional EDA encyclopedia (90+ pages, 13 SVG generators, 9 case studies) to match the depth of the NIST/SEMATECH e-Handbook source material. The Random Walk case study is already the gold standard reference at 339 lines with 16 plot types, full quantitative test results, and model development/validation sections. The remaining 8 case studies range from substantially complete (Normal Random, Cryothermometry, Filter Transmittance, Heat Flow Meter) to needing significant new visualizations (Beam Deflections, Fatigue Life, Ceramic Strength). One entirely new case study (Standard Resistor, NIST Section 1.4.2.7) must be built from scratch. All research confirms this can be accomplished with zero new npm dependencies — existing SVG generators and the statistics.ts library cover every required plot type.
+This milestone expands 29 existing EDA graphical technique pages to full NIST/SEMATECH handbook section depth. The work is a content enrichment project, not a platform or architecture change. Every technical capability needed — KaTeX formula rendering, Python syntax highlighting, case study cross-linking — already exists and is proven on the site's quantitative technique pages and distribution pages. Zero new npm packages are required. The quantitative `[slug].astro` page is the exact reference implementation for the target state. Three NIST sections are entirely absent from all 29 graphical pages today: "Questions Answered," "Importance," and "Case Study" cross-links. Two more sections are partially absent: formulas (0 of 29 graphical pages have them; ~12 of 29 need them) and Python code examples (0 of 29 graphical pages have them; quantitative pages already do).
 
-The recommended approach is infrastructure-first: create a new `hypothesis-tests.ts` module with 7-11 statistical test functions (runs test, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, F-test), extract a shared `PlotFigure.astro` wrapper to reduce duplication across 9 components, define a canonical section template, and establish a URL cheat sheet before writing any content. Content work then proceeds in priority order — easy wins (4 nearly-complete case studies) before the new Standard Resistor build, before complex enhancements (Beam Deflections sinusoidal model, Fatigue Life distribution comparison, Ceramic Strength DOE plots). Total estimated scope: ~2,500-3,500 lines across ~13 files.
+The recommended approach is a phased build: establish infrastructure first (interface extension, template update, file split, case study mapping), then populate content in categorical batches. The three missing prose sections — Questions, Importance, Case Studies — are pure content additions with no infrastructure dependencies and should come first because they deliver the highest value-to-effort ratio and validate the template changes with visible output quickly. Formulas and Python code share the same template infrastructure changes and must be authored together. Variant interpretation captions for the 6 Tier B techniques are standalone polish for a final phase.
 
-The primary risks are statistical value transcription errors (270+ numeric values must exactly match NIST source), build time regression from 100+ SVG renders across 9 case studies, and cross-reference link errors that multiply as content expands. All three are preventable with upfront tooling: programmatic computation of test statistics from dataset arrays (not hardcoding), build time monitoring with a set budget, and a cross-reference URL cheat sheet. Quick task 011 already found 5 real broken links in the existing case studies, confirming this is an active risk.
+The primary risks are content quality drift across 29 technique entries authored sequentially, `technique-content.ts` growing to an unmaintainable 250KB+ if not split before content is added, and subtle Python API errors from deprecated matplotlib/seaborn calls. All three have clear preventive strategies rooted in the existing codebase and v1.9 case study milestone experience. Architectural risk is minimal: the entire target state mirrors a pattern already working in the same repo.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack is entirely sufficient. Zero new npm packages are required. The 13 existing SVG generators cover every plot type referenced in NIST case studies, including residual variants (which are existing generators applied to computed residual arrays). The `statistics.ts` library covers all descriptive statistics; the only additions needed are formal hypothesis test functions in a new `hypothesis-tests.ts` module.
+No new dependencies are needed. The existing stack — `astro-expressive-code@0.41.6` for Python syntax highlighting, `katex@0.16.33` (transitive via `rehype-katex`) for formula rendering, and TypeScript for content interfaces — is already installed, configured, and proven. The only code changes required are: (1) split `technique-content.ts` into per-category modules to prevent the file from becoming unmaintainable; (2) expand the `TechniqueContent` interface with 6 optional fields; (3) update `src/pages/eda/techniques/[slug].astro` to add formula and code slot rendering copied from the quantitative page template.
 
-**Core technologies:**
-- `statistics.ts` (existing, unchanged): descriptive stats, FFT, ACF, OLS regression — handles all model fitting including the AR(1) already in Random Walk
-- `hypothesis-tests.ts` (new module, ~300-400 lines): formal tests (runs, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, F-test) — pure arithmetic on number arrays, no dependencies
-- `*Plots.astro` components (9 existing + 1 new): per-case-study build-time computation + SVG generator dispatch — proven with 16 plot types in Random Walk
-- `datasets.ts` (existing, +1 append): 10 dataset arrays at 93KB; Standard Resistor (DZIUBA1.DAT, 1000 values) adds ~15KB
+**Core technologies (all existing, zero new packages):**
+- `astro-expressive-code@0.41.6`: Python code rendering — proven on quantitative pages, copy pattern directly into graphical `[slug].astro`
+- `katex@0.16.33` (transitive via `rehype-katex`): Build-time formula rendering — proven on quantitative and distribution pages; must be imported in graphical `[slug].astro` frontmatter
+- TypeScript interface extension: `TechniqueContent` grows from 5 to 11 fields, all new fields optional so existing 29 entries compile unchanged
+- Astro named slots (`plot`, `description`, `formula`, `code`): All slots exist in `TechniquePage.astro` today; graphical pages use only `plot` and `description`; activating `code` slot follows quantitative page pattern exactly
+
+**Optional hygiene improvement (low priority):** Add `katex` as a direct dependency (`npm install katex@^0.16.33`) to make the transitive import explicit. Three source files already import it directly. Not a blocker.
 
 ### Expected Features
 
-**Must have (table stakes):**
-- Complete NIST quantitative test statistics with exact values for all 8 existing case studies — source parity is the core goal
-- All NIST graphical outputs reproduced for the 3 significantly-gapped case studies (Beam Deflections, Fatigue Life, Ceramic Strength)
-- Standard Resistor case study: DZIUBA1.DAT dataset + `StandardResistorPlots.astro` + `standard-resistor.mdx` + routing registration + CaseStudyDataset.astro mapping
-- Test Summary table in every case study showing all assumption results (location, variation, randomness, distribution, outlier)
-- Quantitative results section with hypothesis, test statistic, critical value, and conclusion for each test
+The NIST/SEMATECH handbook defines a canonical page structure verified across 15+ technique pages. Features.md provides complete per-technique data for all 29 techniques: 95 question strings, 29 importance paragraphs, a full technique-to-case-study cross-reference matrix, ~40 formula blocks for 12 techniques, and Python library mappings for all 29 techniques.
+
+**Must have (table stakes — NIST parity):**
+- "Questions Answered" section (2-9 questions per technique) — present on all 29 NIST pages, entirely absent from site today
+- "Importance" section (1-3 paragraphs) — present on ~25 of 29 NIST pages, entirely absent from site today
+- Case Study cross-links — 10 case studies exist on site but are not linked from any of the 29 technique pages
+- KaTeX formulas for 12 techniques that have them on NIST (~40 formula blocks total)
+- Python code examples for all 29 techniques — quantitative pages already establish this pattern
 
 **Should have (competitive differentiators):**
-- Test statistics computed at build time from dataset arrays (not just hardcoded) — enables programmatic verification and prevents silent errors
-- Shared `PlotFigure.astro` component — reduces duplication across 9 components
-- Cross-references between related case studies at page bottom (e.g., "Also see: Random Walk for severe violations")
-- Unique, dataset-specific captions for every plot (not generic "Histogram with KDE overlay")
-- "Develop Better Model" and "Validate New Model" sections for Beam Deflections, matching NIST structure
+- Variant interpretation captions for 6 Tier B techniques (35 captions) — PlotVariantSwap shows labels only today
+- Technique decision guidance ("When to use X instead of Y") — extends existing `relatedTechniques` with contextual guidance text
 
 **Defer (v2+):**
-- Bootstrap comparison plots for Uniform Random location estimators — NIST-specific but not core to the EDA narrative
-- Complex demodulation plots for Beam Deflections — highly specialized, NIST treats it as supplementary
-- CI for standard deviation in Normal Random and Heat Flow Meter — minor gap, low user value
-- Chi-square goodness-of-fit and Kolmogorov-Smirnov for Normal Random — mentioned in NIST but not central
-- `datasets.ts` split into per-case-study files — not needed until 15+ datasets
+- Client-side interactive plots (D3/Plotly) — contradicts static-first architecture; adds JS bundle; build-time SVG is the deliberate design
+- Full NIST "Software" section (Dataplot/R code) — Dataplot is obsolete; Python examples replace it more valuably
+- Exhaustive formula derivations — turns technique pages into textbook chapters; show 1-3 key formulas, link to NIST for full derivations
+- Real NIST dataset downloads — licensing ambiguity; Python code using synthetic data demonstrates the same patterns
 
 ### Architecture Approach
 
-The per-case-study `*Plots.astro` component architecture is correct and should not be refactored into a generic component. Each case study has fundamentally different model computations (AR(1), sinusoidal OLS, batch splitting, distribution fitting) that cannot be generalized without losing type safety. What can be shared is the figure wrapper HTML and plot dimension constants — extract these into `PlotFigure.astro` and `plot-configs.ts`. All computation follows a strict downward data flow: datasets.ts → statistics modules → Plots component frontmatter → SVG generators → MDX presentation. MDX files are presentation-only; they never contain computation logic.
+The architecture change is purely additive. No new files, components, or modules are required. `technique-content.ts` is split into per-category modules (a mechanical refactor with zero behavior change). The `TechniqueContent` interface gains 6 optional fields. The graphical `[slug].astro` template expands from ~87 to ~160 lines by adding conditional section rendering and activating the existing `code` slot. `technique-renderer.ts`, `TechniquePage.astro`, and `techniques.json` remain completely unchanged.
 
-**Major components:**
-1. `hypothesis-tests.ts` (new) — formal statistical tests; feeds test statistic values computed from dataset arrays into Plots components and MDX tables
-2. `*Plots.astro` components (9 existing, 1 new for Standard Resistor) — case-study-specific frontmatter computes models and residuals; dispatches to SVG generators by plot type
-3. `PlotFigure.astro` (new, shared) — shared figure wrapper eliminating the 70-80% duplicated HTML across all 9 components
-4. MDX case study pages (8 expanded, 1 new) — prose, InlineMath formulas, quantitative tables with verified values, plot component invocations
+**Major components and their roles:**
+1. `TechniqueContent` interface (`technique-content/index.ts` after split) — data contract; 6 new optional fields follow the `QuantitativeContent` interface as the model
+2. Per-category content modules (6 files, ~30-40KB each) — replaces the single 64KB `technique-content.ts`; maintains identical `getTechniqueContent()` API via barrel re-export
+3. `[slug].astro` (graphical techniques page) — template; conditional rendering for 6 new sections plus `code` slot; built by copying `quantitative/[slug].astro` pattern
+4. `TechniquePage.astro` — layout with all 5 named slots; unchanged; all required slots already exist
+5. `technique-renderer.ts` — SVG generation; unchanged
+
+**Key patterns to follow (all proven in existing codebase):**
+- Optional field extension: new fields marked `?` so all 29 existing entries compile without modification
+- Conditional slot rendering: `{content?.field && (...)}` guards as used throughout quantitative pages
+- Collection-based cross-link resolution: store slugs in content, resolve to titles/URLs via `getCollection('edaPages')` at build time
+- NIST section ordering: What It Is > Questions > Why It Matters > When to Use It > How to Interpret > Examples > Assumptions > Case Studies > Reference > (separate slot) Python Example
+
+**Anti-patterns explicitly rejected:**
+- Do not create a separate `TechniqueContentV2` or `TechniqueContentExtended` — extend the existing interface with optional fields
+- Do not convert technique content to MDX files — TypeScript Record enforces structure across all 29 entries and enables programmatic access
+- Do not use the `formula` slot for graphical technique formulas — that slot is reserved for quantitative pages; use `definitionExpanded` for inline math if needed on graphical pages
+- Do not build a generic "section renderer" component — render sections directly in `[slug].astro`; 87 to 160 lines is still readable
 
 ### Critical Pitfalls
 
-1. **Statistical value transcription errors** — 270+ numeric values across 9 case studies must match NIST exactly; a single wrong digit changes whether a hypothesis test rejects or fails to reject. Compute test statistics from `datasets.ts` arrays programmatically rather than hardcoding; cross-reference every critical value against the NIST source page character-by-character.
+1. **`technique-content.ts` grows to 250KB+ and becomes unmaintainable** — The file is currently 64KB with 5 fields per technique. Adding 7+ new fields (including multiline Python code strings and formula arrays) pushes it to 200-280KB. At that size it is unnavigable, produces massive git diffs, and causes IDE lag. Split into per-category TypeScript modules BEFORE adding any content. Recommended grouping: time-series (5 techniques), distribution (8), comparison (6), multivariate (5), composite (2), regression (3).
 
-2. **Build time regression from 100+ SVG renders** — each `*Plots.astro` component recomputes its full model (regression, FFT, autocorrelation) on every render; with 16 invocations per page the AR(1) computation runs 16 times for Random Walk alone. Monitor with `time npx astro build`; budget less than 2 seconds regression per case study added; memoize expensive computations.
+2. **Python code examples use deprecated APIs** — `seaborn.distplot()` (removed in 0.14), `matplotlib vert=True` on boxplot (deprecated in 3.10), and `plt.acorr()` (wrong for NIST-equivalent output with confidence bounds) are the most common failure modes. Use `sns.histplot()`, `orientation='vertical'`, and `statsmodels.graphics.tsaplots.plot_acf` respectively. Create a grep-based validation script that runs against all code examples to catch deprecated patterns before commit.
 
-3. **Cross-reference link errors multiply during expansion** — quick task 011 already found 5 broken links from technique/quantitative URL prefix confusion. Create a URL cheat sheet for the 20-30 most commonly referenced pages; run link validation after every case study expansion; technique-vs-quantitative ambiguity is the root cause (e.g., `/eda/techniques/autocorrelation-plot/` vs. `/eda/quantitative/autocorrelation/`).
+3. **KaTeX CSS not loaded on formula pages (silent failure)** — `TechniquePage.astro` defaults to `useKatex={false}`. If the graphical `[slug].astro` does not pass `useKatex={true}` for formula-bearing techniques, formulas render as raw HTML spans with no styling. The fix is data-driven: `const useKatex = (content?.formulas?.length ?? 0) > 0;`. Hardcoding `useKatex={true}` for all 29 pages would load 350KB of KaTeX fonts on the 17 techniques that have no formulas — a Lighthouse performance penalty. The conditional pattern already exists in the codebase; use it.
 
-4. **Structural inconsistency across 9 case studies** — section names and depth drift when writing sequentially. Define a canonical section template before any content writing; apply headers-first across all 9 studies before filling content; document intentional deviations (Fatigue Life and Ceramic Strength have genuinely different NIST structures).
+4. **Content quality drifts across 29 techniques written sequentially** — At 30-60 minutes per technique, authoring all 29 is 15-30 hours of work. Without structure, the first 5 techniques get precise, NIST-verified descriptions and the last 5 get copy-paste templates. Process in categorical batches of 4-6 (time-series cluster first, then distribution, etc.), review each batch before starting the next, and use NIST source pages as the primary content driver rather than generating from memory.
 
-5. **KaTeX formula errors silently degrade** — `throwOnError: false` means malformed LaTeX renders as raw text rather than failing the build. Temporarily switch to `throwOnError: true` during development; copy formula patterns verbatim from Random Walk reference implementation; standardize notation conventions for hypothesis tests, confidence intervals, and test statistics in tables.
+5. **Case study cross-links go stale** — 29 technique pages linking to 10 case studies creates up to 290 cross-reference pairs. Store a centralized mapping (not inline strings per technique) and resolve at build time. Validate that every referenced slug corresponds to an actual MDX file in `src/data/eda/pages/case-studies/` as part of the Phase 5 verification pass. The most common failure mode is slug mismatch (e.g., `heat-flow` vs. `heat-flow-meter`).
 
 ## Implications for Roadmap
 
-Based on research, the architecture dependency graph and feature priority matrix clearly suggest a 5-phase structure:
+The natural phase structure follows the dependency graph from FEATURES.md: infrastructure before content, low-complexity content before medium-complexity, shared infrastructure before features that share it, and polish last. The content phases are ordered by risk and effort, not by technique count, to maximize early visible output and catch template issues before they propagate.
 
 ### Phase 1: Infrastructure Foundation
-**Rationale:** All content phases depend on the hypothesis-tests module, the canonical template, and the shared PlotFigure component. Building infrastructure first prevents doing content work twice and eliminates the primary technical debt pitfall (component duplication). Baseline build time must be measured before any content changes.
-**Delivers:** `hypothesis-tests.ts` with 7-11 test functions tested against known NIST values; `PlotFigure.astro` shared wrapper; `plot-configs.ts` shared constants; canonical section template document; URL cross-reference cheat sheet; baseline build time measurement.
-**Addresses:** FEATURES — "computed test statistics" differentiator; ARCHITECTURE — Decision 4 (new module), Decision 1 (shared wrapper)
-**Avoids:** Pitfall 2 (build regression — establish baseline), Pitfall 3 (structural inconsistency — template first), Pitfall 5 (component duplication — extract before scaling)
+**Rationale:** Every subsequent phase depends on this. The file split must happen before content is added or the 250KB problem becomes a recovery task instead of a prevention. The template must be updated before any new sections render. The case study mapping infrastructure must exist before cross-links are authored. Measuring the build time baseline now prevents retroactive performance debugging later.
+**Delivers:** `technique-content.ts` split into per-category modules (6 files, identical public API); `TechniqueContent` interface expanded with 6 optional fields; graphical `[slug].astro` updated with conditional section rendering and activated `code` slot; `getCollection('edaPages')` resolution added for case study cross-links; Python code template with version pins established; baseline build time recorded.
+**Addresses:** All NIST parity features (prerequisite infrastructure)
+**Avoids:** Pitfall 1 (file size — split first), Pitfall 3 (KaTeX CSS — data-driven `useKatex`), Pitfall 5 (stale cross-links — mapping infrastructure), Pitfall 6 (build regression — baseline measurement)
+**Research flag:** NONE — all patterns proven in existing codebase; quantitative `[slug].astro` is the complete reference
 
-### Phase 2: Minor-Gap Case Studies (Quick Wins)
-**Rationale:** Four case studies are already 90%+ complete (Normal Random, Cryothermometry, Filter Transmittance, Heat Flow Meter). Completing them first builds momentum, validates the canonical template in practice, and establishes the enhanced format before tackling complex studies. These studies have no model development sections and need only content deepening and test statistic verification — the lowest risk content work.
-**Delivers:** Normal Random Numbers, Cryothermometry, Filter Transmittance, and Heat Flow Meter at full NIST parity — verified test statistics computed from dataset arrays, complete quantitative sections following canonical template, unique plot captions, cross-study links at page bottom.
-**Uses:** `hypothesis-tests.ts` from Phase 1; existing SVG generators; no new components or plot types needed
-**Avoids:** Pitfall 1 (transcription errors — use computed values), Pitfall 4 (link errors — use cheat sheet), Pitfall 7 (formula errors — follow Random Walk patterns)
+### Phase 2: Content Depth — Questions, Importance, Case Study Links
+**Rationale:** These three features are all LOW complexity (pure content authoring after Phase 1 infrastructure), deliver the highest value-to-effort ratio, and have zero dependencies on formulas or Python code. Together they triple the section count from 5 to 8 on every page and bring all 29 pages to NIST content parity on the prose dimensions. Completing them early validates the Phase 1 template changes with reviewable output before committing to the more complex authoring of formulas and Python examples.
+**Delivers:** "Questions Answered" section for all 29 techniques (~95 question strings); "Importance" section for all 29 techniques (29 paragraphs); Case Study cross-links for ~22 of 29 techniques.
+**Addresses:** FEATURES.md table stakes: Questions Answered (P1), Importance (P1), Case Study cross-links (P1)
+**Avoids:** Pitfall 4 (content drift) — process in Tier B batch first (histogram, scatter-plot, normal-probability-plot, autocorrelation-plot, lag-plot, spectral-plot) then by category; Pitfall 5 (stale links) — validate slugs against actual MDX files per batch
+**Research flag:** NONE — per-technique question inventory and importance themes are pre-researched and documented in FEATURES.md
 
-### Phase 3: Standard Resistor — New Case Study
-**Rationale:** Building one complete new case study before tackling complex enhancements of existing studies tests the full pipeline (dataset → component → MDX → routing → OG image). Standard Resistor follows the standard 4-section NIST pattern (same as Phase 2 studies), making it achievable without new SVG generators. Placing it before the complex enhancements allows the full new-case-study workflow to be validated on a simpler study.
-**Delivers:** Complete Standard Resistor case study — DZIUBA1.DAT dataset (1000 values, programmatically parsed from NIST) verified in datasets.ts; `StandardResistorPlots.astro` following RandomWalkPlots.astro pattern; `standard-resistor.mdx` with full NIST-parity content; CaseStudyDataset.astro CASE_STUDY_MAP update; OG image generation.
-**Uses:** All infrastructure from Phase 1; follows the same component pattern as Phase 2
-**Avoids:** Pitfall 5 (dataset growth — verify 1000-element array count before proceeding); integration gotcha (CaseStudyDataset.astro mapping, MDX relative import path, OG cache clear after finalizing title/description)
+### Phase 3: Technical Depth — Formulas and Python Code
+**Rationale:** Formulas and Python code share the same two infrastructure additions to the `[slug].astro` template (the `katex` import and the `<Code>` import). Authoring them together avoids two separate template modification passes. These changes bring graphical pages to first-class technical parity with quantitative pages. Formulas are MEDIUM complexity (~40 KaTeX strings requiring `String.raw` and validated tex syntax for 12 techniques); Python code is MEDIUM complexity (29 self-contained examples using current, non-deprecated APIs).
+**Delivers:** KaTeX formulas for 12 techniques (~40 formula blocks with labels and explanations); Python code examples for all 29 techniques (each self-contained with synthetic data, 20-35 lines); conditional `useKatex` loading working correctly.
+**Uses:** `katex.renderToString()` with `String.raw` for tex strings; `<Code lang="python">` from `astro-expressive-code/components`
+**Addresses:** FEATURES.md table stakes: Formulas/KaTeX (P1), Python Code Examples (P1)
+**Avoids:** Pitfall 2 (deprecated APIs — grep validation before commit); Pitfall 3 (KaTeX CSS — computed from content.formulas.length); Pitfall 6 (build time — measure after completion against baseline + 5s budget)
+**Research flag:** NONE — formula inventory per technique and Python library mappings are pre-researched and documented in FEATURES.md; quantitative pages provide the exact reference implementation
 
-### Phase 4: Complex Enhancements — Beam Deflections and Fatigue Life
-**Rationale:** These two case studies have NIST Develop/Validate sections requiring model fitting and specialized visualizations. Beam Deflections needs sinusoidal model computation and residual analysis (16+ plot types matching Random Walk depth); Fatigue Life needs Weibull probability plot and distribution comparison visualization. Both share the "model-based residual analysis" architecture pattern. Tackling them together allows the residual analysis pattern established in Random Walk to be extended to two more studies while the pattern is fresh.
-**Delivers:** Beam Deflections with sinusoidal model fit, all residual plots populated with computed data (residual-4-plot, residual-run-sequence, residual-lag, residual-autocorrelation), and parameter estimates table (C=-178.786, AMP=-361.766, FREQ=0.302596, PHASE=1.46536 verified against NIST). Fatigue Life with Weibull probability plot, distribution comparison discussion, verified AIC/BIC/posterior values, and one-sided prediction interval.
-**Uses:** Existing `generateProbabilityPlot({ type: 'weibull' })` for Fatigue Life; existing scatter/line/lag/histogram/autocorrelation generators for Beam Deflections residuals; linearized sinusoidal OLS from existing BeamDeflectionPlots.astro frontmatter
-**Avoids:** Pitfall 1 (parameter estimates verified against NIST source table before building residual plots on top of them); Pitfall 2 (Beam Deflections residual computation runs on every render — memoize in Phase 1 infrastructure)
+### Phase 4: Polish — Variant Interpretation Captions
+**Rationale:** The 6 Tier B techniques (histogram, scatter-plot, normal-probability-plot, lag-plot, autocorrelation-plot, spectral-plot) already have PlotVariantSwap with labeled variants. Adding interpretation captions makes the variant comparisons pedagogically complete by explaining what each pattern means. This is isolated scope — changes to `PlotVariantSwap.astro` and the variant data structures only — with no dependencies on earlier content phases. Placed last because it is polish, not parity.
+**Delivers:** 35 interpretation captions for 6 Tier B techniques; updated `PlotVariantSwap.astro` rendering; updated variant data structures in `technique-renderer.ts` to include `interpretation` field.
+**Addresses:** FEATURES.md differentiator: Variant Interpretation Captions (P2)
+**Avoids:** Pitfall 4 (content drift) — only 35 captions, small enough to review in one pass before committing
+**Research flag:** NONE — straightforward component extension; 35 captions is reviewable scope
 
-### Phase 5: Ceramic Strength — DOE Case Study
-**Rationale:** Ceramic Strength requires the most new visualization variants of any case study: bihistogram, block plots, DOE mean/SD plots, interaction plots, and multi-group box plots. These extend existing generators (generateBarPlot, generateLinePlot, generateBoxPlot) rather than requiring entirely new generator files. Placed last because it is the most complex, its DOE structure is genuinely different from all other case studies, and it benefits from all infrastructure and patterns being proven in Phases 2-4.
-**Delivers:** Ceramic Strength at full NIST parity — batch comparison deepening (bihistogram variant, QQ plot batch comparison), lab effect analysis (box plots by lab overall and per batch), DOE primary factors analysis (mean plots per factor, SD plots per factor, interaction effects), all quantitative DOE effects computed, F-test and two-sample t-test results verified.
-**Uses:** Extended `generateBoxPlot` (multi-group); `generateBarPlot` or `generateLinePlot` extended for DOE means/interaction; existing histogram for bihistogram variant
-**Avoids:** Pitfall 3 (structural inconsistency — Ceramic Strength's 6-section NIST structure is an intentional deviation from the canonical template; document explicitly at top of MDX file)
+### Phase 5: Verification and Audit
+**Rationale:** A dedicated verification phase prevents the milestone from shipping with systematic issues that per-page review misses. The v1.9 case study milestone found 5 broken cross-reference links only through a sweep. The PITFALLS.md "looks done but isn't" checklist defines 12 specific verification items across KaTeX CSS loading, Python API correctness, case study slug resolution, section ordering consistency, build time, and Lighthouse scores.
+**Delivers:** All 29 graphical technique pages confirmed at full NIST section depth; Lighthouse 90+ on mobile verified for three representative pages (with formulas, without formulas, Tier B with variants); build time within baseline + 5 seconds; zero deprecated API patterns in Python examples; all case study cross-links resolve; section ordering consistent across all 29 pages.
+**Avoids:** Every pitfall — this phase catches regressions that slipped through content phases
+**Research flag:** NONE — verification checklist is fully defined in PITFALLS.md
 
 ### Phase Ordering Rationale
 
-- Infrastructure before content: `hypothesis-tests.ts` is referenced by all content phases; building it once with verified outputs prevents 9 independent implementations of the same tests
-- Easy wins before complex: validates the canonical template and enhanced format on low-risk studies before high-stakes model-development sections; Quick confidence checkpoints before committing to Beam Deflections nonlinear regression
-- New case study in the middle: tests the full new-case-study pipeline without the complexity of model fitting; natural checkpoint between "content deepening" and "content plus model development"
-- Most complex last: Ceramic Strength's DOE plots are the highest-effort items and benefit from all prior phases being complete and stable; its unique 6-section structure is less confusing to handle after the standard template is fully internalized
+- Infrastructure before content: the file split and template update are prerequisites; doing content first in a single 250KB file makes the split a painful retroactive refactor rather than a clean structural decision.
+- Questions/Importance/CaseStudyLinks before Formulas/Code: lower complexity validates the Phase 1 template with visible reviewable output at minimal risk; establishes authoring quality baseline before the more demanding KaTeX and Python authoring.
+- Formulas and Python Code in the same phase: they share two lines of template infrastructure and the same content authoring session; separating them would require two template PRs where one suffices.
+- Variant Captions last: isolated scope (6 techniques, 2 component files), polish not parity, benefits from all prior phases being stable.
+- Dedicated verification phase: follows v1.9 experience where a sweep phase caught systematic issues invisible in per-page review.
 
 ### Research Flags
 
-Phases requiring careful implementation attention (known risks, not missing research):
-- **Phase 4 (Beam Deflections sinusoidal model):** The linearized OLS approach in BeamDeflectionPlots.astro must produce values matching NIST (C, AMP, FREQ, PHASE) within rounding before residual plots are built on top of it. Verify parameter match before proceeding to residual analysis.
-- **Phase 5 (Ceramic Strength DOE plots):** Whether existing generators (generateBarPlot, generateLinePlot) can be extended for DOE mean/SD/interaction plots without new generator files should be re-evaluated at implementation time. Research leans toward extension being sufficient, but assess hands-on.
+Phases requiring `/gsd:research-phase` during planning: NONE.
 
-Phases with well-documented patterns (straightforward execution):
-- **Phase 1 (Infrastructure):** All functions are pure arithmetic on number arrays; no external dependencies; RandomWalkPlots.astro is the complete reference pattern
-- **Phase 2 (Minor Gaps):** All existing generators used as-is; content writing + test statistic verification only
-- **Phase 3 (Standard Resistor):** Standard 4-section NIST pattern; copy RandomWalkPlots.astro as template; follow integration checklist from PITFALLS.md
+All five phases use well-documented, already-proven patterns from the existing codebase. The quantitative `[slug].astro` page is a complete reference implementation for Phases 2 and 3. The PITFALLS.md checklist provides a ready-made verification framework for Phase 5.
+
+Phases with standard patterns (skip research-phase):
+- **Phase 1:** Interface extension and template update are mechanical changes; quantitative `[slug].astro` is the exact model
+- **Phase 2:** Content authoring from NIST source; all question/importance data pre-inventoried in FEATURES.md
+- **Phase 3:** Formula and code patterns copied from quantitative pages; full per-technique inventory in FEATURES.md
+- **Phase 4:** Component extension following existing slot and data structure pattern
+- **Phase 5:** Checklist-driven; 12 specific items defined in PITFALLS.md
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Verified by direct codebase analysis of all 13 SVG generators, statistics.ts, package.json; zero new packages required; confirmed no plot type gaps |
-| Features | HIGH | Sourced directly from NIST handbook pages; gap analysis done per-case-study with plot-by-plot and test-by-test comparison against NIST source |
-| Architecture | HIGH | Based on codebase analysis of all 9 existing components; Random Walk 339-line gold standard is a fully working reference; patterns are proven |
-| Pitfalls | HIGH | Based on existing codebase analysis, quick task 011 audit findings (5 real broken links found), and v1.8 pitfalls experience; risks are concrete not speculative |
+| Stack | HIGH | Verified from installed `node_modules` and working code in the same repo; zero new packages required; all three key capabilities (KaTeX, Code, slots) proven on quantitative pages |
+| Features | HIGH | Sourced directly from NIST/SEMATECH handbook (15+ technique pages verified); complete per-technique question inventory, formula inventory, and Python library mappings documented |
+| Architecture | HIGH | Based on direct codebase analysis of all relevant files; target state mirrors the existing quantitative page architecture exactly; no speculation required |
+| Pitfalls | HIGH | Sourced from codebase file size analysis, matplotlib/seaborn changelogs for deprecated APIs, KaTeX documentation, and direct v1.9 case study milestone experience |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Standard Resistor dataset values:** The DZIUBA1.DAT file with 1000 values must be downloaded from NIST and parsed programmatically. Handle during Phase 3 by programmatic download and parse rather than manual entry; verify array length === 1000 before committing.
-- **Ceramic Strength DOE generator strategy:** Whether existing generators (generateBarPlot, generateLinePlot) can be extended for DOE mean/SD/interaction plots without new generator files is an implementation-time decision. Research suggests extension is sufficient but assess hands-on during Phase 5 execution.
-- **Beam Deflections sinusoidal regression match:** NIST used DATAPLOT nonlinear least squares; the codebase uses a linearized OLS approximation. Verify the linearized approach produces NIST-matching parameter values (C=-178.786, AMP=-361.766, FREQ=0.302596, PHASE=1.46536) before building the residual analysis layer in Phase 4.
+- **Python example correctness for 5 unusual plot types:** Star/radar plot (no built-in matplotlib radar — requires polar axes and manual angle computation), complex demodulation (custom amplitude/phase extraction), DOE plots (3-panel custom layout), 4-plot, and 6-plot (specific subplot arrangements). These require careful authoring and should be run in a Python environment to verify before committing. FEATURES.md specifies the correct approach for each; execution correctness must be validated hands-on.
+
+- **Exact case study slug verification:** The technique-to-case-study mapping in FEATURES.md and ARCHITECTURE.md is based on content analysis. Before implementing cross-links, verify every slug against actual MDX filenames in `src/data/eda/pages/case-studies/`. A pre-check during Phase 1 infrastructure setup saves time compared to catching mismatches in Phase 5 verification.
+
+- **`technique-content.ts` split granularity:** PITFALLS.md offers two options — per-technique files (29 files) or per-category files (6 files). The per-category grouping is recommended for readability, but the exact category boundaries (which techniques belong together) should be confirmed by the developer who will own these files long-term before Phase 1 begins. The research suggests: time-series (autocorrelation, lag, run-sequence, spectral, complex-demodulation), distribution (histogram, box-plot, normal-probability, probability, qq, ppcc, weibull, box-cox-normality), comparison (bihistogram, block, bootstrap, youden, mean, std-deviation), multivariate (scatter, scatterplot-matrix, conditioning, contour, star), composite (4-plot, 6-plot), regression (linear-plots, box-cox-linearity, doe-plots).
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- NIST/SEMATECH e-Handbook Section 1.4.2 (all 10 case study subsections, fetched directly via WebFetch) — complete feature gap analysis per case study with plot-by-plot and test-by-test comparison
-- Existing codebase: `src/lib/eda/math/statistics.ts` — 248 lines, 9 functions; baseline math library verified
-- Existing codebase: `src/lib/eda/svg-generators/index.ts` — 13 generators + 2 composite; all verified against case study plot requirements
-- Existing codebase: `src/components/eda/RandomWalkPlots.astro` — 339-line reference implementation, 16 plot types, AR(1) model, full quantitative results
-- Existing codebase: `src/components/eda/BeamDeflectionPlots.astro` — sinusoidal model via OLS normal equations, 13 plot types
-- Existing codebase: `src/data/eda/datasets.ts` — 93KB, 10 dataset arrays
-- Quick task 011 audit — `.planning/quick/011-eda-content-correctness-validation/011-SUMMARY.md` — found 5 broken cross-reference links; verified all existing statistical values correct against NIST
+- Existing codebase: `src/pages/eda/quantitative/[slug].astro` — complete reference implementation for KaTeX + Code pattern on technique pages
+- Existing codebase: `src/lib/eda/quantitative-content.ts` — `QuantitativeContent` interface model for `formulas` and `pythonCode` fields
+- Existing codebase: `src/lib/eda/technique-content.ts` — current 5-field interface and 29 entries (64KB baseline); direct measurement of file size
+- Existing codebase: `src/components/eda/TechniquePage.astro` — all 5 named slots confirmed; `useKatex` prop confirmed wired to conditional CSS loading
+- Existing codebase: `src/layouts/EDALayout.astro` — conditional KaTeX CSS loading via `useKatex` prop confirmed
+- Installed `node_modules/katex/package.json` — version 0.16.33 confirmed
+- Installed `node_modules/astro-expressive-code/package.json` — version 0.41.6 confirmed
+- NIST/SEMATECH e-Handbook Section 1.3.3 and 15+ individual technique pages — canonical section structure verified: https://www.itl.nist.gov/div898/handbook/eda/section3/eda33.htm
 
 ### Secondary (MEDIUM confidence)
-- NIST Quantitative Output pages for each case study (eda4213, eda4223, eda4233, eda4243, eda4253, eda4263, eda4273, eda4283, eda42a3) — exact test statistic values used for gap analysis
-- Existing 9 case study MDX files — current state baseline for each study; line count and section structure assessed
-- NIST Standard Resistor case study (eda427) — DZIUBA1.DAT metadata, quantitative test values (regression slope t=100.2, Levene W=140.85, autocorrelation r1=0.97, runs Z=-30.56)
+- statsmodels `plot_acf` documentation — correct API for NIST-equivalent autocorrelation output with confidence bounds
+- astro-expressive-code CHANGELOG — parallel-safe Shiki initialization confirmed since v0.38+; on-demand language loading verified
 
-### Tertiary (LOW confidence, needs validation)
-- Beam Deflections linearized OLS vs. NIST nonlinear least squares match — assumed from the existing BeamDeflectionPlots.astro implementation but not verified end-to-end; validate parameter estimates in Phase 4 before building residual plots
+### Tertiary (applied from changelog research)
+- Matplotlib 3.10 API changes — `vert` parameter deprecation on boxplot/bxp; replacement is `orientation='vertical'`
+- Seaborn migration guide — `distplot` deprecated in 0.11, removed in 0.14; replacement is `histplot`
 
 ---
-*Research completed: 2026-02-26*
+*Research completed: 2026-02-27*
+*Supersedes: v1.9 SUMMARY.md (2026-02-26)*
 *Ready for roadmap: yes*
-*Supersedes: v1.8 SUMMARY.md (2026-02-24)*

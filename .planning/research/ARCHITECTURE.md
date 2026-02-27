@@ -1,443 +1,627 @@
 # Architecture Patterns
 
-**Domain:** EDA Case Study Deep Dive -- enhancing 8 existing case studies + 1 new case study to match NIST/SEMATECH source depth
-**Researched:** 2026-02-26
-**Confidence:** HIGH (based on direct codebase analysis of all 9 existing components, 13 SVG generators, statistics library, and MDX content)
+**Domain:** EDA Graphical Techniques NIST Parity -- extending 29 graphical technique pages with full NIST section depth
+**Researched:** 2026-02-27
+**Confidence:** HIGH (based on direct codebase analysis of all current files and NIST source structure verification)
 
 ## Current Architecture Inventory
 
 ### What Exists Today
 
-| Component Type | Count | Location | Pattern |
-|---|---|---|---|
-| Plot Components | 9 | `src/components/eda/*Plots.astro` | Per-case-study Astro component with `type` prop |
-| SVG Generators | 13+2 | `src/lib/eda/svg-generators/*.ts` | Pure functions returning SVG strings |
-| Math Functions | 8 | `src/lib/eda/math/statistics.ts` | Pure arithmetic, no DOM/D3 |
-| Datasets | 9 case-study + 6 technique | `src/data/eda/datasets.ts` | Named exports of `number[]` or typed arrays |
-| Case Study MDX | 9 | `src/data/eda/pages/case-studies/*.mdx` | MDX importing plot component + InlineMath |
-| Dynamic Route | 1 | `src/pages/eda/case-studies/[...slug].astro` | Astro content collection rendering |
+| Component | File | Role |
+|---|---|---|
+| `TechniqueContent` interface | `src/lib/eda/technique-content.ts` | 5 string fields: definition, purpose, interpretation, assumptions, nistReference |
+| `TECHNIQUE_CONTENT` record | `src/lib/eda/technique-content.ts` | 29 entries, one per graphical technique |
+| `getTechniqueContent()` | `src/lib/eda/technique-content.ts` | Lookup by slug, returns `TechniqueContent \| undefined` |
+| `[slug].astro` | `src/pages/eda/techniques/[slug].astro` | Dynamic route, renders SVG plot + prose into TechniquePage slots |
+| `TechniquePage.astro` | `src/components/eda/TechniquePage.astro` | Layout component with 5 named slots: plot, description, formula, code, interpretation |
+| `technique-renderer.ts` | `src/lib/eda/technique-renderer.ts` | SVG rendering: `renderTechniquePlot()` and `renderVariants()` |
+| `QuantitativeContent` interface | `src/lib/eda/quantitative-content.ts` | Extended interface with formulas array and optional pythonCode |
+| `[slug].astro` (quantitative) | `src/pages/eda/quantitative/[slug].astro` | Pattern to follow -- uses formula slot with KaTeX, code slot with expressive-code |
 
-### Case Study Maturity Matrix
+### Current Graphical Technique Page Structure
 
-Each case study was assessed against the Random Walk gold standard for completeness.
+The `[slug].astro` route currently renders:
 
-| Case Study | Plots Component | Has Residuals | Has Model | Quantitative Tests | Enhancement Needed |
-|---|---|---|---|---|---|
-| **Random Walk** | RandomWalkPlots | Yes (AR(1)) | Yes (AR(1)) | Full (location, variation, runs, autocorrelation) | NONE -- gold standard |
-| **Normal Random** | NormalRandomPlots | No | No (not needed) | Full | Minor -- already comprehensive |
-| **Uniform Random** | UniformRandomPlots | No | No (not needed) | Full | Minor -- already comprehensive |
-| **Beam Deflections** | BeamDeflectionPlots | Yes (sinusoidal) | Yes (sinusoidal) | Full | Moderate -- residual interpretation sparse |
-| **Cryothermometry** | CryothermometryPlots | No | No (but NIST discusses "no model needed") | Full | Moderate -- consider discrete-data discussion depth |
-| **Filter Transmittance** | FilterTransmittancePlots | No | No (NIST recommends re-run) | Full | Moderate -- root cause section could expand |
-| **Heat Flow Meter** | HeatFlowMeterPlots | No | No (not needed) | Partial | Significant -- needs deeper quantitative section |
-| **Fatigue Life** | FatigueLifePlots | No | No (distribution focus) | Partial | Significant -- needs distribution comparison plots |
-| **Ceramic Strength** | CeramicStrengthPlots | No (batch comparison) | Partial (ANOVA discussed) | Partial | Significant -- needs factor effects plots |
+```
+Header (title + NIST section)
+  slot:plot       -> SVG chart (or PlotVariantSwap for Tier B)
+  slot:description -> 4 sections: "What It Is", "When to Use It", "How to Interpret", "Assumptions and Limitations" + reference
+  slot:formula    -> UNUSED on graphical pages
+  slot:code       -> UNUSED on graphical pages
+  slot:interpretation -> UNUSED
+Related Techniques (pill links)
+```
+
+### NIST Source Section Structure (Verified)
+
+Every NIST graphical technique page follows this section order (confirmed via fetching histogram, scatter plot, and autocorrelation plot pages):
+
+| NIST Section | Current Coverage | Gap |
+|---|---|---|
+| Purpose | Covered by `purpose` field | OK but brief (2-3 sentences vs NIST's full paragraph) |
+| Sample Plot | Covered by SVG generator | OK |
+| Definition | Covered by `definition` field | OK but brief |
+| **Questions** | **NOT COVERED** | Each technique lists 5-9 specific questions the plot answers |
+| **Importance** | **NOT COVERED** | Present on some techniques (e.g., autocorrelation), explains WHY this matters |
+| **Examples** | **NOT COVERED** | Links to sub-pages showing different data patterns |
+| Related Techniques | Covered by `relatedTechniques` in JSON | OK |
+| **Case Study** | **NOT COVERED** | Links to case studies that use this technique |
+| **Software** | **NOT COVERED** -- replaced by Python code | Python examples serve this role |
 
 ## Recommended Architecture
 
-### Decision 1: Keep Per-Case-Study Components (NOT a Generic Component)
+### Decision 1: Extend TechniqueContent Interface (NOT Separate Data Files)
 
-**Recommendation: Keep individual `*Plots.astro` components per case study.**
+**Recommendation: Add new optional fields to the existing `TechniqueContent` interface.**
 
 **Rationale:**
 
-1. **Each case study has unique data transformations.** Random Walk computes AR(1) residuals via `linearRegression`. Beam Deflections computes sinusoidal model residuals via OLS normal equations with `sin`/`cos` basis. Ceramic Strength splits data by batch. These are fundamentally different computations that cannot be genericized without creating a configuration object more complex than the component itself.
+1. **Single source of truth.** All prose content for a technique lives in one record entry. Adding a separate `technique-questions.ts` or JSON file would split the content across files, making edits require cross-file coordination.
 
-2. **Type safety per component.** Each `PlotType` union is specific to its case study. RandomWalkPlots has 16 types including `'residual-uniform-probability'`. NormalRandomPlots has 7 types. CeramicStrengthPlots has 8 types including `'batch-box-plot'`. A generic component would need a superset type that sacrifices compile-time safety.
+2. **Incremental migration.** Making new fields optional means existing content works unchanged. Techniques can be enhanced one at a time without breaking the build.
 
-3. **The existing pattern scales linearly.** Each component is ~100-200 lines of self-contained code. With 9 case studies, that is ~1,800 lines total -- well within maintainability bounds. A generic component would save perhaps 30% of that but add indirection.
+3. **Follows quantitative precedent.** The `QuantitativeContent` interface extended the base pattern by adding `formulas` and `pythonCode` fields. This is the established pattern in this codebase.
 
-4. **Default captions are case-study-specific.** Each component has a `Record<PlotType, string>` of default captions. These are domain-specific descriptions that cannot be generated.
+4. **Type safety.** TypeScript interface gives compile-time validation for all new fields.
 
-**What CAN be shared (and already is):**
-- The `<figure>` wrapper template is identical across all 9 components. Extract to a `PlotFigure.astro` helper:
-
-```astro
-<!-- src/components/eda/PlotFigure.astro -->
----
-interface Props {
-  svg: string;
-  caption?: string;
-  maxWidth?: string;
-}
-const { svg, caption, maxWidth = '720px' } = Astro.props;
----
-<figure class="my-8 not-prose">
-  <div class="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-white dark:bg-[#1a1a2e] p-3">
-    <div class="mx-auto" style={`max-width: ${maxWidth}`} set:html={svg} />
-  </div>
-  {caption && (
-    <figcaption class="mt-2 text-center text-sm text-[var(--color-text-secondary)] italic">
-      {caption}
-    </figcaption>
-  )}
-</figure>
-```
-
-- The `singleConfig` and `compositeConfig` objects are identical across all 9 components. Extract to a shared constant:
+**New `TechniqueContent` interface:**
 
 ```typescript
-// src/lib/eda/plot-configs.ts
-export const SINGLE_PLOT_CONFIG = {
-  width: 720,
-  height: 450,
-  margin: { top: 35, right: 20, bottom: 45, left: 55 },
-};
+export interface TechniqueContent {
+  // --- Existing fields (unchanged) ---
+  /** 1-2 sentences: what this technique is */
+  definition: string;
+  /** 2-3 sentences: when and why to use it */
+  purpose: string;
+  /** 3-5 sentences: how to read the plot */
+  interpretation: string;
+  /** 1-3 sentences: key assumptions and limitations */
+  assumptions: string;
+  /** NIST/SEMATECH section reference string */
+  nistReference: string;
 
-export const COMPOSITE_PLOT_CONFIG = {
-  width: 720,
-  height: 540,
-};
+  // --- New NIST-parity fields (all optional for incremental migration) ---
+
+  /** Questions this technique answers (NIST "Questions" section).
+   *  Array of question strings, e.g., "Are the data random?" */
+  questions?: string[];
+
+  /** Why this technique matters (NIST "Importance" section).
+   *  2-4 sentences explaining statistical/engineering significance. */
+  importance?: string;
+
+  /** Expanded definition beyond the 1-2 sentence `definition` field.
+   *  Covers mathematical formulation, axis meanings, etc. */
+  definitionExpanded?: string;
+
+  /** Python code example using numpy/scipy/matplotlib.
+   *  Replaces NIST "Software" section with modern Python. */
+  pythonCode?: string;
+
+  /** Case study cross-references.
+   *  Array of case study slugs that use this technique. */
+  caseStudySlugs?: string[];
+
+  /** Worked example descriptions (NIST "Examples" section).
+   *  Each entry describes a pattern the technique reveals. */
+  examples?: Array<{
+    /** Short label, e.g., "Strong Positive Correlation" */
+    label: string;
+    /** 2-3 sentence description of what this example shows */
+    description: string;
+    /** Optional: link to a variant if this technique is Tier B */
+    variantLabel?: string;
+  }>;
+}
 ```
 
-**Estimated savings from extraction:** ~40 lines per component (figure wrapper + config). Not a massive win, but reduces the "copy-paste" surface for bugs.
+### Decision 2: Render New Sections in [slug].astro (NOT in a Separate Renderer)
 
-### Decision 2: SVG Generator Strategy for New Plot Types
-
-**Current generators cover most needs.** The 13 existing generators handle:
-- `generateLinePlot` -- run sequence, time series
-- `generateLagPlot` -- lag-k scatter
-- `generateHistogram` -- with KDE
-- `generateProbabilityPlot` -- normal, uniform, Weibull, QQ, PPCC
-- `generateAutocorrelationPlot` -- ACF with confidence bands
-- `generateSpectralPlot` -- Blackman-Tukey PSD
-- `generateScatterPlot` -- bivariate with optional regression
-- `generateBoxPlot` -- single/multi-group
-- `generate4Plot` / `generate6Plot` -- composite diagnostics
-- `generateBarPlot`, `generateStarPlot`, `generateContourPlot`, `generateDistributionCurve` -- technique-level
-
-**New generators potentially needed:**
-
-| Plot Type | Needed By | Existing Generator | New Generator? |
-|---|---|---|---|
-| Predicted vs. Original scatter | Random Walk, Beam Deflections | `generateScatterPlot` -- already used | No |
-| Residual run-sequence | Random Walk, Beam Deflections | `generateLinePlot` -- already used | No |
-| Residual lag plot | Random Walk, Beam Deflections | `generateLagPlot` -- already used | No |
-| Residual histogram | Random Walk, Beam Deflections | `generateHistogram` -- already used | No |
-| Residual probability plot | Random Walk, Beam Deflections | `generateProbabilityPlot` -- already used | No |
-| Residual autocorrelation | Random Walk, Beam Deflections | `generateAutocorrelationPlot` -- already used | No |
-| Residual spectral | Random Walk | `generateSpectralPlot` -- already used | No |
-| Uniform probability plot | Random Walk, Uniform Random | `generateProbabilityPlot({ type: 'uniform' })` -- already supported | No |
-| Weibull probability plot | Fatigue Life | `generateProbabilityPlot({ type: 'weibull' })` -- already supported | No |
-| Multi-distribution overlay | Fatigue Life | None | **Maybe** |
-| DOE main effects / interaction | Ceramic Strength | None | **Maybe** |
-| DEX means plot | Ceramic Strength | None | **Maybe** |
-
-**Recommendation:** The existing SVG generator library is sufficient for all standard EDA plot types. Two case-study-specific visualization needs may arise:
-
-1. **Fatigue Life** -- if NIST-depth requires overlaying multiple fitted distributions (normal, Weibull, lognormal) on the same histogram, this could be handled by calling `generateHistogram` with a custom KDE overlay or by extending `generateProbabilityPlot` to accept multiple distribution types for comparison. Assess during implementation -- likely achievable with existing generators plus frontmatter computation.
-
-2. **Ceramic Strength** -- if NIST-depth requires DOE main-effects plots or interaction plots, these are essentially bar charts or line charts that can be built from `generateBarPlot` or `generateLinePlot` with pre-computed factor-level means. No new generator needed.
-
-**Conclusion: No new SVG generators are required.** All case-study-specific plot variants (residuals, predicted-vs-original, batch comparisons) are produced by computing transformed data in the Astro component frontmatter and passing it to existing generators.
-
-### Decision 3: Quantitative Test Results -- Hybrid Approach
-
-**Recommendation: Use a hybrid approach for quantitative results.**
+**Recommendation: Render all new sections directly in `[slug].astro` using the existing slot pattern, NOT by modifying `technique-renderer.ts`.**
 
 **Rationale:**
 
-1. **The gold standard (Random Walk) already computes in frontmatter.** The AR(1) model coefficients are computed in `RandomWalkPlots.astro` frontmatter via `linearRegression()`. The residuals are computed in real-time from the dataset.
+1. **technique-renderer.ts is for SVG generation only.** Its name, imports, and API (`renderTechniquePlot`, `renderVariants`) are exclusively about SVG chart creation. Adding HTML section rendering would violate single-responsibility and confuse the naming.
 
-2. **MDX tables cannot call TypeScript functions inline.** Values in Markdown table cells wrapped in `<InlineMath>` are static text. Attempting to inject computed values into MDX table cells would require custom components for every table row.
+2. **Quantitative precedent.** The quantitative `[slug].astro` renders formulas and Python code directly in the template -- it does NOT delegate to technique-renderer.ts. Graphical pages should follow the same pattern.
 
-3. **NIST source values are fixed.** The datasets are verbatim from NIST .DAT files. The test results are deterministic. Hardcoding verified values in MDX tables is acceptable.
+3. **Astro components have direct access to astro-expressive-code's `<Code>` component.** Python code rendering requires importing `Code` from `astro-expressive-code/components`, which only works in `.astro` files (not `.ts` files).
 
-**Implementation pattern:**
+**What changes in `technique-renderer.ts`: NOTHING.** It stays a pure SVG rendering module.
 
-- **Values that drive visualizations** (regression coefficients, residuals, predicted values) -- computed in the `*Plots.astro` component frontmatter at build time. Already established pattern.
-- **Values that appear in MDX prose tables** (test statistics, critical values, conclusions) -- hardcoded in MDX. Acceptable because NIST source values are fixed and well-documented.
-- **Optional verification** -- a build-time assertion module could compute expected values from datasets.ts and compare against MDX-stated values. Catches staleness without restructuring the MDX. Implement only if drift becomes a concern.
+### Decision 3: Use Existing Slots Plus Template Sections (NOT New Slots)
 
-### Decision 4: Statistical Test Functions -- New hypothesis-tests.ts Module
-
-**Recommendation: Create `src/lib/eda/math/hypothesis-tests.ts` for formal statistical tests. Keep `statistics.ts` for descriptive statistics and core computations.**
+**Recommendation: Render Questions, Importance, expanded Definition, and Examples as part of the `description` slot. Use the `code` slot for Python. Do NOT add new named slots to TechniquePage.astro.**
 
 **Rationale:**
 
-1. **Separation of concerns.** `statistics.ts` contains descriptive statistics and signal processing (mean, std dev, KDE, ACF, FFT). Hypothesis tests are "compute test statistic + compare to critical value" -- conceptually different.
+1. **TechniquePage.astro is shared between graphical and quantitative pages.** Adding new named slots would affect both page types. The quantitative pages already use `description`, `formula`, and `code` slots -- the same slots serve graphical pages.
 
-2. **Current file is ~250 lines and focused.** Adding 7+ test functions would double it.
+2. **The new sections are semantically part of "description."** Questions, Importance, expanded Definition, and Examples are all descriptive prose about the technique. They belong in the description slot alongside the existing "What It Is" / "When to Use It" / "How to Interpret" / "Assumptions" sections.
 
-3. **Some functions stay in statistics.ts.** `linearRegression` is already there and is used for both computation (AR(1) model) and the location test. Keep it.
+3. **Case study links and Python code use existing unused slots.** The `code` slot is already defined but unused on graphical pages. Activating it for Python follows the quantitative page pattern exactly.
 
-**New module structure:**
-
-```
-src/lib/eda/math/
-  statistics.ts          -- descriptive stats, KDE, FFT, ACF, OLS (existing, unchanged)
-  hypothesis-tests.ts    -- formal tests (NEW)
-```
-
-**Functions needed in `hypothesis-tests.ts`:**
-
-| Function | Used By | Complexity | Notes |
-|---|---|---|---|
-| `runsTest(data)` | 7/9 case studies | Low | Count runs above/below median, compute Z-statistic |
-| `leveneTest(data, k)` | 6/9 case studies | Medium | Median-based variant, F-statistic |
-| `bartlettTest(data, k)` | Normal Random | Medium | Chi-squared test for equal variances |
-| `locationTest(data)` | All 9 | Low | Linear regression slope t-test (wraps existing `linearRegression`) |
-| `andersonDarlingTest(data)` | 4/9 case studies | Medium | Goodness-of-fit test |
-| `grubbsTest(data)` | 3/9 case studies | Low | Outlier detection |
-| `ppcc(data)` | 3/9 case studies | Medium | Probability plot correlation coefficient |
-
-**Critical values approach:** For this static site where all test parameters are known at build time, hardcode common critical values (e.g., `t_{0.975, 498} = 1.96`) in a lookup table rather than implementing full CDF inversions. The NIST source provides the critical values for each test. A lookup table is simpler and more reliable than implementing incomplete beta function inversions.
-
-**Note:** These functions are primarily useful if we want build-time verification of the MDX-hardcoded values, or if future interactive features need live computation. For the current static MDX tables, they are a "nice to have" rather than a strict dependency.
-
-### Decision 5: Component Boundaries and Data Flow
+**Slot mapping after changes:**
 
 ```
-                    datasets.ts
-                        |
-           +------------+-------------+
-           |                          |
-    statistics.ts              hypothesis-tests.ts
-    (descriptive,               (formal tests)
-     regression,                 [NEW]
-     ACF, FFT)
-           |                          |
-           +-------+------------------+
-                   |
-           *Plots.astro components
-           (case-study-specific frontmatter
-            computes residuals, predicted
-            values, test results)
-                   |
-           +-------+-------+
-           |               |
-    SVG generators    PlotFigure.astro
-    (generic,         (shared wrapper)
-     reusable)          [NEW]
-                   |
-           case-study MDX pages
-           (import *Plots component,
-            embed as <XxxPlots type="..." />)
-                   |
-           [...slug].astro
-           (Astro content collection
-            dynamic routing)
+slot:plot        -> SVG chart (UNCHANGED)
+slot:description -> Expanded prose:
+                    - "What It Is" (definition + definitionExpanded)
+                    - "Questions This Plot Answers" (questions array)
+                    - "Why It Matters" (importance)
+                    - "When to Use It" (purpose)
+                    - "How to Interpret" (interpretation)
+                    - "Examples" (examples array -- links to Tier B variants if applicable)
+                    - "Assumptions and Limitations" (assumptions)
+                    - "Case Studies" (caseStudySlugs -> resolved links)
+                    - Reference (nistReference)
+slot:formula     -> UNUSED for graphical (same as today)
+slot:code        -> Python example via <Code> component (NEW)
+slot:interpretation -> UNUSED (same as today)
 ```
 
-**Key data flow principles:**
+### Decision 4: Case Study Cross-Links via Slug Array + Build-Time Resolution
 
-1. **Data flows DOWN.** datasets.ts -> statistics/hypothesis-tests -> Plots.astro -> SVG generators. Never upward.
-2. **Computation in frontmatter.** All build-time computation happens in Astro component frontmatter (the `---` block). This is server-side TypeScript at build time.
-3. **SVG generators are stateless.** They receive data + config, return SVG strings. They never import from datasets.ts directly.
-4. **MDX is presentation only.** MDX files contain prose, InlineMath, and component invocations. They do not contain computation logic.
+**Recommendation: Store case study slugs in `TechniqueContent.caseStudySlugs`, resolve to titles and URLs at build time in `[slug].astro`.**
+
+**Rationale:**
+
+1. **Case studies already exist as an Astro content collection (`edaPages`).** The `[...slug].astro` route uses `getCollection('edaPages')` to access them. The graphical `[slug].astro` can do the same.
+
+2. **Bidirectional linking is already handled.** Case study MDX files already contain markdown links to technique pages (e.g., `[4-plot](/eda/techniques/4-plot/)`). The reverse link (technique -> case study) just needs slug references.
+
+3. **Slug-based references are stable and validate at build time.** If a case study slug is renamed, TypeScript will still compile but the link will 404 -- which is catchable by running the build. This is the same pattern used for `relatedTechniques` in `techniques.json`.
+
+**Implementation in `[slug].astro`:**
+
+```typescript
+// In getStaticPaths or at page level:
+const caseStudyPages = await getCollection('edaPages');
+const caseStudyMap = new Map(
+  caseStudyPages
+    .filter(p => p.data.category === 'case-studies')
+    .map(p => [p.id.replace('case-studies/', ''), p.data])
+);
+
+// Resolve slugs to display data:
+const caseStudyLinks = (content?.caseStudySlugs ?? [])
+  .filter(slug => caseStudyMap.has(slug))
+  .map(slug => ({
+    slug,
+    title: caseStudyMap.get(slug)!.title,
+    url: caseStudyUrl(slug),
+  }));
+```
+
+**Technique-to-case-study mapping (initial, based on current case study content analysis):**
+
+| Technique | Case Studies That Use It |
+|---|---|
+| `4-plot` | random-walk, normal-random-numbers, uniform-random-numbers, filter-transmittance, heat-flow-meter, cryothermometry, beam-deflections, ceramic-strength, fatigue-life, standard-resistor |
+| `run-sequence-plot` | random-walk, normal-random-numbers, uniform-random-numbers, filter-transmittance, ceramic-strength |
+| `lag-plot` | random-walk, normal-random-numbers, uniform-random-numbers, filter-transmittance, ceramic-strength |
+| `histogram` | random-walk, normal-random-numbers, uniform-random-numbers, filter-transmittance, ceramic-strength |
+| `normal-probability-plot` | random-walk, normal-random-numbers, uniform-random-numbers, filter-transmittance, ceramic-strength |
+| `autocorrelation-plot` | random-walk, uniform-random-numbers, filter-transmittance |
+| `spectral-plot` | random-walk, uniform-random-numbers, filter-transmittance |
+| `box-plot` | ceramic-strength |
+| `bihistogram` | ceramic-strength |
+| `block-plot` | ceramic-strength |
+| `doe-plots` | ceramic-strength |
+| `probability-plot` | uniform-random-numbers |
+| `ppcc-plot` | uniform-random-numbers |
+| `scatter-plot` | beam-deflections |
+
+Techniques not currently referenced by any case study (15 of 29): box-cox-linearity, box-cox-normality, bootstrap-plot, complex-demodulation, conditioning-plot, contour-plot, linear-plots, mean-plot, qq-plot, scatterplot-matrix, star-plot, std-deviation-plot, weibull-plot, youden-plot, 6-plot. These will have empty `caseStudySlugs` arrays.
+
+### Decision 5: Python Code Inline in TechniqueContent (NOT Separate Files)
+
+**Recommendation: Store Python code as a string in `TechniqueContent.pythonCode`, NOT as separate `.py` files.**
+
+**Rationale:**
+
+1. **Quantitative precedent.** The `QuantitativeContent` interface stores Python code as `pythonCode?: string` directly in the content record. Every quantitative technique with code uses this pattern. Graphical techniques should be identical.
+
+2. **Build simplicity.** Separate `.py` files would require a file-reading step at build time (`fs.readFileSync` or a content collection loader), adding complexity for zero benefit. The code is a string that gets passed to the `<Code>` component.
+
+3. **Content colocation.** When editing a technique's content, having definition, questions, Python code, and case study links all in one record entry makes authoring faster and reduces cross-file mistakes.
+
+4. **Code size is small.** Each Python example is 15-30 lines. Storing 29 such examples as strings adds roughly 2-3KB to `technique-content.ts` -- negligible.
+
+**Python code structure per technique:**
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate or load sample data
+data = np.random.normal(loc=0, scale=1, size=200)
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.hist(data, bins=20, edgecolor='black', alpha=0.7)
+ax.set_xlabel('Value')
+ax.set_ylabel('Frequency')
+ax.set_title('Histogram')
+plt.tight_layout()
+plt.show()
+```
+
+Standard pattern: numpy for data, matplotlib for plotting, scipy.stats for statistical functions when needed. Each example should be self-contained and runnable.
+
+## Component Boundaries
+
+### What Gets Modified
+
+| Component | Change Type | Details |
+|---|---|---|
+| `TechniqueContent` interface | **EXTEND** | Add 6 optional fields: questions, importance, definitionExpanded, pythonCode, caseStudySlugs, examples |
+| `TECHNIQUE_CONTENT` record | **EXTEND** | Add new field values to all 29 entries (incremental -- can do batches) |
+| `[slug].astro` (graphical) | **MODIFY** | Add description sections for questions/importance/examples, add code slot for Python, add case study resolution |
+| `technique-renderer.ts` | **NO CHANGE** | Stays pure SVG rendering |
+| `TechniquePage.astro` | **NO CHANGE** | Existing 5 slots suffice |
+| `techniques.json` | **NO CHANGE** | Metadata schema unchanged |
+
+### What Gets Created
+
+| Component | Purpose |
+|---|---|
+| Nothing new | All changes fit within existing files and patterns |
+
+This is a key architectural finding: **no new files, components, or modules are needed.** The integration is purely additive to existing interfaces and templates.
+
+## Data Flow
+
+### Current Flow
+
+```
+techniques.json                    technique-content.ts
+      |                                   |
+      v                                   v
+getStaticPaths()                 getTechniqueContent(slug)
+      |                                   |
+      +------- [slug].astro <-------------+
+                    |
+                    v
+            TechniquePage.astro
+              slot:plot -> SVG from technique-renderer.ts
+              slot:description -> 4 prose sections
+```
+
+### Enhanced Flow
+
+```
+techniques.json                    technique-content.ts (EXTENDED)
+      |                                   |
+      v                                   v
+getStaticPaths()                 getTechniqueContent(slug)
+      |                                   |
+      |    edaPages collection             |
+      |         |                          |
+      +------- [slug].astro <---------+---+
+                    |
+                    | (resolves caseStudySlugs -> titles/URLs)
+                    | (imports <Code> from astro-expressive-code)
+                    | (optional: imports katex for formula rendering)
+                    v
+            TechniquePage.astro (UNCHANGED)
+              slot:plot -> SVG from technique-renderer.ts (UNCHANGED)
+              slot:description -> 8-10 prose sections (EXPANDED)
+              slot:code -> Python example via <Code> (NEW)
+```
+
+### Key Observation: No New Data Sources
+
+The enhanced flow adds exactly one new data dependency: `getCollection('edaPages')` for case study resolution. This collection is already used elsewhere in the codebase. The graphical `[slug].astro` does not currently import it but the quantitative `[slug].astro` does not either -- both would need it added.
 
 ## Patterns to Follow
 
-### Pattern 1: The "Residual Analysis" Extension Pattern
+### Pattern 1: Optional Field Extension (from QuantitativeContent)
 
-When a case study requires model validation (residual analysis), the pattern established by RandomWalkPlots.astro is:
+**What:** Add optional fields to an interface, existing entries compile without changes.
 
-**What:** Compute the model and residuals in the Astro component frontmatter, then use existing SVG generators with the residuals array.
+**When:** Adding new content sections that not all entries have yet.
 
-**When:** Case study where the univariate model fails and a better model is developed (Random Walk, Beam Deflections, potentially others).
-
-**Example (established pattern in RandomWalkPlots.astro):**
+**Example:**
 
 ```typescript
-// In Astro frontmatter:
-import { randomWalk } from '../../data/eda/datasets';
-import { linearRegression } from '../../lib/eda/math/statistics';
+// Before:
+export interface TechniqueContent {
+  definition: string;
+  purpose: string;
+  // ...
+}
 
-// 1. Compute model
-const xLag = randomWalk.slice(0, -1);
-const yNext = randomWalk.slice(1);
-const reg = linearRegression(xLag, yNext);
-
-// 2. Compute residuals
-const predicted = xLag.map((x) => reg.intercept + reg.slope * x);
-const residuals = yNext.map((y, i) => y - predicted[i]);
-
-// 3. Pass residuals to EXISTING generators
-case 'residual-run-sequence':
-  svg = generateLinePlot({ data: residuals, mode: 'run-sequence', ... });
+// After:
+export interface TechniqueContent {
+  definition: string;
+  purpose: string;
+  // ... existing fields unchanged ...
+  questions?: string[];      // NEW, optional
+  pythonCode?: string;        // NEW, optional
+}
 ```
 
-**Key insight:** The "residual" variants are not new generator types. They are the same generators called with transformed data. The transformation logic lives in the component, not the generator.
+### Pattern 2: Conditional Slot Rendering (from quantitative [slug].astro)
 
-### Pattern 2: The "Multi-Data" Extension Pattern
+**What:** Only render a slot when content exists. Use `{content?.field && (...)}` guards.
 
-When a case study requires comparing subsets of the data (e.g., batch comparison in Ceramic Strength):
+**When:** Rendering optional sections.
 
-**What:** Split the dataset in the Astro component frontmatter, then pass subsets to existing generators.
+**Example (from existing quantitative page):**
 
-**Example (established pattern in CeramicStrengthPlots.astro):**
+```astro
+{content?.pythonCode && (
+  <Fragment slot="code">
+    <section class="prose-section mt-8">
+      <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+      <Code code={content.pythonCode} lang="python" />
+    </section>
+  </Fragment>
+)}
+```
+
+### Pattern 3: Collection-Based Link Resolution (from case study cross-refs)
+
+**What:** Store slugs in content, resolve to full objects at build time via `getCollection()`.
+
+**When:** Cross-referencing between content types.
+
+**Example (from graphical [slug].astro `getStaticPaths`):**
 
 ```typescript
-// In Astro frontmatter:
-import { ceramicStrength } from '../../data/eda/datasets';
-
-const strengths = ceramicStrength.map(d => d.strength);
-const batch1 = ceramicStrength.filter(d => d.batch === 1).map(d => d.strength);
-const batch2 = ceramicStrength.filter(d => d.batch === 2).map(d => d.strength);
-
-case 'batch-box-plot':
-  svg = generateBoxPlot({
-    groups: [
-      { label: 'Batch 1', values: batch1 },
-      { label: 'Batch 2', values: batch2 },
-    ],
-    ...
-  });
+const caseStudyPages = await getCollection('edaPages');
+const caseStudyMap = new Map(
+  caseStudyPages
+    .filter(p => p.data.category === 'case-studies')
+    .map(p => [p.id.replace('case-studies/', ''), p.data])
+);
 ```
 
-### Pattern 3: Adding New PlotTypes to an Existing Component
+### Pattern 4: Section Ordering Mirrors NIST (Established Convention)
 
-When enhancing a case study, new plot types are added by:
+**What:** The "What It Is" / "When to Use It" / "How to Interpret" / "Assumptions" section order in current pages roughly mirrors the NIST page structure (Definition / Purpose / [content] / [caveats]).
 
-1. Extending the `PlotType` union type
-2. Adding a new `case` to the `switch` statement
-3. Adding a new entry to `defaultCaptions`
-4. Adding the corresponding `<XxxPlots type="new-type" />` invocation in the MDX
+**When:** Adding new sections, insert them in the NIST-standard position.
 
-**No other files need to change.** This is the strength of the per-component architecture.
+**Recommended section order (matching NIST flow):**
+
+1. **What It Is** -- `definition` + `definitionExpanded` (NIST: Definition)
+2. **Questions This Plot Answers** -- `questions` (NIST: Questions)
+3. **Why It Matters** -- `importance` (NIST: Importance)
+4. **When to Use It** -- `purpose` (NIST: Purpose)
+5. **How to Interpret** -- `interpretation` (NIST: Sample Plot + interpretation text)
+6. **Examples** -- `examples` (NIST: Examples)
+7. **Assumptions and Limitations** -- `assumptions`
+8. **Case Studies** -- `caseStudySlugs` resolved to links (NIST: Case Study)
+9. **Reference** -- `nistReference`
+10. *(separate slot)* **Python Example** -- `pythonCode` (NIST: Software)
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Generic CaseStudyPlots Component
+### Anti-Pattern 1: Creating a New TechniqueContentV2 Interface
 
-**What:** A single `CaseStudyPlots.astro` that takes a `caseStudy` prop and dispatches to the right data/computation.
+**What:** Making a separate `TechniqueContentExtended` interface and having two content systems.
 
-**Why bad:** The component would need to import ALL datasets, implement ALL model computations (AR(1), sinusoidal, batch splitting, distribution fitting), and have a PlotType union of 50+ members. The switch statement would be enormous. TypeScript would lose the ability to verify that a specific MDX file only uses valid plot types for its case study. Changes to one case study would risk regressions in others.
+**Why bad:** Fragments the content, requires migration code, two lookup functions, and conditional logic to pick which interface to use.
 
-**Instead:** Keep per-case-study components. Share the figure wrapper and config constants.
+**Instead:** Extend the existing interface with optional fields. TypeScript handles the transition gracefully.
 
-### Anti-Pattern 2: Computing Test Statistics Inside SVG Generators
+### Anti-Pattern 2: Moving Content to MDX
 
-**What:** Extending the SVG generators to compute and display test statistics alongside the plot.
+**What:** Converting graphical technique pages from TypeScript content objects to MDX files (like case studies use).
 
-**Why bad:** Violates the single-responsibility principle. SVG generators produce visual output. Test statistics are textual results that belong in the MDX prose. Mixing them creates generators that are both visualization and analysis tools, making them harder to test and reuse.
+**Why bad:** The graphical pages have a rigid, repeating structure. MDX is for free-form content. Converting to MDX would lose the structural guarantees (every page has questions, every page has assumptions) and require each of the 29 pages to manually maintain consistent formatting. It would also break the current `getTechniqueContent()` API that quantitative pages also rely on as a pattern.
 
-**Instead:** Compute test statistics in the Astro component frontmatter or a dedicated stats module. Display them in MDX tables via hardcoded values verified against computed values.
+**Instead:** Keep the TypeScript Record pattern. It enforces structure, enables programmatic access, and keeps all 29 techniques in one reviewable file.
 
-### Anti-Pattern 3: Putting Model Computation in statistics.ts
+### Anti-Pattern 3: Adding Formulas to Graphical Technique Pages
 
-**What:** Adding case-study-specific model fitting functions (e.g., `fitAR1Model`, `fitSinusoidalModel`) to the shared statistics.ts.
+**What:** Using the `formula` slot with KaTeX for graphical technique definitions.
 
-**Why bad:** These functions are only used by one case study each. They pollute the shared module with single-use code. The computations are already compact enough to live in the component frontmatter (Random Walk AR(1) is 4 lines, Beam Deflections sinusoidal is 15 lines).
+**Why bad:** Graphical techniques are about visual interpretation, not mathematical formulas. The `formula` slot exists for quantitative techniques that need to show equations (t-test formula, ANOVA F-statistic, etc.). Adding formulas to graphical pages would blur the distinction between the two page types. NIST's graphical technique pages rarely include formulas -- the autocorrelation coefficient formula is an exception, not the rule.
 
-**Instead:** Keep model computations in the component frontmatter where they are used. Only general-purpose functions (linearRegression, mean, etc.) belong in statistics.ts.
+**Instead:** If a graphical technique needs a mathematical definition (e.g., the autocorrelation formula), include it as text in the `definitionExpanded` field. Reserve the `formula` slot for quantitative pages.
 
-### Anti-Pattern 4: Dynamic Imports or Lazy Loading for Build-Time Components
+### Anti-Pattern 4: Building a Generic "Section Renderer" Component
 
-**What:** Using dynamic imports or conditional loading to avoid importing all datasets at build time.
+**What:** Creating a `TechniqueSection.astro` component that takes a section type enum and renders different content based on the type.
 
-**Why bad:** Astro already handles this. Each MDX page imports only its own Plots component, which imports only its own dataset. No bundle-size concern because everything runs at build time. Dynamic imports add complexity without benefit in SSG.
+**Why bad:** Over-abstraction for what is essentially a list of `<div>` elements with headings and paragraphs. The sections have slightly different rendering needs (questions is a `<ul>`, examples may have links, case studies need resolved URLs). A generic renderer would need so many conditionals it would be harder to understand than the direct template.
 
-## Integration Points: New vs. Modified
-
-### New Files
-
-| File | Purpose | Depends On |
-|---|---|---|
-| `src/lib/eda/math/hypothesis-tests.ts` | Formal statistical tests (runs, Levene, Bartlett, Anderson-Darling, Grubbs, PPCC, location) | `statistics.ts` (for `mean`, `standardDeviation`, `linearRegression`, `normalQuantile`) |
-| `src/components/eda/PlotFigure.astro` | Shared figure wrapper (optional, reduces duplication) | None |
-| `src/lib/eda/plot-configs.ts` | Shared plot dimension constants (optional, reduces duplication) | None |
-
-### Modified Files (Enhancements)
-
-| File | Change | Scope |
-|---|---|---|
-| `src/components/eda/HeatFlowMeterPlots.astro` | Add deeper quantitative test computation | Extend PlotType, add cases |
-| `src/components/eda/FatigueLifePlots.astro` | Add Weibull/lognormal probability plot types | Extend PlotType, add cases |
-| `src/components/eda/CeramicStrengthPlots.astro` | Add factor-effects plots, interaction plots, within-batch analysis | Extend PlotType, add cases, more data splitting |
-| `src/components/eda/CryothermometryPlots.astro` | Minor -- may add caption updates | Minimal |
-| `src/components/eda/FilterTransmittancePlots.astro` | Minor -- possibly add decimated-data analysis | Moderate |
-| `src/components/eda/BeamDeflectionPlots.astro` | Deepen residual interpretation, add residual spectral if missing | Moderate -- add captions |
-| `src/components/eda/NormalRandomPlots.astro` | Minor -- already comprehensive | Minimal |
-| `src/components/eda/UniformRandomPlots.astro` | Minor -- already comprehensive | Minimal |
-| `src/data/eda/pages/case-studies/*.mdx` (8 files) | All 8 enhanced MDX files -- deeper prose, quantitative sections, test summaries | Major content work |
-| `src/lib/eda/svg-generators/probability-plot.ts` | May need Weibull quantile function refinement for Fatigue Life | Low risk |
-
-### Unchanged Files
-
-| File | Why Unchanged |
-|---|---|
-| `src/lib/eda/svg-generators/index.ts` | No new generators needed |
-| `src/data/eda/datasets.ts` | All 9 datasets already present (new case study would add to it) |
-| `src/pages/eda/case-studies/[...slug].astro` | Dynamic routing unchanged |
-| `src/components/eda/CaseStudyDataset.astro` | All 9 case studies already mapped |
-| `src/lib/eda/svg-generators/*.ts` (all 13 generators) | Used as-is with different data |
-
-## Build Order and Dependencies
-
-### Dependency Graph
-
-```
-Layer 0 (no dependencies):
-  datasets.ts (already complete)
-  plot-configs.ts (new, trivial)
-
-Layer 1 (depends on Layer 0):
-  statistics.ts (already complete)
-  PlotFigure.astro (new, trivial)
-
-Layer 2 (depends on Layer 1):
-  hypothesis-tests.ts (new, depends on statistics.ts)
-
-Layer 3 (depends on Layers 0-2):
-  *Plots.astro components (enhanced, depend on datasets + statistics + hypothesis-tests + SVG generators)
-
-Layer 4 (depends on Layer 3):
-  *.mdx case study pages (enhanced, import *Plots components)
-```
-
-### Recommended Build Order
-
-**Phase 1: Foundation (no external dependencies)**
-1. Create `src/lib/eda/plot-configs.ts` -- shared constants
-2. Create `src/components/eda/PlotFigure.astro` -- shared figure wrapper
-3. Create `src/lib/eda/math/hypothesis-tests.ts` -- formal test functions
-4. Write tests for hypothesis-tests.ts against known NIST values
-
-**Phase 2: "Already Deep" Case Studies (minimal new work)**
-5. Enhance Normal Random Numbers MDX -- verify completeness against NIST
-6. Enhance Uniform Random Numbers MDX -- verify completeness against NIST
-7. Verify Random Walk -- already gold standard, no changes expected
-
-**Phase 3: "Has Residuals" Case Studies (moderate new work)**
-8. Enhance Beam Deflections -- deepen residual interpretation prose, add quantitative model validation results
-9. Refactor existing components to use PlotFigure.astro (optional, can batch)
-
-**Phase 4: "Needs Significant Enhancement" Case Studies**
-10. Enhance Cryothermometry -- discrete-data discussion depth
-11. Enhance Filter Transmittance -- root cause expansion, possibly decimated analysis
-12. Enhance Heat Flow Meter -- deeper quantitative section
-13. Enhance Fatigue Life -- distribution comparison plots (Weibull probability)
-14. Enhance Ceramic Strength -- factor-effects analysis, batch comparison deepening
-
-**Phase 5: New Case Study (if adding 1 new)**
-15. Add dataset to datasets.ts
-16. Create new *Plots.astro component
-17. Create new MDX case study page
-18. Register in CaseStudyDataset.astro
-
-### Why This Order
-
-1. **Foundation first** -- hypothesis-tests.ts is needed by all enhanced case studies. Build and test it once.
-2. **Easy wins second** -- Normal Random and Uniform Random are already near-complete. Quick confidence builders that establish the enhanced format.
-3. **Incremental complexity** -- Beam Deflections already has residuals, just needs deepening. Fatigue Life and Ceramic Strength need the most new plot types.
-4. **New case study last** -- requires all infrastructure to be in place.
+**Instead:** Render each section directly in the `[slug].astro` template. The total template grows from ~87 lines to approximately 160 lines -- still well within single-file readability.
 
 ## Scalability Considerations
 
-| Concern | At 9 case studies (current) | At 15 case studies | At 25+ case studies |
-|---|---|---|---|
-| Per-component approach | 9 files, ~1,800 lines total | 15 files, ~3,000 lines | Consider generic component |
-| datasets.ts size | ~48,000 tokens (already large) | Split into per-case-study files | Definitely split |
-| Build time | Fast (SSG, parallel) | Still fast | Monitor, Astro parallelizes well |
-| statistics.ts | 250 lines, focused | Unchanged | Unchanged |
-| hypothesis-tests.ts | ~200-300 lines (new) | Same | Same |
+| Concern | At 29 techniques (current) | At 50+ techniques (future) |
+|---|---|---|
+| `technique-content.ts` file size | ~35KB currently, ~80-100KB after expansion | Consider splitting into per-category files if 50+ techniques are added |
+| Build time | Negligible (static string rendering) | Still negligible -- no runtime computation |
+| Python code maintenance | 29 code examples, ~500 lines total | Could extract to separate file if > 75 techniques |
+| Case study resolution | 10 case studies, Map lookup is O(1) | Still O(1) per lookup, no concern |
 
-**The per-component pattern is correct for 9 case studies.** It would need revisiting at ~20+, but that is outside the scope of this milestone.
+The current architecture handles 29 techniques easily. The only future concern is `technique-content.ts` becoming very large (100KB+), at which point splitting by category (time-series techniques, distribution techniques, comparison techniques) would be appropriate. This is not needed now.
+
+## Build Order
+
+The recommended build order respects data dependencies and enables incremental verification:
+
+### Phase 1: Interface Extension + Template Update (foundation)
+
+**Dependencies:** None -- this is the starting point.
+
+1. **Extend `TechniqueContent` interface** with 6 new optional fields
+2. **Update `[slug].astro` template** to render new sections conditionally
+3. **Add `<Code>` import** to `[slug].astro` for Python rendering
+4. **Add case study collection resolution** to `getStaticPaths()`
+
+**Verification:** Build succeeds with no visible changes (all new fields are optional and empty).
+
+### Phase 2: Content Population (batch by batch)
+
+**Dependencies:** Phase 1 complete.
+
+Populate new fields for all 29 techniques. Recommended batching by complexity:
+
+1. **Batch A (high-traffic, Tier B):** histogram, scatter-plot, normal-probability-plot, autocorrelation-plot, lag-plot, spectral-plot (6 techniques). These have variants and are referenced by most case studies.
+2. **Batch B (time-series cluster):** run-sequence-plot, 4-plot, 6-plot, complex-demodulation (4 techniques). Related techniques that share context.
+3. **Batch C (probability/distribution cluster):** probability-plot, ppcc-plot, qq-plot, weibull-plot, box-plot, box-cox-normality, box-cox-linearity, bootstrap-plot (8 techniques).
+4. **Batch D (comparison/DOE cluster):** bihistogram, block-plot, doe-plots, mean-plot, std-deviation-plot, youden-plot (6 techniques).
+5. **Batch E (multivariate/remaining):** scatter-plot-matrix, conditioning-plot, contour-plot, star-plot, linear-plots (5 techniques).
+
+**Verification per batch:** Build succeeds, new sections render correctly, no regressions on existing sections.
+
+### Phase 3: Python Code Examples
+
+**Dependencies:** Phase 1 complete (Phase 2 can proceed in parallel).
+
+Add `pythonCode` field to all 29 techniques. Each example follows the standard pattern:
+- numpy for data generation
+- matplotlib.pyplot for visualization
+- scipy.stats for statistical functions where needed
+- Self-contained, runnable, 15-30 lines
+
+**Verification:** Python code renders via `<Code>` component with syntax highlighting.
+
+### Phase 4: Case Study Cross-Links
+
+**Dependencies:** Phase 1 complete, case study slugs must exist in the content collection.
+
+1. Add `caseStudySlugs` arrays to all 29 technique entries
+2. Render case study link section in `[slug].astro`
+
+**Verification:** Links resolve correctly, no 404s on case study URLs.
+
+## Template Diff Preview
+
+The key change in `src/pages/eda/techniques/[slug].astro`:
+
+```astro
+---
+// ADDED IMPORTS:
+import { Code } from 'astro-expressive-code/components';
+import { caseStudyUrl } from '../../../lib/eda/routes';
+
+// IN getStaticPaths -- ADD case study resolution:
+const caseStudyPages = await getCollection('edaPages');
+const caseStudyMap = new Map(
+  caseStudyPages
+    .filter(p => p.data.category === 'case-studies')
+    .map(p => [p.id.replace('case-studies/', ''), p.data])
+);
+
+// In the return props, add:
+//   caseStudyLinks: resolved array
+---
+
+{/* UPDATED description slot: */}
+{content && (
+  <Fragment slot="description">
+    <section class="prose-section mt-8 space-y-6">
+      {/* 1. What It Is (existing + expanded) */}
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">What It Is</h2>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.definition}</p>
+        {content.definitionExpanded && (
+          <p class="text-[var(--color-text-secondary)] leading-relaxed mt-3">{content.definitionExpanded}</p>
+        )}
+      </div>
+
+      {/* 2. Questions (NEW) */}
+      {content.questions && content.questions.length > 0 && (
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Questions This Plot Answers</h2>
+          <ul class="list-disc pl-6 space-y-1">
+            {content.questions.map(q => (
+              <li class="text-[var(--color-text-secondary)] leading-relaxed">{q}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 3. Why It Matters (NEW) */}
+      {content.importance && (
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.importance}</p>
+        </div>
+      )}
+
+      {/* 4. When to Use It (existing) */}
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">When to Use It</h2>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.purpose}</p>
+      </div>
+
+      {/* 5. How to Interpret (existing) */}
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">How to Interpret</h2>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.interpretation}</p>
+      </div>
+
+      {/* 6. Examples (NEW) */}
+      {content.examples && content.examples.length > 0 && (
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Examples</h2>
+          <ul class="space-y-3">
+            {content.examples.map(ex => (
+              <li>
+                <span class="font-semibold text-[var(--color-text-primary)]">{ex.label}:</span>
+                <span class="text-[var(--color-text-secondary)] ml-1">{ex.description}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 7. Assumptions (existing) */}
+      <div>
+        <h2 class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.assumptions}</p>
+      </div>
+
+      {/* 8. Case Studies (NEW) */}
+      {caseStudyLinks.length > 0 && (
+        <div>
+          <h2 class="text-xl font-heading font-bold mb-3">Case Studies</h2>
+          <p class="text-[var(--color-text-secondary)] mb-3">
+            This technique is demonstrated in the following case studies:
+          </p>
+          <div class="flex flex-wrap gap-3">
+            {caseStudyLinks.map(cs => (
+              <a href={cs.url}
+                 class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 transition-colors">
+                {cs.title}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 9. Reference (existing) */}
+      <p class="text-sm text-[var(--color-text-secondary)] italic mt-4">
+        Reference: {content.nistReference}
+      </p>
+    </section>
+  </Fragment>
+)}
+
+{/* NEW: Python code slot (follows quantitative page pattern) */}
+{content?.pythonCode && (
+  <Fragment slot="code">
+    <section class="prose-section mt-8">
+      <h2 class="text-xl font-heading font-bold mb-3">Python Example</h2>
+      <Code code={content.pythonCode} lang="python" />
+    </section>
+  </Fragment>
+)}
+```
 
 ## Sources
 
-- Direct codebase analysis of all files listed in the research question
-- NIST/SEMATECH e-Handbook of Statistical Methods (https://www.itl.nist.gov/div898/handbook/) -- Section 1.4.2 case study structure
-- Astro component architecture: build-time frontmatter computation model
-- Existing gold-standard implementation: `RandomWalkPlots.astro` + `random-walk.mdx`
+- Direct codebase analysis: `src/lib/eda/technique-content.ts`, `src/lib/eda/technique-renderer.ts`, `src/pages/eda/techniques/[slug].astro`, `src/pages/eda/quantitative/[slug].astro`, `src/lib/eda/quantitative-content.ts`, `src/data/eda/techniques.json`, `src/components/eda/TechniquePage.astro`
+- NIST/SEMATECH e-Handbook: Histogram page (https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm) -- section structure verified
+- NIST/SEMATECH e-Handbook: Scatter Plot page (https://www.itl.nist.gov/div898/handbook/eda/section3/scatterp.htm) -- Questions section verified
+- NIST/SEMATECH e-Handbook: Autocorrelation Plot page (https://www.itl.nist.gov/div898/handbook/eda/section3/autocopl.htm) -- Questions, Importance, Examples sections verified
+- Case study cross-reference analysis: grep of all 10 case study MDX files for technique URL references

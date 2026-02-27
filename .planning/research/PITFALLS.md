@@ -1,237 +1,223 @@
-# Pitfalls Research: EDA Case Study Deep Dive (v1.9)
+# Pitfalls Research: EDA Graphical Techniques NIST Parity
 
-**Domain:** Enhancing 8 existing EDA case studies to NIST-source depth and adding 1 new case study (Standard Resistor) to an existing Astro 5 static site with 90+ EDA pages
-**Researched:** 2026-02-26
-**Confidence:** HIGH (based on direct codebase analysis of existing Random Walk reference implementation, datasets.ts at 93KB, 9 existing *Plots.astro components, build-time SVG generation architecture, quick task 011 audit findings, and NIST source structure)
+**Domain:** Enhancing all 29 existing EDA graphical technique pages with NIST section depth -- adding Python code, validated SVGs, KaTeX formulas, case study cross-links, and 3-4 new content sections per page within an Astro 5 static site currently at 951 pages with Lighthouse 90+ on mobile
+**Researched:** 2026-02-27
+**Confidence:** HIGH (based on direct codebase analysis of existing technique-content.ts at 64KB/380 lines for 29 entries, quantitative-content.ts at 55KB/744 lines for 18 entries with KaTeX+Python already proven, technique-renderer.ts at 35KB with all 29 SVG generators operational, [slug].astro page structure, and v1.9 case study pitfalls experience)
 
-**Context:** This is a SUBSEQUENT milestone pitfalls document for v1.9. The v1.8 EDA Visual Encyclopedia is complete with 90+ pages, 13 SVG generators, KaTeX rendering via InlineMath component, and build-time SVG generation in TypeScript (not Python -- the original v1.8 pitfalls document assumed Python but the actual implementation uses pure TypeScript). The Random Walk case study (339 lines, 16 plot types) is the reference implementation. The remaining 8 case studies range from 121 to 266 lines and need expansion to ~300-400 lines each, plus a brand-new Standard Resistor case study.
+**Context:** This is a SUBSEQUENT milestone. The v1.8 EDA Visual Encyclopedia and v1.9 Case Study Deep Dive are complete. The 29 graphical technique pages currently have 5 content fields each (definition, purpose, interpretation, assumptions, nistReference) stored in technique-content.ts. The 18 quantitative technique pages already have the target architecture: KaTeX formulas, Python code examples, and richer prose via quantitative-content.ts. This milestone extends the graphical technique pages to match that depth. The TechniquePage.astro layout already has named slots for `plot`, `description`, `formula`, `code`, and `interpretation`. The quantitative [slug].astro page is the proven reference implementation for the formula+code pattern.
 
-**Key differences from v1.8 pitfalls context:**
-- SVG generation is TypeScript at build time, not Python -- eliminates the Python CI pitfall entirely
-- KaTeX integration is proven via InlineMath component (`katex.renderToString` with `throwOnError: false`)
-- D3 is only used for distribution parameter explorers, not case studies -- case studies are 100% build-time SVG
-- The build already handles 950+ pages including OG image caching
-- Quick task 011 already found and fixed 5 broken cross-reference links in case study MDX files
-- datasets.ts is already 93KB with 10 dataset arrays -- adding the Standard Resistor dataset (1000 values) will push it past 100KB
+**Key scale factors:**
+- 29 technique entries in technique-content.ts must grow from ~5 fields to ~12+ fields
+- technique-content.ts will grow from 64KB to an estimated 200-280KB
+- Each page gains KaTeX formulas (new -- graphical pages currently have zero)
+- Each page gains Python code (new -- only quantitative pages have this)
+- Each page gains case study cross-links (new section)
+- SVG plots need visual validation against NIST reference images
+- All 29 pages load simultaneously during build
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Statistical Value Transcription Errors in Quantitative Test Tables
+### Pitfall 1: technique-content.ts Grows to 250KB+ and Becomes Unmaintainable
 
 **What goes wrong:**
-Each case study contains 5-8 quantitative test result tables with specific numeric values (test statistics, critical values, regression coefficients, standard errors, t-values). These values must match the NIST source exactly. A single wrong digit in a critical value changes whether a hypothesis test "rejects" or "fails to reject" -- silently producing an incorrect statistical conclusion on a page that claims to be a reference. The Random Walk case study has 6 test tables with ~30 individual numeric values. Scaling this to 9 case studies means ~270 individual numeric values that must all be correct.
+technique-content.ts currently has 29 entries with 5 string fields each at 64KB. Adding 7+ new fields per entry (formulas array with tex+label+explanation, pythonCode string, sampleOutput string, relatedCaseStudies array, softwareNotes string, questions array, examples array) will grow each entry from ~1.3KB average to ~5-8KB. At 29 entries, the file grows to 145-232KB of raw TypeScript string content. The quantitative-content.ts precedent is instructive: 18 entries with formulas+code at 55KB means ~3KB per entry -- and graphical techniques need MORE content (longer interpretation sections, more variant discussion, plot-specific examples). A single 250KB TypeScript file with string literals is unnavigable in any editor, impossible to diff meaningfully in git, and causes IDE autocompletion lag.
 
 **Why it happens:**
-LLM-generated content produces plausible but subtly wrong statistical values with high confidence. Rounding differences between NIST's DATAPLOT and the TypeScript `statistics.ts` implementations create small discrepancies. Copy-paste errors when transcribing from NIST HTML tables to MDX tables are common. The NIST source sometimes presents values in scientific notation (e.g., `1.071E-03`) while MDX tables use decimal notation, creating transcription errors. Quick task 011 verified that the existing 9 case study summary statistics tables match NIST values, but the expansion adds ~200+ new values that do not yet exist in the codebase.
+The original architecture placed all technique content in a single file for discoverability and type safety. At 5 fields per entry this was reasonable. The quantitative-content.ts followed the same pattern at 18 entries. But 29 entries with 12+ fields each crosses the practical threshold. More critically, Python code examples contain multiline strings with indentation that conflict with the surrounding TypeScript template literals, making the file a formatting nightmare when using backtick strings inside backtick strings.
 
 **How to avoid:**
-1. **Compute test statistics programmatically in the *Plots.astro component** where feasible, rather than hardcoding values in MDX. The RandomWalkPlots.astro already computes AR(1) regression via `linearRegression()`. Extend this pattern: compute the location test regression, Levene test statistic, runs test Z-score, and autocorrelation values in the Plots component and expose them to the MDX page.
-2. **Cross-reference every hardcoded value against the NIST source page** character-by-character. Create a verification checklist per case study: (a) summary statistics table, (b) location test table, (c) variation test table, (d) randomness test tables, (e) distribution test table, (f) outlier test table, (g) model fit table (if applicable).
-3. **Use the existing `statistics.ts` functions** (mean, standardDeviation, linearRegression, autocorrelation) to compute values at build time rather than manually computing and hardcoding. The autocorrelation r1 for Random Walk (0.987) is already computed this way.
-4. **For critical values** (t-distribution, F-distribution, chi-squared, normal Z), these are fixed mathematical constants. Maintain a small lookup table or compute them. Do not rely on LLM-generated critical values -- they are frequently wrong in the 3rd-4th decimal place.
+1. **Split technique-content.ts into per-technique files** before adding new content. Create `src/lib/eda/technique-content/autocorrelation-plot.ts`, `src/lib/eda/technique-content/bihistogram.ts`, etc., each exporting a single `TechniqueContent` object. Create a barrel `src/lib/eda/technique-content/index.ts` that re-exports and provides the `getTechniqueContent()` lookup. This is a mechanical refactor with zero behavior change.
+2. **Alternatively, split into category groups** if per-file feels too granular: time-series techniques (autocorrelation, lag, run-sequence, spectral, complex-demodulation), distribution techniques (histogram, box-plot, normal-probability, probability, qq, ppcc, weibull, box-cox-normality), comparison techniques (bihistogram, block, bootstrap, youden, mean, std-deviation), multivariate techniques (scatter, scatterplot-matrix, conditioning, contour, star), composite techniques (4-plot, 6-plot), and regression techniques (linear-plots, box-cox-linearity, doe-plots). Six files of 30-40KB each.
+3. **Store Python code in separate .py files** rather than inline TypeScript strings. Create `src/lib/eda/technique-content/code/autocorrelation-plot.py` and import as raw text via Vite's `?raw` import or read at build time. This keeps Python properly syntax-highlighted in the editor and avoids backtick-in-backtick escaping issues.
 
 **Warning signs:**
-- A test statistic is less than its critical value but the conclusion says "reject" (or vice versa)
-- Summary statistics (mean, std dev) differ from what `statistics.ts` computes on the dataset
-- Regression coefficients produce predicted values that do not match the actual data when spot-checked
-- Critical values for the same test (e.g., t_0.975,498 = 1.96) differ between case studies when they should be identical
+- IDE autocomplete takes >2 seconds when editing technique-content.ts
+- Git diffs for a single technique's content changes show 200+ lines because the file is reformatted
+- Python code indentation breaks because of template literal nesting
+- Developers avoid editing the file and instead hardcode content in the .astro page
 
 **Phase to address:**
-Phase 1 (Infrastructure) -- extend `statistics.ts` with helper functions for Levene test, runs test, and t/F/chi-squared critical value lookups. Then each content phase validates computed vs. hardcoded values.
+Phase 1 (Infrastructure) -- split the file BEFORE adding any new content fields.
 
 ---
 
-### Pitfall 2: Build Time Regression from 100+ New SVG Renders
+### Pitfall 2: Python Code Examples with Wrong API or Incorrect Statistical Output
 
 **What goes wrong:**
-The Random Walk case study generates 16 SVG plots at build time via RandomWalkPlots.astro. Each SVG generation involves computing autocorrelation (O(n*maxLag)), power spectrum via FFT (O(n log n)), probability plots with sorting (O(n log n)), and histogram binning. With 500 data points and maxLag=100, the autocorrelation alone iterates 500*100 = 50,000 times per call. Random Walk currently makes ~4 autocorrelation calls (raw + residual, 2 maxLag values). Scaling to 9 case studies with ~13-16 plots each means 120-144 total SVG renders at build time, each involving non-trivial computation. The current build of 950 pages already takes significant time; adding 100+ SVG computations could add 5-15 seconds.
+Adding matplotlib/seaborn Python code to 29 technique pages means 29 independent code examples that must (a) use correct, current API calls, (b) produce the correct statistical plot for that specific technique, (c) use the correct dataset or demonstrate with synthetic data that exhibits the right pattern, and (d) actually run without error if a reader copies the code. LLM-generated Python code is notoriously confident but subtly wrong about statistical plotting APIs. Common errors include: using `plt.acorr()` when `statsmodels.graphics.tsaplots.plot_acf()` is the standard for autocorrelation, using deprecated `seaborn.distplot()` instead of `seaborn.histplot()`, using `vert=True` (deprecated in matplotlib 3.10) instead of `orientation='vertical'` on boxplots, and confusing `scipy.stats.probplot()` (which returns a tuple) with a direct plotting function.
 
 **Why it happens:**
-Each `<CaseStudyPlots type="X" />` invocation in MDX triggers the full Astro component evaluation, including all the computations in the component frontmatter (regression fitting, residual computation, etc.) -- even though only one plot type is rendered per invocation. The RandomWalkPlots component computes AR(1) regression and all 499 residuals every time it renders any plot type, because the computations are in the component's frontmatter scope, not gated by the `type` prop. With 16 invocations per page, the AR(1) computation runs 16 times for a single page.
+matplotlib has extensive API deprecation cycles. The `vert` parameter on boxplot/bxp was deprecated in 3.10 (2024) and replaced with `orientation`. Seaborn deprecated `distplot` in 0.11 (2020) and removed it in 0.14 (2024), replacing it with `histplot` and `displot`. `plt.acorr()` plots raw autocorrelation without confidence bounds, while `plot_acf()` from statsmodels includes them -- the NIST-equivalent output requires confidence bounds. The code examples cannot be tested at build time (they are Python, the build is Node.js), so errors are invisible until a reader reports them.
 
 **How to avoid:**
-1. **Move expensive computations to a shared module** that caches results. Create a `src/lib/eda/case-study-computations.ts` that computes model fits and residuals once per dataset and memoizes the results. Import the pre-computed values in the Plots component rather than computing in the component frontmatter.
-2. **Monitor build time after each case study is enhanced.** Track with `time npx astro build` and set a budget: build should not regress more than 2 seconds per case study added. If it does, investigate memoization.
-3. **The spectral plot computation is the most expensive** -- `powerSpectrum()` computes autocovariance for lag 0 to N/4, then evaluates N/2 frequency bins. For a 1000-point Standard Resistor dataset, that is 250 lags * 1000 iterations + 500 frequency bins * 250 cosine evaluations = 375,000 operations. If this runs 16 times per page, it is 6 million operations for one case study page.
-4. **Consider lazy evaluation per plot type** -- restructure the Plots component to only compute what the specific `type` needs, not all computations upfront.
+1. **Pin specific library versions in every code example.** Each code block should start with a comment: `# Requires: matplotlib>=3.9, numpy>=1.26, scipy>=1.12, statsmodels>=0.14`. This prevents readers from running with incompatible versions.
+2. **Use only the current API surface.** Specifically:
+   - Histogram: `plt.hist()` or `sns.histplot()` (NOT `sns.distplot()`)
+   - Box plot: `plt.boxplot()` with `orientation='vertical'` (NOT `vert=True`)
+   - Autocorrelation: `from statsmodels.graphics.tsaplots import plot_acf` (NOT `plt.acorr()`)
+   - Probability plot: `scipy.stats.probplot(data, plot=plt)` (returns tuple AND plots when plot= is provided)
+   - Q-Q plot: `from statsmodels.graphics.gofplots import qqplot` or `scipy.stats.probplot()`
+   - Spectral plot: `plt.psd()` or `scipy.signal.welch()` + manual plot
+3. **Create a validation script** (`scripts/validate-python-examples.sh`) that extracts all Python code blocks from technique-content files and runs them in a Docker container or virtual environment. This can run in CI nightly, not on every build.
+4. **Use the quantitative-content.ts code examples as the proven template.** The 18 existing Python examples are already working with the correct API patterns. Copy the import blocks and adapt.
+5. **For technique-specific gotchas:**
+   - Lag plot: `plt.scatter(data[:-lag], data[lag:])` manually is safer than `pandas.plotting.lag_plot()` which has inconsistent lag parameter behavior
+   - Star/radar plot: matplotlib has no built-in radar plot; use `plt.subplot(polar=True)` and manual angle computation
+   - Contour plot: `plt.contour()` requires meshgrid data; `plt.tricontour()` for scattered data
+   - 4-plot and 6-plot: must compose subplots with `fig, axes = plt.subplots(2, 2)` -- getting the subplot indices right for NIST's specific arrangement is error-prone
 
 **Warning signs:**
-- Build time increases by more than 3 seconds after adding a single case study enhancement
-- `astro build` output shows case study pages taking disproportionately longer than technique pages
-- Standard Resistor case study (1000 data points vs 500 for most others) takes noticeably longer than other case studies
-- CI build approaches the 10-minute GitHub Pages timeout
+- `DeprecationWarning` messages when running an example
+- A code example imports `seaborn` but never uses it (copy-paste artifact)
+- The plot output looks nothing like the build-time SVG on the same page
+- A code example uses `plt.show()` at the end (harmless but unnecessary in a documentation context; replace with `plt.savefig()` or `plt.tight_layout()`)
 
 **Phase to address:**
-Phase 1 (Infrastructure) -- implement memoized computation module. Measure baseline build time before any content changes. Set build time budget.
+Phase 1 (Infrastructure) -- establish the Python code template with correct imports and version pins. Phase 2+ (Content phases) -- each batch of technique pages uses the template.
 
 ---
 
-### Pitfall 3: Structural Inconsistency Across 9 Case Studies
+### Pitfall 3: KaTeX Formula Rendering Breaks on Graphical Technique Pages
 
 **What goes wrong:**
-The Random Walk case study follows a specific structure: Background and Data > Test Underlying Assumptions (Goals, 4-Plot, individual plot sections) > Quantitative Results (Summary Statistics, Location Test, Variation Test, Randomness Tests, Distribution Tests, Test Summary) > Interpretation > Develop Better Model > Validate New Model > Conclusions. The other 8 existing case studies use slightly different section structures. Normal Random Numbers uses "Graphical Output and Interpretation" and "Quantitative Output and Interpretation" as major sections. Beam Deflections uses the same but with different subsection ordering. Fatigue Life omits the autocorrelation section naming but includes the plot. When expanding all 9 to full depth, inconsistent section headers, missing subsections, and varying depth of interpretation make the collection feel like 9 separate projects rather than a unified reference.
+The 29 graphical technique pages currently do NOT use KaTeX at all. The TechniquePage.astro component passes `useKatex={false}` by default, meaning the KaTeX CSS (`/styles/katex.min.css`) is not loaded on these pages. Adding formulas requires: (1) extending the [slug].astro page to pass `useKatex={true}` when formulas exist, (2) adding `katex.renderToString()` calls in the frontmatter, and (3) rendering the resulting HTML via `set:html`. If step (1) is forgotten, the formulas render as raw HTML spans without the KaTeX CSS, producing invisible or garbled math symbols. This is a silent failure -- the build succeeds, the page loads, but every formula looks broken.
 
 **Why it happens:**
-Case studies are written sequentially, with each taking 30-60 minutes. The writer's mental model of the structure drifts over time. Some NIST source sections include "Develop Better Model" while others do not. The Normal Random Numbers case study (all assumptions satisfied) has no model-improvement section, while Random Walk has an extensive one. Ceramic Strength has a batch comparison angle that other studies lack. These genuine structural differences get confused with accidental inconsistencies.
+The quantitative [slug].astro page always sets `useKatex={true}` because every quantitative page has formulas. But the graphical [slug].astro page conditionally includes formulas only for techniques that have them. The developer adds formula content to technique-content.ts but forgets to update the `useKatex` prop in the [slug].astro page. Or they update it to always be true, which loads 350KB of KaTeX fonts on the 10+ graphical pages that have zero formulas (waste). The KaTeX CSS includes ~25 font files referenced via `@font-face`, and loading them on pages that never render a formula is a Lighthouse performance penalty.
 
 **How to avoid:**
-1. **Define a canonical section template** before starting content work. Map each NIST case study to the template and note which sections are "N/A" vs. which need content:
-
-```
-## Background and Data
-## Test Underlying Assumptions
-### Goals
-### 4-Plot Overview
-### Fixed Location -- Run Sequence Plot
-### Randomness -- Lag Plot
-### Randomness -- Autocorrelation Plot
-### Randomness -- Spectral Plot
-### Fixed Distribution -- Histogram
-### Normality -- Normal Probability Plot
-## Quantitative Results
-### Summary Statistics
-### Location Test
-### Variation Test
-### Randomness Tests
-### Distribution and Outlier Tests  (or "Distribution Test" + "Outlier Detection")
-### Test Summary
-## Interpretation
-## Develop a Better Model  (only if NIST source includes this)
-## Validate New Model  (only if Develop Better Model exists)
-## Conclusions
-```
-
-2. **Process all 8 existing case studies through the template first** before writing new content. Identify which sections exist, which need expansion, and which need restructuring. This creates a gap analysis that guides content writing.
-3. **Handle genuine structural differences explicitly.** Normal Random Numbers does not need "Develop Better Model" because all assumptions pass. Fatigue Life focuses on model selection rather than assumption violation. Document these intentional deviations from the template in a comment at the top of each MDX file.
-4. **Write the section headers first for all 9 case studies** as a batch, before filling in content. Review the headers for consistency. This is 30 minutes of work that prevents 3+ hours of later restructuring.
+1. **Make `useKatex` data-driven.** In the graphical [slug].astro page, compute it from the content: `const useKatex = (content?.formulas?.length ?? 0) > 0;`. This eliminates the manual toggle entirely. The quantitative page already does this implicitly (all quantitative pages have formulas).
+2. **Add the formula rendering pattern from quantitative [slug].astro.** The proven pattern is:
+   ```typescript
+   const renderedFormulas = content?.formulas.map(f => ({
+     ...f,
+     html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
+   })) ?? [];
+   ```
+   Copy this exactly into the graphical [slug].astro frontmatter.
+3. **Conditionally load KaTeX CSS using the same `useKatex` prop** that is already supported by EDALayout.astro. The plumbing exists; only the graphical page needs to use it.
+4. **Avoid loading KaTeX on pages with zero formulas.** Not all 29 graphical techniques need formulas. Simple visual techniques like star-plot, block-plot, and youden-plot may only need textual descriptions. Only load KaTeX CSS when the technique actually has formula content. The data-driven approach in point 1 handles this automatically.
 
 **Warning signs:**
-- Two case studies use different heading text for the same logical section (e.g., "Quantitative Output and Interpretation" vs "Quantitative Results")
-- A case study is missing the Test Summary table that all others have
-- Plot sections are in different order across case studies (e.g., autocorrelation before spectral in one but after in another)
-- The Conclusions section has different depth across case studies (2 sentences in one vs. 2 paragraphs in another)
+- Formula HTML appears in the page source as `<span class="katex">...</span>` but no KaTeX CSS is loaded -- formulas render as garbled inline spans
+- Lighthouse flags unused CSS (katex.min.css loaded on pages without math)
+- KaTeX fonts appear in the network waterfall for technique pages that have no formulas
+- Formulas render correctly in dev but break in production if the CSS path differs
 
 **Phase to address:**
-Phase 1 (Template and Gap Analysis) -- create the canonical template and complete the gap analysis for all 9 case studies before any content writing begins.
+Phase 1 (Infrastructure) -- update the graphical [slug].astro page to support conditional KaTeX rendering before content is added.
 
 ---
 
-### Pitfall 4: Broken Cross-Reference Links Multiply During Content Expansion
+### Pitfall 4: SVG Validation Against NIST Reference Is Subjective and Unscalable
 
 **What goes wrong:**
-Quick task 011 found 5 broken cross-reference links in just 3 MDX files. The errors were all slug mismatches: wrong category prefix (e.g., `/eda/quantitative/autocorrelation/` instead of `/eda/techniques/autocorrelation-plot/`) or wrong slug abbreviation (e.g., `chi-square-goodness-of-fit` instead of `chi-square-gof`). Expanding each case study from ~100-250 lines to ~300-400 lines means adding ~100-200 new lines of content per study, including 10-20 new cross-reference links per study (to technique pages, quantitative test pages, distribution pages, and other case studies). That is 90-180 new links across 9 case studies, each susceptible to the same category/slug confusion that caused the original 5 errors.
+The milestone requires "validating SVGs against NIST originals." The NIST handbook shows static GIF/PNG images of plots generated by DATAPLOT software from the 1990s. The build-time TypeScript SVG generators produce modern, styled, interactive-ready SVGs with different colors, fonts, axis styling, and data resolution. "Validation" becomes a subjective visual comparison where the reviewer must mentally map between two very different visual styles to confirm the statistical pattern matches. At 29 techniques, this manual visual comparison is tedious, error-prone, and not reproducible. Different reviewers may disagree on whether a KDE curve in the SVG "matches" the NIST histogram shape.
 
 **Why it happens:**
-The EDA encyclopedia has three different URL category prefixes (`/eda/techniques/`, `/eda/quantitative/`, `/eda/distributions/`) and 85+ slugs. The autocorrelation technique is at `/eda/techniques/autocorrelation-plot/` but the autocorrelation quantitative test is at `/eda/quantitative/autocorrelation/`. The PPCC technique is at `/eda/techniques/ppcc-plot/` not `/eda/quantitative/ppcc/`. This technique-vs-quantitative ambiguity is the root cause of most cross-reference errors. When writing case study content, the author naturally writes "the autocorrelation plot" and links to what seems logical, not checking whether it is in the techniques or quantitative category.
+There is no automated way to compare a build-time SVG (vector, specific color palette, custom fonts) against a NIST reference GIF (raster, DATAPLOT styling, aliased). Pixel-level comparison tools (BackstopJS, Cypress visual regression) require screenshots of both, which means rendering the SVG in a browser -- adding a browser-based test infrastructure that does not exist in the current build pipeline. The alternative is manual review, which does not scale to 29 techniques and is not repeatable.
 
 **How to avoid:**
-1. **Create a cross-reference cheat sheet** for case study authors. List the 20-30 most commonly referenced pages with their exact URLs:
-   - `/eda/techniques/4-plot/` (not `/eda/techniques/four-plot/`)
-   - `/eda/techniques/run-sequence-plot/`
-   - `/eda/techniques/lag-plot/`
-   - `/eda/techniques/autocorrelation-plot/` (technique -- the PLOT)
-   - `/eda/quantitative/autocorrelation/` (quantitative -- the COEFFICIENT)
-   - `/eda/techniques/histogram/`
-   - `/eda/techniques/normal-probability-plot/`
-   - `/eda/techniques/spectral-plot/`
-   - `/eda/quantitative/runs-test/`
-   - `/eda/quantitative/levene-test/`
-   - `/eda/quantitative/bartletts-test/`
-   - `/eda/quantitative/anderson-darling/`
-   - `/eda/quantitative/grubbs-test/`
-   - `/eda/quantitative/chi-square-gof/` (NOT `chi-square-goodness-of-fit`)
-   - `/eda/techniques/ppcc-plot/` (NOT `/eda/quantitative/ppcc/`)
-2. **Run link validation after every case study expansion.** The quick task 011 validation approach (grep for all `/eda/` links and verify slugs against technique/distribution inventories) should be built into the workflow.
-3. **Use consistent link patterns from the Random Walk reference implementation.** Copy the exact link syntax from Random Walk when linking to techniques and quantitative tests that appear in both.
-4. **Cross-case-study links are new and particularly error-prone.** The expanded content should reference other case studies (e.g., "Compare with the [random walk](/eda/case-studies/random-walk/) case study where the location assumption fails catastrophically"). Verify these case study slugs match the actual file names under `src/data/eda/pages/case-studies/`.
+1. **Redefine "validation" as statistical pattern validation, not visual pixel matching.** The SVG does not need to look like the NIST image. It needs to show the same statistical pattern (e.g., the histogram shows a right-skewed distribution, the autocorrelation decays exponentially from lag 1). Define a checklist per technique:
+   - Does the SVG show the correct plot type? (axes, data representation)
+   - Does the SVG show the correct statistical pattern for the default dataset?
+   - Are axis labels, title, and reference lines present and correct?
+   - Do Tier B variant SVGs show visually distinct patterns?
+2. **Create a visual audit page** at `/eda/dev/svg-audit/` (dev-only, excluded from production build) that renders all 29 default SVGs in a grid, side by side with NIST reference images loaded via `<img>` from a local reference directory. This allows rapid visual comparison without opening 29 separate pages.
+3. **Use unit tests for statistical correctness** rather than visual comparison. Test that the autocorrelation function computed in `technique-renderer.ts` matches the expected values for the known dataset. Test that the histogram binning produces the expected bin counts. This catches computational errors without requiring visual comparison.
+4. **Accept that the SVGs will never match NIST pixel-for-pixel.** The value is pedagogical equivalence, not visual reproduction. Document this explicitly in the milestone scope to prevent scope creep into visual regression testing infrastructure.
 
 **Warning signs:**
-- Build succeeds but clicking a link in the rendered page leads to a 404
-- Astro build reports warnings about unresolved internal links (though Astro may not always catch MDX link issues in static builds)
-- A reviewer notices that a link labeled "autocorrelation plot" points to the quantitative autocorrelation coefficient page instead of the plot technique page
+- Reviewer spends >5 minutes per technique comparing SVG to NIST image
+- Disagreements about whether a plot "matches" the NIST reference
+- Someone proposes adding Playwright or Cypress for visual regression testing (massive scope creep for 29 static SVGs)
+- A technique SVG shows the WRONG statistical pattern (e.g., autocorrelation for random data when it should show autocorrelation for autoregressive data) -- this is a real bug, not a styling difference
 
 **Phase to address:**
-Every content phase -- run link validation after each case study is expanded. The cheat sheet should be created in Phase 1.
+Phase 1 (Infrastructure) -- create the SVG audit page and define the validation checklist. Phase 2+ (Content phases) -- use the checklist during review, not ad-hoc visual comparison.
 
 ---
 
-### Pitfall 5: datasets.ts Grows Past Maintainability and Import Performance Thresholds
+### Pitfall 5: Content Quality Drift Across 29 Technique Pages Written Sequentially
 
 **What goes wrong:**
-`datasets.ts` is already 93KB with 10 dataset arrays. The Standard Resistor case study adds the DZIUBA1.DAT dataset with 1000 observations. If these are 6-digit precision decimal numbers, that is approximately 1000 * 10 characters * ~1.5 (commas, spaces, newlines) = 15KB of new data. The file grows to ~108KB. More importantly, every *Plots.astro component imports from `datasets.ts`, which means the entire 108KB file is parsed by Node.js during build for every plot component evaluation. With 100+ plot component invocations across 9 case studies, this means `datasets.ts` is parsed 100+ times during a single build (though Node.js module caching mitigates this after the first parse). The real risk is not runtime performance but developer experience: a 108KB TypeScript file with thousands of literal numbers is hard to navigate, review, and validate.
+Writing 7+ new content sections for 29 techniques means producing ~200+ individual content fields. When written sequentially over multiple sessions, the quality, depth, and style drift. The first 5 techniques get careful, NIST-verified descriptions with precise statistical language. Techniques 15-20 get shorter, more generic descriptions as writer fatigue sets in. Techniques 25-29 use copy-paste templates with find-replace that introduce errors (e.g., a box-cox-normality description that accidentally says "linearity" because it was copied from box-cox-linearity). The interpretation sections become formulaic ("The horizontal axis shows X and the vertical axis shows Y"), losing the technique-specific insight that makes the content valuable.
 
 **Why it happens:**
-The original architecture placed all datasets in a single file for simplicity and discoverability. At 5 datasets this was reasonable. At 10 datasets it is already large. Adding the 11th (Standard Resistor) continues the pattern without questioning whether it still makes sense. The issue compounds because some case studies (Ceramic Strength) have structured data (objects with batch/lab/strength fields) while others have simple number arrays, making the file a grab-bag of different data shapes.
+29 techniques is a large batch for content creation. Each technique requires understanding its specific statistical purpose, reading the NIST source, writing accurate prose, writing a correct Python example, identifying appropriate formulas, and linking to relevant case studies. At 30-60 minutes per technique, the full batch is 15-30 hours of focused writing. Maintaining consistent quality across this duration is unrealistic without structure. The current technique-content.ts already shows minor drift: some interpretation sections are 3 sentences, others are 8. Some mention variant patterns, others do not.
 
 **How to avoid:**
-1. **Accept that the current single-file approach works for v1.9.** Node.js caches module imports, so the 108KB file is parsed once per build, not 100+ times. The developer experience concern is real but manageable for 11 datasets. Do NOT refactor `datasets.ts` into multiple files as part of v1.9 -- that is a v2.0 concern.
-2. **Verify the Standard Resistor data entry carefully.** The DZIUBA1.DAT dataset has 1000 observations. Manually entering 1000 values is error-prone. Programmatically download and parse the NIST .DAT file, format as TypeScript array literal, and paste into datasets.ts. Verify the array length matches 1000.
-3. **Add a source comment block** above the Standard Resistor dataset following the existing pattern (see normalRandom and uniformRandom blocks), including NIST section reference, .DAT file URL, and observation count.
-4. **Update CaseStudyDataset.astro's CASE_STUDY_MAP** to include the new `standard-resistor` slug pointing to the new dataset export.
+1. **Process techniques in categorical batches of 4-6** rather than all 29 sequentially. Group by statistical domain: time-series techniques first (5 techniques sharing similar concepts), then distribution techniques (8 techniques), etc. Within each batch, the concepts reinforce each other and the writer maintains domain context.
+2. **Define a content template with mandatory and optional fields** before writing any content:
+   - **Mandatory for all 29:** definition (2-3 sentences), purpose (2-3 sentences), interpretation (3-5 sentences), assumptions (2-3 sentences), nistReference
+   - **Mandatory for techniques with formulas:** formulas array with tex, label, explanation
+   - **Mandatory for all 29:** pythonCode with version-pinned imports
+   - **Optional:** questions array, examples array, softwareNotes
+   - **Mandatory for all 29:** relatedCaseStudies (even if empty array -- explicit "no case study" is better than omission)
+3. **Review each batch before starting the next.** Re-read the first batch's content before writing the second. This catches drift early.
+4. **Use the NIST source as the primary content driver, not LLM generation.** For each technique: (a) read the NIST page, (b) extract the key points into the template fields, (c) rewrite in the established voice. This grounds every entry in authoritative source material rather than generative fluency.
+5. **Cross-check field lengths.** After all 29 are written, compute the character count of each field across all techniques. Flag any that are more than 2x shorter or longer than the median. These are likely either incomplete (too short) or verbose (too long).
 
 **Warning signs:**
-- Standard Resistor dataset array has the wrong number of elements (quick task 011 verified other array counts; the same check must run for the new dataset)
-- IDE becomes sluggish when editing datasets.ts (typical at ~150KB+, not yet at 108KB)
-- TypeScript compiler shows memory warnings related to large literal types
+- The last 5 techniques all have identical interpretation structure ("The horizontal axis shows... The vertical axis shows... Points above the line indicate... Points below the line indicate...")
+- A technique's `purpose` field mentions the wrong technique name (copy-paste error)
+- Python code examples across 3+ techniques use identical synthetic data generation code with only the plot function changed
+- Formula `explanation` fields become one-word labels instead of sentences
 
 **Phase to address:**
-Phase 2 (Standard Resistor case study creation) -- data entry and verification phase.
+Every content phase -- batch review gates between groups. Phase 1 defines the content template and review checklist.
 
 ---
 
-### Pitfall 6: *Plots.astro Component Duplication Explosion
+### Pitfall 6: Build Time Regression from 29 Pages Getting 3-4x Larger
 
 **What goes wrong:**
-There are currently 9 *Plots.astro components, one per case study. They share 70-80% identical code: the same `singleConfig` and `compositeConfig` objects, the same `<figure>` wrapper HTML, the same `switch(type)` structure, and the same `defaultCaptions` pattern. Each component independently imports from `svg-generators/index` and `datasets`. When expanding each component to support 13-16 plot types (up from the current 5-8 in most components), the duplication multiplies. The BeamDeflectionPlots component already has a custom sinusoidal model fit in its frontmatter. The CeramicStrengthPlots has batch splitting logic. The RandomWalkPlots has AR(1) regression. Adding similar model-specific computations to the other 6 components creates 9 independent, divergent copies of essentially the same rendering pattern.
+Each graphical technique page currently renders: 1 SVG plot (or variant set for Tier B), 4 prose sections, and a related techniques sidebar. After enhancement, each renders: 1+ SVG plots, 4 prose sections expanded by ~50%, 2-4 KaTeX formula blocks, 1 Python code block via astro-expressive-code (Shiki highlighting), 1 case study cross-links section, and potentially an examples section. The KaTeX `renderToString()` calls add ~1-5ms per formula per page. The Shiki syntax highlighter for Python code adds a meaningful per-page cost. astro-expressive-code optimized parallel highlighter initialization in recent versions, but each Python code block still requires tokenization and HTML generation. Across 29 pages, this adds approximately: 29 pages * 3 formulas * 3ms = ~260ms for KaTeX, 29 pages * 1 code block * ~50-100ms = 1.4-2.9 seconds for Shiki. The SVG generation itself is already paid. The total regression is estimated at 2-4 seconds -- noticeable but not catastrophic for a site that already builds 951 pages.
 
 **Why it happens:**
-Astro components do not easily support parametric inheritance or composition for the frontmatter (server-side) logic. You cannot create a "BasePlots" component that subclasses add model-specific computations to. Each case study has unique model-fitting requirements (AR(1) for Random Walk, sinusoidal for Beam Deflections, batch comparison for Ceramic Strength), making a single generic component impractical. The natural approach is copy-paste-modify from RandomWalkPlots, but this means fixing a bug in the `<figure>` wrapper HTML requires changing 9 files.
+astro-expressive-code uses Shiki under the hood, which loads grammar files and themes into memory. The Python grammar is relatively large. While Shiki reuses the highlighter instance across pages, each code block still requires O(n) tokenization where n is the code length. For 29 code blocks averaging 30 lines each, this is ~870 lines of Python to tokenize. Combined with HTML generation and wrapper element creation, each code block adds measurable latency.
 
 **How to avoid:**
-1. **Extract the shared rendering wrapper** into a `PlotFigure.astro` component. Each *Plots.astro component computes its SVG string and caption, then passes them to `<PlotFigure svg={svg} caption={caption} isComposite={isComposite} />`. This isolates the HTML/CSS rendering from the data/computation logic. Changes to figure styling, responsive behavior, or dark mode only need to be made in one place.
-2. **Extract shared plot generation calls** into helper functions. Create a `generateStandardPlots(data: number[], config)` function that returns the 7 standard plot SVGs (4-plot, run-sequence, lag, histogram, probability, autocorrelation, spectral) as a map. Each *Plots.astro component calls this for its raw data plots, then adds custom residual/model plots.
-3. **Keep model-specific computation in each *Plots.astro component** -- do not try to abstract AR(1) regression vs. sinusoidal fitting vs. batch comparison into a generic system. The computational diversity is genuine and should be explicit.
-4. **Standardize the `PlotType` union** across components. Use a consistent naming convention: raw data plots use short names (`4-plot`, `run-sequence`, `lag`, `histogram`, `probability`, `autocorrelation`, `spectral`); residual plots use `residual-` prefix; model-specific plots use descriptive names (`predicted-vs-original`, `batch-box-plot`).
-5. **Standardize `defaultCaptions`** structure. Each caption should follow: "[Plot type] of [dataset name] [showing/confirming] [key finding]." Review all 9 components' captions for consistent style.
+1. **Measure baseline build time BEFORE adding any content.** Run `time npx astro build` three times and record the median. Set a budget: build must not exceed baseline + 5 seconds after all 29 techniques are enhanced.
+2. **Add Python code blocks in a dedicated phase** (not interleaved with prose) so the build time impact can be measured in isolation.
+3. **Keep Python examples concise: 20-35 lines maximum.** The quantitative pages' examples average ~25 lines. Resist the urge to make graphical technique examples more elaborate (e.g., including data generation, plot customization, subplot arrangement). The example should demonstrate the technique, not be a comprehensive tutorial.
+4. **If build regression exceeds 5 seconds**, investigate whether the expressive-code integration has a cache or precompilation option. Also verify that `shikiConfig.experimentalThemes` is not loading unnecessary themes.
+5. **The OG image generation is already cached** via content-hash caching. Adding content to existing pages changes the hash, triggering OG regeneration for all 29 pages on the first build. This is a one-time cost, not a recurring one. But the first post-enhancement build will be slower than subsequent builds.
 
 **Warning signs:**
-- A CSS change to the plot figure wrapper needs to be applied to 9 separate files
-- Two *Plots.astro components use different `singleConfig` dimensions (currently they all use 720x450, but drift is possible)
-- Caption text inconsistency: some captions describe data behavior, others describe plot construction
+- Build time increases by more than 8 seconds after all techniques are enhanced
+- `astro build` output shows technique pages taking >500ms each (currently ~50-100ms each)
+- Total build exceeds 3 minutes (current baseline is likely 1.5-2.5 minutes for 951 pages)
+- Memory usage spikes during technique page generation (Shiki grammar loading)
 
 **Phase to address:**
-Phase 1 (Infrastructure) -- extract PlotFigure.astro and generateStandardPlots() helper before expanding content.
+Phase 1 (Infrastructure) -- record baseline build time. Each content phase -- measure after completion. Final phase -- verify total regression within budget.
 
 ---
 
-### Pitfall 7: KaTeX Formula Errors in Hypothesis Test Notation
+### Pitfall 7: Case Study Cross-Links Go Stale as Case Studies and Techniques Evolve
 
 **What goes wrong:**
-Each case study contains 5-10 KaTeX-rendered hypothesis test formulas using the `<InlineMath tex="..." />` component. Complex formulas like `H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0` require careful escaping. The `\!` (negative thin space), `\quad`, `\text{}`, and `\neq` commands must all be correctly typed. A missing backslash before `text` renders `{vs.}` as a JSX expression error. A `\ne` instead of `\neq` may render differently. The InlineMath component uses `throwOnError: false`, which means KaTeX silently fails on malformed LaTeX and renders the raw source text instead -- the build succeeds but the page shows broken formulas.
+Each graphical technique page will list related case studies: "See this technique applied in the [Random Walk](/eda/case-studies/random-walk/) and [Beam Deflections](/eda/case-studies/beam-deflections/) case studies." These are currently 10 case studies, and the technique-to-case-study mapping must be maintained manually. When a new case study is added or a case study is renamed/restructured, the cross-links in 29 technique pages become stale. The reverse is also true: case studies link to technique pages, and technique pages link to case studies, creating a bidirectional dependency that is easy to break.
 
 **Why it happens:**
-MDX treats `{}` as JSX expressions. In `<InlineMath tex="..." />`, the `tex` prop is a string, so curly braces inside the string are safe. But if the formula is accidentally placed outside the `tex` attribute or in markdown body text, MDX parses the braces as JSX. Additionally, KaTeX's `throwOnError: false` setting (chosen to prevent build failures on minor formula issues) masks errors. A formula like `\sigma_1^2 = \sigma_2^2` works fine, but `\sigma_{1}^{2}` also works and either pattern might be used inconsistently.
+Cross-links are stored as static strings in technique-content.ts rather than being computed from a central mapping. If the random-walk case study slug changes to `random-walk-analysis`, every technique that references it must be updated. With 29 technique pages and 10 case studies, the cross-reference matrix has up to 290 potential links. No build-time validation exists to verify that case study slugs in technique-content references match actual case study file names.
 
 **How to avoid:**
-1. **Copy the exact formula patterns from the Random Walk reference implementation.** The Random Walk MDX has working examples of every common formula pattern: hypothesis tests, confidence intervals, model equations, test statistics in tables, and parameter estimates. Use these as templates.
-2. **Build a formula test page** (`/eda/test-formulas.mdx` existed during v1.8 development and was deleted) or create a quick validation script that extracts all `tex="..."` strings from case study MDX files and runs `katex.renderToString()` on each one, reporting failures.
-3. **Use `throwOnError: true` during development** (temporarily change in InlineMath.astro) to catch formula errors as build failures rather than silent degradation. Switch back to `false` before deployment.
-4. **Standardize formula notation conventions:**
-   - Hypothesis tests: `H_0\!: ... \quad \text{vs.} \quad H_a\!: ...`
-   - Confidence intervals: `\bar{Y} \pm \frac{2s}{\sqrt{N}}`
-   - Test statistics in tables: `t = 9.275` (no `\text{}` wrapper in table cells)
-   - Negative values: `Z = {-20.324}` (braces around negative sign prevent parsing as minus operator)
+1. **Store the case-study-to-technique mapping in a single data file** (`src/data/eda/case-study-techniques.json`) that maps case study slugs to the technique slugs they demonstrate. The graphical [slug].astro page computes cross-links by reversing this mapping: "Which case studies reference this technique?" This eliminates string duplication and makes the mapping auditable.
+2. **Validate cross-links at build time.** In the graphical [slug].astro `getStaticPaths()`, load the case study collection and verify that every case study slug referenced in the mapping actually exists. Log warnings for broken references.
+3. **If a centralized mapping is too much infrastructure**, at minimum store the `relatedCaseStudies` as an array of slugs (not full URLs) in technique-content, and resolve them to full URLs in the page template using the same `techniqueUrl()` pattern already used for related techniques.
+4. **Add a link validation step** to the milestone's final verification phase, similar to the quick task 011 approach that found 5 broken links in case study MDX files.
 
 **Warning signs:**
-- Raw LaTeX text visible in the rendered page (e.g., user sees `\bar{Y}` instead of Y-bar)
-- Formula renders in a different font size or style than surrounding formulas on the same page
-- Build passes but formula shows red error text from KaTeX (when `throwOnError: false`)
-- Inconsistent spacing in hypothesis test notation across case studies
+- A technique page links to `/eda/case-studies/normal-random/` instead of `/eda/case-studies/normal-random-numbers/` (slug mismatch)
+- A new case study is added but no technique pages reference it (orphaned case study)
+- Two technique pages link to different case studies for the same statistical concept (inconsistency)
 
 **Phase to address:**
-Every content phase -- formula validation is part of the per-case-study review checklist.
+Phase 1 (Infrastructure) -- create the mapping data file and resolution logic. Every content phase -- verify links resolve correctly.
 
 ---
 
@@ -241,67 +227,68 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Hardcode all test statistics in MDX instead of computing at build time | Faster content writing; no need to extend statistics.ts | Values cannot be verified programmatically; typo in one value silently produces wrong statistical conclusion | Acceptable for critical values (t, F, chi-squared tables) that are mathematical constants. NOT acceptable for computed values (mean, std dev, regression coefficients) that can be derived from the dataset |
-| Copy-paste RandomWalkPlots.astro for each new case study without extracting shared code | Each component is self-contained, easy to understand in isolation | Bug fixes to figure wrapper or config must be applied 9 times; caption style drifts; inconsistent PlotType definitions | During v1.9 only -- must refactor to shared PlotFigure component before adding more case studies |
-| Skip individual plot subsections and keep the abbreviated "4-Plot Overview + summary" style | 50% less content to write per case study; faster delivery | Pages are ~150 lines shorter than Random Walk reference; Google may flag as thin content relative to the deeper pages; inconsistent depth across the collection | Never for v1.9 -- the whole point of this milestone is deepening every case study to match Random Walk |
-| Put all new computations (Levene test, runs test, model fitting) inline in each *Plots.astro component | No new module files; computation visible next to rendering | 6+ independent implementations of the same test; any bug fix must be applied in multiple places; no unit testing possible | Never -- all statistical computations belong in statistics.ts or a new test-statistics.ts module |
-| Use approximate critical values (e.g., t_0.975,498 "approximately equals" 1.96) for all tests | Faster writing; no lookup needed | Technically wrong for small samples (t_0.975,10 = 2.228, not 1.96); undermines precision claims | Acceptable when df > 120 where t distribution closely approximates normal. NOT acceptable for Ceramic Strength (batch1 n=240, batch2=240) or Fatigue Life (n=101) if sub-group tests are performed |
-| Omit the "Develop Better Model" and "Validate New Model" sections from case studies where NIST includes them | Faster delivery; shorter pages | Missing the most pedagogically valuable part of the NIST analysis; distinguishes this resource from generic statistics tutorials | Never when the NIST source includes model development -- the full EDA cycle is the differentiator |
+| Keep all content in one technique-content.ts file | No refactoring needed; single import | 250KB+ file is unnavigable; git diffs are massive; Python strings lose syntax highlighting | Never for this milestone -- split before adding content |
+| Inline Python code as template literal strings in .ts | No new file infrastructure; single source of truth | Backtick-in-backtick escaping breaks indentation; no syntax highlighting in editor; hard to validate Python without extracting it first | Acceptable for short code (< 15 lines). For 20+ line examples, use separate .py files with raw import |
+| Copy formulas from quantitative-content.ts for overlapping techniques (e.g., autocorrelation formula used in both autocorrelation-plot and autocorrelation quantitative pages) | Faster authoring; each page is self-contained | Duplicate formula definitions drift when one is updated but not the other; inconsistent tex notation | Acceptable if the formula is technique-specific. For shared formulas (sample mean, standard deviation), create a `shared-formulas.ts` module that both content files import |
+| Add `useKatex={true}` to ALL 29 graphical pages unconditionally | Simple; no conditional logic needed | ~10 pages with zero formulas load 350KB+ of KaTeX fonts for nothing; Lighthouse performance penalty on those pages | Never -- the conditional pattern already exists in the codebase; use it |
+| Write all 29 Python examples using only matplotlib (no seaborn, no statsmodels) | Fewer dependencies to document; simpler install instructions | Missing the idiomatic approach for many techniques (seaborn's `histplot`, statsmodels' `plot_acf`, scipy's `probplot`); readers expect modern Python ecosystem usage | Never -- use the best-fit library for each technique, matching what working data scientists actually use |
+| Skip the SVG audit page and rely on individual page review | No new infrastructure needed | 29 individual page reviews take 5-10 minutes each; inconsistencies between technique SVGs are invisible without side-by-side comparison | Acceptable for initial content phases if time is tight. Must be done before final verification phase. |
 
 ## Integration Gotchas
 
-Common mistakes when adding deep content to the existing EDA case study system.
+Common mistakes when adding formula+code sections to existing graphical technique pages.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| New Standard Resistor dataset + CaseStudyDataset.astro | Adding the dataset to datasets.ts but forgetting to add the mapping in CaseStudyDataset.astro's `CASE_STUDY_MAP`. Result: the dataset panel does not render on the page. | Add both: (1) the dataset export in datasets.ts, (2) the slug mapping in CASE_STUDY_MAP, (3) import the dataset in CaseStudyDataset.astro's import block. The pattern exists for all 9 current datasets -- follow exactly. |
-| New StandardResistorPlots.astro + case study MDX | Creating the component but using the wrong import path in the MDX file. The relative path from `src/data/eda/pages/case-studies/standard-resistor.mdx` to `src/components/eda/StandardResistorPlots.astro` is `../../../../components/eda/StandardResistorPlots.astro`. Getting the depth wrong is a silent build error. | Copy the import line from an existing case study MDX (e.g., random-walk.mdx) and change only the component name. |
-| Expanding existing case studies + existing cross-links | Adding new content to a case study that was previously linked from technique pages. The technique page says "see the [beam deflections](/eda/case-studies/beam-deflections/) case study" -- if the beam deflections page restructures its section headers, these links still work (anchor-free) but readers may land at unexpected content. | Keep all existing MDX file names and URL slugs identical. Only ADD sections; do not rename or remove existing sections that other pages may reference. |
-| New quantitative test links + technique vs. quantitative ambiguity | Adding a link to "Levene test" and pointing to `/eda/quantitative/levene-test/` -- correct. But adding a link to "autocorrelation" and not knowing whether to link to `/eda/techniques/autocorrelation-plot/` (the plot) or `/eda/quantitative/autocorrelation/` (the quantitative coefficient). | Follow the Random Walk pattern: when discussing the PLOT, link to techniques. When discussing the COEFFICIENT or test result, link to quantitative. When in doubt, check what the existing case study links use. |
-| Standard Resistor page + dynamic route | The case study dynamic route at `src/pages/eda/case-studies/[...slug].astro` loads MDX files from `src/data/eda/pages/case-studies/`. Adding `standard-resistor.mdx` should be automatically picked up. But the file must have the correct frontmatter (section, category, nistSection) or the page may not render correctly in the layout. | Copy frontmatter from an existing case study, change title/description/nistSection to match Standard Resistor (NIST 1.4.2.7). Verify the page renders by checking `localhost:4321/eda/case-studies/standard-resistor/` after creation. |
-| OG image for Standard Resistor | The new case study needs an OG image. The existing OG image generation at `src/pages/open-graph/eda/[...slug].png.ts` should automatically pick it up if the page is in the right collection. But the OG cache (`og-cache.ts`) is hash-based on title+description. If the title or description changes after first build, the old cached image persists until the cache is cleared. | After finalizing the Standard Resistor page's title and description, clear the OG cache (`rm -rf node_modules/.cache/og-eda`) and rebuild to generate the correct OG image. |
+| KaTeX CSS loading on graphical pages | Adding `useKatex={true}` as a hardcoded prop instead of computing from content | Compute: `const useKatex = (content?.formulas?.length ?? 0) > 0;` and pass dynamically. The EDALayout.astro already conditionally loads the CSS based on this prop. |
+| katex.renderToString() in graphical [slug].astro | Forgetting to import katex in the frontmatter -- build fails with "katex is not defined" | Add `import katex from 'katex';` to the graphical [slug].astro frontmatter. The quantitative [slug].astro already has this import as a reference. |
+| Python code rendering via Code component | Importing `Code` from `astro-expressive-code/components` but forgetting to pass `lang="python"` | Always pass `lang="python"` explicitly. Without it, the code renders as plain text with no syntax highlighting. The quantitative [slug].astro has the working pattern: `<Code code={content.pythonCode} lang="python" />` |
+| TechniqueContent interface extension | Adding new fields to the interface but not updating all 29 entries -- TypeScript errors for missing required fields | Make new fields optional (`formulas?: Array<...>`, `pythonCode?: string`) and check for existence in the template with nullish coalescing. This allows incremental content addition across multiple phases. |
+| New content slots in TechniquePage.astro | TechniquePage already has `<slot name="formula" />` and `<slot name="code" />` but they are unused by graphical pages. Adding content to these slots works immediately. The mistake is creating NEW slots instead of using existing ones. | Use the existing named slots. The template is already designed for this expansion. Check TechniquePage.astro before adding any new slot declarations. |
+| Case study cross-link URLs | Linking to `/eda/case-studies/heat-flow/` instead of `/eda/case-studies/heat-flow-meter/` (slug mismatch from case study file name) | Check the actual MDX file names in `src/data/eda/pages/case-studies/` before writing any cross-link. The file name IS the slug. |
+| String.raw for KaTeX tex strings | Using regular template literals for tex strings, causing `\frac` and `\sum` to be interpreted as escape sequences | Always use `String.raw` for tex content, exactly as quantitative-content.ts does: `tex: String.raw\`\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i\`` |
 
 ## Performance Traps
 
-Patterns that work at the current scale but fail as case study depth increases.
+Patterns that work at the current scale but may degrade as technique pages grow 3-4x in content.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Every *Plots.astro component recomputes all model fits on every render | Invisible at 5 plot types per page; painful at 16 plot types when frontmatter runs 16 times | Memoize model fits in a shared module; the component just reads pre-computed values | At 9 case studies * 16 plot types = 144 total renders, each recomputing regression/FFT/autocorrelation |
-| Autocorrelation computation with maxLag=100 on 1000-point Standard Resistor data | ~100,000 iterations per autocorrelation call; with 2-4 calls per page, that is 200-400K iterations for one page | Use maxLag=50 unless the data specifically needs higher lag analysis; compute once and cache | When a single case study page takes >1 second to render in build output |
-| Inline KaTeX rendering for 50+ formulas per expanded case study | Each `katex.renderToString()` call takes ~1-5ms; 50 formulas adds 50-250ms per page | This is acceptable at current scale; becomes a concern only if case studies grow to 100+ formulas | Not a problem at v1.9 scale (50 formulas * 9 pages = 450 total KaTeX calls, ~1-2 seconds total) |
-| Large MDX files (300-400 lines) with 13-16 embedded SVG components | Page HTML output grows to 50-100KB per case study (SVGs are typically 5-10KB each); browser downloads all SVGs on page load | Already mitigated: SVGs are inline (`set:html`), which means they are part of the initial HTML. No additional HTTP requests. But large HTML pages may cause slow initial paint. | At 16 inline SVGs * ~8KB average = ~128KB of SVG content per page; combined with text, KaTeX, and layout, a single case study page could be 200KB+ HTML. Consider `loading="lazy"` for below-fold figures. |
-| The `powerSpectrum()` function zero-pads data but the Blackman-Tukey method does not need zero-padding | Wasted computation if the function is called with the wrong expectation of output length | The current implementation uses Blackman-Tukey correlogram method (not FFT-based periodogram), so it does not zero-pad. Verify this is consistent when adding new case studies. | Non-issue with current implementation, but if someone refactors to FFT-based periodogram, zero-padding for non-power-of-2 dataset sizes becomes important |
+| KaTeX CSS loaded on pages without formulas | Lighthouse flags render-blocking CSS; WOFF2 font requests for ~25 KaTeX fonts appear in network tab on pages with no math | Data-driven `useKatex` prop computed from content.formulas.length | Immediate -- any page loading KaTeX CSS unnecessarily loses 5-10 Lighthouse points on performance |
+| All 29 technique SVGs re-rendered on every build even if content did not change | Build time increases linearly with technique count; no caching for SVG output | SVGs are generated from deterministic functions with fixed datasets -- the output is identical across builds. Consider adding a build-cache layer that hashes the generator function + dataset and skips re-rendering if unchanged. | Not a problem until technique count exceeds ~50 or SVG generation becomes more complex. At 29 techniques, the SVG generation is <2 seconds total. |
+| astro-expressive-code Shiki highlighter initialization for Python | First Python code block loads the Python grammar; subsequent blocks reuse it. But if the build processes pages in random order, the grammar load may happen multiple times in parallel workers. | Expressive-code already fixed this: "async tasks like creating syntax highlighters are never started multiple times in parallel." Verify by checking build logs for duplicate grammar loading messages. | Not expected to break. astro-expressive-code has explicit parallel-safe initialization since v0.38+. |
+| Large HTML output per page from inline SVGs + KaTeX + code blocks | Page HTML grows from ~15KB to ~50-80KB; FCP increases; Lighthouse Content metrics may degrade | Inline SVGs are already the pattern. KaTeX renders to compact HTML. Code blocks produce well-structured HTML. The risk is cumulative: 5KB SVG + 3KB KaTeX HTML + 8KB code HTML + 15KB prose = 31KB of content HTML per page. Combined with layout HTML, total page could reach 60-80KB. | Not a problem until page HTML exceeds 100KB. Monitor with `ls -la dist/eda/techniques/*/index.html` after build. |
+| OG image cache invalidation on first post-enhancement build | All 29 technique OG images regenerate because content-hash changed; adds 29 * ~2-3 seconds = ~60-90 seconds to first build | Expected behavior; subsequent builds reuse cache. Not a trap, but worth knowing: the first build after content enhancement will be measurably slower. | One-time cost per content change cycle. Not a recurring problem. |
 
 ## UX Pitfalls
 
-Common user experience mistakes when adding deep statistical content to case study pages.
+Common user experience mistakes when adding NIST-depth content to graphical technique pages.
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Walls of hypothesis test tables without visual breaks | The quantitative results section becomes a 100-line slog of tables; users lose context of which assumption each table tests | Interleave tables with 1-2 sentence conclusions in bold. Use the pattern from Random Walk: each test has its own subsection with hypothesis, table, and conclusion paragraph. |
-| Inconsistent conclusion formatting across case studies | In Random Walk, conclusions are bold and start with "Conclusion:". In Cryothermometry, some conclusions are italic, others plain text. | Standardize: every test conclusion starts with `**Conclusion:**` in bold, followed by the test statistic interpretation and the assumption verdict in bold (e.g., "the **fixed-location assumption is satisfied**"). |
-| No visual indicator of test result (reject vs fail-to-reject) in the Test Summary table | User must mentally cross-reference test statistic vs. critical value to determine the outcome; the "Result" column helps but is easy to overlook | Use the Random Walk Test Summary pattern: Result column uses `**Reject**` or `**Fail to reject**` in bold, making the verdict immediately scannable. For edge cases like Cryothermometry's "Reject (but practically negligible)", include the qualifier in parentheses. |
-| Identical plot captions across case studies | Every histogram caption says "Histogram with KDE overlay" -- no information about what makes THIS histogram different from the others | Each caption should mention the specific dataset name AND the key finding: "Histogram of cryothermometry voltage counts showing a discrete, approximately symmetric distribution with only 8 distinct values." |
-| Missing "so what" in the Interpretation section | The section lists which assumptions failed but does not explain the practical consequences | After listing violations, explain what they mean for the analyst: "Because the randomness assumption is violated, the standard confidence interval formula underestimates the true uncertainty in the mean." |
-| No clear navigation between related case studies | User finishes one case study and has no guidance on which to read next | Add a "Related Case Studies" callout at the bottom of each case study, grouping by assumption violation type: "Also see: [Random Walk](/eda/case-studies/random-walk/) (severe assumption violations) and [Normal Random Numbers](/eda/case-studies/normal-random-numbers/) (all assumptions satisfied)." |
+| Adding formulas to technique pages without visual differentiation from prose | Formulas appear inline in the middle of paragraphs, making the page feel like a textbook rather than a practical reference | Use the proven pattern from quantitative pages: dedicated "Formulas" section with `<h2>`, each formula in its own block with label, rendered display-mode KaTeX, and explanation paragraph beneath |
+| Python code examples that are too long (50+ lines) | Reader cannot see the essential technique call; boilerplate drowns the signal | Keep examples to 20-35 lines: imports (3-4 lines), data setup (3-5 lines), core plot call (3-10 lines), customization (3-5 lines), output (2 lines). The quantitative pages' examples are the benchmark. |
+| Case study cross-links that say "See case study X" without explaining WHY | Reader does not know if the linked case study is relevant to their current problem | Each cross-link should explain what the case study demonstrates for this technique: "The [Random Walk](/eda/case-studies/random-walk/) case study shows how the autocorrelation plot reveals severe serial dependence in a non-stationary process." |
+| Inconsistent section ordering across the 29 technique pages | Reader learns the page structure on one technique, then encounters a different layout on the next | Enforce a fixed section order on all 29 pages: Plot > What It Is > When to Use > How to Interpret > Formulas > Python Example > Assumptions > Related Case Studies > Related Techniques. Some sections may be empty/absent (e.g., no formulas for star-plot), but present sections must be in this order. |
+| Loading KaTeX fonts on pages where no formula exists | Page Load Event delayed by font requests; mobile users on slow connections see a longer white-screen period | Conditional KaTeX CSS loading (already supported by EDALayout.astro). The `useKatex` prop must be computed from content, not hardcoded. |
+| Python examples that import data from files the reader does not have | Code example fails immediately when reader copies it; "FileNotFoundError" is a terrible first experience | Generate synthetic data inline in every example: `data = np.random.default_rng(42).normal(0, 1, 100)`. This makes every example self-contained and reproducible. For technique-specific datasets, generate data that exhibits the relevant pattern (e.g., autocorrelated data for autocorrelation-plot). |
 
 ## "Looks Done But Isn't" Checklist
 
 Things that appear complete but are missing critical pieces.
 
-- [ ] **Test Summary table:** Often missing one test -- verify every case study has ALL tests: location (regression), variation (Levene or Bartlett), randomness (runs test), randomness (autocorrelation lag-1), distribution (PPCC or Anderson-Darling or both), outliers (Grubbs or omitted with explanation)
-- [ ] **Summary statistics match datasets.ts:** Compute `mean()` and `standardDeviation()` on the dataset array and verify they match the values in the Summary Statistics table (the Quick Task 011 audit verified existing values; new content must also match)
-- [ ] **Critical values are correct:** t critical value with N-2 degrees of freedom, F critical value with correct df1 and df2, chi-squared critical value with k-1 degrees of freedom -- verify the degrees of freedom match the sample size and group count for each case study
-- [ ] **Plot captions are unique:** Every `defaultCaptions` entry should mention the specific dataset name and key finding. No two case studies should have identical caption text for the same plot type.
-- [ ] **The "Develop Better Model" section exists where NIST includes it:** Random Walk (AR(1)), Beam Deflections (sinusoidal), and potentially others. Check the NIST source for each case study.
-- [ ] **Residual validation plots exist where a model is developed:** If the case study develops a better model, there must be residual plots (residual-4-plot, residual-run-sequence, residual-lag, residual-autocorrelation at minimum)
-- [ ] **All cross-reference links resolve:** Run link validation script on every case study after expansion. The 5 errors found in quick task 011 establish that this is a real, recurring issue.
-- [ ] **Standard Resistor dataset has correct count:** The DZIUBA1.DAT file has 1000 observations. Verify `standardResistor.length === 1000` in datasets.ts.
-- [ ] **Standard Resistor slug is registered everywhere:** datasets.ts export, CaseStudyDataset.astro CASE_STUDY_MAP, DATASET_SOURCES object, MDX file name, and the frontmatter nistSection field.
-- [ ] **KaTeX formulas render correctly in dark mode:** The Random Walk formulas are verified, but new formulas added during expansion (especially complex Levene test notation or Bartlett test chi-squared notation) must be checked in both light and dark themes.
-- [ ] **Accessibility alt text on all plots:** Each `<figure>` element has a `<figcaption>` (already the pattern from RandomWalkPlots), but verify the caption provides enough context for screen readers to understand the key finding without seeing the plot.
-- [ ] **SEO: Each expanded case study has a unique meta description:** The frontmatter `description` field should be specific to the case study, naming the NIST dataset and the key statistical finding. Verify no two case studies share the same description text.
+- [ ] **KaTeX CSS loading:** Verify that graphical technique pages with formulas load katex.min.css AND that pages without formulas do NOT load it. Check the `<head>` of 3 pages with formulas and 3 without.
+- [ ] **Python code actually runs:** Extract 5 random Python examples from the content file, paste into a Python 3.11+ environment with matplotlib/seaborn/scipy/statsmodels, and verify they execute without error and produce the expected plot type.
+- [ ] **String.raw used for ALL tex strings:** Grep technique-content for `tex:` fields that do NOT use `String.raw`. Any bare template literal or regular string will silently break `\frac`, `\sum`, `\hat`, etc.
+- [ ] **All 29 techniques have content:** After adding fields incrementally, verify no technique entry was accidentally skipped. Count the entries in technique-content and verify === 29.
+- [ ] **Formulas render in both light and dark mode:** KaTeX `color` is set via `var(--color-text-primary)` in the dark-mode override style. Verify that formula text is visible against both light and dark backgrounds on 3 technique pages.
+- [ ] **Case study cross-links resolve to real pages:** For every `relatedCaseStudies` slug referenced across all 29 techniques, verify a corresponding MDX file exists in `src/data/eda/pages/case-studies/`.
+- [ ] **Python examples use CURRENT API:** Grep all Python code for `distplot` (deprecated seaborn), `normed=True` (deprecated matplotlib), `vert=True` (deprecated matplotlib 3.10), `plt.acorr` (wrong for NIST-style autocorrelation). Zero matches expected.
+- [ ] **technique-content interface matches actual usage:** The TypeScript interface for TechniqueContent defines all new fields; the [slug].astro page accesses them without type errors; `astro check` passes.
+- [ ] **SVG audit page exists and shows all 29 techniques:** Navigate to `/eda/dev/svg-audit/` in dev mode and visually confirm all 29 SVGs render with correct statistical patterns.
+- [ ] **Build time within budget:** Measure `time npx astro build` and verify it is within baseline + 5 seconds.
+- [ ] **No Lighthouse regression on sample technique pages:** Run Lighthouse on 3 representative technique pages (one with formulas, one without, one Tier B with variants). All must score 90+ on mobile performance.
+- [ ] **Section ordering is consistent:** Open 5 random technique pages and verify sections appear in the canonical order: Plot > What It Is > When to Use > How to Interpret > Formulas > Python Example > Assumptions > Related Case Studies > Related Techniques.
 
 ## Recovery Strategies
 
@@ -309,13 +296,14 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Wrong test statistic in quantitative table | LOW | Fix the single value in MDX; verify conclusion still matches. But if the wrong value changed a "reject" to "fail to reject", review the entire Interpretation and Conclusions section for cascading errors. |
-| Build time doubles after adding all case studies | LOW-MEDIUM | Implement memoized computation module (statistics-cache.ts); restructure *Plots.astro to only compute what the current `type` prop needs. Can be done in 2-4 hours. |
-| Inconsistent section structure across 9 case studies | MEDIUM | Create a restructuring PR that normalizes all section headers. Content is preserved, just reorganized. Effort: 30 min per case study = 4.5 hours. Harder if external pages already link to specific section anchors. |
-| 20+ broken cross-reference links across expanded content | LOW-MEDIUM | Run bulk grep for all `/eda/` links in case study MDX files. Validate each against the technique/distribution slug inventory. Fix in a single PR. Effort: 1-2 hours for 20 links. |
-| Standard Resistor dataset transcription errors | MEDIUM | Must re-download DZIUBA1.DAT from NIST, parse programmatically, and diff against the committed dataset. If the dataset is wrong, all computed test statistics and plots are wrong -- requiring regeneration of all Standard Resistor plots. |
-| *Plots.astro code duplication causes inconsistent rendering | MEDIUM | Extract PlotFigure.astro and migrate all 9 components. Effort: 1-2 hours for the extraction, plus testing all 9 case study pages. The migration is mechanical but touches many files. |
-| Formula errors visible in production | LOW | Fix the `tex` string in the MDX file; rebuild; deploy. Each formula fix is <1 minute. The risk is not the fix time but the credibility damage while the error is live. |
+| technique-content.ts at 250KB is unmanageable | MEDIUM (4-6 hours) | Split into per-category files retroactively. This is a mechanical refactor: extract each technique's content object, create a new file, update the barrel import. TypeScript compiler validates correctness. |
+| 5+ Python examples have deprecated API calls | LOW (1-2 hours) | Grep for deprecated patterns, find-replace across affected examples. Each fix is 1-2 line changes. Revalidation by running the examples catches remaining issues. |
+| KaTeX CSS loaded on wrong pages | LOW (30 min) | Change `useKatex` from hardcoded to computed (`content?.formulas?.length > 0`). Single line change in [slug].astro. |
+| SVG for a technique shows wrong statistical pattern | LOW-MEDIUM (30-60 min) | Identify the incorrect generator call or dataset in technique-renderer.ts. Fix the data or function call. The SVG generators are well-tested and the issue is almost always incorrect input data, not a generator bug. |
+| Content quality varies wildly across 29 techniques | HIGH (8-12 hours) | Review all 29 entries, identify the weakest 10, rewrite those to match the quality of the best. This is editorial work that cannot be automated. Prevention (batch review gates) is far cheaper. |
+| Build time exceeds budget by >10 seconds | MEDIUM (2-4 hours) | Profile with `ASTRO_PERF=1 astro build` or `astro-speed-measure`. Identify whether the bottleneck is KaTeX, Shiki, SVG generation, or OG images. Apply targeted optimization: shorter Python examples reduce Shiki cost; fewer formulas reduce KaTeX cost; SVG caching reduces generation cost. |
+| Case study cross-links break after case study refactor | LOW (1-2 hours) | If using centralized mapping file: fix the mapping, all pages update automatically. If using inline strings: grep for the old slug, replace with new slug across technique-content files. |
+| Formula renders raw LaTeX on production page | LOW (15 min) | Three possible causes: (1) missing `import katex`, (2) missing `useKatex={true}` in layout, (3) malformed tex string. Check in this order. Fix and rebuild. |
 
 ## Pitfall-to-Phase Mapping
 
@@ -323,33 +311,37 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Statistical value errors | Every content phase | Computed values match `statistics.ts` output; critical values verified against standard tables; reject/fail-to-reject conclusions consistent with statistic vs critical value comparison |
-| Build time regression | Phase 1 (Infrastructure) | Baseline build time recorded; each case study enhancement adds <2 seconds; total build stays under 2x baseline |
-| Structural inconsistency | Phase 1 (Template/Gap Analysis) | Canonical template created; gap analysis for all 9 case studies completed; section header review passed |
-| Cross-reference link errors | Every content phase | Link validation script runs after each case study expansion; 0 broken links in the final build |
-| datasets.ts growth | Phase for Standard Resistor | Array length verified (1000 elements); source comment block present; CaseStudyDataset mapping added |
-| *Plots.astro duplication | Phase 1 (Infrastructure) | PlotFigure.astro extracted; shared singleConfig/compositeConfig in one place; all 9 components use consistent pattern |
-| KaTeX formula errors | Every content phase | All `tex` strings render without raw LaTeX visible; formula notation consistent across case studies; dark mode tested |
-| Page size concerns | Phase 2+ (Content phases) | No case study page exceeds 250KB HTML output; below-fold plots use lazy loading if needed |
-| Accessibility | Every content phase | All `<figure>` elements have descriptive `<figcaption>` text; captions mention dataset name and key finding |
-| SEO thin/duplicate content | Phase 3+ (Review phase) | Each case study has unique description; unique interpretation section; unique conclusions; no template-only content |
+| technique-content.ts file size | Phase 1 (Infrastructure) | File split into per-category or per-technique modules before content work begins; no single file exceeds 60KB |
+| Python code API correctness | Phase 1 (Template + validation script) | Python template established; validation script exists and runs; deprecated API grep returns zero matches |
+| KaTeX rendering on graphical pages | Phase 1 (Infrastructure) | [slug].astro updated with conditional KaTeX; verified on 3 test pages before content phases |
+| SVG validation subjectivity | Phase 1 (SVG audit page + checklist) | Dev-only audit page renders all 29 SVGs; validation checklist defined per technique |
+| Content quality drift | Every content phase (batch review gates) | Each batch of 4-6 techniques reviewed before starting next batch; field length variance within 2x of median |
+| Build time regression | Phase 1 (baseline) + every content phase | Baseline recorded; each phase measures post-build time; total within baseline + 5s |
+| Case study cross-link staleness | Phase 1 (centralized mapping) + every content phase | Mapping file created; link validation runs after each content batch |
+| Lighthouse performance on formula pages | Final verification phase | Lighthouse 90+ on mobile for 3 representative technique pages (with/without formulas, Tier B) |
+| Section ordering consistency | Phase 1 (template definition) + final verification | Canonical section order defined; 5 random pages spot-checked at each phase boundary |
+| Python examples self-contained | Every content phase | Every example uses inline synthetic data; no `read_csv()` or file paths; validated by running extracted examples |
 
 ## Sources
 
-- Existing codebase: `src/data/eda/pages/case-studies/random-walk.mdx` -- Reference implementation (339 lines, 16 plot types, full quantitative results, model development, residual validation)
-- Existing codebase: `src/components/eda/RandomWalkPlots.astro` -- Reference Plots component pattern (226 lines, AR(1) model computation, 16 plot type switch)
-- Existing codebase: `src/components/eda/BeamDeflectionPlots.astro` -- Sinusoidal model computation pattern (216 lines, OLS normal equations via Cramer's rule)
-- Existing codebase: `src/lib/eda/math/statistics.ts` -- Shared math functions (mean, standardDeviation, linearRegression, autocorrelation, fft, powerSpectrum, normalQuantile)
-- Existing codebase: `src/lib/eda/svg-generators/index.ts` -- 13 SVG generators barrel export
-- Existing codebase: `src/data/eda/datasets.ts` -- 93KB, 10 dataset arrays, DATASET_SOURCES metadata
-- Existing codebase: `src/components/eda/CaseStudyDataset.astro` -- Dataset panel with slug-to-dataset mapping
-- Existing codebase: `src/components/eda/InlineMath.astro` -- KaTeX build-time rendering with `throwOnError: false`
-- Quick task 011: `.planning/quick/011-eda-content-correctness-validation/011-SUMMARY.md` -- Found 5 broken cross-reference links; verified all existing statistical values correct
-- [NIST/SEMATECH e-Handbook, Section 1.4.2](https://www.itl.nist.gov/div898/handbook/eda/section4/eda42.htm) -- Source material for all 10 case studies
-- [NIST Standard Resistor case study](https://www.itl.nist.gov/div898/handbook/eda/section4/eda427.htm) -- Section 1.4.2.7, DZIUBA1.DAT, 1000 observations
-- [Dataplot Commands for Resistor Case Study](https://www.itl.nist.gov/div898/handbook/eda/section4/resistor/resistor.htm) -- NIST analysis methodology
-- Existing PITFALLS.md (v1.8): `.planning/research/PITFALLS.md` (previous version, 2026-02-24) -- Foundation pitfalls for the original EDA encyclopedia build
+- Existing codebase: `src/lib/eda/technique-content.ts` -- 64KB, 380 lines, 29 entries with 5 fields each (definition, purpose, interpretation, assumptions, nistReference)
+- Existing codebase: `src/lib/eda/quantitative-content.ts` -- 55KB, 744 lines, 18 entries with formulas+pythonCode -- the proven reference architecture for formula+code content
+- Existing codebase: `src/pages/eda/quantitative/[slug].astro` -- Reference implementation for KaTeX rendering in page frontmatter + Code component usage
+- Existing codebase: `src/pages/eda/techniques/[slug].astro` -- Current graphical page without KaTeX/Python; target for enhancement
+- Existing codebase: `src/components/eda/TechniquePage.astro` -- Layout with existing `formula` and `code` named slots already defined but unused by graphical pages
+- Existing codebase: `src/components/eda/InlineMath.astro` -- Build-time KaTeX rendering with `throwOnError: false`
+- Existing codebase: `src/layouts/EDALayout.astro` -- Conditional KaTeX CSS loading via `useKatex` prop
+- Existing codebase: `src/lib/eda/technique-renderer.ts` -- 35KB, all 29 SVG generators with variant support
+- Existing v1.9 pitfalls: `.planning/research/PITFALLS.md` (2026-02-26) -- Case study deep dive pitfalls; informed by similar content expansion challenges
+- [Matplotlib 3.10 API changes](https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.10.0.html) -- `vert` parameter deprecation on boxplot/bxp
+- [Seaborn migration: distplot to histplot](https://seaborn.pydata.org/tutorial/introduction.html) -- `distplot` deprecated since 0.11, removed in 0.14
+- [KaTeX font documentation](https://katex.org/docs/font) -- ~350KB font files, `font-display: block` default, WOFF2 optimization
+- [KaTeX common issues](https://katex.org/docs/issues.html) -- Known rendering issues and workarounds
+- [astro-expressive-code CHANGELOG](https://github.com/expressive-code/expressive-code/blob/main/packages/astro-expressive-code/CHANGELOG.md) -- Parallel-safe Shiki initialization, on-demand language loading
+- [Astro Content Layer deep dive](https://astro.build/blog/content-layer-deep-dive/) -- 5x faster builds, 50% less memory with Content Layer API
+- [Astro build speed optimization](https://www.bitdoze.com/astro-ssg-build-optimization/) -- Pages/second benchmarking methodology
+- [NIST Histogram page](https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm) -- Reference for NIST section depth: Purpose, Sample Plot, Definition, Questions, Examples, Related Techniques, Case Study, Software
 
 ---
-*Pitfalls research for: EDA Case Study Deep Dive (v1.9) -- enhancing 8 existing case studies and adding Standard Resistor*
-*Researched: 2026-02-26*
+*Pitfalls research for: EDA Graphical Techniques NIST Parity -- enhancing 29 graphical technique pages with formulas, Python code, SVG validation, and case study cross-links*
+*Researched: 2026-02-27*
