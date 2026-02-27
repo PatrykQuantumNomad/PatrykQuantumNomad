@@ -69,9 +69,9 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Ceramic Strength
 
-- [ ] **CER-01**: Response variable analysis with individual plot subsections
-- [ ] **CER-02**: Batch effect analysis with batch-specific plots and tests
-- [ ] **CER-03**: Lab effect analysis with lab-specific plots and tests
+- [x] **CER-01**: Response variable analysis with individual plot subsections
+- [x] **CER-02**: Batch effect analysis with batch-specific plots and tests
+- [x] **CER-03**: Lab effect analysis with lab-specific plots and tests
 - [ ] **CER-04**: Primary factors analysis with DOE-specific visualizations (bihistogram, block plots, interaction plots)
 - [ ] **CER-05**: Interpretation section synthesizing multi-factor evidence
 
@@ -135,9 +135,9 @@ Deferred to future release.
 | FAT-02 | Phase 61 | Complete |
 | FAT-03 | Phase 61 | Complete |
 | FAT-04 | Phase 61 | Complete |
-| CER-01 | Phase 62 | Pending |
-| CER-02 | Phase 62 | Pending |
-| CER-03 | Phase 62 | Pending |
+| CER-01 | Phase 62 | Complete |
+| CER-02 | Phase 62 | Complete |
+| CER-03 | Phase 62 | Complete |
 | CER-04 | Phase 62 | Pending |
 | CER-05 | Phase 62 | Pending |
 | VAL-01 | Phase 63 | Pending |
