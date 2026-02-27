@@ -35,10 +35,10 @@ Requirements for EDA Case Study Deep Dive milestone. Each maps to roadmap phases
 
 ### Case Study — Beam Deflections
 
-- [ ] **BEAM-01**: Individual named plot subsections with per-plot interpretation for both original data and residuals
+- [x] **BEAM-01**: Individual named plot subsections with per-plot interpretation for both original data and residuals
 - [ ] **BEAM-02**: Quantitative results with full test suite and test summary table
 - [ ] **BEAM-03**: Develop Better Model section with sinusoidal/polynomial model fitting and regression results
-- [ ] **BEAM-04**: Validate New Model section with residual diagnostics (4-plot, run sequence, lag, histogram, probability, autocorrelation, spectral) and validation summary table
+- [x] **BEAM-04**: Validate New Model section with residual diagnostics (4-plot, run sequence, lag, histogram, probability, autocorrelation, spectral) and validation summary table
 - [ ] **BEAM-05**: Interpretation section synthesizing evidence
 
 ### Case Study — Filter Transmittance
@@ -126,10 +126,10 @@ Deferred to future release.
 | URN-02 | Phase 59 | Complete |
 | URN-03 | Phase 59 | Complete |
 | URN-04 | Phase 59 | Complete |
-| BEAM-01 | Phase 60 | Pending |
+| BEAM-01 | Phase 60 | Complete |
 | BEAM-02 | Phase 60 | Pending |
 | BEAM-03 | Phase 60 | Pending |
-| BEAM-04 | Phase 60 | Pending |
+| BEAM-04 | Phase 60 | Complete |
 | BEAM-05 | Phase 60 | Pending |
 | FAT-01 | Phase 61 | Pending |
 | FAT-02 | Phase 61 | Pending |
