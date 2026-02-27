@@ -22,6 +22,8 @@ export interface HistogramOptions {
   data: number[];
   binCount?: number;
   showKDE?: boolean;
+  showUniformPDF?: boolean;
+  uniformRange?: [number, number];
   config?: Partial<PlotConfig>;
   title?: string;
   xLabel?: string;
@@ -29,7 +31,7 @@ export interface HistogramOptions {
 }
 
 export function generateHistogram(options: HistogramOptions): string {
-  const { data, binCount, showKDE = false } = options;
+  const { data, binCount, showKDE = false, showUniformPDF = false, uniformRange } = options;
   const config: PlotConfig = { ...DEFAULT_CONFIG, ...options.config };
   const { innerWidth, innerHeight } = innerDimensions(config);
   const { margin } = config;
@@ -99,6 +101,23 @@ export function generateHistogram(options: HistogramOptions): string {
     }
   }
 
+  // Optional uniform PDF overlay
+  let uniformOverlay = '';
+  if (showUniformPDF) {
+    const [rangeMin, rangeMax] = uniformRange ?? [domainMin, domainMax];
+    const rangeWidth = rangeMax - rangeMin;
+    // Expected frequency per bin: n * binWidth / range
+    const binWidth =
+      bins.length > 0
+        ? bins[0].x1! - bins[0].x0!
+        : (domainMax - domainMin) / thresholds;
+    const expectedFreq = (data.length * binWidth) / rangeWidth;
+    const y = yScale(expectedFreq);
+    const x1 = xScale(rangeMin);
+    const x2 = xScale(rangeMax);
+    uniformOverlay = `<line x1="${x1.toFixed(2)}" y1="${y.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y.toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="2" stroke-dasharray="6,4" />`;
+  }
+
   // Assemble
   const xTicks = xScale.ticks(7);
   const yTicks = yScale.ticks(5);
@@ -113,6 +132,8 @@ export function generateHistogram(options: HistogramOptions): string {
     bars +
     '\n' +
     kdeOverlay +
+    '\n' +
+    uniformOverlay +
     '\n' +
     xAxis(
       xTicks,
