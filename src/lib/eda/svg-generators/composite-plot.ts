@@ -102,20 +102,17 @@ export function generate4Plot(
 }
 
 /**
- * Generate a 3x2 regression diagnostic plot (NIST Section 1.3.3.33).
- * - Top-left: Response vs Predictor (scatter with regression line)
- * - Top-right: Residuals vs Predictor
- * - Mid-left: Residuals vs Predicted
- * - Mid-right: Lag plot of residuals
- * - Bottom-left: Histogram of residuals
- * - Bottom-right: Normal probability plot of residuals
+ * Generate a 2x3 regression diagnostic plot (NIST Section 1.3.3.33).
+ * NIST layout: 2 rows × 3 columns
+ * - Row 1: (1) Y & predicted vs X, (2) Residuals vs X, (3) Residuals vs predicted
+ * - Row 2: (4) Lag plot of residuals, (5) Histogram of residuals, (6) Normal prob plot
  */
 export function generate6Plot(
   data: { x: number; y: number }[],
   config?: Partial<PlotConfig>,
 ): string {
-  const width = config?.width ?? 800;
-  const height = config?.height ?? 900;
+  const width = config?.width ?? 900;
+  const height = config?.height ?? 600;
   const fullConfig: PlotConfig = {
     ...DEFAULT_CONFIG,
     ...config,
@@ -123,12 +120,12 @@ export function generate6Plot(
     height,
   };
 
-  const halfW = (width - 20) / 2;
-  const thirdH = (height - 30) / 3;
+  const thirdW = (width - 30) / 3;
+  const halfH = (height - 20) / 2;
   const subConfig: Partial<PlotConfig> = {
-    width: halfW,
-    height: thirdH,
-    margin: { top: 30, right: 15, bottom: 35, left: 50 },
+    width: thirdW,
+    height: halfH,
+    margin: { top: 30, right: 15, bottom: 35, left: 55 },
   };
 
   // Compute regression
@@ -143,7 +140,7 @@ export function generate6Plot(
     data,
     showRegression: true,
     config: subConfig,
-    title: 'Y vs X',
+    title: 'Y & Predicted vs X',
     xLabel: 'X',
     yLabel: 'Y',
   });
@@ -192,14 +189,14 @@ export function generate6Plot(
     title: 'Residual Normal Prob',
   });
 
-  // 3x2 grid layout
+  // 2x3 grid layout (NIST convention: 2 rows × 3 columns)
   const panels = [
     { svg: yVsX, x: 0, y: 0 },
-    { svg: residVsX, x: halfW + 10, y: 0 },
-    { svg: residVsPred, x: 0, y: thirdH + 10 },
-    { svg: residLag, x: halfW + 10, y: thirdH + 10 },
-    { svg: residHist, x: 0, y: 2 * (thirdH + 10) },
-    { svg: residProb, x: halfW + 10, y: 2 * (thirdH + 10) },
+    { svg: residVsX, x: thirdW + 10, y: 0 },
+    { svg: residVsPred, x: 2 * (thirdW + 10), y: 0 },
+    { svg: residLag, x: 0, y: halfH + 10 },
+    { svg: residHist, x: thirdW + 10, y: halfH + 10 },
+    { svg: residProb, x: 2 * (thirdW + 10), y: halfH + 10 },
   ];
 
   const groups = panels

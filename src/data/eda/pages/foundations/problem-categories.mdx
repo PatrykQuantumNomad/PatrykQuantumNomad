@@ -1,73 +1,191 @@
 ---
 title: "EDA Problem Categories"
-description: "Explore the general problem categories in EDA including univariate and multivariate characterization, comparison studies, and regression modeling"
-section: "1.1.6"
+description: "The eight general problem categories in EDA: univariate, control, comparative, screening, optimization, regression, time series, and multivariate — each with its data structure, model, output, and recommended techniques"
+section: "1.1.7"
 category: "foundations"
-nistSection: "1.1.6-1.1.7 General Problem Categories"
+nistSection: "1.1.7 General Problem Categories"
 ---
 
-## The Four General Problem Categories
+## General Problem Categories
 
-The NIST/SEMATECH Engineering Statistics Handbook (Sections 1.1.6-1.1.7) organizes data analysis problems into four broad categories. Recognizing which category your problem falls into is the first step toward selecting the right set of EDA techniques -- and ultimately the right confirmatory analysis.
+The NIST/SEMATECH Engineering Statistics Handbook (Section 1.1.7) provides a convenient classification of EDA problems into eight distinct categories. Each category is defined by its **data structure**, **underlying model**, **desired output**, and **recommended EDA techniques**. Recognizing which category your problem falls into is the first step toward selecting the right analytical approach.
 
-### 1. Univariate Characterization
+The eight categories are presented below exactly as the Handbook defines them.
 
-The most basic question in data analysis is: "What does this single variable look like?" Univariate characterization aims to describe the distribution of a single measured quantity -- its center, spread, shape, and outliers.
+---
 
-Typical EDA techniques for characterization include:
+### 1. Univariate
 
-- [Histogram](/eda/techniques/histogram/) to visualize the shape of the distribution
-- [Box plot](/eda/techniques/box-plot/) to summarize center, spread, and outliers
-- [Normal probability plot](/eda/techniques/normal-probability-plot/) to assess normality
-- [Measures of location](/eda/quantitative/measures-of-location/) (mean, median) and [measures of scale](/eda/quantitative/measures-of-scale/) (standard deviation, interquartile range) for numerical summaries
+**Data:** A single column of numbers, *Y*.
 
-Characterization questions arise whenever you receive a new dataset and need to understand its basic properties before proceeding to more complex analyses.
+**Model:** *y* = constant + error
 
-### 2. Comparison
+**Output:**
 
-Comparison problems ask: "Are these groups different?" You might be comparing the yield from two manufacturing processes, the performance of several materials, or the output of multiple shifts. The goal is to determine whether observed differences reflect real effects or merely random variation.
+1. A number (the estimated constant in the model).
+2. An estimate of uncertainty for the constant.
+3. An estimate of the distribution for the error.
 
-Key EDA and quantitative techniques for comparison include:
+**Techniques:**
 
-- [Box plot](/eda/techniques/box-plot/) for visual side-by-side comparison
-- [Two-sample t-test](/eda/quantitative/two-sample-t-test/) to test whether two means differ significantly
-- [One-factor ANOVA](/eda/quantitative/one-factor-anova/) to compare means across three or more groups
-- [F-test](/eda/quantitative/f-test/) and [Levene test](/eda/quantitative/levene-test/) to compare variances between groups
+- [4-Plot](/eda/techniques/4-plot/)
+- [Probability Plot](/eda/techniques/probability-plot/)
+- [PPCC Plot](/eda/techniques/ppcc-plot/)
 
-Before running formal comparison tests, EDA encourages visual inspection: do the box plots overlap? Are the spreads comparable? Are there outliers that could distort the comparison?
+The univariate category is the most fundamental: you have a single measured quantity and want to characterize its center, spread, and distributional shape. The 4-Plot provides a comprehensive single-page diagnostic, while probability plots and PPCC plots help identify the best-fitting distribution for the error term.
 
-### 3. Regression and Modeling
+---
 
-Modeling problems ask: "What is the relationship between these variables?" Linear regression, polynomial fits, and other modeling approaches attempt to describe how one or more predictor variables influence a response.
+### 2. Control
 
-EDA contributes to modeling through:
+**Data:** A single column of numbers, *Y*.
 
-- [Scatter plot](/eda/techniques/scatter-plot/) to visualize bivariate relationships before fitting a model
-- Residual analysis plots to check whether model assumptions hold after fitting
-- [Run sequence plot](/eda/techniques/run-sequence-plot/) of residuals to detect time-dependent patterns
+**Model:** *y* = constant + error
 
-The Handbook emphasizes that blind model fitting without exploratory graphics is a common source of error. A scatter plot that reveals curvature, for example, would prevent the analyst from fitting a straight line to inherently nonlinear data.
+**Output:** A "yes" or "no" to the question: "Is the system out of control?"
 
-### 4. Screening and Design of Experiments (DOE)
+**Techniques:**
 
-Screening problems ask: "Which factors matter?" In designed experiments, multiple factors are varied simultaneously, and the goal is to identify which ones have a significant effect on the response. This category is central to industrial process improvement and quality engineering.
+- Control Charts
 
-Relevant EDA techniques include:
+Control problems share the same data structure and model as univariate problems, but the goal is different. Rather than characterizing the distribution, you want to determine whether the process generating the data is stable over time. Control charts monitor sequential observations against expected limits to flag departures from statistical control.
 
-- [DOE plots](/eda/techniques/doe-plots/) (main effects plots, interaction plots) to visualize factor effects
-- [Multi-factor ANOVA](/eda/quantitative/multi-factor-anova/) to test factor significance formally
-- [Yates analysis](/eda/quantitative/yates-analysis/) for systematic effect estimation in factorial designs
+---
 
-DOE problems are distinctive because the data are collected according to a deliberate experimental plan rather than observed passively. EDA techniques adapted for DOE help the analyst interpret results and detect unexpected interactions between factors.
+### 3. Comparative
 
-## Choosing the Right Approach
+**Data:** A single response variable and *k* independent variables (*Y*, *X*<sub>1</sub>, *X*<sub>2</sub>, ..., *X*<sub>k</sub>), with primary focus on **one** of these independent variables (the primary factor).
 
-The problem category determines which EDA toolkit to reach for first. The Handbook recommends starting with graphical displays appropriate to your category, then following up with the corresponding quantitative techniques for formal confirmation. See [What is EDA?](/eda/foundations/what-is-eda/) for the overall philosophy and [The Role of Graphics](/eda/foundations/role-of-graphics/) for why visual inspection should precede numerical analysis.
+**Model:** *y* = *f*(*x*<sub>1</sub>, *x*<sub>2</sub>, ..., *x*<sub>k</sub>) + error
+
+**Output:** A "yes" or "no" to the question: "Is the primary factor significant?"
+
+**Techniques:**
+
+- [Block Plot](/eda/techniques/block-plot/)
+- [Scatter Plot](/eda/techniques/scatter-plot/)
+- [Box Plot](/eda/techniques/box-plot/)
+
+Comparative problems ask whether a specific factor has a real effect on the response, after accounting for other variables. The block plot is particularly useful for visualizing factor effects while controlling for other sources of variation.
+
+---
+
+### 4. Screening
+
+**Data:** A single response variable and *k* independent variables (*Y*, *X*<sub>1</sub>, *X*<sub>2</sub>, ..., *X*<sub>k</sub>).
+
+**Model:** *y* = *f*(*x*<sub>1</sub>, *x*<sub>2</sub>, ..., *x*<sub>k</sub>) + error
+
+**Output:**
+
+1. A ranked list (from most important to least important) of factors.
+2. Best settings for the factors.
+3. A good model/prediction equation relating *Y* to the factors.
+
+**Techniques:**
+
+- [Block Plot](/eda/techniques/block-plot/)
+- [Probability Plot](/eda/techniques/probability-plot/)
+- [Bihistogram](/eda/techniques/bihistogram/)
+
+Screening problems arise in designed experiments where multiple factors are varied simultaneously. The goal is to determine which factors matter most. Unlike comparative problems (which focus on a single primary factor), screening casts a wider net to rank all factors by importance.
+
+---
+
+### 5. Optimization
+
+**Data:** A single response variable and *k* independent variables (*Y*, *X*<sub>1</sub>, *X*<sub>2</sub>, ..., *X*<sub>k</sub>).
+
+**Model:** *y* = *f*(*x*<sub>1</sub>, *x*<sub>2</sub>, ..., *x*<sub>k</sub>) + error
+
+**Output:** Best settings for the factor variables.
+
+**Techniques:**
+
+- [Block Plot](/eda/techniques/block-plot/)
+- Least Squares Fitting
+- [Contour Plot](/eda/techniques/contour-plot/)
+
+Optimization goes beyond screening: once you know which factors matter, the goal becomes finding the factor settings that produce the best response. Contour plots are especially valuable here, as they visualize the response surface and reveal the region of optimal settings.
+
+---
+
+### 6. Regression
+
+**Data:** A single response variable and *k* independent variables (*Y*, *X*<sub>1</sub>, *X*<sub>2</sub>, ..., *X*<sub>k</sub>). The independent variables can be continuous.
+
+**Model:** *y* = *f*(*x*<sub>1</sub>, *x*<sub>2</sub>, ..., *x*<sub>k</sub>) + error
+
+**Output:** A good model/prediction equation relating *Y* to the factors.
+
+**Techniques:**
+
+- Least Squares Fitting
+- [Scatter Plot](/eda/techniques/scatter-plot/)
+- [6-Plot](/eda/techniques/6-plot/)
+
+Regression problems focus on building a predictive model. While the data structure resembles screening and optimization, the emphasis is on obtaining a good functional relationship between the response and its predictors. The 6-Plot provides a comprehensive residual diagnostic for validating the fitted model.
+
+---
+
+### 7. Time Series
+
+**Data:** A column of time-dependent numbers, *Y*. Time is an independent variable that can be either explicit or implied. If the data are not equi-spaced, the time variable should be explicitly provided.
+
+**Model:** *y*<sub>t</sub> = *f*(*t*) + error. The model can be either time-domain based or frequency-domain based.
+
+**Output:** A good model/prediction equation relating *Y* to previous values of *Y*.
+
+**Techniques:**
+
+- [Autocorrelation Plot](/eda/techniques/autocorrelation-plot/)
+- [Spectrum](/eda/techniques/spectral-plot/)
+- [Complex Demodulation Amplitude Plot](/eda/techniques/complex-demodulation/)
+- [Complex Demodulation Phase Plot](/eda/techniques/complex-demodulation/)
+- ARIMA Models
+
+Time series problems are distinguished by the sequential, time-dependent nature of the data. The analyst must determine whether the underlying structure is best captured in the time domain (autocorrelation, ARIMA) or the frequency domain (spectral analysis, complex demodulation).
+
+---
+
+### 8. Multivariate
+
+**Data:** *k* factor variables (*X*<sub>1</sub>, *X*<sub>2</sub>, ..., *X*<sub>k</sub>).
+
+**Model:** The model is not explicit.
+
+**Output:** Identify the underlying correlation structure in the data.
+
+**Techniques:**
+
+- [Star Plot](/eda/techniques/star-plot/)
+- [Scatter Plot Matrix](/eda/techniques/scatterplot-matrix/)
+- [Conditioning Plot](/eda/techniques/conditioning-plot/)
+- Profile Plot
+- Principal Components
+- Clustering
+- Discrimination/Classification
+
+Multivariate problems differ fundamentally from the preceding categories: there is no single response variable and no explicit model. Instead, the goal is to discover relationships and structure among multiple variables simultaneously. Note that multivariate analysis is only covered lightly in the NIST Handbook.
+
+---
+
+## Choosing the Right Category
+
+Identifying your problem category narrows the field of applicable techniques considerably. The Handbook recommends starting with the graphical displays appropriate to your category, then following up with corresponding quantitative methods for formal confirmation.
+
+Key distinctions to keep in mind:
+
+- **Univariate vs. Control**: Same data and model, but different questions (characterize vs. monitor).
+- **Comparative vs. Screening**: Comparative focuses on one primary factor; screening ranks all factors.
+- **Screening vs. Optimization**: Screening identifies important factors; optimization finds the best settings.
+- **Regression vs. Optimization**: Both seek a model, but regression emphasizes prediction while optimization emphasizes finding the best operating point.
+- **Time Series**: Distinguished by time-dependent data and the choice between time-domain and frequency-domain approaches.
+- **Multivariate**: No explicit response variable; the goal is to uncover correlation structure.
 
 ### Cross-References
 
-- [Two-Sample t-Test](/eda/quantitative/two-sample-t-test/) -- formal comparison of two group means
-- [One-Factor ANOVA](/eda/quantitative/one-factor-anova/) -- comparison across multiple groups
-- [DOE Plots](/eda/techniques/doe-plots/) -- graphical tools for designed experiments
-- [Histogram](/eda/techniques/histogram/) -- the starting point for univariate characterization
-- [Scatter Plot](/eda/techniques/scatter-plot/) -- the starting point for regression and modeling
+- [What is EDA?](/eda/foundations/what-is-eda/) — the overall philosophy behind exploratory data analysis
+- [The 4-Plot](/eda/foundations/the-4-plot/) — the primary diagnostic tool for univariate problems
+- [Scatter Plot](/eda/techniques/scatter-plot/) — foundational technique for comparative and regression problems
+- [Star Plot](/eda/techniques/star-plot/) — key multivariate visualization technique

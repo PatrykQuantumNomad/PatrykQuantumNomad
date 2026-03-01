@@ -92,7 +92,7 @@ const QUANTITATIVE_CONTENT: Record<string, QuantitativeContent> = {
       },
     ],
     interpretation:
-      'A 95% confidence interval means that if the sampling procedure were repeated many times, approximately 95% of the resulting intervals would contain the true population mean. A wider interval indicates greater uncertainty about the parameter, typically due to high variability or small sample size. If the confidence interval for a difference includes zero, the difference is not statistically significant at that confidence level. The interval width is inversely proportional to the square root of the sample size, so quadrupling the sample size halves the interval width. Reporting confidence intervals alongside point estimates is considered best practice because it conveys both the estimate and its precision.',
+      'A 95% confidence interval means that if the sampling procedure were repeated many times, approximately 95% of the resulting intervals would contain the true population mean. A wider interval indicates greater uncertainty about the parameter, typically due to high variability or small sample size. If the confidence interval for the mean does not contain a specified target value, the hypothesis that the population mean equals that target can be rejected at that confidence level. The interval width is inversely proportional to the square root of the sample size, so quadrupling the sample size halves the interval width. Reporting confidence intervals alongside point estimates is considered best practice because it conveys both the estimate and its precision.',
     assumptions:
       'The confidence interval for the mean assumes the data are independently and identically distributed from a population with a finite variance. For small samples, the underlying population should be approximately normal; for large samples (n > 30), the Central Limit Theorem ensures approximate validity regardless of the parent distribution.',
     nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.2',
@@ -117,16 +117,28 @@ const QUANTITATIVE_CONTENT: Record<string, QuantitativeContent> = {
           'The pooled standard deviation combines the two sample variances, weighted by their degrees of freedom, under the equal-variance assumption.',
       },
       {
-        label: 'Degrees of Freedom',
+        label: 'Degrees of Freedom (Equal Variances)',
         tex: String.raw`\nu = n_1 + n_2 - 2`,
         explanation:
           'Under the equal-variance assumption, the degrees of freedom equal the total sample size minus two.',
+      },
+      {
+        label: 't-Statistic (Unequal Variances / Welch)',
+        tex: String.raw`t = \frac{\bar{x}_1 - \bar{x}_2}{\sqrt{\dfrac{s_1^2}{n_1} + \dfrac{s_2^2}{n_2}}}`,
+        explanation:
+          'When the equal-variance assumption is not met, each sample variance is divided by its own sample size rather than using a pooled estimate.',
+      },
+      {
+        label: 'Welch-Satterthwaite Degrees of Freedom',
+        tex: String.raw`\nu = \frac{\left(\dfrac{s_1^2}{n_1} + \dfrac{s_2^2}{n_2}\right)^2}{\dfrac{(s_1^2/n_1)^2}{n_1-1} + \dfrac{(s_2^2/n_2)^2}{n_2-1}}`,
+        explanation:
+          'The approximate degrees of freedom for the Welch t-test, accounting for unequal variances. The result is generally not an integer and is rounded down.',
       },
     ],
     interpretation:
       'Compare the absolute value of the computed t-statistic to the critical value from the t-distribution at the chosen significance level. If |t| exceeds the critical value, reject the null hypothesis that the two means are equal. Equivalently, if the p-value is less than the significance level (commonly 0.05), the difference is statistically significant. A large t-statistic indicates that the difference between means is large relative to the variability within the groups. Always pair this test with an examination of the confidence interval for the mean difference to assess practical significance.',
     assumptions:
-      'The test assumes both samples are drawn independently from normally distributed populations. The pooled version additionally assumes equal population variances; when this assumption is violated, use the Welch (unequal variance) version. For large samples, the normality assumption is relaxed by the Central Limit Theorem.',
+      'The test assumes both samples are drawn independently from normally distributed populations. The pooled version additionally assumes equal population variances; when this assumption is violated, use the Welch (unequal variance) version with Welch-Satterthwaite degrees of freedom. For large samples, the normality assumption is relaxed by the Central Limit Theorem.',
     pythonCode: `import numpy as np
 from scipy import stats
 
@@ -223,7 +235,7 @@ print(f"Eta-squared: {eta_sq:.4f}")`,
       },
       {
         label: 'Interaction F-Statistic',
-        tex: String.raw`F_{AB} = \frac{MS_{AB}}{MS_E} = \frac{SS_{AB} / (a-1)(b-1)}{SS_E / (N - ab)}`,
+        tex: String.raw`F_{AB} = \frac{MS_{AB}}{MS_E} = \frac{SS_{AB} \,/\, [(a-1)(b-1)]}{SS_E \,/\, (N - ab)}`,
         explanation:
           'Tests whether the interaction between factors A and B is significant. A significant interaction means the effect of one factor depends on the level of the other.',
       },
@@ -243,7 +255,7 @@ print(f"Eta-squared: {eta_sq:.4f}")`,
 
   'measures-of-scale': {
     definition:
-      'Measures of scale quantify the spread or variability of a dataset, indicating how tightly or loosely the observations cluster around the center. The most common measures are the variance, standard deviation, range, and interquartile range (IQR).',
+      'Measures of scale quantify the spread or variability of a dataset, indicating how tightly or loosely the observations cluster around the center. The most common measures are the variance, standard deviation, range, average absolute deviation (AAD), median absolute deviation (MAD), and interquartile range (IQR).',
     purpose:
       'Use measures of scale to characterize data dispersion and assess process variability. They are essential companions to measures of location: two datasets can have identical means but very different spreads. In quality control, the standard deviation directly determines process capability indices and control chart limits. The IQR is preferred when outliers are present or the distribution is skewed.',
     formulas: [
@@ -258,6 +270,18 @@ print(f"Eta-squared: {eta_sq:.4f}")`,
         tex: String.raw`s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}`,
         explanation:
           'The square root of the variance, expressed in the same units as the original data for easier interpretation.',
+      },
+      {
+        label: 'Average Absolute Deviation',
+        tex: String.raw`\text{AAD} = \frac{1}{n}\sum_{i=1}^{n}|x_i - \bar{x}|`,
+        explanation:
+          'The mean of the absolute deviations from the sample mean. Less affected by extreme observations than the variance because it does not square the distances.',
+      },
+      {
+        label: 'Median Absolute Deviation',
+        tex: String.raw`\text{MAD} = \text{median}(|x_i - \tilde{x}|)`,
+        explanation:
+          'The median of the absolute deviations from the sample median. Highly robust to outliers because both the center and the spread measure use the median.',
       },
       {
         label: 'Range',
@@ -275,21 +299,21 @@ print(f"Eta-squared: {eta_sq:.4f}")`,
     interpretation:
       'A small standard deviation relative to the mean indicates that observations are clustered tightly around the center, while a large value suggests wide dispersion. The coefficient of variation (CV = s / x-bar) allows comparison of variability across datasets with different units or scales. The range is the simplest but least robust measure, as a single outlier can inflate it dramatically. The IQR is preferred for skewed data or when outliers are present, as it depends only on the central portion of the distribution. When reporting variability, always pair the measure of scale with the corresponding measure of location.',
     assumptions:
-      'The sample variance is an unbiased estimator of the population variance when observations are independent and identically distributed. The standard deviation is slightly biased for small samples from normal populations but consistent. For non-normal distributions, robust alternatives like the median absolute deviation (MAD) may be more appropriate.',
+      'The sample variance is an unbiased estimator of the population variance when observations are independent and identically distributed. The standard deviation is slightly biased for small samples from normal populations but consistent. For non-normal or heavy-tailed distributions, robust alternatives like the median absolute deviation (MAD) or interquartile range are more appropriate because they provide robustness of validity -- confidence intervals maintain correct coverage regardless of the underlying distribution.',
     nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.6',
   },
 
   'bartletts-test': {
     definition:
-      'Bartlett\'s test assesses whether several independent samples have equal variances, a condition known as homoscedasticity. It computes a test statistic based on the ratio of the pooled variance to the individual group variances, approximately following a chi-square distribution.',
+      'Bartlett\'s test assesses whether several independent samples have equal variances, a condition known as homoscedasticity. It computes a test statistic based on the difference between the logarithm of the pooled variance and a weighted sum of logarithms of individual group variances, approximately following a chi-square distribution.',
     purpose:
       'Use Bartlett\'s test before applying ANOVA or pooled t-tests to verify the equal-variance assumption. Violations of this assumption can inflate Type I error rates and produce misleading F-statistics. Bartlett\'s test is the most powerful test for homogeneity of variances when the data are normally distributed, making it the default choice for well-behaved data.',
     formulas: [
       {
         label: 'Bartlett Test Statistic',
-        tex: String.raw`\chi^2 = \frac{(N-k)\ln s_p^2 - \sum_{j=1}^{k}(n_j - 1)\ln s_j^2}{1 + \frac{1}{3(k-1)}\left(\sum_{j=1}^{k}\frac{1}{n_j - 1} - \frac{1}{N-k}\right)}`,
+        tex: String.raw`T = \frac{(N-k)\ln s_p^2 - \sum_{j=1}^{k}(n_j - 1)\ln s_j^2}{1 + \frac{1}{3(k-1)}\left(\sum_{j=1}^{k}\frac{1}{n_j - 1} - \frac{1}{N-k}\right)}`,
         explanation:
-          'Compares the logarithm of the pooled variance to the weighted sum of logarithms of individual group variances. Under H0, this follows a chi-square distribution with k-1 degrees of freedom.',
+          'Compares the logarithm of the pooled variance to the weighted sum of logarithms of individual group variances. Under H0, T follows a chi-square distribution with k-1 degrees of freedom.',
       },
       {
         label: 'Pooled Variance',
@@ -299,7 +323,7 @@ print(f"Eta-squared: {eta_sq:.4f}")`,
       },
     ],
     interpretation:
-      'If the Bartlett test statistic exceeds the chi-square critical value at (k-1) degrees of freedom, reject the null hypothesis of equal variances. A large test statistic indicates that the group variances differ substantially. When the test is significant, consider using the Welch ANOVA or a non-parametric alternative instead of standard ANOVA. Note that Bartlett\'s test is highly sensitive to departures from normality -- even if variances are truly equal, non-normal data can produce false positives. For non-normal data, use the Levene test instead.',
+      'If T exceeds the chi-square critical value at (k-1) degrees of freedom, reject the null hypothesis of equal variances. A large test statistic indicates that the group variances differ substantially. When the test is significant, consider using the Welch ANOVA or a non-parametric alternative instead of standard ANOVA. Note that Bartlett\'s test is highly sensitive to departures from normality -- even if variances are truly equal, non-normal data can produce false positives. For non-normal data, use the Levene test instead.',
     assumptions:
       'Bartlett\'s test assumes that each sample is drawn from a normal distribution. It is sensitive to non-normality, which can cause inflated Type I error rates. The test requires at least two groups, each with at least two observations.',
     pythonCode: `import numpy as np
@@ -327,9 +351,9 @@ print(f"Equal variances (alpha=0.05): {p_value > 0.05}")`,
     formulas: [
       {
         label: 'Chi-Square Test Statistic',
-        tex: String.raw`\chi^2 = \frac{(n-1)s^2}{\sigma_0^2}`,
+        tex: String.raw`T = \frac{(n-1)s^2}{\sigma_0^2}`,
         explanation:
-          'The test statistic scales the sample variance by the hypothesized population variance. Under H0, it follows a chi-square distribution with n-1 degrees of freedom.',
+          'The test statistic scales the sample variance by the hypothesized population variance. Under H0, T follows a chi-square distribution with n-1 degrees of freedom.',
       },
       {
         label: 'Confidence Interval for Variance',
@@ -355,7 +379,7 @@ print(f"Equal variances (alpha=0.05): {p_value > 0.05}")`,
         label: 'F-Statistic',
         tex: String.raw`F = \frac{s_1^2}{s_2^2}`,
         explanation:
-          'The ratio of the two sample variances, where by convention the larger variance is placed in the numerator to produce F >= 1.',
+          'The ratio of the two sample variances. The more this ratio deviates from 1, the stronger the evidence for unequal population variances.',
       },
       {
         label: 'Degrees of Freedom',
@@ -409,10 +433,22 @@ print(f"Equal variances (alpha=0.05): {p_value > 0.05}")`,
           'An F-statistic computed on the transformed values Z_ij = |x_ij - x-bar_j|. The test is equivalent to a one-way ANOVA on absolute deviations.',
       },
       {
-        label: 'Absolute Deviation Transform',
+        label: 'Absolute Deviation Transform (Mean)',
         tex: String.raw`Z_{ij} = |x_{ij} - \bar{x}_j|`,
         explanation:
-          'Each observation is replaced by its absolute deviation from its group mean. Using the group median instead gives the Brown-Forsythe variant.',
+          'Each observation is replaced by its absolute deviation from its group mean. This is the original Levene formulation, best suited for symmetric, moderate-tailed distributions.',
+      },
+      {
+        label: 'Brown-Forsythe Variant (Median)',
+        tex: String.raw`Z_{ij} = |x_{ij} - \tilde{x}_j|`,
+        explanation:
+          'Uses the group median instead of the mean. More robust against skewed and heavy-tailed distributions and is generally recommended as the default choice.',
+      },
+      {
+        label: 'Trimmed Mean Variant',
+        tex: String.raw`Z_{ij} = |x_{ij} - \bar{x}_j'|`,
+        explanation:
+          'Uses the 10% trimmed mean of each group. A compromise that performs well for heavy-tailed distributions such as the Cauchy.',
       },
     ],
     interpretation:
@@ -449,13 +485,19 @@ print(f"\\nEqual variances (alpha=0.05): {p_mean > 0.05}")`,
         label: 'Sample Skewness',
         tex: String.raw`g_1 = \frac{\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^3}{\left[\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2\right]^{3/2}}`,
         explanation:
-          'The ratio of the third central moment to the cube of the standard deviation. Positive values indicate right skew; negative values indicate left skew.',
+          'The ratio of the third central moment to the cube of the standard deviation. Note that s here uses N (not N-1) in the denominator. Positive values indicate right skew; negative values indicate left skew.',
       },
       {
         label: 'Sample Kurtosis (Excess)',
         tex: String.raw`g_2 = \frac{\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^4}{\left[\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2\right]^{2}} - 3`,
         explanation:
           'The ratio of the fourth central moment to the square of the variance, minus 3 so that the normal distribution has excess kurtosis zero. Positive values indicate heavy tails.',
+      },
+      {
+        label: 'Adjusted Fisher-Pearson Skewness',
+        tex: String.raw`G_1 = \frac{\sqrt{n(n-1)}}{n-2} \cdot g_1`,
+        explanation:
+          'The adjusted skewness coefficient used by many software packages. It corrects the bias of the sample skewness for finite samples.',
       },
       {
         label: 'Standard Error of Skewness',
@@ -525,7 +567,7 @@ print(f"\\nEqual variances (alpha=0.05): {p_mean > 0.05}")`,
     interpretation:
       'If the absolute value of Z exceeds 1.96 (at the 5% significance level), reject the null hypothesis of randomness. Too few runs (negative Z) suggest positive autocorrelation or trending behavior -- adjacent observations tend to be on the same side of the median. Too many runs (positive Z) suggest negative autocorrelation or oscillatory behavior -- observations frequently alternate above and below the median. The runs test complements the autocorrelation function by detecting patterns that may not manifest as simple lag-1 dependence. Always visualize the data with a run-sequence plot to supplement the test results.',
     assumptions:
-      'The runs test requires a sequence of observations in their original time order. It is a non-parametric test and makes no assumptions about the underlying distribution. The normal approximation for the Z-statistic requires a minimum sample size (generally n >= 20). The test is sensitive to ties at the median, which must be handled consistently.',
+      'The runs test requires a sequence of observations in their original time order. It is a non-parametric test and makes no assumptions about the underlying distribution. The normal approximation for the Z-statistic requires that both n1 > 10 and n2 > 10 (where n1 and n2 are the counts above and below the median); for smaller samples, exact critical value tables should be used. The test is sensitive to ties at the median, which must be handled consistently.',
     nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.13',
   },
 
@@ -594,7 +636,7 @@ for sl, cv in zip(result.significance_level, result.critical_values):
         label: 'Degrees of Freedom',
         tex: String.raw`\nu = k - 1 - m`,
         explanation:
-          'The degrees of freedom equal the number of bins minus one, minus the number of parameters estimated from the data (m).',
+          'The degrees of freedom equal the number of non-empty bins (k) minus one, minus the number of parameters estimated from the data (m). Equivalently, NIST defines c = m + 1, giving df = k - c.',
       },
     ],
     interpretation:
@@ -612,9 +654,9 @@ for sl, cv in zip(result.significance_level, result.critical_values):
     formulas: [
       {
         label: 'K-S Statistic',
-        tex: String.raw`D_n = \sup_x |F_n(x) - F_0(x)|`,
+        tex: String.raw`D = \max_{1 \le i \le n} \left( F_0(x_{(i)}) - \frac{i-1}{n},\; \frac{i}{n} - F_0(x_{(i)}) \right)`,
         explanation:
-          'The supremum of the absolute difference between the empirical CDF F_n(x) and the hypothesized CDF F_0(x) over all values of x.',
+          'The maximum distance between the empirical and hypothesized CDFs, computed at each ordered data point as the larger of the two one-sided distances. This accounts for the step-function nature of the empirical CDF.',
       },
       {
         label: 'Empirical CDF',
@@ -626,7 +668,7 @@ for sl, cv in zip(result.significance_level, result.critical_values):
     interpretation:
       'Compare the D_n statistic to the critical value from the Kolmogorov-Smirnov table at the chosen significance level. If D_n exceeds the critical value, reject the null hypothesis that the data follow the specified distribution. The K-S test has less power than the Anderson-Darling test because it weights all parts of the distribution equally, whereas the Anderson-Darling test gives more weight to the tails. The K-S test is most sensitive to differences near the center of the distribution. For composite hypotheses (parameters estimated from data), the standard critical values are conservative -- use the Lilliefors correction for normality testing.',
     assumptions:
-      'The K-S test requires a fully specified continuous null distribution. When parameters are estimated from the data, the standard critical values are no longer valid and modified tables (Lilliefors) must be used. The test is not applicable to discrete distributions because the CDF has jumps.',
+      'The K-S test requires a fully specified continuous null distribution. When parameters are estimated from the data, the standard critical values are no longer valid and modified tables (Lilliefors) must be used. The test is designed for continuous distributions; extensions to discrete and censored data exist but require modified critical values.',
     pythonCode: `import numpy as np
 from scipy import stats
 
@@ -700,20 +742,20 @@ print(f"Suspected outlier: {data[outlier_idx]} (index {outlier_idx})")
 print(f"G statistic: {G:.4f}")
 print(f"G critical:  {G_crit:.4f}")
 print(f"Is outlier (alpha=0.05): {G > G_crit}")`,
-    nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.18',
+    nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.17.1',
   },
 
   'yates-analysis': {
     definition:
       'Yates analysis is an efficient algorithm for computing all main effects and interaction effects in a two-level full factorial (2^k) experiment. It systematically applies pairwise sums and differences to the ordered response totals to extract every factor effect in a single pass.',
     purpose:
-      'Use Yates analysis when analyzing data from a 2^k factorial experiment to efficiently compute all main effects and interactions without constructing the full ANOVA table. The algorithm reduces the computational effort from O(2^k * k) to O(k * 2^k) operations and provides effect estimates that can be directly compared to assess factor importance. It is a classical tool in industrial experimentation and process optimization.',
+      'Use Yates analysis when analyzing data from a 2^k factorial experiment to efficiently compute all main effects and interactions without constructing the full ANOVA table. The algorithm systematically organizes the calculations through k column operations on the 2^k response totals, providing effect estimates that can be directly compared to assess factor importance. It is a classical tool in industrial experimentation and process optimization.',
     formulas: [
       {
         label: 'Yates Algorithm (Column Operation)',
-        tex: String.raw`\begin{aligned} y_i' &= y_i + y_{i + 2^{j-1}} \quad &\text{(first half)} \\ y_i' &= y_{i} - y_{i - 2^{j-1}} \quad &\text{(second half)} \end{aligned}`,
+        tex: String.raw`\begin{aligned} y_i' &= y_{2i-1} + y_{2i} \quad &i = 1, \ldots, 2^{k-1} \text{ (first half)} \\ y_{i+2^{k-1}}' &= y_{2i} - y_{2i-1} \quad &i = 1, \ldots, 2^{k-1} \text{ (second half)} \end{aligned}`,
         explanation:
-          'At each step j = 1, 2, ..., k, the column of responses is transformed by computing pairwise sums (first half) and differences (second half). After k steps, the first entry is the grand total.',
+          'At each of k column steps, the responses are grouped into adjacent pairs. The first half of the new column contains pairwise sums and the second half contains pairwise differences (second minus first). After k steps, the first entry is the grand total.',
       },
       {
         label: 'Effect Estimate',
@@ -732,7 +774,7 @@ print(f"Is outlier (alpha=0.05): {G > G_crit}")`,
       'After applying the Yates algorithm, the resulting contrasts are ordered by the standard Yates convention: grand mean, factor A, factor B, AB interaction, factor C, AC, BC, ABC, and so on. The magnitude of each effect estimate indicates the practical importance of that factor or interaction. Effects can be ranked and plotted on a normal probability plot of effects (Daniel plot) to identify which are statistically significant -- significant effects will deviate from the line formed by the inactive effects. The sum of squares for each effect can be used to construct an ANOVA table and compute F-statistics.',
     assumptions:
       'Yates analysis assumes a complete 2^k factorial design with a fixed number of replicates per treatment combination. It requires that the factors have exactly two levels (low and high). For fractional factorials or designs with more than two levels, modified approaches are needed. The standard analysis assumes normally distributed errors with constant variance across all treatment combinations.',
-    nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.21',
+    nistReference: 'NIST/SEMATECH e-Handbook, Section 1.3.5.18',
   },
 };
 

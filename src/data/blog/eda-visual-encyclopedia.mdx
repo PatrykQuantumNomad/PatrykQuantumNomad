@@ -1,24 +1,25 @@
 ---
 title: "Exploratory Data Analysis: A Visual Encyclopedia"
 description: "A comprehensive interactive reference for Exploratory Data Analysis based on the NIST/SEMATECH Engineering Statistics Handbook. 90+ pages covering graphical techniques, quantitative methods, probability distributions, and case studies."
-publishedDate: 2026-02-25
+publishedDate: 2026-03-01
 tags: ["eda", "statistics", "data-analysis", "nist", "data-science", "data-visualization"]
+coverImage: "/images/eda-visual-encyclopedia-cover.svg"
 draft: false
 ---
 
 Every dataset has a story to tell. The challenge is knowing how to listen. Before fitting models, running hypothesis tests, or building dashboards, there is a critical first step that separates rigorous analysis from educated guessing: Exploratory Data Analysis.
 
-EDA is the practice of using visual and quantitative techniques to understand the shape, structure, and surprises hidden in your data before committing to any formal statistical model. It was formalized by John Tukey in the 1970s and later codified by NIST in their Engineering Statistics Handbook, which remains the most comprehensive public-domain reference on the subject.
+EDA is the practice of using visual and quantitative techniques to understand the shape, structure, and surprises hidden in your data before committing to any formal statistical model. John Tukey formalized the approach in the 1970s, and NIST later codified it in their Engineering Statistics Handbook, which remains the most comprehensive public-domain reference on the subject.
 
-After spending months implementing every technique and distribution from the NIST handbook as interactive visualizations, I have published the [EDA Visual Encyclopedia](/eda/) -- a 90+ page reference that turns static statistical theory into explorable, parameterized tools. This post walks through what is inside, why it matters, and how the technical implementation works.
+After spending months implementing every technique and distribution from the NIST handbook as interactive visualizations, I published the [EDA Visual Encyclopedia](/eda/), a 90+ page reference that turns static statistical theory into explorable, parameterized tools. This post walks through what is inside, why it matters, and how I built it.
 
 ## What Is Exploratory Data Analysis?
 
-EDA is a philosophy more than a procedure. Where classical statistics starts with a hypothesis and tests it against data, EDA starts with data and asks: what is here? The [foundations section](/eda/foundations/what-is-eda/) of the encyclopedia covers this distinction in detail, but the core idea is simple: look at your data from as many angles as possible before making assumptions.
+EDA is a philosophy more than a procedure. Where classical statistics starts with a hypothesis and tests it against data, EDA starts with data and asks: what is here? The [foundations section](/eda/foundations/what-is-eda/) of the encyclopedia covers this distinction in detail, but the core idea is simple. Look at your data from as many angles as possible before making assumptions.
 
 Tukey argued that the most dangerous thing a statistician could do was apply a model to data without first understanding its structure. A normal distribution assumption applied to bimodal data produces meaningless confidence intervals. A linear regression fitted to data with outliers produces misleading slopes. A time series model applied to data with a hidden seasonal component produces forecasts that are worse than random guessing.
 
-EDA catches these problems before they become expensive mistakes. The [assumptions page](/eda/foundations/assumptions/) explains the four key assumptions that underlie most statistical techniques -- randomness, fixed distribution, fixed location, and fixed variation -- and the [consequences of violated assumptions](/eda/foundations/when-assumptions-fail/) demonstrates what happens when you skip this step.
+EDA catches these problems before they become expensive mistakes. The [assumptions page](/eda/foundations/assumptions/) explains the four key assumptions that underlie most statistical techniques (randomness, fixed distribution, fixed location, and fixed variation), and the [consequences of violated assumptions](/eda/foundations/when-assumptions-fail/) page demonstrates what happens when you skip this step.
 
 The [role of graphics](/eda/foundations/role-of-graphics/) in EDA cannot be overstated. A single histogram reveals distributional shape, outliers, gaps, and clustering patterns that would require dozens of summary statistics to capture numerically. The [4-plot](/eda/techniques/4-plot/) technique, which combines a run sequence plot, lag plot, histogram, and normal probability plot on a single page, can diagnose most common data pathologies in seconds.
 
@@ -28,39 +29,39 @@ The [EDA Visual Encyclopedia](/eda/) is organized into six sections, each coveri
 
 ### Graphical Techniques: 29 Interactive Visualizations
 
-The largest section covers [29 graphical techniques](/eda/techniques/histogram/) ranging from fundamental tools like [histograms](/eda/techniques/histogram/), [scatter plots](/eda/techniques/scatter-plot/), and [box plots](/eda/techniques/box-plot/) to specialized diagnostic plots like [autocorrelation plots](/eda/techniques/autocorrelation-plot/), [normal probability plots](/eda/techniques/normal-probability-plot/), and [Weibull plots](/eda/techniques/weibull-plot/).
+The largest section covers [29 graphical techniques](/eda/#techniques) ranging from fundamental tools like [histograms](/eda/techniques/histogram/), [scatter plots](/eda/techniques/scatter-plot/), and [box plots](/eda/techniques/box-plot/) to specialized diagnostic plots like [autocorrelation plots](/eda/techniques/autocorrelation-plot/), [normal probability plots](/eda/techniques/normal-probability-plot/), and [Weibull plots](/eda/techniques/weibull-plot/).
 
-Each technique page includes an interactive SVG visualization generated from realistic sample data, a clear explanation of what the plot reveals, interpretation guidelines, and variant visualizations where applicable. For example, the [scatter plot page](/eda/techniques/scatter-plot/) shows both the basic scatter and a version with a confidence band, while the [box plot page](/eda/techniques/box-plot/) demonstrates single-group and multi-group comparisons.
+Each technique page includes an interactive SVG visualization generated from realistic sample data, a clear explanation of what the plot reveals, interpretation guidelines, and variant visualizations where applicable. The [scatter plot page](/eda/techniques/scatter-plot/) shows both the basic scatter and a version with a confidence band, while the [box plot page](/eda/techniques/box-plot/) demonstrates single-group and multi-group comparisons.
 
-Several specialized techniques deserve particular attention:
+A few specialized techniques deserve particular attention:
 
-- The [PPCC plot](/eda/techniques/ppcc-plot/) (Probability Plot Correlation Coefficient) is a powerful but underused tool for identifying the best-fitting distribution family. It sweeps across Tukey-Lambda shape parameters, and the peak correlation indicates the closest distributional match.
+- The [PPCC plot](/eda/techniques/ppcc-plot/) (Probability Plot Correlation Coefficient) is a powerful but underused tool for identifying the best-fitting distribution family. It sweeps across shape parameters, and the peak correlation indicates the closest distributional match.
 
-- The [star plot](/eda/techniques/star-plot/) provides a multivariate visualization that maps each variable to a spoke of a radial chart, making it possible to compare multiple observations across many dimensions simultaneously.
+- The [star plot](/eda/techniques/star-plot/) provides a multivariate visualization that maps each variable to a spoke of a radial chart, making it possible to compare multiple observations across many dimensions at once.
 
-- The [spectral plot](/eda/techniques/spectral-plot/) uses power spectral density estimation to detect hidden periodicities in time series data -- essential for manufacturing quality control and signal processing.
+- The [spectral plot](/eda/techniques/spectral-plot/) uses power spectral density estimation to detect hidden periodicities in time series data. This is essential for manufacturing quality control and signal processing.
 
 - The [conditioning plot](/eda/techniques/conditioning-plot/) reveals how the relationship between two variables changes across levels of a third, which is critical for detecting interaction effects.
 
 ### Quantitative Methods: 18 Statistical Tests
 
-The [quantitative methods section](/eda/quantitative/measures-of-location/) covers 18 statistical procedures organized by purpose: [measures of location](/eda/quantitative/measures-of-location/) (mean, median, mode), [measures of scale](/eda/quantitative/measures-of-scale/) (standard deviation, range, IQR), hypothesis tests for comparing groups ([two-sample t-test](/eda/quantitative/two-sample-t-test/), [one-factor ANOVA](/eda/quantitative/one-factor-anova/), [multi-factor ANOVA](/eda/quantitative/multi-factor-anova/)), tests for equal variance ([Bartlett's test](/eda/quantitative/bartletts-test/), [Levene's test](/eda/quantitative/levene-test/), [F-test](/eda/quantitative/f-test/)), and goodness-of-fit tests ([Anderson-Darling](/eda/quantitative/anderson-darling/), [chi-square](/eda/quantitative/chi-square-gof/), [Kolmogorov-Smirnov](/eda/quantitative/kolmogorov-smirnov/)).
+The [quantitative methods section](/eda/#quantitative) covers 18 statistical procedures organized by purpose: [measures of location](/eda/quantitative/measures-of-location/) (mean, median, mode), [measures of scale](/eda/quantitative/measures-of-scale/) (standard deviation, range, IQR), hypothesis tests for comparing groups ([two-sample t-test](/eda/quantitative/two-sample-t-test/), [one-factor ANOVA](/eda/quantitative/one-factor-anova/), [multi-factor ANOVA](/eda/quantitative/multi-factor-anova/)), tests for equal variance ([Bartlett's test](/eda/quantitative/bartletts-test/), [Levene's test](/eda/quantitative/levene-test/), [F-test](/eda/quantitative/f-test/)), and goodness-of-fit tests ([Anderson-Darling](/eda/quantitative/anderson-darling/), [chi-square](/eda/quantitative/chi-square-gof/), [Kolmogorov-Smirnov](/eda/quantitative/kolmogorov-smirnov/)).
 
-Each method page includes the mathematical formulation rendered with KaTeX, step-by-step interpretation guidance, and connections to related graphical techniques. The [skewness and kurtosis page](/eda/quantitative/skewness-kurtosis/) is particularly useful as a quick diagnostic: skewness values far from zero indicate asymmetry, and kurtosis values far from three indicate heavy or light tails relative to the normal distribution.
+Each method page includes the mathematical formulation rendered with KaTeX, step-by-step interpretation guidance, and connections to related graphical techniques. The [skewness and kurtosis page](/eda/quantitative/skewness-kurtosis/) is particularly useful as a quick diagnostic. Skewness values far from zero indicate asymmetry, and kurtosis values far from three indicate heavy or light tails relative to the normal distribution.
 
 ### Probability Distributions: 19 Interactive Explorers
 
-The [probability distributions section](/eda/distributions/normal/) is where the encyclopedia becomes genuinely interactive. Each of the 19 distributions -- from the ubiquitous [normal distribution](/eda/distributions/normal/) to specialized distributions like the [Tukey-Lambda](/eda/distributions/tukey-lambda/) and [fatigue-life (Birnbaum-Saunders)](/eda/distributions/fatigue-life/) -- includes a client-side distribution explorer built with D3.
+The [probability distributions section](/eda/#distributions) is where the encyclopedia becomes genuinely interactive. Each of the 19 distributions, from the ubiquitous [normal distribution](/eda/distributions/normal/) to specialized ones like the [Tukey-Lambda](/eda/distributions/tukey-lambda/) and [fatigue-life (Birnbaum-Saunders)](/eda/distributions/fatigue-life/), includes a client-side distribution explorer built with D3.
 
 The explorer renders both the PDF (probability density function) and CDF (cumulative distribution function) in real time as you adjust parameter sliders. Change the shape parameter of a [Weibull distribution](/eda/distributions/weibull/) and watch the density curve transform from exponential-like to approximately normal. Adjust the degrees of freedom of a [chi-square distribution](/eda/distributions/chi-square/) and observe the skewness decrease as the distribution approaches normality.
 
-The mathematical formulas for each distribution are rendered with KaTeX directly in the page, and the [related distributions page](/eda/reference/related-distributions/) maps the connections between all 19 distributions -- which distributions are special cases of others, which converge in the limit, and which arise as transformations.
+The mathematical formulas for each distribution are rendered with KaTeX directly in the page. The [related distributions page](/eda/reference/related-distributions/) maps the connections between all 19 distributions: which are special cases of others, which converge in the limit, and which arise as transformations.
 
 ### Case Studies: 9 Real-World Analyses
 
-The [case studies section](/eda/case-studies/ceramic-strength/) walks through 9 complete EDA analyses on real engineering datasets from the NIST archive. These are not toy examples. The [ceramic strength study](/eda/case-studies/ceramic-strength/) analyzes fracture strength measurements to determine which distribution best models material failure. The [heat flow meter study](/eda/case-studies/heat-flow-meter/) examines calibration data for systematic bias and drift. The [fatigue life study](/eda/case-studies/fatigue-life/) applies the complete EDA methodology to failure-time data from accelerated life testing.
+The [case studies section](/eda/#case-studies) walks through 9 complete EDA analyses on real engineering datasets from the NIST archive. These are not toy examples. The [ceramic strength study](/eda/case-studies/ceramic-strength/) analyzes a designed experiment to uncover an unexpected batch effect in silicon nitride specimens. The [heat flow meter study](/eda/case-studies/heat-flow-meter/) examines calibration data to confirm a well-behaved measurement process. The [fatigue life study](/eda/case-studies/fatigue-life/) compares four candidate probability distributions for aluminum alloy failure-time data.
 
-Each case study follows the NIST methodology: state the questions, examine the data graphically, apply quantitative tests, and draw conclusions. The [beam deflections study](/eda/case-studies/beam-deflections/) is an excellent starting point because it demonstrates the full EDA workflow on a straightforward dataset with a clear conclusion.
+Each case study follows the NIST methodology: state the questions, examine the data graphically, apply quantitative tests, and draw conclusions. The [beam deflections study](/eda/case-studies/beam-deflections/) is a great starting point because it shows how the autocorrelation plot and spectral analysis detect hidden periodic structure that summary statistics completely miss.
 
 ### Foundations and Reference
 
@@ -74,13 +75,13 @@ Building a 90+ page interactive statistics reference as a static site presented 
 
 ### Build-Time SVG Generation
 
-All graphical technique visualizations are generated at build time as inline SVG. There is no client-side rendering overhead for these pages -- the SVGs are part of the HTML payload. This approach means the visualizations work without JavaScript, load instantly, and are indexable by search engines. For a reference site where most visitors will be reading and studying rather than interacting, this is the correct tradeoff.
+All graphical technique visualizations are generated at build time as inline SVG. There is no client-side rendering overhead for these pages because the SVGs are part of the HTML payload. The visualizations work without JavaScript, load instantly, and are fully indexable by search engines. For a reference site where most visitors will be reading and studying rather than interacting, this is the right tradeoff.
 
 The SVG generators are written in TypeScript and use a shared coordinate system with consistent margins, axis labeling, and color palettes that automatically adapt to light and dark themes via CSS custom properties. Each generator takes a dataset and configuration object and returns a complete SVG string. The underlying statistics library implements kernel density estimation, FFT-based spectral analysis, linear regression, normal quantile computation, and autocorrelation in pure TypeScript with no runtime dependencies.
 
 ### D3 Micro-Module Isolation
 
-The interactive distribution explorers use D3 for real-time chart rendering, but the full D3 library is 280KB gzipped -- unacceptable for a site where most pages do not need it. The implementation uses D3 micro-modules (d3-scale, d3-shape, d3-axis) that total 17KB gzipped, and Astro's `client:visible` directive ensures the JavaScript only loads when a distribution page scrolls into view.
+The interactive distribution explorers use D3 for real-time chart rendering, but the full D3 library weighs 280KB gzipped. That is unacceptable for a site where most pages do not need it. Instead, the implementation uses D3 micro-modules (d3-scale, d3-shape, d3-axis) that total 17KB gzipped, and Astro's `client:visible` directive ensures the JavaScript only loads when a distribution page scrolls into view.
 
 Bundle analysis confirms that D3 is isolated to a single chunk that only loads on distribution pages. The 70+ technique, case study, and reference pages ship zero client-side JavaScript.
 
@@ -88,30 +89,26 @@ Bundle analysis confirms that D3 is isolated to a single chunk that only loads o
 
 Statistical formulas are rendered with KaTeX, which produces high-quality mathematical typesetting at build time. The `remark-math` plugin processes LaTeX notation in MDX files, and KaTeX CSS is conditionally loaded only on pages that contain formulas.
 
-For `.astro` pages (as opposed to MDX), formulas use `katex.renderToString()` at build time, producing static HTML that requires no client-side JavaScript. This means the distribution explorer pages have interactive charts but static formulas -- the best of both approaches.
-
-### OG Image Generation
-
-Every section of the encyclopedia has a custom Open Graph image generated at build time using Satori. When someone shares an EDA page on social media, the preview card shows a branded image with the section title, description, and decorative chart motifs rather than a generic fallback. The images are cached using content-addressed hashing so subsequent builds skip regeneration.
+For `.astro` pages (as opposed to MDX), formulas use `katex.renderToString()` at build time, producing static HTML that requires no client-side JavaScript. The distribution explorer pages end up with interactive charts but static formulas, which is the best of both approaches.
 
 ## Why EDA Still Matters in the Age of AI
 
 It is tempting to think that modern machine learning makes EDA obsolete. If a neural network can learn arbitrary nonlinear relationships from data, why bother plotting histograms and running normality tests?
 
-The answer is that EDA is not about finding patterns -- it is about understanding data quality. A machine learning model trained on data with measurement errors, selection bias, or distributional anomalies will learn those artifacts and amplify them. The model will be confidently wrong, and you will not know why until the predictions fail in production.
+The answer is that EDA is not about finding patterns. It is about understanding data quality. A machine learning model trained on data with measurement errors, selection bias, or distributional anomalies will learn those artifacts and amplify them. The model will be confidently wrong, and you will not know why until the predictions fail in production.
 
-Consider a practical example. You receive a dataset of sensor readings from a manufacturing process. You train a predictive model, it achieves 95% accuracy on the test set, and you deploy it. Two weeks later, the model's predictions drift catastrophically. What happened? A quick [run sequence plot](/eda/techniques/run-sequence-plot/) would have revealed that the sensor readings have a systematic drift over time -- the training data captured one regime, and the deployment data captured another. An [autocorrelation plot](/eda/techniques/autocorrelation-plot/) would have confirmed that consecutive readings are not independent, violating the randomness assumption that your cross-validation implicitly relied on.
+Consider a practical example. You receive a dataset of sensor readings from a manufacturing process. You train a predictive model, it achieves 95% accuracy on the test set, and you deploy it. Two weeks later, the model's predictions drift catastrophically. What happened? A quick [run sequence plot](/eda/techniques/run-sequence-plot/) would have revealed that the sensor readings have a systematic drift over time. The training data captured one regime, and the deployment data captured another. An [autocorrelation plot](/eda/techniques/autocorrelation-plot/) would have confirmed that consecutive readings are not independent, violating the randomness assumption that your cross-validation implicitly relied on.
 
-EDA is the quality control layer. It catches the problems that no amount of model complexity can fix: sensors that drifted during data collection, outliers from equipment malfunction, missing data patterns that are not random, and distributional shifts between training and deployment environments. The [Grubbs' test](/eda/quantitative/grubbs-test/) can formally identify outliers. The [runs test](/eda/quantitative/runs-test/) detects non-randomness. The [Anderson-Darling test](/eda/quantitative/anderson-darling/) evaluates distributional fit. These are not outdated tools -- they are the immune system of modern data science.
+EDA is the quality control layer. It catches the problems that no amount of model complexity can fix: sensors that drifted during data collection, outliers from equipment malfunction, missing data patterns that are not random, and distributional shifts between training and deployment environments. The [Grubbs' test](/eda/quantitative/grubbs-test/) can formally identify outliers. The [runs test](/eda/quantitative/runs-test/) detects non-randomness. The [Anderson-Darling test](/eda/quantitative/anderson-darling/) evaluates distributional fit. These are not outdated tools. They are the immune system of modern data science.
 
 In machine learning pipelines specifically, EDA serves three critical functions. First, it validates that the training data is representative of the deployment environment. Second, it identifies feature engineering opportunities that improve model performance far more than hyperparameter tuning. Third, it provides the diagnostic framework for debugging model failures when they inevitably occur. A [scatter plot matrix](/eda/techniques/scatterplot-matrix/) of feature pairs reveals collinearity, non-linear relationships, and clustering structure that directly inform model selection.
 
 ## Getting Started with the Encyclopedia
 
-If you are new to EDA, I recommend starting with the [foundations section](/eda/foundations/what-is-eda/) to understand the philosophy, then working through the [4-plot technique](/eda/foundations/the-4-plot/) which gives you a universal starting point for any dataset. From there, the [beam deflections case study](/eda/case-studies/beam-deflections/) demonstrates the full workflow on a clean dataset with clear results.
+If you are new to EDA, I recommend starting with the [foundations section](/eda/foundations/what-is-eda/) to understand the philosophy, then working through the [4-plot technique](/eda/foundations/the-4-plot/) which gives you a universal starting point for any dataset. From there, the [beam deflections case study](/eda/case-studies/beam-deflections/) demonstrates how autocorrelation and spectral analysis uncover periodic structure that simple summary statistics miss entirely.
 
-For experienced practitioners, the [reference tables](/eda/reference/techniques-by-category/) provide quick lookups organized by analysis goal, and the [distribution explorer](/eda/distributions/normal/) is useful for comparing distributional fits and understanding parameter sensitivity.
+For experienced practitioners, the [reference tables](/eda/reference/techniques-by-category/) provide quick lookups organized by analysis goal, and the [distribution explorer](/eda/distributions/) is useful for comparing distributional fits and understanding parameter sensitivity.
 
-The [EDA Visual Encyclopedia](/eda/) puts every tool from the NIST handbook at your fingertips, interactive, visual, and immediately applicable. Whether you are a data scientist validating a training dataset, a quality engineer analyzing manufacturing measurements, or a student learning statistics for the first time, the techniques in this reference will make your analysis more rigorous and your conclusions more trustworthy.
+The [EDA Visual Encyclopedia](/eda/) puts every tool from the NIST handbook at your fingertips: interactive, visual, and immediately applicable. Whether you are a data scientist validating a training dataset, a quality engineer analyzing manufacturing measurements, or a student learning statistics for the first time, the techniques in this reference will make your analysis more rigorous and your conclusions more trustworthy.
 
 Explore the full [EDA Visual Encyclopedia](/eda/) to see all 90+ pages in action.

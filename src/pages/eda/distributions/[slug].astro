@@ -13,6 +13,13 @@ import { generateDistributionCurve } from '../../../lib/eda/svg-generators/distr
 import { distributionUrl } from '../../../lib/eda/routes';
 import { isDiscrete } from '../../../lib/eda/math/distribution-math';
 
+/** Replace $...$ delimiters with KaTeX inline HTML at build time */
+function renderInlineMath(text: string): string {
+  return text.replace(/\$([^$]+)\$/g, (_, tex) =>
+    katex.renderToString(tex, { displayMode: false, throwOnError: false })
+  );
+}
+
 export async function getStaticPaths() {
   const distributions = await getCollection('edaDistributions');
   const distMap = new Map(distributions.map(d => [d.data.slug, d.data]));
@@ -70,6 +77,12 @@ const varianceHtml = katex.renderToString(distribution.variance, {
   throwOnError: false,
 });
 
+// Pre-render parameter symbols to KaTeX HTML for the client-side explorer
+const parametersWithHtml = distribution.parameters.map((p: { name: string; symbol: string; min: number; max: number; default: number; step: number }) => ({
+  ...p,
+  symbolHtml: katex.renderToString(p.symbol, { displayMode: false, throwOnError: false }),
+}));
+
 const pdfLabel = discrete ? 'Probability Mass Function' : 'Probability Density Function';
 ---
 
@@ -103,7 +116,7 @@ const pdfLabel = discrete ? 'Probability Mass Function' : 'Probability Density F
       <DistributionExplorer
         client:visible
         distributionId={distribution.id}
-        parameters={distribution.parameters}
+        parameters={parametersWithHtml}
         title={distribution.title}
         isDiscrete={discrete}
       />
@@ -146,7 +159,7 @@ const pdfLabel = discrete ? 'Probability Mass Function' : 'Probability Density F
   <Fragment slot="description">
     <section class="prose-section mt-8">
       <h2 class="text-xl font-heading font-bold mb-3">Overview</h2>
-      <p class="text-[var(--color-text-secondary)] leading-relaxed">{distribution.description}</p>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(distribution.description)} />
     </section>
   </Fragment>
 </DistributionPage>

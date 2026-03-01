@@ -46,6 +46,9 @@ export interface TechniqueContent {
   /** Slugs of related EDA case-study pages */
   caseStudySlugs?: string[];
 
+  /** Optional SVG anatomy diagram rendered in the "What It Is" section */
+  anatomyDiagram?: string;
+
   /** Worked examples showing the technique applied to real data */
   examples?: Array<{
     /** Short title for the example */

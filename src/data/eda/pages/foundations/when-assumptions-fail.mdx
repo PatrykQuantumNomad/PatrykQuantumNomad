@@ -1,44 +1,107 @@
 ---
 title: "When Assumptions Fail"
 description: "Understand the consequences when underlying statistical assumptions are violated and how non-compliance affects the validity of analysis results"
-section: "1.2.6"
+section: "1.2.5"
 category: "foundations"
-nistSection: "1.2.6 Consequences of Non-Compliance"
+nistSection: "1.2.5 Consequences"
 ---
+
+import InlineMath from '../../../../components/eda/InlineMath.astro';
 
 ## Consequences of Assumption Violations
 
 When the [four underlying assumptions](/eda/foundations/assumptions/) of a statistical analysis are violated, the consequences range from mild inaccuracy to completely misleading conclusions. Section 1.2.5 of the NIST/SEMATECH Engineering Statistics Handbook addresses this directly: understanding what happens when assumptions fail is just as important as checking them.
 
-Not all violations are equally severe. A slight departure from normality in a large sample may have negligible practical impact, while even a mild autocorrelation in a small sample can dramatically distort confidence intervals and p-values. The analyst must judge both the nature of the violation and its magnitude before deciding how to proceed.
+The handbook frames assumption-testing positively — as a framework for learning about the process. Assumption-testing promotes insight into important aspects of the process that may not have surfaced otherwise. The primary goal is to have correct, validated, and complete scientific and engineering conclusions flowing from the analysis.
 
-## Common Violations and Their Effects
+The four underlying assumptions are:
 
-### Non-Fixed Location (Drifting Mean)
+1. Random drawings (randomness)
+2. Fixed location
+3. Fixed variation
+4. Fixed distribution
 
-When the process mean shifts over time, standard estimators of the mean are still unbiased but they no longer describe a single, stable population. Confidence intervals become meaningless because they describe a target that is moving. Hypothesis tests may fail to detect real differences (or detect spurious ones) because the variability attributed to random error actually includes systematic drift.
+This ordering follows the structure of Section 1.2.5, which addresses consequences in subsections 1.2.5.1 through 1.2.5.4.
+
+## 1. Consequences of Non-Randomness (Section 1.2.5.1)
+
+The randomness assumption is the most critical but the least tested.
+
+If the randomness assumption does not hold, then:
+
+1. All of the usual statistical tests are invalid.
+2. The calculated uncertainties for commonly used statistics become meaningless.
+3. The calculated minimal sample size required for a pre-specified tolerance becomes meaningless.
+4. The simple model <InlineMath tex="y = \text{constant} + \text{error}" /> becomes invalid.
+5. The parameter estimates become suspect and non-supportable.
+
+**Autocorrelation-specific consequences.** One specific and common type of non-randomness is autocorrelation — the correlation between <InlineMath tex="Y_t" /> and <InlineMath tex="Y_{t-k}" />, where <InlineMath tex="k" /> is an integer that defines the lag. That is, autocorrelation is a time-dependent non-randomness, meaning the value of the current point is highly dependent on the previous point (if <InlineMath tex="k = 1" />) or the point <InlineMath tex="k" /> steps ago. If the data are not random due to autocorrelation, then:
+
+1. Adjacent data values may be related.
+2. There may not be <InlineMath tex="n" /> independent snapshots of the phenomenon under study.
+3. There may be undetected "junk" outliers.
+4. There may be undetected "information-rich" outliers.
+
+**Detection:** Structure in the [lag plot](/eda/techniques/lag-plot/); significant spikes in the [autocorrelation plot](/eda/techniques/autocorrelation-plot/).
+
+## 2. Consequences of Non-Fixed Location (Section 1.2.5.2)
+
+If the [run sequence plot](/eda/techniques/run-sequence-plot/) does not support the assumption of fixed location, then:
+
+1. The location may be drifting.
+2. The single location estimate may be meaningless (if the process is drifting).
+3. The choice of location estimator (e.g., the sample mean) may be sub-optimal.
+4. The usual formula for the uncertainty of the mean may be invalid and the numerical value optimistically small.
+5. The location estimate may be poor.
+6. The location estimate may be biased.
 
 **Detection:** A trend or step change in the [run sequence plot](/eda/techniques/run-sequence-plot/).
 
-### Non-Fixed Variation (Changing Spread)
+## 3. Consequences of Non-Fixed Variation (Section 1.2.5.3)
 
-When the variance changes over time or across groups, ordinary least squares regression assigns equal weight to all observations, even though some carry more information than others. Standard errors computed under constant-variance assumptions will be wrong, and confidence intervals will have incorrect coverage.
+If the [run sequence plot](/eda/techniques/run-sequence-plot/) does not support the assumption of fixed variation, then:
 
-**Detection:** A widening or narrowing pattern in the [run sequence plot](/eda/techniques/run-sequence-plot/); formal testing via [Bartlett's test](/eda/quantitative/bartletts-test/) or the [Levene test](/eda/quantitative/levene-test/).
+1. The variation may be drifting.
+2. The single variation estimate may be meaningless (if the process variation is drifting).
+3. The variation estimate may be poor.
+4. The variation estimate may be biased.
 
-### Non-Randomness (Autocorrelation)
+**Detection:** A widening or narrowing pattern in the [run sequence plot](/eda/techniques/run-sequence-plot/).
 
-Serial dependence is perhaps the most dangerous violation because it directly attacks the standard error formulas that underpin all classical inference. Positive autocorrelation causes the effective sample size to be much smaller than the nominal sample size, which means standard errors are underestimated, confidence intervals are too narrow, and hypothesis tests reject the null hypothesis far more often than the stated significance level.
+## 4. Consequences Related to Distributional Assumptions (Section 1.2.5.4)
 
-**Detection:** Structure in the [lag plot](/eda/techniques/lag-plot/); significant spikes in the [autocorrelation plot](/eda/techniques/autocorrelation-plot/); formal testing via the [runs test](/eda/quantitative/runs-test/) or [autocorrelation statistic](/eda/quantitative/autocorrelation/).
+The variability and noisiness of the mean as a location estimator are intrinsically linked with the underlying distribution of the data. For certain distributions, the mean is a poor choice. For any given distribution, there exists an optimal choice — the estimator with minimum variability. This optimal choice may be the median, the midrange, the midmean, the mean, or something else. The implication is to **estimate the distribution first**, and then — based on the distribution — **choose the optimal estimator**. The resulting parameter estimators will have less variability than if this approach is not followed.
 
-### Non-Normal Distribution
+Other consequences that flow from problems with distributional assumptions are organized into three categories:
 
-Many classical procedures (t-tests, F-tests, ANOVA) assume that the data -- or the residuals from a fitted model -- follow a normal distribution. Moderate departures from normality have limited impact in large samples thanks to the Central Limit Theorem. However, heavy tails inflate the variance of the sample mean, skewness biases confidence intervals, and extreme outliers can dominate least-squares estimates.
+**Distribution:**
 
-**Detection:** Curvature in the [normal probability plot](/eda/techniques/normal-probability-plot/); elevated [skewness or kurtosis](/eda/quantitative/skewness-kurtosis/); formal testing via the [Anderson-Darling test](/eda/quantitative/anderson-darling/) or [Kolmogorov-Smirnov test](/eda/quantitative/kolmogorov-smirnov/).
+1. The distribution may be changing.
+2. The single distribution estimate may be meaningless (if the process distribution is changing).
+3. The distribution may be markedly non-normal.
+4. The distribution may be unknown.
+5. The true probability distribution for the error may remain unknown.
+
+**Model:**
+
+1. The model may be changing.
+2. The single model estimate may be meaningless.
+3. The default model <InlineMath tex="y = \text{constant} + \text{error}" /> may be invalid.
+4. If the default model is insufficient, information about a better model may remain undetected.
+5. A poor deterministic model may be fit.
+6. Information about an improved model may go undetected.
+
+**Process:**
+
+1. The process may be out-of-control.
+2. The process may be unpredictable.
+3. The process may be un-modelable.
+
+**Detection:** Curvature in the [normal probability plot](/eda/techniques/normal-probability-plot/); formal testing via the [Anderson-Darling test](/eda/quantitative/anderson-darling/) or [Kolmogorov-Smirnov test](/eda/quantitative/kolmogorov-smirnov/).
 
 ## Remedial Actions
+
+The following remedial strategies are general statistical practice and are not part of Section 1.2.5, which covers only consequences.
 
 ### Data Transformations
 
@@ -54,23 +117,12 @@ When the distributional assumption cannot be rescued by transformation, non-para
 
 ### Time-Series Methods
 
-When randomness is violated because the data exhibit autocorrelation, time-series methods -- autoregressive models, moving-average models, and their ARIMA generalizations -- explicitly model the dependence structure. Alternatively, the analyst can subsample the data at intervals large enough to achieve approximate independence.
-
-## When to Proceed Despite Violations
-
-Not every violation requires remedial action. The decision depends on:
-
-- **Severity of the violation.** A slight departure from normality in a sample of 500 observations is far less concerning than the same departure in a sample of 15.
-- **Robustness of the procedure.** Some methods (e.g., the two-sample t-test with equal sample sizes) are quite robust to moderate non-normality. Others (e.g., the chi-square variance test) are extremely sensitive.
-- **Purpose of the analysis.** If the goal is rough characterization rather than precise inference, mild violations may be acceptable.
-
-The Handbook recommends: when in doubt, apply both the standard method and a robust alternative. If they agree, the violation is likely inconsequential. If they disagree, investigate further.
+When randomness is violated because the data exhibit autocorrelation, time-series methods — autoregressive models, moving-average models, and their ARIMA generalizations — explicitly model the dependence structure. Alternatively, the analyst can subsample the data at intervals large enough to achieve approximate independence.
 
 ### Cross-References
 
-- [Skewness and Kurtosis](/eda/quantitative/skewness-kurtosis/) -- quantifying distributional shape departures
-- [Anderson-Darling Test](/eda/quantitative/anderson-darling/) -- formal normality test
-- [Kolmogorov-Smirnov Test](/eda/quantitative/kolmogorov-smirnov/) -- distribution comparison test
-- [Box-Cox Normality Plot](/eda/techniques/box-cox-normality/) -- optimal power transformation selection
-- [Underlying Assumptions](/eda/foundations/assumptions/) -- the four assumptions and how to check them
-- [The 4-Plot](/eda/foundations/the-4-plot/) -- the diagnostic display that reveals violations
+- [Underlying Assumptions](/eda/foundations/assumptions/) — the four assumptions and how to check them
+- [The 4-Plot](/eda/foundations/the-4-plot/) — the diagnostic display that reveals violations
+- [Box-Cox Normality Plot](/eda/techniques/box-cox-normality/) — optimal power transformation selection
+- [Anderson-Darling Test](/eda/quantitative/anderson-darling/) — formal normality test
+- [Kolmogorov-Smirnov Test](/eda/quantitative/kolmogorov-smirnov/) — distribution comparison test

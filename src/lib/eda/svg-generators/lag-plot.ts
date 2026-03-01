@@ -1,6 +1,7 @@
 /**
  * Lag plot SVG generator for autocorrelation pattern detection.
- * Plots Y(i) vs Y(i+k) to reveal serial dependence structure.
+ * Plots Y(i-k) on horizontal axis vs Y(i) on vertical axis (NIST convention)
+ * to reveal serial dependence structure.
  */
 import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
@@ -39,7 +40,7 @@ export function generateLagPlot(options: LagPlotOptions): string {
     );
   }
 
-  // Create lag pairs: (data[i], data[i + lag])
+  // Create lag pairs: x = Y(i-k) (lagged), y = Y(i) (current) per NIST convention
   const pairs: { x: number; y: number }[] = [];
   for (let i = 0; i < data.length - lag; i++) {
     pairs.push({ x: data[i], y: data[i + lag] });
@@ -81,9 +82,9 @@ export function generateLagPlot(options: LagPlotOptions): string {
     )
     .join('\n');
 
-  // Labels
-  const xLabel = `Y(i)`;
-  const yLabel = `Y(i+${lag})`;
+  // Labels — NIST convention: horizontal = Y(i-k), vertical = Y(i)
+  const xLabel = lag === 1 ? `Y(i-1)` : `Y(i-${lag})`;
+  const yLabel = `Y(i)`;
 
   return (
     svgOpen(

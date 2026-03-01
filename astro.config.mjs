@@ -13,14 +13,13 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://patrykgolabek.dev',
   output: 'static',
+  trailingSlash: 'always',
   integrations: [expressiveCode(), mdx(), tailwind(), sitemap({
-    customPages: [
-      'https://networking-tools.patrykgolabek.dev/',
-      'https://financial-data-extractor.patrykgolabek.dev/',
-      'https://jobflow.patrykgolabek.dev/',
-      'https://kubert-assistant-lite.patrykgolabek.dev/',
-      'https://webinar-slack-bot.patrykgolabek.dev/',
-    ],
+    filter: (page) => !page.includes('/404'),
+    serialize(item) {
+      item.lastmod = new Date().toISOString();
+      return item;
+    },
   }), indexNow(), react()],
   markdown: {
     remarkPlugins: [remarkReadingTime, remarkMath],

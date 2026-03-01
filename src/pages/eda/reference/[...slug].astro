@@ -27,6 +27,11 @@ const slug = page.id.replace('reference/', '');
 <EDALayout
   title={`${page.data.title} | EDA Visual Encyclopedia`}
   description={page.data.description}
+  ogImage={`/open-graph/eda/reference/${slug}.png`}
+  ogImageAlt={`${page.data.title} — EDA Visual Encyclopedia`}
+  ogType="article"
+  publishedDate={new Date('2026-02-25')}
+  tags={['eda', 'statistics', 'reference']}
 >
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },

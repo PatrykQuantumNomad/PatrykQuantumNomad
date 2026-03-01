@@ -15,11 +15,12 @@ import {
   generateAutocorrelationPlot,
   generateSpectralPlot,
 } from '../../lib/eda/svg-generators/index';
+import { renderTechniquePlot } from '../../lib/eda/technique-renderer';
 
 type PlotType =
-  | '4-plot' | 'run-sequence' | 'lag' | 'histogram'
+  | '4-plot' | 'run-sequence' | 'lag' | 'histogram' | 'histogram-normal'
   | 'normal-probability' | 'uniform-probability'
-  | 'autocorrelation' | 'spectral';
+  | 'autocorrelation' | 'spectral' | 'bootstrap';
 
 interface Props {
   type: PlotType;
@@ -74,6 +75,16 @@ switch (type) {
       yLabel: 'Frequency',
     });
     break;
+  case 'histogram-normal':
+    svg = generateHistogram({
+      data: uniformRandom,
+      showNormalPDF: true,
+      config: singleConfig,
+      title: 'Histogram with Normal PDF Overlay',
+      xLabel: 'Value',
+      yLabel: 'Frequency',
+    });
+    break;
   case 'normal-probability':
     svg = generateProbabilityPlot({
       data: uniformRandom,
@@ -107,6 +118,9 @@ switch (type) {
       title: 'Spectral Plot',
     });
     break;
+  case 'bootstrap':
+    svg = renderTechniquePlot('bootstrap-plot');
+    break;
 }
 
 const defaultCaptions: Record<PlotType, string> = {
@@ -114,10 +128,12 @@ const defaultCaptions: Record<PlotType, string> = {
   'run-sequence': 'Run sequence plot of the uniform random numbers showing a stable band between 0 and 1 with no trend or shift.',
   'lag': 'Lag-1 plot showing a structureless square cloud — characteristic of independent, uniformly distributed observations.',
   'histogram': 'Histogram with uniform PDF overlay showing the expected frequency under U(0,1) against the observed data. The flat histogram shape matches the uniform distribution.',
+  'histogram-normal': 'Histogram with overlaid normal PDF curve. The flat rectangular histogram is a poor fit to the bell-shaped normal distribution.',
   'normal-probability': 'Normal probability plot showing a pronounced S-shaped curve, indicating departure from normality (light-tailed, platykurtic distribution).',
   'uniform-probability': 'Uniform probability plot showing a nearly linear pattern, confirming an excellent fit to the uniform distribution.',
   'autocorrelation': 'Autocorrelation plot with all coefficients at lags 1 through 50 within the 95% confidence bands, confirming independence.',
   'spectral': 'Spectral plot showing a flat power spectrum with no dominant peaks, consistent with white noise.',
+  'bootstrap': 'Bootstrap plots for mean, median, and midrange showing sampling variability (top) and distributions (bottom). The midrange has the smallest variance and is the superior location estimator for uniform data.',
 };
 
 const figCaption = caption ?? defaultCaptions[type];

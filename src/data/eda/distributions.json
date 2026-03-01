@@ -27,7 +27,7 @@
     "variance": "\\sigma^2",
     "relatedDistributions": ["t-distribution", "chi-square", "lognormal"],
     "nistSection": "1.3.6.6.1 Normal Distribution",
-    "description": "The normal (Gaussian) distribution is the most important continuous probability distribution, characterized by its symmetric bell-shaped curve. It is fully defined by its mean and standard deviation and arises naturally via the central limit theorem."
+    "description": "The normal (Gaussian) distribution is the most important continuous probability distribution, characterized by its symmetric bell-shaped curve. It is fully defined by its mean $\\mu$ and standard deviation $\\sigma$ and arises naturally via the central limit theorem."
   },
   {
     "id": "uniform",
@@ -57,7 +57,7 @@
     "variance": "\\frac{(b - a)^2}{12}",
     "relatedDistributions": ["beta", "normal"],
     "nistSection": "1.3.6.6.2 Uniform Distribution",
-    "description": "The uniform distribution assigns equal probability to all values within a specified interval. It is the simplest continuous distribution and serves as a baseline for random number generation."
+    "description": "The uniform distribution assigns equal probability to all values within a specified interval $[a, b]$. It is the simplest continuous distribution and serves as a baseline for random number generation."
   },
   {
     "id": "cauchy",
@@ -87,7 +87,7 @@
     "variance": "\\text{undefined}",
     "relatedDistributions": ["t-distribution", "normal"],
     "nistSection": "1.3.6.6.3 Cauchy Distribution",
-    "description": "The Cauchy distribution is a symmetric distribution with heavy tails. Its mean and variance are undefined, making it a canonical example of a pathological distribution in statistics."
+    "description": "The Cauchy distribution is a symmetric distribution with heavy tails, centred at location $x_0$ with scale $\\gamma$. Its mean and variance are undefined, making it a canonical example of a pathological distribution in statistics."
   },
   {
     "id": "t-distribution",
@@ -109,7 +109,7 @@
     "variance": "\\frac{\\nu}{\\nu - 2} \\;(\\nu > 2)",
     "relatedDistributions": ["normal", "cauchy", "f-distribution"],
     "nistSection": "1.3.6.6.4 Student's t-Distribution",
-    "description": "Student's t-distribution arises when estimating the mean of a normally distributed population with small sample sizes. It approaches the normal distribution as degrees of freedom increase."
+    "description": "Student's $t$-distribution arises when estimating the mean of a normally distributed population with small sample sizes. It has $\\nu$ degrees of freedom and approaches the normal distribution as $\\nu \\to \\infty$."
   },
   {
     "id": "f-distribution",
@@ -139,7 +139,7 @@
     "variance": "\\frac{2d_2^2(d_1+d_2-2)}{d_1(d_2-2)^2(d_2-4)} \\;(d_2 > 4)",
     "relatedDistributions": ["chi-square", "t-distribution", "beta"],
     "nistSection": "1.3.6.6.5 F-Distribution",
-    "description": "The F-distribution is the ratio of two scaled chi-squared variables. It is used in analysis of variance (ANOVA) and for comparing variances of two populations."
+    "description": "The $F$-distribution is the ratio of two scaled chi-squared variables with $d_1$ and $d_2$ degrees of freedom. It is used in analysis of variance (ANOVA) and for comparing variances of two populations."
   },
   {
     "id": "chi-square",
@@ -161,7 +161,7 @@
     "variance": "2k",
     "relatedDistributions": ["normal", "gamma", "f-distribution"],
     "nistSection": "1.3.6.6.6 Chi-Square Distribution",
-    "description": "The chi-square distribution with k degrees of freedom is the distribution of a sum of squares of k independent standard normal random variables. It is fundamental to hypothesis testing and confidence interval estimation."
+    "description": "The chi-square distribution with $k$ degrees of freedom is the distribution of a sum of squares of $k$ independent standard normal random variables. It is fundamental to hypothesis testing and confidence interval estimation."
   },
   {
     "id": "exponential",
@@ -183,7 +183,7 @@
     "variance": "\\frac{1}{\\lambda^2}",
     "relatedDistributions": ["gamma", "weibull", "poisson"],
     "nistSection": "1.3.6.6.7 Exponential Distribution",
-    "description": "The exponential distribution models the time between events in a Poisson process. It is a one-parameter distribution commonly used for reliability analysis and waiting time problems."
+    "description": "The exponential distribution models the time between events in a Poisson process with rate $\\lambda$. It is a one-parameter distribution commonly used for reliability analysis and waiting time problems."
   },
   {
     "id": "weibull",
@@ -213,7 +213,7 @@
     "variance": "\\beta^2\\left[\\Gamma\\!\\left(1+\\frac{2}{\\alpha}\\right) - \\Gamma^2\\!\\left(1+\\frac{1}{\\alpha}\\right)\\right]",
     "relatedDistributions": ["exponential", "gamma", "extreme-value"],
     "nistSection": "1.3.6.6.8 Weibull Distribution",
-    "description": "The Weibull distribution is a versatile distribution used in reliability engineering and failure analysis. It can model increasing, decreasing, or constant failure rates depending on its shape parameter."
+    "description": "The Weibull distribution is a versatile distribution used in reliability engineering and failure analysis. It can model increasing ($\\alpha > 1$), decreasing ($\\alpha < 1$), or constant ($\\alpha = 1$) failure rates depending on its shape parameter $\\alpha$."
   },
   {
     "id": "lognormal",
@@ -243,7 +243,7 @@
     "variance": "(e^{\\sigma^2} - 1)\\,e^{2\\mu + \\sigma^2}",
     "relatedDistributions": ["normal", "weibull", "gamma"],
     "nistSection": "1.3.6.6.9 Lognormal Distribution",
-    "description": "The lognormal distribution describes a random variable whose logarithm is normally distributed. It is commonly used to model positive-valued data with right skew, such as income, stock prices, and particle sizes."
+    "description": "The lognormal distribution describes a random variable $X$ whose logarithm $\\ln X$ is normally distributed with parameters $\\mu$ and $\\sigma$. It is commonly used to model positive-valued data with right skew, such as income, stock prices, and particle sizes."
   },
   {
     "id": "fatigue-life",
@@ -273,7 +273,7 @@
     "variance": "\\beta^2 \\alpha^2\\left(1 + \\frac{5\\alpha^2}{4}\\right)",
     "relatedDistributions": ["lognormal", "weibull", "gamma"],
     "nistSection": "1.3.6.6.10 Birnbaum-Saunders (Fatigue Life) Distribution",
-    "description": "The Birnbaum-Saunders distribution models fatigue life of materials subject to cyclic stress. It is derived from a physical crack-growth model and is widely used in reliability engineering."
+    "description": "The Birnbaum-Saunders distribution models fatigue life of materials subject to cyclic stress, with shape $\\alpha$ and scale $\\beta$. It is derived from a physical crack-growth model and is widely used in reliability engineering."
   },
   {
     "id": "gamma",
@@ -303,7 +303,7 @@
     "variance": "\\alpha\\beta^2",
     "relatedDistributions": ["chi-square", "exponential", "beta"],
     "nistSection": "1.3.6.6.11 Gamma Distribution",
-    "description": "The gamma distribution is a two-parameter family of continuous distributions that generalizes the exponential and chi-square distributions. It is used to model waiting times, rainfall amounts, and insurance claims."
+    "description": "The gamma distribution is a two-parameter family of continuous distributions with shape $\\alpha$ and scale $\\beta$ that generalizes the exponential and chi-square distributions. It is used to model waiting times, rainfall amounts, and insurance claims."
   },
   {
     "id": "double-exponential",
@@ -333,7 +333,7 @@
     "variance": "2\\beta^2",
     "relatedDistributions": ["normal", "exponential", "cauchy"],
     "nistSection": "1.3.6.6.12 Double Exponential Distribution",
-    "description": "The double exponential (Laplace) distribution is a symmetric distribution with heavier tails than the normal distribution. It is the distribution of the difference of two independent exponential random variables."
+    "description": "The double exponential (Laplace) distribution is a symmetric distribution centred at $\\mu$ with scale $\\beta$, having heavier tails than the normal distribution. It is the distribution of the difference of two independent exponential random variables."
   },
   {
     "id": "power-normal",
@@ -349,13 +349,13 @@
         "step": 0.1
       }
     ],
-    "pdfFormula": "f(x) = p\\,\\phi(x)\\left[\\Phi(x)\\right]^{p-1}",
-    "cdfFormula": "F(x) = \\left[\\Phi(x)\\right]^p",
+    "pdfFormula": "f(x) = p\\,\\phi(x)\\left[\\Phi(-x)\\right]^{p-1}",
+    "cdfFormula": "F(x) = 1 - \\left[\\Phi(-x)\\right]^p",
     "mean": "\\text{no closed form}",
     "variance": "\\text{no closed form}",
     "relatedDistributions": ["normal", "power-lognormal"],
     "nistSection": "1.3.6.6.13 Power Normal Distribution",
-    "description": "The power normal distribution is a family of distributions obtained by raising the standard normal CDF to a power p. When p equals 1 it reduces to the standard normal distribution."
+    "description": "The power normal distribution is used in reliability analysis to model the minimum of $p$ independent normal lifetimes. When $p = 1$ it reduces to the standard normal distribution."
   },
   {
     "id": "power-lognormal",
@@ -379,13 +379,13 @@
         "step": 0.1
       }
     ],
-    "pdfFormula": "f(x) = \\frac{p}{x\\sigma}\\,\\phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\left[\\Phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\right]^{p-1}, \\quad x > 0",
-    "cdfFormula": "F(x) = \\left[\\Phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\right]^p",
+    "pdfFormula": "f(x) = \\frac{p}{x\\sigma}\\,\\phi\\!\\left(\\frac{\\ln x}{\\sigma}\\right)\\left[\\Phi\\!\\left(-\\frac{\\ln x}{\\sigma}\\right)\\right]^{p-1}, \\quad x > 0",
+    "cdfFormula": "F(x) = 1 - \\left[\\Phi\\!\\left(-\\frac{\\ln x}{\\sigma}\\right)\\right]^p",
     "mean": "\\text{no closed form}",
     "variance": "\\text{no closed form}",
     "relatedDistributions": ["lognormal", "power-normal", "weibull"],
     "nistSection": "1.3.6.6.14 Power Lognormal Distribution",
-    "description": "The power lognormal distribution generalizes the lognormal distribution by raising its CDF to a power p. It is used in reliability analysis when the lognormal model needs additional shape flexibility."
+    "description": "The power lognormal distribution generalizes the lognormal distribution for reliability analysis, modeling the minimum of $p$ independent lognormal lifetimes with scale $\\sigma$. It provides additional shape flexibility beyond the lognormal."
   },
   {
     "id": "tukey-lambda",
@@ -407,7 +407,7 @@
     "variance": "\\frac{2}{\\lambda^2}\\left(\\frac{1}{1+2\\lambda} - \\frac{\\Gamma(\\lambda+1)^2}{\\Gamma(2\\lambda+2)}\\right)",
     "relatedDistributions": ["normal", "cauchy", "uniform"],
     "nistSection": "1.3.6.6.15 Tukey-Lambda Distribution",
-    "description": "The Tukey-Lambda distribution is a symmetric family defined by its quantile function. By varying the shape parameter lambda, it can approximate the normal, logistic, Cauchy, and uniform distributions."
+    "description": "The Tukey-Lambda distribution is a symmetric family defined by its quantile function. By varying the shape parameter $\\lambda$, it can approximate the normal, logistic, Cauchy, and uniform distributions."
   },
   {
     "id": "extreme-value",
@@ -437,7 +437,7 @@
     "variance": "\\frac{\\pi^2\\beta^2}{6}",
     "relatedDistributions": ["weibull", "normal", "double-exponential"],
     "nistSection": "1.3.6.6.16 Extreme Value Type I Distribution",
-    "description": "The extreme value type I (Gumbel) distribution models the maximum or minimum of a large number of independent samples. It is widely used in hydrology, meteorology, and structural engineering for modeling extreme events."
+    "description": "The extreme value type I (Gumbel) distribution models the maximum or minimum of a large number of independent samples, with location $\\mu$ and scale $\\beta$. It is widely used in hydrology, meteorology, and structural engineering for modeling extreme events."
   },
   {
     "id": "beta",
@@ -467,7 +467,7 @@
     "variance": "\\frac{\\alpha\\beta}{(\\alpha+\\beta)^2(\\alpha+\\beta+1)}",
     "relatedDistributions": ["uniform", "gamma", "binomial"],
     "nistSection": "1.3.6.6.17 Beta Distribution",
-    "description": "The beta distribution is a continuous distribution defined on the interval [0, 1]. It is commonly used to model proportions, probabilities, and random variables with bounded support."
+    "description": "The beta distribution is a continuous distribution defined on the interval $[0,\\,1]$ with shape parameters $\\alpha$ and $\\beta$. It is commonly used to model proportions, probabilities, and random variables with bounded support."
   },
   {
     "id": "binomial",
@@ -497,7 +497,7 @@
     "variance": "np(1-p)",
     "relatedDistributions": ["poisson", "normal", "beta"],
     "nistSection": "1.3.6.6.18 Binomial Distribution",
-    "description": "The binomial distribution models the number of successes in a fixed number of independent Bernoulli trials. It is the foundation for binary outcome analysis and quality control sampling."
+    "description": "The binomial distribution models the number of successes in $n$ independent Bernoulli trials, each with success probability $p$. It is the foundation for binary outcome analysis and quality control sampling."
   },
   {
     "id": "poisson",
@@ -519,6 +519,6 @@
     "variance": "\\lambda",
     "relatedDistributions": ["binomial", "exponential", "normal"],
     "nistSection": "1.3.6.6.19 Poisson Distribution",
-    "description": "The Poisson distribution models the number of events occurring in a fixed interval of time or space when events occur independently at a constant average rate. It is used for count data in fields ranging from telecommunications to epidemiology."
+    "description": "The Poisson distribution models the number of events occurring in a fixed interval of time or space when events occur independently at a constant average rate $\\lambda$. It is used for count data in fields ranging from telecommunications to epidemiology."
   }
 ]

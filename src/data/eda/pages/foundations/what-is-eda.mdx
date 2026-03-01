@@ -8,45 +8,88 @@ nistSection: "1.1.1-1.1.4 EDA Introduction"
 
 ## What is Exploratory Data Analysis?
 
-Exploratory Data Analysis (EDA) is an approach to data analysis that prioritizes open-ended investigation over rigid hypothesis testing. Rather than beginning with a preconceived model and asking whether the data fit it, EDA encourages the analyst to let the data reveal its own structure. The approach was pioneered by John Tukey in the 1970s and formalized by the NIST/SEMATECH Engineering Statistics Handbook as a complement to classical and Bayesian methods (Section 1.1.1).
+Exploratory Data Analysis (EDA) is an approach and philosophy for data analysis that employs a variety of techniques (mostly graphical) to:
 
-At its core, EDA rests on a simple insight: before you can model data correctly, you must understand it. That means examining distributions, spotting outliers, detecting patterns, and questioning every assumption that a formal analysis would take for granted. The primary tools of EDA are graphical -- [histograms](/eda/techniques/histogram/), [scatter plots](/eda/techniques/scatter-plot/), [box plots](/eda/techniques/box-plot/), and probability plots -- supported by lightweight quantitative summaries such as [measures of location](/eda/quantitative/measures-of-location/) and [measures of scale](/eda/quantitative/measures-of-scale/).
+1. Maximize insight into a data set
+2. Uncover underlying structure
+3. Extract important variables
+4. Detect outliers and anomalies
+5. Test underlying assumptions
+6. Develop parsimonious models
+7. Determine optimal factor settings
+
+The approach is precisely that: not a set of techniques, but an attitude and philosophy about how a data analysis should be carried out (Section 1.1.1).
+
+EDA is not identical to statistical graphics, although the two terms are used almost interchangeably. Statistical graphics is a collection of techniques — all graphically based and all focusing on one data characterization aspect. EDA encompasses a larger venue: it is a philosophy as to how we dissect a data set, what we look for, how we look, and how we interpret. EDA heavily uses the collection of techniques we call "statistical graphics," but it is not identical to statistical graphics per se (Section 1.1.1).
+
+The seminal work in EDA is *Exploratory Data Analysis*, Tukey (1977). Over the years it has benefitted from other noteworthy publications such as *Data Analysis and Regression*, Mosteller and Tukey (1977); *Interactive Data Analysis*, Hoaglin (1977); and *The ABC's of EDA*, Velleman and Hoaglin (1981). The approach is described in detail in the NIST/SEMATECH Engineering Statistics Handbook as a complement to classical and Bayesian methods.
 
 ## How EDA Differs from Classical and Bayesian Analysis
 
-Classical statistical analysis, as described in Section 1.1.2, follows a rigid sequence: state a model, derive the probability distribution, apply the analysis, and draw conclusions. The model is chosen up front, and the data are used to estimate its parameters. The strength of this approach is mathematical rigor; its weakness is that the conclusions are only as good as the initial model choice.
+<img src="/images/eda-visual-encyclopedia-cover.svg" alt="EDA Visual Encyclopedia — Exploratory Data Analysis techniques including histograms, scatter plots, probability plots, and box plots" width="800" height="400" style="width:100%;height:auto;margin-bottom:1.5rem;border-radius:0.5rem;" />
 
-Bayesian analysis (Section 1.1.3) incorporates prior knowledge through a probability distribution on the parameters themselves. It updates beliefs as data arrive, producing posterior distributions rather than point estimates. While powerful, Bayesian analysis still depends on a correctly specified likelihood and a defensible prior.
+Three popular data analysis approaches exist: Classical, Exploratory (EDA), and Bayesian. All three start with a general science or engineering problem and yield science or engineering conclusions. The difference is the sequence and focus of the intermediate steps (Section 1.1.2).
 
-EDA (Section 1.1.4) takes a fundamentally different stance. It imposes no model at the start. Instead, the analyst uses a battery of graphical and quantitative techniques to discover what the data suggest. Only after this exploratory phase does model selection occur -- and the chosen model is guided by evidence rather than convention.
+The three canonical analysis sequences are:
+
+- **Classical:** Problem => Data => Model => Analysis => Conclusions
+- **EDA:** Problem => Data => Analysis => Model => Conclusions
+- **Bayesian:** Problem => Data => Model => Prior Distribution => Analysis => Conclusions
+
+The key difference is how each approach deals with the underlying model for the data. For classical analysis, the data collection is followed by the imposition of a model (normality, linearity, etc.) and the analysis, estimation, and testing that follow are focused on the parameters of that model. For EDA, the data collection is not followed by a model imposition; rather it is followed immediately by analysis with a goal of inferring what model would be appropriate. For Bayesian analysis, the analyst attempts to incorporate scientific and engineering knowledge into the analysis by imposing a data-independent distribution on the parameters of the selected model; the analysis thus consists of formally combining both the prior distribution on the parameters and the collected data to jointly make inferences and/or test assumptions about the model parameters (Section 1.1.2).
+
+In the real world, data analysts freely mix elements of all three approaches. The distinctions above are made to emphasize the major differences among them.
 
 ### When to Use Each Approach
 
 In practice, these paradigms are complementary rather than competing:
 
-- **EDA first** -- to understand the shape, spread, and quirks of your dataset before committing to a model.
-- **Classical analysis** -- when you have strong theoretical justification for a specific model and need formal inference (confidence intervals, hypothesis tests).
-- **Bayesian analysis** -- when informative prior knowledge is available and you want to quantify uncertainty through posterior distributions.
+- **EDA first** — to understand the shape, spread, and quirks of your dataset before committing to a model.
+- **Classical analysis** — when you have strong theoretical justification for a specific model and need formal inference (confidence intervals, hypothesis tests).
+- **Bayesian analysis** — when informative prior knowledge is available and you want to formally combine that prior with the collected data.
 
 A robust analysis workflow typically begins with EDA, uses its findings to inform model selection, and then applies classical or Bayesian methods for confirmatory analysis.
+
+## EDA vs. Summary Analysis
+
+Summary analysis is simply a numeric reduction of a historical data set. It is quite passive. Its focus is in the past. Quite commonly, its purpose is to simply arrive at a few key statistics (for example, mean and standard deviation) which may then either replace the data set or be added to it in the form of a summary table (Section 1.1.3).
+
+In contrast, EDA has as its broadest goal the desire to gain insight into the engineering or scientific process behind the data. Whereas summary statistics are passive and historical, EDA is active and futuristic. In an attempt to understand the process and improve it in the future, EDA uses the data as a "window" to peer into the heart of the process that generated the data. There is an archival role for summary statistics, but there is an enormously larger role for the EDA approach (Section 1.1.3).
+
+## EDA Goals
+
+The primary goal of EDA is to maximize the analyst's insight into a data set and into its underlying structure, while providing all of the specific items that an analyst would want to extract from a data set (Section 1.1.4), such as:
+
+1. A good-fitting, parsimonious model
+2. A list of outliers
+3. A sense of robustness of conclusions
+4. Estimates for parameters
+5. Uncertainties for those estimates
+6. A ranked list of important factors
+7. Conclusions as to whether individual factors are statistically significant
+8. Optimal settings
+
+These items serve as the specific targets of an analysis, but the real insight and "feel" for a data set comes as the analyst judiciously probes and explores the various subtleties of the data. That feel comes almost exclusively from the application of various graphical techniques, which serve as the window into the essence of the data. Graphics are irreplaceable — there are no quantitative analogues that will give the same insight as well-chosen graphics (Section 1.1.4).
 
 ## The EDA Philosophy
 
 Several principles distinguish the EDA mindset:
 
 - **Openness to the unexpected.** The analyst does not know in advance what the data will reveal. EDA embraces surprise rather than filtering it out.
-- **Skepticism of assumptions.** Every standard statistical procedure carries assumptions -- normality, independence, constant variance. EDA provides tools to test those assumptions before they are relied upon (see [Underlying Assumptions](/eda/foundations/assumptions/)).
+- **Skepticism of assumptions.** Every standard statistical procedure carries assumptions — normality, independence, constant variance. EDA provides tools to test those assumptions before they are relied upon (see [Underlying Assumptions](/eda/foundations/assumptions/)).
 - **Emphasis on visualization.** Numerical summaries compress data into a few numbers; graphics preserve the richness that those summaries discard (see [Role of Graphics](/eda/foundations/role-of-graphics/)).
 - **Role of judgment.** EDA is as much an art as a science. The analyst's domain knowledge, experience, and intuition are essential for interpreting what the plots and summaries reveal.
 
 ## Getting Started with EDA
 
+The primary tools of EDA are graphical — [histograms](/eda/techniques/histogram/), [scatter plots](/eda/techniques/scatter-plot/), [box plots](/eda/techniques/box-plot/), and probability plots — supported by lightweight quantitative summaries such as [measures of location](/eda/quantitative/measures-of-location/) and [measures of scale](/eda/quantitative/measures-of-scale/).
+
 A practical starting point for any new dataset is the [4-Plot](/eda/techniques/4-plot/), which simultaneously checks location stability, variation stability, randomness, and distributional shape. From there, deeper investigation can branch into specific graphical techniques such as the [run sequence plot](/eda/techniques/run-sequence-plot/) for time-dependent patterns or the [normal probability plot](/eda/techniques/normal-probability-plot/) for distributional assessment.
 
 ### Cross-References
 
-- [Histogram](/eda/techniques/histogram/) -- the most common graphical tool in EDA
-- [Measures of Location](/eda/quantitative/measures-of-location/) -- fundamental quantitative summary
-- [4-Plot](/eda/techniques/4-plot/) -- universal first-pass diagnostic
-- [The Role of Graphics](/eda/foundations/role-of-graphics/) -- why visualization is central to EDA
-- [Underlying Assumptions](/eda/foundations/assumptions/) -- the four standard assumptions that EDA helps verify
+- [Histogram](/eda/techniques/histogram/) — the most common graphical tool in EDA
+- [Measures of Location](/eda/quantitative/measures-of-location/) — fundamental quantitative summary
+- [4-Plot](/eda/techniques/4-plot/) — universal first-pass diagnostic
+- [The Role of Graphics](/eda/foundations/role-of-graphics/) — why visualization is central to EDA
+- [Underlying Assumptions](/eda/foundations/assumptions/) — the four standard assumptions that EDA helps verify

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdf8f3"/>
+      <stop offset="1" stop-color="#faf5ef"/>
+    </linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="0.4" fill="#d5ccc3"/>
+    </pattern>
+    <filter id="card" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#2c2c2c" flood-opacity="0.06"/>
+    </filter>
+    <linearGradient id="nodeProblem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffcec6"/>
+      <stop offset="1" stop-color="#ffbbb1"/>
+    </linearGradient>
+    <linearGradient id="nodeData" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd08a"/>
+      <stop offset="1" stop-color="#ffc374"/>
+    </linearGradient>
+    <linearGradient id="nodeModel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset="1" stop-color="#ffeca9"/>
+    </linearGradient>
+    <linearGradient id="nodeAnalysis" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4efc0"/>
+      <stop offset="1" stop-color="#c7e8ac"/>
+    </linearGradient>
+    <linearGradient id="nodeConclusion" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7dcdb9"/>
+      <stop offset="1" stop-color="#5abaa7"/>
+    </linearGradient>
+    <linearGradient id="nodePrior" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5a84b"/>
+      <stop offset="1" stop-color="#ef8d22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <text x="600.054" y="43.733" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="16" font-weight="700" fill="#c44b20" letter-spacing="3" style="white-space: pre; font-size: 16px;">THREE APPROACHES TO DATA ANALYSIS</text>
+  <line x1="400.475" y1="57.454" x2="800.475" y2="57.454" stroke="#e5ddd5" stroke-width="1"/>
+  <g filter="url(#card)" style="" transform="matrix(1, 0, 0, 1.034584, 0, -21.372858)">
+    <rect x="60" y="88" width="330" height="530" rx="12" fill="white" fill-opacity="0.5" stroke="#e5ddd5" stroke-width="1"/>
+  </g>
+  <text x="225" y="118" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="18" font-weight="700" fill="#333" style="white-space: pre;">Classical</text>
+  <text x="225" y="136" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="11" fill="#888" style="white-space: pre;">Hypothesis-driven</text>
+  <g filter="url(#card)" style="" transform="matrix(1, 0, 0, 1.032164, 0, -19.877073)">
+    <rect x="435" y="88" width="330" height="530" rx="12" fill="white" fill-opacity="0.5" stroke="#e5ddd5" stroke-width="1"/>
+  </g>
+  <text x="600" y="118" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="18" font-weight="700" fill="#333" style="white-space: pre;">Bayesian</text>
+  <text x="600" y="136" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="11" fill="#888" style="white-space: pre;">Prior-informed</text>
+  <g filter="url(#card)" style="" transform="matrix(1, 0, 0, 1.030416, 0, -18.797409)">
+    <rect x="810" y="88" width="330" height="530" rx="12" fill="white" fill-opacity="0.7" stroke="#c44b20" stroke-width="2"/>
+  </g>
+  <text x="975" y="118" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="18" font-weight="700" fill="#c44b20" style="white-space: pre;">EDA</text>
+  <text x="975" y="136" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="11" fill="#888" style="white-space: pre;">Data-driven</text>
+  <circle cx="225" cy="170" r="10" fill="#0c7cba"/>
+  <line x1="225" y1="180" x2="225" y2="200" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="210" y1="192" x2="240" y2="192" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="225" y1="200" x2="212" y2="218" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="225" y1="200" x2="238" y2="218" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="225" y1="224" x2="225" y2="248" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="225,255 220,245 230,245" fill="#5e5e5e"/>
+  <ellipse cx="225" cy="282" rx="68" ry="24" fill="url(#nodeProblem)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="225" y="287" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Problem</text>
+  <line x1="225" y1="306" x2="225" y2="330" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="225,337 220,327 230,327" fill="#5e5e5e"/>
+  <ellipse cx="225" cy="364" rx="68" ry="24" fill="url(#nodeData)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="225" y="369" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Data</text>
+  <line x1="225" y1="388" x2="225" y2="412" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="225,419 220,409 230,409" fill="#5e5e5e"/>
+  <ellipse cx="225" cy="446" rx="68" ry="24" fill="url(#nodeModel)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="225" y="451" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Model</text>
+  <line x1="225" y1="470" x2="225" y2="494" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="225,501 220,491 230,491" fill="#5e5e5e"/>
+  <ellipse cx="225" cy="528" rx="68" ry="24" fill="url(#nodeAnalysis)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="225" y="533" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Analysis</text>
+  <line x1="225" y1="552" x2="225" y2="566" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="225,573 220,563 230,563" fill="#5e5e5e"/>
+  <ellipse cx="225" cy="590" rx="68" ry="18" fill="url(#nodeConclusion)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="225" y="595" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" font-weight="600" fill="#fff" style="white-space: pre;">Conclusions</text>
+  <circle cx="600" cy="170" r="10" fill="#0c7cba"/>
+  <line x1="600" y1="180" x2="600" y2="200" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="585" y1="192" x2="615" y2="192" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="600" y1="200" x2="587" y2="218" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="600" y1="200" x2="613" y2="218" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="600" y1="224" x2="600" y2="240" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,247 595,237 605,237" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="270" rx="68" ry="24" fill="url(#nodeProblem)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="275" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Problem</text>
+  <line x1="600" y1="294" x2="600" y2="310" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,317 595,307 605,307" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="340" rx="68" ry="24" fill="url(#nodeData)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="345" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Data</text>
+  <line x1="600" y1="364" x2="600" y2="380" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,387 595,377 605,377" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="410" rx="68" ry="24" fill="url(#nodeModel)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="415" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Model</text>
+  <line x1="600" y1="434" x2="600" y2="450" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,457 595,447 605,447" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="478" rx="68" ry="24" fill="url(#nodePrior)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="474" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="12" font-weight="600" fill="#fff" style="white-space: pre;">Prior</text>
+  <text x="600" y="488" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="12" font-weight="600" fill="#fff" style="white-space: pre;">Distribution</text>
+  <line x1="600" y1="502" x2="600" y2="515" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,522 595,512 605,512" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="542" rx="68" ry="24" fill="url(#nodeAnalysis)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="547" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Analysis</text>
+  <line x1="600" y1="566" x2="600" y2="570" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="600,577 595,567 605,567" fill="#5e5e5e"/>
+  <ellipse cx="600" cy="593" rx="68" ry="18" fill="url(#nodeConclusion)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="600" y="598" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" font-weight="600" fill="#fff" style="white-space: pre;">Conclusions</text>
+  <circle cx="975" cy="162" r="10" fill="#0c7cba"/>
+  <line x1="975" y1="172" x2="975" y2="192" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="960" y1="184" x2="990" y2="184" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="975" y1="192" x2="962" y2="210" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="975" y1="192" x2="988" y2="210" stroke="#5e5e5e" stroke-width="2"/>
+  <line x1="975" y1="216" x2="975" y2="242" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="975,249 970,239 980,239" fill="#5e5e5e"/>
+  <ellipse cx="975" cy="270" rx="68" ry="22" fill="url(#nodeProblem)" stroke="#5e5e5e" stroke-width="1.5"/>
+  <text x="975" y="275" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="600" fill="#444" style="white-space: pre;">Problem</text>
+  <line x1="975" y1="292" x2="975" y2="318" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="975,325 970,315 980,315" fill="#5e5e5e"/>
+  <ellipse cx="975" cy="350" rx="80" ry="26" fill="url(#nodeData)" stroke="#c44b20" stroke-width="2"/>
+  <text x="975" y="356" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="16" font-weight="700" fill="#444" style="white-space: pre;">Data</text>
+  <line x1="975" y1="376" x2="975" y2="400" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="975,407 970,397 980,397" fill="#5e5e5e"/>
+  <ellipse cx="975" cy="430" rx="72" ry="24" fill="url(#nodeAnalysis)" stroke="#c44b20" stroke-width="2"/>
+  <text x="975" y="435" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="14" font-weight="700" fill="#444" style="white-space: pre;">Analysis</text>
+  <line x1="975" y1="454" x2="975" y2="476" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="975,483 970,473 980,473" fill="#5e5e5e"/>
+  <ellipse cx="975" cy="502" rx="68" ry="20" fill="url(#nodeModel)" stroke="#5e5e5e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="975" y="507" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" font-weight="600" fill="#444" style="white-space: pre;">Model</text>
+  <line x1="975" y1="522" x2="975" y2="544" stroke="#5e5e5e" stroke-width="1.5"/>
+  <polygon points="975,551 970,541 980,541" fill="#5e5e5e"/>
+  <ellipse cx="975" cy="572" rx="68" ry="20" fill="url(#nodeConclusion)" stroke="#006d6d" stroke-width="1.5"/>
+  <text x="975" y="577" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" font-weight="600" fill="#fff" style="white-space: pre;">Conclusions</text>
+  <path d="M 907,562 C 858,535 858,455 903,430" fill="none" stroke="#c44b20" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="905,427 896,436 902,438" fill="#c44b20"/>
+  <text x="833.6" y="498" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="10" fill="#c44b20" font-style="italic" style="white-space: pre; font-size: 10px;">iterate</text>
+  <path d="M 28,44 L 28,24 L 53,24" fill="none" stroke="#c44b20" stroke-width="1" opacity="0.12" stroke-linecap="round"/>
+  <circle cx="95" cy="50" r="2" fill="#c44b20" opacity="0.12"/>
+  <circle cx="320" cy="78" r="1.5" fill="#006d6d" opacity="0.10"/>
+  <circle cx="710" cy="82" r="2" fill="#c44b20" opacity="0.08"/>
+  <circle cx="1100" cy="55" r="1.5" fill="#006d6d" opacity="0.10"/>
+  <circle cx="1150" cy="92" r="2" fill="#c44b20" opacity="0.07"/>
+  <circle cx="50" cy="580" r="1.5" fill="#006d6d" opacity="0.10"/>
+  <g transform="matrix(1, 0, 0, 1, 14.236884, 9.459905)">
+    <rect width="26" height="22" rx="5" fill="#c44b20"/>
+    <text x="13" y="16" text-anchor="middle" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" font-weight="700" fill="#fff" style="white-space: pre;">PG</text>
+    <text x="34" y="15" text-anchor="start" font-family="'DM Sans','Segoe UI',system-ui,sans-serif" font-size="13" fill="#999" letter-spacing="0.5" style="white-space: pre;">patrykgolabek.dev</text>
+  </g>
+</svg>

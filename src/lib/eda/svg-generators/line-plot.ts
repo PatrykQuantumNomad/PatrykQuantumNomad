@@ -27,6 +27,8 @@ export interface LinePlotOptions {
   title?: string;
   xLabel?: string;
   yLabel?: string;
+  /** Custom reference line value (overrides the default mean for run-sequence mode). */
+  refValue?: number;
 }
 
 export function generateLinePlot(options: LinePlotOptions): string {
@@ -69,6 +71,12 @@ function renderLineSeries(
 
   let [yMin, yMax] = extent(data) as [number, number];
   if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  // Extend y domain to include custom reference value when provided
+  const refVal = options.refValue ?? (mode === 'run-sequence' ? mean(data) : undefined);
+  if (refVal !== undefined) {
+    if (refVal < yMin) yMin = refVal;
+    if (refVal > yMax) yMax = refVal;
+  }
   const yScale = scaleLinear()
     .domain([yMin, yMax])
     .range([margin.top + innerHeight, margin.top])
@@ -94,11 +102,10 @@ function renderLineSeries(
   const pathD = lineGen(pairs) ?? '';
   const linePath = `<path d="${pathD}" fill="none" stroke="${PALETTE.dataPrimary}" stroke-width="1.5" />`;
 
-  // Mean reference line (only for run-sequence mode)
+  // Reference line (only for run-sequence mode)
   let meanLine = '';
-  if (mode === 'run-sequence') {
-    const m = mean(data);
-    const my = yScale(m).toFixed(2);
+  if (mode === 'run-sequence' && refVal !== undefined) {
+    const my = yScale(refVal).toFixed(2);
     meanLine = `<line x1="${margin.left.toFixed(2)}" y1="${my}" x2="${(margin.left + innerWidth).toFixed(2)}" y2="${my}" stroke="${PALETTE.dataSecondary}" stroke-width="1.5" stroke-dasharray="6,4" />`;
   }
 
@@ -158,8 +165,8 @@ function renderAutocorrelation(
   const zeroY = yScale(0).toFixed(2);
   const zeroLine = `<line x1="${margin.left.toFixed(2)}" y1="${zeroY}" x2="${(margin.left + innerWidth).toFixed(2)}" y2="${zeroY}" stroke="${PALETTE.axis}" stroke-width="1" />`;
 
-  // Significance bounds at +/- 2/sqrt(n) per NIST convention
-  const bound = 2 / Math.sqrt(n);
+  // 95% significance bounds at ±1.96/√N
+  const bound = 1.96 / Math.sqrt(n);
   const upperY = yScale(bound).toFixed(2);
   const lowerY = yScale(-bound).toFixed(2);
   const sigBounds =

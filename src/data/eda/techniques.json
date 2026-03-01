@@ -45,7 +45,7 @@
     "category": "graphical",
     "section": "1.3.3.4",
     "nistSection": "1.3.3.4 Bootstrap Plot",
-    "description": "A bootstrap plot shows the uncertainty of a sample statistic by plotting the distribution of that statistic from repeated resampling with replacement. It is used to assess the stability and confidence interval of an estimate.",
+    "description": "A bootstrap plot displays the computed value of a sample statistic versus the subsample number for repeated resamples drawn with replacement. It is used to assess the uncertainty, stability, and confidence interval of an estimate.",
     "tier": "A",
     "variantCount": 0,
     "relatedTechniques": ["histogram", "normal-probability-plot", "box-plot"],
@@ -87,7 +87,7 @@
     "description": "A box plot summarizes a dataset using its median, quartiles, and potential outliers in a compact graphical form. It is used to quickly compare distributions across groups and identify skewness and outliers.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["histogram", "bihistogram", "normal-probability-plot"],
+    "relatedTechniques": ["mean-plot", "histogram", "normal-probability-plot"],
     "tags": ["distribution", "summary", "outliers", "quartiles"]
   },
   {
@@ -110,11 +110,11 @@
     "category": "graphical",
     "section": "1.3.3.10",
     "nistSection": "1.3.3.10 Contour Plot",
-    "description": "A contour plot displays a three-dimensional surface on a two-dimensional plane using lines of constant response. It is used to explore the relationship between a response variable and two predictor variables.",
+    "description": "A contour plot is a graphical technique for representing a three-dimensional surface by plotting constant z slices, called contours, on a two-dimensional format. It is an alternative to a 3-D surface plot.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["scatter-plot", "doe-plots", "linear-plots"],
-    "tags": ["multivariate", "surface", "response", "three-dimensional"]
+    "relatedTechniques": ["scatter-plot", "doe-plots"],
+    "tags": ["multivariate", "surface", "contour", "three-dimensional"]
   },
   {
     "id": "doe-plots",
@@ -202,8 +202,8 @@
     "section": "1.3.3.22",
     "nistSection": "1.3.3.22 Probability Plot",
     "description": "A probability plot displays the sorted data values against the theoretical quantiles of a specified distribution. It is used to assess whether data follow any distribution family, not just the normal.",
-    "tier": "A",
-    "variantCount": 0,
+    "tier": "B",
+    "variantCount": 3,
     "relatedTechniques": ["normal-probability-plot", "ppcc-plot", "qq-plot"],
     "tags": ["distribution", "goodness-of-fit", "quantiles", "assessment"]
   },
@@ -227,7 +227,7 @@
     "category": "graphical",
     "section": "1.3.3.24",
     "nistSection": "1.3.3.24 Q-Q Plot",
-    "description": "A quantile-quantile (Q-Q) plot compares the quantiles of two datasets or a dataset against a theoretical distribution. It is used to determine whether two datasets come from populations with a common distribution.",
+    "description": "A quantile-quantile (Q-Q) plot compares the quantiles of two data sets to determine if they come from populations with a common distribution. It is similar to a probability plot, but compares two empirical samples rather than one sample against a theoretical distribution.",
     "tier": "A",
     "variantCount": 0,
     "relatedTechniques": ["normal-probability-plot", "probability-plot", "bihistogram"],
@@ -243,7 +243,7 @@
     "description": "A run-sequence plot displays the data values in the order they were collected, with the vertical axis showing the response and the horizontal axis the run order. It is used to detect shifts in location, scale, or the presence of outliers over time.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["lag-plot", "autocorrelation-plot", "4-plot"],
+    "relatedTechniques": ["scatter-plot", "histogram", "autocorrelation-plot", "lag-plot", "4-plot"],
     "tags": ["time-series", "trend", "shift-detection", "run-order"]
   },
   {
@@ -256,7 +256,7 @@
     "description": "A scatter plot displays the relationship between two quantitative variables by plotting data points on a two-dimensional graph. It is used to identify patterns, trends, correlations, and outliers in bivariate data.",
     "tier": "B",
     "variantCount": 12,
-    "relatedTechniques": ["scatterplot-matrix", "conditioning-plot", "linear-plots"],
+    "relatedTechniques": ["run-sequence-plot", "box-plot", "block-plot", "scatterplot-matrix", "conditioning-plot", "linear-plots"],
     "tags": ["correlation", "bivariate", "relationship", "outliers"]
   },
   {
@@ -269,7 +269,7 @@
     "description": "A spectral plot displays the power spectrum of a time series, showing the contribution of each frequency component to the overall variance. It is used to detect dominant periodicities and cyclic behavior in time-ordered data.",
     "tier": "B",
     "variantCount": 3,
-    "relatedTechniques": ["autocorrelation-plot", "complex-demodulation", "lag-plot"],
+    "relatedTechniques": ["autocorrelation-plot", "complex-demodulation"],
     "tags": ["time-series", "frequency", "periodicity", "spectral-analysis"]
   },
   {
@@ -279,11 +279,11 @@
     "category": "graphical",
     "section": "1.3.3.28",
     "nistSection": "1.3.3.28 Standard Deviation Plot",
-    "description": "A standard deviation plot displays the standard deviations of groups for a factor variable, with an overall reference line. It is used to determine whether a factor affects the variability of the response.",
+    "description": "A standard deviation plot displays the group standard deviations versus group identifier, with an overall reference line. It is the scale counterpart to the mean plot, used to detect whether variability is constant across groups or changing over time.",
     "tier": "A",
     "variantCount": 0,
     "relatedTechniques": ["mean-plot", "doe-plots", "box-plot"],
-    "tags": ["variability", "spread", "factors", "group-comparison"]
+    "tags": ["variability", "spread", "scale", "group-comparison", "equal-variance"]
   },
   {
     "id": "star-plot",
@@ -334,7 +334,7 @@
     "description": "A 4-plot combines a run-sequence plot, lag plot, histogram, and normal probability plot in a single display. It is used as a quick screening tool to simultaneously check the four underlying assumptions of a univariate dataset.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["6-plot", "run-sequence-plot", "lag-plot", "histogram"],
+    "relatedTechniques": ["run-sequence-plot", "lag-plot", "histogram", "normal-probability-plot", "autocorrelation-plot", "spectral-plot", "ppcc-plot", "6-plot"],
     "tags": ["assumptions", "screening", "composite", "univariate"]
   },
   {
@@ -344,19 +344,19 @@
     "category": "graphical",
     "section": "1.3.3.33",
     "nistSection": "1.3.3.33 6-Plot",
-    "description": "A 6-plot extends the 4-plot by adding an autocorrelation plot and a spectral plot. It provides a comprehensive screening of all four assumptions and additional time-series diagnostics in a single display.",
+    "description": "A 6-plot is a regression diagnostic display with six panels: response vs predictor, residuals vs predictor, residuals vs predicted values, lag plot of residuals, histogram of residuals, and normal probability plot of residuals. It is used to assess model adequacy after fitting a regression model.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["4-plot", "autocorrelation-plot", "spectral-plot"],
-    "tags": ["assumptions", "screening", "composite", "time-series"]
+    "relatedTechniques": ["scatter-plot", "run-sequence-plot", "lag-plot", "normal-probability-plot", "histogram"],
+    "tags": ["assumptions", "screening", "composite", "regression"]
   },
   {
     "id": "scatterplot-matrix",
     "title": "Scatterplot Matrix",
     "slug": "scatterplot-matrix",
     "category": "graphical",
-    "section": "1.3.3.26.1",
-    "nistSection": "1.3.3.26.1 Scatterplot Matrix",
+    "section": "1.3.3.26.11",
+    "nistSection": "1.3.3.26.11 Scatterplot Matrix",
     "description": "A scatterplot matrix displays all pairwise scatter plots of variables in a dataset arranged in a grid. It is used to explore multivariate relationships and detect pairwise correlations, clusters, and outliers.",
     "tier": "A",
     "variantCount": 0,
@@ -368,12 +368,12 @@
     "title": "Conditioning Plot",
     "slug": "conditioning-plot",
     "category": "graphical",
-    "section": "1.3.3.26.2",
-    "nistSection": "1.3.3.26.2 Conditioning Plot",
-    "description": "A conditioning plot (coplot) displays the relationship between two variables conditioned on the values of one or more additional variables. It is used to explore how a bivariate relationship changes across levels of a third variable.",
+    "section": "1.3.3.26.12",
+    "nistSection": "1.3.3.26.12 Conditioning Plot",
+    "description": "A conditioning plot (coplot) is a plot of two variables conditional on the value of a third variable. It is used to explore how a bivariate relationship changes across levels of a third variable.",
     "tier": "A",
     "variantCount": 0,
-    "relatedTechniques": ["scatter-plot", "scatterplot-matrix", "contour-plot"],
+    "relatedTechniques": ["scatter-plot", "scatterplot-matrix"],
     "tags": ["multivariate", "conditional", "interaction", "exploration"]
   },
   {
@@ -589,8 +589,8 @@
     "title": "Grubbs' Test for Outliers",
     "slug": "grubbs-test",
     "category": "quantitative",
-    "section": "1.3.5.18",
-    "nistSection": "1.3.5.18 Grubbs' Test for Outliers",
+    "section": "1.3.5.17.1",
+    "nistSection": "1.3.5.17.1 Grubbs' Test for Outliers",
     "description": "Grubbs' test detects a single outlier in a univariate dataset assumed to come from a normally distributed population. It is used to formally test whether the most extreme value in a sample is statistically aberrant.",
     "tier": "A",
     "variantCount": 0,
@@ -602,8 +602,8 @@
     "title": "Yates Analysis for Designed Experiments",
     "slug": "yates-analysis",
     "category": "quantitative",
-    "section": "1.3.5.21",
-    "nistSection": "1.3.5.21 Yates Analysis for Designed Experiments",
+    "section": "1.3.5.18",
+    "nistSection": "1.3.5.18 Yates Analysis for Designed Experiments",
     "description": "Yates analysis is an efficient algorithm for computing main effects and interactions in two-level full factorial experiments. It is used to systematically estimate all factor effects from a 2^k factorial design.",
     "tier": "A",
     "variantCount": 0,

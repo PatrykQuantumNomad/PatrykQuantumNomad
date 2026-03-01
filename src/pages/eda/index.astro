@@ -13,6 +13,9 @@ import CategoryFilter from '../../components/eda/CategoryFilter.tsx';
 import { techniqueUrl, distributionUrl, caseStudyUrl, referenceUrl, foundationUrl } from '../../lib/eda/routes';
 import { generateThumbnail } from '../../lib/eda/thumbnail';
 import { generateDistributionCurve } from '../../lib/eda/svg-generators/distribution-curve';
+import { generateEdaHeroSvg } from '../../lib/eda/svg-generators/eda-hero';
+
+const heroSvg = generateEdaHeroSvg({ width: 400, height: 210 });
 
 interface LandingCard {
   title: string;
@@ -67,7 +70,7 @@ distributions.forEach((dist) => {
     type: 'pdf',
     distribution: dist.data.id,
     params: defaultParams,
-    config: { width: 200, height: 140, margin: { top: 10, right: 10, bottom: 20, left: 25 } },
+    config: { width: 200, height: 152, margin: { top: 22, right: 10, bottom: 28, left: 25 } },
   });
   const sectionMatch = dist.data.nistSection.match(/[\d.]+/);
   cards.push({
@@ -104,30 +107,41 @@ pages.forEach((page) => {
 
 // ── Group and sort by section ──────────────────────────────────────────
 
-type SectionDef = { id: string; heading: string; category: string };
+type SectionDef = { id: string; heading: string; category: string; indexHref: string };
 
 const SECTIONS: SectionDef[] = [
-  { id: 'foundations', heading: 'Foundations', category: 'foundations' },
-  { id: 'techniques', heading: 'Graphical Techniques', category: 'graphical' },
-  { id: 'quantitative', heading: 'Quantitative Methods', category: 'quantitative' },
-  { id: 'distributions', heading: 'Probability Distributions', category: 'distributions' },
-  { id: 'case-studies', heading: 'Case Studies', category: 'case-studies' },
-  { id: 'reference', heading: 'Reference', category: 'reference' },
+  { id: 'foundations', heading: 'Foundations', category: 'foundations', indexHref: '/eda/foundations/' },
+  { id: 'techniques', heading: 'Graphical Techniques', category: 'graphical', indexHref: '/eda/techniques/' },
+  { id: 'quantitative', heading: 'Quantitative Methods', category: 'quantitative', indexHref: '/eda/quantitative/' },
+  { id: 'distributions', heading: 'Probability Distributions', category: 'distributions', indexHref: '/eda/distributions/' },
+  { id: 'case-studies', heading: 'Case Studies', category: 'case-studies', indexHref: '/eda/case-studies/' },
+  { id: 'reference', heading: 'Reference', category: 'reference', indexHref: '/eda/reference/' },
 ];
+
+function sectionSort(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const va = pa[i] ?? 0;
+    const vb = pb[i] ?? 0;
+    if (va !== vb) return va - vb;
+  }
+  return 0;
+}
 
 function getCards(category: string): LandingCard[] {
   return cards
     .filter((c) => c.category === category)
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => sectionSort(a.section, b.section) || a.title.localeCompare(b.title));
 }
 
 const NAV_ITEMS = [
-  { label: 'Foundations', href: '#foundations' },
-  { label: 'Techniques', href: '#techniques' },
-  { label: 'Quantitative', href: '#quantitative' },
-  { label: 'Distributions', href: '#distributions' },
-  { label: 'Case Studies', href: '#case-studies' },
-  { label: 'Reference', href: '#reference' },
+  { label: 'Foundations', href: '#foundations', indexHref: '/eda/foundations/' },
+  { label: 'Techniques', href: '#techniques', indexHref: '/eda/techniques/' },
+  { label: 'Quantitative', href: '#quantitative', indexHref: '/eda/quantitative/' },
+  { label: 'Distributions', href: '#distributions', indexHref: '/eda/distributions/' },
+  { label: 'Case Studies', href: '#case-studies', indexHref: '/eda/case-studies/' },
+  { label: 'Reference', href: '#reference', indexHref: '/eda/reference/' },
 ];
 ---
 
@@ -149,16 +163,24 @@ const NAV_ITEMS = [
   />
 
   <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <!-- Header -->
-    <header class="mb-10">
-      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
-        EDA Visual Encyclopedia
-      </h1>
-      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
-        A comprehensive interactive reference for Exploratory Data Analysis, covering graphical
-        techniques, quantitative methods, probability distributions, case studies, and reference
-        tables. Based on the NIST/SEMATECH Engineering Statistics Handbook.
-      </p>
+    <!-- Header with inline 4-plot illustration -->
+    <header class="mb-10 flex flex-col sm:flex-row sm:items-start sm:gap-8">
+      <div class="flex-1 min-w-0">
+        <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
+          EDA Visual Encyclopedia
+        </h1>
+        <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+          A comprehensive interactive reference for Exploratory Data Analysis, covering graphical
+          techniques, quantitative methods, probability distributions, case studies, and reference
+          tables. Based on the NIST/SEMATECH Engineering Statistics Handbook.
+        </p>
+      </div>
+      <div
+        class="hidden sm:block shrink-0 w-[260px] rounded-lg overflow-hidden border border-[var(--color-border)]"
+        role="img"
+        aria-label="4-Plot diagnostic diagram — run sequence, lag plot, histogram, and normal probability plot"
+        set:html={heroSvg}
+      />
     </header>
 
     <!-- Section Navigation -->
@@ -181,7 +203,10 @@ const NAV_ITEMS = [
       const sectionCards = getCards(sec.category);
       return sectionCards.length > 0 && (
         <section id={sec.id} data-category={sec.category} class="mb-16">
-          <h2 class="text-2xl font-heading font-bold mb-6">{sec.heading}</h2>
+          <div class="flex items-baseline justify-between mb-6">
+            <h2 class="text-2xl font-heading font-bold">{sec.heading}</h2>
+            <a href={sec.indexHref} class="text-sm text-[var(--color-accent)] hover:underline">View all &rarr;</a>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {sectionCards.map((card) => (
               <a

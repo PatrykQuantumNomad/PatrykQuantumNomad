@@ -6,7 +6,20 @@ interface Props {
 
 const { category, techniqueName } = Astro.props;
 
+/**
+ * Map category labels to their actual index pages.
+ * Only Distributions has its own index; all others link to the EDA landing page.
+ */
+const categoryHrefMap: Record<string, string> = {
+  'distributions': '/eda/distributions/',
+  'foundations': '/eda/foundations/',
+  'case-studies': '/eda/case-studies/',
+  'reference': '/eda/reference/',
+  'graphical-techniques': '/eda/techniques/',
+  'quantitative-methods': '/eda/quantitative/',
+};
 const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+const categoryHref = categoryHrefMap[categorySlug] ?? '/eda/';
 
 interface Crumb {
   label: string;
@@ -15,7 +28,7 @@ interface Crumb {
 
 const crumbs: Crumb[] = [
   { label: 'EDA', href: '/eda/' },
-  { label: category, href: `/eda/${categorySlug}/` },
+  { label: category, href: categoryHref },
 ];
 
 if (techniqueName) {

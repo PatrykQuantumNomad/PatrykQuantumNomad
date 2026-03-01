@@ -77,6 +77,10 @@ export function generateScatterPlot(options: ScatterPlotOptions): string {
     )
     .join('\n');
 
+  // Clip path to constrain regression line / confidence band to plot area
+  const clipId = `clip-scatter-${Math.random().toString(36).slice(2, 8)}`;
+  const clipDef = `<defs><clipPath id="${clipId}"><rect x="${margin.left}" y="${margin.top}" width="${innerWidth}" height="${innerHeight}" /></clipPath></defs>`;
+
   // Optional regression line
   let regressionLine = '';
   let regressionAnnotation = '';
@@ -139,13 +143,16 @@ export function generateScatterPlot(options: ScatterPlotOptions): string {
       config,
       `Scatter plot${options.title ? ': ' + options.title : ''}`,
     ) +
+    clipDef +
+    '\n' +
     grid +
     '\n' +
+    `<g clip-path="url(#${clipId})">` +
     confidenceBand +
     '\n' +
-    points +
-    '\n' +
     regressionLine +
+    '\n</g>\n' +
+    points +
     '\n' +
     regressionAnnotation +
     '\n' +

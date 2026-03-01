@@ -4,6 +4,12 @@
 
 A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
 
+## Reference Data
+
+- `handbook/` — Local copy of the full NIST/SEMATECH e-Handbook of Statistical Methods website.
+- `handbook/eda/` — Chapter 1 (Exploratory Data Analysis). This is the authoritative source for all EDA Visual Encyclopedia content: technique definitions, formulas, interpretation guidance, case study data, and plot examples. Always read from these local files instead of fetching from `itl.nist.gov`.
+- `handbook/datasets/` — Original NIST `.DAT` files used in case studies and technique examples (e.g., `CERAMIC.DAT`, `LEW.DAT`, `FLICKER.DAT`, `RANDWALK.DAT`). Use these for verifying computed statistics and generating accurate plots.
+
 ## Core Value
 
 The site must be fast, fully SEO-optimized, and visually distinctive — a portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.

@@ -1,0 +1,78 @@
+---
+/**
+ * Reference landing page — /eda/reference/
+ * Card grid of reference material — distribution tables, technique catalogues,
+ * analysis question lookup, and related-distribution maps.
+ */
+import { getCollection } from 'astro:content';
+import EDALayout from '../../../layouts/EDALayout.astro';
+import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import EDAJsonLd from '../../../components/eda/EDAJsonLd.astro';
+import { referenceUrl } from '../../../lib/eda/routes';
+
+const pages = await getCollection('edaPages');
+const reference = pages
+  .filter((p) => p.data.category === 'reference')
+  .sort((a, b) => a.data.section.localeCompare(b.data.section, undefined, { numeric: true }));
+
+const cards = reference.map((page) => {
+  const slug = page.id.replace('reference/', '');
+  return {
+    title: page.data.title,
+    url: referenceUrl(slug),
+    section: page.data.section,
+    description: page.data.description,
+  };
+});
+---
+
+<EDALayout
+  title="Reference | EDA Visual Encyclopedia"
+  description="EDA reference material — probability distribution tables, technique catalogues by category, analysis question lookup, and related-distribution maps."
+  ogImage="/open-graph/eda/overview.png"
+  ogImageAlt="EDA Reference — EDA Visual Encyclopedia"
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Reference', url: 'https://patrykgolabek.dev/eda/reference/' },
+  ]} />
+  <EDAJsonLd
+    title="Reference"
+    description="EDA reference material — probability distribution tables, technique catalogues by category, analysis question lookup, and related-distribution maps."
+    url="https://patrykgolabek.dev/eda/reference/"
+    pageType="reference"
+  />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Reference" />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Reference</h1>
+      <p class="text-sm text-[var(--color-text-secondary)]">NIST/SEMATECH Sections 1.3.2 – 1.3.6</p>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+        Quick-access reference material for Exploratory Data Analysis — probability distribution
+        tables, technique catalogues organized by category, analysis question lookup, and
+        related-distribution maps.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {cards.map((card) => (
+        <a
+          href={card.url}
+          class="group rounded-lg border border-[var(--color-border)] p-5 hover:border-[var(--color-accent)] transition-colors"
+        >
+          <h3 class="text-base font-heading font-bold group-hover:text-[var(--color-accent)] transition-colors">
+            {card.title}
+          </h3>
+          <p class="text-xs text-[var(--color-text-secondary)] mt-1">Section {card.section}</p>
+          <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-3">
+            {card.description}
+          </p>
+        </a>
+      ))}
+    </div>
+  </article>
+</EDALayout>

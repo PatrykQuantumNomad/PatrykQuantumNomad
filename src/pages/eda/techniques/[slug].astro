@@ -64,12 +64,26 @@ const content = getTechniqueContent(technique.slug);
 const isTierB = technique.tier === 'B';
 const variants = isTierB ? renderVariants(technique.slug) : [];
 
+/** Replace $...$ delimiters with KaTeX inline HTML at build time */
+function renderInlineMath(text: string): string {
+  return text.replace(/\$([^$]+)\$/g, (_, tex) =>
+    katex.renderToString(tex, { displayMode: false, throwOnError: false })
+  );
+}
+
 // Pre-render KaTeX formulas at build time (pattern from quantitative/[slug].astro)
 const renderedFormulas = content?.formulas?.map(f => ({
   ...f,
   html: katex.renderToString(f.tex, { displayMode: true, throwOnError: false }),
 })) ?? [];
 const hasFormulas = renderedFormulas.length > 0;
+const hasInlineMath = [
+  content?.definition, content?.definitionExpanded, content?.importance,
+  content?.purpose, content?.interpretation, content?.assumptions,
+  ...(content?.questions ?? []),
+  ...(content?.examples?.map(e => e.description) ?? []),
+].some(t => t?.includes('$'));
+const needsKatex = hasFormulas || hasInlineMath;
 ---
 
 <TechniquePage
@@ -79,13 +93,16 @@ const hasFormulas = renderedFormulas.length > 0;
   nistSection={technique.nistSection}
   slug={technique.slug}
   relatedTechniques={relatedTechniques}
-  useKatex={hasFormulas}
+  useKatex={needsKatex}
 >
   <Fragment slot="plot">
     {isTierB ? (
       <PlotVariantSwap variants={variants} techniqueTitle={technique.title} />
     ) : (
-      <div role="img" aria-label={`${technique.title} statistical chart`} class="mt-8 mb-10" set:html={plotSvg} />
+      <figure class="mt-8 mb-10">
+        <div role="img" aria-label={`${technique.title} — ${content?.definition?.substring(0, 120) ?? 'statistical chart'}`} set:html={plotSvg} />
+        <figcaption class="sr-only">{content?.definition}</figcaption>
+      </figure>
     )}
   </Fragment>
 
@@ -94,20 +111,23 @@ const hasFormulas = renderedFormulas.length > 0;
       <section class="prose-section mt-8 space-y-6">
         {/* 1. What It Is (definition + optional definitionExpanded) */}
         <div>
-          <h2 class="text-xl font-heading font-bold mb-3">What It Is</h2>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.definition}</p>
+          <h2 id="what-it-is" class="text-xl font-heading font-bold mb-3">What It Is</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(content.definition)} />
+          {content.anatomyDiagram && (
+            <div role="img" aria-label="Annotated box plot anatomy diagram" class="my-6" set:html={content.anatomyDiagram} />
+          )}
           {content.definitionExpanded && (
-            <p class="text-[var(--color-text-secondary)] leading-relaxed mt-3">{content.definitionExpanded}</p>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mt-3" set:html={renderInlineMath(content.definitionExpanded)} />
           )}
         </div>
 
         {/* 2. Questions This Plot Answers */}
         {content.questions && content.questions.length > 0 && (
           <div>
-            <h2 class="text-xl font-heading font-bold mb-3">Questions This Plot Answers</h2>
+            <h2 id="questions" class="text-xl font-heading font-bold mb-3">Questions This Plot Answers</h2>
             <ul class="list-disc list-inside space-y-1 text-[var(--color-text-secondary)]">
               {content.questions.map(q => (
-                <li>{q}</li>
+                <li set:html={renderInlineMath(q)} />
               ))}
             </ul>
           </div>
@@ -116,21 +136,21 @@ const hasFormulas = renderedFormulas.length > 0;
         {/* 3. Why It Matters */}
         {content.importance && (
           <div>
-            <h2 class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
-            <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.importance}</p>
+            <h2 id="why-it-matters" class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(content.importance)} />
           </div>
         )}
 
         {/* 4. When to Use It */}
         <div>
-          <h2 class="text-xl font-heading font-bold mb-3">When to Use It</h2>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.purpose}</p>
+          <h2 id="when-to-use" class="text-xl font-heading font-bold mb-3">When to Use a {technique.title}</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(content.purpose)} />
         </div>
 
         {/* 5. How to Interpret */}
         <div>
-          <h2 class="text-xl font-heading font-bold mb-3">How to Interpret</h2>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.interpretation}</p>
+          <h2 id="how-to-interpret" class="text-xl font-heading font-bold mb-3">How to Interpret a {technique.title}</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(content.interpretation)} />
         </div>
 
         {/* 6. Examples */}
@@ -140,7 +160,7 @@ const hasFormulas = renderedFormulas.length > 0;
             {content.examples.map(ex => (
               <div class="mb-4">
                 <h3 class="text-lg font-semibold mb-1">{ex.label}</h3>
-                <p class="text-[var(--color-text-secondary)] leading-relaxed">{ex.description}</p>
+                <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(ex.description)} />
               </div>
             ))}
           </div>
@@ -148,8 +168,8 @@ const hasFormulas = renderedFormulas.length > 0;
 
         {/* 7. Assumptions and Limitations */}
         <div>
-          <h2 class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed">{content.assumptions}</p>
+          <h2 id="assumptions" class="text-xl font-heading font-bold mb-3">Assumptions and Limitations</h2>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed" set:html={renderInlineMath(content.assumptions)} />
         </div>
 
         {/* 8. See It In Action (case study cross-links) */}
@@ -185,7 +205,7 @@ const hasFormulas = renderedFormulas.length > 0;
           <div class="formula-block mb-6">
             <h3 class="text-lg font-semibold mb-2">{f.label}</h3>
             <div class="katex-display-wrapper my-4 overflow-x-auto" set:html={f.html} />
-            <p class="text-[var(--color-text-secondary)]">{f.explanation}</p>
+            <p class="text-[var(--color-text-secondary)]" set:html={renderInlineMath(f.explanation)} />
           </div>
         ))}
       </section>

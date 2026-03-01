@@ -16,7 +16,7 @@ import {
   titleText,
   type PlotConfig,
 } from './plot-base';
-import { kde, silvermanBandwidth } from '../math/statistics';
+import { kde, silvermanBandwidth, mean, standardDeviation } from '../math/statistics';
 
 export interface HistogramOptions {
   data: number[];
@@ -24,6 +24,7 @@ export interface HistogramOptions {
   showKDE?: boolean;
   showUniformPDF?: boolean;
   uniformRange?: [number, number];
+  showNormalPDF?: boolean;
   config?: Partial<PlotConfig>;
   title?: string;
   xLabel?: string;
@@ -31,7 +32,7 @@ export interface HistogramOptions {
 }
 
 export function generateHistogram(options: HistogramOptions): string {
-  const { data, binCount, showKDE = false, showUniformPDF = false, uniformRange } = options;
+  const { data, binCount, showKDE = false, showUniformPDF = false, uniformRange, showNormalPDF = false } = options;
   const config: PlotConfig = { ...DEFAULT_CONFIG, ...options.config };
   const { innerWidth, innerHeight } = innerDimensions(config);
   const { margin } = config;
@@ -118,6 +119,27 @@ export function generateHistogram(options: HistogramOptions): string {
     uniformOverlay = `<line x1="${x1.toFixed(2)}" y1="${y.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y.toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="2" stroke-dasharray="6,4" />`;
   }
 
+  // Optional normal PDF overlay
+  let normalOverlay = '';
+  if (showNormalPDF && data.length >= 3) {
+    const mu = mean(data);
+    const sigma = standardDeviation(data);
+    if (sigma > 0) {
+      const binWidth = bins.length > 0 ? bins[0].x1! - bins[0].x0! : (domainMax - domainMin) / thresholds;
+      const step = (domainMax - domainMin) / 100;
+      const pts: [number, number][] = [];
+      for (let x = domainMin; x <= domainMax + step / 2; x += step) {
+        const z = (x - mu) / sigma;
+        const pdf = Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+        pts.push([x, pdf * data.length * binWidth]);
+      }
+      const pathD = pts
+        .map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(p[0]).toFixed(2)},${yScale(p[1]).toFixed(2)}`)
+        .join(' ');
+      normalOverlay = `<path d="${pathD}" fill="none" stroke="${PALETTE.dataSecondary}" stroke-width="2" stroke-dasharray="6,4" />`;
+    }
+  }
+
   // Assemble
   const xTicks = xScale.ticks(7);
   const yTicks = yScale.ticks(5);
@@ -134,6 +156,8 @@ export function generateHistogram(options: HistogramOptions): string {
     kdeOverlay +
     '\n' +
     uniformOverlay +
+    '\n' +
+    normalOverlay +
     '\n' +
     xAxis(
       xTicks,

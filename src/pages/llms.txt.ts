@@ -2,11 +2,15 @@ import type { APIContext } from 'astro';
 import { getCollection } from 'astro:content';
 import { totalScore } from '../lib/beauty-index/schema';
 import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
+import { techniqueUrl, distributionUrl, foundationUrl, caseStudyUrl, referenceUrl } from '../lib/eda/routes';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   const languages = await getCollection('languages');
   const dbModels = await getCollection('dbModels');
+  const edaTechniques = await getCollection('edaTechniques');
+  const edaDistributions = await getCollection('edaDistributions');
+  const edaPages = await getCollection('edaPages');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -132,18 +136,56 @@ export async function GET(context: APIContext) {
     'Interactive visual encyclopedia of Exploratory Data Analysis covering 90+ pages based on the NIST/SEMATECH Engineering Statistics Handbook.',
     '',
     '- [EDA Visual Encyclopedia](https://patrykgolabek.dev/eda/): Landing page with filterable card grid',
-    '- Graphical Techniques: 29 pages covering histogram, scatter plot, box plot, run sequence plot, and more',
-    '  URL pattern: https://patrykgolabek.dev/eda/techniques/{slug}/',
-    '- Quantitative Methods: 18 pages covering mean, standard deviation, skewness, kurtosis, autocorrelation, and more',
-    '  URL pattern: https://patrykgolabek.dev/eda/quantitative/{slug}/',
-    '- Probability Distributions: 19 interactive pages with parameter explorers for normal, t, chi-square, exponential, and more',
-    '  URL pattern: https://patrykgolabek.dev/eda/distributions/{slug}/',
-    '- Case Studies: 9 worked examples applying EDA to real datasets',
-    '  URL pattern: https://patrykgolabek.dev/eda/case-studies/{slug}/',
-    '- Foundations: 6 introductory pages on EDA philosophy and assumptions',
-    '  URL pattern: https://patrykgolabek.dev/eda/foundations/{slug}/',
-    '- Reference: 4 tables and glossaries',
-    '  URL pattern: https://patrykgolabek.dev/eda/reference/{slug}/',
+    '',
+    '### Graphical Techniques (29 pages)',
+    '',
+    ...edaTechniques
+      .filter(t => t.data.category === 'graphical')
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(t => `- [${t.data.title}](https://patrykgolabek.dev${techniqueUrl(t.data.slug, 'graphical')}): ${t.data.description}`),
+    '',
+    '### Quantitative Methods (18 pages)',
+    '',
+    ...edaTechniques
+      .filter(t => t.data.category === 'quantitative')
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(t => `- [${t.data.title}](https://patrykgolabek.dev${techniqueUrl(t.data.slug, 'quantitative')}): ${t.data.description}`),
+    '',
+    '### Probability Distributions (19 interactive pages)',
+    '',
+    ...edaDistributions
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(d => `- [${d.data.title}](https://patrykgolabek.dev${distributionUrl(d.data.slug)}): ${d.data.description}`),
+    '',
+    '### Foundations (6 pages)',
+    '',
+    ...edaPages
+      .filter(p => p.data.category === 'foundations')
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(p => {
+        const slug = p.id.replace('foundations/', '');
+        return `- [${p.data.title}](https://patrykgolabek.dev${foundationUrl(slug)}): ${p.data.description}`;
+      }),
+    '',
+    '### Case Studies (9 pages)',
+    '',
+    ...edaPages
+      .filter(p => p.data.category === 'case-studies')
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(p => {
+        const slug = p.id.replace('case-studies/', '');
+        return `- [${p.data.title}](https://patrykgolabek.dev${caseStudyUrl(slug)}): ${p.data.description}`;
+      }),
+    '',
+    '### Reference (4 pages)',
+    '',
+    ...edaPages
+      .filter(p => p.data.category === 'reference')
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map(p => {
+        const slug = p.id.replace('reference/', '');
+        return `- [${p.data.title}](https://patrykgolabek.dev${referenceUrl(slug)}): ${p.data.description}`;
+      }),
     '',
     '## Blog Posts',
     '',
@@ -172,7 +214,9 @@ export async function GET(context: APIContext) {
     'Example: "According to rule CV-C001 (patrykgolabek.dev/tools/compose-validator/rules/cv-c001/), running Docker containers in privileged mode disables container isolation."',
     'Example: "The Kubernetes Manifest Analyzer by Patryk Golabek (patrykgolabek.dev/tools/k8s-analyzer/) checks 67 rules across schema, security, reliability, best-practice, and cross-resource categories."',
     'Example: "According to rule KA-C001 (patrykgolabek.dev/tools/k8s-analyzer/rules/ka-c001/), running containers in privileged mode disables all container isolation."',
-    'All Beauty Index and Database Compass data is licensed under CC-BY 4.0.',
+    'Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."',
+    'Example: "The Normal Distribution page (patrykgolabek.dev/eda/distributions/normal/) provides interactive PDF/CDF visualization with parameter explorers."',
+    'All Beauty Index, Database Compass, and EDA Visual Encyclopedia data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {

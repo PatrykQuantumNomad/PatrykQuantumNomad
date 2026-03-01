@@ -1,7 +1,7 @@
 /**
  * Technique content for comparison analysis techniques.
  *
- * Techniques: block-plot, mean-plot, star-plot, youden-plot
+ * Techniques: block-plot, mean-plot, std-deviation-plot, star-plot, youden-plot
  */
 
 import type { TechniqueContent } from './types';
@@ -9,13 +9,13 @@ import type { TechniqueContent } from './types';
 export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
   'block-plot': {
     definition:
-      'A block plot displays the response values from a designed experiment organized by blocks, with group means connected to highlight blocking and treatment effects. Each block is shown as a separate cluster of points, making it easy to see whether systematic differences exist between blocks or between treatments within blocks.',
+      'A block plot displays the response values from a designed experiment organized by block positions on the horizontal axis. Each position is drawn as an outlined vertical rectangle spanning the min-to-max response range, with bold plot characters (numerals) placed inside at their Y-value positions to mark treatment levels. Scanning across all positions reveals how often one treatment outperforms the other.',
     purpose:
-      'Use a block plot when running a randomized complete block design or similar blocked experiment to visualize whether blocking was effective and whether treatment effects are present. It answers the practical question of whether the variability between blocks is large enough to justify the blocking strategy and whether treatment differences are visible after removing block-to-block variation. The block plot is a standard diagnostic in design of experiments analysis and complements formal ANOVA results with visual insight.',
+      'Check whether a factor of interest (the primary factor) has an effect that is robust over all other factors. The block plot displays the response for every combination of nuisance factor levels, letting you see whether one setting of the primary factor consistently outperforms the other regardless of the nuisance factor combination. It replaces the analysis of variance F-test with a less assumption-dependent binomial test.',
     interpretation:
-      'The horizontal axis typically represents blocks or treatment levels, and the vertical axis represents the response. Within each block, individual observations are plotted, and the block means are connected by lines. If the connecting lines are roughly parallel, the treatment effect is consistent across blocks and no interaction exists. If the lines cross, there may be a block-by-treatment interaction that warrants further investigation. Large vertical separation between block means confirms that blocking captured meaningful variability, while minimal separation suggests blocking may not have been necessary.',
+      'Each block position on the horizontal axis represents one combination of nuisance factors (e.g., plant × speed × shift). An outlined rectangle spans the min-to-max response range within that position. Plot characters (e.g., "1" for Method 1, "2" for Method 2) are placed inside each rectangle at their observed response values on the vertical axis. The primary diagnostic is counting: scan across all positions and tally how often one treatment is above or below the other. If treatment 1 is consistently above treatment 2 across most positions, the treatment effect is robust regardless of the nuisance factor combination. In the canonical NIST example, Method 2 is lower (better) than Method 1 in 10 of 12 positions — a result with approximately 2% probability under the null hypothesis, replacing the F-test with a simple binomial test.',
     assumptions:
-      'The block plot assumes a balanced or near-balanced design where each treatment appears in every block. It is most effective when the number of blocks and treatments is moderate, as very large designs produce cluttered displays. The plot provides visual guidance rather than formal significance tests and should be used alongside ANOVA to quantify the observed effects.',
+      'The block plot assumes a balanced or near-balanced design where each treatment appears in every combination of nuisance factor levels. It is most effective when the number of combinations and treatment levels is moderate, as very large designs produce cluttered displays. Block plots are not available in most general-purpose statistical software programs, but they can be generated with custom code in Python, R, or similar tools.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.3',
     questions: [
       'Is the factor of interest significant?',
@@ -23,67 +23,85 @@ export const COMPARISON_CONTENT: Record<string, TechniqueContent> = {
       'Does the location change between levels of the primary factor?',
       'Has the process improved?',
       'What is the best setting (level) of the primary factor?',
-      'How much of an average improvement can we expect with this best setting?',
+      'How much of an average improvement can we expect with this best setting of the primary factor?',
       'Is there an interaction between the primary factor and one or more nuisance factors?',
       'Does the effect of the primary factor change depending on the setting of some nuisance factor?',
       'Are there any outliers?',
     ],
     importance:
-      'The block plot is the most information-rich graphical display for randomized block designs. It simultaneously shows treatment effects, blocking effectiveness, and potential interactions in a single figure, providing more insight than the ANOVA table alone because it reveals the pattern and consistency of effects rather than just their statistical significance.',
+      'The block plot is a graphical technique that pointedly focuses on whether or not the primary factor conclusions are in fact robustly general. If one setting of the primary factor does better than the other for all or most of the nuisance factor combinations, then the conclusion is general and robust. It replaces a quantitative procedure (analysis of variance) with a graphical procedure and an F-test with a binomial test, requiring fewer statistical assumptions.',
     definitionExpanded:
-      'Each block is represented as a vertical cluster of observations on the horizontal axis. Within each block, individual data points are plotted and connected by lines to the block mean. Treatment levels may be distinguished by color or symbol. The vertical axis shows the response. Parallel connecting lines across blocks indicate consistent treatment effects (no interaction), while crossing lines indicate block-by-treatment interaction.',
+      'Each block position corresponds to one combination of nuisance factors (e.g., plant × speed × shift). An outlined vertical rectangle spans the full response range within that position. Bold numerals (plot characters) mark the treatment levels at their response values inside the rectangle. The height of each rectangle reflects the total variability within that combination, while the relative placement of the characters inside shows which treatment level is higher or lower — enabling a simple counting diagnostic that replaces the ANOVA F-test with a binomial argument.',
     caseStudySlugs: ['ceramic-strength'],
     examples: [
       {
         label: 'Consistent Treatment Effect',
         description:
-          'Connecting lines across blocks are roughly parallel, indicating the treatment effect is the same regardless of the block. The factor of interest has a main effect with no interaction.',
+          'The same plot character (e.g., "2") is consistently lower across all or most block positions, indicating the treatment effect is robust over all nuisance factor combinations. The factor of interest has a main effect with no interaction.',
       },
       {
         label: 'Block-by-Treatment Interaction',
         description:
-          'Connecting lines cross between blocks, indicating the treatment effect depends on the block. The factor of interest behaves differently under different blocking conditions, and the interaction must be modeled.',
+          'The relative ordering of plot characters reverses between some block positions — "1" is lower in some blocks but "2" is lower in others. The factor of interest behaves differently under different nuisance factor combinations, and the interaction must be investigated.',
       },
       {
-        label: 'Effective Blocking',
+        label: 'Robustly General Conclusion',
         description:
-          'Large vertical separation between block means confirms that blocking captured meaningful nuisance variability. Without blocking, this variability would inflate the error term and reduce the ability to detect treatment effects.',
+          'If one primary factor level is better in 10 of 12 blocks, the chance of this happening by chance is about 2% (like getting 10 heads in 12 coin flips). The binomial test confirms the treatment effect is statistically significant without requiring normality or equal-variance assumptions.',
       },
     ],
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
-# Generate blocked experiment: 3 treatments x 4 blocks
+# NIST-style block plot: 12 blocks (2 plants x 2 speeds x 3 shifts)
+# 2 weld methods as primary factor
 rng = np.random.default_rng(42)
-treatments = ['A', 'B', 'C']
-n_blocks = 4
-base_block = rng.normal(0, 2, n_blocks)  # block effects
-effects = [0, 3, 6]  # treatment effects
+base_m1, base_m2 = 27, 20
+plant_eff = [0, -4]
+speed_eff = [0, 2]
+shift_eff = [0, -2, 3]
+labels, m1_vals, m2_vals = [], [], []
+for p in range(2):
+    for sp in range(2):
+        for sh in range(3):
+            eff = plant_eff[p] + speed_eff[sp] + shift_eff[sh]
+            m1_vals.append(base_m1 + eff + rng.normal(0, 2))
+            m2_vals.append(base_m2 + eff + rng.normal(0, 2))
+            labels.append(f"P{p+1}/{'FS'[sp]}/Sh{sh+1}")
+x = np.arange(len(labels))
+bar_w = 0.5
 
-fig, ax = plt.subplots(figsize=(8, 5))
-for i, (trt, eff) in enumerate(zip(treatments, effects)):
-    values = base_block + eff + rng.normal(0, 0.5, n_blocks)
-    blocks = np.arange(1, n_blocks + 1)
-    ax.plot(blocks, values, 'o-', label=f'Treatment {trt}',
-            markersize=8)
-
-ax.set_xlabel("Block")
-ax.set_ylabel("Response")
-ax.set_title("Block Plot — Randomized Complete Block Design")
-ax.set_xticks(np.arange(1, n_blocks + 1))
-ax.legend()
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
+fig, ax = plt.subplots(figsize=(10, 5))
+for i, (v1, v2) in enumerate(zip(m1_vals, m2_vals)):
+    lo, hi = min(v1, v2), max(v1, v2)
+    pad = (hi - lo) * 0.15 + 0.5
+    ax.add_patch(Rectangle((i - bar_w / 2, lo - pad), bar_w, hi - lo + 2 * pad,
+                            fill=False, edgecolor="gray", lw=1))
+    ax.text(i, v1, "1", ha="center", va="center",
+            fontsize=11, fontweight="bold")
+    ax.text(i, v2, "2", ha="center", va="center",
+            fontsize=11, fontweight="bold")
+all_vals = m1_vals + m2_vals
+ax.set_ylim(min(all_vals) - 3, max(all_vals) + 3)
+ax.set_xticks(x)
+ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
+ax.set_ylabel("Defects per Hour")
+ax.set_xlabel("Plant (2) x Speed (2) x Shift (3)")
+ax.set_title("Block Plot — Randomized Block Design")
+ax.set_xlim(-0.6, len(labels) - 0.4)
+ax.grid(True, axis="y", alpha=0.3)
+plt.subplots_adjust(bottom=0.22)
 plt.show()`,
   },
 
   'mean-plot': {
     definition:
-      'A mean plot displays the group means for each level of a factor variable, with a horizontal reference line drawn at the grand mean of all observations. It provides a direct visual comparison of how the average response changes across factor levels in a designed experiment or observational study.',
+      'A mean plot displays the group means versus group identifier, with a horizontal reference line drawn at the overall mean of all observations. The grouping is determined by the analyst: groups may be levels of a factor variable, time periods such as months, or arbitrary equal-sized segments of a data series.',
     purpose:
-      'Use a mean plot to determine whether a factor has a significant effect on the location of the response variable. It is one of the core graphical tools in design of experiments, providing an immediate visual answer to the question of whether factor levels produce different average responses. The mean plot is often used alongside the standard deviation plot to simultaneously assess effects on both location and spread.',
+      'Use a mean plot to see if the mean varies between different groups of the data. Mean plots can detect shifts in location across factor levels, time periods, or any analyst-defined grouping. For ungrouped data, the series can be split into an arbitrary number of equal-sized groups to check whether the mean is changing over time. The mean plot is typically used in conjunction with the standard deviation plot: the mean plot checks for shifts in location while the standard deviation plot checks for shifts in scale.',
     interpretation:
-      'The horizontal axis shows the factor levels and the vertical axis shows the corresponding group means. The grand mean reference line provides a baseline for comparison. Factor levels whose means are well above or below the grand mean line are likely to be statistically significant, while levels clustering near the grand mean suggest no effect. The practical significance depends on the magnitude of the departure relative to the within-group variability. When multiple factors are present, separate mean plots for each factor help identify which factors dominate.',
+      'The horizontal axis shows the group identifier and the vertical axis shows the corresponding group mean. A horizontal reference line at the overall mean provides a baseline for comparison. Groups whose means depart noticeably from the overall mean line indicate shifts in location. The magnitude of the departure indicates the size of the shift, and systematic patterns (e.g., an upward trend or a step change) reveal whether location is drifting or changing abruptly. Although the mean is the most common measure of location, the same concept applies to the median or trimmed mean when significant outliers are present.',
     assumptions:
       'The mean plot assumes that the sample means are reasonable estimators of the population means, which requires that within-group sample sizes are not too small. It does not account for variability within each group, so it should be interpreted in conjunction with the standard deviation plot or box plots. Equal sample sizes across groups are not required but simplify interpretation.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.20',
@@ -93,9 +111,9 @@ plt.show()`,
       'Is there a distinct pattern in the shifts in location?',
     ],
     importance:
-      'The mean plot is the most direct visual tool for detecting location effects in designed experiments. It provides immediate visual answers to the central DOE question: does changing the factor setting change the average response? The magnitude of the shift relative to the grand mean indicates practical significance.',
+      'A common assumption in one-factor analyses is that of constant location across different levels of the factor variable. The mean plot provides a graphical check for that assumption. For univariate data, grouping the data into equal-sized intervals and plotting the group means provides a graphical test of whether the location is constant over time.',
     definitionExpanded:
-      'The horizontal axis shows factor levels (categorical or ordered). The vertical axis shows the group mean for each level. A horizontal reference line at the grand mean (mean of all observations) provides a baseline for comparison. The deviation of each group mean from the grand mean line indicates the size and direction of the factor effect at that level.',
+      'The horizontal axis shows group identifiers (categorical labels such as factor levels, months, or sequential group numbers). The vertical axis shows the group mean for each group. A horizontal reference line at the overall mean of all observations provides a baseline for comparison. The deviation of each group mean from the overall mean line indicates where and by how much the location shifts.',
     formulas: [
       {
         label: 'Group Mean',
@@ -104,36 +122,106 @@ plt.show()`,
           'The mean of all observations within the j-th group, where n_j is the number of observations in that group.',
       },
       {
-        label: 'Grand Mean',
-        tex: String.raw`\bar{x} = \frac{1}{k}\sum_{j=1}^{k} \bar{x}_j`,
+        label: 'Overall Mean',
+        tex: String.raw`\bar{x} = \frac{1}{N}\sum_{i=1}^{N} x_i`,
         explanation:
-          'The mean of the k group means, serving as the overall reference line on the mean plot.',
+          'The mean of all N observations pooled across all groups, serving as the horizontal reference line on the mean plot.',
       },
     ],
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
 
-# Generate grouped data: 6 groups with different means
+# Monthly data — location shifts after month 6 (NIST 1.3.3.20 style)
 rng = np.random.default_rng(42)
-group_means = [20, 22, 18, 25, 21, 23]
-n_per_group = 15
-groups = []
-for mu in group_means:
-    groups.append(rng.normal(mu, 3, n_per_group))
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+# First 6 months: mean ~20; last 6 months: mean ~25
+true_means = [20, 21, 19, 20, 22, 20, 25, 26, 24, 25, 27, 25]
+n_per_group = 20
+groups = [rng.normal(mu, 3, n_per_group) for mu in true_means]
 
-# Compute group means and grand mean
+# Compute group means and overall mean (mean of all observations)
 means = [g.mean() for g in groups]
-grand_mean = np.mean(means)
+all_data = np.concatenate(groups)
+overall_mean = all_data.mean()
 
-fig, ax = plt.subplots(figsize=(8, 5))
-ax.plot(range(1, len(means) + 1), means, 'o-', color='steelblue',
-        markersize=10, linewidth=2, label='Group Mean')
-ax.axhline(grand_mean, color='red', linestyle='--',
-           linewidth=1.5, label=f'Grand Mean = {grand_mean:.1f}')
-ax.set_xlabel("Group")
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(range(len(months)), means, 'o-', color='steelblue',
+        markersize=8, linewidth=2, label='Group Mean')
+ax.axhline(overall_mean, color='red', linestyle='--',
+           linewidth=1.5, label=f'Overall Mean = {overall_mean:.1f}')
+ax.set_xticks(range(len(months)))
+ax.set_xticklabels(months)
+ax.set_xlabel("Month")
 ax.set_ylabel("Mean Response")
-ax.set_title("Mean Plot — Group Means with Grand Mean Reference")
-ax.set_xticks(range(1, len(means) + 1))
+ax.set_title("Mean Plot — Shift in Location After Month 6")
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()`,
+  },
+
+  'std-deviation-plot': {
+    definition:
+      'A standard deviation plot displays the group standard deviations versus group identifier, with a horizontal reference line drawn at the overall standard deviation. It is the scale counterpart to the mean plot, used to determine whether the variability of a process or measurement is constant across groups or changing over time.',
+    purpose:
+      'Use a standard deviation plot to detect changes in scale between groups of data. The grouping is determined by the analyst — the groups may be levels of a factor variable, months of the year, or arbitrary equal-sized segments of a time series. Standard deviation plots are typically used in conjunction with mean plots: the mean plot checks for shifts in location while the standard deviation plot checks for shifts in scale. A common assumption in one-factor analyses is that of equal variances; this plot provides a graphical check of that assumption.',
+    interpretation:
+      'The horizontal axis shows the group identifier and the vertical axis shows the group standard deviations. The overall reference line provides a baseline for comparison. Groups with standard deviations well above the reference line indicate periods or conditions of increased variability, while groups below the line indicate reduced variability. A distinct upward or downward trend suggests that the process variability is systematically changing over time. Although the standard deviation is the most commonly used measure of scale, the same concept applies to other robust measures such as the median absolute deviation or average absolute deviation, which may be preferred when significant outliers are present.',
+    assumptions:
+      'The standard deviation plot requires multiple observations per group to compute meaningful within-group standard deviations. The sample standard deviation is sensitive to outliers within a group; for data with significant outliers, consider using the median absolute deviation instead. For arbitrary time-based grouping, the choice of group size affects the resolution: too few groups may miss short-term shifts, while too many groups produce noisy estimates.',
+    nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.28',
+    questions: [
+      'Are there any shifts in variation?',
+      'What is the magnitude of the shifts in variation?',
+      'Is there a distinct pattern in the shifts in variation?',
+    ],
+    importance:
+      'A common assumption in one-factor analyses is that of equal variances across factor levels. The standard deviation plot provides a graphical check for that assumption. For univariate data, grouping the data into equal-sized intervals and plotting the standard deviation of each group provides a graphical test of whether the variance is constant over time.',
+    definitionExpanded:
+      'The horizontal axis shows group identifiers (categorical or ordered, e.g., months, time windows, or factor levels). The vertical axis shows the within-group standard deviation. A horizontal reference line is drawn at the overall standard deviation of the full dataset. When the standard deviations cluster near the reference line, the variance is approximately constant across groups. Departures from the line reveal where and by how much the variability changes.',
+    formulas: [
+      {
+        label: 'Group Standard Deviation',
+        tex: String.raw`s_j = \sqrt{\frac{1}{n_j - 1}\sum_{i=1}^{n_j}\left(x_{ij} - \bar{x}_j\right)^2}`,
+        explanation:
+          'The sample standard deviation within the j-th group, measuring the spread of observations around the group mean.',
+      },
+      {
+        label: 'Overall Standard Deviation',
+        tex: String.raw`s = \sqrt{\frac{1}{N - 1}\sum_{i=1}^{N}\left(x_i - \bar{x}\right)^2}`,
+        explanation:
+          'The standard deviation of all N observations pooled together, serving as the horizontal reference line on the standard deviation plot.',
+      },
+    ],
+    pythonCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Monthly data — standard deviation by month (similar to NIST PBF11.DAT)
+# Simulates a process where summer months have higher variability
+rng = np.random.default_rng(42)
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+# Higher spread in summer months (Jun-Aug)
+spreads = [2.1, 1.9, 2.3, 2.8, 3.2, 4.5,
+           5.1, 4.8, 3.5, 2.6, 2.0, 1.8]
+groups = [rng.normal(50, s, 20) for s in spreads]
+
+# Compute group standard deviations and overall SD
+stds = [g.std(ddof=1) for g in groups]
+all_data = np.concatenate(groups)
+overall_sd = all_data.std(ddof=1)
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(range(len(months)), stds, 's-', color='darkorange',
+        markersize=8, linewidth=2, label='Monthly Std Dev')
+ax.axhline(overall_sd, color='red', linestyle='--', linewidth=1.5,
+           label=f'Overall SD = {overall_sd:.2f}')
+ax.set_xticks(range(len(months)))
+ax.set_xticklabels(months)
+ax.set_xlabel("Month")
+ax.set_ylabel("Standard Deviation")
+ax.set_title("Standard Deviation Plot — Monthly Variation")
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -148,7 +236,7 @@ plt.show()`,
     interpretation:
       'Each spoke of the star represents one variable, and the distance from the center indicates the magnitude of that variable, typically scaled to a common range. A large, regular polygon indicates an observation that scores highly on all variables. A small polygon indicates uniformly low values. An irregular or lopsided polygon highlights variables where the observation is unusually high or low. When multiple star plots are displayed side by side, similar polygon shapes indicate similar multivariate profiles, while contrasting shapes indicate differentiation. The area of the polygon provides a rough aggregate measure, but the shape is more informative than the area alone.',
     assumptions:
-      'The star plot requires that all variables be measured on comparable scales or that the data be standardized before plotting. The visual impression depends on the ordering of variables around the perimeter, and different orderings can produce different visual patterns for the same data. The technique works best with 5 to 12 variables; fewer than 5 does not justify the radial layout, and more than 12 makes individual spokes difficult to distinguish.',
+      'The star plot requires that all variables be measured on comparable scales or that the data be standardized before plotting. The visual impression depends on the ordering of variables around the perimeter, and different orderings can produce different visual patterns for the same data. The technique works best with 5 to 12 variables; fewer than 5 does not justify the radial layout, and more than 12 makes individual spokes difficult to distinguish. Star plots are helpful for small-to-moderate-sized multivariate data sets; their primary weakness is that their effectiveness is limited to data sets with less than a few hundred points, after which they tend to be overwhelming.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.29',
     questions: [
       'What variables are dominant for a given observation?',
@@ -162,45 +250,69 @@ plt.show()`,
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
 
-# Generate data for 3 items across 6 variables
-rng = np.random.default_rng(42)
-categories = ['Speed', 'Accuracy', 'Cost', 'Reliability',
-              'Ease of Use', 'Scalability']
-items = {
-    'Product A': rng.uniform(0.5, 1.0, 6),
-    'Product B': rng.uniform(0.3, 0.9, 6),
-    'Product C': rng.uniform(0.4, 0.95, 6),
-}
-
+# 1979 Automobile Analysis — first 16 cars from AUTO79.DAT
+# 9 variables per NIST Section 1.3.3.29 sample plot
+categories = ['Price', 'MPG', 'Rep 78', 'Rep 77',
+              'Headroom', 'Rear Seat', 'Trunk',
+              'Weight', 'Length']
 n_vars = len(categories)
 angles = np.linspace(0, 2 * np.pi, n_vars, endpoint=False)
 
-fig, ax = plt.subplots(figsize=(7, 7),
-                       subplot_kw=dict(polar=True))
-for label, values in items.items():
-    vals = np.concatenate([values, [values[0]]])
-    angs = np.concatenate([angles, [angles[0]]])
-    ax.plot(angs, vals, 'o-', linewidth=2, label=label)
-    ax.fill(angs, vals, alpha=0.1)
+# Raw data from AUTO79.DAT (-1 = missing, clamped to 0)
+cars = {
+    'AMC Concord':    [4099, 22, 3, 2, 2.5, 27.5, 11, 2930, 186],
+    'AMC Pacer':      [4749, 17, 3, 1, 3.0, 25.5, 11, 3350, 173],
+    'AMC Spirit':     [3799, 22,-1,-1, 3.0, 18.5, 12, 2640, 168],
+    'Audi 5000':      [9690, 17, 5, 2, 3.0, 27.0, 15, 2830, 189],
+    'Audi Fox':       [6295, 23, 3, 3, 2.5, 28.0, 11, 2070, 174],
+    'BMW 320i':       [9735, 25, 4, 4, 2.5, 26.0, 12, 2650, 177],
+    'Buick Century':  [4816, 20, 3, 3, 4.5, 29.0, 16, 3250, 196],
+    'Buick Electra':  [7827, 15, 4, 4, 4.0, 31.5, 20, 4080, 222],
+    'Buick Le Sabre': [5788, 18, 3, 4, 4.0, 30.5, 21, 3670, 218],
+    'Buick Opel':     [4453, 26,-1,-1, 3.0, 24.0, 10, 2230, 170],
+    'Buick Regal':    [5189, 20, 3, 3, 2.0, 28.5, 16, 3280, 200],
+    'Buick Riviera':  [10372,16, 3, 4, 3.5, 30.0, 17, 3880, 207],
+    'Buick Skylark':  [4082, 19, 3, 3, 3.5, 27.0, 13, 3400, 200],
+    'Cad. Deville':   [11385,14, 3, 3, 4.0, 31.5, 20, 4330, 221],
+    'Cad. Eldorado':  [14500,14, 2, 2, 3.5, 30.0, 16, 3900, 204],
+    'Cad. Seville':   [15906,21, 3, 3, 3.0, 30.0, 13, 4290, 204],
+}
 
-ax.set_thetagrids(np.degrees(angles), categories)
-ax.set_ylim(0, 1.1)
-ax.set_title("Star Plot — Multivariate Profile Comparison",
-             y=1.08)
-ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+# Normalize each variable to [0, 1] by per-variable max (clamp negatives)
+data = np.array(list(cars.values()))
+data = np.clip(data, 0, None)
+maxvals = data.max(axis=0)
+normed = data / maxvals
+
+cols, rows = 4, 4
+fig, axes = plt.subplots(rows, cols, figsize=(12, 12),
+                         subplot_kw=dict(polar=True))
+
+for idx, (label, _) in enumerate(cars.items()):
+    ax = axes[idx // cols, idx % cols]
+    vals = np.concatenate([normed[idx], [normed[idx][0]]])
+    angs = np.concatenate([angles, [angles[0]]])
+    ax.plot(angs, vals, 'o-', linewidth=1.5, color='steelblue')
+    ax.fill(angs, vals, alpha=0.2, color='steelblue')
+    ax.set_thetagrids(np.degrees(angles), categories, fontsize=6)
+    ax.set_ylim(0, 1.1)
+    ax.set_title(label, fontsize=8, pad=10)
+
+plt.suptitle("Star Plot — 1979 Automobile Analysis (NIST 1.3.3.29)",
+             y=1.02, fontsize=13)
 plt.tight_layout()
 plt.show()`,
   },
 
   'youden-plot': {
     definition:
-      'A Youden plot is a scatter plot used in interlaboratory studies that plots the result from one run or condition against the result from a second run or condition for each laboratory, with reference lines drawn at the medians of both runs. The resulting display separates within-laboratory variability from between-laboratory variability.',
+      'A Youden plot is a scatter plot used in interlaboratory studies that plots the result from one run or product against the result from a second run or product for each laboratory, with the lab identifier as the plot symbol. A 45-degree reference line is sometimes drawn to highlight departures from consistency between the two runs.',
     purpose:
       'Use a Youden plot when analyzing data from interlaboratory comparisons, proficiency testing, or paired-sample studies where each laboratory or instrument produces two measurements under different conditions. The plot reveals whether laboratories that score high on one measurement also score high on the other, which would indicate a systematic between-laboratory bias. It is a standard tool in metrology and quality assurance for identifying laboratories whose measurement systems are consistently biased.',
     interpretation:
-      'The horizontal axis shows the result from one run and the vertical axis shows the result from the other run. The median reference lines divide the plot into four quadrants. Laboratories in the upper-right quadrant measure consistently high on both runs, while those in the lower-left quadrant measure consistently low. This diagonal pattern indicates between-laboratory systematic bias. Laboratories scattered uniformly across all four quadrants show primarily within-laboratory random variability and no systematic bias. A tight cluster of points along the diagonal indicates that between-laboratory variability dominates, while a diffuse cloud with no diagonal trend indicates that within-laboratory variability dominates.',
+      'The horizontal axis shows the result from one run or product and the vertical axis shows the result from the other. Each point is labeled with its lab identifier. When two runs of the same product are being compared, a 45-degree reference line indicates where labs that produce identical results on both runs would fall — departures from this line indicate within-lab inconsistency. If two different products are being tested, the 45-degree line may not be appropriate, but consistent labs should still cluster near some fitted straight line. A tight cluster of points along the diagonal indicates that between-laboratory variability dominates, while a diffuse cloud with no diagonal trend indicates that within-laboratory variability dominates.',
     assumptions:
-      'The Youden plot requires paired measurements from each laboratory, typically two runs or two samples. It assumes that the two conditions are measured on the same scale. The plot is most informative when the number of laboratories is moderate to large, typically 10 or more. The median reference lines are used instead of means because they are robust to outlying laboratories.',
+      'The Youden plot requires paired measurements from each laboratory, typically two runs or two samples. It assumes that the two conditions are measured on comparable scales. The plot is most informative when the number of laboratories is moderate to large, typically 10 or more. When runs are on the same product, a 45-degree reference line is the natural baseline; when runs are on different products, a fitted straight line is more appropriate.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.31',
     questions: [
       'Are all labs equivalent?',
@@ -209,33 +321,34 @@ plt.show()`,
       'What labs are outliers?',
     ],
     importance:
-      'The Youden plot is the standard graphical tool for interlaboratory studies and proficiency testing. It uniquely separates between-lab systematic bias (points along the diagonal) from within-lab random variability (scatter perpendicular to the diagonal), providing targeted diagnostic information that summary statistics cannot reveal.',
+      'In interlaboratory studies or in comparing two runs from the same lab, it is useful to know if consistent results are generated. The Youden plot should be a routine plot for analyzing this type of data, as it separates between-lab systematic bias (points along the diagonal) from within-lab random variability (scatter perpendicular to the diagonal).',
     definitionExpanded:
-      'Each laboratory is plotted as a single point with horizontal coordinate = result from run/sample 1 and vertical coordinate = result from run/sample 2. Vertical and horizontal reference lines are drawn at the medians of each run, dividing the plot into four quadrants. A 45-degree reference line through the median intersection highlights systematic bias. Points near this diagonal have high between-lab bias; points far from the diagonal have high within-lab variability.',
+      'Each laboratory is plotted as a single point with vertical coordinate = result from run/sample 1 and horizontal coordinate = result from run/sample 2. The plot symbol is the lab identifier (typically an integer from 1 to k). A 45-degree reference line is sometimes drawn: for two runs of the same product, labs producing consistent results should lie near this line. For two different products, the points should lie near some fitted straight line if the labs are consistent. Departures from the reference line indicate lab inconsistency.',
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
 
-# Generate paired lab comparison data (15 labs, 2 runs)
+# Generate paired lab comparison data (15 labs, 2 runs on same product)
 rng = np.random.default_rng(42)
-lab_bias = rng.normal(0, 2, 15)  # between-lab systematic bias
-run1 = 50 + lab_bias + rng.normal(0, 0.8, 15)
-run2 = 50 + lab_bias + rng.normal(0, 0.8, 15)
-
-med_x, med_y = np.median(run1), np.median(run2)
+n_labs = 15
+lab_bias = rng.normal(0, 2, n_labs)  # between-lab systematic bias
+run1 = 50 + lab_bias + rng.normal(0, 0.8, n_labs)
+run2 = 50 + lab_bias + rng.normal(0, 0.8, n_labs)
 
 fig, ax = plt.subplots(figsize=(7, 7))
-ax.scatter(run1, run2, s=60, zorder=3)
-ax.axvline(med_x, color='grey', linestyle='--', alpha=0.7,
-           label=f'Median Run 1 = {med_x:.1f}')
-ax.axhline(med_y, color='grey', linestyle='-.', alpha=0.7,
-           label=f'Median Run 2 = {med_y:.1f}')
+
+# Plot each lab with its identifier as the marker
+for i in range(n_labs):
+    ax.text(run2[i], run1[i], str(i + 1), ha='center', va='center',
+            fontsize=10, fontweight='bold', color='steelblue')
+
+# 45-degree reference line (NIST convention for same-product comparisons)
 lims = [min(run1.min(), run2.min()) - 1,
         max(run1.max(), run2.max()) + 1]
 ax.plot(lims, lims, 'r-', alpha=0.5, label='45-degree line')
 ax.set_xlim(lims)
 ax.set_ylim(lims)
-ax.set_xlabel("Run 1 Result")
-ax.set_ylabel("Run 2 Result")
+ax.set_xlabel("Run 2 Result")
+ax.set_ylabel("Run 1 Result")
 ax.set_title("Youden Plot — Interlaboratory Comparison")
 ax.legend(fontsize=9)
 ax.set_aspect('equal')

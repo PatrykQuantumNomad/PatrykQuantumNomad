@@ -31,6 +31,7 @@ const {
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL.toString()} />
 <meta name="robots" content={robots}>
+<meta name="author" content="Patryk Golabek" />
 <link rel="alternate" hreflang="en-CA" href={canonicalURL.toString()} />
 <link rel="alternate" hreflang="x-default" href={canonicalURL.toString()} />
 
@@ -41,17 +42,17 @@ const {
 <meta property="og:url" content={canonicalURL.toString()} />
 <meta property="og:site_name" content="Patryk Golabek" />
 <meta property="og:locale" content="en_CA" />
-{ogImage && <meta property="og:image" content={ogImage} />}
+{ogImage && <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site).toString()} />}
 {ogImage && <meta property="og:image:width" content="1200" />}
 {ogImage && <meta property="og:image:height" content="630" />}
-{ogImage && <meta property="og:image:type" content="image/png" />}
+{ogImage && <meta property="og:image:type" content={ogImage.endsWith('.svg') ? 'image/svg+xml' : 'image/png'} />}
 {ogImage && <meta property="og:image:alt" content={ogImageAlt} />}
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-{ogImage && <meta name="twitter:image" content={ogImage} />}
+{ogImage && <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site).toString()} />}
 {ogImage && <meta name="twitter:image:alt" content={ogImageAlt} />}
 <meta name="twitter:site" content="@QuantumMentat" />
 <meta name="twitter:creator" content="@QuantumMentat" />

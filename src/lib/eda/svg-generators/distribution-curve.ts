@@ -211,8 +211,8 @@ export function generateDistributionCurve(options: DistributionCurveOptions): st
     dataContent = areaFill + '\n' + curvePath;
   }
 
-  // Distribution label annotation
-  const annotation = `<text x="${(margin.left + innerWidth - 10).toFixed(2)}" y="${(margin.top + 16).toFixed(2)}" text-anchor="end" font-size="11" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${label} ${type.toUpperCase()}</text>`;
+  // Distribution label annotation (above the plot area)
+  const annotation = `<text x="${(margin.left + innerWidth - 10).toFixed(2)}" y="${(margin.top - 6).toFixed(2)}" text-anchor="end" font-size="11" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${label} ${type.toUpperCase()}</text>`;
 
   // Default axis labels
   const xLbl = options.xLabel ?? (discrete ? 'k' : 'x');

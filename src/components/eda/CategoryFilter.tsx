@@ -8,6 +8,7 @@ const CATEGORIES = [
   { id: 'distributions', label: 'Distributions' },
   { id: 'case-studies', label: 'Case Studies' },
   { id: 'reference', label: 'Reference' },
+  { id: 'foundations', label: 'Foundations' },
 ] as const;
 
 export default function CategoryFilter() {

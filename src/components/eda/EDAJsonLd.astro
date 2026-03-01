@@ -44,7 +44,7 @@ if (isOverview) {
     "description": description,
     "url": url,
     "datePublished": "2026-02-25",
-    "dateModified": "2026-02-25",
+    "dateModified": new Date().toISOString().split('T')[0],
     "version": "2026 Edition",
     "license": "https://creativecommons.org/licenses/by/4.0/",
     "creator": person,
@@ -61,7 +61,14 @@ if (isOverview) {
     ],
   };
 } else {
-  const learningResourceType = pageType === 'case-study' ? 'Case Study' : 'Reference';
+  const learningResourceTypeMap: Record<string, string> = {
+    'technique': 'Diagram',
+    'distribution': 'Interactive resource',
+    'foundation': 'Overview',
+    'case-study': 'Case Study',
+    'reference': 'Reference',
+  };
+  const learningResourceType = learningResourceTypeMap[pageType ?? 'reference'] ?? 'Reference';
 
   schema = {
     "@context": "https://schema.org",
@@ -70,7 +77,7 @@ if (isOverview) {
     "description": description,
     "url": url,
     "datePublished": "2026-02-25",
-    "dateModified": "2026-02-25",
+    "dateModified": new Date().toISOString().split('T')[0],
     "inLanguage": "en",
     "proficiencyLevel": "Expert",
     "learningResourceType": learningResourceType,

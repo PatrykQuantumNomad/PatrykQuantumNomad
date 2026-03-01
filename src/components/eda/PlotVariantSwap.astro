@@ -12,7 +12,6 @@ interface Variant {
 
 interface Props {
   variants: Variant[];
-  defaultLabel?: string;
   techniqueTitle?: string;
 }
 
@@ -80,32 +79,39 @@ const componentId = `pvs-${Math.random().toString(36).slice(2, 8)}`;
 </style>
 
 <script>
-  // View Transition safe: re-query on each click, no cached references
-  document.querySelectorAll('.plot-variant-swap').forEach((container) => {
-    container.addEventListener('click', (e) => {
-      const tab = (e.target as HTMLElement).closest('[role="tab"]');
-      if (!tab) return;
+  function initPlotVariantSwap() {
+    document.querySelectorAll('.plot-variant-swap').forEach((container) => {
+      if (container.hasAttribute('data-pvs-init')) return;
+      container.setAttribute('data-pvs-init', '');
+      container.addEventListener('click', (e) => {
+        const tab = (e.target as HTMLElement).closest('[role="tab"]');
+        if (!tab) return;
 
-      const variant = tab.getAttribute('data-variant');
-      if (!variant) return;
+        const variant = tab.getAttribute('data-variant');
+        if (!variant) return;
 
-      // Update all tabs within this container
-      const tabs = container.querySelectorAll('[role="tab"]');
-      tabs.forEach((t) => {
-        t.setAttribute('aria-selected', 'false');
-      });
-      tab.setAttribute('aria-selected', 'true');
+        // Update all tabs within this container
+        const tabs = container.querySelectorAll('[role="tab"]');
+        tabs.forEach((t) => {
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.setAttribute('aria-selected', 'true');
 
-      // Toggle panel visibility
-      const panels = container.querySelectorAll('[role="tabpanel"]');
-      panels.forEach((p) => {
-        const panel = p as HTMLElement;
-        if (panel.getAttribute('data-panel') === variant) {
-          panel.classList.remove('hidden');
-        } else {
-          panel.classList.add('hidden');
-        }
+        // Toggle panel visibility
+        const panels = container.querySelectorAll('[role="tabpanel"]');
+        panels.forEach((p) => {
+          const panel = p as HTMLElement;
+          if (panel.getAttribute('data-panel') === variant) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
       });
     });
-  });
+  }
+
+  // Run on initial load and after each View Transition navigation
+  initPlotVariantSwap();
+  document.addEventListener('astro:page-load', initPlotVariantSwap);
 </script>

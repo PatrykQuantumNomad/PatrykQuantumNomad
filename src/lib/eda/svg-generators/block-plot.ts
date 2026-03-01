@@ -1,10 +1,14 @@
 /**
- * Block plot SVG generator — shows mean response for each block
- * with separate symbols/colors for each group, connected by lines.
+ * Block plot SVG generator — NIST/SEMATECH convention.
+ * Each X-position represents a combination of nuisance factors.
+ * An outlined vertical rectangle spans the min-to-max response range
+ * within each position.  Bold plot characters (numerals) mark
+ * primary-factor levels at their Y-value inside the rectangle.
+ * Reference: NIST/SEMATECH e-Handbook Section 1.3.3.3.
  * Produces valid SVG markup at build time with no client-side JS.
  */
 import { scaleLinear, scaleBand } from 'd3-scale';
-import { extent } from 'd3-array';
+import { extent, min, max } from 'd3-array';
 import {
   DEFAULT_CONFIG,
   PALETTE,
@@ -19,7 +23,10 @@ import {
 export interface BlockPlotOptions {
   blocks: {
     label: string;
-    values: { group: string; mean: number }[];
+    /** Individual observations per group within this block */
+    points?: { group: string; value: number }[];
+    /** Legacy: aggregated means per group (renders as single points) */
+    values?: { group: string; mean: number }[];
   }[];
   config?: Partial<PlotConfig>;
   title?: string;
@@ -29,30 +36,59 @@ export interface BlockPlotOptions {
 
 export function generateBlockPlot(options: BlockPlotOptions): string {
   const { blocks } = options;
-  const config: PlotConfig = { ...DEFAULT_CONFIG, ...options.config };
-  const { innerWidth, innerHeight } = innerDimensions(config);
-  const { margin } = config;
 
   if (!blocks || blocks.length === 0) {
+    const emptyConfig: PlotConfig = { ...DEFAULT_CONFIG, ...options.config };
     return (
-      svgOpen(config, 'Insufficient data for block plot') +
-      `<text x="${(config.width / 2).toFixed(2)}" y="${(config.height / 2).toFixed(2)}" text-anchor="middle" font-size="14" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">Insufficient data</text></svg>`
+      svgOpen(emptyConfig, 'Insufficient data for block plot') +
+      `<text x="${(emptyConfig.width / 2).toFixed(2)}" y="${(emptyConfig.height / 2).toFixed(2)}" text-anchor="middle" font-size="14" fill="${PALETTE.textSecondary}" font-family="${emptyConfig.fontFamily}">Insufficient data</text></svg>`
     );
   }
 
-  // Extract unique groups
-  const groups = [...new Set(blocks.flatMap(b => b.values.map(v => v.group)))];
-  const groupColors = [PALETTE.dataPrimary, PALETTE.dataSecondary, PALETTE.dataTertiary];
+  // Dynamic sizing: wider plot and taller bottom margin for many blocks
+  const needsRotation = blocks.length > 8;
+  const defaultBottom = needsRotation ? 70 : DEFAULT_CONFIG.margin.bottom;
+  const config: PlotConfig = {
+    ...DEFAULT_CONFIG,
+    ...options.config,
+    width: Math.max((options.config?.width ?? DEFAULT_CONFIG.width), needsRotation ? 700 : 600),
+    margin: {
+      ...(DEFAULT_CONFIG.margin),
+      ...(options.config?.margin),
+      bottom: options.config?.margin?.bottom ?? defaultBottom,
+    },
+  };
+  // If labels will rotate and caller's bottom margin is too small, expand it
+  if (needsRotation && config.margin.bottom < 70) {
+    config.height += (70 - config.margin.bottom);
+    config.margin.bottom = 70;
+  }
+  const { innerWidth, innerHeight } = innerDimensions(config);
+  const { margin } = config;
+
+  // Normalize: convert legacy { group, mean } to { group, value }
+  const normalized = blocks.map(b => ({
+    label: b.label,
+    points: b.points ?? (b.values ?? []).map(v => ({ group: v.group, value: v.mean })),
+  }));
+
+  // Extract unique groups (preserving order)
+  const groups: string[] = [];
+  for (const b of normalized) {
+    for (const p of b.points) {
+      if (!groups.includes(p.group)) groups.push(p.group);
+    }
+  }
 
   // Scales
   const xScale = scaleBand()
-    .domain(blocks.map(b => b.label))
+    .domain(normalized.map(b => b.label))
     .range([margin.left, margin.left + innerWidth])
-    .padding(0.2);
+    .padding(0.25);
 
-  const allMeans = blocks.flatMap(b => b.values.map(v => v.mean));
-  const [yMin, yMax] = extent(allMeans) as [number, number];
-  const yPad = (yMax - yMin) * 0.1 || 1;
+  const allValues = normalized.flatMap(b => b.points.map(p => p.value));
+  const [yMin, yMax] = extent(allValues) as [number, number];
+  const yPad = (yMax - yMin) * 0.12 || 1;
 
   const yScale = scaleLinear()
     .domain([yMin - yPad, yMax + yPad])
@@ -61,51 +97,68 @@ export function generateBlockPlot(options: BlockPlotOptions): string {
   const bandWidth = xScale.bandwidth();
   const yTicks = yScale.ticks(6);
 
-  // Points and connecting lines per group
-  const groupElements = groups.map((group, gi) => {
-    const color = groupColors[gi % groupColors.length];
-    const pts = blocks.map(b => {
-      const v = b.values.find(val => val.group === group);
-      if (!v) return null;
-      const cx = (xScale(b.label) ?? 0) + bandWidth / 2;
-      return { x: cx, y: yScale(v.mean) };
-    }).filter((p): p is { x: number; y: number } => p !== null);
+  // --- Outlined rectangles with single accent fill + plot characters ---
+  const blockElements = normalized.map(b => {
+    const blockX = xScale(b.label) ?? 0;
+    const vals = b.points.map(p => p.value);
+    const blockMin = min(vals) as number;
+    const blockMax = max(vals) as number;
+    const yTop = yScale(blockMax);
+    const yBot = yScale(blockMin);
+    // Pad the rectangle so numbers sit inside, not on the edge
+    const pad = 10;
+    const rectHeight = Math.max(yBot - yTop + pad * 2, 2);
+    const rx = blockX + 2;
+    const rw = bandWidth - 4;
 
-    const circles = pts.map(p =>
-      `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="4" fill="${color}" />`,
-    ).join('\n');
+    // Filled + outlined rectangle
+    const rect = `<rect x="${rx.toFixed(2)}" y="${(yTop - pad).toFixed(2)}" width="${rw.toFixed(2)}" height="${rectHeight.toFixed(2)}" fill="${PALETTE.dataPrimary}" opacity="0.18" stroke="${PALETTE.axis}" stroke-width="1" rx="1" />`;
 
-    const line = pts.length > 1
-      ? `<polyline points="${pts.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2" />`
-      : '';
+    // Bold numbered plot characters at Y-value positions
+    const cx = blockX + bandWidth / 2;
+    const labels = b.points.map(p => {
+      const gi = groups.indexOf(p.group);
+      const cy = yScale(p.value);
+      const label = `${gi + 1}`;
+      return `<text x="${cx.toFixed(2)}" y="${cy.toFixed(2)}" text-anchor="middle" dy="0.35em" font-size="11" font-weight="bold" fill="${PALETTE.text}" font-family="${config.fontFamily}">${label}</text>`;
+    }).join('\n');
 
-    return line + '\n' + circles;
+    return rect + '\n' + labels;
   }).join('\n');
 
-  // Legend in upper-right
+  // --- Legend: "Plot Character = Group Name" ---
   const legendX = margin.left + innerWidth - 100;
-  const legendY = margin.top + 10;
-  const legend = groups.map((group, gi) => {
-    const color = groupColors[gi % groupColors.length];
-    const y = legendY + gi * 18;
-    return `<circle cx="${legendX}" cy="${y}" r="4" fill="${color}" /><text x="${(legendX + 10).toFixed(2)}" y="${y.toFixed(2)}" dy="0.35em" font-size="11" fill="${PALETTE.text}" font-family="${config.fontFamily}">${group}</text>`;
+  const legendY = margin.top + 14;
+  const legendTitle = `<text x="${legendX.toFixed(2)}" y="${(legendY - 2).toFixed(2)}" dy="0.35em" font-size="10" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">Plot Character</text>`;
+  const legendItems = groups.map((group, gi) => {
+    const y = legendY + (gi + 1) * 16;
+    return (
+      `<text x="${legendX.toFixed(2)}" y="${y.toFixed(2)}" dy="0.35em" font-size="11" font-weight="bold" fill="${PALETTE.text}" font-family="${config.fontFamily}">${gi + 1}</text>` +
+      `<text x="${(legendX + 12).toFixed(2)}" y="${y.toFixed(2)}" dy="0.35em" font-size="10" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">= ${group}</text>`
+    );
   }).join('\n');
+  const legend = legendTitle + '\n' + legendItems;
 
-  // X axis labels
-  const xLabels = blocks.map(b => {
+  // --- X-axis labels (rotated for many blocks) ---
+  const rotateLabels = normalized.length > 8;
+  const xLabels = normalized.map(b => {
     const cx = (xScale(b.label) ?? 0) + bandWidth / 2;
-    return `<text x="${cx.toFixed(2)}" y="${(margin.top + innerHeight + 18).toFixed(2)}" text-anchor="middle" dy="0.35em" font-size="11" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${b.label}</text>`;
+    const ly = margin.top + innerHeight + 16;
+    if (rotateLabels) {
+      return `<text x="${cx.toFixed(2)}" y="${ly.toFixed(2)}" text-anchor="end" dy="0.35em" font-size="9" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}" transform="rotate(-45,${cx.toFixed(2)},${ly.toFixed(2)})">${b.label}</text>`;
+    }
+    return `<text x="${cx.toFixed(2)}" y="${ly.toFixed(2)}" text-anchor="middle" dy="0.35em" font-size="10" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${b.label}</text>`;
   }).join('\n');
 
   const xAxisLine = `<line x1="${margin.left}" y1="${(margin.top + innerHeight)}" x2="${(margin.left + innerWidth)}" y2="${(margin.top + innerHeight)}" stroke="${PALETTE.axis}" stroke-width="1" />`;
   const xLabelEl = options.xLabel
-    ? `<text x="${(config.width / 2).toFixed(2)}" y="${(margin.top + innerHeight + 40).toFixed(2)}" text-anchor="middle" font-size="12" fill="${PALETTE.text}" font-family="${config.fontFamily}">${options.xLabel}</text>`
+    ? `<text x="${(config.width / 2).toFixed(2)}" y="${(config.height - 6).toFixed(2)}" text-anchor="middle" font-size="12" fill="${PALETTE.text}" font-family="${config.fontFamily}">${options.xLabel}</text>`
     : '';
 
   return (
     svgOpen(config, `Block Plot${options.title ? ': ' + options.title : ''}`) +
     gridLinesH(yTicks, yScale, margin.left, margin.left + innerWidth) + '\n' +
-    groupElements + '\n' +
+    blockElements + '\n' +
     legend + '\n' +
     xAxisLine + '\n' + xLabels + '\n' + xLabelEl + '\n' +
     yAxis(yTicks, yScale, margin.left, options.yLabel ?? '', config) + '\n' +

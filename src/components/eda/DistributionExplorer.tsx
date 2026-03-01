@@ -12,6 +12,8 @@ import { evalDistribution, getXDomain, isDiscrete as isDiscreteCheck } from '../
 interface Parameter {
   name: string;
   symbol: string;
+  /** Pre-rendered KaTeX HTML for the symbol (built at compile time) */
+  symbolHtml?: string;
   min: number;
   max: number;
   default: number;
@@ -270,7 +272,10 @@ export default function DistributionExplorer({
             className="min-w-[160px] flex flex-col gap-1"
           >
             <span className="text-sm text-[var(--color-text-secondary)]">
-              {p.symbol}: <strong className="text-[var(--color-text-primary)]">{params[p.name]?.toFixed(p.step < 1 ? 2 : 0)}</strong>
+              {p.symbolHtml
+                ? <span className="katex-inline-wrapper" dangerouslySetInnerHTML={{ __html: p.symbolHtml }} />
+                : <span>{p.symbol}</span>
+              }: <strong className="text-[var(--color-text-primary)]">{params[p.name]?.toFixed(p.step < 1 ? 2 : 0)}</strong>
             </span>
             <input
               type="range"

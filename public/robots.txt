@@ -1,8 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /open-graph/
 
 Sitemap: https://patrykgolabek.dev/sitemap-index.xml
 
-# LLM-friendly plain-text summary
-# See https://llmstxt.org for specification
+# LLM-friendly plain-text summaries (llmstxt.org specification)
 # llms.txt: https://patrykgolabek.dev/llms.txt
+# llms-full.txt: https://patrykgolabek.dev/llms-full.txt

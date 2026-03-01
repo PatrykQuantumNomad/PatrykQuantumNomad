@@ -1,0 +1,16 @@
+---
+/**
+ * Renders a KaTeX formula inline at build time.
+ * Usage in MDX: <InlineMath tex="R_i = \\sum_{j=1}^{i}(U_j - 0.5)" />
+ */
+import katex from 'katex';
+
+interface Props {
+  tex: string;
+  display?: boolean;
+}
+
+const { tex, display = false } = Astro.props;
+const html = katex.renderToString(tex, { displayMode: display, throwOnError: false });
+---
+<span class="katex-inline-wrapper" set:html={html} />

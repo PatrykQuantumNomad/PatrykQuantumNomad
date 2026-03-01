@@ -101,15 +101,31 @@ The [bihistogram](/eda/techniques/bihistogram/) compares the distributions of Ba
 
 ### Batch Box Plot
 
-[Box plots](/eda/techniques/box-plot/) by batch confirm the location difference and show multiple outliers on the low side for both batches, with Batch 2 also showing high-side outliers. The quantile-quantile plot comparing batches is not linear — Batch 1 quantiles consistently exceed Batch 2 (except in the right tail), indicating the batch difference involves more than a simple location shift. There are also differences in variation and skewness between the two batches.
+[Box plots](/eda/techniques/box-plot/) by batch confirm the location difference and show multiple outliers on the low side for both batches, with Batch 2 also showing high-side outliers.
 
 <CeramicStrengthPlots type="batch-box-plot" />
 
+### Batch Q-Q Plot
+
+The [quantile-quantile plot](/eda/techniques/qq-plot/) compares Batch 1 quantiles directly against Batch 2 quantiles. Except for a few points in the right tail, Batch 1 values have consistently higher quantiles than Batch 2, confirming the location difference. The [Q-Q plot](/eda/techniques/qq-plot/) is not linear — this implies that the difference between the batches is not explained simply by a shift in location. The variation and skewness differ between batches as well, consistent with the shape differences visible in the bihistogram.
+
+<CeramicStrengthPlots type="batch-qq-plot" />
+
 ### Batch Block Plots
 
-Block plots showing batch means by lab confirm that the batch effect is consistent across all 8 laboratories. In every lab, Batch 1 means exceed Batch 2 means. The parallel nature of the two lines indicates that the batch effect is additive — approximately the same magnitude regardless of which lab performed the measurements. This consistency across labs strengthens the conclusion that the batch difference reflects a genuine material property difference rather than a lab-specific artifact.
+[Block plots](/eda/techniques/block-plot/) showing batch means by lab confirm that the batch effect is consistent across all 8 laboratories. In every lab, Batch 1 means exceed Batch 2 means. The parallel nature of the two lines indicates that the batch effect is additive — approximately the same magnitude regardless of which lab performed the measurements.
 
 <CeramicStrengthPlots type="batch-block-plot" />
+
+The additional block plots below confirm that the batch effect holds across all combinations of labs and primary factor levels. In every case, Batch 1 exceeds Batch 2 — the batch effect is robust over table speed, down feed rate, and wheel grit size.
+
+<CeramicStrengthPlots type="batch-block-plot-x1" />
+
+<CeramicStrengthPlots type="batch-block-plot-x2" />
+
+<CeramicStrengthPlots type="batch-block-plot-x3" />
+
+This consistency across all labs and all primary factor combinations strengthens the conclusion that the batch difference reflects a genuine material property difference rather than a lab-specific or factor-dependent artifact.
 
 ### Batch Statistical Tests
 

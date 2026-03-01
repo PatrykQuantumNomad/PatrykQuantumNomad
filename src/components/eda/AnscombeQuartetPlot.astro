@@ -1,0 +1,145 @@
+---
+/**
+ * AnscombeQuartetPlot — Build-time SVG generator for Anscombe's Quartet.
+ * Renders all four datasets in a 2×2 grid with regression lines,
+ * demonstrating that identical summary statistics can hide vastly different data structures.
+ * Zero client-side JS.
+ */
+import PlotFigure from './PlotFigure.astro';
+import { scaleLinear } from 'd3-scale';
+import { PALETTE } from '../../lib/eda/svg-generators/plot-base';
+
+// Anscombe's Quartet data (Anscombe, 1973)
+const datasets = [
+  {
+    label: 'Data Set 1',
+    points: [
+      { x: 10, y: 8.04 }, { x: 8, y: 6.95 }, { x: 13, y: 7.58 },
+      { x: 9, y: 8.81 }, { x: 11, y: 8.33 }, { x: 14, y: 9.96 },
+      { x: 6, y: 7.24 }, { x: 4, y: 4.26 }, { x: 12, y: 10.84 },
+      { x: 7, y: 4.82 }, { x: 5, y: 5.68 },
+    ],
+  },
+  {
+    label: 'Data Set 2',
+    points: [
+      { x: 10, y: 9.14 }, { x: 8, y: 8.14 }, { x: 13, y: 8.74 },
+      { x: 9, y: 8.77 }, { x: 11, y: 9.26 }, { x: 14, y: 8.10 },
+      { x: 6, y: 6.13 }, { x: 4, y: 3.10 }, { x: 12, y: 9.13 },
+      { x: 7, y: 7.26 }, { x: 5, y: 4.74 },
+    ],
+  },
+  {
+    label: 'Data Set 3',
+    points: [
+      { x: 10, y: 7.46 }, { x: 8, y: 6.77 }, { x: 13, y: 12.74 },
+      { x: 9, y: 7.11 }, { x: 11, y: 7.81 }, { x: 14, y: 8.84 },
+      { x: 6, y: 6.08 }, { x: 4, y: 5.39 }, { x: 12, y: 8.15 },
+      { x: 7, y: 6.42 }, { x: 5, y: 5.73 },
+    ],
+  },
+  {
+    label: 'Data Set 4',
+    points: [
+      { x: 8, y: 6.58 }, { x: 8, y: 5.76 }, { x: 8, y: 7.71 },
+      { x: 8, y: 8.84 }, { x: 8, y: 8.47 }, { x: 8, y: 7.04 },
+      { x: 8, y: 5.25 }, { x: 19, y: 12.50 }, { x: 8, y: 5.56 },
+      { x: 8, y: 7.91 }, { x: 8, y: 6.89 },
+    ],
+  },
+];
+
+// Shared regression: y = 3 + 0.5x for all four datasets
+const regIntercept = 3;
+const regSlope = 0.5;
+
+// Layout
+const totalW = 640;
+const totalH = 520;
+const gap = 16;
+const panelW = (totalW - gap) / 2;
+const panelH = (totalH - gap - 30) / 2; // 30 for overall title area
+const margin = { top: 28, right: 12, bottom: 32, left: 40 };
+const font = "'DM Sans', sans-serif";
+
+// Shared axis domain across all panels for fair comparison
+const xDomain = [2, 20];
+const yDomain = [2, 14];
+
+function renderPanel(
+  ds: typeof datasets[0],
+  offsetX: number,
+  offsetY: number,
+): string {
+  const iw = panelW - margin.left - margin.right;
+  const ih = panelH - margin.top - margin.bottom;
+
+  const xScale = scaleLinear()
+    .domain(xDomain)
+    .range([offsetX + margin.left, offsetX + margin.left + iw]);
+  const yScale = scaleLinear()
+    .domain(yDomain)
+    .range([offsetY + margin.top + ih, offsetY + margin.top]);
+
+  // Panel background
+  const bg = `<rect x="${offsetX}" y="${offsetY}" width="${panelW}" height="${panelH}" rx="4" fill="${PALETTE.surface}" stroke="${PALETTE.grid}" stroke-width="0.5" />`;
+
+  // Grid
+  const xTicks = [4, 8, 12, 16, 20];
+  const yTicks = [4, 6, 8, 10, 12, 14];
+  const gridH = yTicks
+    .map(t => `<line x1="${xScale(xDomain[0]).toFixed(1)}" y1="${yScale(t).toFixed(1)}" x2="${xScale(xDomain[1]).toFixed(1)}" y2="${yScale(t).toFixed(1)}" stroke="${PALETTE.grid}" stroke-width="0.5" stroke-dasharray="3,3" />`)
+    .join('\n');
+  const gridV = xTicks
+    .map(t => `<line x1="${xScale(t).toFixed(1)}" y1="${yScale(yDomain[0]).toFixed(1)}" x2="${xScale(t).toFixed(1)}" y2="${yScale(yDomain[1]).toFixed(1)}" stroke="${PALETTE.grid}" stroke-width="0.5" stroke-dasharray="3,3" />`)
+    .join('\n');
+
+  // Axes
+  const axisBottom = `<line x1="${xScale(xDomain[0]).toFixed(1)}" y1="${yScale(yDomain[0]).toFixed(1)}" x2="${xScale(xDomain[1]).toFixed(1)}" y2="${yScale(yDomain[0]).toFixed(1)}" stroke="${PALETTE.axis}" stroke-width="1" />`;
+  const axisLeft = `<line x1="${xScale(xDomain[0]).toFixed(1)}" y1="${yScale(yDomain[0]).toFixed(1)}" x2="${xScale(xDomain[0]).toFixed(1)}" y2="${yScale(yDomain[1]).toFixed(1)}" stroke="${PALETTE.axis}" stroke-width="1" />`;
+
+  const xTickMarks = xTicks
+    .map(t => `<text x="${xScale(t).toFixed(1)}" y="${(yScale(yDomain[0]) + 14).toFixed(1)}" text-anchor="middle" font-size="9" fill="${PALETTE.textSecondary}" font-family="${font}">${t}</text>`)
+    .join('\n');
+  const yTickMarks = yTicks
+    .map(t => `<text x="${(xScale(xDomain[0]) - 6).toFixed(1)}" y="${yScale(t).toFixed(1)}" text-anchor="end" dy="0.35em" font-size="9" fill="${PALETTE.textSecondary}" font-family="${font}">${t}</text>`)
+    .join('\n');
+
+  // Axis labels
+  const xLabelEl = `<text x="${(offsetX + margin.left + iw / 2).toFixed(1)}" y="${(offsetY + panelH - 4).toFixed(1)}" text-anchor="middle" font-size="10" fill="${PALETTE.textSecondary}" font-family="${font}">X</text>`;
+  const yLabelEl = `<text x="${(offsetX + 10).toFixed(1)}" y="${(offsetY + margin.top + ih / 2).toFixed(1)}" text-anchor="middle" font-size="10" fill="${PALETTE.textSecondary}" font-family="${font}" transform="rotate(-90,${(offsetX + 10).toFixed(1)},${(offsetY + margin.top + ih / 2).toFixed(1)})">Y</text>`;
+
+  // Regression line (y = 3 + 0.5x, clipped to domain)
+  const regY0 = regIntercept + regSlope * xDomain[0];
+  const regY1 = regIntercept + regSlope * xDomain[1];
+  const regLine = `<line x1="${xScale(xDomain[0]).toFixed(1)}" y1="${yScale(regY0).toFixed(1)}" x2="${xScale(xDomain[1]).toFixed(1)}" y2="${yScale(regY1).toFixed(1)}" stroke="${PALETTE.dataSecondary}" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7" />`;
+
+  // Data points
+  const dots = ds.points
+    .map(p => `<circle cx="${xScale(p.x).toFixed(1)}" cy="${yScale(p.y).toFixed(1)}" r="3.5" fill="${PALETTE.dataPrimary}" fill-opacity="0.75" />`)
+    .join('\n');
+
+  // Title
+  const title = `<text x="${(offsetX + panelW / 2).toFixed(1)}" y="${(offsetY + 17).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="600" fill="${PALETTE.text}" font-family="${font}">${ds.label}</text>`;
+
+  return [bg, gridH, gridV, axisBottom, axisLeft, xTickMarks, yTickMarks, xLabelEl, yLabelEl, regLine, dots, title].join('\n');
+}
+
+// Build full SVG
+const panels = [
+  renderPanel(datasets[0], 0, 30),
+  renderPanel(datasets[1], panelW + gap, 30),
+  renderPanel(datasets[2], 0, 30 + panelH + gap),
+  renderPanel(datasets[3], panelW + gap, 30 + panelH + gap),
+];
+
+const overallTitle = `<text x="${(totalW / 2).toFixed(1)}" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="${PALETTE.text}" font-family="${font}">Anscombe's Quartet — Four datasets, identical statistics</text>`;
+
+const svg = `<svg viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Anscombe's Quartet: four scatter plots with identical summary statistics but very different visual patterns" style="width:100%;height:auto;max-width:${totalW}px">${overallTitle}\n${panels.join('\n')}</svg>`;
+---
+
+<PlotFigure
+  svg={svg}
+  caption="Anscombe's Quartet (1973). All four datasets share nearly identical summary statistics (mean, variance, correlation, regression line), yet their scatter plots reveal fundamentally different structures. Dashed line: y = 3 + 0.5x."
+  maxWidth="640px"
+/>

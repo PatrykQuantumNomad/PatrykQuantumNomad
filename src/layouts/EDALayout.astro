@@ -6,13 +6,17 @@ interface Props {
   description?: string;
   ogImage?: string;
   ogImageAlt?: string;
+  ogType?: 'website' | 'article';
+  publishedDate?: Date;
+  updatedDate?: Date;
+  tags?: string[];
   useKatex?: boolean;
 }
 
-const { title, description, ogImage, ogImageAlt, useKatex = false } = Astro.props;
+const { title, description, ogImage, ogImageAlt, ogType = 'article', publishedDate, updatedDate, tags, useKatex = false } = Astro.props;
 ---
 
-<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt}>
+<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType={ogType} publishedDate={publishedDate} updatedDate={updatedDate} tags={tags}>
   {/* Conditionally load KaTeX CSS only when page uses formulas */}
   {useKatex && (
     <link slot="head" rel="stylesheet" href="/styles/katex.min.css" />

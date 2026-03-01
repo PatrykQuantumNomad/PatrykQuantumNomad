@@ -27,6 +27,12 @@ const slug = page.id.replace('foundations/', '');
 <EDALayout
   title={`${page.data.title} | EDA Visual Encyclopedia`}
   description={page.data.description}
+  ogImage={`/open-graph/eda/foundations/${slug}.png`}
+  ogImageAlt={`${page.data.title} — EDA Visual Encyclopedia`}
+  ogType="article"
+  publishedDate={new Date('2026-02-25')}
+  tags={['eda', 'statistics']}
+  useKatex={true}
 >
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },

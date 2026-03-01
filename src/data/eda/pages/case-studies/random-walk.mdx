@@ -1,75 +1,339 @@
 ---
 title: "Random Walk Case Study"
-description: "EDA case study analyzing NIST RANDWALK.DAT dataset to demonstrate detection of non-stationary location and violation of the fixed-location assumption"
+description: "EDA case study analyzing NIST RANDWALK.DAT dataset — a cumulative sum of uniform random numbers — to demonstrate detection of non-stationary location and violation of the fixed-location assumption"
 section: "1.4.2"
 category: "case-studies"
 nistSection: "1.4.2.3 Random Walk"
 ---
+import CaseStudyDataset from '../../../../components/eda/CaseStudyDataset.astro';
+import InlineMath from '../../../../components/eda/InlineMath.astro';
+import RandomWalkPlots from '../../../../components/eda/RandomWalkPlots.astro';
 
 ## Background and Data
 
-This case study applies exploratory data analysis to 500 observations from the NIST RANDWALK.DAT dataset, which is a cumulative sum (random walk) of standard normal random numbers. The purpose is to demonstrate how EDA techniques detect a non-stationary process where the fixed-location assumption is violated. In a random walk, each observation equals the previous observation plus a random increment, creating persistent drift.
+This case study applies exploratory data analysis to 500 observations from the NIST RANDWALK.DAT dataset, which is a cumulative sum of uniform random numbers:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="R_i = \sum_{j=1}^{i}(U_j - 0.5)" />
+</div>
+
+where <InlineMath tex="U" /> is a set of uniform random numbers. The purpose is to demonstrate how EDA techniques detect a non-stationary process where the fixed-location assumption is violated. In a random walk, each observation equals the previous observation plus a random increment, creating persistent drift.
 
 The dataset originates from NIST/SEMATECH Section 1.4.2.3. This is a critically important case study because random walks appear frequently in financial time series, sensor drift, and instrument calibration problems.
 
-## Graphical Output and Interpretation
+<CaseStudyDataset slug="random-walk" />
+
+## Test Underlying Assumptions
+
+### Goals
+
+The analysis has three primary objectives:
+
+1. **Model validation** — assess whether the univariate model is an appropriate fit for the random walk data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i" />
+</div>
+2. **Assumption testing** — evaluate whether the data satisfy the four standard assumptions for a measurement process in statistical control:
+   - **Random sampling** — the data are uncorrelated
+   - **Fixed distribution** — the data come from a fixed distribution
+   - **Fixed location** — the distribution location (mean) is constant
+   - **Fixed variation** — the distribution scale (standard deviation) is constant
+3. **Confidence interval validity** — determine whether the standard confidence interval formula is appropriate:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}}" />
+</div>
+
+   where <InlineMath tex="s" /> is the standard deviation. This formula relies on all four assumptions holding; if they are violated, the confidence interval has no statistical meaning.
+
+If the assumptions are violated, identify the nature and severity of the violations and recommend appropriate remedial actions.
 
 ### 4-Plot Overview
 
-The [4-plot](/eda/techniques/4-plot/) reveals severe violations of assumptions. The run sequence plot shows a meandering, non-stationary trajectory rather than a stable band. The lag plot shows a tight diagonal line indicating extreme autocorrelation. The histogram and normal probability plot are less informative because the underlying assumptions of fixed location and independence are violated.
+The [4-plot](/eda/techniques/4-plot/) is the primary graphical tool for testing all four assumptions simultaneously. For the random walk data, it reveals severe violations.
 
-### Run Sequence Plot
+<RandomWalkPlots type="4-plot" />
 
-The [run sequence plot](/eda/techniques/run-sequence-plot/) is the most informative panel for this dataset. Instead of fluctuating around a fixed horizontal location, the data wander freely with no tendency to return to a central value. The trajectory drifts both positive and negative over the 500 observations, demonstrating the classic non-stationary behavior of a random walk. This is the primary diagnostic for a location assumption violation.
+The run sequence plot (upper left) shows a meandering, non-stationary trajectory rather than a stable band — the location is clearly not fixed. The lag plot (upper right) shows a tight diagonal line indicating extreme autocorrelation — the data are not random. The histogram (lower left) and normal probability plot (lower right) are not meaningful when location and independence assumptions are violated.
 
-### Lag Plot
+### Fixed Location — Run Sequence Plot
 
-The [lag plot](/eda/techniques/lag-plot/) at lag 1 shows an extremely tight linear cluster along the diagonal y = x, with very little scatter. This indicates that consecutive observations are nearly identical -- the hallmark of a strongly autocorrelated process. The randomness assumption fails catastrophically.
+The [run sequence plot](/eda/techniques/run-sequence-plot/) tests whether the location is constant over time. For the random walk, instead of fluctuating around a fixed horizontal level, the data wander freely with no tendency to return to a central value.
 
-### Histogram
+<RandomWalkPlots type="run-sequence" />
 
-The [histogram](/eda/techniques/histogram/) shows an irregular, multi-modal shape that depends entirely on the particular path taken by the random walk. It does not represent a meaningful underlying distribution because the data are not identically distributed.
+**Conclusion:** The trajectory drifts both positive and negative over the 500 observations, demonstrating classic non-stationary behavior. The **fixed-location assumption is violated**.
 
-### Normal Probability Plot
+### Randomness — Lag Plot
 
-The [normal probability plot](/eda/techniques/normal-probability-plot/) shows substantial curvature and departure from linearity. However, this result must be interpreted cautiously: the distributional test is invalid when the location and independence assumptions are violated.
+The [lag plot](/eda/techniques/lag-plot/) tests whether the data are random by plotting <InlineMath tex="Y_i" /> versus <InlineMath tex="Y_{i-1}" />. If the data are random, the lag plot should show a structureless cloud.
 
-## Quantitative Output and Interpretation
+<RandomWalkPlots type="lag" />
+
+**Conclusion:** The lag plot shows an extremely tight linear cluster along the diagonal <InlineMath tex="y = x" />, indicating consecutive observations are nearly identical. The lag-1 autocorrelation is 0.987. The **randomness assumption is catastrophically violated**.
+
+### Randomness — Autocorrelation Plot
+
+When the lag plot reveals significant non-randomness, the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) provides essential follow-up detail. It shows the autocorrelation coefficient <InlineMath tex="r_k" /> at each lag <InlineMath tex="k" />, with 95% confidence bands at <InlineMath tex="\pm 2/\sqrt{N}" />.
+
+<RandomWalkPlots type="autocorrelation" />
+
+The autocorrelation plot shows significant positive autocorrelation at lags 1 through 100 in a linearly decreasing fashion. This slow, linear decay is the signature of a random walk — the process has long-range memory because each observation carries forward the cumulative effect of all prior random increments. Every lag from 1 to 100 exceeds the 95% confidence band, confirming that the randomness assumption is not just violated but fundamentally inapplicable.
+
+### Randomness — Spectral Plot
+
+The [spectral plot](/eda/techniques/spectral-plot/) complements the autocorrelation plot by showing the frequency-domain structure of the data — specifically, the power spectral density as a function of frequency.
+
+<RandomWalkPlots type="spectral" />
+
+The spectral plot shows a single dominant low-frequency peak. Virtually all power is concentrated near frequency zero, which corresponds to slow, long-period drift. There are no secondary peaks at higher frequencies, confirming that the data have no periodic component — the non-randomness is purely drift-driven, consistent with the random walk mechanism.
+
+### Fixed Distribution — Histogram
+
+The [histogram](/eda/techniques/histogram/) assesses the shape of the underlying distribution. However, because the location and randomness assumptions are already violated, the histogram cannot be meaningfully interpreted.
+
+<RandomWalkPlots type="histogram" />
+
+**Conclusion:** The irregular, multi-modal shape depends entirely on the particular path taken by the random walk. **Distribution testing is not meaningful** when prior assumptions fail.
+
+### Normality — Normal Probability Plot
+
+The [normal probability plot](/eda/techniques/normal-probability-plot/) tests whether the data follow a normal distribution. Like the histogram, this test is invalid when location and independence assumptions are violated.
+
+<RandomWalkPlots type="probability" />
+
+**Conclusion:** The plot shows substantial curvature and departure from linearity, but this result must be interpreted cautiously — **normality testing is not valid** when stationarity and independence fail.
+
+## Quantitative Results
 
 ### Summary Statistics
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | -2.127 |
-| Std Dev | 8.326 |
-| Median | -1.683 |
-| Min | -22.930 |
-| Max | 15.843 |
-| Range | 38.773 |
-| n | 500 |
+| Sample size <InlineMath tex="n" /> | 500 |
+| Mean <InlineMath tex="\bar{Y}" /> | 3.2167 |
+| Std Dev <InlineMath tex="s" /> | 2.0787 |
+| Autocorrelation <InlineMath tex="r_1" /> | 0.987 |
 
-The large standard deviation relative to the mean reflects the wide-ranging drift of the random walk. These summary statistics are essentially meaningless as descriptors of a fixed process because the location is non-stationary.
+These summary statistics are essentially meaningless as descriptors of a fixed process because the location is non-stationary. In particular, the standard confidence interval is not valid:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\bar{Y} \pm \frac{2s}{\sqrt{N}} = 3.217 \pm 0.186" />
+</div>
+
+This dramatically understates the true uncertainty because it assumes independent observations. With autocorrelation this extreme, the effective sample size is far smaller than 500, and any confidence interval computed from the standard formula has no statistical justification.
 
 ### Location Test
 
-A linear regression against run order shows a statistically significant slope, confirming that the location is not fixed. However, the linear model underestimates the true non-stationarity because the random walk drifts non-linearly.
+The location test fits a linear regression of the response <InlineMath tex="Y" /> against the run-order index <InlineMath tex="X = 1, 2, \ldots, N" /> and tests whether the slope is significantly different from zero.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: B_1 = 0 \quad \text{vs.} \quad H_a\!: B_1 \neq 0" />
+</div>
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="B_0" /> (intercept) | 1.8335 | 0.1721 | 10.650 |
+| <InlineMath tex="B_1" /> (slope) | 0.005522 | 0.000595 | 9.275 |
+
+Residual standard deviation: 1.9214 with 498 degrees of freedom.
+
+**Conclusion:** The slope t-value of 9.275 exceeds the critical value <InlineMath tex="t_{0.975,\,498} = 1.96" />, so we **reject** <InlineMath tex="H_0" /> — the location is not constant. The data drift upward at a rate of approximately 0.0055 units per observation.
 
 ### Variation Test
 
-[Bartlett's test](/eda/quantitative/bartletts-test/) may or may not reject constant variance, depending on how the drift affects the within-group variability. The test result is unreliable because the independence assumption is violated.
+The [Levene test](/eda/quantitative/levene-test/) (median-based variant, preferred for non-normal data) divides the data into <InlineMath tex="k = 4" /> equal-length intervals and tests whether their variances are homogeneous.
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \sigma_1^2 = \sigma_2^2 = \sigma_3^2 = \sigma_4^2 \quad \text{vs.} \quad H_a\!: \text{at least one } \sigma_i^2 \text{ differs}" />
+</div>
+
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="W" /> | 10.459 |
+| Degrees of freedom | <InlineMath tex="k - 1 = 3" /> and <InlineMath tex="N - k = 496" /> |
+| Critical value <InlineMath tex="F_{0.05,\,3,\,496}" /> | 2.623 |
+
+**Conclusion:** The test statistic of 10.459 exceeds the critical value of 2.623, so we **reject** <InlineMath tex="H_0" /> — the variances are significantly different across the four intervals. This is expected for a random walk: the variance of a cumulative sum grows with time.
 
 ### Randomness Tests
 
-The [autocorrelation](/eda/quantitative/autocorrelation/) at lag 1 is approximately 0.997, an extreme value that dwarfs the significance bound of approximately 0.088. Autocorrelation remains significant at all tested lags. The [runs test](/eda/quantitative/runs-test/) also strongly rejects randomness (p < 0.001). The data are not independent.
+Two complementary tests assess whether the observations are independent.
 
-### Distribution Test
+**Runs test** — tests whether the sequence of values above and below the median was produced randomly.
 
-The [Anderson-Darling test](/eda/quantitative/anderson-darling/) rejects normality, but this result is not meaningful because the test assumes independent observations. When data are strongly autocorrelated, distributional tests produce unreliable results.
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="H_0\!: \text{sequence is random} \quad \text{vs.} \quad H_a\!: \text{sequence is not random}" />
+</div>
 
-### Outlier Detection
+| Statistic | Value |
+|-----------|-------|
+| Test statistic <InlineMath tex="Z" /> | −20.324 |
+| Critical value <InlineMath tex="Z_{1-\alpha/2}" /> | 1.96 |
 
-[Grubbs' test](/eda/quantitative/grubbs-test/) results are unreliable for autocorrelated data and should not be interpreted.
+**Conclusion:** <InlineMath tex="|Z| = 20.324" /> far exceeds 1.96, so we **reject** <InlineMath tex="H_0" /> — the data are not random. The negative Z indicates far fewer runs than expected, meaning the data cluster in long sequences above or below the median.
+
+**Lag-1 autocorrelation** — measures the linear dependence between consecutive observations.
+
+| Statistic | Value |
+|-----------|-------|
+| <InlineMath tex="r_1" /> | 0.987 |
+| Critical value <InlineMath tex="2/\sqrt{N}" /> | 0.087 |
+
+**Conclusion:** The lag-1 autocorrelation of 0.987 vastly exceeds the critical value of 0.087. Consecutive observations are nearly identical — the **randomness assumption is catastrophically violated**.
+
+### Distribution and Outlier Tests
+
+Since the quantitative tests confirm that the assumptions of randomness, constant location, and constant scale are all violated, distributional measures have no meaning. The histogram and normal probability plot reflect the particular random walk path, not any underlying fixed distribution. Therefore the distribution and outlier tests are omitted.
+
+### Test Summary
+
+| Assumption | Test | Statistic | Critical Value | Result |
+|---|---|---|---|---|
+| **Fixed location** | Regression on run order | <InlineMath tex="t = 9.275" /> | 1.96 | **Reject** |
+| **Fixed variation** | [Levene test](/eda/quantitative/levene-test/) | <InlineMath tex="W = 10.459" /> | 2.623 | **Reject** |
+| **Randomness** | [Runs test](/eda/quantitative/runs-test/) | <InlineMath tex="Z = {-20.324}" /> | 1.96 | **Reject** |
+| **Randomness** | [Autocorrelation](/eda/quantitative/autocorrelation/) lag-1 | <InlineMath tex="r_1 = 0.987" /> | 0.087 | **Reject** |
+| **Distribution** | — | — | — | Not meaningful |
+| **Outliers** | — | — | — | Not meaningful |
+
+Three of the four assumptions are severely violated. The univariate model <InlineMath tex="Y_i = C + E_i" /> is not appropriate for this data.
+
+## Interpretation
+
+The combined graphical and quantitative evidence presents a clear picture:
+
+- The **run sequence plot** shows significant shifts in location over time — the process drifts without returning to a stable mean
+- The **lag plot** reveals extreme non-randomness — consecutive observations are nearly identical
+- The **autocorrelation plot** quantifies this dependence: significant autocorrelation persists at all lags from 1 through 100, declining linearly — the hallmark of an integrated (non-stationary) process
+- The **spectral plot** confirms the dominance of low-frequency drift with a single peak near zero frequency
+
+Because the randomness and fixed-location assumptions fail catastrophically, the distributional assumptions (histogram and normal probability plot) become irrelevant. The univariate model is **not valid** for this data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = C + E_i \quad \text{— rejected}" />
+</div>
+
+## Develop a Better Model
+
+The univariate model <InlineMath tex="Y_i = C + E_i" /> fails because it ignores the strong dependence between consecutive observations. The lag plot showed a distinct linear pattern when plotting <InlineMath tex="Y_i" /> versus <InlineMath tex="Y_{i-1}" />, suggesting a first-order autoregressive relationship. This motivates the model:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = A_0 + A_1 \cdot Y_{i-1} + E_i" />
+</div>
+
+Fitting this model by ordinary least squares regression of <InlineMath tex="Y_i" /> on <InlineMath tex="Y_{i-1}" /> yields:
+
+| Parameter | Estimate | Std Error | t-Value |
+|-----------|----------|-----------|---------|
+| <InlineMath tex="A_0" /> (intercept) | 0.0502 | 0.0242 | 2.075 |
+| <InlineMath tex="A_1" /> (slope) | 0.9871 | 0.0063 | 156.350 |
+
+The slope is overwhelmingly significant (<InlineMath tex="t = 156.35" /> with 497 residual degrees of freedom), confirming the strong autoregressive dependence. The residual standard deviation is 0.2931, compared to the original data's standard deviation of 2.079 — a roughly **7-fold reduction** in variability. The autoregressive model captures the vast majority of the structure in the data.
+
+Because <InlineMath tex="A_1 \approx 1.0" /> and <InlineMath tex="A_0 \approx 0" />, the model simplifies to:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = Y_{i-1} + E_i" />
+</div>
+
+This is precisely the random walk definition — each observation equals the previous one plus a random increment. The residuals are the first differences:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="E_i = Y_i - Y_{i-1}" />
+</div>
+
+These should recover the underlying uniform random numbers.
+
+## Validate New Model
+
+### Predicted vs. Original
+
+The first validation step is to plot the predicted values against the original data:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="\hat{Y}_i = 0.0502 + 0.9871 \cdot Y_{i-1}" />
+</div>
+
+<RandomWalkPlots type="predicted-vs-original" />
+
+The points cluster tightly along the diagonal, indicating a reasonably good fit. The model captures the essential dynamics of the random walk process.
+
+### 4-Plot of Residuals
+
+The [4-plot](/eda/techniques/4-plot/) applied to the residuals tests whether the error term <InlineMath tex="E_i" /> satisfies all four assumptions.
+
+<RandomWalkPlots type="residual-4-plot" />
+
+The transformation is dramatic compared to the original data's 4-plot:
+
+- **Run sequence plot** (upper left) — no significant shifts in location or scale over time; the residuals fluctuate around zero in a stable band
+- **Lag plot** (upper right) — random, structureless cloud; the autoregressive dependence has been completely removed
+- **Histogram** (lower left) — relatively flat appearance, suggesting a uniform rather than normal distribution
+- **Normal probability plot** (lower right) — S-shaped departure from linearity, confirming the residuals are not normally distributed
+
+### Residual Run Sequence Plot
+
+<RandomWalkPlots type="residual-run-sequence" />
+
+The residuals show no trend, no drift, and no shifts in variability — the **fixed-location and fixed-variation assumptions are satisfied**.
+
+### Residual Lag Plot
+
+<RandomWalkPlots type="residual-lag" />
+
+The residual lag plot shows a random, structureless cloud with no discernible pattern — the **randomness assumption is satisfied**. This is a stark contrast to the original data's tight diagonal cluster.
+
+### Residual Histogram
+
+<RandomWalkPlots type="residual-histogram" />
+
+The histogram of residuals shows a relatively flat, rectangular shape — characteristic of a uniform distribution rather than a normal (bell-shaped) one. This is expected, since the underlying random walk was constructed from uniform random numbers.
+
+### Residual Autocorrelation Plot
+
+<RandomWalkPlots type="residual-autocorrelation" />
+
+The residual autocorrelation plot shows no significant autocorrelation at any lag — all values fall within the 95% confidence bands. The autoregressive model has successfully removed the dependence structure.
+
+### Residual Spectral Plot
+
+<RandomWalkPlots type="residual-spectral" />
+
+The residual spectral plot shows a flat spectrum with no dominant peaks — consistent with white noise. The single low-frequency peak from the original data has been completely eliminated.
+
+### Uniform Probability Plot
+
+Since the histogram suggests a uniform rather than normal distribution, the [uniform probability plot](/eda/techniques/probability-plot/) provides the definitive distributional test.
+
+<RandomWalkPlots type="residual-uniform-probability" />
+
+The nearly linear pattern confirms that a **uniform distribution is a good model for the error component**. This validates the full model:
+
+<div class="my-4 px-4 py-3 rounded-lg bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-center">
+  <InlineMath tex="Y_i = Y_{i-1} + E_i, \quad E_i \sim \text{Uniform}(-0.5,\; 0.5)" />
+</div>
+
+### Validation Summary
+
+| Assumption | Result |
+|-----------|--------|
+| **Fixed location** | Satisfied — no shifts in residual location |
+| **Fixed variation** | Satisfied — stable residual spread |
+| **Randomness** | Satisfied — no autocorrelation in residuals |
+| **Distribution** | Uniform — confirmed by probability plot |
+
+All four assumptions are satisfied for the residuals. The AR(1) model — or equivalently, first-differencing — successfully transforms the non-stationary random walk into a stationary, independent, uniformly distributed series.
 
 ## Conclusions
 
-The random walk violates two of the four assumptions: fixed location and randomness. The data exhibit extreme positive autocorrelation (lag-1 correlation near 1.0) and a non-stationary, drifting location. The recommended remedial action is to difference the data -- computing the first differences (each observation minus its predecessor) recovers the underlying N(0,1) random increments, which satisfy all four assumptions. This case study demonstrates why the [run sequence plot](/eda/techniques/run-sequence-plot/) and [lag plot](/eda/techniques/lag-plot/) should always be examined first: without confirming stationarity and independence, location and distributional estimates are meaningless.
+The random walk data violate three of the four assumptions of the univariate model:
+
+1. **Fixed location** — rejected; the process drifts stochastically over time
+2. **Fixed variation** — rejected; variances differ significantly across quarters
+3. **Randomness** — rejected; extreme positive autocorrelation (<InlineMath tex="r_1 = 0.987" />) persisting through lag 100
+
+The autoregressive model <InlineMath tex="Y_i = A_0 + A_1 \cdot Y_{i-1} + E_i" /> captures the dependence structure, achieving a 7-fold reduction in residual standard deviation. Because <InlineMath tex="A_1 \approx 1.0" />, the simplified form <InlineMath tex="Y_i = Y_{i-1} + E_i" /> is preferred — first-differencing recovers the underlying uniform random increments, which satisfy all four assumptions. The error component follows a uniform distribution, consistent with the known data-generation process.
+
+This case study demonstrates the full EDA cycle: the [run sequence plot](/eda/techniques/run-sequence-plot/) and [lag plot](/eda/techniques/lag-plot/) detect the violations, the [autocorrelation plot](/eda/techniques/autocorrelation-plot/) and [spectral plot](/eda/techniques/spectral-plot/) characterize the dependence structure, the autoregressive model addresses the violations, and the residual diagnostics confirm the model's validity.

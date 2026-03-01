@@ -1,0 +1,78 @@
+---
+/**
+ * Foundations landing page — /eda/foundations/
+ * Card grid of all foundation articles covering EDA philosophy, assumptions,
+ * graphics, and the 4-plot diagnostic.
+ */
+import { getCollection } from 'astro:content';
+import EDALayout from '../../../layouts/EDALayout.astro';
+import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import EDAJsonLd from '../../../components/eda/EDAJsonLd.astro';
+import { foundationUrl } from '../../../lib/eda/routes';
+
+const pages = await getCollection('edaPages');
+const foundations = pages
+  .filter((p) => p.data.category === 'foundations')
+  .sort((a, b) => a.data.section.localeCompare(b.data.section, undefined, { numeric: true }));
+
+const cards = foundations.map((page) => {
+  const slug = page.id.replace('foundations/', '');
+  return {
+    title: page.data.title,
+    url: foundationUrl(slug),
+    section: page.data.section,
+    description: page.data.description,
+  };
+});
+---
+
+<EDALayout
+  title="Foundations | EDA Visual Encyclopedia"
+  description="Core concepts of Exploratory Data Analysis — what EDA is, underlying assumptions, the role of graphics, problem categories, and the 4-plot diagnostic."
+  ogImage="/open-graph/eda/overview.png"
+  ogImageAlt="EDA Foundations — EDA Visual Encyclopedia"
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Foundations', url: 'https://patrykgolabek.dev/eda/foundations/' },
+  ]} />
+  <EDAJsonLd
+    title="Foundations"
+    description="Core concepts of Exploratory Data Analysis — what EDA is, underlying assumptions, the role of graphics, problem categories, and the 4-plot diagnostic."
+    url="https://patrykgolabek.dev/eda/foundations/"
+    pageType="foundation"
+  />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Foundations" />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Foundations</h1>
+      <p class="text-sm text-[var(--color-text-secondary)]">NIST/SEMATECH Sections 1.1 – 1.2</p>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+        Core concepts of Exploratory Data Analysis — what EDA is, how it differs from
+        classical and Bayesian approaches, the role of graphics, underlying assumptions,
+        and the essential 4-plot diagnostic.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {cards.map((card) => (
+        <a
+          href={card.url}
+          class="group rounded-lg border border-[var(--color-border)] p-5 hover:border-[var(--color-accent)] transition-colors"
+        >
+          <h3 class="text-base font-heading font-bold group-hover:text-[var(--color-accent)] transition-colors">
+            {card.title}
+          </h3>
+          <p class="text-xs text-[var(--color-text-secondary)] mt-1">Section {card.section}</p>
+          <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-3">
+            {card.description}
+          </p>
+        </a>
+      ))}
+    </div>
+  </article>
+</EDALayout>

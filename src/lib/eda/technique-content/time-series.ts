@@ -12,11 +12,11 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
     definition:
       'An autocorrelation plot displays the sample autocorrelation function of a dataset as a function of the lag. Each vertical bar in the plot represents the correlation between pairs of observations separated by that lag interval, providing a compact view of serial dependence across all relevant time offsets.',
     purpose:
-      'Use an autocorrelation plot when analyzing time-ordered data to determine whether successive observations are statistically independent. It is essential for validating the randomness assumption underlying many statistical procedures, including control charts, capability studies, and regression models. The plot is particularly valuable after fitting a model, where it helps verify that residuals behave as white noise rather than retaining unexplained temporal structure.',
+      'Use an autocorrelation plot when analyzing time-ordered data to determine whether successive observations are statistically independent. It is essential for validating the randomness assumption underlying many statistical procedures, including control charts, capability studies, and regression models. The plot is also used in the model identification stage for Box-Jenkins time series modeling. After fitting a model, the plot helps verify that residuals behave as white noise rather than retaining unexplained temporal structure.',
     interpretation:
-      'The horizontal axis shows the lag value and the vertical axis shows the autocorrelation coefficient, which ranges from -1 to +1. A pair of horizontal reference lines, typically drawn at plus and minus 1.96 divided by the square root of the sample size, marks the 95 percent significance bounds. For truly random data, approximately 95 percent of the autocorrelation values should fall within these bounds. A pattern where the autocorrelation decays slowly from a large positive value at lag 1 indicates a trend or drift in the process. A single dominant spike at lag 1 that cuts off sharply suggests a first-order autoregressive process, while a sinusoidal pattern in the autocorrelation function indicates periodic behavior in the data. Variant patterns include random data showing no significant spikes, moderate autocorrelation with a gradual exponential decay, strong autocorrelation from an autoregressive model with slow decay, and sinusoidal models producing oscillating autocorrelation values.',
+      'The horizontal axis shows the lag value and the vertical axis shows the autocorrelation coefficient, which ranges from $-1$ to $+1$. A pair of horizontal reference lines, typically drawn at $\\pm\\,1.96/\\sqrt{N}$, marks the 95 percent significance bounds. For truly random data, approximately 95 percent of the autocorrelation values should fall within these bounds. The key diagnostic is the decay pattern of the autocorrelation function. Strong autocorrelation shows a lag-1 value near 1.0 with a smooth, nearly linear decline that crosses zero into negative values — the decreasing autocorrelation has little noise and provides high predictability. Moderate autocorrelation shows a lag-1 value around 0.75 with a gradual but noisier decline that reaches the significance bounds sooner. Both patterns indicate an autoregressive process where the recommended model is $Y_i = A_0 + A_1 Y_{i-1} + E_i$. A sinusoidal pattern — alternating positive and negative spikes that do not decay toward zero — indicates periodic behavior in the data.',
     assumptions:
-      'The autocorrelation plot assumes the data are uniformly spaced in time or sequence order. It requires a reasonably large sample size, typically at least 50 observations, to produce reliable estimates at moderate lags. The significance bounds assume normality and independence under the null hypothesis, so they serve as approximate guides rather than exact critical values.',
+      'The autocorrelation plot assumes the data are uniformly spaced in time or sequence order. It requires a reasonably large sample size, typically at least 50 observations, to produce reliable estimates at moderate lags. The significance bounds assume normality and independence under the null hypothesis, so they serve as approximate guides rather than exact critical values. Note that autocorrelation measures only linear dependence; data with zero autocorrelation at all lags may still be non-random (e.g., non-linear dependence).',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.1',
     questions: [
       'Are the data random?',
@@ -27,43 +27,37 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
       'Is the standard error formula for sample means applicable?',
     ],
     importance:
-      'Randomness is the foundational assumption underlying most statistical estimation and testing. If violated, confidence intervals, control charts, and capability indices become invalid. The autocorrelation plot is the primary tool for detecting this violation.',
+      'Randomness is one of the critical assumptions underlying the validity of engineering conclusions drawn from data. Most standard statistical tests depend on it, and common formulas such as the standard error of the mean $s/\\sqrt{N}$ become unreliable when serial dependence is present. Without randomness, the default univariate model $Y = \\text{constant} + \\text{error}$ breaks down, making parameter estimates and derived confidence intervals, control charts, and capability indices suspect. The autocorrelation plot is the primary tool for detecting this violation before flawed statistics lead to unsound engineering decisions.',
     definitionExpanded:
-      'The vertical axis shows the autocorrelation coefficient R_h = C_h / C_0, where C_h is the autocovariance at lag h and C_0 is the variance. Horizontal reference lines at plus or minus 2/sqrt(N) mark the 95% significance bounds under the null hypothesis of white noise. The autocorrelation at lag 0 is always 1 by definition.',
+      'The vertical axis shows the autocorrelation coefficient, which normalizes the autocovariance at each lag by the variance. Horizontal reference lines mark the 95% significance bounds under the null hypothesis of white noise. The autocorrelation at lag 0 is always 1 by definition. See the formulas below for the precise definitions.',
     caseStudySlugs: ['beam-deflections'],
     examples: [
       {
         label: 'White Noise',
         description:
-          'All autocorrelation values fall within the 95% confidence bands, with no significant spikes at any lag. This is the signature of purely random data where each observation is independent of all others. The constant-plus-error model Y = c + e is appropriate.',
+          'All autocorrelation values fall within the 95% confidence bands, with no significant spikes at any lag. This is the signature of purely random data where each observation is independent of all others and there is no ability to predict the next value from the current one. With a 95% confidence interval, roughly one in twenty lags may still fall outside the bounds due to random fluctuations alone, so an isolated spike is not cause for concern. The constant-plus-error model $Y = c + e$ is appropriate.',
         variantLabel: 'White Noise',
       },
       {
-        label: 'AR(1) Process',
+        label: 'Strong Autocorrelation',
         description:
-          'A large positive spike at lag 1 followed by exponentially decaying values indicates a first-order autoregressive process. Each observation depends primarily on its immediate predecessor. The decay rate reflects the strength of the serial dependence.',
-        variantLabel: 'AR(1)',
+          'The autocorrelation at lag 1 is high (only slightly less than 1) and declines slowly in a smooth, nearly linear fashion with little noise. The decay continues past zero into negative autocorrelation at higher lags. This pattern is the autocorrelation plot signature of strong autocorrelation, which provides high predictability if modeled properly. The recommended next step is to fit the autoregressive model $Y_i = A_0 + A_1 \\cdot Y_{i-1} + E_i$ using least squares or Box-Jenkins methods, then verify that the residuals are random. The residual standard deviation for this autoregressive model will be much smaller than the residual standard deviation for the default constant model.',
+        variantLabel: 'Strong Autocorrelation',
       },
       {
-        label: 'MA(1) Process',
+        label: 'Moderate Autocorrelation',
         description:
-          'A single significant spike at lag 1 that cuts off sharply to zero at lag 2 and beyond is the hallmark of a first-order moving average process. The data have short-range dependence limited to adjacent observations.',
-        variantLabel: 'MA(1)',
+          'The autocorrelation at lag 1 is moderately high (approximately 0.75) and decreases gradually over successive lags. The decay is generally linear but with significant noise — the bars are visibly jagged compared to the smooth decline of strong autocorrelation. This pattern indicates data with moderate serial dependence, providing moderate predictability if modeled properly. The same autoregressive model $Y_i = A_0 + A_1 \\cdot Y_{i-1} + E_i$ applies, but the initial spike is smaller and the decay is faster, reaching the significance bounds sooner than in the strong case.',
+        variantLabel: 'Moderate Autocorrelation',
       },
       {
-        label: 'Seasonal Pattern',
+        label: 'Sinusoidal Model',
         description:
-          'Oscillating autocorrelation values that repeat at regular lag intervals indicate periodic behavior in the time series. The spacing of the peaks reveals the seasonal period, and the amplitude of the oscillation indicates the strength of the cyclic component.',
-        variantLabel: 'Seasonal',
+          'Sinusoidal models produce oscillating autocorrelation values that repeat at regular lag intervals. The alternating positive and negative spikes fail to decay toward zero. This non-decaying behavior is the key signature that distinguishes periodic data from an autoregressive process, where oscillations would diminish over successive lags. The spacing of the peaks reveals the period, and the amplitude of the oscillation indicates the strength of the cyclic component.',
+        variantLabel: 'Sinusoidal Model',
       },
     ],
     formulas: [
-      {
-        label: 'Autocovariance Function',
-        tex: String.raw`C_h = \frac{1}{N}\sum_{t=1}^{N-h}(Y_t - \bar{Y})(Y_{t+h} - \bar{Y})`,
-        explanation:
-          'The autocovariance at lag h measures the average product of deviations from the mean for observations separated by h time steps.',
-      },
       {
         label: 'Autocorrelation Coefficient',
         tex: String.raw`R_h = \frac{C_h}{C_0}`,
@@ -71,10 +65,22 @@ export const TIME_SERIES_CONTENT: Record<string, TechniqueContent> = {
           'The autocorrelation at lag h is the autocovariance at lag h divided by the variance (autocovariance at lag 0), giving a value between -1 and +1.',
       },
       {
-        label: '95% Significance Bounds',
-        tex: String.raw`\pm\,\frac{2}{\sqrt{N}}`,
+        label: 'Lag-Zero Identity',
+        tex: String.raw`R_0 = \frac{C_0}{C_0} = 1`,
         explanation:
-          'Under the null hypothesis of white noise, approximately 95% of autocorrelation values should fall within these bounds. Uses 2/sqrt(N) per NIST convention.',
+          'The autocorrelation at lag 0 is always 1 by definition, since the autocovariance at lag 0 equals the variance.',
+      },
+      {
+        label: 'Autocovariance Function',
+        tex: String.raw`C_h = \frac{1}{N}\sum_{t=1}^{N-h}(Y_t - \bar{Y})(Y_{t+h} - \bar{Y})`,
+        explanation:
+          'The autocovariance at lag h measures the average product of deviations from the mean for observations separated by h time steps.',
+      },     
+      {
+        label: '95% Significance Bounds',
+        tex: String.raw`\pm\,\frac{1.96}{\sqrt{N}}`,
+        explanation:
+          'Under the null hypothesis of white noise, approximately 95% of autocorrelation values should fall within these bounds. Uses 1.96/sqrt(N) as the exact 95% critical value.',
       },
     ],
     pythonCode: `import numpy as np
@@ -98,65 +104,101 @@ plt.show()`,
 
   'complex-demodulation': {
     definition:
-      'Complex demodulation is a time-series analysis technique that extracts the time-varying amplitude and phase of a sinusoidal component at a specified frequency. It produces two companion plots: an amplitude plot showing how the strength of the cyclic component changes over time, and a phase plot showing how the timing or alignment of the cycle shifts.',
+      'Complex demodulation (Granger, 1964) is a time-series analysis technique that extracts the time-varying amplitude and phase of a sinusoidal component at a specified frequency. It produces two companion plots: an amplitude plot showing how the strength of the cyclic component changes over time, and a phase plot used to improve the estimate of the frequency in the sinusoidal model.',
     purpose:
-      'Use complex demodulation when a time series contains a known or suspected periodic component and the analyst needs to determine whether that component is stationary or whether its amplitude or phase drifts over time. This is particularly important in manufacturing process monitoring, vibration analysis, and environmental science where cyclic effects may strengthen, weaken, or shift in timing. Unlike spectral analysis, which gives a single global frequency decomposition, complex demodulation tracks the evolution of a specific frequency component across the observation period.',
+      'The amplitude plot is used to determine if the assumption of constant amplitude in the sinusoidal model is justifiable. If the amplitude changes over time, the constant $\\alpha$ should be replaced with a time-varying model such as a linear fit ($B_0 + B_1 t$) or quadratic fit. The phase plot is used to improve the estimate of the frequency $\\omega$: if the phase plot shows lines sloping from left to right, the frequency estimate should be increased; if lines slope right to left, it should be decreased; if the slope is essentially zero, the frequency estimate does not need to be modified.',
     interpretation:
-      'In the amplitude plot, the vertical axis shows the estimated amplitude of the sinusoidal component as a function of time. A flat amplitude trace indicates a stationary cyclic component, while trends or abrupt changes indicate non-stationarity in the cycle strength. In the phase plot, the vertical axis shows the phase angle in degrees or radians. A constant phase indicates a stable cycle aligned with the demodulation frequency, while a linear drift in phase suggests that the true frequency differs slightly from the specified demodulation frequency. Sudden phase jumps may indicate structural changes in the underlying process.',
+      'In the amplitude plot, the vertical axis shows the estimated amplitude as a function of time. A flat amplitude trace indicates a stationary cyclic component with constant $\\alpha$, while trends or abrupt changes indicate that $\\alpha$ varies with time and the model should be updated accordingly. In the phase plot, the vertical axis shows the phase angle as a function of time. Lines sloping from left to right indicate that the demodulation frequency should be increased. Lines sloping from right to left indicate the frequency should be decreased. An essentially flat phase trace confirms that the specified demodulation frequency is correct.',
     assumptions:
-      'Complex demodulation requires specifying the target frequency in advance, which typically comes from prior domain knowledge or a preliminary spectral analysis. It assumes the signal can be approximated by a sinusoidal model at the chosen frequency, and it uses a low-pass filter whose bandwidth must be selected to balance smoothing and time resolution. The technique is most effective when the cyclic component is well-separated in frequency from other signals and noise.',
+      'Complex demodulation requires specifying the target frequency in advance, which typically comes from a preliminary spectral plot. It assumes the signal can be approximated by a sinusoidal model at the chosen frequency, and it uses a low-pass filter whose bandwidth must be selected to balance smoothing and time resolution. The mathematical computations for determining the amplitude and phase are detailed in Granger (1964).',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Sections 1.3.3.8-9',
     questions: [
       'Does the amplitude change over time?',
       'Are there any outliers that need to be investigated?',
       'Is the amplitude different at the beginning of the series (start-up effect)?',
+      'Is the specified demodulation frequency correct?',
     ],
     importance:
-      'Non-stationary cyclic components invalidate spectral analysis assumptions. Complex demodulation is the only technique that tracks time-varying amplitude and phase, making it essential for detecting when periodic behavior strengthens, weakens, or shifts timing during a process.',
+      'In the sinusoidal model $Y_i = C + \\alpha\\sin(2\\pi\\omega t_i + \\phi) + E_i$, the amplitude $\\alpha$ is assumed constant. The amplitude plot checks whether this assumption is reasonable; if not, $\\alpha$ should be replaced with a time-varying model. The non-linear fitting for the sinusoidal model is usually quite sensitive to the choice of good starting values. The initial estimate of $\\omega$ is obtained from a spectral plot, and the phase plot assesses whether this estimate is adequate. Using the phase plot together with the spectral plot can significantly improve the quality of the non-linear fits obtained.',
     definitionExpanded:
-      'The display consists of two panels: an amplitude plot (vertical axis = estimated amplitude of the sinusoidal component vs. time) and a phase plot (vertical axis = phase angle in degrees vs. time). The demodulation process multiplies the signal by a complex exponential at the target frequency, then applies a low-pass filter to extract the slowly varying envelope. The filter bandwidth controls the trade-off between time resolution and noise suppression.',
+      'The underlying sinusoidal model is $Y_i = C + \\alpha\\sin(2\\pi\\omega t_i + \\phi) + E_i$, where $\\alpha$ is the amplitude, $\\phi$ is the phase shift, and $\\omega$ is the dominant frequency. In this model $\\alpha$ and $\\phi$ are assumed constant. The amplitude plot displays estimated amplitude vs. time, and the phase plot displays phase angle vs. time. If the amplitude is not constant, the model is typically replaced with $Y_i = C + (B_0 + B_1 t_i)\\sin(2\\pi\\omega t_i + \\phi) + E_i$, where the amplitude varies linearly with time. Quadratic amplitude models are sometimes used; higher order models are relatively rare.',
+    formulas: [
+      {
+        label: 'Sinusoidal Model (Constant Amplitude)',
+        tex: String.raw`Y_i = C + \alpha\sin(2\pi\omega\, t_i + \phi) + E_i`,
+        explanation:
+          'The standard sinusoidal time series model where alpha is the amplitude, phi is the phase shift, omega is the dominant frequency, C is a constant, and E_i is the error term. Both alpha and phi are assumed constant over time.',
+      },
+      {
+        label: 'Time-Varying Amplitude Model',
+        tex: String.raw`Y_i = C + (B_0 + B_1\, t_i)\sin(2\pi\omega\, t_i + \phi) + E_i`,
+        explanation:
+          'When the amplitude plot shows that alpha is not constant, it is replaced by a linear function of time. This is the most common replacement; quadratic models are sometimes used, but higher order models are relatively rare.',
+      },
+    ],
     caseStudySlugs: ['beam-deflections'],
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import hilbert
 
-# Generate sinusoidal signal with time-varying amplitude
-rng = np.random.default_rng(42)
-n = 500
-t = np.linspace(0, 10, n)
-freq = 2.0  # target frequency in Hz
-amplitude_envelope = 1.0 + 0.5 * np.sin(2 * np.pi * 0.2 * t)
-signal = amplitude_envelope * np.sin(2 * np.pi * freq * t)
-signal += 0.3 * rng.standard_normal(n)
+# LEW.DAT — beam deflection data (NIST Section 1.4.2.5)
+# True dominant frequency ≈ 0.3026 cycles/observation.
+lew = np.array([
+    -213, -564,  -35,  -15,  141,  115, -420, -360,  203, -338,
+    -431,  194, -220, -513,  154, -125, -559,   92,  -21, -579,
+     -52,   99, -543, -175,  162, -457, -346,  204, -300, -474,
+     164, -107, -572,   -8,   83, -541, -224,  180, -420, -374,
+     201, -236, -531,   83,   27, -564, -112,  131, -507, -254,
+     199, -311, -495,  143,  -46, -579,  -90,  136, -472, -338,
+     202, -287, -477,  169, -124, -568,   17,   48, -568, -135,
+     162, -430, -422,  172,  -74, -577,  -13,   92, -534, -243,
+     194, -355, -465,  156,  -81, -578,  -64,  139, -449, -384,
+     193, -198, -538,  110,  -44, -577,   -6,   66, -552, -164,
+], dtype=float)
+n = len(lew)
+filter_hw = 30  # moving-average half-width
 
-# Complex demodulation via analytic signal
-analytic = hilbert(signal)
-envelope = np.abs(analytic)
-phase = np.unwrap(np.angle(analytic))
+def demodulate(data, freq, hw):
+    """Complex demodulation at a given frequency."""
+    t = np.arange(len(data))
+    kernel = np.ones(2 * hw + 1) / (2 * hw + 1)
+    re = np.convolve(data * np.cos(2 * np.pi * freq * t), kernel, mode="same")
+    im = np.convolve(data * np.sin(2 * np.pi * freq * t), kernel, mode="same")
+    return re, im
 
-fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
-axes[0].plot(t, envelope, label="Amplitude envelope")
-axes[0].plot(t, amplitude_envelope, "--", alpha=0.7, label="True envelope")
-axes[0].set_ylabel("Amplitude")
-axes[0].set_title("Complex Demodulation")
-axes[0].legend()
+# Amplitude: use correct frequency (0.3025) for stable envelope
+re_a, im_a = demodulate(lew, 0.3025, filter_hw)
+amplitude = 2 * np.sqrt(re_a**2 + im_a**2)
 
-axes[1].plot(t, np.degrees(phase))
+# Phase: use wrong frequency (0.28) to show sawtooth drift
+re_p, im_p = demodulate(lew, 0.28, filter_hw)
+phase = np.arctan2(im_p, re_p)  # wrapped radians
+
+# Trim edge points where the moving average has partial windows
+trim = slice(filter_hw, n - filter_hw)
+t = np.arange(n)
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 6))
+axes[0].plot(t, amplitude)
+axes[0].set_ylabel("Estimated Amplitude")
+axes[0].set_title("Complex Demodulation Amplitude Plot (freq = 0.3025)")
+
+axes[1].scatter(t[trim], phase[trim], s=12, marker="x", color="k")
 axes[1].set_xlabel("Time")
-axes[1].set_ylabel("Phase (degrees)")
+axes[1].set_ylabel("Estimated Phase")
+axes[1].set_title("Complex Demodulation Phase Plot (freq = 0.28)")
 plt.tight_layout()
 plt.show()`,
   },
 
   'lag-plot': {
     definition:
-      'A lag plot is a scatter plot of each observation in a dataset against the observation at a fixed lag, typically lag 1. That is, the point at position i is plotted as (Y_i, Y_{i+k}) where k is the chosen lag, creating a visual test for serial dependence in time-ordered data.',
+      'A lag plot is a scatter plot that checks whether a dataset or time series is random. For a lag of k, each point is plotted as ($Y_{i-k}$, $Y_i$), where the horizontal axis shows the lagged value and the vertical axis shows the current value. The most commonly used lag is 1. Random data should not exhibit any identifiable structure; non-random structure indicates that the underlying data are not random.',
     purpose:
-      'Use a lag plot as a simple and powerful diagnostic for detecting non-randomness in time series data. It complements the autocorrelation plot by providing a direct visual impression of how successive observations are related. The lag plot is particularly useful for detecting non-linear dependencies that might not be captured by linear autocorrelation, such as clustered or oscillating patterns. It is one of the four panels in the standard 4-plot diagnostic display.',
+      'Use a lag plot as a simple and powerful diagnostic for detecting non-randomness in time series data. It complements the autocorrelation plot by providing a direct visual impression of how successive observations are related. The lag plot is particularly useful for detecting non-linear dependencies that might not be captured by linear autocorrelation, such as clustered or oscillating patterns. Inasmuch as randomness is an underlying assumption for most statistical estimation and testing techniques, the lag plot should be a routine tool for researchers.',
     interpretation:
-      'For random data, the lag plot appears as a structureless cloud of points with no discernible pattern, indicating that knowing the value at time i provides no information about the value at time i+1. A strong positive linear pattern in the lag plot indicates positive autocorrelation, meaning high values tend to follow high values and low values follow low values. A cluster of points along the diagonal suggests a slowly drifting process. An elliptical or circular pattern suggests oscillatory behavior. A pattern of distinct clusters indicates that the data alternate between distinct states. Variant patterns include random data showing a formless scatter, moderate autocorrelation producing an elongated ellipse along the diagonal, strong autocorrelation displaying a tight linear band, and sinusoidal models creating a structured elliptical loop.',
+      'For random data, the lag plot appears as a structureless cloud of points with no discernible pattern, indicating that knowing the current value $Y_{i-1}$ provides no information about the next value $Y_i$. A strong positive linear pattern along the diagonal indicates positive autocorrelation, meaning high values tend to follow high values and low values follow low values. Moderate autocorrelation produces a noisy elliptical cluster along the diagonal with a restricted but still wide range of possible next values. Strong autocorrelation produces a tight linear band along the diagonal, making prediction possible from one observation to the next. A tight elliptical or circular loop pattern indicates a sinusoidal model. The lag plot is also valuable for outlier detection: each data point appears twice in a lag-1 plot (once as $Y_i$ and once as $Y_{i-1}$), so apparent outliers in the lag plot can be traced back to specific data points in the original sequence.',
     assumptions:
-      'The lag plot requires that the data be recorded in the order of collection. It is most effective at lag 1 for detecting first-order dependence, though higher lags can be explored for more complex patterns. The visual assessment is qualitative and should be supported by quantitative tests such as the autocorrelation coefficient or the Durbin-Watson statistic.',
+      'The lag plot requires that the data be recorded in the order of collection. It is most effective at lag 1 for detecting first-order dependence, though lag plots can be generated for any arbitrary lag to explore more complex patterns. The visual assessment is qualitative and should be supported by quantitative tests such as the autocorrelation coefficient or the runs test.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.15',
     questions: [
       'Are the data random?',
@@ -165,34 +207,54 @@ plt.show()`,
       'Are there outliers in the data?',
     ],
     importance:
-      'The lag plot provides an instant visual diagnostic for randomness that requires no distributional assumptions. A single glance reveals whether successive observations are independent, which is critical because non-independence invalidates standard error formulas, makes confidence intervals too narrow, and causes control charts to generate false alarms.',
+      'The lag plot provides an instant visual diagnostic for randomness that requires no distributional assumptions. A single glance reveals whether successive observations are independent, which is critical because non-independence invalidates standard error formulas, makes confidence intervals too narrow, and causes control charts to generate false alarms. When the lag plot reveals autocorrelation, the next step is to estimate the parameters for an autoregressive model $Y_i = A_0 + A_1 Y_{i-1} + E_i$ using linear regression directly from the lag plot axes.',
     definitionExpanded:
-      'The plot shows Y_i on the horizontal axis vs Y_{i+k} on the vertical axis, where k is the lag (default k=1). Each point represents two successive observations. The plot exploits the human eye\'s pattern recognition: random data produce a structureless cloud, while any departure from randomness produces a recognizable geometric shape.',
+      'The horizontal axis shows $Y_{i-1}$ and the vertical axis shows $Y_i$ for lag 1. Each point represents two successive observations. The plot exploits the human eye\'s pattern recognition: random data produce a structureless "shotgun" cloud, while any departure from randomness produces a recognizable geometric shape. Since the axes are exactly $Y_{i-1}$ and $Y_i$, an autoregressive fit can be performed as a linear regression directly from the lag plot.',
     caseStudySlugs: ['beam-deflections'],
     examples: [
       {
         label: 'Random Data',
         description:
-          'A structureless, circular cloud of points centered on the plot with no discernible pattern. This indicates that knowing the value at time i provides no information about the value at time i+1. The data satisfy the randomness assumption.',
+          'A structureless, circular cloud of points centered on the plot with no discernible pattern — a "shotgun" pattern. One cannot infer from a current value $Y_{i-1}$ the next value $Y_i$. For example, a given value on the horizontal axis corresponds to virtually any value on the vertical axis. Such non-association is the essence of randomness.',
         variantLabel: 'Random',
       },
       {
-        label: 'Autoregressive',
+        label: 'Moderate Autocorrelation',
         description:
-          'Points form a tight ellipse aligned along the diagonal, indicating strong positive autocorrelation. High values tend to follow high values and low values follow low values. The tighter the ellipse, the stronger the serial dependence.',
-        variantLabel: 'Autoregressive',
+          'Points cluster noisily along the diagonal, forming an elongated ellipse. This is the lag plot signature of moderate positive autocorrelation. For a known current value $Y_{i-1}$, the range of possible next values $Y_i$ is restricted but still broad, suggesting that prediction via an autoregressive model is possible but imprecise.',
+        variantLabel: 'Moderate Autocorrelation',
       },
       {
-        label: 'Seasonal',
+        label: 'Strong Autocorrelation',
         description:
-          'Points form a structured elliptical or circular loop pattern rather than a random cloud. The cyclic structure in the data creates a recognizable geometric shape in the lag plot that is distinct from both random scatter and linear autocorrelation.',
-        variantLabel: 'Seasonal',
+          'Points form a tight linear band along the diagonal, indicating strong positive autocorrelation. If you know $Y_{i-1}$ you can make a strong guess as to what $Y_i$ will be. The recommended next step is to fit the autoregressive model $Y_i = A_0 + A_1 Y_{i-1} + E_i$ using linear regression directly from the lag plot.',
+        variantLabel: 'Strong Autocorrelation',
       },
       {
-        label: 'Trend',
+        label: 'Sinusoidal',
         description:
-          'Points cluster tightly along the diagonal with the cloud displaced from the center, indicating a strong trend in the data. The linear structure arises because successive values in a trending series are nearly identical, differing only by the trend increment plus noise.',
-        variantLabel: 'Trend',
+          'Points form a tight elliptical loop, the lag plot signature of a single-cycle sinusoidal model. The lag plot also reveals outliers: points lying off the ellipse indicate suspect data values. Each raw data point appears twice in the lag plot (once as $Y_i$ and once as $Y_{i-1}$), so apparent outlier pairs can be traced back to a single faulty observation.',
+        variantLabel: 'Sinusoidal',
+      },
+    ],
+    formulas: [
+      {
+        label: 'Autoregressive Model',
+        tex: String.raw`Y_i = A_0 + A_1\, Y_{i-1} + E_i`,
+        explanation:
+          'When the lag plot reveals autocorrelation, this model is fit using linear regression directly from the lag plot axes. The residual standard deviation will be much smaller than for the default constant model.',
+      },
+      {
+        label: 'Default (Constant) Model',
+        tex: String.raw`Y_i = A_0 + E_i`,
+        explanation:
+          'The null model assumes each observation is a constant plus random error. When autocorrelation is present, this model is inadequate and the autoregressive model above should be used.',
+      },
+      {
+        label: 'Sinusoidal Model',
+        tex: String.raw`Y_i = C + \alpha\sin(2\pi\omega\, t_i + \phi) + E_i`,
+        explanation:
+          'When the lag plot shows an elliptical loop, a sinusoidal model is appropriate. Alpha is the amplitude, omega is the frequency (between 0 and 0.5 cycles per observation), and phi is the phase.',
       },
     ],
     pythonCode: `import numpy as np
@@ -205,10 +267,11 @@ y = np.zeros(n)
 for t in range(1, n):
     y[t] = 0.7 * y[t - 1] + rng.standard_normal()
 
+lag = 1
 fig, ax = plt.subplots(figsize=(6, 6))
-ax.scatter(y[:-1], y[1:], alpha=0.5, edgecolors="k", linewidths=0.5)
-ax.set_xlabel("Y(t)")
-ax.set_ylabel("Y(t+1)")
+ax.scatter(y[:-lag], y[lag:], alpha=0.5, edgecolors="k", linewidths=0.5)
+ax.set_xlabel(r"$Y_{i-1}$")
+ax.set_ylabel(r"$Y_i$")
 ax.set_title("Lag Plot (lag = 1)")
 ax.set_aspect("equal")
 plt.tight_layout()
@@ -273,13 +336,13 @@ plt.show()`,
 
   'spectral-plot': {
     definition:
-      'A spectral plot, also known as a power spectral density (PSD) plot, displays the contribution of each frequency component to the total variance of a time series. It transforms the time-domain representation into the frequency domain using the Fourier transform, revealing the dominant periodicities and cyclic behavior in the data.',
+      'A spectral plot is a graphical technique for examining cyclic structure in the frequency domain. It is a smoothed Fourier transform of the autocovariance function. The frequency is measured in cycles per unit time where unit time is defined to be the distance between two points. A frequency of 0 corresponds to an infinite cycle while a frequency of 0.5 corresponds to a cycle of 2 data points. Equi-spaced time series are inherently limited to detecting frequencies between 0 and 0.5.',
     purpose:
-      'Use a spectral plot when the goal is to identify dominant frequencies, periodicities, or cyclic patterns in time series data. It provides a global frequency decomposition that complements the time-domain information from run-sequence and autocorrelation plots. Spectral analysis is particularly important in vibration monitoring, signal processing, environmental science, and manufacturing process diagnostics where cyclic patterns may be caused by rotating equipment, seasonal effects, or periodic disturbances.',
+      'Use a spectral plot when the goal is to identify dominant frequencies, periodicities, or cyclic patterns in time series data. Trends should typically be removed from the time series before applying the spectral plot. Trends can be detected from a run sequence plot and are typically removed by differencing the series or by fitting a straight line and applying the spectral analysis to the residuals. Spectral plots are often used to find a starting value for the frequency in the sinusoidal model $Y_i = C + \\alpha\\sin(2\\pi\\omega t_i + \\phi) + E_i$.',
     interpretation:
-      'The horizontal axis represents frequency, often in cycles per unit time, and the vertical axis represents power spectral density, typically on a logarithmic scale when the dynamic range is large. Sharp peaks in the spectral plot indicate dominant periodic components at those frequencies. The frequency of a peak can be converted to a period by taking its reciprocal. A flat spectrum indicates white noise with equal power at all frequencies, consistent with random data. A spectrum that decreases with frequency indicates a red noise process where low-frequency variations dominate. Variant patterns include white noise (flat spectrum), autoregressive processes with broad spectral peaks, and sinusoidal signals producing sharp narrow spikes at the signal frequency and its harmonics.',
+      'The horizontal axis represents frequency in cycles per observation and the vertical axis represents smoothed variance (power). Sharp peaks in the spectral plot indicate dominant periodic components at those frequencies. The frequency of a peak can be converted to a period by taking its reciprocal. A flat spectrum indicates white noise with equal power at all frequencies, consistent with random data. A spectrum that starts with a dominant peak near zero and decays rapidly indicates strong positive autocorrelation where an autoregressive model is appropriate. A single sharp peak at a non-zero frequency indicates an underlying sinusoidal model.',
     assumptions:
-      'Spectral analysis assumes that the time series is stationary, meaning that its statistical properties do not change over time. Non-stationary data should be detrended or differenced before applying spectral methods. The frequency resolution depends on the length of the time series: longer series provide finer frequency resolution. Windowing functions such as Hanning or Hamming are typically applied to reduce spectral leakage from the finite sample length.',
+      'Trends should be removed before applying spectral analysis, as they can distort the spectrum. The computations for generating the smoothed variances can be involved; details can be found in Jenkins and Watts (1968) and Bloomfield (1976). The frequency resolution depends on the length of the time series: longer series provide finer frequency resolution.',
     nistReference: 'NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3.27',
     questions: [
       'How many cyclic components are there?',
@@ -287,62 +350,70 @@ plt.show()`,
       'If there is a dominant cyclic frequency, what is it?',
     ],
     importance:
-      'Identifying the dominant frequencies in a time series is essential for understanding the underlying physical mechanism generating the data. In manufacturing, a spectral peak at a specific frequency can identify the rotating component or periodic process responsible for variation, enabling targeted corrective action rather than broad process changes.',
+      'The spectral plot is the primary technique for assessing the cyclic nature of univariate time series in the frequency domain. It is almost always the second plot (after a run sequence plot) generated in a frequency domain analysis of a time series.',
     definitionExpanded:
-      'The power spectral density is computed via the Fourier transform of the autocovariance function (or equivalently, the squared magnitude of the discrete Fourier transform of the data, suitably normalized). The horizontal axis shows frequency in cycles per observation interval, and the vertical axis shows power spectral density. Sharp peaks indicate periodic components; the frequency resolution is 1/N where N is the series length.',
+      'The spectral plot is formed with the vertical axis showing smoothed variance (power) and the horizontal axis showing frequency (cycles per observation). The smoothed variances are computed via the Fourier transform of the autocovariance function. Sharp peaks indicate periodic components. The frequency resolution is 1/N where N is the series length.',
     caseStudySlugs: ['beam-deflections'],
     examples: [
       {
-        label: 'Single Frequency',
-        description:
-          'A single sharp peak rises prominently above a flat noise floor, identifying one dominant periodic component in the data. The frequency of the peak can be converted to a period by taking its reciprocal. This pattern is typical of data driven by a single cyclic mechanism.',
-        variantLabel: 'Single Frequency',
-      },
-      {
-        label: 'Multiple Frequencies',
-        description:
-          'Two or more distinct peaks appear at different frequencies, indicating that the time series contains multiple periodic components. Each peak represents an independent cyclic mechanism. The relative heights indicate which frequency contributes most to the total variance.',
-        variantLabel: 'Multiple Frequencies',
-      },
-      {
         label: 'White Noise',
         description:
-          'A flat, featureless spectrum with roughly equal power at all frequencies. This is the spectral signature of purely random data with no periodic structure. The absence of peaks confirms that no cyclic model is needed.',
+          'A flat, featureless spectrum with no dominant peaks and no identifiable pattern. The peaks fluctuate at random. This type of appearance indicates that there are no significant cyclic patterns in the data and the data are random. Corresponds to NIST Example 1 (200 normal random numbers).',
         variantLabel: 'White Noise',
+      },
+      {
+        label: 'Autoregressive',
+        description:
+          'A strong dominant peak near zero frequency that decays rapidly toward zero. This is the spectral plot signature of a process with strong positive autocorrelation. Such processes are highly non-random in that there is high association between an observation and a succeeding observation. An autoregressive model $Y_i = A_0 + A_1 Y_{i-1} + E_i$ is appropriate. The next step would be to determine the model parameters and then investigate the source of the autocorrelation: is it the phenomenon under study, drifting in the environment, or contamination from the data acquisition system?',
+        variantLabel: 'Autoregressive',
+      },
+      {
+        label: 'Single Frequency',
+        description:
+          'A single dominant peak at a specific frequency, indicating an underlying single-cycle sinusoidal model. The proper model is $Y_i = C + \\alpha\\sin(2\\pi\\omega t_i + \\phi) + E_i$, where $\\alpha$ is the amplitude, $\\omega$ is the frequency (between 0 and 0.5 cycles per observation), and $\\phi$ is the phase. The recommended next steps are to estimate the frequency from the spectral plot, use a complex demodulation phase plot to fine-tune the estimate, and carry out a non-linear fit of the sinusoidal model.',
+        variantLabel: 'Single Frequency',
       },
     ],
     formulas: [
       {
-        label: 'Power Spectral Density (Periodogram)',
-        tex: String.raw`S(f_k) = \frac{1}{N}\left|\sum_{t=0}^{N-1} Y_t\, e^{-i\,2\pi f_k t}\right|^2`,
+        label: 'Sinusoidal Model',
+        tex: String.raw`Y_i = C + \alpha\sin(2\pi\omega\, t_i + \phi) + E_i`,
         explanation:
-          'The periodogram estimates the power spectral density at frequency f_k as the squared magnitude of the discrete Fourier transform of the data, divided by the number of observations.',
+          'The sinusoidal time series model where alpha is the amplitude, omega is the frequency (between 0 and 0.5 cycles per observation), and phi is the phase. Spectral plots are often used to find a starting value for omega in this model.',
+      },
+      {
+        label: 'Autoregressive Model',
+        tex: String.raw`Y_i = A_0 + A_1\, Y_{i-1} + E_i`,
+        explanation:
+          'When the spectral plot shows a dominant peak near zero that decays rapidly, this autoregressive model is appropriate. The parameters can be estimated by linear regression or by fitting a Box-Jenkins AR model.',
       },
       {
         label: 'Frequency Range',
         tex: String.raw`f_k = \frac{k}{N}, \quad k = 0, 1, \ldots, \left\lfloor\frac{N}{2}\right\rfloor`,
         explanation:
-          'The frequencies range from 0 to the Nyquist frequency (0.5 cycles per observation interval). The frequency resolution is 1/N, determined by the series length.',
+          'The frequencies range from 0 (infinite cycle) to 0.5 (cycle of 2 data points). The frequency resolution is 1/N, determined by the series length.',
       },
     ],
     pythonCode: `import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import periodogram
 
-# Generate sinusoidal signal at 0.1 Hz plus noise
+# Sinusoidal signal at 0.3 cycles/observation (NIST LEW.DAT pattern)
 rng = np.random.default_rng(42)
-n = 500
-fs = 1.0  # sampling frequency
-t = np.arange(n) / fs
-signal = 2.0 * np.sin(2 * np.pi * 0.1 * t) + rng.standard_normal(n)
+n = 200
+t = np.arange(n)
+signal = 10 * np.sin(2 * np.pi * 0.3 * t) + rng.standard_normal(n)
 
-freqs, psd = periodogram(signal, fs=fs)
+freqs, psd = periodogram(signal, fs=1.0)
 
+# Skip DC component (freq=0) for clearer display
+mask = freqs > 0
 fig, ax = plt.subplots(figsize=(8, 4))
-ax.semilogy(freqs, psd)
-ax.set_xlabel("Frequency (Hz)")
-ax.set_ylabel("Power Spectral Density")
-ax.set_title("Spectral Plot")
+ax.plot(freqs[mask], psd[mask])
+ax.set_xlabel("Frequency (cycles/observation)")
+ax.set_ylabel("Smoothed Variance (Power)")
+ax.set_title("Spectral Plot — Dominant Frequency at 0.3")
+ax.set_ylim(bottom=0)
 plt.tight_layout()
 plt.show()`,
   },

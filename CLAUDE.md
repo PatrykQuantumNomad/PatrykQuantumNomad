@@ -23,6 +23,12 @@ Improve the **SEO and public visibility** of the PatrykQuantumNomad GitHub accou
 
 - `README.md` — Profile page with bio, tech stack, featured projects, and writing links
 
+## Reference Data
+
+- `handbook/` — Local copy of the NIST/SEMATECH e-Handbook of Statistical Methods website. Use as the authoritative source when building or verifying EDA Visual Encyclopedia content.
+- `handbook/eda/` — Chapter 1 (Exploratory Data Analysis) of the handbook. This is the primary source for EDA technique definitions, formulas, interpretation guidance, case study data, and plot examples. Always prefer reading from these local files over fetching from `itl.nist.gov`.
+- `handbook/datasets/` — Original NIST `.DAT` files used in case studies and technique examples (e.g., `CERAMIC.DAT`, `LEW.DAT`, `FLICKER.DAT`, `RANDWALK.DAT`). Use these for verifying computed statistics and generating accurate plots.
+
 ## SEO & Visibility Strategy
 
 When editing this repository, keep these priorities in mind:

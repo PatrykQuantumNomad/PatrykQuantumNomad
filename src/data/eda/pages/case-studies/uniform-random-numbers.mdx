@@ -74,17 +74,23 @@ The [lag plot](/eda/techniques/lag-plot/) at lag 1 displays a structureless squa
 
 <UniformRandomPlots type="lag" />
 
-### Histogram
+### Histogram with Normal PDF Overlay
 
-The [histogram](/eda/techniques/histogram/) is approximately flat (rectangular) across the interval [0, 1], which is the signature of a uniform distribution. There is no central peak, no bell shape, and no skewness. This is the clearest graphical signal that the data are not normally distributed.
+The [histogram](/eda/techniques/histogram/) with an overlaid normal probability density function shows that the flat, rectangular shape of the data is a poor fit to the bell-shaped normal curve. The frequencies are relatively flat across the range of the data while the normal PDF peaks sharply in the center. This mismatch is the clearest graphical signal that the normal distribution is not appropriate for these data.
 
-<UniformRandomPlots type="histogram" />
+<UniformRandomPlots type="histogram-normal" />
 
 ### Normal Probability Plot
 
 The [normal probability plot](/eda/techniques/normal-probability-plot/) shows a pronounced S-shaped curve rather than the expected straight line. The tails curve away from the theoretical line in opposite directions -- the lower tail curves upward and the upper tail curves downward. This S-shape is the classic indicator of a light-tailed (platykurtic) distribution compared to the normal.
 
 <UniformRandomPlots type="normal-probability" />
+
+### Histogram with Uniform PDF Overlay
+
+The [histogram](/eda/techniques/histogram/) with a uniform PDF overlay provides a much better fit. The flat, rectangular histogram shape matches the expected constant frequency under the U(0,1) distribution, in stark contrast to the poor normal fit above.
+
+<UniformRandomPlots type="histogram" />
 
 ### Uniform Probability Plot
 
@@ -93,6 +99,14 @@ The [uniform probability plot](/eda/techniques/probability-plot/) provides the d
 <UniformRandomPlots type="uniform-probability" />
 
 The nearly linear pattern confirms that the uniform distribution is an excellent model for these data, contrasting sharply with the S-shaped curvature in the normal probability plot above.
+
+### Bootstrap Plot
+
+The [bootstrap plot](/eda/techniques/bootstrap-plot/) compares the sampling variability of three location estimators -- the mean, median, and midrange -- by drawing 100 subsamples with replacement from the data and computing each statistic for every subsample. The top row shows the computed statistic versus subsample number; the bottom row shows the corresponding histograms.
+
+<UniformRandomPlots type="bootstrap" />
+
+The midrange has a far smaller variance than either the mean or the median, making it the superior location estimator for uniform data. The bootstrap confidence interval for the midrange is substantially tighter than for the mean, demonstrating why the standard mean-based confidence interval overestimates uncertainty for this distribution.
 
 ### Autocorrelation Plot
 

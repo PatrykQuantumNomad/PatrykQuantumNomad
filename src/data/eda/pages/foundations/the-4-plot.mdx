@@ -1,16 +1,29 @@
 ---
 title: "The 4-Plot for Assumption Testing"
 description: "Learn how the 4-plot technique tests all four underlying assumptions simultaneously using a run sequence plot, lag plot, histogram, and normal probability plot"
-section: "1.2.5"
+section: "1.3.3.32"
 category: "foundations"
-nistSection: "1.2.5 Interpretation of 4-Plot"
+nistSection: "1.3.3.32 4-Plot, 1.2.4 Interpretation of 4-Plot"
 ---
 
-## The Universal First-Pass Diagnostic
+import InlineMath from '../../../../components/eda/InlineMath.astro';
 
-The 4-plot is arguably the single most important diagnostic tool in Exploratory Data Analysis. As described in Section 1.2.4 of the NIST/SEMATECH Engineering Statistics Handbook, it is designed to test all four underlying assumptions -- fixed location, fixed variation, randomness, and fixed distribution -- in a single, compact display. Before running any formal analysis, the 4-plot gives you a rapid health check of your data.
+## A Simple, Efficient, and Powerful Diagnostic
 
-The power of the 4-plot lies in its comprehensiveness. Rather than checking assumptions one at a time with separate tools, the analyst can assess all four simultaneously and see how they interact. A dataset that passes all four panels of the 4-plot is ready for standard statistical analysis; a dataset that fails one or more panels requires investigation before proceeding.
+The 4-plot is a collection of four specific EDA graphical techniques whose purpose is to test the assumptions that underlie most measurement processes. As described in Sections 1.3.3.32 and 1.2.4 of the NIST/SEMATECH Engineering Statistics Handbook, these four techniques are simple, efficient, and powerful for the routine testing of underlying assumptions.
+
+There are four assumptions that typically underlie all measurement processes; namely, that the data from the process at hand "behave like":
+
+1. **Random drawings**
+2. **From a fixed distribution**
+3. **With that distribution having a fixed location**
+4. **With that distribution having fixed variation**
+
+If all four assumptions hold, then the above four plots will have a characteristic appearance; if any of the underlying assumptions fail to hold, then it will be revealed by an anomalous appearance in one or more of the plots. Rather than checking assumptions one at a time with separate tools, the analyst can assess all four simultaneously and see how they interact. A dataset that passes all four panels of the 4-plot is ready for standard statistical analysis; a dataset that fails one or more panels requires investigation before proceeding.
+
+## Applicability to Residuals
+
+Although the 4-plot has an obvious use for univariate and time series data, its usefulness extends far beyond that. Many statistical models of the form <InlineMath tex="Y_i = f(X_1, \ldots, X_k) + E_i" /> have the same underlying assumptions for the error term. That is, no matter how complicated the functional fit, the assumptions on the underlying error term are still the same. The 4-plot can and should be routinely applied to the residuals when fitting models regardless of whether the model is simple or complicated.
 
 ## The Four Panels
 
@@ -21,15 +34,15 @@ The 4-plot arranges four diagnostic graphics in a fixed layout. Each panel targe
 The [run sequence plot](/eda/techniques/run-sequence-plot/) displays the data in the order they were collected, with the observation index on the horizontal axis and the measured value on the vertical axis.
 
 **What to look for:**
-- **Fixed location:** The data should scatter randomly around a constant horizontal level. Visible trends, step changes, or oscillations indicate that the location is shifting over time.
-- **Fixed variation:** The vertical spread of points should remain roughly constant from left to right. A funnel shape (widening or narrowing) suggests changing variance.
+- **Fixed location:** If the fixed location assumption holds, the run sequence plot will be flat and non-drifting. Visible trends, step changes, or oscillations indicate that the location is shifting over time.
+- **Fixed variation:** If the fixed variation assumption holds, the vertical spread in the run sequence plot will be approximately the same over the entire horizontal axis. A funnel shape (widening or narrowing) suggests changing variance.
 
 ### Panel 2: Lag Plot (Upper Right)
 
-The [lag plot](/eda/techniques/lag-plot/) graphs each observation against the immediately preceding observation. If the data are truly random and independent, the lag plot will show a structureless cloud of points.
+The [lag plot](/eda/techniques/lag-plot/) graphs each observation against the immediately preceding observation (<InlineMath tex="Y_i" /> versus <InlineMath tex="Y_{i-1}" />). If the data are truly random and independent, the lag plot will be structureless and random.
 
 **What to look for:**
-- **Randomness:** A circular or blob-shaped scatter with no apparent pattern confirms independence. Diagonal linear structure indicates positive autocorrelation; an X pattern indicates negative autocorrelation; curved patterns suggest a nonlinear time-dependent process.
+- **Randomness:** A structureless, blob-shaped scatter with no apparent pattern confirms independence. Clustering along the diagonal indicates positive autocorrelation and suggests an autoregressive model may be appropriate. A tight elliptical pattern indicates a sinusoidal (single-cycle) model. The lag plot is also valuable for outlier detection — points that lie far from the main structure warrant investigation.
 
 ### Panel 3: Histogram (Lower Left)
 
@@ -44,13 +57,38 @@ The [histogram](/eda/techniques/histogram/) bins the data and displays the frequ
 The [normal probability plot](/eda/techniques/normal-probability-plot/) is the most sensitive of the four panels for assessing whether the data follow a normal (Gaussian) distribution. It plots the ordered data values against the theoretical quantiles of the standard normal distribution.
 
 **What to look for:**
-- **Normality:** If the data are normally distributed, the points will fall approximately on a straight line. Curvature in the tails indicates heavy tails (S-shape) or light tails (reverse S). Systematic departure from linearity suggests the data come from a different distribution family.
+- **Normality:** If the data are normally distributed, the points will fall approximately on a straight line. Both short-tailed and long-tailed departures from normality produce an S-like pattern in the middle of the plot. The distinguishing factor is the direction of departure of the first few and last few points from the fitted line. For long (heavy) tails, the first few points show increasing departure *below* the line and the last few points show increasing departure *above* the line. For short (light) tails, this pattern is reversed — the first few points depart *above* the line and the last few points depart *below* the line.
+
+## Questions the 4-Plot Answers
+
+The 4-plot can provide answers to many questions:
+
+1. Is the process in-control, stable, and predictable?
+2. Is the process drifting with respect to location?
+3. Is the process drifting with respect to variation?
+4. Are the data random?
+5. Is an observation related to an adjacent observation?
+6. If the data are a time series, is it white noise?
+7. If the data are a time series and not white noise, is it sinusoidal, autoregressive, etc.?
+8. If the data are non-random, what is a better model?
+9. Does the process follow a normal distribution?
+10. If non-normal, what distribution does the process follow?
+11. Is the model <InlineMath tex="Y_i = A_0 + E_i" /> valid and sufficient?
+12. If the default model is insufficient, what is a better model?
+13. Is the formula <InlineMath tex="s / \sqrt{N}" /> valid for the standard error of the mean?
+14. Is the sample mean a good estimator of the process location?
+15. If not, what would be a better estimator?
+16. Are there any outliers?
+
+## Probabilistic Predictability
+
+Predictability is an all-important goal in science and engineering. If the four assumptions hold, then we have achieved probabilistic predictability — the ability to make probability statements not only about the process in the past, but also about the process in the future. In short, such processes are said to be "statistically in control." If the four assumptions do not hold, then we have a process that is drifting (with respect to location, variation, or distribution), is unpredictable, and is out of control. A simple characterization of such processes by a location estimate, a variation estimate, or a distribution "estimate" inevitably leads to optimistic and grossly invalid engineering conclusions.
 
 ## Interpreting the Combined Evidence
 
 The real strength of the 4-plot is in reading all four panels together. Here are common patterns:
 
-- **All four panels clean:** The data satisfy all standard assumptions. Proceed with parametric analysis (t-tests, ANOVA, regression).
+- **All four panels clean:** The data satisfy all standard assumptions. The process is "statistically in control." Proceed with parametric analysis (t-tests, ANOVA, regression).
 - **Run sequence shows a trend, other panels noisy:** The location is shifting. Before analyzing, detrend the data or model the trend explicitly.
 - **Lag plot shows structure:** The data are autocorrelated. Standard error formulas will underestimate uncertainty. Consider time-series methods or subsample to reduce dependence.
 - **Histogram bimodal, probability plot curved:** The data likely come from a mixture of two populations. Investigate whether a grouping variable can separate them.
@@ -58,15 +96,21 @@ The real strength of the 4-plot is in reading all four panels together. Here are
 
 ## Beyond the 4-Plot
 
-When the 4-plot reveals a violation, deeper investigation is needed. The [6-plot](/eda/techniques/6-plot/) extends the 4-plot with two additional panels (a fitted linear plot and residual-based diagnostics) for more detailed assessment. Formal hypothesis tests -- the [runs test](/eda/quantitative/runs-test/) for randomness, the [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality -- can quantify what the 4-plot reveals visually. See [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) for guidance on remedial actions.
+When the 4-plot reveals a violation, deeper investigation is needed. The [6-plot](/eda/techniques/6-plot/) is a collection of six graphical techniques whose purpose is to assess the validity of a <InlineMath tex="Y" /> versus <InlineMath tex="X" /> fit, where the fit can be linear, non-linear, LOWESS, spline, or any other fit utilizing a single independent variable. Formal hypothesis tests — the [runs test](/eda/quantitative/runs-test/) for randomness, the [Anderson-Darling test](/eda/quantitative/anderson-darling/) for normality — can quantify what the 4-plot reveals visually. See [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) for guidance on remedial actions.
+
+### Related Techniques
+
+- [Run Sequence Plot](/eda/techniques/run-sequence-plot/) — tests fixed location and fixed variation
+- [Lag Plot](/eda/techniques/lag-plot/) — tests randomness
+- [Histogram](/eda/techniques/histogram/) — tests distribution shape
+- [Normal Probability Plot](/eda/techniques/normal-probability-plot/) — tests normality
+- [Autocorrelation Plot](/eda/techniques/autocorrelation-plot/) — quantifies serial dependence beyond the lag plot
+- [Spectral Plot](/eda/techniques/spectral-plot/) — identifies cyclic components in the frequency domain
+- [PPCC Plot](/eda/techniques/ppcc-plot/) — identifies the distributional family via probability plot correlation coefficients
 
 ### Cross-References
 
-- [4-Plot](/eda/techniques/4-plot/) -- the technique page with interactive visualization
-- [6-Plot](/eda/techniques/6-plot/) -- extended diagnostic display with additional panels
-- [Run Sequence Plot](/eda/techniques/run-sequence-plot/) -- detailed treatment of Panel 1
-- [Lag Plot](/eda/techniques/lag-plot/) -- detailed treatment of Panel 2
-- [Histogram](/eda/techniques/histogram/) -- detailed treatment of Panel 3
-- [Normal Probability Plot](/eda/techniques/normal-probability-plot/) -- detailed treatment of Panel 4
-- [Underlying Assumptions](/eda/foundations/assumptions/) -- the four assumptions that the 4-plot tests
-- [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) -- what to do when the 4-plot reveals violations
+- [4-Plot](/eda/techniques/4-plot/) — the technique page with interactive visualization
+- [6-Plot](/eda/techniques/6-plot/) — extended diagnostic for single-independent-variable model validation
+- [Underlying Assumptions](/eda/foundations/assumptions/) — the four assumptions that the 4-plot tests
+- [When Assumptions Fail](/eda/foundations/when-assumptions-fail/) — what to do when the 4-plot reveals violations

@@ -432,36 +432,38 @@ function doubleExpCdf(x: number, params: Record<string, number>): number {
 }
 
 // 13. Power-normal: p = power parameter
+// NIST definition: CDF = 1 - [Phi(-x)]^p  (minimum of p normal lifetimes)
 function powerNormalPdf(x: number, params: Record<string, number>): number {
   const p = params.p ?? 1;
   const phi = stdNormalPDF(x);
-  const Phi = stdNormalCDF(x);
-  if (Phi <= 0) return 0;
-  return p * phi * Math.pow(Phi, p - 1);
+  const PhiNeg = stdNormalCDF(-x);
+  if (PhiNeg <= 0) return 0;
+  return p * phi * Math.pow(PhiNeg, p - 1);
 }
 function powerNormalCdf(x: number, params: Record<string, number>): number {
   const p = params.p ?? 1;
-  const Phi = stdNormalCDF(x);
-  return Math.pow(Phi, p);
+  const PhiNeg = stdNormalCDF(-x);
+  return 1 - Math.pow(PhiNeg, p);
 }
 
 // 14. Power-lognormal: p, sigma (no mu -- parameterized with ln(x)/sigma)
+// NIST definition: CDF = 1 - [Phi(-z)]^p  where z = ln(x)/sigma
 function powerLognormalPdf(x: number, params: Record<string, number>): number {
   const p = params.p ?? 1;
   const sigma = params.sigma ?? 1;
   if (x <= 0) return 0;
   const z = Math.log(x) / sigma;
   const phi = stdNormalPDF(z);
-  const Phi = stdNormalCDF(z);
-  if (Phi <= 0) return 0;
-  return (p / (x * sigma)) * phi * Math.pow(Phi, p - 1);
+  const PhiNeg = stdNormalCDF(-z);
+  if (PhiNeg <= 0) return 0;
+  return (p / (x * sigma)) * phi * Math.pow(PhiNeg, p - 1);
 }
 function powerLognormalCdf(x: number, params: Record<string, number>): number {
   const p = params.p ?? 1;
   const sigma = params.sigma ?? 1;
   if (x <= 0) return 0;
   const z = Math.log(x) / sigma;
-  return Math.pow(stdNormalCDF(z), p);
+  return 1 - Math.pow(stdNormalCDF(-z), p);
 }
 
 // 15. Tukey-Lambda: defined via quantile function Q(F)

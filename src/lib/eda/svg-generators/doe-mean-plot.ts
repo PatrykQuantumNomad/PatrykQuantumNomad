@@ -25,6 +25,7 @@ export interface DoeMeanPlotOptions {
   config?: Partial<PlotConfig>;
   title?: string;
   yLabel?: string;
+  refLineLabel?: string;
 }
 
 export function generateDoeMeanPlot(options: DoeMeanPlotOptions): string {
@@ -61,7 +62,8 @@ export function generateDoeMeanPlot(options: DoeMeanPlotOptions): string {
 
   // Grand mean dashed line across full width
   const grandMeanLine = `<line x1="${margin.left}" y1="${yScale(grandMean).toFixed(2)}" x2="${(margin.left + innerWidth)}" y2="${yScale(grandMean).toFixed(2)}" stroke="${PALETTE.dataSecondary}" stroke-width="1.5" stroke-dasharray="6,4" />`;
-  const grandMeanLabel = `<text x="${(margin.left + innerWidth + 4).toFixed(2)}" y="${yScale(grandMean).toFixed(2)}" dy="0.35em" font-size="10" fill="${PALETTE.dataSecondary}" font-family="${config.fontFamily}">Grand Mean</text>`;
+  const refLabel = options.refLineLabel ?? 'Grand Mean';
+  const grandMeanLabel = `<text x="${(margin.left + innerWidth + 4).toFixed(2)}" y="${yScale(grandMean).toFixed(2)}" dy="0.35em" font-size="10" fill="${PALETTE.dataSecondary}" font-family="${config.fontFamily}">${refLabel}</text>`;
 
   // Render each panel
   const panels = factors.map((factor, fi) => {
@@ -87,11 +89,11 @@ export function generateDoeMeanPlot(options: DoeMeanPlotOptions): string {
 
     // Level labels along bottom
     const labels = points.map(p =>
-      `<text x="${p.x.toFixed(2)}" y="${(margin.top + innerHeight + 18).toFixed(2)}" text-anchor="middle" dy="0.35em" font-size="11" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${p.label}</text>`,
+      `<text x="${p.x.toFixed(2)}" y="${(margin.top + innerHeight + 14).toFixed(2)}" text-anchor="middle" dy="0.35em" font-size="9" fill="${PALETTE.textSecondary}" font-family="${config.fontFamily}">${p.label}</text>`,
     ).join('\n');
 
     // Factor name below level labels
-    const factorLabel = `<text x="${((xStart + xEnd) / 2).toFixed(2)}" y="${(margin.top + innerHeight + 38).toFixed(2)}" text-anchor="middle" font-size="12" font-weight="bold" fill="${PALETTE.text}" font-family="${config.fontFamily}">${factor.name}</text>`;
+    const factorLabel = `<text x="${((xStart + xEnd) / 2).toFixed(2)}" y="${(margin.top + innerHeight + 34).toFixed(2)}" text-anchor="middle" font-size="11" font-weight="bold" fill="${PALETTE.text}" font-family="${config.fontFamily}">${factor.name}</text>`;
 
     // Panel separator (except first)
     const sep = fi > 0

@@ -19,6 +19,7 @@ import {
   generateBlockPlot,
   generateDoeMeanPlot,
   generateInteractionPlot,
+  generateScatterPlot,
 } from '../../lib/eda/svg-generators/index';
 import { mean, standardDeviation } from '../../lib/eda/math/statistics';
 
@@ -29,7 +30,11 @@ type PlotType =
   | 'batch-box-plot' | 'batch1-histogram' | 'batch2-histogram'
   // New — Batch Effect (CER-02)
   | 'batch-bihistogram'
+  | 'batch-qq-plot'
   | 'batch-block-plot'
+  | 'batch-block-plot-x1'
+  | 'batch-block-plot-x2'
+  | 'batch-block-plot-x3'
   // New — Lab Effect (CER-03)
   | 'lab-box-plot'
   | 'lab-box-plot-batch1'
@@ -99,6 +104,11 @@ const blockData = labs.map(lab => ({
   ],
 }));
 
+// Q-Q plot data: sorted quantiles paired (Batch 2 on X, Batch 1 on Y)
+const sortedB1 = [...batch1].sort((a, b) => a - b);
+const sortedB2 = [...batch2].sort((a, b) => a - b);
+const qqData = sortedB1.map((v, i) => ({ x: sortedB2[i], y: v }));
+
 // Factor means by batch for DOE mean plots
 type FactorKey = 'tableSpeed' | 'downFeed' | 'wheelGrit';
 const factorNames: Record<FactorKey, string> = {
@@ -107,6 +117,26 @@ const factorNames: Record<FactorKey, string> = {
   wheelGrit: 'Wheel Grit (X3)',
 };
 const factorKeys: FactorKey[] = ['tableSpeed', 'downFeed', 'wheelGrit'];
+
+// Block plot data: batch means by lab × primary factor level (skip empty combos)
+function buildFactorBlockData(factorKey: FactorKey) {
+  return labs.flatMap(lab =>
+    ([-1, 1] as const)
+      .filter(level => {
+        // Only include combinations that have data in BOTH batches
+        const b1 = batch1Data.filter(d => d.lab === lab && d[factorKey] === level);
+        const b2 = batch2Data.filter(d => d.lab === lab && d[factorKey] === level);
+        return b1.length > 0 && b2.length > 0;
+      })
+      .map(level => ({
+        label: `L${lab}/${level === -1 ? '\u2212' : '+'}`,
+        values: [
+          { group: 'Batch 1', mean: mean(batch1Data.filter(d => d.lab === lab && d[factorKey] === level).map(d => d.strength)) },
+          { group: 'Batch 2', mean: mean(batch2Data.filter(d => d.lab === lab && d[factorKey] === level).map(d => d.strength)) },
+        ],
+      }))
+  );
+}
 
 function computeFactorMeans(data: typeof ceramicStrength) {
   return factorKeys.map(key => ({
@@ -229,12 +259,48 @@ switch (type) {
       xLabel: 'Flexural Strength',
     });
     break;
+  case 'batch-qq-plot':
+    svg = generateScatterPlot({
+      data: qqData,
+      config: singleConfig,
+      title: 'Q-Q Plot: Batch 1 vs Batch 2',
+      xLabel: 'Batch 2 Quantiles',
+      yLabel: 'Batch 1 Quantiles',
+    });
+    break;
   case 'batch-block-plot':
     svg = generateBlockPlot({
       blocks: blockData,
       config: singleConfig,
       title: 'Batch Means by Lab',
       xLabel: 'Lab',
+      yLabel: 'Mean Flexural Strength',
+    });
+    break;
+  case 'batch-block-plot-x1':
+    svg = generateBlockPlot({
+      blocks: buildFactorBlockData('tableSpeed'),
+      config: { ...singleConfig, margin: { ...singleConfig.margin, bottom: 60 } },
+      title: 'Batch by Lab \u00d7 Table Speed (X\u2081)',
+      xLabel: 'Lab / Table Speed Level',
+      yLabel: 'Mean Flexural Strength',
+    });
+    break;
+  case 'batch-block-plot-x2':
+    svg = generateBlockPlot({
+      blocks: buildFactorBlockData('downFeed'),
+      config: { ...singleConfig, margin: { ...singleConfig.margin, bottom: 60 } },
+      title: 'Batch by Lab \u00d7 Down Feed (X\u2082)',
+      xLabel: 'Lab / Down Feed Level',
+      yLabel: 'Mean Flexural Strength',
+    });
+    break;
+  case 'batch-block-plot-x3':
+    svg = generateBlockPlot({
+      blocks: buildFactorBlockData('wheelGrit'),
+      config: { ...singleConfig, margin: { ...singleConfig.margin, bottom: 60 } },
+      title: 'Batch by Lab \u00d7 Wheel Grit (X\u2083)',
+      xLabel: 'Lab / Wheel Grit Level',
       yLabel: 'Mean Flexural Strength',
     });
     break;
@@ -336,7 +402,11 @@ const defaultCaptions: Record<PlotType, string> = {
   'batch1-histogram': 'Histogram of Batch 1 ceramic strength data showing a roughly symmetric distribution centered near 689.',
   'batch2-histogram': 'Histogram of Batch 2 ceramic strength data showing a roughly symmetric distribution centered near 611.',
   'batch-bihistogram': 'Bihistogram comparing Batch 1 (top) and Batch 2 (bottom) flexural strength distributions on a shared x-axis. The clear separation confirms the approximately 78-unit batch effect.',
+  'batch-qq-plot': 'Quantile-quantile plot comparing Batch 1 and Batch 2 quantiles. Batch 1 quantiles consistently exceed Batch 2, and the non-linear pattern indicates the batch difference involves more than a simple location shift.',
   'batch-block-plot': 'Block plot of batch means by lab showing Batch 1 consistently exceeds Batch 2 across all 8 labs, confirming the batch effect is not lab-specific.',
+  'batch-block-plot-x1': 'Block plot of batch means by lab and table speed level. Batch 1 exceeds Batch 2 in all 16 combinations, confirming the batch effect is robust over table speed.',
+  'batch-block-plot-x2': 'Block plot of batch means by lab and down feed level. Batch 1 exceeds Batch 2 in all 16 combinations, confirming the batch effect is robust over down feed rate.',
+  'batch-block-plot-x3': 'Block plot of batch means by lab and wheel grit level. Batch 1 exceeds Batch 2 in all 16 combinations, confirming the batch effect is robust over wheel grit size.',
   'lab-box-plot': 'Box plots of flexural strength by lab (pooled data). Medians vary slightly across labs with relatively constant scales. Labs 3 and 5 show low-side outliers.',
   'lab-box-plot-batch1': 'Box plots by lab for Batch 1. Median strength ranges from 650 to 700 across labs with relatively constant variability.',
   'lab-box-plot-batch2': 'Box plots by lab for Batch 2. Median strength ranges from 550 to 600 with somewhat more cross-lab variability than Batch 1.',
