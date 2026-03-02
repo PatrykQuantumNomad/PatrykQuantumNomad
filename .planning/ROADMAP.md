@@ -42,10 +42,10 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
   3. Multi-stage Dockerfile with USER only in a builder stage triggers PG011 on the final stage
   4. `FROM scratch` with no USER does NOT trigger PG011
   5. Rule documentation page renders at /tools/dockerfile-analyzer/rules/pg011/ with expert explanation, before/after code, and related rules
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 72-01: Implement PG011 rule and documentation page
+- [ ] 72-01-PLAN.md -- Implement PG011 rule and register in engine
 
 ### Phase 73: PG012 Node.js Pointer Compression
 **Goal**: Users running the Dockerfile Analyzer on Node.js images see an efficiency suggestion for platformatic/node-caged with memory savings context
