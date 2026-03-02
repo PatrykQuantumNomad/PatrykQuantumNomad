@@ -1,5 +1,5 @@
 /**
- * Dimension justifications for all 25 Beauty Index languages.
+ * Dimension justifications for all 26 Beauty Index languages.
  * Each entry maps a dimension key to the editorial reasoning behind that score.
  * Text may contain HTML (e.g. <em>, <code>) — render with set:html.
  */
@@ -75,6 +75,14 @@ export const JUSTIFICATIONS: Record<string, Record<string, string>> = {
     psi: 'A devoted, intellectually engaged community. The REPL-driven workflow induces genuine flow states. The ecosystem is mature (for its size). Docked because the community is small and Lisp-family syntax creates a real adoption barrier.',
     gamma: 'Immutable data and pure functions produce code that is inherently easy to extend and modify, no hidden state to trip over. Rich Hickey\'s "simple made easy" philosophy is the definition of habitable design.',
     sigma: '"Code is data. Data is code. Everything is immutable." Clojure is distilled philosophy, every design choice follows from a handful of axioms. Rich Hickey\'s talks are effectively the language\'s specification, and the language is the talks made concrete.',
+  },
+  lisp: {
+    phi: 'Parentheses-only syntax creates a uniform tree structure that is mathematically regular but visually monotonous. Unlike Clojure, which introduces <code>[]</code> for vectors and <code>{}</code> for maps to break the visual rhythm, Common Lisp uses parentheses for everything. The result is walls of nested parens that demand careful indentation to parse. There is a geometric coherence to it, but it scores below Clojure\'s bracket variety.',
+    omega: '<code>defmacro</code> gives programmers full access to the compiler\'s code representation, enabling language extensions that other languages can only dream of. Common Lisp macros are unhygienic and more powerful than Clojure\'s: reader macros can redefine syntax itself, and <code>macrolet</code> enables local macro bindings. Homoiconicity is not just a feature here, it is the founding idea of computing\'s most influential language. Ties Clojure at 9, as both inherit the same code-as-data foundation.',
+    lambda: 'Prefix notation is unambiguous but unnatural for mathematical expressions. CLOS generic functions, the <code>format</code> directive language (a Turing-complete sublanguage for string formatting), and the condition/restart system add conceptual layers that Clojure avoids. Scored below Clojure (8) because Clojure\'s threading macros (<code>-&gt;&gt;</code>) actively improve readability, while Common Lisp relies on deeply nested forms.',
+    psi: 'The community is small and fragmented across implementations: SBCL, CCL, ECL, ABCL, and others each have their own strengths and quirks. There is no unified package manager comparable to Clojure\'s Leiningen or the JVM ecosystem. Quicklisp exists but is maintained by a single person. The language\'s age means much tribal knowledge lives in books from the 1980s and 1990s rather than Stack Overflow. Scored well below Clojure (7) which benefits from JVM interop and a cohesive modern community.',
+    gamma: 'CLOS generic functions allow extending behavior without modifying existing code, a form of the open-closed principle baked into the language decades before the term existed. The condition/restart system enables graceful error recovery without unwinding the stack, something no other language in this index offers. Image-based development, saving and restoring an entire running Lisp system, makes the environment uniquely habitable for exploratory programming.',
+    sigma: '"Code is data, data is code." John McCarthy\'s 1958 paper demonstrated that seven primitive operators could define an entire programming language. This is the most singular design principle in computing history. Every Lisp since, including Clojure, inherits this axiom. Common Lisp was ANSI standardized in 1994, crystallizing sixty years of accumulated language design wisdom into a coherent, if sprawling, specification. The soul is pure even if the body grew large.',
   },
   swift: {
     phi: 'Swift\'s syntax is visually clean and well-proportioned, closures, guard statements, and trailing closure syntax create a natural reading flow. Apple\'s design obsession shows in the visual weight of the code.',

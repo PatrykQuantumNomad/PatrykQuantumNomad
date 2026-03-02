@@ -9,7 +9,7 @@ export interface CodeSnippet {
 }
 
 /**
- * Signature code snippets for all 25 Beauty Index languages.
+ * Signature code snippets for all 26 Beauty Index languages.
  * Each snippet showcases what makes that language distinctive.
  * Keyed by language ID matching entry.data.id values.
  */
@@ -168,6 +168,19 @@ def findEligible(
        (sort)
        (dedupe)
        (into [])))`,
+  },
+
+  lisp: {
+    lang: 'common-lisp',
+    label: 'Macros that write code',
+    code: `(defmacro when-let ((var expr) &body body)
+  \`(let ((,var ,expr))
+     (when ,var
+       ,@body)))
+
+(when-let (user (find-user "ada"))
+  (format t "Hello, ~a!" (user-name user))
+  (log-visit user))`,
   },
 
   fsharp: {
