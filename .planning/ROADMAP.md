@@ -73,10 +73,10 @@ Plans:
   2. Searching the built output for "25 languages" returns zero results -- all instances read "26 languages"
   3. The homepage Beauty Index callout, overview page meta description, blog post body, JSON-LD structured data, and LLMs.txt all reference 26 languages
   4. PROJECT.md contains Lisp-related validated requirements under the v1.11 section
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 71-01: TBD
+- [ ] 71-01-PLAN.md -- Update all hardcoded 25->26 references, PROJECT.md documentation, and build verification
 
 ## Progress
 
@@ -98,4 +98,4 @@ Phases execute in numeric order: 69 -> 70 -> 71
 | 64-68 | v1.10 EDA Graphical NIST Parity | 12/12 | Complete | 2026-02-27 |
 | 69 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
 | 70 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
-| 71 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
+| 71 | v1.11 Beauty Index: Lisp | 0/1 | Not started | - |
