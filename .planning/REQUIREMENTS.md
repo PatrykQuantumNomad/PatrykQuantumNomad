@@ -1,0 +1,67 @@
+# Requirements: patrykgolabek.dev
+
+**Defined:** 2026-03-02
+**Core Value:** The site must be fast, fully SEO-optimized, and visually distinctive — a portfolio that ranks well in search engines and makes a memorable impression.
+
+## v1.12 Requirements
+
+Requirements for Dockerfile Rules Expansion milestone. Each maps to roadmap phases.
+
+### Rules
+
+- [ ] **RULES-01**: PG011 security rule flags Dockerfiles with no USER directive in final build stage
+- [ ] **RULES-02**: PG011 only checks final stage (skips builder stages and FROM scratch)
+- [ ] **RULES-03**: PG011 has no overlap with DL3002 (fires only when no USER instruction exists at all)
+- [ ] **RULES-04**: PG012 efficiency rule suggests platformatic/node-caged for Node.js base images
+- [ ] **RULES-05**: PG012 matches official node images correctly (not substrings or custom namespaces)
+- [ ] **RULES-06**: PG012 explanation includes Node 25+ version requirement and ~50% memory benefit
+
+### Documentation
+
+- [ ] **DOCS-01**: PG011 rule page includes expert explanation, fix with before/after code, and related rules
+- [ ] **DOCS-02**: PG012 rule page includes expert explanation, fix with before/after code, and related rules
+
+### Integration
+
+- [ ] **INTG-01**: Both rules registered in allRules array in rules/index.ts
+- [ ] **INTG-02**: All hardcoded rule counts updated site-wide to reflect 46 total rules
+- [ ] **INTG-03**: Full production build passes with 46 rules and both new documentation pages
+
+## Future Requirements
+
+None for this milestone.
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Updating the sample Dockerfile | New rules will surface on users' own Dockerfiles |
+| Blog post updates | Companion blog post unchanged for this milestone |
+| Additional rules beyond PG011/PG012 | Scoped to 2 rules; more can come in future milestones |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| RULES-01 | — | Pending |
+| RULES-02 | — | Pending |
+| RULES-03 | — | Pending |
+| RULES-04 | — | Pending |
+| RULES-05 | — | Pending |
+| RULES-06 | — | Pending |
+| DOCS-01 | — | Pending |
+| DOCS-02 | — | Pending |
+| INTG-01 | — | Pending |
+| INTG-02 | — | Pending |
+| INTG-03 | — | Pending |
+
+**Coverage:**
+- v1.12 requirements: 11 total
+- Mapped to phases: 0
+- Unmapped: 11
+
+---
+*Requirements defined: 2026-03-02*
+*Last updated: 2026-03-02 after initial definition*
