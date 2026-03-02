@@ -1,6 +1,6 @@
 import type { LintRule, RuleSeverity, RuleCategory } from '../types';
 
-// Security rules (14)
+// Security rules (15)
 import { DL3006 } from './security/DL3006-tag-version';
 import { DL3007 } from './security/DL3007-no-latest';
 import { DL3008 } from './security/DL3008-pin-apt-versions';
@@ -15,6 +15,7 @@ import { PG006 } from './security/PG006-prefer-digest';
 import { PG007 } from './security/PG007-explicit-uid-gid';
 import { PG009 } from './security/PG009-remove-unnecessary-tools';
 import { PG010 } from './security/PG010-detect-tool-usage';
+import { PG011 } from './security/PG011-missing-user-directive';
 
 // Efficiency rules (8)
 import { DL3059 } from './efficiency/DL3059-consolidate-runs';
@@ -56,7 +57,7 @@ import { PG005 } from './best-practice/PG005-inconsistent-casing';
 
 // Rule registry -- all rules exported as a flat array
 export const allRules: LintRule[] = [
-  // Security (14)
+  // Security (15)
   DL3006,
   DL3007,
   DL3008,
@@ -71,6 +72,7 @@ export const allRules: LintRule[] = [
   PG007,
   PG009,
   PG010,
+  PG011,
   // Efficiency (8)
   DL3059,
   DL3014,
