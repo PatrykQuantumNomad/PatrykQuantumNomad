@@ -59,10 +59,10 @@ Plans:
   3. The Error Handling tab shows the condition/restart system (handler-bind, restart-case), a feature unique to Common Lisp
   4. The Signature Idiom tab shows defmacro with backquote/unquote, the quintessential Lisp capability that Clojure simplified
   5. No snippet exceeds 12 lines or requires horizontal scrolling at 576px viewport width
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 70-01: TBD
+- [ ] 70-01-PLAN.md -- Insert 9 Lisp code snippets into code-features.ts with build verification
 
 ### Phase 71: Site-Wide Integration
 **Goal**: Every reference to the language count across the entire site reflects 26 languages, and the full production build passes with the Lisp detail page, OG image, and all VS comparison pages generated
