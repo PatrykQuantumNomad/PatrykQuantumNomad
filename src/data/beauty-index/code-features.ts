@@ -157,6 +157,17 @@ lazy val expensive = computeResult()`,
       total (+ x y)]
   (println name total))`,
     },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Defvar, defparameter, and let',
+      code: `(defvar *name* "Lisp")
+(defparameter *count* 0)
+
+(let ((x 10)
+      (y 20)
+      (langs '("Lisp" "Scheme")))
+  (+ x y (length langs)))`,
+    },
     fsharp: {
       lang: 'fsharp',
       label: 'Let bindings with inference',
@@ -460,6 +471,15 @@ else:
   (>= score 70) "good"
   (>= score 50) "average"
   :else         "needs improvement")`,
+    },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Cond expression',
+      code: `(cond
+  ((>= score 90) "excellent")
+  ((>= score 70) "good")
+  ((>= score 50) "average")
+  (t "needs improvement"))`,
     },
     fsharp: {
       lang: 'fsharp',
@@ -770,6 +790,17 @@ while sum < 100 do sum += 10`,
   (if (> n 100)
     sum
     (recur (+ sum n) (inc n))))`,
+    },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Loop macro',
+      code: `(loop for i from 1 to 10
+      do (print i))
+
+(loop for x in '(1 2 3 4 5)
+      when (evenp x)
+      sum x into total
+      finally (return total))`,
     },
     fsharp: {
       lang: 'fsharp',
@@ -1126,6 +1157,18 @@ val add: (Int, Int) => Int = _ + _`,
 (def double #(* % 2))
 (def add (fn [a b] (+ a b)))`,
     },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Defun and lambda',
+      code: `(defun greet (name)
+  (format nil "Hello, ~a!" name))
+
+(defun apply-fn (f x)
+  (funcall f x))
+
+(let ((double (lambda (x) (* x 2))))
+  (apply-fn double 21))`,
+    },
     fsharp: {
       lang: 'fsharp',
       label: 'Let-bound functions and lambdas',
@@ -1467,6 +1510,20 @@ val updated = user.copy(age = 31)`,
     (str "Hello, " (:name this) "!")))
 
 (def user (->User "Alice" "alice@ex.com" 30))`,
+    },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'CLOS defclass and methods',
+      code: `(defclass user ()
+  ((name :initarg :name :accessor user-name)
+   (age  :initarg :age  :accessor user-age)))
+
+(defgeneric greet (obj))
+(defmethod greet ((u user))
+  (format nil "Hello, ~a!" (user-name u)))
+
+(greet (make-instance 'user
+         :name "Alice" :age 30))`,
     },
     fsharp: {
       lang: 'fsharp',
@@ -1838,6 +1895,19 @@ function area(shape: Shape): number {
 (let [{:keys [name age]} person]
   (str name " is " age))`,
     },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Typecase dispatch',
+      code: `(defun describe-val (x)
+  (typecase x
+    (integer (format nil "int: ~d" x))
+    (string  (format nil "str: ~a" x))
+    (list    (format nil "~d items" (length x)))
+    (t       "unknown")))
+
+(describe-val 42)
+(describe-val '(1 2 3))`,
+    },
     fsharp: {
       lang: 'fsharp',
       label: 'Match expression',
@@ -2088,6 +2158,22 @@ result match
   (parse-number "42")
   (catch Exception e
     (println "Error:" (ex-message e))))`,
+    },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Condition and restart system',
+      code: `(define-condition bad-input (error)
+  ((val :initarg :val :reader bad-val)))
+
+(defun parse (s)
+  (restart-case (error 'bad-input :val s)
+    (use-value (v) v)))
+
+(handler-bind
+    ((bad-input
+      (lambda (c) (invoke-restart
+                    'use-value 0))))
+  (parse "x"))`,
     },
     fsharp: {
       lang: 'fsharp',
@@ -2476,6 +2562,19 @@ val raw = raw"No \\n escape: $name"`,
 (println (str "Welcome to " name ". "
               "Version: " version))`,
     },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Format directives',
+      code: `(defvar *name* "Lisp")
+(defvar *version* 1994)
+
+(format nil "Hello, ~a!" *name*)
+(format nil "v~d, caps: ~:@(~a~)"
+        *version* *name*)
+
+(format nil "Items: ~{~a~^, ~}"
+        '("a" "b" "c"))`,
+    },
     fsharp: {
       lang: 'fsharp',
       label: 'Interpolated strings',
@@ -2797,6 +2896,19 @@ val result = numbers
      (filter even?)
      (map #(* % %))
      (reduce +))`,
+    },
+    lisp: {
+      lang: 'common-lisp',
+      label: 'Map, remove-if-not, reduce',
+      code: `(defvar *nums* '(1 2 3 4 5 6 7 8 9 10))
+
+(mapcar (lambda (n) (* n 2)) *nums*)
+(remove-if-not #'evenp *nums*)
+(reduce #'+ *nums*)
+
+(reduce #'+
+  (mapcar (lambda (n) (* n n))
+    (remove-if-not #'evenp *nums*)))`,
     },
     fsharp: {
       lang: 'fsharp',
