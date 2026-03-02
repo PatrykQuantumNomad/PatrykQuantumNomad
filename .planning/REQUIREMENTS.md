@@ -56,33 +56,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Pending | Pending |
-| DATA-02 | Pending | Pending |
-| DATA-03 | Pending | Pending |
-| DATA-04 | Pending | Pending |
-| CODE-01 | Pending | Pending |
-| CODE-02 | Pending | Pending |
-| CODE-03 | Pending | Pending |
-| CODE-04 | Pending | Pending |
-| CODE-05 | Pending | Pending |
-| CODE-06 | Pending | Pending |
-| CODE-07 | Pending | Pending |
-| CODE-08 | Pending | Pending |
-| CODE-09 | Pending | Pending |
-| CODE-10 | Pending | Pending |
-| SITE-01 | Pending | Pending |
-| SITE-02 | Pending | Pending |
-| SITE-03 | Pending | Pending |
-| SITE-04 | Pending | Pending |
-| SITE-05 | Pending | Pending |
-| SITE-06 | Pending | Pending |
-| SITE-07 | Pending | Pending |
+| DATA-01 | Phase 69 | Pending |
+| DATA-02 | Phase 69 | Pending |
+| DATA-03 | Phase 69 | Pending |
+| DATA-04 | Phase 69 | Pending |
+| CODE-01 | Phase 70 | Pending |
+| CODE-02 | Phase 70 | Pending |
+| CODE-03 | Phase 70 | Pending |
+| CODE-04 | Phase 70 | Pending |
+| CODE-05 | Phase 70 | Pending |
+| CODE-06 | Phase 70 | Pending |
+| CODE-07 | Phase 70 | Pending |
+| CODE-08 | Phase 70 | Pending |
+| CODE-09 | Phase 70 | Pending |
+| CODE-10 | Phase 70 | Pending |
+| SITE-01 | Phase 71 | Pending |
+| SITE-02 | Phase 71 | Pending |
+| SITE-03 | Phase 71 | Pending |
+| SITE-04 | Phase 71 | Pending |
+| SITE-05 | Phase 71 | Pending |
+| SITE-06 | Phase 71 | Pending |
+| SITE-07 | Phase 71 | Pending |
 
 **Coverage:**
 - v1.11 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21/21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 after roadmap creation*

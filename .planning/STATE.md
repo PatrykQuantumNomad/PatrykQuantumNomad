@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Beauty Index: Lisp
-status: defining_requirements
+status: ready_to_plan
 last_updated: "2026-03-01T00:00:00Z"
 progress:
-  total_phases: 68
+  total_phases: 71
   completed_phases: 68
   total_plans: 159
   completed_plans: 159
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.11 Beauty Index: Lisp
+**Current focus:** Phase 69 - Lisp Data Foundation (v1.11 Beauty Index: Lisp)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-01 — Milestone v1.11 started
+Phase: 69 (1 of 3 in v1.11)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-03-01 -- Roadmap created for v1.11 Beauty Index: Lisp
 
-Progress: [██████████████████████████████] 68/68 phases
+Progress: [██████████████████████████████░░] 68/71 phases
 
 ## Performance Metrics
 
@@ -56,7 +56,11 @@ Progress: [███████████████████████
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-v1.0-v1.10 decisions archived in respective milestone files.
+
+- v1.11 reuses version number from abandoned Cloud Architecture Patterns milestone
+- Lisp score target: 44 (Handsome tier), 4 points below Clojure (48)
+- Shiki grammar: use `common-lisp` as lang field, not `lisp` alias
+- Lisp must differentiate from Clojure via CLOS, condition system, macro emphasis
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Defining requirements for v1.11 Beauty Index: Lisp
+Stopped at: Roadmap created for v1.11, ready to plan Phase 69
 Resume file: None
-Next: Define requirements → create roadmap
+Next: `/gsd:plan-phase 69`
