@@ -1,91 +1,81 @@
 # Requirements: patrykgolabek.dev
 
-**Defined:** 2026-02-27
-**Core Value:** The site must be fast, fully SEO-optimized, and visually distinctive — a portfolio that ranks well and makes a memorable impression.
+**Defined:** 2026-03-01
+**Core Value:** The site must be fast, fully SEO-optimized, and visually distinctive — a portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
 
-## v1.10 Requirements
+## v1.11 Requirements
 
-Requirements for EDA Graphical Techniques — NIST Parity & Validation. Each maps to roadmap phases.
+Requirements for Cloud Architecture Patterns milestone. Each maps to roadmap phases.
 
-### Infrastructure
+### Data Model
 
-- [x] **INFRA-01**: technique-content.ts is split into manageable modules (per-category or per-group) to prevent 200KB+ monolith
-- [x] **INFRA-02**: TechniqueContent interface is extended with optional fields: questions, importance, definitionExpanded, formulas, pythonCode, caseStudySlugs, examples
-- [x] **INFRA-03**: Graphical [slug].astro template renders new sections (Questions Answered, Importance, expanded Definition, Examples, Case Studies) in the description slot
-- [x] **INFRA-04**: Graphical [slug].astro template activates the code slot for Python examples using astro-expressive-code Code component
-- [x] **INFRA-05**: Graphical [slug].astro template renders KaTeX formulas at build time using katex.renderToString() for techniques that have formulas
-- [x] **INFRA-06**: Case study cross-link resolution works at build time (technique slug → case study title + URL)
+- [ ] **DATA-01**: Pattern data defined in JSON with Zod schema validation for 13 patterns across 7 scoring dimensions
+- [ ] **DATA-02**: Content collection registered in content.config.ts with file() loader for pattern data
+- [ ] **DATA-03**: Each pattern has slug, name, category, characterSketch, summary, scores (7 dimensions), strengths, weaknesses, whenToUse, whenToAvoid, relatedPatterns
 
-### SVG Validation
+### Catalog
 
-- [x] **SVG-01**: All 29 graphical technique SVGs are audited against NIST original plots for visual accuracy (axes, shapes, labels, scales)
-- [x] **SVG-02**: All 29 graphical technique SVGs are audited for data pattern correctness (statistical patterns match what NIST describes)
-- [x] **SVG-03**: All identified SVG visual issues are fixed (incorrect shapes, axes, labels, scales)
-- [x] **SVG-04**: All identified SVG data pattern issues are fixed (datasets generating incorrect statistical patterns)
+- [ ] **CATL-01**: Overview page at /patterns/ with pattern card grid grouped by 5 categories (Resilience, Data Management, Communication, Structural, Scaling)
+- [ ] **CATL-02**: Category filter React island with 5 toggle pills using nanostores pattern
+- [ ] **CATL-03**: Sortable scoring table showing all 13 patterns across 7 dimensions
+- [ ] **CATL-04**: Complexity spectrum visualization positioning patterns from simple to complex
 
-### Content — Questions Answered
+### Detail Pages
 
-- [x] **QUES-01**: All 29 graphical technique pages have a "Questions This Plot Answers" section with 2-9 numbered questions sourced from NIST
-- [x] **QUES-02**: Questions are specific and actionable (e.g., "Are the data random?" not "What does this show?")
+- [ ] **DETL-01**: Per-pattern detail pages at /patterns/[slug]/ for all 13 patterns
+- [ ] **DETL-02**: Radar chart visualization (7-axis heptagonal) per pattern using radar-math.ts
+- [ ] **DETL-03**: Score breakdown display with per-dimension values
+- [ ] **DETL-04**: Custom SVG architecture diagram per pattern (13 total)
+- [ ] **DETL-05**: Strengths/weaknesses, when to use/avoid sections per pattern
+- [ ] **DETL-06**: Character sketch narrative per pattern
+- [ ] **DETL-07**: Related patterns section with linked cards
+- [ ] **DETL-08**: Prev/next navigation between patterns
 
-### Content — Importance
+### Interactive Features
 
-- [x] **IMPT-01**: All 29 graphical technique pages have a "Why It Matters" section explaining statistical/engineering significance
-- [x] **IMPT-02**: Importance sections connect to practical consequences (e.g., "invalid if assumption violated")
+- [ ] **INTX-01**: Interactive SVG diagrams with hover states highlighting data flow paths and clickable components
+- [ ] **INTX-02**: Pattern comparison pages at /patterns/vs/[slug]/ with overlay radar charts
+- [ ] **INTX-03**: Compare picker React island for selecting comparison patterns
+- [ ] **INTX-04**: Share controls (URL copy, Web Share API on mobile, Clipboard API on desktop, text URL fallback)
 
-### Content — Expanded Definitions
+### Scoring
 
-- [x] **DEFN-01**: All 29 graphical technique pages have expanded definitions covering axis meanings, construction method, and mathematical formulation where applicable
-- [x] **DEFN-02**: 12 techniques with NIST formulas have KaTeX-rendered formulas (autocorrelation, spectral, probability plot, normal probability, PPCC, Box-Cox linearity, Box-Cox normality, Weibull, Q-Q, bootstrap, mean plot, std deviation plot)
+- [ ] **SCOR-01**: 7-dimension scoring system (Scalability, Resilience, Complexity, Coupling, Consistency, Latency, Observability) with 1-10 scale
+- [ ] **SCOR-02**: Scoring justification paragraphs per dimension per pattern (91 total)
+- [ ] **SCOR-03**: Download radar chart as PNG image via SVG-to-PNG at 2x
 
-### Content — Case Study Cross-Links
+### Site Integration
 
-- [x] **CASE-01**: All techniques with matching case studies display a "See It In Action" section with links to relevant case studies
-- [x] **CASE-02**: At least 14 of 29 techniques have at least one case study cross-link (based on research mapping)
-- [x] **CASE-03**: Case study links render as styled pill buttons matching the existing Related Techniques pattern
-
-### Content — Examples
-
-- [x] **EXMP-01**: All 6 Tier B techniques have interpretive captions on their variant plots explaining what each pattern means
-- [x] **EXMP-02**: Tier A techniques with NIST examples have an Examples section describing common patterns the technique reveals
-
-### Python Code
-
-- [x] **PYTH-01**: All 29 graphical technique pages have a Python code example section
-- [x] **PYTH-02**: Python examples use current matplotlib/seaborn/scipy APIs (no deprecated functions like distplot or vert=True)
-- [x] **PYTH-03**: Python examples include sample data generation so they are self-contained and runnable
-- [x] **PYTH-04**: Python examples render with syntax highlighting via astro-expressive-code
-
-### Verification
-
-- [x] **VRFY-01**: Build completes cleanly with zero errors after all changes
-- [x] **VRFY-02**: Lighthouse performance score remains 90+ on graphical technique pages
-- [x] **VRFY-03**: All case study cross-links resolve to valid pages (no broken links)
-- [x] **VRFY-04**: All KaTeX formulas render correctly (no raw LaTeX visible on page)
-- [x] **VRFY-05**: Python code examples use no deprecated API calls (verified via grep)
+- [ ] **SITE-01**: Header navigation link for Patterns
+- [ ] **SITE-02**: Homepage callout linking to the Patterns encyclopedia
+- [ ] **SITE-03**: Build-time OG images for overview and all 13 pattern detail pages (14 total)
+- [ ] **SITE-04**: JSON-LD structured data (CreativeWork + BreadcrumbList) on all pattern pages
+- [ ] **SITE-05**: All pattern pages in sitemap and LLMs.txt
+- [ ] **SITE-06**: Companion blog post with bidirectional cross-links to pattern pages
 
 ## Future Requirements
 
-### Extended EDA Features
+Deferred to future milestones. Tracked but not in current roadmap.
 
-- **FUTURE-01**: Interactive "Try It" Python snippets with editable code blocks
-- **FUTURE-02**: Technique decision tree ("When to use X instead of Y" guidance)
-- **FUTURE-03**: Formula-to-code visual pairing showing formula alongside implementing function
-- **FUTURE-04**: Variant deep-linking via URL fragments for PlotVariantSwap tabs
-- **FUTURE-05**: Python code validation CI step (run examples in CI to verify correctness)
+### Decision Support
+
+- **DCSN-01**: Interactive decision flowchart at /patterns/decide/ guiding architects to pattern recommendations
+- **DCSN-02**: Pattern relationship graph (D3.js force-directed) showing how patterns connect
+
+### Expansion
+
+- **EXPN-01**: Expand catalog to 18-20 patterns (Event-Driven Architecture overview, Service Mesh, Outbox, Materialized View, Throttling)
+- **EXPN-02**: "Pattern of the Month" blog series deep-diving individual patterns
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Client-side interactive D3/Plotly plots on technique pages | Massive JS bundle; site is static-first with build-time SVG |
-| Full NIST "Software" section (Dataplot/R references) | Dataplot is obsolete; Python examples serve this role |
-| Exhaustive formula derivations | Turns pages into textbook chapters; link to NIST for full derivations |
-| NIST .DAT file downloads | Copyright/licensing ambiguity; Python examples generate synthetic data |
-| Video tutorials per technique | Production cost of 29 videos; text + SVG + Python code is more searchable |
-| New case studies beyond existing 9 (e.g., Alaska Pipeline for 6-Plot) | Scope control; cross-link to existing case studies only |
-| In-browser Python execution (Pyodide) | 14MB+ WASM destroys performance |
-| Unified TechniqueContent/QuantitativeContent interface merge | Separate concern; refactor after this milestone |
+| Code implementation examples | Vendor-agnostic by design; code ages quickly and requires language-specific maintenance |
+| Cloud-provider-specific mapping | Creates maintenance burden and vendor-bias perception |
+| User-submitted ratings or comments | Static site; deliberately opinionated author voice (consistent with Beauty Index, DB Compass) |
+| Real-time playground / simulator | Enormous complexity for marginal value; animated SVGs convey flow effectively |
+| Exhaustive 40+ pattern catalog | 13 core patterns at this quality level (custom SVG + scoring + justifications) is the right scope |
 
 ## Traceability
 
@@ -93,42 +83,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 64 | Complete |
-| INFRA-02 | Phase 64 | Complete |
-| INFRA-03 | Phase 64 | Complete |
-| INFRA-04 | Phase 64 | Complete |
-| INFRA-05 | Phase 64 | Complete |
-| INFRA-06 | Phase 64 | Complete |
-| SVG-01 | Phase 65 | Complete |
-| SVG-02 | Phase 65 | Complete |
-| SVG-03 | Phase 65 | Complete |
-| SVG-04 | Phase 65 | Complete |
-| QUES-01 | Phase 66 | Complete |
-| QUES-02 | Phase 66 | Complete |
-| IMPT-01 | Phase 66 | Complete |
-| IMPT-02 | Phase 66 | Complete |
-| DEFN-01 | Phase 66 | Complete |
-| CASE-01 | Phase 66 | Complete |
-| CASE-02 | Phase 66 | Complete |
-| CASE-03 | Phase 66 | Complete |
-| EXMP-01 | Phase 66 | Complete |
-| EXMP-02 | Phase 66 | Complete |
-| DEFN-02 | Phase 67 | Complete |
-| PYTH-01 | Phase 67 | Complete |
-| PYTH-02 | Phase 67 | Complete |
-| PYTH-03 | Phase 67 | Complete |
-| PYTH-04 | Phase 67 | Complete |
-| VRFY-01 | Phase 68 | Complete |
-| VRFY-02 | Phase 68 | Complete |
-| VRFY-03 | Phase 68 | Complete |
-| VRFY-04 | Phase 68 | Complete |
-| VRFY-05 | Phase 68 | Complete |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| CATL-01 | — | Pending |
+| CATL-02 | — | Pending |
+| CATL-03 | — | Pending |
+| CATL-04 | — | Pending |
+| DETL-01 | — | Pending |
+| DETL-02 | — | Pending |
+| DETL-03 | — | Pending |
+| DETL-04 | — | Pending |
+| DETL-05 | — | Pending |
+| DETL-06 | — | Pending |
+| DETL-07 | — | Pending |
+| DETL-08 | — | Pending |
+| INTX-01 | — | Pending |
+| INTX-02 | — | Pending |
+| INTX-03 | — | Pending |
+| INTX-04 | — | Pending |
+| SCOR-01 | — | Pending |
+| SCOR-02 | — | Pending |
+| SCOR-03 | — | Pending |
+| SITE-01 | — | Pending |
+| SITE-02 | — | Pending |
+| SITE-03 | — | Pending |
+| SITE-04 | — | Pending |
+| SITE-05 | — | Pending |
+| SITE-06 | — | Pending |
 
 **Coverage:**
-- v1.10 requirements: 30 total
-- Mapped to phases: 30
-- Unmapped: 0
+- v1.11 requirements: 28 total
+- Mapped to phases: 0
+- Unmapped: 28 ⚠️
 
 ---
-*Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after roadmap creation*
+*Requirements defined: 2026-03-01*
+*Last updated: 2026-03-01 after initial definition*
