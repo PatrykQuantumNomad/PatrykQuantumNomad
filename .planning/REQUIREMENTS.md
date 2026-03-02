@@ -23,9 +23,9 @@ Requirements for Dockerfile Rules Expansion milestone. Each maps to roadmap phas
 
 ### Integration
 
-- [ ] **INTG-01**: Both rules registered in allRules array in rules/index.ts
-- [ ] **INTG-02**: All hardcoded rule counts updated site-wide to reflect 46 total rules
-- [ ] **INTG-03**: Full production build passes with 46 rules and both new documentation pages
+- [x] **INTG-01**: Both rules registered in allRules array in rules/index.ts
+- [x] **INTG-02**: All hardcoded rule counts updated site-wide to reflect 46 total rules
+- [x] **INTG-03**: Full production build passes with 46 rules and both new documentation pages
 
 ## Future Requirements
 
@@ -53,9 +53,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RULES-06 | Phase 73 | Complete |
 | DOCS-01 | Phase 72 | Complete |
 | DOCS-02 | Phase 73 | Complete |
-| INTG-01 | Phase 74 | Pending |
-| INTG-02 | Phase 74 | Pending |
-| INTG-03 | Phase 74 | Pending |
+| INTG-01 | Phase 74 | Complete |
+| INTG-02 | Phase 74 | Complete |
+| INTG-03 | Phase 74 | Complete |
 
 **Coverage:**
 - v1.12 requirements: 11 total

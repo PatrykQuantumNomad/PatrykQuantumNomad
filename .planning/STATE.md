@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Dockerfile Rules Expansion
 status: active
-last_updated: "2026-03-02T18:36:09Z"
+last_updated: "2026-03-02T20:33:43Z"
 progress:
   total_phases: 74
-  completed_phases: 73
+  completed_phases: 74
   total_plans: 165
-  completed_plans: 164
+  completed_plans: 165
 ---
 
 # Project State
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 73 - PG012 Node.js Pointer Compression
+**Current focus:** Phase 74 - Site-Wide Integration (v1.12 complete)
 
 ## Current Position
 
-Phase: 73 (2 of 3 in v1.12 Dockerfile Rules Expansion)
+Phase: 74 (3 of 3 in v1.12 Dockerfile Rules Expansion)
 Plan: 1 of 1 in current phase
-Status: Phase 73 complete
-Last activity: 2026-03-02 — Completed 73-01-PLAN.md (PG012 rule)
+Status: v1.12 milestone complete
+Last activity: 2026-03-02 — Completed 74-01-PLAN.md (site-wide integration)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 164 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11 + 2 v1.12)
+- Total plans completed: 165 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11 + 3 v1.12)
 
 **Cumulative Stats:**
 
@@ -50,7 +50,8 @@ Progress: [██████████] 100%
 | v1.9 Case Study Deep Dive | 56-63 | 19 | 41 | 2026-02-27 |
 | v1.10 EDA Graphical NIST Parity | 64-68 | 13 | 20 | 2026-02-27 |
 | v1.11 Beauty Index: Lisp | 69-71 | 3 | 21 | 2026-03-02 |
-| **Total** | **71** | **162** | **630** | |
+| v1.12 Dockerfile Rules Expansion | 72-74 | 3 | 11 | 2026-03-02 |
+| **Total** | **74** | **165** | **641** | |
 
 ## Accumulated Context
 
@@ -60,6 +61,7 @@ Full decision log in PROJECT.md Key Decisions table.
 
 - **Phase 72:** PG011 uses warning severity matching DL3002 convention; non-overlap boundary with DL3002 ensures PG011 fires only when zero USER instructions exist in final stage
 - **Phase 73:** PG012 uses info severity (not warning) because pointer compression is an optimization suggestion; exact image name matching with registry check prevents false positives on custom registries
+- **Phase 74:** SKILL.md entries sourced from authoritative TypeScript rule files for accuracy; site-wide count update pattern with exhaustive file inventory and grep-based verification
 
 ### Pending Todos
 
@@ -79,6 +81,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 73-01-PLAN.md (PG012 pointer compression rule)
+Stopped at: Completed 74-01-PLAN.md (site-wide integration)
 Resume file: None
-Next: `/gsd:plan-phase 74`
+Next: v1.12 milestone complete. Start next milestone.

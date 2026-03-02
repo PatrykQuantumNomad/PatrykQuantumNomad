@@ -18,7 +18,7 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
 - ✅ **v1.9 EDA Case Study Deep Dive** - Phases 56-63 (shipped 2026-02-27)
 - ✅ **v1.10 EDA Graphical Techniques NIST Parity** - Phases 64-68 (shipped 2026-02-28)
 - ✅ **v1.11 Beauty Index: Lisp** - Phases 69-71 (shipped 2026-03-02)
-- 🚧 **v1.12 Dockerfile Rules Expansion** - Phases 72-74 (in progress)
+- ✅ **v1.12 Dockerfile Rules Expansion** - Phases 72-74 (shipped 2026-03-02)
 
 ## Phases
 
@@ -28,7 +28,7 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
 
 - [x] **Phase 72: PG011 Missing USER Directive** - Security rule flagging Dockerfiles with no USER instruction in the final build stage
 - [x] **Phase 73: PG012 Node.js Pointer Compression** - Efficiency rule suggesting platformatic/node-caged for Node.js base images
-- [ ] **Phase 74: Site-Wide Integration** - Register both rules, update all hardcoded counts to 46, and verify full production build
+- [x] **Phase 74: Site-Wide Integration** - Register both rules, update all hardcoded counts to 46, and verify full production build
 
 ## Phase Details
 
@@ -72,7 +72,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 74-01-PLAN.md -- Update all hardcoded counts to 46, add missing SKILL.md entries, verify production build
+- [x] 74-01-PLAN.md -- Update all hardcoded counts to 46, add missing SKILL.md entries, verify production build
 
 ## Progress
 
@@ -83,7 +83,7 @@ Phases execute in numeric order: 72 → 73 → 74
 |-------|----------------|--------|-----------|
 | 72. PG011 Missing USER Directive | 1/1 | Complete | 2026-03-02 |
 | 73. PG012 Node.js Pointer Compression | 1/1 | Complete | 2026-03-02 |
-| 74. Site-Wide Integration | 0/1 | Not started | - |
+| 74. Site-Wide Integration | 1/1 | Complete | 2026-03-02 |
 
 ---
 *Roadmap created: 2026-03-02*
