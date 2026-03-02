@@ -56,10 +56,10 @@ Plans:
   2. Non-node images (python, ubuntu, etc.) and custom registry node images (myregistry.io/node) do NOT trigger PG012
   3. PG012 explanation text includes the Node 25+ version requirement and ~50% memory benefit
   4. Rule documentation page renders at /tools/dockerfile-analyzer/rules/pg012/ with expert explanation, before/after code, and related rules
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 73-01: Implement PG012 rule and documentation page
+- [ ] 73-01-PLAN.md -- Implement PG012 rule, tests, and register in engine
 
 ### Phase 74: Site-Wide Integration
 **Goal**: Both new rules are registered in the analyzer engine and all site-wide references reflect 46 total rules with a clean production build
