@@ -27,7 +27,7 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 72: PG011 Missing USER Directive** - Security rule flagging Dockerfiles with no USER instruction in the final build stage
-- [ ] **Phase 73: PG012 Node.js Pointer Compression** - Efficiency rule suggesting platformatic/node-caged for Node.js base images
+- [x] **Phase 73: PG012 Node.js Pointer Compression** - Efficiency rule suggesting platformatic/node-caged for Node.js base images
 - [ ] **Phase 74: Site-Wide Integration** - Register both rules, update all hardcoded counts to 46, and verify full production build
 
 ## Phase Details
@@ -69,10 +69,10 @@ Plans:
   1. Both PG011 and PG012 appear in the allRules array and are executed during analysis
   2. No references to "39 rules" or "44 rules" remain in source -- all updated to 46
   3. Full `astro build` passes with both new rule documentation pages in the output
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 74-01: Register rules and update all hardcoded counts site-wide
+- [ ] 74-01-PLAN.md -- Update all hardcoded counts to 46, add missing SKILL.md entries, verify production build
 
 ## Progress
 
