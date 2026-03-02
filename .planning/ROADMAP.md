@@ -44,10 +44,10 @@ See `.planning/milestones/` for detailed archives.
   2. Lisp appears in the overview page ranking chart, scoring table, and language grid at the correct tier position (Handsome, score 44)
   3. The code comparison page at /beauty-index/code/ includes Lisp in the feature support matrix (even if individual snippets are placeholder/undefined)
   4. All 6 dimension justifications display on the Lisp detail page with Lisp-specific reasoning that differentiates from Clojure
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 69-01: TBD
+- [ ] 69-01-PLAN.md -- Add Lisp language entry, signature snippet, dimension justifications, and ALL_LANGS registration
 
 ### Phase 70: Code Comparison Snippets
 **Goal**: Lisp has complete, readable code snippets across all 10 feature tabs that showcase distinctive Lisp idioms (CLOS, condition system, macros) rather than duplicating patterns already covered by Clojure
@@ -96,6 +96,6 @@ Phases execute in numeric order: 69 -> 70 -> 71
 | 48-55 | v1.8 EDA Visual Encyclopedia | 24/24 | Complete | 2026-02-25 |
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64-68 | v1.10 EDA Graphical NIST Parity | 12/12 | Complete | 2026-02-27 |
-| 69 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
+| 69 | v1.11 Beauty Index: Lisp | 0/1 | Not started | - |
 | 70 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
 | 71 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
