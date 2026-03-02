@@ -83,40 +83,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| CATL-01 | — | Pending |
-| CATL-02 | — | Pending |
-| CATL-03 | — | Pending |
-| CATL-04 | — | Pending |
-| DETL-01 | — | Pending |
-| DETL-02 | — | Pending |
-| DETL-03 | — | Pending |
-| DETL-04 | — | Pending |
-| DETL-05 | — | Pending |
-| DETL-06 | — | Pending |
-| DETL-07 | — | Pending |
-| DETL-08 | — | Pending |
-| INTX-01 | — | Pending |
-| INTX-02 | — | Pending |
-| INTX-03 | — | Pending |
-| INTX-04 | — | Pending |
-| SCOR-01 | — | Pending |
-| SCOR-02 | — | Pending |
-| SCOR-03 | — | Pending |
-| SITE-01 | — | Pending |
-| SITE-02 | — | Pending |
-| SITE-03 | — | Pending |
-| SITE-04 | — | Pending |
-| SITE-05 | — | Pending |
-| SITE-06 | — | Pending |
+| DATA-01 | Phase 69 | Pending |
+| DATA-02 | Phase 69 | Pending |
+| DATA-03 | Phase 69 | Pending |
+| CATL-01 | Phase 70 | Pending |
+| CATL-02 | Phase 70 | Pending |
+| CATL-03 | Phase 70 | Pending |
+| CATL-04 | Phase 70 | Pending |
+| DETL-01 | Phase 71 | Pending |
+| DETL-02 | Phase 71 | Pending |
+| DETL-03 | Phase 71 | Pending |
+| DETL-04 | Phase 71 | Pending |
+| DETL-05 | Phase 71 | Pending |
+| DETL-06 | Phase 71 | Pending |
+| DETL-07 | Phase 71 | Pending |
+| DETL-08 | Phase 71 | Pending |
+| INTX-01 | Phase 72 | Pending |
+| INTX-02 | Phase 72 | Pending |
+| INTX-03 | Phase 72 | Pending |
+| INTX-04 | Phase 72 | Pending |
+| SCOR-01 | Phase 69 | Pending |
+| SCOR-02 | Phase 71 | Pending |
+| SCOR-03 | Phase 72 | Pending |
+| SITE-01 | Phase 70 | Pending |
+| SITE-02 | Phase 70 | Pending |
+| SITE-03 | Phase 72 | Pending |
+| SITE-04 | Phase 70 | Pending |
+| SITE-05 | Phase 72 | Pending |
+| SITE-06 | Phase 72 | Pending |
 
 **Coverage:**
 - v1.11 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28 ⚠️
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 after roadmap creation*
