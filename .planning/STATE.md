@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Dockerfile Rules Expansion
 status: active
-last_updated: "2026-03-02T18:30:00Z"
+last_updated: "2026-03-02T17:58:17Z"
 progress:
   total_phases: 74
   completed_phases: 71
   total_plans: 165
-  completed_plans: 162
+  completed_plans: 163
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 72 (1 of 3 in v1.12 Dockerfile Rules Expansion)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-03-02 — Roadmap created for v1.12
+Plan: 1 of 1 in current phase
+Status: Phase 72 complete
+Last activity: 2026-03-02 — Completed 72-01-PLAN.md (PG011 rule)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 162 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11)
+- Total plans completed: 163 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11 + 1 v1.12)
 
 **Cumulative Stats:**
 
@@ -58,6 +58,8 @@ Progress: [░░░░░░░░░░] 0%
 
 Full decision log in PROJECT.md Key Decisions table.
 
+- **Phase 72:** PG011 uses warning severity matching DL3002 convention; non-overlap boundary with DL3002 ensures PG011 fires only when zero USER instructions exist in final stage
+
 ### Pending Todos
 
 None.
@@ -76,6 +78,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Roadmap created for v1.12, ready to plan Phase 72
+Stopped at: Completed 72-01-PLAN.md (PG011 missing USER directive rule)
 Resume file: None
-Next: `/gsd:plan-phase 72`
+Next: `/gsd:plan-phase 73`

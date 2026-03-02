@@ -26,7 +26,7 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 72: PG011 Missing USER Directive** - Security rule flagging Dockerfiles with no USER instruction in the final build stage
+- [x] **Phase 72: PG011 Missing USER Directive** - Security rule flagging Dockerfiles with no USER instruction in the final build stage
 - [ ] **Phase 73: PG012 Node.js Pointer Compression** - Efficiency rule suggesting platformatic/node-caged for Node.js base images
 - [ ] **Phase 74: Site-Wide Integration** - Register both rules, update all hardcoded counts to 46, and verify full production build
 
@@ -45,7 +45,7 @@ Expand the Dockerfile Analyzer from 44 to 46 rules by adding PG011 (missing USER
 **Plans:** 1 plan
 
 Plans:
-- [ ] 72-01-PLAN.md -- Implement PG011 rule and register in engine
+- [x] 72-01-PLAN.md -- Implement PG011 rule and register in engine
 
 ### Phase 73: PG012 Node.js Pointer Compression
 **Goal**: Users running the Dockerfile Analyzer on Node.js images see an efficiency suggestion for platformatic/node-caged with memory savings context
@@ -81,7 +81,7 @@ Phases execute in numeric order: 72 → 73 → 74
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 72. PG011 Missing USER Directive | 0/1 | Not started | - |
+| 72. PG011 Missing USER Directive | 1/1 | Complete | 2026-03-02 |
 | 73. PG012 Node.js Pointer Compression | 0/1 | Not started | - |
 | 74. Site-Wide Integration | 0/1 | Not started | - |
 
