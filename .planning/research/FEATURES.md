@@ -1,483 +1,207 @@
-# Feature Landscape: Lisp (Common Lisp / Scheme Heritage) for the Beauty Index
+# Feature Research
 
-**Domain:** Beauty Index language scoring -- 26th language addition
-**Researched:** 2026-03-01
-**Overall confidence:** HIGH (well-established language with decades of aesthetic discourse)
+**Domain:** Dockerfile lint rule expansion (PG011, PG012)
+**Researched:** 2026-03-02
+**Confidence:** HIGH
 
----
+## Feature Landscape
 
-## Executive Summary
+### Table Stakes (Users Expect These)
 
-Lisp is the ancestor. It is the oldest language family still in active use (1958), the origin of nearly every idea modern languages now celebrate -- garbage collection, first-class functions, recursion, closures, homoiconicity, macros, REPL-driven development. Adding "Lisp" to the Beauty Index alongside Clojure requires defining what "Lisp" means here: the **classic Lisp tradition** rooted in Common Lisp and Scheme, as distinct from Clojure's modern, opinionated subset.
+For a lint rule flagging missing USER directives, users expect behavior consistent with how other "absence detection" rules work in the existing analyzer (e.g., DL3057 for missing HEALTHCHECK).
 
-The aesthetic case for Lisp is paradoxical. It contains arguably the most profound design idea in programming (code-as-data / homoiconicity) and some of the most visually alienating syntax (parenthesis walls). Paul Graham called it "the most beautiful" language he knows. Newcomers call it unreadable. The Beauty Index must reckon with both truths.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **PG011: Flag missing USER in final stage** | Hadolint DL3002 only flags explicit `USER root`, leaving a critical gap: Dockerfiles with NO `USER` instruction silently run as root. Hadolint community requested this as DL3063. Users of any Dockerfile linter expect the tool to catch implicit-root-as-default. | LOW | The existing DL3002 code already scopes to the final stage and filters USER instructions -- PG011 inverts the empty-check branch to flag instead of skip. |
+| **PG011: Skip `FROM scratch` images** | `scratch` has no filesystem, no `/etc/passwd`, no shell -- USER cannot work without a multi-stage copy of passwd. Flagging scratch is a false positive. | LOW | Check `getImageName() === 'scratch'` on the last FROM. |
+| **PG011: Skip build-stage aliases** | In multi-stage builds, intermediate stages (e.g., `FROM node:22 AS builder`) often run as root intentionally for `apt-get install` / compilation. Only the final runtime stage matters. | LOW | Already handled: scope to instructions after the last FROM, matching DL3002's existing pattern. |
+| **PG012: Detect `node:*` base images** | When `FROM node:20-alpine` or `FROM node:22-slim` is used, suggest `platformatic/node-caged` for V8 pointer compression. Users expect the rule to match all official Node.js image variants. | MEDIUM | Must match: `node`, `node:TAG`, `docker.io/library/node:TAG`, and variable tags like `node:${VERSION}`. The From class provides `getImageName()` and `getImageTag()` methods. |
+| **PG012: Before/after code examples** | Every existing rule provides `fix.beforeCode` and `fix.afterCode`. Users expect concrete Dockerfile snippets showing what to change. | LOW | `FROM node:22-alpine` -> `FROM platformatic/node-caged:22-alpine` |
+| **PG011 + PG012: Rule documentation pages** | The `[code].astro` page auto-generates from `allRules`. Adding rules to the index automatically creates rule doc pages with explanation, fix, severity badge, and related rules. | LOW | No new page code needed -- just export from `rules/index.ts`. |
 
-Proposed total score: **44** (handsome tier, 40-47 range). This places Lisp above OCaml (44), alongside Go (43) and Julia (43), and below Clojure (48). The rationale: Lisp's philosophical depth is unmatched, but its visual density, small community, and committee-designed breadth prevent it from reaching the beautiful tier.
+### Differentiators (Competitive Advantage)
 
----
+These features go beyond what Hadolint and other linters offer, positioning this analyzer as uniquely valuable.
 
-## Proposed Scores with Detailed Justifications
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **PG012: Node-caged memory savings suggestion** | No other Dockerfile linter suggests `platformatic/node-caged` as an optimization. This is a novel, opinionated recommendation that demonstrates deep Node.js expertise -- exactly the kind of insight a "Cloud-Native Software Architect" portfolio tool should showcase. | MEDIUM | The Platformatic blog documents ~50% memory savings with 2-4% avg latency increase. This is a genuine production optimization, not theoretical. |
+| **PG011: Expert explanation of implicit root danger** | Hadolint's proposed DL3063 defaults to "ignore" severity. PG011 as a `warning` with a rich explanation (container escape risk, Kubernetes securityContext implications, Pod Security Standards enforcement) goes further than any existing linter. | LOW | Leverage the existing explanation style from DL3002 and PG007 to create a cohesive security narrative across the three USER-related rules. |
+| **PG012: Compatibility caveat in explanation** | Mentioning the 4GB heap-per-isolate limit and native addon compatibility (N-API works, legacy V8 API like better-sqlite3 does not) in the explanation prevents users from blindly adopting the suggestion. This nuance builds trust. | LOW | Include in the `explanation` field, not as a separate feature. |
+| **PG011: Correct line reporting on last FROM** | When USER is missing, report the violation on the last `FROM` line (where the final stage begins). This mirrors DL3057's pattern for missing HEALTHCHECK and gives users a clear anchor point for the fix location. | LOW | `lastFrom.getRange().start.line + 1` -- identical to DL3057 pattern. |
 
-### Score Summary
+### Anti-Features (Commonly Requested, Often Problematic)
 
-| Dimension | Symbol | Score | Key Factor |
-|-----------|--------|-------|------------|
-| Aesthetic Geometry | Phi | 5 | Parenthesis density, visual monotony of S-expressions |
-| Mathematical Elegance | Omega | 10 | Homoiconicity, macro system, self-interpreting language |
-| Linguistic Clarity | Lambda | 7 | Prefix notation barrier, but remarkable once internalized |
-| Practitioner Happiness | Psi | 5 | Tiny community, tooling friction, profound satisfaction for devotees |
-| Organic Habitability | Gamma | 9 | The original "habitable" language per Richard Gabriel |
-| Conceptual Integrity | Sigma | 8 | Profound core ideas diluted by committee standardization |
-| **TOTAL** | | **44** | **Handsome tier** |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| **Auto-detect which stage is the "runtime" stage** | In complex multi-stage builds, the final FROM is not always the runtime stage (some Dockerfiles have test/debug stages after runtime). | Requires semantic analysis of the entire build graph to determine which stage is "runtime." The `dockerfile-ast` library has no concept of "target stage" -- that is a `docker build --target` flag at build time, not parseable from the Dockerfile alone. | Scope to the **last** FROM, matching Hadolint's convention. Document that `--target` overrides are not detectable. |
+| **PG012: Suggest node-caged for ALL stages** | Users might want memory optimization everywhere. | Builder stages run `npm install`, `npm run build`, then discard. Memory savings in ephemeral build stages are irrelevant. Flagging every `FROM node:*` creates noise. | Only flag the **final stage** FROM that uses a node image. |
+| **PG012: Auto-rewrite the FROM line** | Users want one-click fixes. | `platformatic/node-caged` tags may not have exact parity with every official `node:*` variant. Auto-rewrite could introduce a non-existent tag. The tool is a static analyzer, not an editor with write access. | Provide clear before/after examples in the fix. Let the user make the conscious decision. |
+| **PG011: Flag ALL stages without USER** | Seems thorough. | Builder stages (`FROM node:22 AS builder`) intentionally run as root for package installation and compilation. Flagging them creates false positives that train users to ignore warnings. | Only flag the final stage, consistent with DL3002 behavior. |
+| **PG012: Suggest node-caged for non-Docker Hub node images** | Images like `gcr.io/distroless/nodejs` or `mcr.microsoft.com/node` also run Node.js. | These are fundamentally different images with different base layers, security profiles, and purposes. node-caged is a drop-in for the official `node:*` image only. | Only match image names that resolve to the official Docker Hub `node` image: bare `node`, `library/node`, `docker.io/library/node`. |
 
----
-
-### Phi (Aesthetic Geometry): 5
-
-**The honest truth: S-expressions are visually monotonous.**
-
-Lisp code is structurally uniform -- everything is a parenthesized list. This regularity has geometric coherence in the abstract (it is a tree, rendered as text), but on screen it produces dense blocks where closing parentheses stack at the end of expressions:
-
-```lisp
-(defun fibonacci (n)
-  (cond ((= n 0) 0)
-        ((= n 1) 1)
-        (t (+ (fibonacci (- n 1))
-              (fibonacci (- n 2))))))
-```
-
-The visual weight is concentrated in delimiters rather than content. Unlike Python (where indentation *is* structure) or Ruby (where blocks flow like prose), Lisp requires the reader to mentally filter out the parentheses to see the logic. Experienced Lispers genuinely stop seeing the parentheses -- they read by indentation, not by delimiter matching. But the Beauty Index measures the language's visual presentation, not the expertise of its readers.
-
-**Calibration:** Clojure scores Phi=6 because its additional syntax forms (square brackets for vectors `[]`, curly braces for maps `{}`) break up the visual monotony and provide semantic cues that pure S-expression Lisp lacks. Classic Lisp's more uniform parenthesization is actually *less* visually differentiated. Score of 5 is appropriate -- same as Java and JavaScript, languages whose visual noise comes from different sources but produces similar cognitive load.
-
-**What prevents a lower score:** The *regularity* of S-expressions is not chaos. It is monotonous, not messy. A screenful of well-indented Lisp has a tree-like visual structure that, while dense, is internally consistent. This is better than C++ (Phi=3) where visual density comes from heterogeneous noise (templates, preprocessor directives, angle brackets).
-
-**Justification text for implementation:**
-> S-expressions create uniform, tree-structured code that has geometric regularity but overwhelming visual density. Parentheses dominate the visual field -- experienced Lispers read by indentation, not delimiters, but the language itself presents a wall of parens. Lacks the visual differentiation that Clojure adds with brackets and braces.
-
----
-
-### Omega (Mathematical Elegance): 10
-
-**The strongest case for a perfect score of any language in the index.**
-
-Lisp is not just mathematically elegant -- it *is* mathematics made executable. John McCarthy derived Lisp from lambda calculus, attempting to "axiomatize computation" rather than design a practical language. The result:
-
-1. **Homoiconicity**: Code and data share the same representation (S-expressions). A Lisp program is a data structure that Lisp can manipulate. This is not a feature bolted on -- it is the foundational insight of the language. `(+ 1 2)` is simultaneously a function call and a list of three elements.
-
-2. **The metacircular evaluator**: A Lisp interpreter can be written in Lisp in roughly 20 lines. This is "the most beautiful program ever written" according to William Byrd's famous lecture -- a self-interpreting language where the evaluator is expressed in terms of the very constructs it evaluates.
-
-3. **Macro system**: Because code is data, macros in Lisp operate on the actual program tree using the full power of the language itself. This is not textual substitution (C preprocessor) or template expansion (C++ templates) -- it is computation over code. Common Lisp macros can implement control structures, domain-specific languages, and pattern matching as libraries rather than language features.
-
-4. **The condition system** (Common Lisp): Error handling separated into signaling, handling, and restarting. The stack is not unwound until the handler decides what to do, allowing recovery strategies to be defined at different abstraction levels. No other mainstream language has replicated this.
-
-5. **CLOS** (Common Lisp Object System): Multiple dispatch, method combination, and a meta-object protocol where the object system is defined in terms of itself. Classes are instances of metaclasses. The MOP is a level of mathematical self-reference that makes even Haskell's type classes look bolted-on.
-
-**Calibration:** Haskell scores Omega=10 for purity, lazy evaluation, and higher-kinded types. Lisp matches this from a different angle -- not through types, but through the code-as-data isomorphism. Both achieve Hardy's "inevitability" criterion. Clojure scores Omega=9 because it inherits homoiconicity but deliberately limits some of the power (no reader macros, simplified dispatch). Classic Lisp retains the full expressive arsenal.
-
-**Justification text for implementation:**
-> The language that *is* mathematics made executable. Homoiconicity means code and data share the same representation -- a Lisp program is a data structure Lisp can manipulate. The metacircular evaluator (a Lisp interpreter in 20 lines of Lisp) is arguably the most beautiful program ever written. Macros operate on the actual program tree, CLOS defines objects in terms of themselves, and the condition system separates error handling into three independent concerns. No other language achieves this depth of self-reference.
-
----
-
-### Lambda (Linguistic Clarity): 7
-
-**Prefix notation is a genuine barrier, but the underlying clarity is remarkable.**
-
-Lisp's prefix notation `(+ 1 2)` instead of `1 + 2` is the single largest readability barrier for newcomers. It is consistent -- every expression has the form `(operator operand ...)` -- but it fights decades of mathematical convention. Reading `(> x 5)` instead of `x > 5` requires conscious translation.
-
-However, once the prefix barrier is crossed, Lisp achieves extraordinary clarity:
-
-```lisp
-(defun process-users (users)
-  (remove-if-not #'active-p
-    (mapcar #'user-email
-      (sort users #'string< :key #'user-name))))
-```
-
-The verb-first structure means every expression declares its intent at the leftmost position. You always know what an expression *does* before you see what it operates on. Common Lisp's verbose, English-derived names (`remove-if-not`, `multiple-value-bind`, `with-open-file`) make code self-documenting for those who know the conventions.
-
-**What docks it from 8+:** Three factors:
-1. **Prefix notation barrier**: Real and permanent for many developers.
-2. **Nested expressions**: Without threading macros (which Clojure adds), complex transformations become deeply nested `(f (g (h x)))` -- read inside-out, which is cognitively expensive.
-3. **Common Lisp's keyword arguments and special forms**: `(loop for x in list when (evenp x) collect (* x x))` uses a domain-specific mini-language inside `LOOP` that reads differently from the rest of the language.
-
-**Calibration:** Clojure scores Lambda=8 because threading macros (`->`, `->>`) transform nested expressions into linear pipelines, solving the nesting problem. Classic Lisp lacks this convention (though libraries exist). Haskell also scores Lambda=8 -- its barriers are different (monadic code, lens operators) but comparable in scale.
-
-**Justification text for implementation:**
-> Prefix notation declares intent at the leftmost position of every expression -- you always know what code *does* before seeing what it operates on. Common Lisp's English-derived names (<code>remove-if-not</code>, <code>with-open-file</code>) are self-documenting. Docked because prefix notation fights mathematical convention, deeply nested expressions read inside-out, and the <code>LOOP</code> macro introduces a mini-language with its own grammar.
-
----
-
-### Psi (Practitioner Happiness): 5
-
-**Profound satisfaction for a tiny community, but real friction for everyone else.**
-
-Lisp practitioners are among the most devoted in programming. The REPL-driven development workflow -- where you can redefine functions, inspect live state, and restart from errors without stopping the program -- induces genuine flow states that few other environments match. Paul Graham built a startup (Viaweb) on Common Lisp and called it his "secret weapon." HackerNews runs on SBCL to this day.
-
-However:
-- **Community size**: Lisp does not appear in Stack Overflow's "Most Admired" rankings. Survey representation is approximately 1.5% of respondents. The community is passionate but tiny.
-- **Tooling**: The primary development environment is Emacs + SLIME/SLY. VS Code support exists but is less mature. The tooling is powerful but assumes a specific workflow. Modern developers expect language servers, formatters, and package managers that "just work" -- Common Lisp's Quicklisp/ASDF ecosystem works but has rough edges (FFI/CFFI problems, dependency resolution issues).
-- **Ecosystem**: Libraries exist for most tasks but are maintained by small teams or individuals. Documentation ranges from excellent (Practical Common Lisp, the HyperSpec) to nonexistent.
-- **Learning curve**: The combination of unfamiliar syntax, Emacs dependency, and concepts like macros/CLOS/conditions creates a steep onboarding. This is a language where proficiency takes years, not weeks.
-
-**Calibration:** OCaml scores Psi=5 for similar reasons -- small community, niche adoption, thin ecosystem, but deep satisfaction for practitioners. Haskell scores Psi=6, slightly higher because it has more academic support and a larger (though still niche) community. C scores Psi=4 -- respected but actively unpleasant. Lisp at 5 reflects the genuine delight of REPL-driven development offset by the real friction of a small ecosystem and steep learning curve.
-
-**Justification text for implementation:**
-> The REPL-driven workflow induces flow states few environments match -- redefine functions, inspect live state, and recover from errors without restarting. Paul Graham called Common Lisp his "secret weapon." But the community is tiny (not in Stack Overflow's admired rankings), tooling assumes Emacs proficiency, the ecosystem has rough edges, and the learning curve spans years rather than weeks. Profound satisfaction for devotees; real friction for everyone else.
-
----
-
-### Gamma (Organic Habitability): 9
-
-**Richard Gabriel literally wrote the book on habitability -- and he was writing about Lisp.**
-
-This is Lisp's second-strongest dimension after Omega. Richard Gabriel's concept of "habitability" -- code as a place where programmers can live, with growth points and organic extensibility -- was developed *while working in Lisp*. The language embodies the concept:
-
-1. **Macro-based extensibility**: Need a new control structure? Write a macro. Need a domain-specific language? Write macros. The language grows toward the problem domain organically, bottom-up. Paul Graham: "Experienced Lisp programmers build the language up toward their programs."
-
-2. **Interactive development**: The REPL allows incremental, exploratory development. You grow a program organically, testing each piece as you build it. This is the programming equivalent of Gabriel's "piecemeal growth" -- small changes, tested immediately, accumulating into a coherent whole.
-
-3. **The condition system as habitability**: Error recovery strategies can be added at any level without restructuring existing code. New restarts can be defined without modifying the signaling code. This is exactly the "growth point" concept -- code designed to be extended.
-
-4. **Multi-paradigm flexibility**: Common Lisp supports functional, imperative, and object-oriented styles. CLOS can be layered on incrementally. You can write purely functional code and add stateful patterns where the domain requires it. The language bends to the domain rather than forcing a paradigm.
-
-5. **Dynamic nature**: Redefining classes at runtime, updating method combinations, adding advice to functions -- Lisp systems are designed to be modified while running. This is the ultimate expression of code that "lives and grows."
-
-**Calibration:** Go scores Gamma=9 for maintainability through enforced simplicity. Lisp achieves the same score through the opposite mechanism -- maintainability through extensibility. Python (Gamma=9) and Ruby (Gamma=9) follow similar patterns. Clojure scores Gamma=8 -- slightly lower because its opinionated immutability constraints, while excellent for correctness, are slightly more rigid than Common Lisp's full flexibility.
-
-**What prevents a 10:** The same flexibility that makes Lisp habitable can make it *too* flexible. Every team can (and does) build its own dialect through macros. Without strong conventions, a Lisp codebase can become a collection of idiolects rather than a shared language. Scheme's fragmentation into dozens of incompatible implementations is the cautionary tale. Common Lisp's ANSI standard helps, but macro-heavy codebases can still feel like "one person's Lisp."
-
-**Justification text for implementation:**
-> Richard Gabriel literally coined "habitability" while working in Lisp. The macro system lets the language grow toward the problem domain -- need a new control structure? Write a macro. The REPL enables piecemeal growth: small changes, tested immediately, accumulating organically. The condition system adds recovery strategies without restructuring existing code. Docked from 10 because the same flexibility can produce macro-heavy idiolects where every team speaks a different dialect.
-
----
-
-### Sigma (Conceptual Integrity): 8
-
-**Profound core ideas, diluted by committee standardization.**
-
-The *idea* of Lisp has perfect conceptual integrity: code is data, data is code, everything is a list, and the evaluator is just another function. McCarthy's original formulation is one of the purest designs in computing history -- seven primitives and you have a complete language. This is Kolmogorov complexity at its most extreme: a language whose entire semantics compress into a page.
-
-But "Lisp" as scored here is the Common Lisp / Scheme heritage, and that history introduces cracks:
-
-1. **Common Lisp is a committee language.** It unified MacLisp, Zetalisp, InterLisp, and other dialects through the ANSI X3J13 process. The result is comprehensive but sprawling -- the HyperSpec defines 978 symbols. The language has separate namespaces for functions and variables (Lisp-2), multiple iteration constructs (`do`, `dotimes`, `dolist`, `loop`, `map*`), and accumulated features from different traditions. This is not "a single coherent mind."
-
-2. **Scheme goes the opposite direction** -- minimalist to the point of impracticality. The R7RS standard is 50 pages. But Scheme has fragmented into dozens of incompatible implementations (Racket, Guile, Chicken, Chez, Gambit...), each adding its own extensions. The "one Scheme" vision is theoretical.
-
-3. **The Lisp family lacks a single living auteur.** McCarthy died in 2011. Guy Steele and Gerald Sussman designed Scheme in the 1970s. The language evolves through committee and community rather than through the singular vision that gives Rust (Sigma=10), Clojure (Sigma=10), or Go (Sigma=9) their coherence.
-
-**What prevents a lower score:** Despite the committee sprawl, Lisp's *core idea* -- code-as-data, evaluation, macros -- remains one of the most coherent conceptual foundations in computing. Every feature in Lisp, even the accumulated ones, follows from the S-expression representation. The foundation is a 10; the implementation is a 6. The score of 8 reflects this tension.
-
-**Calibration:** Clojure scores Sigma=10 because Rich Hickey maintained laser focus on a subset of Lisp ideas (immutability, data orientation, simplicity). Common Lisp inherits the same foundational ideas but adds committee-era complexity. OCaml (Sigma=8) is a fair comparison -- strong foundational vision (types as organizing principle) with some accumulated pragmatic additions. F# (Sigma=8) is similar.
-
-**Justification text for implementation:**
-> The *idea* of Lisp has perfect conceptual integrity: code is data, data is code, everything is a list, the evaluator is just another function. McCarthy's seven primitives are one of the purest designs in computing history. But Common Lisp is a committee language (978 HyperSpec symbols, Lisp-2 namespaces, five iteration constructs), and Scheme fragmented into dozens of incompatible implementations. The foundation is transcendent; the standardization diluted it.
-
----
-
-## Tier Classification
-
-**Total: 44 -- Handsome tier (40-47)**
-
-This places Lisp in the same tier as:
-- OCaml (44): Strong mathematical heritage, small community, niche tooling
-- Go (43): Different aesthetic entirely, but similar total through different strengths
-- Julia (43): Scientific elegance with ecosystem friction
-- Scala (41): Intellectual power with community fragmentation
-
-The handsome tier is correct for Lisp. It is not "beautiful" in the Beauty Index sense (48-60) because:
-- Phi=5 is a significant drag (S-expression visual density)
-- Psi=5 reflects the reality of a tiny, friction-heavy ecosystem
-- The committee-designed breadth of Common Lisp prevents the "single coherent mind" that the beautiful tier demands
-
-But it is far from "practical" (32-39). Omega=10 and Gamma=9 are among the highest in the entire index. Lisp's intellectual and philosophical contributions to programming aesthetics are unmatched.
-
----
-
-## Character Sketch (Draft)
-
-> The ancient philosopher who invented every idea the young languages now claim as their own. Lisp arrived in 1958, handed the world garbage collection, first-class functions, and the radical notion that code is data -- then watched from the sidelines as its children got all the credit.
-
-**Alternative options considered:**
-
-> The grandmother of functional programming who still writes more elegant code than her grandchildren. Lisp invented the ideas that Haskell formalized, that Clojure simplified, and that JavaScript eventually adopted 40 years late.
-
-> The archaeologist's dream and the newcomer's nightmare. Lisp's parentheses conceal the most profound design insight in programming: that code and data are the same thing. Once you see it, you can never unsee it.
-
-**Recommended:** Option 1 -- it captures the ancestral relationship, the irony of influence without credit, and the wit of the existing character sketches.
-
----
-
-## Distinction from Clojure
-
-This is critical because both languages share "code is data" heritage. The key differences:
-
-| Aspect | Lisp (CL/Scheme) | Clojure |
-|--------|-------------------|---------|
-| **Visual syntax** | Uniform parens `()` for everything | Mixed `()` `[]` `{}` for semantic cues |
-| **Mutability** | Mutable by default, immutable by choice | Immutable by default, mutable by exception |
-| **Threading macros** | Not standard (available as libraries) | Core idiom (`->`, `->>`) |
-| **Namespace** | Lisp-2 (separate function/variable ns) | Lisp-1 (unified namespace) |
-| **Object system** | CLOS (full MOP, multiple dispatch) | Protocols + records (simpler, more constrained) |
-| **Error handling** | Condition system (unique, powerful) | JVM exceptions (standard) |
-| **Macro system** | Full reader macros + compiler macros | Restricted (no reader macros) |
-| **Ecosystem** | Quicklisp, small but mature | Clojars + Maven, JVM interop |
-| **Community** | Tiny, academic-leaning | Small but growing, industry-present |
-| **Philosophy** | "Everything is possible" | "Simple made easy" |
-| **Design** | Committee (ANSI X3J13) | Auteur (Rich Hickey) |
-
-**Score comparison:**
-
-| Dimension | Lisp | Clojure | Delta | Explanation |
-|-----------|------|---------|-------|-------------|
-| Phi | 5 | 6 | -1 | Clojure's `[]` `{}` add visual differentiation |
-| Omega | 10 | 9 | +1 | Lisp retains full macro power, CLOS MOP, condition system |
-| Lambda | 7 | 8 | -1 | Clojure's threading macros solve the nesting problem |
-| Psi | 5 | 7 | -2 | Clojure has JVM ecosystem, larger community, better tooling |
-| Gamma | 9 | 8 | +1 | Lisp's full flexibility > Clojure's opinionated constraints |
-| Sigma | 8 | 10 | -2 | Hickey's auteur vision vs. committee standardization |
-| **Total** | **44** | **48** | **-4** | |
-
-The 4-point gap is justified. Clojure is what happens when a single brilliant designer takes Lisp's best ideas and imposes ruthless editorial judgment. Lisp is the raw material -- more powerful, less refined.
-
----
-
-## Signature Code Snippet (Draft)
-
-The signature snippet should showcase homoiconicity and macro power -- the features that make Lisp unique:
-
-```lisp
-(defmacro when-let ((var expr) &body body)
-  `(let ((,var ,expr))
-     (when ,var
-       ,@body)))
-
-(when-let (user (find-user "alice"))
-  (format t "Found: ~a" (user-name user)))
-```
-
-**Why this snippet:** It demonstrates a macro that creates new syntax -- `when-let` binds a value and executes the body only if non-nil. The backquote/comma/splice syntax shows code-as-data manipulation. The resulting usage reads almost like English. This is uniquely Lisp -- no other language in the index can create new binding forms as library code.
-
-**Alternative -- the metacircular evaluator (more famous but longer):**
-
-```lisp
-(defun eval. (expr env)
-  (cond
-    ((atom expr) (assoc expr env))
-    ((eq (car expr) 'quote) (cadr expr))
-    ((eq (car expr) 'lambda) expr)
-    (t (apply. (eval. (car expr) env)
-               (mapcar (lambda (x) (eval. x env))
-                       (cdr expr))
-               env))))
-```
-
-**Recommended:** The `when-let` macro -- it is concise, demonstrates the unique power, and the usage site is immediately readable. The metacircular evaluator is more famous but requires more context to appreciate.
-
----
-
-## 10 Code Comparison Features (Drafts)
-
-### 1. Variable Declaration
-
-```lisp
-(defvar *name* "Lisp")
-(defparameter *languages* '("Lisp" "Scheme"))
-
-(let ((count 0)
-      (x 10)
-      (y 20)
-      (total (+ 10 20)))
-  (format t "~a ~a" *name* total))
-```
-Label: "Defvar and let bindings"
-
-### 2. If/Else
-
-```lisp
-(cond
-  ((>= score 90) "excellent")
-  ((>= score 70) "good")
-  ((>= score 50) "average")
-  (t             "needs improvement"))
-```
-Label: "Cond expression"
-
-### 3. Loops
-
-```lisp
-(dotimes (i 10)
-  (print i))
-
-(loop for sum = 0 then (+ sum n)
-      for n from 1 to 100
-      finally (return sum))
-```
-Label: "Dotimes and LOOP macro"
-
-### 4. Functions
-
-```lisp
-(defun greet (name)
-  (format nil "Hello, ~a!" name))
-
-(defun apply-fn (f x)
-  (funcall f x))
-
-(let ((double (lambda (x) (* x 2))))
-  (funcall double 5))
-```
-Label: "Defun and lambda"
-
-### 5. Structs
-
-```lisp
-(defclass user ()
-  ((name  :initarg :name  :accessor user-name)
-   (email :initarg :email :accessor user-email)
-   (age   :initarg :age   :accessor user-age)))
-
-(defmethod greet ((u user))
-  (format nil "Hello, ~a!" (user-name u)))
-
-(make-instance 'user :name "Alice"
-                     :email "alice@ex.com"
-                     :age 30)
-```
-Label: "CLOS defclass"
-
-### 6. Pattern Matching
-
-```lisp
-(defun describe-pair (x y)
-  (cond
-    ((zerop y) "y is zero")
-    ((zerop x) "x is zero")
-    (t (format nil "both non-zero: ~a, ~a" x y))))
-
-(destructuring-bind (&key name age) person
-  (format nil "~a is ~a" name age))
-```
-Label: "Cond and destructuring-bind"
-
-### 7. Error Handling
-
-```lisp
-(define-condition invalid-input (error)
-  ((text :initarg :text :reader input-text)))
-
-(defun parse-number (s)
-  (restart-case
-      (or (parse-integer s :junk-allowed t)
-          (error 'invalid-input :text s))
-    (use-value (v) v)
-    (skip () nil)))
-
-(handler-bind
-    ((invalid-input
-      (lambda (c)
-        (invoke-restart 'skip))))
-  (parse-number "abc"))
-```
-Label: "Condition system with restarts"
-
-### 8. String Interpolation
-
-```lisp
-(defvar *name* "Lisp")
-(defvar *version* 2.0)
-
-(format nil "Hello, ~a! Version: ~,1f" *name* *version*)
-(format nil "~{~a~^, ~}" '("one" "two" "three"))
-
-(concatenate 'string "Welcome to " *name* ".")
-```
-Label: "Format directives"
-
-### 9. List Operations
-
-```lisp
-(defvar *numbers* (loop for i from 1 to 10 collect i))
-
-(mapcar (lambda (x) (* x 2)) *numbers*)
-(remove-if-not #'evenp *numbers*)
-(reduce #'+ *numbers*)
-
-(reduce #'+
-  (mapcar (lambda (x) (* x x))
-    (remove-if-not #'evenp *numbers*)))
-```
-Label: "Mapcar, remove-if, reduce"
-
-### 10. Signature Idiom
-
-(Use the `when-let` macro snippet from the Signature Code Snippet section above)
-
----
-
-## Anti-Features
-
-Features to explicitly NOT highlight or build for Lisp:
-
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| LOOP macro complexity | The LOOP macro is a divisive mini-language within CL; showcasing it extensively would misrepresent the language | Use simpler iteration forms (dotimes, mapcar) as primary examples |
-| Reader macro examples | Too obscure for the audience; reader macros are powerful but alienating | Focus on regular macros which are more accessible |
-| Format string directive zoo | `~{~a~^, ~}` is powerful but looks like line noise | Show simple format usage, note the power exists |
-| Multiple inheritance CLOS | Correct but creates misleading "complexity" impression | Show single-class CLOS which demonstrates the elegance |
-
----
-
-## Feature Dependencies for Implementation
+## Feature Dependencies
 
 ```
-Character sketch → No dependencies (standalone text)
-Signature snippet → No dependencies (standalone code)
-6 dimension scores → No dependencies (standalone values)
-6 justification texts → Require final scores to be confirmed
-10 code comparison features → Should reference existing Clojure snippets for consistency
-Tier assignment → Requires final total score
+PG011 (missing USER)
+    depends on ──> existing DL3002 pattern (final-stage scoping logic)
+    depends on ──> existing PG007 pattern (USER instruction detection)
+    enhances ──> DL3002 (fills the "no USER at all" gap)
+    enhances ──> PG007 (PG007 checks UID/GID quality, PG011 checks USER existence)
+
+PG012 (node-caged suggestion)
+    depends on ──> existing PG006 pattern (FROM instruction iteration, image name parsing)
+    depends on ──> From.getImageName() / From.getImageTag() API from dockerfile-ast
+    independent of ──> PG011 (no dependency between the two new rules)
+
+Both rules
+    depend on ──> rules/index.ts (must be added to allRules array)
+    depend on ──> rules/related.ts (auto-generates related rules by category)
+    enhance ──> scorer.ts (more rules = more granular scoring, no changes needed)
+    enhance ──> [code].astro (auto-generates documentation pages, no changes needed)
 ```
 
----
+### Dependency Notes
 
-## Aesthetic Strengths Relative to Other Languages
+- **PG011 depends on DL3002 pattern:** The final-stage scoping logic (find last FROM, filter instructions after it) is already proven in DL3002. PG011 should reuse the same approach for consistency.
+- **PG012 depends on PG006 pattern:** PG006 already iterates `getFROMs()`, checks `getImageName()`, skips `scratch`, and skips build-stage aliases. PG012 needs the same iteration with a different check (image name match instead of digest check).
+- **PG011 enhances DL3002 + PG007:** Together, the three rules form a complete USER security story: PG011 checks presence, DL3002 checks the value is not root, PG007 checks UID/GID quality.
+- **Both rules are independent:** PG011 and PG012 have zero dependencies on each other and can be implemented in any order or in parallel.
 
-### Where Lisp scores HIGHEST in the entire index:
-- **Omega = 10**: Tied only with Haskell. The homoiconicity argument is at least as strong as Haskell's purity argument.
-- **Gamma = 9**: Tied with Python, Ruby, Elixir, Go. But Lisp's claim is the most historically grounded -- Gabriel coined the concept *for* Lisp.
+## MVP Definition
 
-### Where Lisp scores LOWEST relative to its tier:
-- **Phi = 5**: Lowest in the handsome tier (next lowest is Scala at 7). This is the primary aesthetic penalty.
-- **Psi = 5**: Tied for lowest in the handsome tier with OCaml. Real ecosystem friction.
+### Launch With (v1)
 
-### The "paradox profile":
-Lisp has the widest spread between its best and worst dimensions: Omega=10, Phi=5 (range of 5). Only Haskell comes close (Omega=10, Gamma=6, range of 4). This extreme profile reflects the fundamental Lisp paradox: the most intellectually beautiful language with the most visually challenging syntax.
+Since this is a subsequent milestone adding 2 rules to an existing 44-rule analyzer, "MVP" means both rules are complete and consistent with existing patterns.
 
----
+- [ ] **PG011 rule file** (`rules/security/PG011-require-user.ts`) -- Flag final stage with no USER instruction
+- [ ] **PG011 edge cases** -- Skip `FROM scratch`, skip build-stage alias references in final FROM
+- [ ] **PG012 rule file** (`rules/efficiency/PG012-node-caged.ts` or `rules/best-practice/PG012-node-caged.ts`) -- Flag `node:*` in final stage FROM
+- [ ] **PG012 image name matching** -- Match `node`, `library/node`, `docker.io/library/node`; skip variable-only image names
+- [ ] **Register both in `rules/index.ts`** -- Add to `allRules` array in correct category sections
+- [ ] **Rule documentation** -- Automatic via `[code].astro` static paths; no new code needed
+- [ ] **Related rules** -- Automatic via `related.ts` category matching; no new code needed
+
+### Add After Validation (v1.x)
+
+- [ ] **Update sample Dockerfile** -- Add a scenario that triggers PG011 and/or PG012 in the default sample so new visitors see the rules in action
+- [ ] **Blog post update** -- Reference PG011 and PG012 in the existing `dockerfile-best-practices.mdx` blog post for SEO
+- [ ] **PG012 variant tag mapping** -- If platformatic/node-caged adds more variants, update the before/after examples to cover slim/alpine/bookworm
+
+### Future Consideration (v2+)
+
+- [ ] **PG012 expansion to other runtimes** -- If pointer-compression images emerge for Deno or Bun, add similar suggestions
+- [ ] **PG011 Kubernetes Pod Security Standards integration** -- Link to PSS restricted profile requirements in the explanation
+- [ ] **Rule severity customization** -- Allow users to override severity per rule (e.g., upgrade PG011 from warning to error for strict environments)
+
+## Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| PG011: Missing USER detection | HIGH | LOW | P1 |
+| PG011: Skip scratch/alias edge cases | HIGH | LOW | P1 |
+| PG012: Node-caged suggestion | MEDIUM | MEDIUM | P1 |
+| PG012: Image name matching logic | MEDIUM | MEDIUM | P1 |
+| Register both in index.ts | HIGH | LOW | P1 |
+| Update sample Dockerfile | LOW | LOW | P2 |
+| Blog post cross-reference | LOW | LOW | P2 |
+
+**Priority key:**
+- P1: Must have for this milestone
+- P2: Should have, add when possible
+- P3: Nice to have, future consideration
+
+## Competitor Feature Analysis
+
+| Feature | Hadolint | Dockle | Trivy | Our Approach (PG011/PG012) |
+|---------|----------|--------|-------|---------------------------|
+| Flag explicit `USER root` | DL3002 (warning) | CIS-DI-0001 | Dockerfile misconfiguration | DL3002 (already have) |
+| Flag missing USER entirely | DL3063 (ignore by default, in PR) | CIS-DI-0001 (checks both) | Not implemented | **PG011 (warning)** -- enabled by default, not hidden behind config |
+| Suggest alternative base image | Not implemented | Not implemented | Not implemented | **PG012 (info)** -- novel rule, no competitor offers this |
+| Memory optimization suggestions | Not implemented | Not implemented | Not implemented | **PG012** -- unique differentiator for Node.js-focused analysis |
+| Expert explanations with fix examples | Terse one-line messages | Brief descriptions | Brief descriptions | Rich multi-paragraph explanations with before/after code blocks |
+
+### Key Competitive Insights
+
+1. **Hadolint's DL3063 defaults to "ignore"** -- They added it but disabled it by default, likely due to false-positive concerns in multi-stage builds. Our PG011 avoids this by scoping strictly to the final stage and skipping scratch, making `warning` severity safe as default.
+
+2. **No linter suggests node-caged** -- PG012 is genuinely novel. Dockerfile linters focus on correctness and security, not runtime optimization. This positions the analyzer as going beyond "lint" into "optimization advisor."
+
+3. **Dockle's CIS-DI-0001** is the closest competitor to PG011, as it checks both explicit root and missing USER. However, Dockle analyzes built images (not Dockerfiles), so it operates at a different layer.
+
+## Edge Cases Summary
+
+### PG011 Edge Cases
+
+| Scenario | Expected Behavior | Rationale |
+|----------|-------------------|-----------|
+| No USER instruction anywhere | Flag on last FROM line | Implicit root is the security risk |
+| `USER root` in final stage | Do NOT flag (DL3002 handles this) | Avoid double-flagging; DL3002 owns explicit root |
+| `USER node` in final stage | Do NOT flag | Non-root user is set correctly |
+| `FROM scratch` as final stage | Do NOT flag | scratch has no passwd; USER requires multi-stage setup that is too complex to prescribe |
+| `FROM builder` (alias) as final stage | Do NOT flag | Alias references inherit from their source stage; cannot determine USER from alias alone |
+| Multi-stage with USER only in builder | Flag on last FROM | Builder's USER does not carry into runtime stage |
+| `USER ${APP_USER}` (variable) | Do NOT flag | A USER instruction exists; variable may resolve to non-root at build time |
+| Single-stage Dockerfile, no USER | Flag on FROM line | Most common case; highest impact |
+| `FROM node:22` with USER in ONBUILD | Flag | ONBUILD USER only fires in child images, not in this image |
+
+### PG012 Edge Cases
+
+| Scenario | Expected Behavior | Rationale |
+|----------|-------------------|-----------|
+| `FROM node:22-alpine` | Flag with suggestion | Standard node image, eligible for node-caged |
+| `FROM node:22-alpine AS builder` (not final) | Do NOT flag | Only flag the final stage; builder memory is ephemeral |
+| `FROM node` (no tag) | Flag with suggestion | Still an official node image |
+| `FROM node:${VERSION}` | Flag with suggestion, note variable tag | The base image IS node; the tag is unknown but suggestion is still valid |
+| `FROM platformatic/node-caged:22` | Do NOT flag | Already using node-caged |
+| `FROM myregistry.io/node:22` | Do NOT flag | Custom registry node images may be customized; only match official `node` |
+| `FROM docker.io/library/node:22` | Flag | This is the fully-qualified official node image |
+| `FROM gcr.io/distroless/nodejs22` | Do NOT flag | Different image entirely, not a drop-in replacement candidate |
+| `FROM node:22` in non-final stage only | Do NOT flag | Only the final stage matters for runtime memory |
+| `FROM scratch` with COPY from node stage | Do NOT flag | Final image is scratch, not node |
+
+## Severity and Category Recommendations
+
+### PG011: Require USER instruction
+
+- **Category:** `security` -- Aligns with DL3002 and PG007 (all three form the USER security chain)
+- **Severity:** `warning` -- Not `error` because some base images (e.g., bitnami) set non-root USER in their base layer. Not `info` because running as root is a genuine security risk that most users should fix.
+- **Rationale for warning over info:** Hadolint defaults their equivalent (DL3063) to "ignore", which means nobody sees it. The whole point of PG011 is to close the DL3002 gap where missing USER goes completely undetected. `warning` ensures visibility without blocking.
+
+### PG012: Suggest node-caged
+
+- **Category:** `efficiency` -- This is a memory optimization, not a security or correctness issue. The `efficiency` category (weight: 25%) is appropriate because it aligns with other resource-optimization rules.
+- **Severity:** `info` -- This is an optimization suggestion, not a problem. The Dockerfile is valid without node-caged. Using `info` (3-point deduction per the scorer) keeps the score impact minimal while still surfacing the recommendation.
+- **Rationale for info over warning:** node-caged has real limitations (4GB heap cap, native addon compatibility). Treating this as `warning` would imply the user is doing something wrong, when in fact they are doing something that could be better.
+
+## API Notes (dockerfile-ast)
+
+Key finding: `dockerfile-ast` does NOT provide a `getUSERs()` method (unlike `getFROMs()`, `getCMDs()`, `getENTRYPOINTs()`, `getHEALTHCHECKs()`). USER instructions must be found via:
+
+```typescript
+const userInstructions = dockerfile.getInstructions().filter(
+  (inst) => inst.getKeyword() === 'USER'
+);
+```
+
+This is already the pattern used by DL3002. The `From` class provides: `getImageName()`, `getImageTag()`, `getImageDigest()`, `getBuildStage()`, `getRegistry()` -- all needed for PG012's image matching.
 
 ## Sources
 
-### Primary / HIGH confidence
-- Existing Beauty Index data: `/src/data/beauty-index/languages.json`, `justifications.ts`, `tiers.ts`
-- [Paul Graham - What Made Lisp Different](https://paulgraham.com/diff.html)
-- [Peter Seibel - Beyond Exception Handling: Conditions and Restarts](https://gigamonkeys.com/book/beyond-exception-handling-conditions-and-restarts.html)
-- [Clojure.org - Differences with other Lisps](https://clojure.org/reference/lisps)
-- [Richard Gabriel - Patterns of Software](https://www.dreamsongs.com/Files/PatternsOfSoftware.pdf)
+- [Hadolint issue #1089: Warn if Dockerfile omits USER instruction](https://github.com/hadolint/hadolint/issues/1089) -- Feature request for missing USER detection
+- [Hadolint PR #1032: Adding rule DL3062/DL3063](https://github.com/hadolint/hadolint/pull/1032) -- Implementation of missing USER rule (default: ignore)
+- [Platformatic node-caged GitHub](https://github.com/platformatic/node-caged) -- V8 pointer compression Docker images
+- [Platformatic blog: We Cut Node.js Memory in Half](https://blog.platformatic.dev/we-cut-nodejs-memory-in-half) -- Technical details on memory savings
+- [node-caged memory reduction (Vinta Software)](https://www.vintasoftware.com/lessons-learned/node-caged-can-get-up-to-50-memory-reduction-in-nodejs-with-pointer-compression) -- Independent validation of ~50% savings
+- [Matteo Collina on V8 IsolateGroups](https://x.com/matteocollina/status/2023805916961800301) -- Technical background on V8 pointer compression in Node.js
+- [Snyk: Docker Security Best Practices](https://snyk.io/blog/10-docker-image-security-best-practices/) -- Industry standard for USER directive requirement
+- [Sysdig: Dockerfile Best Practices](https://sysdig.com/blog/dockerfile-best-practices/) -- USER instruction as security baseline
+- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) -- Authoritative security guidance
+- [Non-privileged containers from scratch](https://medium.com/@lizrice/non-privileged-containers-based-on-the-scratch-image-a80105d6d341) -- Edge case: USER in scratch images
+- [dockerfile-ast npm](https://www.npmjs.com/package/dockerfile-ast) -- Parser library API reference
+- [dockerfile-ast GitHub](https://github.com/rcjsuen/dockerfile-ast) -- TypeScript type definitions for API methods
+- [Docker Hub: node official image](https://hub.docker.com/_/node/) -- Official Node.js image tag variants
 
-### Secondary / MEDIUM confidence
-- [Common Lisp tooling in 2025](https://aliquote.org/post/cl-tooling-in-2025/)
-- [Reasons to use Common Lisp in 2025](https://dev.to/veer66/reasons-to-use-common-lisp-in-2025-523h)
-- [These years in Common Lisp: 2023-2024 in review](https://lisp-journey.gitlab.io/blog/these-years-in-common-lisp-2023-2024-in-review/)
-- [Notes on Common Lisp vs Clojure](https://gist.github.com/vindarel/3484a4bcc944a5be143e74bfae1025e4)
-- [Scheme Documentation: Comparison with Common Lisp](https://docs.scheme.org/guide/common-lisp/)
-- [The Most Beautiful Program Ever Written](https://www.lvguowei.me/post/the-most-beautiful-program-ever-written/)
-- [CLOS - Dreamsongs](https://www.dreamsongs.com/CLOS.html)
-- [Macro elegance: the magical simplicity of Lisp macros](https://dotink.co/posts/macros/)
-- [Homoiconicity - Wikipedia](https://en.wikipedia.org/wiki/Homoiconicity)
-- [Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/technology)
-
-### Tertiary / LOW confidence
-- [Slant - Clojure vs Common Lisp](https://www.slant.co/versus/1538/2105/~clojure_vs_common-lisp) (community-sourced)
-- [Freshcode - Clojure vs Common Lisp](https://www.freshcodeit.com/blog/clojure-vs-common-lisp) (blog comparison)
+---
+*Feature research for: Dockerfile Analyzer rule expansion (PG011 + PG012)*
+*Researched: 2026-03-02*

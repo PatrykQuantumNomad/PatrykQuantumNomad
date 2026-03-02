@@ -1,53 +1,103 @@
 # Stack Research
 
-**Domain:** Adding Lisp (Common Lisp/Scheme family) as 26th language to the Beauty Index
-**Researched:** 2026-03-01
+**Domain:** Dockerfile Analyzer rule expansion -- PG011 (missing USER directive) and PG012 (Node.js memory optimization via pointer compression)
+**Researched:** 2026-03-02
 **Confidence:** HIGH
 
 ## Verdict: No New Dependencies Required
 
-Adding Lisp requires **zero npm installs** and **zero config changes**. Every technology needed is already present in the project. This is a pure data-addition task.
+Both PG011 and PG012 can be implemented using only the existing `dockerfile-ast@^0.7.1` library and its already-used API surface. Zero new npm packages, zero config changes. This is a pure rule-authoring task.
 
-## Shiki Language Support (Verified)
+## Existing API Surface Verification
 
-Shiki 3.22.0 (installed via `astro-expressive-code@0.41.6`) ships bundled grammars for all Lisp-family languages:
+Every API method needed by PG011 and PG012 is already proven in the codebase by existing rules:
 
-| Shiki Language ID | Display Name | File Extensions | Aliases |
-|-------------------|-------------|-----------------|---------|
-| `common-lisp` | Common Lisp | `.lisp`, `.lsp`, `.l`, `.cl`, `.asd`, `.asdf` | `lisp` |
-| `scheme` | Scheme | `.scm`, `.ss`, `.sch`, `.rkt` | (none) |
-| `clojure` | Clojure | (already in use) | (already entry #10) |
-| `racket` | Racket | `.rkt` | (available if needed) |
-| `emacs-lisp` | Emacs Lisp | (available) | `elisp` |
-| `lisp` | (alias) | -- | Re-exports `common-lisp` |
+| API Method | Used By | Needed By | Purpose |
+|------------|---------|-----------|---------|
+| `dockerfile.getFROMs()` | DL3006, DL3007, DL3002, PG006, PG009, PG010 | PG011, PG012 | Get all FROM instructions |
+| `dockerfile.getInstructions()` | DL3002, PG007, PG009, PG010, many others | PG011 | Get all instructions to find USER directives |
+| `inst.getKeyword()` | Every rule | PG011 | Filter by instruction type (e.g., `'USER'`) |
+| `inst.getArgumentsContent()` | DL3002, PG007, many others | PG011 | Get USER argument to check if non-root |
+| `inst.getRange()` | Every rule | PG011, PG012 | Get line numbers for violation reporting |
+| `from.getImageName()` | DL3006, DL3007, PG006 | PG012 | Get base image name (e.g., `node`) |
+| `from.getImageTag()` | DL3006, DL3007, PG006 | PG012 | Get image tag (e.g., `22-slim`) |
+| `from.getBuildStage()` | DL3007 | PG011, PG012 | Get build stage alias for multi-stage awareness |
 
-**Verification method:** Direct inspection of `node_modules/@shikijs/langs/dist/` and `node_modules/shiki/dist/langs/` confirmed all grammars are bundled. Node.js module loading confirmed `bundledLanguages['common-lisp']`, `bundledLanguages['lisp']`, and `bundledLanguages['scheme']` all resolve correctly. The `lisp.mjs` file is a re-export of `common-lisp.mjs`.
+**Verification method:** Confirmed by reading source code of 8 existing rules. All methods are TypeScript-typed via `import type { Dockerfile } from 'dockerfile-ast'`.
 
-### Recommended Shiki Language ID: `common-lisp`
+## Rule Implementation Details
 
-Use `common-lisp` (not `lisp`, not `scheme`) for the `lang` field in `snippets.ts` and `code-features.ts` entries. Rationale:
+### PG011: Missing USER Directive (Security)
 
-1. **Primary, not alias.** `common-lisp` is the grammar's canonical `name` field. `lisp` is a convenience alias that re-exports it. Using the primary name avoids confusion and matches how the grammar identifies itself internally.
+**Category:** `security` | **Severity:** `warning` | **File:** `rules/security/PG011-missing-user.ts`
 
-2. **The entry covers Common Lisp/Scheme as a family.** The Common Lisp grammar provides richer highlighting than the Scheme grammar (supports CLOS classes, condition types, format strings, package qualifiers, `defmacro`/`defgeneric`/`defmethod`, lambda lists, reader macros). Most "iconic Lisp" code snippets will look better with Common Lisp highlighting.
+**What it detects:** The final build stage has no USER instruction at all, meaning the container runs as root by default. This is distinct from existing rule DL3002, which only flags explicit `USER root` in the final stage.
 
-3. **Consistency with existing pattern.** The Clojure entry uses `lang: 'clojure'` (its canonical Shiki name). Following the same pattern means using `common-lisp`.
+**API usage pattern:** Identical to DL3002 (already proven):
+1. `dockerfile.getFROMs()` to find the last FROM (start of final stage)
+2. `dockerfile.getInstructions()` to find USER instructions after the last FROM
+3. If zero USER instructions found in final stage, report violation on the last FROM line
 
-4. **Scheme snippets also highlight acceptably under `common-lisp`.** S-expression syntax, `define`, `lambda`, `let`, `cond` -- all shared forms highlight correctly in either grammar. If a specific Scheme-only snippet is needed in `code-features.ts`, that individual snippet can use `lang: 'scheme'` since `astro-expressive-code` resolves per-block.
+**Multi-stage build awareness:** Must only inspect the final build stage. Builder stages commonly omit USER intentionally. The pattern for detecting the final stage boundary is already established in DL3002, PG009, and PG010.
 
-### Alternative: Per-Snippet Switching
+**Known edge cases to handle:**
+- `FROM scratch` -- skip; scratch images have no user system, and the binary's UID is typically set by the runner
+- Build stage references (`COPY --from=builder`) -- only check the final stage, not intermediate stages
+- Single-stage Dockerfiles -- the only stage IS the final stage
 
-For `code-features.ts` entries, if some feature snippets are written in Scheme dialect while others use Common Lisp dialect, each snippet's `lang` field can be set independently:
+**Why this fills a gap:** Hadolint's DL3002 only catches `USER root`. Hadolint issue #1089 (opened 2025-05-06, still open) is a feature request for exactly this rule. Hadolint issue #1025 is the same request. Neither has been implemented in Hadolint as of this writing. PG011 covers the more common and arguably more dangerous case: USER is never set at all, so root is the silent default.
 
-```typescript
-// Common Lisp snippet
-clSnippet: { lang: 'common-lisp', label: '...', code: '...' }
+**Relationship to DL3002:** Complementary, not overlapping. DL3002 flags explicit `USER root`. PG011 flags the absence of any USER directive. A Dockerfile can trigger one, both, or neither:
+- `USER root` at end --> DL3002 fires, PG011 does NOT fire (USER exists)
+- No USER at all --> PG011 fires, DL3002 does NOT fire (no USER to inspect)
+- `USER appuser` at end --> Neither fires (correct)
 
-// Scheme snippet for the same language entry
-schemeSnippet: { lang: 'scheme', label: '...', code: '...' }
-```
+### PG012: Consider Node.js Pointer Compression Image (Efficiency)
 
-Both will resolve at build time without any configuration. However, **for simplicity and consistency, prefer writing all snippets in Common Lisp style and using `common-lisp` throughout.**
+**Category:** `efficiency` | **Severity:** `info` | **File:** `rules/efficiency/PG012-node-pointer-compression.ts`
+
+**What it detects:** FROM instructions that use official `node:` base images where the workload could benefit from ~50% memory reduction by switching to `platformatic/node-caged`, which ships Node.js compiled with V8 pointer compression (`--experimental-enable-pointer-compression`).
+
+**API usage pattern:** Identical to DL3007 (already proven):
+1. `dockerfile.getFROMs()` to iterate all FROM instructions
+2. `from.getImageName()` to check if image is `node` (official Docker Hub image)
+3. `from.getImageTag()` to extract version/variant information
+4. Report informational suggestion with the equivalent `platformatic/node-caged` tag
+
+**Node.js image name patterns to match:**
+
+| FROM Pattern | `getImageName()` Returns | Match? |
+|--------------|--------------------------|--------|
+| `FROM node:22` | `node` | YES |
+| `FROM node:22-slim` | `node` | YES |
+| `FROM node:22-alpine` | `node` | YES |
+| `FROM node:22-bookworm` | `node` | YES |
+| `FROM node:lts-slim` | `node` | YES |
+| `FROM node` (no tag) | `node` | YES |
+| `FROM docker.io/library/node:22` | `docker.io/library/node` | YES (check suffix) |
+| `FROM gcr.io/distroless/nodejs22` | `gcr.io/distroless/nodejs22` | NO (different image) |
+| `FROM python:3.12` | `python` | NO |
+| `FROM node:22 AS builder` | `node` | YES (but see note below) |
+
+**Multi-stage build consideration:** Report on ALL node: FROM stages, not just the final stage. Unlike security rules that focus on the final stage, an efficiency suggestion is valuable for any stage -- memory savings apply to both build and runtime containers. However, the message should note that the 4GB heap limit per isolate is a constraint.
+
+**platformatic/node-caged image variants available:**
+
+| Official Node Tag | Equivalent node-caged Tag |
+|-------------------|---------------------------|
+| `node:25` | `platformatic/node-caged:25` |
+| `node:25-slim` | `platformatic/node-caged:25-slim` |
+| `node:25-alpine` | `platformatic/node-caged:25-alpine` |
+| `node:25-bookworm` | `platformatic/node-caged:25-bookworm` |
+| `node:latest` | `platformatic/node-caged:latest` |
+
+**Important constraint:** node-caged is currently built from Node.js v25.x. Users on Node 20 LTS or Node 22 LTS cannot directly use node-caged without upgrading their Node.js version. The rule message should mention the 4GB heap limit per V8 isolate and the Node 25+ requirement.
+
+**Severity rationale:** `info` not `warning` because:
+1. This is an optimization suggestion, not a correctness issue
+2. The 4GB heap limit may not suit all workloads
+3. Switching base images is a significant decision that requires testing
+4. Node 25+ is not LTS and may not be suitable for all teams
 
 ## Existing Stack (No Changes Needed)
 
@@ -55,32 +105,31 @@ Both will resolve at build time without any configuration. However, **for simpli
 
 | Technology | Version | Purpose | Status |
 |------------|---------|---------|--------|
+| dockerfile-ast | ^0.7.1 | Dockerfile AST parsing | No change; provides all methods needed |
 | Astro | 5.17.1 | Static site generator | No change |
-| astro-expressive-code | 0.41.6 | Syntax highlighting (wraps Shiki) | No change |
-| Shiki | 3.22.0 | TextMate grammar engine | No change, `common-lisp` grammar bundled |
-| Zod | (via Astro) | Schema validation for `languages.json` | No change |
+| TypeScript | (via Astro) | Type-safe rule implementation | No change |
 
-### Data Files to Update (Not Stack Changes)
+### Files to Create (New)
+
+| File | Purpose | Pattern Source |
+|------|---------|---------------|
+| `src/lib/tools/dockerfile-analyzer/rules/security/PG011-missing-user.ts` | PG011 rule implementation | Follow PG007/DL3002 pattern |
+| `src/lib/tools/dockerfile-analyzer/rules/efficiency/PG012-node-pointer-compression.ts` | PG012 rule implementation | Follow DL3007/PG010 pattern |
+
+### Files to Modify (Registration Only)
 
 | File | Change | Type |
 |------|--------|------|
-| `src/data/beauty-index/languages.json` | Add Lisp entry object | Data |
-| `src/data/beauty-index/snippets.ts` | Add `lisp` key with `lang: 'common-lisp'` | Data |
-| `src/data/beauty-index/code-features.ts` | Add `lisp` entries to all 10 features | Data |
-| `src/data/beauty-index/justifications.ts` | Add `lisp` justification entries | Data |
+| `src/lib/tools/dockerfile-analyzer/rules/index.ts` | Import PG011/PG012, add to `allRules` array | Registration |
 
-Note: The language ID in data files should be `lisp` (the slug used in URLs like `/beauty-index/lisp/`), while the Shiki language identifier in the `lang` field should be `common-lisp`.
+### Files that Auto-Update (No Manual Changes)
 
-### Build Pipeline (No Changes)
-
-| Step | How It Works | Impact of Adding Lisp |
-|------|-------------|----------------------|
-| Content collection | `file()` loader reads `languages.json`, validates with Zod | One more entry validated |
-| Static paths | `getStaticPaths()` generates `/beauty-index/[slug]/` | One more page at `/beauty-index/lisp/` |
-| Radar chart SVG | `radar-math.ts` computes at build time | One more SVG generated |
-| OG image | Satori + Sharp at `/open-graph/beauty-index/[slug].png` | One more OG image |
-| Syntax highlighting | `<Code>` component from `astro-expressive-code` | Resolves `common-lisp` from bundled Shiki grammars |
-| VS comparison pages | `[slug].astro` in `/beauty-index/vs/` | ~50 new comparison pages (lisp-vs-X, X-vs-lisp) |
+| File | What Happens | Why |
+|------|-------------|-----|
+| `src/pages/tools/dockerfile-analyzer/rules/[code].astro` | Generates `/tools/dockerfile-analyzer/rules/pg011/` and `/tools/dockerfile-analyzer/rules/pg012/` pages | Uses `allRules.map()` in `getStaticPaths()` -- new rules automatically get documentation pages |
+| Related rules sidebar | PG011 appears alongside other security rules; PG012 alongside other efficiency rules | `getRelatedRules()` in `related.ts` filters by `rule.category` automatically |
+| Score engine | PG011 deductions count toward security category (30% weight); PG012 toward efficiency (25% weight) | `scorer.ts` uses `rule.category` from the rule object |
+| Badge generator | Rule count updates from `allRules.length` | Dynamic count |
 
 ## Installation
 
@@ -92,54 +141,64 @@ Note: The language ID in data files should be `lisp` (the slug used in URLs like
 
 | Decision | Chosen | Alternative | Why Not Alternative |
 |----------|--------|-------------|---------------------|
-| Shiki lang ID | `common-lisp` | `lisp` (alias) | `lisp` is a re-export alias. Use the canonical name for clarity. |
-| Shiki lang ID | `common-lisp` | `scheme` | Scheme grammar is simpler (fewer token types). Common Lisp grammar highlights more constructs (CLOS, conditions, format strings). |
-| Data ID / URL slug | `lisp` | `common-lisp` | Other entries use short slugs (`csharp` not `c-sharp`, `cpp` not `cplusplus`). `lisp` is the natural short form and differentiates from the existing `clojure` entry. |
+| PG011 severity | `warning` | `error` | Missing USER is a serious issue but some base images (e.g., bitnami/) set a non-root USER internally. Warning is appropriate since we cannot inspect the base image's USER. |
+| PG011 scope | Final stage only | All stages | Builder stages routinely need root for package installation. Flagging them would generate excessive noise with no security benefit. |
+| PG012 severity | `info` | `warning` | This is an optimization opportunity, not a problem. Suggesting image changes as warnings would be too opinionated for a general-purpose linter. |
+| PG012 scope | All FROM stages | Final stage only | Memory savings apply everywhere, including build containers in CI. Showing the suggestion on all stages lets users decide. |
+| PG012 matching | `getImageName() === 'node'` only | Regex matching for all Node.js-derived images | Cannot reliably detect all Node.js-based images (e.g., custom images with Node.js installed via RUN). Matching only the official `node:` image avoids false positives. |
+| New dependency | None | `semver` for version comparison | Overkill. Simple string matching on image name is sufficient. Version constraints can be mentioned in the message text. |
 
 ## What NOT to Do
 
 | Avoid | Why | Do Instead |
 |-------|-----|------------|
-| Adding `shiki` as a direct dependency | Already installed transitively via `astro-expressive-code` | Use existing `<Code>` component |
-| Configuring Shiki languages in `astro.config.mjs` | `common-lisp` and `scheme` are bundled by default in Shiki 3.x; no explicit registration needed | Just use the language ID in `<Code lang="common-lisp">` |
-| Using `lang: 'lisp'` in snippet data | While it works (alias), it obscures which grammar is actually being used | Use `lang: 'common-lisp'` explicitly |
-| Creating a custom TextMate grammar | Shiki already bundles comprehensive Common Lisp and Scheme grammars | Use bundled grammars |
-| Adding `@shikijs/langs` directly | Languages are loaded on-demand from the bundled set by Shiki's core | No additional package needed |
+| Adding any new npm packages | Every API method needed already exists in `dockerfile-ast` | Use existing `getImageName()`, `getImageTag()`, `getInstructions()`, `getKeyword()` |
+| Modifying `types.ts` | The `LintRule` interface already supports everything both rules need | Implement rules conforming to existing interface |
+| Modifying `engine.ts` | Rules auto-run when registered in `allRules` | Just add to `rules/index.ts` |
+| Modifying `scorer.ts` | Scoring already handles all categories and severities | Category/severity on the rule object is sufficient |
+| Modifying `[code].astro` | Documentation pages are auto-generated from rule metadata via `getStaticPaths()` | Just ensure rule has complete `title`, `explanation`, `fix` fields |
+| Trying to detect non-official Node.js images for PG012 | Cannot reliably determine if a custom image contains Node.js | Only match `node` as the image name from `getImageName()` |
+| Making PG011 check intermediate build stages | Builder stages need root for `apt-get install` etc. | Only check the final stage (same pattern as DL3002, PG009, PG010) |
+| Adding `semver` or any version parsing library | Image tag parsing for PG012 does not need semver comparison | Use string matching; mention Node 25+ requirement in message text |
 
 ## Version Compatibility
 
-| Package | Version | Common Lisp Support | Notes |
+| Package | Version | PG011/PG012 Support | Notes |
 |---------|---------|---------------------|-------|
-| shiki@3.22.0 | 3.22.0 | Bundled | `common-lisp`, `scheme`, `lisp` (alias) all available |
-| astro-expressive-code@0.41.6 | 0.41.6 | Via Shiki | Uses `@expressive-code/plugin-shiki` which delegates to Shiki |
-| astro@5.17.1 | 5.17.1 | Via expressive-code | No direct Shiki config needed |
+| dockerfile-ast@0.7.1 | ^0.7.1 | Full support | All methods (`getFROMs`, `getInstructions`, `getImageName`, `getImageTag`, `getBuildStage`, `getKeyword`, `getArgumentsContent`, `getRange`) available and proven by 44 existing rules |
+| TypeScript | (via Astro) | Full support | All rule types imported from `../../types` as usual |
+| Astro@5.17.1 | 5.17.1 | Full support | `getStaticPaths()` in `[code].astro` auto-generates new rule pages |
 
-## Common Lisp Grammar Coverage
+## platformatic/node-caged Reference Data (for PG012 rule content)
 
-The bundled `common-lisp` TextMate grammar provides highlighting for:
+These facts should be embedded in the PG012 rule's `explanation` and `fix` fields:
 
-- **Special operators:** `block`, `catch`, `let`, `let*`, `if`, `progn`, `quote`, `function`, etc.
-- **Macros:** `defun`, `defmacro`, `defclass`, `defmethod`, `defgeneric`, `loop`, `cond`, `when`, `unless`, etc.
-- **CLOS:** Classes, methods, generic functions, method combinations
-- **Type system:** Built-in types, condition types, type specifiers
-- **Constants:** `t`, `nil`, `pi`, numeric constants
-- **Lambda lists:** `&optional`, `&key`, `&rest`, `&body`, `&whole`, etc.
-- **Accessor functions:** `car`, `cdr`, `caar`-`cddddr`, `aref`, `gethash`, etc.
-- **Strings:** Including `format` directive highlighting (`~A`, `~D`, `~{...~}`, etc.)
-- **Reader macros:** `#'`, `#\`, `#|...|#`, `'`, backtick/unquote
-- **Package qualifiers:** `package:symbol`, `package::symbol`
-- **Style conventions:** `*earmuffs*` for specials, `+constants+`
-
-This is comprehensive enough for all Beauty Index snippet categories (variable declaration, control flow, pattern matching, error handling, etc.).
+| Claim | Source | Confidence |
+|-------|--------|------------|
+| ~50% memory reduction for pointer-heavy workloads | Platformatic blog, multiple independent sources | HIGH |
+| 2-4% average latency increase | Platformatic benchmarks | MEDIUM |
+| 7% improvement in P99 latency | Platformatic benchmarks | MEDIUM |
+| 4GB heap limit per V8 isolate | GitHub README, multiple sources | HIGH |
+| Worker threads each get their own 4GB limit | GitHub README | HIGH |
+| Available variants: bookworm, slim, alpine | Docker Hub, GitHub README | HIGH |
+| Built from Node.js v25.x branch | GitHub README | HIGH |
+| Uses `--experimental-enable-pointer-compression` V8 flag | GitHub README | HIGH |
+| Multi-arch: linux/amd64 and linux/arm64 | GitHub README | HIGH |
 
 ## Sources
 
-- Shiki bundled languages: Direct inspection of `node_modules/@shikijs/langs/dist/common-lisp.mjs` (grammar name: `common-lisp`, scope: `source.commonlisp`)
-- Shiki bundled languages: Direct inspection of `node_modules/@shikijs/langs/dist/scheme.mjs` (grammar name: `scheme`, scope: `source.scheme`)
-- Shiki bundled languages: Direct inspection of `node_modules/@shikijs/langs/dist/lisp.mjs` (re-export of `common-lisp.mjs`)
-- Shiki version: `npm ls shiki` confirmed 3.22.0 installed via `astro-expressive-code` dependency chain
-- Existing codebase: `astro.config.mjs`, `snippets.ts`, `code-features.ts`, `[slug].astro`, `code/index.astro` -- confirmed `<Code>` component from `astro-expressive-code` is used for all syntax highlighting with per-block `lang` attribute
+- **Existing codebase:** Direct inspection of `types.ts`, `rules/index.ts`, `engine.ts`, `scorer.ts`, `[code].astro`, `related.ts`, and 8 existing rule implementations (DL3002, DL3006, DL3007, DL3059, PG006, PG007, PG009, PG010) -- confirmed all API methods and patterns needed
+- **dockerfile-ast:** npm package ^0.7.1 already installed, TypeScript types confirmed via `import type { Dockerfile } from 'dockerfile-ast'`
+- [platformatic/node-caged GitHub](https://github.com/platformatic/node-caged) -- V8 pointer compression Docker images, variants, constraints
+- [platformatic/node-caged Docker Hub](https://hub.docker.com/r/platformatic/node-caged) -- Available image tags and multi-arch support
+- [Platformatic blog: Halving Node.js Memory Usage](https://blog.platformatic.dev/we-cut-nodejs-memory-in-half) -- Benchmark results, memory savings data
+- [Hadolint issue #1089: Warn if Dockerfile omits USER](https://github.com/hadolint/hadolint/issues/1089) -- Confirms this gap exists in Hadolint (not implemented)
+- [Hadolint issue #1025: USER must be specified](https://github.com/hadolint/hadolint/issues/1025) -- Additional confirmation of the missing USER gap
+- [Hadolint DL3002 wiki](https://github.com/hadolint/hadolint/wiki/DL3002) -- Confirms DL3002 only flags explicit `USER root`, not missing USER
+- [Hadolint issue #328](https://github.com/hadolint/hadolint/issues/328) -- Confirms DL3002 passes when default user is root (no USER directive)
+- [Snyk Docker Security Best Practices](https://snyk.io/blog/10-docker-image-security-best-practices/) -- Missing USER as a top security concern
+- [Docker Official Best Practices](https://docs.docker.com/build/building/best-practices/) -- USER directive guidance
 
 ---
-*Stack research for: Adding Lisp to the Beauty Index*
-*Researched: 2026-03-01*
+*Stack research for: Dockerfile Analyzer PG011 + PG012 rule expansion*
+*Researched: 2026-03-02*

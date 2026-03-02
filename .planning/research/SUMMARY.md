@@ -1,206 +1,185 @@
 # Project Research Summary
 
-**Project:** Add Lisp as the 26th language to the Beauty Index
-**Domain:** Language data addition — static site content update (Astro)
-**Researched:** 2026-03-01
+**Project:** v1.12 Dockerfile Analyzer Rules Expansion (PG011 + PG012)
+**Domain:** Dockerfile lint rule authoring -- static analysis rule expansion for existing Astro-based tool
+**Researched:** 2026-03-02
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Adding Lisp (Common Lisp / Scheme family) to the Beauty Index is a pure data-addition task with zero dependency changes. The existing Astro 5.17.1 stack already bundles Shiki 3.22.0 with the `common-lisp` grammar, validates entries via Zod, and auto-generates all detail pages, VS comparison pages, and OG images from `languages.json` through `getCollection()`. The only development work is: (1) writing the 4 data files — `languages.json`, `snippets.ts`, `justifications.ts`, `code-features.ts`; and (2) updating approximately 28 hardcoded "25 languages" count strings scattered across source files.
+This milestone adds two new custom lint rules to the existing Dockerfile Analyzer: PG011 (flag missing USER directive in the final build stage) and PG012 (suggest `platformatic/node-caged` for Node.js pointer compression memory savings). Both rules are pure TypeScript implementations that use only the existing `dockerfile-ast@^0.7.1` API surface -- zero new dependencies are required. The existing plugin-style architecture (self-contained rule modules registered in a flat array) means the integration footprint is minimal: 2 new files, 1 modified file, and 4+ files that auto-adapt without any changes.
 
-The proposed Beauty Index score for Lisp is **44** (Handsome tier), with a paradox profile: Omega (Mathematical Elegance) = 10 — tied only with Haskell — and Gamma (Organic Habitability) = 9, offset by Phi (Aesthetic Geometry) = 5 and Psi (Practitioner Happiness) = 5. This makes Lisp the highest Omega scorer and one of the lowest Phi/Psi scorers in the index. The score is 4 points below Clojure (48), which is justified because Rich Hickey's auteur vision and JVM ecosystem refined the raw Lisp ideas into a more polished product.
+PG011 fills a genuine gap that Hadolint's DL3002 leaves open: DL3002 only flags explicit `USER root`, while Dockerfiles with NO USER directive at all silently default to root. Hadolint's community has requested this rule twice (issues #1025, #1089) and it remains unimplemented or default-disabled. PG012 is a novel rule with no equivalent in any existing Dockerfile linter -- it surfaces the `platformatic/node-caged` image as a ~50% memory reduction option for Node.js workloads via V8 pointer compression. Together these rules expand the analyzer from 44 to 46 rules and strengthen two categories: security (14 to 15 rules) and efficiency (8 to 9 rules).
 
-The critical risk is identity confusion between Lisp and Clojure. Because Clojure is already in the index and already described as a "functional, Lisp dialect," the new Lisp entry must establish distinct identity through its character sketch, justification texts, and code snippets. Snippets must showcase features Clojure does not have: the condition/restart system, CLOS `defgeneric`/`defmethod`, and the full macro system — not just `defun` and list operations that overlap with Clojure's `defn` and `map`. A secondary risk is the hardcoded "25" count spread across 28 locations, including OG images, JSON-LD structured data, and LLM-facing text files — a missed update creates SEO inconsistencies visible to crawlers.
+The primary technical risk is PG011/DL3002 rule overlap -- if PG011 fires when `USER root` is present, users see double violations for the same issue. The boundary is clear and well-documented: PG011 fires ONLY when zero USER instructions exist in the final stage; DL3002 handles the explicit `USER root` case. A secondary risk is stale hardcoded rule counts ("39 rules" and "44 rules" in various places across the site). All four research files converge on this being a LOW-complexity, LOW-risk expansion with well-established patterns proven by 44 existing rules.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No new dependencies are required. Shiki 3.22.0, installed transitively via `astro-expressive-code@0.41.6`, bundles the `common-lisp` TextMate grammar. The grammar ID `common-lisp` is canonical; `lisp` is an alias that re-exports it. Research directly verified both identifiers resolve at build time.
+No new dependencies. Every API method needed by both rules is already proven in the codebase by 8+ existing rules. The `dockerfile-ast` library provides `getFROMs()`, `getInstructions()`, `getKeyword()`, `getArgumentsContent()`, `getImageName()`, `getImageTag()`, `getBuildStage()`, and `getRange()` -- all verified by direct source inspection.
 
-**Core technologies (no changes needed):**
-- **Astro 5.17.1**: Static site generator — data-driven, `getCollection()` auto-generates all pages from `languages.json`
-- **astro-expressive-code 0.41.6**: Syntax highlighting wrapper — resolves `common-lisp` from bundled Shiki grammars, no registration needed
-- **Shiki 3.22.0**: TextMate grammar engine — `common-lisp`, `lisp` (alias), and `scheme` all bundled; use `common-lisp` as the `lang` field value
-- **Zod (via Astro)**: Schema validation — generic schema in `schema.ts` requires no changes for a new language entry
+**Core technologies (no changes):**
+- **dockerfile-ast ^0.7.1**: Dockerfile AST parsing -- provides all methods needed, already installed and browser-safe
+- **TypeScript (via Astro)**: Type-safe rule implementation via existing `LintRule` interface
+- **Astro 5.17.1**: Static site generator -- `[code].astro` auto-generates rule documentation pages via `getStaticPaths()`
 
-**Key data-file decisions:**
-- Language URL slug and data key: `lisp` (short, lowercase, matches existing convention)
-- Shiki `lang` field in snippets: `common-lisp` (canonical grammar name, not the alias)
-- These serve different purposes; inconsistency between them breaks keyed lookups silently
+**Key stack decision:** No `semver` library needed for PG012. Simple string matching on `getImageName() === 'node'` is sufficient. Version constraints are communicated in the rule message text, not enforced programmatically.
 
 ### Expected Features
 
-The 10 code comparison features are well-defined for Lisp. All should be populated, with deliberate choices about which idioms to showcase.
+**Must have (table stakes -- P1):**
+- PG011: Flag final stage with no USER instruction (fills DL3002 gap)
+- PG011: Skip `FROM scratch` (no user system) and builder stages (root is intentional)
+- PG012: Detect `node:*` base images in final stage and suggest `platformatic/node-caged`
+- PG012: Match official Docker Hub `node` image only (not custom registries or substrings)
+- Both: Register in `rules/index.ts` for automatic engine, scorer, docs integration
+- Both: Before/after code examples in `fix` field (consistent with all 44 existing rules)
 
-**Must have (table stakes for any language entry):**
-- Variable declaration — `defvar`, `defparameter`, `let` bindings
-- If/else — `if`, `cond`, `when`
-- Loops — `dotimes`, functional `mapcar` (avoid complex `loop` macro as primary)
-- Functions — `defun`, `lambda`, `funcall`
-- Structs — CLOS `defclass` with `:initarg` / `:accessor`
-- Error handling — condition system: `handler-bind`, `restart-case` (uniquely Lisp)
-- List operations — `mapcar`, `remove-if-not`, `reduce` (Lisp's strength)
-- Signature idiom — `defmacro` with backquote/unquote (quintessential Lisp, distinguishes from Clojure)
+**Should have (differentiators -- P2):**
+- PG011: Expert explanation covering container escape risk, Kubernetes Pod Security Standards, CIS Benchmark 4.1
+- PG012: Nuanced explanation mentioning 4GB heap limit, Node 25+ requirement, native addon compatibility
+- Update sample Dockerfile or blog posts to reference new rules
 
-**Should have (differentiators from Clojure):**
-- CLOS `defgeneric` / `defmethod` for pattern matching (shows multiple dispatch, unlike Clojure protocols)
-- `format` directives for string formatting (not interpolation — mark "String Interpolation" as `undefined` or show `format` as the idiom)
-
-**Defer / mark as unsupported:**
-- Native pattern matching — Lisp lacks it; use `cond`/`typecase` or mark `undefined`
-- String interpolation — `format` is the idiom, not interpolation; mark `undefined` with a note
-
-**Anti-features (do not highlight):**
-- `LOOP` macro complexity (divisive mini-language)
-- Reader macros (too obscure, alienating)
-- `format` directive zoo (looks like line noise)
-- Multiple inheritance CLOS (creates "complexity" impression)
+**Defer (v2+):**
+- PG012 expansion to other runtimes (Deno, Bun)
+- Rule severity customization (user overrides)
+- Auto-detect runtime stage via build graph analysis (not feasible with static analysis)
 
 ### Architecture Approach
 
-The codebase follows a strict data-first architecture: all rendering derives dynamically from `languages.json` via Astro's `getCollection()`. Adding Lisp is an entirely additive operation — no existing files are modified except for count strings. Dynamic routes (`[slug].astro`, `vs/[slug].astro`), OG image generation, JSON-LD structured data, and LLM-readable text files all auto-generate from the collection. The `code-features.ts` file maintains a separate manual `ALL_LANGS` const array that is NOT derived from the collection — this is the one place where the data-first pattern breaks.
+The analyzer follows a clean plugin-style architecture where each rule is a self-contained TypeScript module implementing the `LintRule` interface. Registration in the `allRules` array in `rules/index.ts` is the single integration point -- engine, scorer, related rules, and documentation pages all consume this array dynamically. Adding a rule requires exactly 3 touchpoints: create the rule file, add to `allRules`, verify the docs route renders.
 
-**Major components and their change surface:**
-1. `src/data/beauty-index/languages.json` — Add 1 JSON object with all required fields; defines canonical ID `lisp` and scores
-2. `src/data/beauty-index/snippets.ts` — Add `lisp` key with `lang: 'common-lisp'` and signature snippet
-3. `src/data/beauty-index/justifications.ts` — Add `lisp` key with all 6 dimension justification strings
-4. `src/data/beauty-index/code-features.ts` — Add `'lisp'` to `ALL_LANGS` array AND add `lisp` snippets to all 10 feature objects
-5. ~28 source files — Update hardcoded "25" count strings to "26" (and derived counts: 600 -> 650, 150 -> 156, 250 -> 260)
+**Major components (change surface):**
+1. **Rule files** (2 NEW) -- `rules/security/PG011-missing-user-directive.ts` and `rules/efficiency/PG012-node-pointer-compression.ts`
+2. **Registry** (1 MODIFY) -- `rules/index.ts` adds 2 imports and 2 array entries
+3. **Engine, Scorer, Related, [code].astro** (4 NO CHANGE) -- all auto-adapt from `allRules`
 
-**Data flow:**
-```
-languages.json -> content.config.ts (Zod validation) -> getCollection('languages')
-  -> [slug].astro (26 detail pages, auto)
-  -> vs/[slug].astro (650 comparison pages, auto)
-  -> index.astro (overview, auto)
-  -> code/index.astro (reads CODE_FEATURES, NOT collection)
-  -> open-graph/beauty-index/[slug].png.ts (OG images, auto)
-```
+**Key architectural patterns to follow:**
+- Self-contained rule module: metadata + `check()` in one exported const
+- Final-stage scoping: find last FROM, filter instructions after it (proven by DL3002, PG007, PG009, PG010)
+- Registry-driven auto-discovery: `allRules` is the single source of truth
 
 ### Critical Pitfalls
 
-1. **Incomplete hardcoded "25 languages" text updates** — 28 locations across source files, including OG image render text (`og-image.ts` line 618), JSON-LD structured data (`BeautyIndexJsonLd.astro` line 23), blog post body (`the-beauty-index.mdx` multiple lines), `llms.txt`/`llms-full.txt.ts`, homepage, and page meta descriptions. Use grep to audit all occurrences before and after the update pass. Missed instances cause SEO inconsistency visible to crawlers.
+1. **PG011/DL3002 rule overlap** -- PG011 must ONLY fire when NO USER instruction exists. If any USER exists (even `USER root`), PG011 stays silent and DL3002 handles it. Test: Dockerfile with `USER root` should trigger DL3002 only, not both.
 
-2. **Lisp-vs-Clojure identity confusion** — Clojure is already in the index as a "functional, Lisp dialect." Without deliberate differentiation, readers see Lisp as a duplicate. Character sketch must position Lisp as the ancestor (pre-Clojure), not a competitor. Code snippets must showcase CLOS, condition system, and macros — features Clojure deliberately simplified or removed. Justifications must write in explicit contrast to Clojure's existing justifications.
+2. **Multi-stage build false positives** -- Only check the final build stage. Builder stages routinely run as root for `apt-get install` and compilation. Skip `FROM scratch` entirely. Pattern already established in DL3002, PG009, PG010.
 
-3. **ALL_LANGS const array omission** — `code-features.ts` has a manually maintained `ALL_LANGS` const tuple that is NOT derived from `languages.json`. Missing `'lisp'` in this array causes the Code Comparison page and Feature Matrix to silently omit the new language — no build error, no warning, just a missing row. Add `'lisp'` to `ALL_LANGS` in the same commit as `languages.json`.
+3. **PG012 image name matching precision** -- Match `getImageName()` being exactly `node` or `docker.io/library/node`. Do NOT match substrings (`auth-node`), custom registries (`myregistry.com/node`), or non-Node images (`distroless/nodejs`). For info-severity, precision over recall.
 
-4. **Shiki language identifier mismatch** — Use `common-lisp` (not `lisp`, not `scheme`, not `clojure`) as the `lang` field in all snippet objects. The `lisp` alias works but is less explicit. Copying a Clojure snippet as a template and forgetting to change the `lang` field is the primary failure mode. Test syntax highlighting renders in color before writing all 10+ snippets.
+4. **Stale hardcoded rule counts** -- The site has rule count references at "39" (v1.4 era) and "44" (current). Adding 2 rules makes 46. Grep for all count references and update in a coordinated pass. Missed counts create SEO inconsistency.
 
-5. **Score calibration contradiction with Clojure** — Common Lisp must score below Clojure's total (48) because Clojure represents a more refined editorial selection of Lisp ideas. Any dimension where Lisp scores higher than Clojure requires a specific, defensible justification. Omega=10 (vs Clojure's 9) is justified by CLOS MOP and condition system. Lambda or Psi scores above Clojure's 8 and 7 respectively would be indefensible.
+5. **node-caged version limitation** -- PG012 must clearly communicate that `platformatic/node-caged` requires Node 25+ (not LTS). Users on Node 18/20/22 LTS cannot use it. Include this constraint in the rule explanation text.
 
 ## Implications for Roadmap
 
-The research clearly defines a 3-phase structure based on data dependencies and content quality requirements.
+Based on research, this is a compact 3-phase expansion. Both rules can technically be built in parallel since they are independent, but sequential implementation allows validation of the DL3002 boundary before moving to the more nuanced PG012 detection logic.
 
-### Phase 1: Data & Infrastructure Foundation
+### Phase 1: PG011 -- Missing USER Directive
 
-**Rationale:** `languages.json` is the source of truth for all downstream pages. It must exist with correct fields and a valid Shiki grammar identifier before any content work begins. The `ALL_LANGS` array update must be simultaneous to prevent a "looks done but isn't" trap. The "25 -> 26" count audit should happen in this phase, even if string updates are deferred, so the complete list is known.
+**Rationale:** PG011 is the simpler rule (absence detection) but has the most critical boundary condition (DL3002 overlap). Building it first establishes that the overlap is handled correctly before PG012 adds more complexity.
 
-**Delivers:** A valid Lisp entry that builds without errors, appears in rankings and radar charts, and has placeholder or minimal content in snippets/justifications/code-features. The site builds and the `/beauty-index/lisp/` page renders (even if incomplete).
+**Delivers:** `PG011-missing-user-directive.ts` rule file, registration in `index.ts`, auto-generated documentation page at `/tools/dockerfile-analyzer/rules/pg011/`.
 
-**Addresses:** Variable declaration, if/else, loops, functions (placeholder snippets sufficient for Phase 1)
+**Addresses features:** Missing USER detection, `FROM scratch` skip, builder stage skip, final-stage scoping, before/after code examples.
 
-**Avoids pitfalls:**
-- Pitfall 3 (Shiki lang ID) — verify `common-lisp` renders before writing all snippets
-- Pitfall 4 (ALL_LANGS omission) — add to array in the same commit as `languages.json`
-- Pitfall 1 (hardcoded "25") — audit all occurrences with grep in this phase
+**Avoids pitfalls:** Pitfall 1 (DL3002 overlap -- explicit boundary test), Pitfall 2 (multi-stage false positives -- final stage only).
 
-**Files changed:** `languages.json` (add entry), `snippets.ts` (add key + signature snippet), `justifications.ts` (stub or full), `code-features.ts` (add to `ALL_LANGS` + all 10 snippets or `undefined` markers)
+**Verification checklist:**
+- No USER anywhere --> PG011 fires
+- `USER root` --> DL3002 fires, PG011 silent
+- `USER node` --> Neither fires
+- `FROM scratch` + no USER --> PG011 silent
+- Multi-stage with USER only in builder --> PG011 fires on final stage
 
-**No research flag needed:** Patterns are fully established by existing 25 languages. The Shiki grammar ID was verified directly.
+### Phase 2: PG012 -- Node.js Pointer Compression
 
-### Phase 2: Scoring & Content
+**Rationale:** PG012 requires more nuanced detection (image name matching) and messaging (version constraints, heap limits). Building it after PG011 means the index.ts registration pattern is already proven.
 
-**Rationale:** Scores must be calibrated against Clojure before justifications are written — the justification text references the comparative position. Content quality (differentiation from Clojure, snippet readability) determines whether the Lisp entry adds value to the index or is perceived as noise. This phase is creative work requiring editorial judgment.
+**Delivers:** `PG012-node-pointer-compression.ts` rule file, registration in `index.ts`, auto-generated documentation page at `/tools/dockerfile-analyzer/rules/pg012/`.
 
-**Delivers:** All 6 justification texts finalized, all 10 code feature snippets written and readable, character sketch polished, scores confirmed at 44 with correct tier "handsome".
+**Addresses features:** Node.js image detection, node-caged suggestion, 4GB heap caveat, Node 25+ requirement in message, before/after code examples.
 
-**Addresses:** Score calibration, Lisp-Clojure differentiation, snippet readability constraints (5-12 lines, max 3 nesting levels, no horizontal scroll at 576px)
+**Avoids pitfalls:** Pitfall 3 (image name matching -- exact match only), Pitfall 5 (version limitation -- explicit in message).
 
-**Avoids pitfalls:**
-- Pitfall 2 (Lisp-vs-Clojure identity crisis) — write with Clojure's justifications open in parallel
-- Pitfall 6 (score calibration contradictions) — total score must stay below Clojure's 48
-- Pitfall 7 (missing justifications) — write all 6 dimensions in one session
-- Pitfall 8 (S-expression readability) — prefer `defun`/`loop`/`defgeneric` over backquote-heavy macros
+**Verification checklist:**
+- `FROM node:22` --> PG012 fires
+- `FROM python:3.12` --> PG012 silent
+- `FROM platformatic/node-caged:25` --> PG012 silent
+- `FROM myregistry.io/node:22` --> PG012 silent
+- `FROM docker.io/library/node:22` --> PG012 fires
 
-**Files changed:** `justifications.ts` (all 6 texts), `code-features.ts` (all 10 snippets refined), `languages.json` (confirm scores + character sketch), `snippets.ts` (signature snippet refined)
+### Phase 3: Site-Wide Integration & Count Updates
 
-**Research flag:** No additional research needed — all scores, justifications, and snippets are fully specified in FEATURES.md. Treat FEATURES.md as the content brief.
+**Rationale:** Count string updates are mechanical but high-impact for SEO. They should be done as a coordinated pass after both rules are complete, so the final state can be verified with a full build.
 
-### Phase 3: Count Updates & Integration Verification
+**Delivers:** All hardcoded rule counts updated (39/44 to 46), full production build verification, related rules cross-linking confirmed, scoring impact validated.
 
-**Rationale:** Count string updates are mechanical but high-impact (SEO, structured data). They are best done as a single coordinated pass after content is complete, so a grep-based verification pass covers the final state. The full production build must be run to catch any build-time issues before deployment.
+**Addresses features:** Blog post cross-references, LLMs.txt updates, JSON-LD updates, homepage callout updates.
 
-**Delivers:** All 28 hardcoded "25" references updated to "26", all derived counts updated (600 -> 650, 150 -> 156, 250 -> 260), full `astro build` passes, 650 VS pages and 650 VS OG images generated, blog posts updated.
+**Avoids pitfalls:** Pitfall 4 (stale counts -- systematic grep audit).
 
-**Addresses:** Homepage, meta descriptions, JSON-LD, OG image text, LLM-facing files, blog posts, code comments
-
-**Avoids pitfalls:**
-- Pitfall 1 (incomplete count updates) — systematic grep audit, not ad-hoc find-and-replace
-- Pitfall 5 (VS page count explosion) — verify full build completes within acceptable time/memory
-
-**Files changed:** ~28 files across `src/pages/`, `src/components/`, `src/data/blog/`, `src/lib/`, `src/pages/llms*.ts`
-
-**No research flag needed:** This is mechanical string replacement with a defined checklist from ARCHITECTURE.md and PITFALLS.md.
+**Verification checklist:**
+- `allRules.length === 46`
+- Security rules: 15, Efficiency rules: 9
+- Documentation pages render at `/rules/pg011/` and `/rules/pg012/`
+- Full `astro build` passes
+- No references to "39 rules" or "44 rules" remain in source
 
 ### Phase Ordering Rationale
 
-- Phase 1 before Phase 2: The Shiki grammar identifier must be verified working before all 10+ snippets are written. Writing snippets with a wrong `lang` field means rewriting all of them.
-- Phase 1 before Phase 3: Count updates assume the entry exists. Updating "25 -> 26" before `languages.json` has the Lisp entry creates a period where counts are wrong.
-- Phase 2 before Phase 3: Content must be finalized before the full build verification, so Phase 3's `astro build` test validates the complete state.
-- The hardcoded count audit belongs to Phase 1 (identify all locations), while the actual string replacements belong to Phase 3 (execute all replacements together). This prevents partial updates.
+- Phase 1 before Phase 2: PG011 validates the DL3002 boundary and the index.ts registration pattern. PG012 reuses the same pattern with confidence.
+- Phase 2 before Phase 3: Both rules must exist before count updates are meaningful. Updating counts to 46 before both rules are registered would be temporarily incorrect.
+- Both rules independent: If needed, they CAN be implemented in parallel. The sequential recommendation is for review quality, not dependency.
 
 ### Research Flags
 
 Phases with standard patterns (no `/gsd:research-phase` needed):
-- **Phase 1:** Fully established patterns from 25 existing languages; Shiki grammar verified by direct inspection
-- **Phase 2:** Content brief is complete in FEATURES.md; scores, justifications, and code snippets all specified
-- **Phase 3:** Mechanical string replacement with complete location inventory in ARCHITECTURE.md and PITFALLS.md
+- **Phase 1:** Detection logic is identical to DL3002 with an inverted check. Pattern proven by 8+ existing rules.
+- **Phase 2:** Image name matching via `getImageName()` is proven by DL3006, DL3007, PG006. Node-caged facts are documented in STACK.md.
+- **Phase 3:** Mechanical grep-and-replace with defined checklist.
 
-No phases require deeper research. The project is bounded and fully documented.
+No phases require deeper research. All patterns are established and all API methods are verified.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Shiki grammar verified by direct file inspection of `node_modules`; all technologies already installed and in production use for 25 languages |
-| Features | HIGH | Scores and justifications fully specified with calibration against all 25 existing languages; Lisp has decades of aesthetic discourse to draw from |
-| Architecture | HIGH | Direct codebase analysis of every affected file; data flow is explicit and well-understood; hardcoded count locations fully inventoried |
-| Pitfalls | HIGH | Pitfalls identified from direct codebase inspection, not inference; recovery strategies specified with concrete grep commands |
+| Stack | HIGH | Zero new dependencies; all API methods verified by direct source inspection of 8 existing rules |
+| Features | HIGH | Feature set fully defined with clear P1/P2 priorities; competitive analysis confirms PG011 fills a real gap, PG012 is genuinely novel |
+| Architecture | HIGH | Direct codebase analysis of all affected files; plugin architecture is clean and well-understood; auto-adapt pattern eliminates integration risk |
+| Pitfalls | HIGH | All pitfalls identified from direct codebase inspection with concrete prevention strategies; DL3002 boundary documented at source-line level |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Shiki alias behavior in Astro Expressive Code**: Research recommends `common-lisp` as canonical and notes `lisp` is an alias. Before writing all snippets, a 30-second test with `<Code lang="common-lisp">` in a dev page confirms the identifier works as expected. This is a verification step, not a research gap.
+- **PG012 final-stage-only vs. all-stages scope:** FEATURES.md and ARCHITECTURE.md disagree slightly. FEATURES.md lists "flag all FROM stages" as an anti-feature and recommends final-stage only. ARCHITECTURE.md also scopes to final stage. STACK.md mentions reporting on ALL node: FROM stages. The recommendation is **final stage only** -- builder stage memory is ephemeral and flagging every stage creates noise for multi-stage builds. Resolve during Phase 2 implementation.
 
-- **`when-let` vs. simpler signature idiom**: FEATURES.md recommends the `when-let` macro as the signature snippet, which uses backquote/unquote syntax. PITFALLS.md cautions against backquote in code blocks (readability). The implementation phase should resolve this by testing both options at the rendered viewport width. A simpler CLOS example may be the better signature idiom if `when-let` reads poorly in the two-column grid.
-
-- **Blog post editorial decisions**: ARCHITECTURE.md identifies 7 blog post locations containing "25 languages." The Kubernetes observability blog post (`building-kubernetes-observability-stack.mdx`) is a cross-reference to the Beauty Index — updating it is straightforward. The main `the-beauty-index.mdx` post may benefit from a paragraph acknowledging Lisp's addition as a milestone (25th vs. 26th language). This is an editorial choice for Phase 3, not a research gap.
+- **Sample Dockerfile update:** ARCHITECTURE.md notes the current sample uses `FROM ubuntu:latest` with `USER root`, which cannot trigger PG011 (USER exists) or PG012 (not a node image). Both research files agree to leave the sample unchanged. Users will see these rules on their own Dockerfiles. Consider adding a second sample in a future milestone if usage data warrants it.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct inspection of `node_modules/@shikijs/langs/dist/common-lisp.mjs`, `scheme.mjs`, `lisp.mjs` — grammar availability verified
-- Direct codebase analysis: `src/data/beauty-index/languages.json`, `code-features.ts`, `snippets.ts`, `justifications.ts`, `schema.ts`, `tiers.ts` — architecture and data model
-- Direct codebase analysis: `src/pages/beauty-index/index.astro`, `[slug].astro`, `code/index.astro`, `vs/[slug].astro` — hardcoded count locations
-- Direct codebase analysis: `src/lib/og-image.ts`, `BeautyIndexJsonLd.astro`, `src/pages/llms.txt.ts`, `llms-full.txt.ts` — structured data and LLM-facing files
+- Direct codebase inspection of `types.ts`, `rules/index.ts`, `engine.ts`, `scorer.ts`, `[code].astro`, `related.ts`, and 8 existing rule implementations (DL3002, DL3006, DL3007, DL3059, PG006, PG007, PG009, PG010)
+- `dockerfile-ast` npm package ^0.7.1 -- TypeScript types confirmed via `import type { Dockerfile } from 'dockerfile-ast'`
+- [Hadolint issue #1089](https://github.com/hadolint/hadolint/issues/1089) -- Missing USER feature request (open)
+- [Hadolint issue #1025](https://github.com/hadolint/hadolint/issues/1025) -- Missing USER feature request (open)
+- [Hadolint DL3002 wiki](https://github.com/hadolint/hadolint/wiki/DL3002) -- Confirms DL3002 only flags explicit `USER root`
+- [platformatic/node-caged GitHub](https://github.com/platformatic/node-caged) -- V8 pointer compression images, variants, constraints
+- [CIS Docker Benchmark V1.6.0 Section 4.1](https://hub.powerpipe.io/mods/turbot/steampipe-mod-docker-compliance/benchmarks/control.cis_v160_4_1) -- USER directive requirement
 
 ### Secondary (MEDIUM confidence)
-- [Paul Graham - What Made Lisp Different](https://paulgraham.com/diff.html) — historical and aesthetic context for scores
-- [Peter Seibel - Beyond Exception Handling: Conditions and Restarts](https://gigamonkeys.com/book/beyond-exception-handling-conditions-and-restarts.html) — condition system justification
-- [Richard Gabriel - Patterns of Software](https://www.dreamsongs.com/Files/PatternsOfSoftware.pdf) — Gamma/habitability score rationale
-- [Clojure.org - Differences with other Lisps](https://clojure.org/reference/lisps) — Lisp-vs-Clojure differentiation
-- [Shiki Languages](https://shiki.style/languages) — grammar availability
-- Common Lisp community tooling survey (2025) — Psi score calibration
+- [Platformatic blog: Halving Node.js Memory](https://blog.platformatic.dev/we-cut-nodejs-memory-in-half) -- ~50% memory savings, 2-4% latency benchmarks
+- [Vinta Software: node-caged validation](https://www.vintasoftware.com/lessons-learned/node-caged-can-get-up-to-50-memory-reduction-in-nodejs-with-pointer-compression) -- Independent confirmation of memory savings
+- [Snyk Docker Security Best Practices](https://snyk.io/blog/10-docker-image-security-best-practices/) -- Missing USER as top security concern
+- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) -- Authoritative security guidance
 
 ### Tertiary (LOW confidence)
-- Stack Overflow Developer Survey 2025 — community size for Psi calibration
-- Community comparisons of Clojure vs. Common Lisp — secondary calibration, not primary source
+- [Hadolint PR #1032](https://github.com/hadolint/hadolint/pull/1032) -- DL3063 implementation (default: ignore) -- confirms the severity calibration challenge
+- Platformatic benchmarks for P99 latency (7% improvement) -- single-source claim, needs independent validation
 
 ---
-*Research completed: 2026-03-01*
+*Research completed: 2026-03-02*
 *Ready for roadmap: yes*

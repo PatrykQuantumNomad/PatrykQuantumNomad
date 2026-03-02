@@ -1,319 +1,361 @@
-# Architecture Patterns
+# Architecture Research
 
-**Domain:** Adding Lisp (26th language) to the Beauty Index
-**Researched:** 2026-03-01
+**Domain:** Dockerfile Analyzer -- Rule Expansion (PG011, PG012)
+**Researched:** 2026-03-02
+**Confidence:** HIGH
 
-## Recommended Architecture
+## System Overview
 
-No new architecture needed. Lisp integrates into the existing data-driven architecture by adding entries to existing data files and updating hardcoded count strings. The system is designed for language additions -- all rendering is dynamic from the `languages` content collection.
-
-### Language ID Convention
-
-Use `lisp` as the language ID. Convention analysis:
-
-| Language | ID | Pattern |
-|----------|-----|---------|
-| C# | `csharp` | Spelled-out name |
-| C++ | `cpp` | Common abbreviation |
-| F# | `fsharp` | Spelled-out name |
-| JavaScript | `javascript` | Full lowercase |
-| Clojure | `clojure` | Full lowercase (already a Lisp dialect) |
-
-**Recommendation: `lisp`** -- simple, follows the lowercase single-word convention. Since Clojure already uses `clojure` (not `clojure-lisp`), and the entry represents the Common Lisp/Scheme family broadly, `lisp` is the correct ID. This also matches Shiki's language identifier for syntax highlighting (`lisp`).
-
-**Display name: "Lisp"** -- matches the family name. The `paradigm` field can clarify: `"functional, homoiconic, multi-paradigm"`.
-
-### Component Boundaries
-
-| Component | Responsibility | Impact of Adding Lisp |
-|-----------|---------------|----------------------|
-| `src/data/beauty-index/languages.json` | Language entries with scores | Add 1 JSON object |
-| `src/data/beauty-index/snippets.ts` | Signature code snippets | Add 1 keyed entry |
-| `src/data/beauty-index/justifications.ts` | Per-dimension editorial text | Add 1 keyed entry (6 justifications) |
-| `src/data/beauty-index/code-features.ts` | 10 features x N languages | Add `lisp` to `ALL_LANGS`, add up to 10 snippets |
-| `src/lib/beauty-index/schema.ts` | Zod validation schema | **No changes needed** -- schema is generic |
-| `src/lib/beauty-index/dimensions.ts` | 6 dimension definitions | **No changes needed** |
-| `src/lib/beauty-index/tiers.ts` | Tier boundaries + colors | **No changes needed** |
-| `src/lib/beauty-index/radar-math.ts` | SVG chart math | **No changes needed** -- works with any `values.length` |
-| `src/content.config.ts` | Collection definitions | **No changes needed** -- uses `file()` loader |
-| Pages (`[slug].astro`, `vs/[slug].astro`) | Dynamic route generation | **Auto-generated** from collection |
-| OG images (`open-graph/beauty-index/`) | Build-time PNG generation | **Auto-generated** from collection |
-
-### Data Flow
+The existing Dockerfile Analyzer follows a clean plugin-style architecture where each lint rule is a self-contained TypeScript module. Adding new rules requires exactly three touchpoints: create the rule file, register it in the index, and verify the dynamic documentation route picks it up.
 
 ```
-languages.json (source of truth)
-      |
-      v
-content.config.ts (file() loader + Zod validation)
-      |
-      v
-getCollection('languages') (Astro content layer)
-      |
-      +---> [slug].astro (26 detail pages, auto-generated)
-      +---> vs/[slug].astro (650 comparison pages: 26x25, auto-generated)
-      +---> index.astro (overview: bar chart, scoring table, radar grid)
-      +---> code/index.astro (code comparison, reads CODE_FEATURES)
-      +---> justifications/index.astro (editorial justifications)
-      +---> open-graph/beauty-index/[slug].png.ts (26 OG images)
-      +---> open-graph/beauty-index/vs/[slug].png.ts (650 OG images)
-      +---> open-graph/beauty-index.png.ts (overview OG image)
-      +---> llms.txt.ts / llms-full.txt.ts (LLM-readable summaries)
-      +---> BeautyIndexJsonLd.astro (structured data)
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Rule Layer (one file per rule)               │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ DL3002   │  │ PG007    │  │ PG011    │  │ PG012    │  ...       │
+│  │ no-root  │  │ uid/gid  │  │ NEW      │  │ NEW      │           │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘           │
+│       │              │              │              │                │
+├───────┴──────────────┴──────────────┴──────────────┴────────────────┤
+│                   Registry (rules/index.ts)                         │
+│  allRules[], getRuleById(), getRuleSeverity(), getRuleCategory()    │
+├─────────────────────────────────────────────────────────────────────┤
+│            Engine (engine.ts) + Scorer (scorer.ts)                  │
+│  runRuleEngine() iterates allRules → collects violations → scores  │
+├─────────────────────────────────────────────────────────────────────┤
+│                    Documentation Layer                               │
+│  [code].astro dynamic route → getStaticPaths() reads allRules      │
+│  related.ts → getRelatedRules() groups by category                 │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key insight:** The dynamic pages (`[slug].astro`, `vs/[slug].astro`, OG image routes) all use `getCollection('languages')` and iterate over the result. Adding an entry to `languages.json` automatically creates the new detail page, all VS comparison pages, and the OG image. No page file modifications needed for routing.
+### Component Responsibilities
 
-## File-by-File Integration Plan
+| Component | Responsibility | Integration Impact for PG011/PG012 |
+|-----------|----------------|-------------------------------------|
+| Rule file (e.g. `PG011-*.ts`) | Implements `LintRule` interface: metadata + `check()` function | **NEW FILE** -- primary work |
+| `rules/index.ts` | Flat registry of all rules, lookup helpers | **MODIFY** -- add 2 imports + 2 array entries |
+| `rules/related.ts` | Groups same-category rules for cross-linking | **NO CHANGE** -- uses `allRules` dynamically |
+| `engine.ts` | Iterates `allRules`, calls `check()`, sorts violations | **NO CHANGE** -- reads `allRules` from index |
+| `scorer.ts` | Weighted scoring with diminishing returns per category | **NO CHANGE** -- reads `allRules` from index |
+| `parser.ts` | Wraps `dockerfile-ast` into `ParseResult` | **NO CHANGE** -- rules use AST directly |
+| `types.ts` | `LintRule`, `RuleViolation`, `RuleCategory`, etc. | **NO CHANGE** -- existing types sufficient |
+| `[code].astro` | Dynamic route generating docs per rule | **NO CHANGE** -- `getStaticPaths()` reads `allRules` |
+| `sample-dockerfile.ts` | Default sample shown in the analyzer UI | **NO CHANGE** -- see rationale below |
 
-### Phase 1: Core Data (must be done together, order matters)
+## Files: New vs Modified
 
-**1. `src/data/beauty-index/languages.json`** -- ADD ENTRY
+### Files to CREATE (2)
 
-Add a new object to the JSON array. Position in array does not matter (pages sort by score). Required fields per Zod schema:
-
-```json
-{
-  "id": "lisp",
-  "name": "Lisp",
-  "phi": <1-10>,
-  "omega": <1-10>,
-  "lambda": <1-10>,
-  "psi": <1-10>,
-  "gamma": <1-10>,
-  "sigma": <1-10>,
-  "tier": "<workhorses|practical|handsome|beautiful>",
-  "characterSketch": "<editorial character sketch>",
-  "year": 1958,
-  "paradigm": "functional, homoiconic, multi-paradigm"
-}
+```
+src/lib/tools/dockerfile-analyzer/rules/
+├── security/
+│   └── PG011-missing-user-directive.ts    # NEW -- missing USER directive
+└── efficiency/
+    └── PG012-node-pointer-compression.ts  # NEW -- Node.js pointer compression
 ```
 
-The `tier` field must match the total score against tier boundaries:
-- beautiful: 48-60
-- handsome: 40-47
-- practical: 32-39
-- workhorses: 6-31
+### Files to MODIFY (1)
 
-**Build validation:** Zod schema in `schema.ts` validates all fields at build time. A wrong tier-score mismatch won't be caught by schema (tier is independent enum), but the UI will display inconsistently.
+```
+src/lib/tools/dockerfile-analyzer/rules/index.ts   # Add imports + array entries
+```
 
-**2. `src/data/beauty-index/snippets.ts`** -- ADD ENTRY
+### Files that AUTO-ADAPT (no changes needed) (4)
 
-Add a `lisp` key to the `SNIPPETS` record. The Shiki language identifier for Common Lisp syntax highlighting is `lisp`. Example:
+```
+src/lib/tools/dockerfile-analyzer/engine.ts         # Reads allRules dynamically
+src/lib/tools/dockerfile-analyzer/scorer.ts         # Reads allRules dynamically
+src/lib/tools/dockerfile-analyzer/rules/related.ts  # Reads allRules dynamically
+src/pages/tools/dockerfile-analyzer/rules/[code].astro  # getStaticPaths() reads allRules
+```
+
+### Files NOT modified (1)
+
+```
+src/lib/tools/dockerfile-analyzer/sample-dockerfile.ts  # See rationale below
+```
+
+**Sample Dockerfile rationale:** The current sample uses `FROM ubuntu:latest` and ends with `USER root`. PG011 only fires when there is NO `USER` directive at all (DL3002 handles `USER root`). PG012 only fires for `node:` images. Since the sample already triggers many existing rules and cannot trigger both new rules without a confusing rewrite, leave it unchanged. Users will see PG011/PG012 when they analyze their own Dockerfiles.
+
+## Architectural Patterns
+
+### Pattern 1: Self-Contained Rule Module
+
+**What:** Each rule is a single exported `const` implementing `LintRule`. It owns its metadata (id, title, severity, category, explanation, fix examples) and its detection logic (`check()` function).
+
+**When to use:** Every new rule follows this pattern. No exceptions.
+
+**Trade-offs:** Maximizes isolation (one rule cannot break another) at the cost of some duilerplate structure.
+
+**Example -- PG011 skeleton:**
+```typescript
+import type { Dockerfile } from 'dockerfile-ast';
+import type { LintRule, RuleViolation } from '../../types';
+
+export const PG011: LintRule = {
+  id: 'PG011',
+  title: 'Add a USER directive to avoid running as root',
+  severity: 'warning',
+  category: 'security',
+  explanation: '...',
+  fix: {
+    description: '...',
+    beforeCode: '...',
+    afterCode: '...',
+  },
+  check(dockerfile: Dockerfile, rawText: string): RuleViolation[] {
+    const violations: RuleViolation[] = [];
+    // Detection logic here
+    return violations;
+  },
+};
+```
+
+### Pattern 2: Final-Stage Scoping
+
+**What:** Many rules scope detection to the final build stage by finding the last `FROM` instruction and only inspecting instructions after it. This avoids false positives in builder stages.
+
+**When to use:** Both PG011 and PG012 need this. A missing `USER` in a builder stage is irrelevant. Pointer compression advice only matters for the runtime stage.
+
+**Trade-offs:** Slightly more complex `check()` logic, but critical for multi-stage Dockerfile accuracy.
+
+**Example -- final stage detection (used by DL3002, PG007, PG008, PG010):**
+```typescript
+const froms = dockerfile.getFROMs();
+if (froms.length === 0) return violations;
+
+const lastFrom = froms.at(-1);
+if (!lastFrom) return violations;
+const lastFromLine = lastFrom.getRange().start.line;
+
+// Filter instructions to only those in the final stage
+const finalStageInstructions = dockerfile.getInstructions().filter(
+  (inst) => inst.getRange().start.line > lastFromLine,
+);
+```
+
+### Pattern 3: Registry-Driven Auto-Discovery
+
+**What:** The `allRules` array in `rules/index.ts` is the single source of truth. Every downstream consumer (engine, scorer, related rules, documentation pages) reads from this array. Adding a rule to the array instantly makes it available everywhere.
+
+**When to use:** Always -- this is the integration mechanism.
+
+**Trade-offs:** Manual import/registration required (no filesystem auto-discovery), but this is intentional: it keeps the dependency graph explicit and tree-shakeable.
+
+## Data Flow
+
+### Rule Execution Flow
+
+```
+User pastes Dockerfile
+    |
+    v
+DockerfileParser.parse(rawText) --> Dockerfile AST
+    |
+    v
+runRuleEngine(ast, rawText)
+    |
+    v
+for each rule in allRules:          <-- PG011, PG012 join here
+    rule.check(ast, rawText)
+    |
+    v
+    RuleViolation[]
+    |
+    v
+Sort violations by line/column
+    |
+    v
+computeScore(violations)
+    |
+    +-> Category-weighted scoring (security=30%, efficiency=25%, ...)
+    +-> Diminishing returns per category
+    |
+    v
+AnalysisResult { violations, score }
+    |
+    v
+UI renders violations + score
+```
+
+### Documentation Route Flow
+
+```
+Astro build (getStaticPaths)
+    |
+    v
+allRules.map(rule => ({ params: { code: rule.id.toLowerCase() } }))
+    |                                           |
+    v                                           v
+/tools/dockerfile-analyzer/rules/pg011/    /tools/dockerfile-analyzer/rules/pg012/
+    |
+    v
+getRelatedRules(rule.id) --> same-category rules for cross-linking
+```
+
+## Detailed Integration Plan
+
+### PG011: Missing USER Directive
+
+**Category:** `security` (same as DL3002, PG007)
+**Severity:** `warning`
+**File:** `src/lib/tools/dockerfile-analyzer/rules/security/PG011-missing-user-directive.ts`
+
+**Relationship to existing rules:**
+- **DL3002** flags `USER root` as the last USER instruction. It explicitly does NOT flag missing USER (see DL3002 line 40-42: "No USER instruction in final stage -- do NOT flag (DL3002 only flags explicit USER root)").
+- **PG007** flags `useradd`/`groupadd` without explicit UID/GID.
+- **PG011** fills the gap: it flags Dockerfiles that have NO `USER` directive at all in the final stage.
+
+**Detection logic outline:**
+1. Find the final build stage (last `FROM`).
+2. Scan for any `USER` instruction after the last `FROM`.
+3. If no `USER` instruction exists, flag on the last `FROM` instruction (or the last `CMD`/`ENTRYPOINT`).
+4. Edge cases to handle:
+   - Multi-stage builds: only check the final stage.
+   - `FROM scratch` should not trigger this rule (no shell, no user table).
+   - Base images that include built-in non-root users (e.g., some `node` image variants) cannot be detected via static analysis. Flag anyway with an appropriately worded message.
+
+**Scoring impact:** Security category (weight 30%). A `warning` severity deducts 8 base points from the security category score. This is appropriate -- missing USER is a significant security concern per CIS Docker Benchmark 4.1.
+
+### PG012: Node.js Pointer Compression
+
+**Category:** `efficiency`
+**Severity:** `info`
+**File:** `src/lib/tools/dockerfile-analyzer/rules/efficiency/PG012-node-pointer-compression.ts`
+
+**Detection logic outline:**
+1. Find the final build stage (last `FROM`).
+2. Check if the base image is Node.js-based by inspecting the FROM instruction's image name for `node:` references.
+3. If Node.js detected, check whether pointer compression or memory tuning is addressed:
+   - Look for `FROM platformatic/node-caged` (pre-compiled with pointer compression).
+   - Look for `ENV NODE_OPTIONS` containing `--max-old-space-size`.
+4. If none found, emit an informational suggestion about pointer compression and memory tuning.
+
+**Key technical context:**
+- Pointer compression is a V8 compile-time flag (`--experimental-enable-pointer-compression`), not a runtime flag. Official Node.js builds do not include it yet.
+- The practical advice is: consider `platformatic/node-caged` images for ~50% memory reduction, OR explicitly set `ENV NODE_OPTIONS="--max-old-space-size=..."` to control heap sizing within container memory limits.
+- This is `info` severity because it is a performance recommendation, not a correctness issue.
+
+**Scoring impact:** Efficiency category (weight 25%). An `info` severity deducts only 3 base points. Minimal impact on overall score.
+
+### index.ts Modifications
+
+**Exact changes needed:**
 
 ```typescript
-lisp: {
-  lang: 'lisp',
-  label: 'Recursive macros',
-  code: `(defmacro when (test &body body)
-  \`(if ,test
-       (progn ,@body)))
+// Add to security imports section (after PG010 import):
+import { PG011 } from './security/PG011-missing-user-directive';
 
-(defun factorial (n)
-  (if (<= n 1)
-      1
-      (* n (factorial (1- n)))))`,
-},
+// Add to efficiency imports section (after DL3019 import):
+import { PG012 } from './efficiency/PG012-node-pointer-compression';
+
+// Add to allRules array -- security section (after PG010):
+  PG010,
+  PG011,      // <-- NEW
+
+// Add to allRules array -- efficiency section (after DL3019):
+  DL3019,
+  PG012,      // <-- NEW
+
+// Update comment counts:
+// Security rules (14) --> Security rules (15)
+// Efficiency rules (8) --> Efficiency rules (9)
 ```
 
-**Shiki support:** Shiki (used by astro-expressive-code) supports `lisp` as a language identifier. This covers Common Lisp syntax. If Scheme-specific highlighting is needed, `scheme` is also available, but `lisp` is the correct choice for representing the Lisp family.
+## Anti-Patterns
 
-**3. `src/data/beauty-index/justifications.ts`** -- ADD ENTRY
+### Anti-Pattern 1: Overlapping Detection with DL3002
 
-Add a `lisp` key with justifications for all 6 dimensions (`phi`, `omega`, `lambda`, `psi`, `gamma`, `sigma`). Text may contain HTML (`<em>`, `<code>`). Example structure:
+**What people do:** Have PG011 also flag `USER root` as "missing proper user."
+**Why it's wrong:** DL3002 already covers `USER root`. Double-flagging the same issue inflates the violation count and confuses users.
+**Do this instead:** PG011 must ONLY fire when there is NO `USER` directive in the final stage. If any `USER` directive exists (even `USER root`), PG011 stays silent and lets DL3002 handle it. The DL3002 source code explicitly documents this boundary at line 40-42.
 
-```typescript
-lisp: {
-  phi: 'Parentheses create a uniform tree structure...',
-  omega: 'Homoiconicity means code is data...',
-  lambda: 'S-expressions are transparent...',
-  psi: 'A small but deeply devoted community...',
-  gamma: 'Macros enable organic extension...',
-  sigma: 'The oldest surviving design philosophy...',
-},
-```
+### Anti-Pattern 2: Over-Broad Node.js Detection for PG012
 
-**4. `src/data/beauty-index/code-features.ts`** -- ADD TO ALL_LANGS + ADD SNIPPETS
+**What people do:** Try to detect Node.js usage by scanning `RUN npm install` or `CMD ["node", ...]` in any stage.
+**Why it's wrong:** Builder stages commonly use Node.js for building but ship a different runtime (e.g., nginx for SPAs). Flagging builder stages creates noise.
+**Do this instead:** Only check the FROM instruction of the final stage for `node:` image references. This is the authoritative signal that Node.js is the runtime.
 
-Two changes required:
+### Anti-Pattern 3: Hardcoding Rule IDs in Related Rules
 
-a) Add `'lisp'` to the `ALL_LANGS` array (line 29-34):
-```typescript
-const ALL_LANGS = [
-  'haskell', 'rust', 'elixir', 'kotlin', 'swift', 'python', 'ruby',
-  'typescript', 'scala', 'clojure', 'fsharp', 'ocaml', 'go', 'csharp',
-  'dart', 'julia', 'lua', 'zig', 'java', 'javascript', 'c', 'cpp',
-  'php', 'gleam', 'r', 'lisp',
-] as const;
-```
+**What people do:** Manually wire PG011 as related to DL3002 in `related.ts`.
+**Why it's wrong:** The `getRelatedRules()` function already groups by category automatically. Since PG011 is in the `security` category, it will automatically appear as a related rule on DL3002, DL3007, PG001, etc.
+**Do this instead:** Trust the existing category-based grouping. No changes to `related.ts` needed.
 
-b) Add `lisp` snippets to each of the 10 feature objects (`variableDeclaration`, `ifElse`, `loops`, `functions`, `structs`, `patternMatching`, `errorHandling`, `stringInterpolation`, `listOperations`, `signatureIdiom`). Each snippet is optional -- `undefined` means "Feature not natively supported" is displayed.
+## Integration Points
 
-Lisp should have snippets for most features. Notable considerations:
-- **Variable Declaration**: `defvar`, `defparameter`, `let` bindings
-- **If/Else**: `if`, `cond`, `when`
-- **Loops**: `loop`, `do`, `mapcar` (functional iteration)
-- **Functions**: `defun`, `lambda`
-- **Structs**: `defstruct`, `defclass` (CLOS)
-- **Pattern Matching**: Lisp doesn't have native pattern matching (use `cond`/`typecase`), or mark as unsupported
-- **Error Handling**: `handler-case`, `restart-case` (condition system)
-- **String Interpolation**: Lisp lacks native string interpolation (`format` instead), mark as unsupported or show `format`
-- **List Operations**: `mapcar`, `remove-if-not`, `reduce` -- Lisp's strength
-- **Signature Idiom**: Macros -- the quintessential Lisp feature
+### Internal Boundaries
 
-### Phase 2: Hardcoded Count Updates (25 -> 26)
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| Rule file --> types.ts | Implements `LintRule` interface | Types are stable; no changes needed |
+| Rule file --> index.ts | Import + array registration | Only manual step for integration |
+| index.ts --> engine.ts | `allRules` array consumed | Automatic via import |
+| index.ts --> scorer.ts | `allRules` array consumed (for rule lookup) | Automatic via import |
+| index.ts --> related.ts | `allRules` array consumed (for category grouping) | Automatic via import |
+| index.ts --> [code].astro | `allRules` array consumed (for static path generation) | Automatic via import |
 
-Every hardcoded "25" that refers to the language count must be updated to "26". Every derived count (150 justifications = 25x6, 250 code blocks = 25x10, 600 VS pages = 25x24) must also be updated.
+### dockerfile-ast API Used by Rules
 
-**CRITICAL: Complete list of hardcoded "25 languages" references to update:**
+| API Method | Used By Existing Rules | PG011 Needs | PG012 Needs |
+|------------|------------------------|-------------|-------------|
+| `dockerfile.getFROMs()` | DL3002, PG008, PG010 | YES (final stage detection) | YES (image name detection) |
+| `dockerfile.getInstructions()` | DL3002, PG007, PG008 | YES (scan for USER) | YES (scan for ENV) |
+| `inst.getKeyword()` | All rules | YES (filter USER instructions) | YES (filter FROM, ENV) |
+| `inst.getArgumentsContent()` | All rules | YES (read user name) | YES (read image name, env values) |
+| `inst.getRange()` | All rules | YES (line reporting) | YES (line reporting) |
 
-| File | Line | Current Text | New Text |
-|------|------|-------------|----------|
-| `src/pages/beauty-index/index.astro` | 30 | `"...ranks 25 programming languages..."` | `"...ranks 26 programming languages..."` |
-| `src/pages/beauty-index/index.astro` | 32 | `"...Ranking 25 programming languages..."` | `"...Ranking 26 programming languages..."` |
-| `src/pages/beauty-index/index.astro` | 47 | `Ranking 25 programming languages` | `Ranking 26 programming languages` |
-| `src/pages/beauty-index/index.astro` | 124 | `Ranking 25 Programming Languages` | `Ranking 26 Programming Languages` |
-| `src/pages/beauty-index/[slug].astro` | 4 | `Generates 25 static pages` (comment) | `Generates 26 static pages` |
-| `src/pages/beauty-index/[slug].astro` | 80 | `among 25 programming languages` | `among 26 programming languages` |
-| `src/pages/beauty-index/code/index.astro` | 5 | `for all 25 languages. All 250 code blocks` (comment) | `for all 26 languages. All 260 code blocks` |
-| `src/pages/beauty-index/code/index.astro` | 29 | `"Compare how 25 programming languages..."` | `"Compare how 26 programming languages..."` |
-| `src/pages/beauty-index/code/index.astro` | 31 | `"...across 25 programming languages"` | `"...across 26 programming languages"` |
-| `src/pages/beauty-index/code/index.astro` | 39 | `See how 25 languages` | `See how 26 languages` |
-| `src/pages/beauty-index/justifications/index.astro` | 5 | `for all 25 languages` (comment) | `for all 26 languages` |
-| `src/pages/beauty-index/justifications/index.astro` | 31 | `"...25 languages, 6 dimensions, 150 justifications."` | `"...26 languages, 6 dimensions, 156 justifications."` |
-| `src/pages/beauty-index/justifications/index.astro` | 33 | `"...for 25 programming languages"` | `"...for 26 programming languages"` |
-| `src/pages/beauty-index/vs/[slug].astro` | 4 | `600 static pages (25 x 24)` (comment) | `650 static pages (26 x 25)` |
-| `src/pages/index.astro` | 181 | `25 programming languages ranked` | `26 programming languages ranked` |
-| `src/pages/llms.txt.ts` | 89 | `ranks 25 programming languages` | `ranks 26 programming languages` |
-| `src/pages/llms.txt.ts` | 94 | `25 languages compared` | `26 languages compared` |
-| `src/pages/llms.txt.ts` | 95 | `150 editorial justifications` | `156 editorial justifications` |
-| `src/pages/llms-full.txt.ts` | 143 | `ranking of 25 programming languages` | `ranking of 26 programming languages` |
-| `src/pages/llms-full.txt.ts` | 184 | `600 comparison pages available (25 x 24)` | `650 comparison pages available (26 x 25)` |
-| `src/lib/og-image.ts` | 618 | `Ranking 25 programming languages` | `Ranking 26 programming languages` |
-| `src/components/BeautyIndexJsonLd.astro` | 5 | `list all 25 languages` (comment) | `list all 26 languages` |
-| `src/components/BeautyIndexJsonLd.astro` | 23 | `"Ranking 25 programming languages..."` | `"Ranking 26 programming languages..."` |
-| `src/components/beauty-index/RankingBarChart.astro` | 84 | `all 25 languages sorted` | `all 26 languages sorted` |
-| `src/components/beauty-index/FeatureMatrix.astro` | 4 | `25-row x 10-column` (comment) | `26-row x 10-column` |
-| `src/data/beauty-index/snippets.ts` | 12 | `all 25 Beauty Index languages` (comment) | `all 26 Beauty Index languages` |
-| `src/data/beauty-index/justifications.ts` | 2 | `all 25 Beauty Index languages` (comment) | `all 26 Beauty Index languages` |
-| `src/data/beauty-index/code-features.ts` | 28 | `All 25 language IDs` (comment) | `All 26 language IDs` |
-| `src/data/beauty-index/code-features.ts` | 3025 | `up to 25 languages` (comment) | `up to 26 languages` |
+## Build Order
 
-**Blog post references (editorial decision needed):**
+Both rules can be built in parallel since they are independent. The recommended sequence accounts for review efficiency and dependency validation:
 
-| File | Line | Current Text | Decision |
-|------|------|-------------|----------|
-| `src/data/blog/the-beauty-index.mdx` | 3 | `ranks 25 programming languages` | Update to 26 |
-| `src/data/blog/the-beauty-index.mdx` | 16 | (long line, references 25) | Update to 26 |
-| `src/data/blog/the-beauty-index.mdx` | 30 | `ranking of 25 programming languages` | Update to 26 |
-| `src/data/blog/the-beauty-index.mdx` | 36 | `25 languages scored` | Update to 26 |
-| `src/data/blog/the-beauty-index.mdx` | 227 | (references 25 languages) | Update to 26 |
-| `src/data/blog/the-beauty-index.mdx` | 229 | `all 25 languages` | Update to 26 |
-| `src/data/blog/building-kubernetes-observability-stack.mdx` | 173 | `25 languages are scored` | Update to 26 |
+### Phase 1: PG011 -- Missing USER Directive (build first)
 
-### Phase 3: No Changes Needed (Auto-Generated)
+**Rationale:** PG011 is a straightforward security rule with well-established prior art (CIS Docker Benchmark 4.1). The detection logic is simple (absence check), but the relationship to DL3002 must be carefully validated. Building this first establishes that the DL3002 boundary is respected.
 
-These files require **zero modifications** -- they dynamically derive from the collection:
+**Files touched:**
+1. CREATE `src/lib/tools/dockerfile-analyzer/rules/security/PG011-missing-user-directive.ts`
+2. MODIFY `src/lib/tools/dockerfile-analyzer/rules/index.ts` (add PG011 import + entry)
 
-- `src/pages/beauty-index/[slug].astro` -- `getStaticPaths()` iterates `getCollection('languages')`, auto-generates `/beauty-index/lisp/`
-- `src/pages/beauty-index/vs/[slug].astro` -- Double loop generates all pairs, auto-creates 50 new VS pages (25 existing + lisp, lisp + 25 existing)
-- `src/pages/open-graph/beauty-index/[slug].png.ts` -- Auto-generates `/open-graph/beauty-index/lisp.png`
-- `src/pages/open-graph/beauty-index/vs/[slug].png.ts` -- Auto-generates 50 new VS OG images
-- `src/pages/beauty-index/index.astro` -- Overview dynamically renders all languages (bar chart, table, grid all use `sorted` array from collection)
-- `src/components/beauty-index/ScoringTable.astro` -- Renders from props
-- `src/components/beauty-index/LanguageGrid.astro` -- Renders from props
-- `src/components/beauty-index/RadarChart.astro` -- Renders from single language prop
-- `src/components/beauty-index/OverlayRadarChart.astro` -- Renders from two language props
-- `src/components/beauty-index/VsComparePicker.tsx` -- Receives language list from parent
-- `src/components/beauty-index/LanguageFilter.tsx` -- Receives language list from parent
-- `src/components/beauty-index/FeatureMatrix.astro` -- Reads from `languages.json` directly (sorted alphabetically)
-- `src/content.config.ts` -- Generic `file()` loader, no count awareness
+**Verification:**
+- Dockerfile with NO `USER` directive: PG011 should fire.
+- Dockerfile with `USER root`: only DL3002 should fire, NOT PG011.
+- Dockerfile with `USER node`: neither PG011 nor DL3002 should fire.
+- Dockerfile with `FROM scratch` and no USER: PG011 should NOT fire.
 
-## Patterns to Follow
+### Phase 2: PG012 -- Node.js Pointer Compression (build second)
 
-### Pattern 1: Data-First Architecture
-**What:** All rendering derives from `languages.json`. Adding a language is purely a data operation plus count string updates.
-**When:** Always -- this is the existing pattern.
-**Example:** The `[slug].astro` page uses `getStaticPaths()` to iterate all languages. Adding a JSON entry automatically creates the page.
+**Rationale:** PG012 is more nuanced -- it requires Node.js image detection and knowledge of a cutting-edge optimization. Building it second allows full focus on the detection heuristics.
 
-### Pattern 2: Keyed Records for Optional Data
-**What:** `snippets.ts`, `justifications.ts`, and `code-features.ts` use `Record<string, T>` keyed by language ID. Missing keys are handled gracefully (show "not supported" or skip section).
-**When:** For all language-specific data that might not exist for every language.
-**Example:** If a code feature snippet is `undefined` for lisp, the code comparison page shows "Feature not natively supported" -- no crash.
+**Files touched:**
+1. CREATE `src/lib/tools/dockerfile-analyzer/rules/efficiency/PG012-node-pointer-compression.ts`
+2. MODIFY `src/lib/tools/dockerfile-analyzer/rules/index.ts` (add PG012 import + entry)
 
-### Pattern 3: Score-Based Sorting
-**What:** All display ordering uses `totalScore(b) - totalScore(a)` descending sort. Array position in `languages.json` is irrelevant.
-**When:** Rankings, navigation (prev/next), radar grids.
-**Example:** Lisp's position in `languages.json` does not affect display order. Its total score determines rank.
+**Verification:**
+- `FROM node:22` Dockerfile without `ENV NODE_OPTIONS`: PG012 should fire.
+- `FROM python:3.12` Dockerfile: PG012 should NOT fire.
+- `FROM platformatic/node-caged:25`: PG012 should NOT fire.
+- `FROM node:22` with `ENV NODE_OPTIONS="--max-old-space-size=1536"`: PG012 should NOT fire.
 
-### Pattern 4: Shiki Language Identifiers
-**What:** The `lang` field in snippets must match a Shiki grammar identifier for syntax highlighting.
-**When:** Every `CodeSnippet` object.
-**Example:** Use `lisp` (not `common-lisp` or `scheme`). Shiki supports `lisp` as a built-in grammar.
+### Phase 3: Verify Downstream (both rules together)
 
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Hardcoding Language Count in Dynamic Logic
-**What:** Using `25` as a number in calculations or conditionals.
-**Why bad:** Breaks silently when languages are added.
-**Instead:** The codebase already avoids this -- all dynamic logic uses `.length`, `sorted.length`, etc. The "25" references are only in human-readable strings, comments, and meta descriptions. Keep it that way.
-
-### Anti-Pattern 2: Adding Lisp Data Without ALL_LANGS Update
-**What:** Adding lisp snippets to code-features.ts but forgetting to add `'lisp'` to the `ALL_LANGS` const array.
-**Why bad:** `getFeatureSupport()` won't include lisp in its results, and the FeatureMatrix will not show the lisp row properly.
-**Instead:** Always update `ALL_LANGS` when adding a language to code-features.ts.
-
-### Anti-Pattern 3: Inconsistent ID Between Files
-**What:** Using `common-lisp` in one file and `lisp` in another.
-**Why bad:** Keyed lookups (`SNIPPETS[languageId]`, `JUSTIFICATIONS[languageId]`) will fail silently, returning `undefined`.
-**Instead:** Use `lisp` consistently across all files. The `id` field in `languages.json` is the canonical key.
-
-### Anti-Pattern 4: Mismatched Tier and Score
-**What:** Setting `"tier": "beautiful"` when the total score is 38 (which falls in "practical" range).
-**Why bad:** The Zod schema does not validate tier-score consistency. The detail page will show a "Beautiful" badge but the overview page groups by tier score, causing visual inconsistency.
-**Instead:** Calculate total score first, then assign tier based on boundaries: beautiful 48-60, handsome 40-47, practical 32-39, workhorses 6-31.
-
-## Build Order (Correct Dependency Sequence)
-
-```
-Step 1: languages.json        (content collection source -- must exist for build)
-Step 2: snippets.ts           (keyed by language ID from Step 1)
-Step 3: justifications.ts     (keyed by language ID from Step 1)
-Step 4: code-features.ts      (ALL_LANGS array + snippets, keyed by language ID)
-Step 5: Count string updates  (all hardcoded "25" -> "26" updates)
-Step 6: Blog post updates     (editorial "25" -> "26" references)
-Step 7: Build + verify        (astro build, check new pages render)
-```
-
-Steps 1-4 are data additions (no existing code modified, only new entries added).
-Step 5 is string replacements (existing text modified).
-Step 6 is editorial content updates.
-
-Steps 1-4 can technically be done in any order since they're all consumed at build time, but `languages.json` should be first because it defines the canonical ID and scores that inform the other files.
-
-## Scalability Considerations
-
-| Concern | At 26 languages | At 50 languages | At 100 languages |
-|---------|-----------------|-----------------|------------------|
-| Build time (VS pages) | 650 pages (26x25) | 2,450 pages (50x49) | 9,900 pages (100x99) |
-| Build time (VS OG images) | 650 PNGs via Satori | 2,450 PNGs -- **may need optimization** | 9,900 PNGs -- **will need pagination/lazy** |
-| Page load (overview) | 26 radar charts: fine | 50 charts: may need virtualization | 100 charts: needs virtualization |
-| `code-features.ts` file size | ~25K tokens: manageable | ~50K tokens: consider splitting | ~100K tokens: **must split** |
-
-At 26 languages, no scalability concerns exist. The quadratic VS page growth (N*(N-1)) is the first thing that will become a problem if languages continue to be added.
-
-## Clojure vs Lisp: Relationship Note
-
-Clojure is already in the Beauty Index with `id="clojure"` and `paradigm: "functional, Lisp dialect"`. Adding Lisp as a separate entry is valid because:
-
-1. Clojure is a modern JVM-hosted Lisp dialect with its own distinct characteristics (persistent data structures, STM, Java interop)
-2. "Lisp" (Common Lisp / Scheme family) represents the original 1958 language family with its own distinct beauty characteristics (condition system, CLOS, reader macros, historical significance)
-3. The existing codebase treats each language as independent -- no parent-child relationships in the schema
-
-The `characterSketch` and `justifications` for Lisp should acknowledge Clojure's existence as a descendant while focusing on what makes traditional Lisp distinctive.
+1. Confirm `getRelatedRules('PG011')` returns other security rules (DL3002, PG007, etc.).
+2. Confirm `getRelatedRules('PG012')` returns other efficiency rules (DL3059, DL3009, etc.).
+3. Confirm documentation pages generate at `/tools/dockerfile-analyzer/rules/pg011/` and `/tools/dockerfile-analyzer/rules/pg012/`.
+4. Confirm scoring: PG011 deducts from security (30% weight), PG012 from efficiency (25% weight).
+5. Confirm total rule count updates: security 14->15, efficiency 8->9, overall 44->46.
 
 ## Sources
 
-- Direct codebase analysis of all files listed above (HIGH confidence)
-- Shiki language grammar list (built-in `lisp` support): verified via Shiki documentation (HIGH confidence)
-- Astro content collections with `file()` loader: verified in `content.config.ts` (HIGH confidence)
+- CIS Docker Benchmark V1.6.0, Section 4.1: [Powerpipe Hub](https://hub.powerpipe.io/mods/turbot/steampipe-mod-docker-compliance/benchmarks/control.cis_v160_4_1)
+- Node.js TSC Discussion on Pointer Compression: [nodejs/TSC#790](https://github.com/nodejs/TSC/issues/790)
+- Platformatic node-caged (pointer compression Docker images): [GitHub](https://github.com/platformatic/node-caged)
+- "Halving Node.js Memory Usage" (Platformatic blog): [blog.platformatic.dev](https://blog.platformatic.dev/we-cut-nodejs-memory-in-half)
+- Node.js 20 Memory Management in Containers: [Red Hat Developer](https://developers.redhat.com/articles/2025/10/10/nodejs-20-memory-management-containers)
+- DL3002 source (explicit boundary comment at line 40-42): `src/lib/tools/dockerfile-analyzer/rules/security/DL3002-no-root-user.ts`
+- Existing codebase: all files in `src/lib/tools/dockerfile-analyzer/` reviewed directly
+
+---
+*Architecture research for: Dockerfile Analyzer rule expansion (PG011, PG012)*
+*Researched: 2026-03-02*
