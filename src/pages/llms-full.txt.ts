@@ -127,7 +127,7 @@ export async function GET(context: APIContext) {
   lines.push('### Dockerfile Analyzer');
   lines.push('URL: https://patrykgolabek.dev/tools/dockerfile-analyzer/');
   lines.push('Blog: https://patrykgolabek.dev/blog/dockerfile-best-practices/');
-  lines.push('40 validation rules across 5 categories:');
+  lines.push('46 validation rules across 5 categories:');
   lines.push('- Security: secret exposure in ENV/ARG, running as root, untagged base images');
   lines.push('- Efficiency: layer optimization, cache-friendly ordering, multi-stage builds');
   lines.push('- Maintainability: label metadata, pinned package versions');

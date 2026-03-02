@@ -74,7 +74,7 @@ export async function GET(context: APIContext) {
     '  Rules: https://patrykgolabek.dev/tools/compose-validator/rules/cv-c001/ (52 individual rule documentation pages)',
     '  Blog: https://patrykgolabek.dev/blog/docker-compose-best-practices/',
     '',
-    '- Dockerfile Analyzer: 40-rule engine analyzing Dockerfiles for security, efficiency, maintainability, reliability, and best-practice issues. Based on Hadolint DL codes plus custom production Kubernetes rules. Downloadable as a Claude Skill.',
+    '- Dockerfile Analyzer: 46-rule engine analyzing Dockerfiles for security, efficiency, maintainability, reliability, and best-practice issues. Based on Hadolint DL codes plus custom production Kubernetes rules. Downloadable as a Claude Skill.',
     '  URL: https://patrykgolabek.dev/tools/dockerfile-analyzer/',
     '  Rules: https://patrykgolabek.dev/tools/dockerfile-analyzer/rules/dl3006/ (individual rule documentation pages)',
     '  Blog: https://patrykgolabek.dev/blog/dockerfile-best-practices/',

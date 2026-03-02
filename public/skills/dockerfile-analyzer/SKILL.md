@@ -2,7 +2,7 @@
 name: dockerfile-analyzer
 description: >
   Analyze Dockerfiles for security vulnerabilities, efficiency issues, and
-  best-practice violations using 40 rules across 5 categories (security,
+  best-practice violations using 46 rules across 5 categories (security,
   efficiency, maintainability, reliability, best-practice). Scores Dockerfiles
   on a 0-100 scale with letter grades (A+ through F). Generates detailed fix
   recommendations with before/after code examples. Use when a user shares a
@@ -82,7 +82,7 @@ Diminishing returns: each additional violation in a category deducts less. Formu
 
 ## Rule Set
 
-### Security Rules (11 rules)
+### Security Rules (15 rules)
 
 #### DL3006 — Always tag the version of an image explicitly
 - **Severity:** warning
@@ -172,7 +172,39 @@ Diminishing returns: each additional violation in a category deducts less. Formu
 - **Before:** `FROM node:20-alpine`
 - **After:** `FROM node:20-alpine@sha256:1a2b3c...`
 
-### Efficiency Rules (8 rules)
+#### PG007 — Use explicit UID/GID for container users
+- **Severity:** warning
+- **Check:** `useradd` without `-u`/`--uid` or `groupadd` without `-g`/`--gid` in RUN instructions
+- **Why:** When useradd is called without -u, the system auto-assigns the next available UID. These IDs are non-deterministic and depend on the order of package installations. Rebuild the image after a base image update and the UID may change, breaking file ownership on persistent volumes. In Kubernetes, a mismatch between the image UID and securityContext.runAsUser causes permission errors at startup. Use explicit IDs above 10000 to avoid collisions with host system users and Linux reserved ranges.
+- **Fix:** Specify explicit UID and GID using -u/-g flags with values above 10000
+- **Before:** `RUN groupadd appgroup\nRUN useradd appuser`
+- **After:** `ARG uid=10001\nARG gid=10001\nRUN groupadd -g ${gid} appgroup && useradd -u ${uid} -g appgroup -s /bin/false appuser\nUSER appuser`
+
+#### PG009 — Remove unnecessary network tools from production images
+- **Severity:** warning
+- **Check:** Package-manager install commands that install network/debugging tools (curl, wget, netcat, nmap, telnet, ftp, ssh client, socat, tcpdump) in the final build stage without removing them
+- **Why:** Network utilities like curl, wget, and netcat expand the attack surface of a production container. If an attacker gains code execution, these tools allow downloading additional payloads, establishing reverse shells, or communicating with command-and-control servers. The CIS Docker Benchmark (Section 4.3) states: "Do not install unnecessary packages in containers."
+- **Fix:** Use a multi-stage build so network tools stay in the builder stage, or remove them after use
+- **Before:** `FROM ubuntu:22.04\nRUN apt-get update && apt-get install -y curl && curl -o app.tar.gz https://example.com/app.tar.gz\nCMD ["./app"]`
+- **After:** `FROM ubuntu:22.04 AS builder\nRUN apt-get update && apt-get install -y curl && curl -o app.tar.gz https://example.com/app.tar.gz\n\nFROM ubuntu:22.04\nCOPY --from=builder /app.tar.gz /app.tar.gz\nCMD ["./app"]`
+
+#### PG010 — Avoid using network tools in the final build stage
+- **Severity:** info
+- **Check:** RUN instructions in the final build stage that execute network tool binaries (curl, wget, nc, netcat, nmap, telnet, ftp, ssh, scp, socat, tcpdump) -- even if pre-installed in the base image
+- **Why:** Even when network tools are not explicitly installed (they may come pre-installed in the base image), their usage in the final stage indicates the production image will ship with these tools available. The CIS Docker Benchmark (Section 4.3) advises against keeping unnecessary packages in containers. Use a multi-stage build to confine network tool usage to a builder stage.
+- **Fix:** Move network tool usage to a builder stage and COPY artifacts into the final image
+- **Before:** `FROM node:22-bookworm\nRUN curl -fsSL https://bun.sh/install | bash\nCMD ["node", "server.js"]`
+- **After:** `FROM node:22-bookworm AS builder\nRUN curl -fsSL -o /tmp/install.sh https://bun.sh/install && bash /tmp/install.sh\n\nFROM node:22-slim\nCOPY --from=builder /root/.bun /root/.bun\nCMD ["node", "server.js"]`
+
+#### PG011 — Add a USER directive to avoid running as root
+- **Severity:** warning
+- **Check:** Final build stage has no USER instruction at all (not even `USER root`). Does NOT fire when any USER instruction exists in the final stage (defers to DL3002 for explicit `USER root` cases). Skips FROM scratch (no user system).
+- **Why:** When a Dockerfile has no USER instruction, the container runs as root (UID 0) by default. If an attacker exploits a vulnerability, they gain root access -- and in the event of a container escape, they become root on the host. The CIS Docker Benchmark (Section 4.1) and Kubernetes Pod Security Standards both require non-root containers. Unlike USER root (caught by DL3002), a missing USER directive is invisible -- there is no line to flag.
+- **Fix:** Add a non-root USER instruction after completing root-only setup tasks
+- **Before:** `FROM node:22-bookworm-slim\nWORKDIR /app\nCOPY . .\nCMD ["node", "server.js"]`
+- **After:** `FROM node:22-bookworm-slim\nRUN groupadd -g 10001 appgroup && useradd -u 10001 -g appgroup -s /bin/false appuser\nWORKDIR /app\nCOPY --chown=appuser:appgroup . .\nUSER appuser\nCMD ["node", "server.js"]`
+
+### Efficiency Rules (9 rules)
 
 #### DL3059 — Multiple consecutive RUN instructions
 - **Severity:** info
@@ -238,6 +270,14 @@ Diminishing returns: each additional violation in a category deducts less. Formu
 - **Before:** `RUN apk update && apk add curl`
 - **After:** `RUN apk add --no-cache curl`
 
+#### PG012 — Consider pointer compression for Node.js images
+- **Severity:** info
+- **Check:** Final build stage uses an official Docker Hub Node.js base image (node:* or library/node:*). Does NOT fire on custom registry images, non-node images, FROM scratch, or build stage alias references.
+- **Why:** V8 pointer compression shrinks every internal pointer from 64 bits to 32 bits. Since tagged values (mostly pointers) make up roughly 70% of all heap memory, this can reduce memory usage by approximately 50% for pointer-heavy Node.js workloads -- with no code changes. The platformatic/node-caged Docker image ships Node.js built with --experimental-enable-pointer-compression. Requires Node.js 25+ (with V8 IsolateGroups). 4GB per-isolate heap limit (Buffers don't count). N-API addons compatible but older V8 native addons may not work.
+- **Fix:** Replace the official Node.js base image with platformatic/node-caged
+- **Before:** `FROM node:22-bookworm-slim\nWORKDIR /app\nCOPY . .\nCMD ["node", "server.js"]`
+- **After:** `FROM platformatic/node-caged:25-slim\nWORKDIR /app\nCOPY . .\nCMD ["node", "server.js"]`
+
 ### Maintainability Rules (7 rules)
 
 #### DL4000 — MAINTAINER is deprecated
@@ -296,7 +336,7 @@ Diminishing returns: each additional violation in a category deducts less. Formu
 - **Before:** `CMD ["node", "server.js"]`
 - **After:** `HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD curl -f http://localhost:8080/health || exit 1` / `CMD ["node", "server.js"]`
 
-### Reliability Rules (5 rules)
+### Reliability Rules (6 rules)
 
 #### DL4003 — Multiple CMD instructions found
 - **Severity:** warning
@@ -335,6 +375,14 @@ Diminishing returns: each additional violation in a category deducts less. Formu
 - **Fix:** Give each build stage a unique alias
 - **Before:** `FROM node:20 AS build` / `FROM node:20 AS build`
 - **After:** `FROM node:20 AS build` / `FROM node:20 AS runtime`
+
+#### PG008 — Use an init process (tini) for proper signal handling and zombie reaping
+- **Severity:** info
+- **Check:** Final build stage has an ENTRYPOINT or CMD that runs a process without an init system (tini, dumb-init, or docker --init). Checks both JSON and shell form entrypoints.
+- **Why:** When your application runs as PID 1 inside a container, the kernel treats it differently: SIGTERM has no default handler and is silently ignored. This means `docker stop` and Kubernetes graceful shutdown signals do nothing -- the container hangs for the full terminationGracePeriodSeconds until killed with SIGKILL. PID 1 is also responsible for reaping zombie child processes. Without an init process, orphaned children accumulate as zombies until the PID table is exhausted.
+- **Fix:** Install tini and use it as the ENTRYPOINT
+- **Before:** `CMD ["node", "server.js"]`
+- **After:** `RUN apt-get update && apt-get install -y --no-install-recommends tini && rm -rf /var/lib/apt/lists/*\nENTRYPOINT ["/usr/bin/tini", "--"]\nCMD ["node", "server.js"]`
 
 ### Best Practice Rules (9 rules)
 
