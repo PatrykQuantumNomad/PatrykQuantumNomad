@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (25 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (26 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
 
 ## Reference Data
 
@@ -81,7 +81,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Floating parallax orbs behind category sections — v1.2
 - ✓ Magnetic pull effect on CTA buttons — v1.2
 - ✓ All v1.2 animations respect prefers-reduced-motion and touch device fallbacks — v1.2
-- ✓ Language data schema (languages.json) with Zod validation for 25 languages across 6 dimensions — v1.3
+- ✓ Language data schema (languages.json) with Zod validation for 26 languages across 6 dimensions — v1.3
 - ✓ Shared radar SVG math utility (radar-math.ts) for Astro components and OG images — v1.3
 - ✓ Content collection integration via Astro 5 file() loader for language data — v1.3
 - ✓ Greek symbol rendering with Noto Sans unicode-range fallback — v1.3
@@ -92,16 +92,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Overview page at /beauty-index/ with ranking chart, scoring table, and language grid — v1.3
 - ✓ Sortable scoring table with column header sort — v1.3
 - ✓ 4-tier visual grouping with color-coded sections — v1.3
-- ✓ 25 radar charts in overview grid linking to detail pages — v1.3
-- ✓ Per-language detail pages at /beauty-index/[slug]/ for all 25 languages — v1.3
+- ✓ 26 radar charts in overview grid linking to detail pages — v1.3
+- ✓ Per-language detail pages at /beauty-index/[slug]/ for all 26 languages — v1.3
 - ✓ Character sketch narrative per language — v1.3
 - ✓ Signature code snippet with syntax highlighting per language — v1.3
 - ✓ Navigation between languages and back to overview — v1.3
 - ✓ Code comparison page at /beauty-index/code/ with 10 feature-tabbed layout — v1.3
-- ✓ All 25 languages per tab with syntax-highlighted code blocks (240 total) — v1.3
+- ✓ All 26 languages per tab with syntax-highlighted code blocks (260 total) — v1.3
 - ✓ Tab-based lazy rendering with content-visibility: auto — v1.3
 - ✓ Feature support matrix table — v1.3
-- ✓ Build-time OG images with radar chart visuals for overview and all 25 language pages — v1.3
+- ✓ Build-time OG images with radar chart visuals for overview and all 26 language pages — v1.3
 - ✓ Download-as-image button via client-side SVG-to-PNG at 2x — v1.3
 - ✓ Web Share API on mobile, Clipboard API on desktop, text URL fallback — v1.3
 - ✓ Full Beauty Index methodology blog post as local MDX content — v1.3
@@ -219,6 +219,22 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - Updated counts (25→26) across overview, blog post, and site metadata
 - OG image generated for Lisp detail page
 
+**Validated Requirements:**
+- ✓ Lisp language entry in languages.json with scores, tier (Handsome/44), character sketch — v1.11
+- ✓ Lisp signature code snippet with common-lisp syntax highlighting — v1.11
+- ✓ 6 dimension justifications for Lisp differentiating from Clojure — v1.11
+- ✓ Lisp registered in ALL_LANGS constant — v1.11
+- ✓ 10 code comparison snippets for Lisp across all feature tabs — v1.11
+- ✓ CLOS (defclass/defgeneric/defmethod) for Structs tab — v1.11
+- ✓ Condition/restart system for Error Handling tab — v1.11
+- ✓ All hardcoded "25 languages" references updated to "26 languages" — v1.11
+- ✓ Blog posts updated from 25 to 26 language references — v1.11
+- ✓ OG image text updated from 25 to 26 — v1.11
+- ✓ JSON-LD structured data description updated to 26 languages — v1.11
+- ✓ LLMs.txt files updated with 26 languages and derived counts — v1.11
+- ✓ PROJECT.md updated with Lisp validated requirements — v1.11
+- ✓ Full production build passes with Lisp detail page, OG image, and 650 VS pages — v1.11
+
 ### Out of Scope
 
 - Cloning Astro Nano or any starter template — building custom from scratch (achieved in v1.0)
@@ -249,11 +265,11 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 Shipped v1.10 EDA Graphical Techniques NIST Parity on top of v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP. v1.11 (Cloud Architecture Patterns) was planned but abandoned before execution; version reused for Beauty Index: Lisp.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 requirements delivered (609 total). 951 pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 14 v1.11 requirements delivered (623 total). 951 pages total. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
-Beauty Index content pillar: 25 languages ranked across 6 aesthetic dimensions, with overview page, 25 detail pages, code comparison explorer (240 code blocks), and companion blog essay.
+Beauty Index content pillar: 26 languages ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.

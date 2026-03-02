@@ -3134,7 +3134,7 @@ const signatureIdiom: CodeFeature = {
 
 /**
  * All 10 code features for the comparison page.
- * Each feature contains code snippets for up to 25 languages.
+ * Each feature contains code snippets for up to 26 languages.
  */
 export const CODE_FEATURES: CodeFeature[] = [
   variableDeclaration,

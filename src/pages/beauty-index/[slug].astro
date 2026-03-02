@@ -1,7 +1,7 @@
 ---
 /**
  * [slug].astro — Language detail page for the Beauty Index.
- * Generates 25 static pages at /beauty-index/{id}/ using getStaticPaths.
+ * Generates 26 static pages at /beauty-index/{id}/ using getStaticPaths.
  * Each page shows a radar chart, score breakdown, tier badge, character sketch,
  * syntax-highlighted code snippet, and prev/next navigation.
  * Includes client-side JavaScript for SVG-to-PNG share controls.
@@ -77,7 +77,7 @@ const justifications = JUSTIFICATIONS[language.id];
 const total = totalScore(language);
 const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.site).toString();
 const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
-const fullDescription = `${language.name} scores ${total}/60 in the Beauty Index, ranking #${rank} among 25 programming languages (${tierLabel} tier). ${language.characterSketch}`;
+const fullDescription = `${language.name} scores ${total}/60 in the Beauty Index, ranking #${rank} among 26 programming languages (${tierLabel} tier). ${language.characterSketch}`;
 const metaDescription = fullDescription.length <= 155
   ? fullDescription
   : fullDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';

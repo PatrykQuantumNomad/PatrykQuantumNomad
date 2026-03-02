@@ -615,7 +615,7 @@ export async function generateOverviewOgImage(): Promise<Uint8Array<ArrayBuffer>
                     color: '#555566',
                     lineHeight: 1.5,
                   },
-                  children: 'Ranking 25 programming languages across 6 aesthetic dimensions',
+                  children: 'Ranking 26 programming languages across 6 aesthetic dimensions',
                 },
               },
               // Dimension pills

@@ -140,7 +140,7 @@ export async function GET(context: APIContext) {
   // Beauty Index section
   lines.push('## Beauty Index');
   lines.push('');
-  lines.push('The Beauty Index is an editorial ranking of 25 programming languages across 6 aesthetic dimensions.');
+  lines.push('The Beauty Index is an editorial ranking of 26 programming languages across 6 aesthetic dimensions.');
   lines.push('Each dimension is scored 1-10 (max total: 60). Languages are grouped into 4 tiers:');
   lines.push('Beautiful (48-60), Handsome (40-47), Practical (32-39), Workhorses (6-31).');
   lines.push('');
@@ -181,7 +181,7 @@ export async function GET(context: APIContext) {
   lines.push('');
   lines.push('Compare any two languages side-by-side: /beauty-index/vs/{langA}-vs-{langB}/');
   lines.push('URL pattern: https://patrykgolabek.dev/beauty-index/vs/{langA-id}-vs-{langB-id}/');
-  lines.push('600 comparison pages available (25 × 24 ordered pairs). Both directions work.');
+  lines.push('650 comparison pages available (26 × 25 ordered pairs). Both directions work.');
   lines.push('');
 
   // Generate summaries for popular pairs

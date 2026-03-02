@@ -2,7 +2,7 @@
 /**
  * Code Comparison Page — /beauty-index/code/
  * Renders 10 tabbed feature panels with syntax-highlighted code blocks
- * for all 25 languages. All 250 code blocks are rendered at build time
+ * for all 26 languages. All 260 code blocks are rendered at build time
  * using Astro's Code component, with client-side tab switching via
  * the CodeComparisonTabs React island.
  */
@@ -26,9 +26,9 @@ const filterLanguages = sortedLanguages.map((l) => ({ id: l.id, name: l.name, ti
 
 <Layout
   title="Code Comparison | Beauty Index | Patryk Golabek"
-  description="Compare how 25 programming languages express the same concepts side-by-side. From variable declarations to pattern matching."
+  description="Compare how 26 programming languages express the same concepts side-by-side. From variable declarations to pattern matching."
   ogImage={ogImageURL}
-  ogImageAlt="Beauty Index — Code Comparison across 25 programming languages"
+  ogImageAlt="Beauty Index — Code Comparison across 26 programming languages"
 >
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
@@ -36,7 +36,7 @@ const filterLanguages = sortedLanguages.map((l) => ({ id: l.id, name: l.name, ti
       Code Comparison
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto text-center">
-      See how 25 languages express the same programming concepts. <br />
+      See how 26 languages express the same programming concepts. <br />
       Click tabs to switch features.
     </p>
     <p class="text-sm text-[var(--color-text-secondary)] mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
