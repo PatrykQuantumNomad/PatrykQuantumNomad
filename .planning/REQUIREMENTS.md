@@ -9,10 +9,10 @@ Requirements for Beauty Index: Lisp milestone. Each maps to roadmap phases.
 
 ### Data Entry
 
-- [ ] **DATA-01**: Lisp entry added to languages.json with scores across all 6 dimensions (phi, omega, lambda, psi, gamma, sigma), tier, character sketch, year, and paradigm
-- [ ] **DATA-02**: Lisp signature code snippet added to snippets.ts showcasing a distinctive Lisp idiom
-- [ ] **DATA-03**: Per-dimension justifications added to justifications.ts for all 6 dimensions with Lisp-specific reasoning
-- [ ] **DATA-04**: `'lisp'` added to ALL_LANGS array in code-features.ts
+- [x] **DATA-01**: Lisp entry added to languages.json with scores across all 6 dimensions (phi, omega, lambda, psi, gamma, sigma), tier, character sketch, year, and paradigm
+- [x] **DATA-02**: Lisp signature code snippet added to snippets.ts showcasing a distinctive Lisp idiom
+- [x] **DATA-03**: Per-dimension justifications added to justifications.ts for all 6 dimensions with Lisp-specific reasoning
+- [x] **DATA-04**: `'lisp'` added to ALL_LANGS array in code-features.ts
 
 ### Code Content
 
@@ -56,10 +56,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 69 | Pending |
-| DATA-02 | Phase 69 | Pending |
-| DATA-03 | Phase 69 | Pending |
-| DATA-04 | Phase 69 | Pending |
+| DATA-01 | Phase 69 | Complete |
+| DATA-02 | Phase 69 | Complete |
+| DATA-03 | Phase 69 | Complete |
+| DATA-04 | Phase 69 | Complete |
 | CODE-01 | Phase 70 | Pending |
 | CODE-02 | Phase 70 | Pending |
 | CODE-03 | Phase 70 | Pending |
