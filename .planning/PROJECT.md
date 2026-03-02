@@ -207,18 +207,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-## Current Milestone: v1.10 EDA Graphical Techniques — NIST Parity & Validation
+## Current Milestone: v1.11 Cloud Architecture Patterns
 
-**Goal:** Validate all 29 graphical technique SVG plots and bring every page to full NIST/SEMATECH section depth with Questions, Importance, expanded Definitions, Python code examples, and case study cross-links.
+**Goal:** Build an interactive visual encyclopedia of 10-15 core distributed systems / cloud architecture patterns with multi-dimensional scoring, custom SVG diagrams, interactive elements, and decision support.
 
 **Target features:**
-- Audit and fix all 29 graphical technique SVGs (visual accuracy and data patterns vs NIST originals)
-- Add "Questions Answered" section to all 29 technique pages (numbered list of what the plot reveals)
-- Add "Importance" section to all 29 technique pages (why this technique matters for analysis)
-- Expand Definition sections with formulas where NIST provides them (KaTeX rendering)
-- Add Python code examples (matplotlib/seaborn) for generating each of the 29 plots
-- Add Case Study cross-links connecting techniques to relevant existing 9 case studies
-- Add Examples section referencing variant patterns and interpretation guidance
+- Pattern data model with Zod-validated JSON for 10-15 core cloud architecture patterns across scored dimensions (complexity, scalability, coupling, testability, etc.)
+- Catalog page at /patterns/ with filterable grid, category grouping, and pattern comparison support
+- Per-pattern detail pages at /patterns/[slug]/ with custom SVG architecture diagrams, interactive hover/click elements, deep-dive explanations, code examples, and tradeoff analysis
+- Multi-dimensional scoring with radar charts (reusing radar-math.ts pattern from Beauty Index / DB Compass)
+- Decision support — help architects choose the right pattern for their situation
+- Build-time OG images for overview and all detail pages
+- Companion blog post with bidirectional cross-links
+- Full site integration (header nav, homepage callout, JSON-LD, sitemap, LLMs.txt)
 
 ### Out of Scope
 
@@ -247,11 +248,10 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.9 EDA Case Study Deep Dive on top of v1.8 EDA Visual Encyclopedia. Now working on v1.10 to bring all 29 graphical technique pages to full NIST/SEMATECH parity — adding missing sections (Questions, Importance, expanded Definitions with formulas), Python code examples, case study cross-links, and auditing all SVG plots for correctness.
-Shipped v1.9 EDA Case Study Deep Dive on top of v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Shipped v1.10 EDA Graphical Techniques NIST Parity on top of v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP. Now building v1.11 Cloud Architecture Patterns — a visual encyclopedia of distributed systems patterns with scored dimensions, custom SVG architecture diagrams, and interactive decision support.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 requirements delivered (589 total). 951 pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 requirements delivered (609 total). 951 pages total. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
@@ -363,4 +363,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-02-27 after v1.10 milestone started*
+*Last updated: 2026-03-01 after v1.11 milestone started*
