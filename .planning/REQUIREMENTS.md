@@ -45,23 +45,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RULES-01 | — | Pending |
-| RULES-02 | — | Pending |
-| RULES-03 | — | Pending |
-| RULES-04 | — | Pending |
-| RULES-05 | — | Pending |
-| RULES-06 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| INTG-01 | — | Pending |
-| INTG-02 | — | Pending |
-| INTG-03 | — | Pending |
+| RULES-01 | Phase 72 | Pending |
+| RULES-02 | Phase 72 | Pending |
+| RULES-03 | Phase 72 | Pending |
+| RULES-04 | Phase 73 | Pending |
+| RULES-05 | Phase 73 | Pending |
+| RULES-06 | Phase 73 | Pending |
+| DOCS-01 | Phase 72 | Pending |
+| DOCS-02 | Phase 73 | Pending |
+| INTG-01 | Phase 74 | Pending |
+| INTG-02 | Phase 74 | Pending |
+| INTG-03 | Phase 74 | Pending |
 
 **Coverage:**
 - v1.12 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-02*
-*Last updated: 2026-03-02 after initial definition*
+*Last updated: 2026-03-02 after roadmap creation*
