@@ -205,8 +205,6 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ 4 DOE-specific SVG generators (bihistogram, DOE mean plot, block plot, interaction plot) for Ceramic Strength — v1.9
 - ✓ All 9 case studies validated: zero broken links, clean 951-page build, all statistical values verified against NIST — v1.9
 
-### Active
-
 - ✓ Lisp language entry in languages.json with scores, tier (Handsome/44), character sketch — v1.11
 - ✓ Lisp signature code snippet with common-lisp syntax highlighting — v1.11
 - ✓ 6 dimension justifications for Lisp differentiating from Clojure — v1.11
@@ -220,6 +218,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ JSON-LD structured data description updated to 26 languages — v1.11
 - ✓ LLMs.txt files updated with 26 languages and derived counts — v1.11
 - ✓ Full production build passes with Lisp detail page, OG image, and 650 VS pages — v1.11
+
+### Active
+
+## Current Milestone: v1.12 Dockerfile Rules Expansion
+
+**Goal:** Add 2 new custom lint rules to the Dockerfile Analyzer — missing USER directive (security) and Node.js pointer compression (efficiency) — with documentation pages and updated rule counts site-wide.
+
+**Target features:**
+- PG011: Missing USER directive security rule
+- PG012: Node.js pointer compression efficiency rule
+- Rule documentation pages for both new rules
+- Updated rule counts across all site references (44 → 46)
 
 ### Out of Scope
 
@@ -256,7 +266,7 @@ Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages, and companion blog essay.
-Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 39 expert rules (Hadolint DL codes + custom PG rules), category-weighted scoring, inline annotations, 39 rule documentation pages, PNG badge export, and shareable URL state.
+Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 44 rules (34 Hadolint DL codes + 10 custom PG rules), category-weighted scoring, inline annotations, 44 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
 Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
@@ -368,4 +378,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-02 after v1.11 milestone*
+*Last updated: 2026-03-02 after v1.12 milestone start*
