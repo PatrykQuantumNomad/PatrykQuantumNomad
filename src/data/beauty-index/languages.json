@@ -126,6 +126,20 @@
     "paradigm": "functional, Lisp dialect"
   },
   {
+    "id": "lisp",
+    "name": "Lisp",
+    "phi": 5,
+    "omega": 9,
+    "lambda": 7,
+    "psi": 5,
+    "gamma": 8,
+    "sigma": 10,
+    "tier": "handsome",
+    "characterSketch": "The ancient architect whose blueprints everyone copies but nobody credits. Lisp invented garbage collection, conditionals, recursion, and the very concept of code-as-data in 1958, then watched sixty years of languages reinvent its ideas with different syntax.",
+    "year": 1958,
+    "paradigm": "multi-paradigm, homoiconic"
+  },
+  {
     "id": "swift",
     "name": "Swift",
     "phi": 9,

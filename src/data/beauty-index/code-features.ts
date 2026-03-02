@@ -25,10 +25,10 @@ export interface CodeFeature {
   snippets: Record<string, FeatureCodeSnippet | undefined>;
 }
 
-// ─── All 25 language IDs ──────────────────────────────────────────────────────
+// ─── All 26 language IDs ──────────────────────────────────────────────────────
 const ALL_LANGS = [
   'haskell', 'rust', 'elixir', 'kotlin', 'swift', 'python', 'ruby',
-  'typescript', 'scala', 'clojure', 'fsharp', 'ocaml', 'go', 'csharp',
+  'typescript', 'scala', 'clojure', 'lisp', 'fsharp', 'ocaml', 'go', 'csharp',
   'dart', 'julia', 'lua', 'zig', 'java', 'javascript', 'c', 'cpp',
   'php', 'gleam', 'r',
 ] as const;
