@@ -30,7 +30,7 @@ See `.planning/milestones/` for detailed archives.
 **Milestone Goal:** Add Lisp (Common Lisp / Scheme family) as the 26th language to the Beauty Index, with full scoring, content, code snippets, and site integration.
 
 - [x] **Phase 69: Lisp Data Foundation** - Lisp entry in languages.json, signature snippet, dimension justifications, and ALL_LANGS registration
-- [ ] **Phase 70: Code Comparison Snippets** - All 10 code feature snippets for Lisp with Clojure differentiation
+- [x] **Phase 70: Code Comparison Snippets** - All 10 code feature snippets for Lisp with Clojure differentiation
 - [ ] **Phase 71: Site-Wide Integration** - Update all hardcoded counts from 25 to 26 and verify full production build
 
 ## Phase Details
@@ -62,7 +62,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 70-01-PLAN.md -- Insert 9 Lisp code snippets into code-features.ts with build verification
+- [x] 70-01-PLAN.md -- Insert 9 Lisp code snippets into code-features.ts with build verification
 
 ### Phase 71: Site-Wide Integration
 **Goal**: Every reference to the language count across the entire site reflects 26 languages, and the full production build passes with the Lisp detail page, OG image, and all VS comparison pages generated
@@ -97,5 +97,5 @@ Phases execute in numeric order: 69 -> 70 -> 71
 | 56-63 | v1.9 EDA Case Study Deep Dive | 19/19 | Complete | 2026-02-27 |
 | 64-68 | v1.10 EDA Graphical NIST Parity | 12/12 | Complete | 2026-02-27 |
 | 69 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
-| 70 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
+| 70 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
 | 71 | v1.11 Beauty Index: Lisp | 0/TBD | Not started | - |
