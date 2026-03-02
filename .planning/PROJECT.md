@@ -207,7 +207,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(Next milestone TBD — run `/gsd:new-milestone` to define)
+## Current Milestone: v1.11 Beauty Index: Lisp
+
+**Goal:** Add Lisp (Common Lisp / Scheme family) as the 26th language to the Beauty Index, with full scoring, content, code snippets, and site integration.
+
+**Target features:**
+- Lisp scored across 6 aesthetic dimensions with justified ratings
+- Character sketch and signature code snippet
+- 10 code comparison snippets for all feature tabs
+- Detail page at /beauty-index/lisp/
+- Updated counts (25→26) across overview, blog post, and site metadata
+- OG image generated for Lisp detail page
 
 ### Out of Scope
 
@@ -236,7 +246,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.10 EDA Graphical Techniques NIST Parity on top of v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP. v1.11 Cloud Architecture Patterns was planned but abandoned before execution. Next milestone TBD.
+Shipped v1.10 EDA Graphical Techniques NIST Parity on top of v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP. v1.11 (Cloud Architecture Patterns) was planned but abandoned before execution; version reused for Beauty Index: Lisp.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 requirements delivered (609 total). 951 pages total. Lighthouse 90+ on mobile.
@@ -351,4 +361,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-01 after v1.11 abandoned*
+*Last updated: 2026-03-01 after v1.11 Beauty Index: Lisp started*
