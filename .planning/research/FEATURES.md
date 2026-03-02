@@ -1,583 +1,308 @@
-# Feature Research: EDA Graphical Techniques NIST Section Parity
+# Feature Research: Cloud Architecture Patterns Visual Encyclopedia
 
-**Domain:** EDA Visual Encyclopedia -- Graphical Technique Page Enhancement
-**Researched:** 2026-02-27
-**Confidence:** HIGH (sourced directly from NIST/SEMATECH handbook pages, verified against existing codebase)
-
----
-
-## Context: What Exists Today vs. What NIST Provides
-
-### Current State (29 Graphical Technique Pages)
-
-Each page currently renders **5 content fields** from `technique-content.ts`:
-
-| Current Section | Maps To NIST Section | Status |
-|----------------|---------------------|--------|
-| "What It Is" (definition) | Definition | Complete |
-| "When to Use It" (purpose) | Purpose | Complete |
-| "How to Interpret" (interpretation) | Part of Definition/Questions | Complete |
-| "Assumptions and Limitations" (assumptions) | Partially in Importance | Complete |
-| NIST Reference (nistReference) | Footer reference | Complete |
-| Build-time SVG plot | Sample Plot | Complete |
-| Related Techniques links | Related Techniques | Complete |
-| PlotVariantSwap (Tier B) | Examples (partial) | Complete for 6 techniques |
-
-### NIST Canonical Page Structure (from handbook crawl)
-
-Every NIST graphical technique page follows this template (verified across 15+ pages):
-
-| NIST Section | Present on All? | Currently Implemented? |
-|-------------|----------------|----------------------|
-| **Purpose** | YES (all 29) | YES (as "When to Use It") |
-| **Sample Plot** | YES (all 29) | YES (SVG generators) |
-| **Definition** | YES (all 29) | YES (as "What It Is") |
-| **Questions** | YES (all 29) | **NO -- MISSING** |
-| **Importance** | YES (most, ~25 of 29) | **NO -- MISSING** |
-| **Examples** | YES (most, ~20 of 29) | PARTIAL (Tier B variants only) |
-| **Related Techniques** | YES (all 29) | YES |
-| **Case Study** | YES (most, ~22 of 29) | **NO -- MISSING (no cross-links)** |
-| **Software** | YES (all 29) | **NO -- replaced by Python code** |
-
-### Gap Summary
-
-Three **entirely missing** NIST sections across all 29 pages:
-1. **"Questions Answered"** -- Every NIST page lists 2-9 specific questions the technique answers
-2. **"Importance"** -- Most NIST pages explain why the technique matters for engineering conclusions
-3. **"Case Study" cross-links** -- NIST pages link to specific case studies; our case studies exist but are not linked from technique pages
-
-Two **partially missing** sections:
-4. **Formulas** -- ~12 of 29 graphical techniques have formulas on their NIST pages; 0 of 29 graphical pages currently show formulas (quantitative pages do)
-5. **Python code examples** -- 0 of 29 graphical pages have Python code (quantitative pages do)
-
----
+**Domain:** Interactive visual encyclopedia for cloud/distributed systems architecture patterns
+**Researched:** 2026-03-01
+**Confidence:** HIGH
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features that complete the NIST section parity contract. Missing these makes pages feel thin compared to the quantitative technique pages which already have formulas and Python code.
+Features users assume exist when visiting a pattern catalog. Missing any of these makes the encyclopedia feel like a half-finished blog post series rather than a reference tool.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Questions Answered section** | Every NIST page has this; users visit to answer specific analytical questions | LOW | 2-9 bullet points per technique, pure content addition to `technique-content.ts` |
-| **Importance section** | ~25 of 29 NIST pages have this; explains WHY this technique matters | LOW | 1-3 paragraphs per technique, pure content addition |
-| **Case Study cross-links** | NIST pages link to case studies; our 10 case studies already exist but are orphaned from technique pages | LOW | Map technique-to-case-study relationships, render as links |
-| **Expanded Definition with formulas** | ~12 techniques have formulas on NIST; autocorrelation, spectral, probability plots, Box-Cox, Weibull, PPCC all need math | MEDIUM | Requires adding `formulas` field to `TechniqueContent` interface, KaTeX rendering in `[slug].astro`, ~40 formula blocks total |
-| **Python code examples** | Quantitative pages already have Python code; graphical pages without them feel incomplete by comparison | MEDIUM | 29 code snippets using matplotlib/seaborn/statsmodels, added to `technique-content.ts` |
+| Catalog page with pattern grid | Microsoft Azure, microservices.io, and AWS all lead with a catalog overview. Users arrive expecting to browse. | LOW | Reuse `ModelCardGrid` pattern from DB Compass. Route: `/patterns/` |
+| Category grouping | Every major reference (Azure: 8 categories, microservices.io: 12 categories) groups patterns. Users scan by problem domain, not alphabetically. | LOW | 5 categories recommended (see Pattern Selection below). Render as headed sections within the grid. |
+| Per-pattern detail pages | Azure devotes 2,000-4,000 words per pattern with Context/Problem, Solution, When to Use, When Not To Use. Users expect deep dives. | MEDIUM | Route: `/patterns/[slug]/`. Follow DB Compass `[slug].astro` structure with `getStaticPaths`. |
+| Architecture diagram per pattern | Every serious pattern reference includes a visual. Azure uses SVG diagrams, O'Reilly books use hand-drawn illustrations. A "visual encyclopedia" without visuals is a contradiction. | HIGH | Custom SVG per pattern. This is the highest-effort table-stakes item. Budget ~2-4 hours per diagram. |
+| "When to use" / "When not to use" sections | Azure and microservices.io both include these for every pattern. Architects need decision-support, not just description. | LOW | Two string arrays per pattern in the data model, rendered as bullet lists on detail pages. |
+| Related patterns with links | Patterns form a connected graph (CQRS pairs with Event Sourcing, Saga relates to Compensating Transaction). Every major reference cross-links. | LOW | `relatedPatterns` array of slug strings in the JSON. Render as linked cards at bottom of detail page. |
+| SEO metadata and JSON-LD | Existing pillars all have structured data (CreativeWork, BreadcrumbList). Google indexes these pages for competitive search terms. | LOW | Copy `CompassJsonLd.astro` pattern. Target keywords: "cloud architecture patterns", "microservices patterns", "distributed systems patterns". |
+| Strengths and weaknesses | DB Compass has these per model. Pattern references universally discuss tradeoffs. | LOW | Two string arrays per pattern in the JSON schema. |
+| Responsive mobile layout | Existing pillars are all mobile-responsive. A broken mobile experience on a new pillar undermines the whole site. | LOW | Inherits from Layout.astro. Grid cards and detail page already responsive in existing pillars. |
+| Prev/next navigation between patterns | DB Compass and Beauty Index both have this. Enables sequential browsing through the collection. | LOW | Copy `ModelNav.astro` pattern from DB Compass. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that go beyond NIST parity and make these pages uniquely valuable.
+Features that elevate this beyond "yet another pattern blog" into a tool architects bookmark and return to.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Examples section with interpretation** | NIST lists example sub-pages but our Tier B variants already show 6 techniques with multiple patterns; extending interpretive text to variants makes them pedagogically rich | MEDIUM | Add interpretive captions per variant (e.g., "This right-skewed histogram suggests a lognormal or exponential model") |
-| **Interactive "Try It" Python snippets** | Copyable Python code blocks with realistic sample data that users can paste into Jupyter | LOW | Already done for quantitative pages; extend the pattern |
-| **Technique-to-Technique navigation flow** | NIST's "Related Techniques" section is just a list; adding contextual "When to use X instead of Y" guidance creates a decision tree | MEDIUM | Extends existing `relatedTechniques` with `whenToUseInstead` text |
-| **Formula-to-Code mapping** | Show formula alongside the Python function that computes it | LOW | Combine existing formula and code sections with visual pairing |
+| Multi-dimensional radar chart scoring | No existing pattern catalog scores patterns across comparable dimensions. Azure maps to Well-Architected pillars (binary tags, not scores). This would be the only pattern reference with quantitative comparison across 7 dimensions. | MEDIUM | Reuse `CompassRadarChart.astro` with new dimension set. Requires defining 7 orthogonal scoring dimensions (see Scoring Dimensions below). |
+| Category filter (React island) | Azure has no filtering. microservices.io has no filtering. Adding toggle-filter pills that show/hide pattern cards by category gives instant interactivity that static references lack. | LOW | Reuse `UseCaseFilter.tsx` pattern from DB Compass. Already proven with nanostores. |
+| Pattern comparison picker | "Compare Circuit Breaker vs Bulkhead" with overlapping radar charts. No existing pattern reference offers side-by-side quantitative comparison. | MEDIUM | Adapt `VsComparePicker.tsx` and `OverlayRadarChart.astro` from Beauty Index. Route: `/patterns/vs/[slug]/`. |
+| Character sketches | DB Compass's character sketches ("The sprinter of the database world") and Beauty Index's character sketches are the site's signature voice. No other pattern catalog uses opinionated personality descriptions. | LOW | One `characterSketch` string field per pattern in JSON. ~1-2 sentences. |
+| Complexity spectrum visualization | DB Compass uses a horizontal complexity bar positioning models from simple to complex. Patterns have a similar simple-to-complex axis (Retry is simple, Saga is complex). | LOW | Reuse `ComplexitySpectrum.astro` and `spectrum-math.ts` from DB Compass. |
+| Interactive SVG diagrams | Static SVGs are table stakes. SVGs with hover states that highlight data flow paths, clickable components that show tooltips, or animated sequence flows would be unique among pattern references. | HIGH | CSS transitions on SVG elements. Keep animations subtle (opacity, stroke-dashoffset for flow arrows). |
+| Scoring justifications | DB Compass provides a written justification paragraph for each dimension score. No pattern catalog does this. It turns subjective scores into defensible opinions. | MEDIUM | `justifications` object with one string per dimension key in the JSON schema. ~50-100 words each. |
+| OG images per pattern | Per-pattern social sharing images showing the pattern name, radar chart, and a visual identity. Makes shared links look professional on LinkedIn/Twitter. | MEDIUM | Follow existing OG image generation pipeline. One PNG per pattern at `/open-graph/patterns/[slug].png`. |
+| Decision flowchart | "I have problem X, which pattern should I use?" -- a guided decision tree. This is what architects actually need. Azure offers something similar with Well-Architected pillar mapping but it is not interactive. | HIGH | Could be a dedicated page at `/patterns/decide/` with a step-through wizard component. Defer to v1.x. |
+| Share controls | URL copy, Twitter/LinkedIn share buttons. Beauty Index and DB Compass both have these. | LOW | Reuse `CompassShareControls.astro`. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Client-side interactive plots (D3/Plotly)** | "Let users manipulate the data" | Adds massive JS bundle, SSR complexity, hydration bugs; site is static-first with build-time SVG | Keep build-time SVG plots; Python code examples let users reproduce interactively in their own environment |
-| **Full NIST "Software" section** | NIST lists Dataplot/R availability | Dataplot is obsolete; users expect Python, not legacy tool lists | Replace with focused Python code examples using modern libraries |
-| **Exhaustive formula derivations** | "Show all the math" | Turns technique pages into textbook chapters; overwhelms non-statistician visitors | Show 1-3 key formulas with brief explanations; link to NIST for full derivations |
-| **Real dataset downloads** | "Let users download the NIST .DAT files" | Copyright/licensing ambiguity with NIST data files; adds file hosting burden | Python code examples generate synthetic data that demonstrates the same patterns |
-| **Video tutorials per technique** | "Add video walkthroughs" | Production cost of 29 videos; maintenance burden; slows page load | Well-structured text + SVG + Python code is more searchable and scannable |
+| Exhaustive 40+ pattern catalog | Completeness signals authority | 40+ patterns at this quality level (custom SVG + 7-dimension scoring + justifications + character sketch) would take months and create a maintenance burden. Most patterns are niche. Azure can do 40+ because they have a docs team. | Start with 13 core patterns. Expand to 20-25 over time. Each pattern added should justify its inclusion by search volume or architectural significance. |
+| Code implementation examples | Azure and microservices.io include code samples | Code examples require language-specific maintenance (which language? which framework?), age quickly, and bloat the page. The value proposition is architectural understanding, not implementation tutorials. | Link to authoritative implementation references (Azure docs, microservices.io) in a "Further Reading" section per pattern. |
+| Cloud-provider-specific mapping | "Here's how to implement this pattern on AWS/Azure/GCP" | Ties content to vendor specifics that change constantly. Creates maintenance burden and vendor-bias perception. | Keep patterns vendor-agnostic. Mention representative technologies (e.g., "message brokers like RabbitMQ, Kafka, or cloud-native equivalents") without mapping to specific cloud services. |
+| User-submitted ratings or comments | Community engagement | Requires authentication, moderation, spam prevention, and database infrastructure. This is a static Astro site. The opinions are deliberately the author's own (consistent with Beauty Index and DB Compass positioning). | "This index is deliberately opinionated" framing. Author authority over crowd-sourced scores. |
+| Real-time playground / simulator | "See the pattern in action with live message passing" | Enormous implementation complexity for marginal educational value. Requires server-side infrastructure or complex client-side simulation. | Animated SVG diagrams with step-through sequence (CSS-only, no runtime) convey flow effectively without the engineering cost. |
+| Comparison matrix table (all patterns x all dimensions) | Quick overview of all scores at once | With 13 patterns x 7 dimensions = 91 cells, a table is dense but manageable. However, radar charts communicate the shape of tradeoffs more effectively than raw numbers. | Sortable scoring table (like DB Compass `CompassScoringTable.astro`) as a secondary view below the visual grid. Table supplements radar charts rather than replacing them. This is actually useful -- include it as a P1 table stakes feature. |
 
 ---
 
-## Detailed Feature Specifications
+## Recommended Pattern Selection (13 Core Patterns)
 
-### Feature 1: Questions Answered Section
+Patterns selected based on: (1) frequency of appearance across Azure, AWS, and microservices.io catalogs, (2) architectural significance for cloud-native systems, (3) coverage of all 5 categories without redundancy, (4) search volume and SEO value.
 
-**NIST source pattern:** Every technique page has a "Questions" section listing 2-9 specific questions the technique can answer, formatted as a bulleted list.
+### Category: Resilience (3 patterns)
 
-**Verified questions by technique (from NIST crawl):**
+| Pattern | Why Include | Category Justification |
+|---------|-------------|----------------------|
+| **Circuit Breaker** | Appears in all 3 major catalogs. The canonical resilience pattern. High search volume ("circuit breaker pattern" ~5K monthly). | Prevents cascading failures by failing fast when a dependency is down. |
+| **Retry with Backoff** | Foundational resilience. Every distributed system needs retry logic. Azure, AWS, and microservices.io all include it. | Handles transient failures transparently with exponential backoff and jitter. |
+| **Bulkhead** | Critical isolation pattern. Often paired with Circuit Breaker. Appears in Azure and microservices.io. | Isolates failures to prevent one failing component from consuming all resources. |
 
-| Technique | # Questions | Sample Questions |
-|-----------|-------------|------------------|
-| Autocorrelation Plot | 9 | "Are the data random?", "Is an autoregressive model appropriate?", "Is the assumed model valid?" |
-| Bihistogram | 6 | "Is a factor significant?", "Does the location differ?", "Does the variation differ?", "Does the distribution differ?" |
-| Block Plot | 3 | "Are there block effects?", "Are there treatment effects?", "Which factors dominate?" |
-| Bootstrap Plot | 3 | "What does the sampling distribution look like?", "What is a 95% CI?", "Which statistic has the narrowest CI?" |
-| Box-Cox Linearity | 2 | "What power transformation maximizes linearity?", "Is a transformation needed?" |
-| Box-Cox Normality | 2 | "What transformation normalizes the data?", "What is the optimal lambda?" |
-| Box Plot | 4 | "Is a factor significant?", "Does location differ between subgroups?", "Does variation differ?", "Are there outliers?" |
-| Complex Demodulation | 3 | "Is amplitude changing?", "Is phase changing?", "At what rate?" |
-| Contour Plot | 1 | "How does Z change as a function of X and Y?" |
-| DOE Plots | 2 | "Which factors are important with respect to location and scale?", "Are there outliers?" |
-| Histogram | 5 | "What distribution?", "Where located?", "How spread?", "Symmetric or skewed?", "Outliers?" |
-| Lag Plot | 4 | "Are the data random?", "Serial correlation?", "Suitable model?", "Outliers?" |
-| Linear Plots | 2 | "Is the intercept/slope/correlation constant across groups?", "Is there a discernible pattern?" |
-| Mean Plot | 3 | "Do location shifts exist?", "What is the magnitude?", "Is there a pattern?" |
-| Normal Probability Plot | 2 | "Are the data normally distributed?", "What characterizes departures from normality?" |
-| Probability Plot | 3 | "Does a specified distribution fit?", "Which distribution fits best?", "What are the parameter estimates?" |
-| PPCC Plot | 4 | "Best-fit member of a family?", "How good is the fit?", "Comparison among distributions?", "Parameter sensitivity?" |
-| Q-Q Plot | 4 | "Common distribution?", "Matching location/scale?", "Similar shapes?", "Comparable tail behavior?" |
-| Run-Sequence Plot | 3 | "Location shifts?", "Variation shifts?", "Outliers?" |
-| Scatter Plot | 5 | "Related?", "Linear?", "Non-linear?", "Does variation in Y depend on X?", "Outliers?" |
-| Spectral Plot | 3 | "How many cyclic components?", "Dominant frequency?", "What is the frequency?" |
-| Std Deviation Plot | 3 | "Do variation shifts exist?", "What is the magnitude?", "Is there a pattern?" |
-| Star Plot | 3 | "Which variables dominate?", "Which observations cluster?", "Outliers?" |
-| Weibull Plot | 3 | "Weibull distributed?", "Shape parameter?", "Scale parameter?" |
-| Youden Plot | 3 | "Within-lab vs between-lab variability?", "Lab biases?", "Outlier labs?" |
-| 4-Plot | 4 | "Random?", "Fixed distribution?", "Fixed location?", "Fixed variation?" |
-| 6-Plot | 4 | "Residuals normal with fixed location/scale?", "Outliers?", "Model adequate?", "Better model?" |
-| Scatterplot Matrix | 3 | "Pairwise correlations?", "Clusters?", "Outlier observations?" |
-| Conditioning Plot | 3 | "Does the X-Y relationship change with Z?", "Interaction effects?", "Pattern across conditions?" |
+### Category: Data Management (3 patterns)
 
-**Implementation:**
-- Add `questionsAnswered: string[]` field to `TechniqueContent` interface
-- Render as a styled `<ul>` in the `[slug].astro` page between "When to Use It" and "How to Interpret"
-- Each question is a short sentence ending in "?"
-- Total: ~95 question strings across 29 techniques
+| Pattern | Why Include | Category Justification |
+|---------|-------------|----------------------|
+| **CQRS** | Appears in all 3 major catalogs. High search volume. Pairs naturally with Event Sourcing. | Separates read and write models for independent scaling and optimization. |
+| **Event Sourcing** | Appears in Azure and AWS catalogs. Pairs with CQRS. Foundational for event-driven architectures. | Stores state as an append-only sequence of domain events rather than current state. |
+| **Saga** | Appears in all 3 catalogs. Critical for microservices data consistency. Two sub-patterns (orchestration vs choreography) add depth. | Manages distributed transactions across services using compensating actions. |
 
-**Complexity: LOW** -- Pure content authoring + 1 new field + ~10 lines of Astro template.
+### Category: Communication (3 patterns)
 
----
+| Pattern | Why Include | Category Justification |
+|---------|-------------|----------------------|
+| **API Gateway** | Universal in microservices architectures. Appears in microservices.io as a core pattern. High search volume. | Single entry point that routes, aggregates, and cross-cuts concerns for client requests. |
+| **Pub/Sub (Publisher-Subscriber)** | Appears in Azure and AWS. The foundational async communication pattern. | Decouples producers from consumers through topic-based event distribution. |
+| **Backends for Frontends (BFF)** | Appears in Azure. Increasingly important with mobile/web/API client diversity. | Creates dedicated backend services tailored to each frontend's specific needs. |
 
-### Feature 2: Importance Section
+### Category: Structural (2 patterns)
 
-**NIST source pattern:** Most technique pages have an "Importance" section explaining why the technique matters for engineering conclusions and which statistical assumptions it validates.
+| Pattern | Why Include | Category Justification |
+|---------|-------------|----------------------|
+| **Sidecar** | Appears in Azure and microservices.io. Critical for Kubernetes/service mesh architectures. Directly relevant to the author's K8s expertise. | Deploys auxiliary processes alongside the main container for cross-cutting concerns. |
+| **Strangler Fig** | Appears in all 3 catalogs. The canonical migration pattern. Every organization with legacy systems needs this. | Incrementally replaces legacy system functionality by routing traffic to new implementations. |
 
-**Importance themes by technique (from NIST crawl):**
+### Category: Scaling (2 patterns)
 
-| Technique | Importance Theme |
-|-----------|-----------------|
-| Autocorrelation Plot | "Ensure validity of engineering conclusions" -- validates randomness assumption |
-| Bihistogram | Validates 3 of 4 assumptions (location, variation, distribution) |
-| Box Plot | "Important EDA tool for determining if a factor has a significant effect" |
-| Bootstrap Plot | "Provides method for calculating uncertainty where formulas are impractical" |
-| Contour Plot | "Necessary for understanding 3-D data" -- analogous to scatter plot for 2-D |
-| Histogram | Reveals 5 key features: center, spread, skewness, outliers, multiple modes |
-| Lag Plot | "Randomness is an underlying assumption for most statistical estimation" |
-| Mean Plot | Validates constant-location assumption across groups |
-| Normal Probability Plot | "Most statistical models assume normal residuals" |
-| Probability Plot | Validates distributional assumptions for reliability applications |
-| PPCC Plot | "Statistical analyses depend on distributional assumptions" |
-| Run-Sequence Plot | Validates constant location and scale; "even in complex models when applied to residuals" |
-| Scatter Plot | Identifies relationships; warns against assuming causation from association |
-| Spectral Plot | "Primary technique for assessing cyclic nature of time series in frequency domain" |
-| Std Deviation Plot | Validates constant-variation assumption across groups |
-| Weibull Plot | "Check distributional assumptions" for reliability engineering |
-| 4-Plot | Simultaneous check of all 4 underlying assumptions |
-| 6-Plot | "Validating model" -- checks residual behavior in regression |
+| Pattern | Why Include | Category Justification |
+|---------|-------------|----------------------|
+| **Cache-Aside** | Appears in Azure. Universally needed. Simple enough to be a good entry-level pattern but has real tradeoffs. | Loads data into cache on demand, improving read performance while managing staleness. |
+| **Queue-Based Load Leveling** | Appears in Azure. Essential for decoupling producers from consumers and handling traffic spikes. | Uses a queue as a buffer between task submission and processing to smooth load spikes. |
 
-**Implementation:**
-- Add `importance: string` field to `TechniqueContent` interface
-- Render as a paragraph section after "Assumptions and Limitations"
-- 2-4 sentences per technique emphasizing practical consequences
-- Total: 29 importance paragraphs
+### Pattern Selection Rationale
 
-**Complexity: LOW** -- Same pattern as Questions Answered.
+**Why 13 and not 10 or 15:** 13 covers all 5 categories with at least 2 patterns each (needed for meaningful within-category comparison on radar charts) without overcommitting on content production. Each pattern requires: custom SVG diagram, 7-dimension scoring with justifications, character sketch, when-to-use/avoid lists, strengths/weaknesses, and related patterns. At ~4-6 hours per pattern, 13 patterns = 52-78 hours of content work.
+
+**Why these 5 categories:** They map to the fundamental concerns of distributed systems architecture:
+- **Resilience** -- How does the system handle failure?
+- **Data Management** -- How does the system manage state and transactions?
+- **Communication** -- How do services talk to each other?
+- **Structural** -- How are services organized and deployed?
+- **Scaling** -- How does the system handle growing load?
+
+**Patterns deliberately excluded:**
+- **Choreography** -- Covered within Saga (choreography vs orchestration is a Saga sub-topic)
+- **Event-Driven Architecture** -- Too broad; it is an architectural style, not a pattern. Pub/Sub + Event Sourcing cover the concrete patterns.
+- **Service Mesh** -- Infrastructure concern, not an application pattern. Sidecar covers the pattern that underlies service mesh.
+- **Materialized View** -- Covered as a sub-topic within CQRS (CQRS with materialized read models).
+- **Compensating Transaction** -- Covered within Saga (compensating actions are the mechanism sagas use).
+- **Leader Election** -- Niche. Important but rarely a decision point for application architects. Add in v1.x expansion.
+- **Throttling / Rate Limiting** -- Closely related to Bulkhead and Queue-Based Load Leveling. Add in v1.x if search demand warrants.
 
 ---
 
-### Feature 3: Case Study Cross-Links
+## Scoring Dimensions (7 Dimensions)
 
-**NIST source pattern:** Most technique pages link to 1-2 case studies that demonstrate the technique in practice. Our site has 10 case studies that already use these techniques in their analysis.
+Designed to be orthogonal (each measures something different), relevant (architects actually care about these tradeoffs), and compatible with the existing radar chart infrastructure (DB Compass uses 8 dimensions on an octagonal chart; 7 produces a heptagonal chart which renders cleanly).
 
-**Technique-to-Case-Study mapping (from NIST and existing case study content):**
+| Dimension | Key | Short Name | Description (what it measures) | Why Orthogonal |
+|-----------|-----|------------|-------------------------------|----------------|
+| **Scalability Impact** | `scalability` | Scale | How much the pattern improves or enables horizontal scaling; 1 = no scaling benefit, 10 = enables near-linear horizontal scale. | Measures throughput capacity. Independent of latency, coupling, or operational burden. |
+| **Resilience Gain** | `resilience` | Resil | How much the pattern improves fault tolerance and graceful degradation; 1 = no resilience benefit, 10 = system survives cascading failures. | Measures failure handling. A pattern can be highly resilient but complex (Circuit Breaker) or simple but fragile. |
+| **Complexity Cost** | `complexity` | Cmplx | Inverse: how simple the pattern is to implement and maintain; 1 = requires distributed systems expertise to implement correctly, 10 = straightforward to implement in any codebase. | Measures implementation burden. Independent of what the pattern achieves -- CQRS is powerful but complex, Retry is simple but limited. |
+| **Coupling** | `coupling` | Coupl | How much the pattern reduces inter-service coupling; 1 = creates tight dependencies between services, 10 = fully decouples services with zero direct knowledge of each other. | Measures architectural independence. Orthogonal to resilience (tightly coupled systems can still be resilient via retry). |
+| **Data Consistency** | `consistency` | Consis | How well the pattern preserves data consistency guarantees; 1 = introduces eventual consistency with complex conflict resolution, 10 = maintains strong consistency with no additional effort. | Measures correctness guarantees. Independent of performance -- strong consistency often costs latency but that is captured separately. |
+| **Latency Impact** | `latency` | Latcy | How the pattern affects request latency; 1 = adds significant latency (extra network hops, async processing), 10 = reduces or does not affect end-to-end latency. | Measures speed impact. Independent of throughput (a pattern can improve throughput while adding latency). |
+| **Observability** | `observability` | Obsrv | How easy the pattern makes it to monitor, debug, and trace behavior; 1 = creates opaque distributed flows that are hard to trace, 10 = produces clear, linear flows that are easy to monitor and debug. | Measures operational visibility. Independent of complexity -- a simple pattern with poor logging is hard to observe; a complex one with good tracing is easy. |
 
-| Technique | NIST Case Study Reference | Our Case Studies That Use It |
-|-----------|--------------------------|------------------------------|
-| Autocorrelation Plot | Beam deflections | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry |
-| Bihistogram | Ceramic strength | ceramic-strength |
-| Block Plot | Ceramic strength | ceramic-strength |
-| Bootstrap Plot | Uniform random numbers | uniform-random-numbers |
-| Box-Cox Linearity | -- | -- |
-| Box-Cox Normality | -- | -- |
-| Box Plot | Ceramic strength | ceramic-strength |
-| Complex Demodulation | -- | -- |
-| Contour Plot | -- | -- |
-| DOE Plots | Ceramic strength | ceramic-strength |
-| Histogram | Heat flow meter | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry, fatigue-life |
-| Lag Plot | Beam deflections | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry |
-| Linear Plots | -- | -- |
-| Mean Plot | -- | ceramic-strength |
-| Normal Probability Plot | Normal random numbers | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry, fatigue-life |
-| Probability Plot | Fatigue life | fatigue-life |
-| PPCC Plot | -- | fatigue-life |
-| Q-Q Plot | Ceramic strength | ceramic-strength |
-| Run-Sequence Plot | Filter transmittance | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry |
-| Scatter Plot | Load cell calibration | beam-deflections |
-| Spectral Plot | Beam deflections | beam-deflections, standard-resistor |
-| Std Deviation Plot | -- | ceramic-strength |
-| Star Plot | -- | -- |
-| Weibull Plot | Fatigue life | fatigue-life |
-| Youden Plot | -- | -- |
-| 4-Plot | Normal random numbers | normal-random-numbers, uniform-random-numbers, random-walk, beam-deflections, filter-transmittance, standard-resistor, heat-flow-meter, cryothermometry |
-| 6-Plot | Alaska pipeline | -- |
-| Scatterplot Matrix | -- | -- |
-| Conditioning Plot | -- | -- |
+### Dimension Rationale
 
-**Implementation:**
-- Add `caseStudies: Array<{ slug: string; title: string }>` field to `TechniqueContent` interface (or compute from a mapping object)
-- Render as pill-style links (matching existing Related Techniques pattern) in a "See It In Action" section
-- Only techniques with at least 1 linked case study get the section (~22 of 29)
-- Alternative: Create a standalone mapping constant `TECHNIQUE_CASE_STUDY_MAP` for maintainability
+**Why 7 and not 8 (like DB Compass):** Seven dimensions produce a clean heptagonal radar chart. More importantly, 7 is the right number of truly orthogonal concerns for architecture patterns. Adding an 8th would require either splitting a dimension (breaking orthogonality) or adding a dimension like "Ecosystem Maturity" which does not meaningfully differentiate patterns (all 13 selected patterns are well-established).
 
-**Complexity: LOW** -- Content mapping + ~15 lines of Astro template. Data already exists; just need the linkage.
+**Why these 7:**
+- **Scalability + Resilience** are the two core "what does the pattern give you?" dimensions.
+- **Complexity + Coupling** are the two core "what does the pattern cost you?" dimensions.
+- **Consistency + Latency** are the two core tradeoff dimensions that the CAP theorem and distributed systems theory identify as fundamental tensions.
+- **Observability** captures the operational reality that patterns which are theoretically elegant can be nightmares to debug in production.
 
----
+**Dimensions deliberately excluded:**
+- **Performance** -- Overlaps with Latency + Scalability. "Performance" is too vague as a standalone dimension.
+- **Security** -- Most patterns are security-neutral. Only a few (API Gateway, Sidecar) have direct security implications. Not orthogonal enough across 13 patterns.
+- **Learning Curve** -- Correlates too strongly with Complexity. If it is hard to implement, it is hard to learn.
+- **Ecosystem Maturity** -- All 13 selected patterns are mature, well-documented, and widely adopted. This dimension would not differentiate them.
+- **Cost** -- Cloud cost impact is too dependent on implementation specifics and cloud provider pricing to score meaningfully at the pattern level.
 
-### Feature 4: Formulas (KaTeX) for Graphical Techniques
+### Sample Scoring (3 patterns to illustrate dimension utility)
 
-**NIST source pattern:** ~12 of 29 graphical technique pages include mathematical formulas. The quantitative technique pages already render KaTeX formulas using the proven `katex.renderToString()` build-time pattern.
+| Dimension | Circuit Breaker | CQRS | Retry with Backoff |
+|-----------|----------------|------|-------------------|
+| Scalability | 3 | 9 | 2 |
+| Resilience | 9 | 3 | 7 |
+| Complexity | 6 | 3 | 9 |
+| Coupling | 5 | 6 | 8 |
+| Consistency | 8 | 4 | 8 |
+| Latency | 7 | 5 | 4 |
+| Observability | 7 | 4 | 8 |
 
-**Techniques requiring formulas:**
-
-| Technique | Formula(s) Needed | KaTeX Complexity |
-|-----------|-------------------|------------------|
-| Autocorrelation Plot | r(h) = C_h/C_0, autocovariance C_h, confidence bands +/- z/sqrt(N) | HIGH (5-6 formulas) |
-| Box-Cox Linearity | T(X) = (X^lambda - 1)/lambda | LOW (1 formula) |
-| Box-Cox Normality | T(Y) = (Y^lambda - 1)/lambda, ln(Y) when lambda=0 | LOW (1-2 formulas) |
-| Normal Probability Plot | N_i = G(U_i), Filliben approximation for U_i | MEDIUM (3 formulas) |
-| Probability Plot | N_i = G(U_i) generalized | MEDIUM (2 formulas) |
-| PPCC Plot | r = correlation coefficient from probability plot | LOW (1 formula) |
-| Spectral Plot | Y_i = C + alpha*sin(2*pi*omega*t + phi) + E_i, power spectrum | MEDIUM (2-3 formulas) |
-| Weibull Plot | Weibull CDF, log-log transformation, shape/scale extraction | MEDIUM (3-4 formulas) |
-| Box Plot | Fence calculations: L1 = Q1 - 1.5*IQR, U1 = Q3 + 1.5*IQR | LOW (4 formulas) |
-| Bootstrap Plot | Resampling definition | LOW (1 formula) |
-| Q-Q Plot | Quantile mapping definition | LOW (1 formula) |
-| 6-Plot | Y_i = f(X_i) + E_i | LOW (1 formula) |
-
-**Total: ~40 formula blocks across 12 techniques**
-
-**Implementation:**
-- Extend `TechniqueContent` interface with optional `formulas?: Array<{ label: string; tex: string; explanation: string }>` (matching `QuantitativeContent` interface exactly)
-- Update `[slug].astro` to import `katex` and render formulas in the `formula` slot (pattern already exists in `quantitative/[slug].astro`)
-- Add `useKatex={true}` prop when formulas are present
-- 17 techniques (no formulas) remain unchanged
-
-**Complexity: MEDIUM** -- Template change is small (copy from quantitative), but authoring ~40 KaTeX formula strings with explanations requires careful validation.
-
----
-
-### Feature 5: Python Code Examples
-
-**NIST source pattern:** NIST's "Software" section lists Dataplot/R code. Modern users expect Python. The quantitative technique pages already show Python code using `astro-expressive-code`.
-
-**Standard Python libraries per technique category:**
-
-| Plot Category | Primary Library | Function | Techniques |
-|-------------|----------------|----------|------------|
-| Distribution plots | `matplotlib.pyplot` + `seaborn` | `sns.histplot()`, `plt.hist()` | histogram, bihistogram |
-| Box plots | `matplotlib.pyplot` + `seaborn` | `sns.boxplot()`, `plt.boxplot()` | box-plot |
-| Scatter plots | `matplotlib.pyplot` + `seaborn` | `sns.scatterplot()`, `plt.scatter()` | scatter-plot, youden-plot |
-| Probability plots | `scipy.stats` | `scipy.stats.probplot()` | normal-probability-plot, probability-plot, qq-plot, weibull-plot, ppcc-plot |
-| Time series | `matplotlib.pyplot` | `plt.plot()` | run-sequence-plot |
-| Autocorrelation | `statsmodels` | `plot_acf()`, `plot_pacf()` | autocorrelation-plot |
-| Lag plots | `pandas` | `pd.plotting.lag_plot()` | lag-plot |
-| Spectral | `scipy.signal` + `matplotlib` | `scipy.signal.periodogram()`, `plt.semilogy()` | spectral-plot |
-| Contour | `matplotlib.pyplot` | `plt.contour()`, `plt.contourf()` | contour-plot |
-| Bar/Mean/SD | `matplotlib.pyplot` | `plt.bar()` | mean-plot, std-deviation-plot, block-plot |
-| DOE | `matplotlib.pyplot` + `statsmodels` | Custom DOE plotting | doe-plots |
-| Star/Radar | `matplotlib.pyplot` | Polar axes `plt.subplot(polar=True)` | star-plot |
-| Multi-panel | `matplotlib.pyplot` | `fig, axes = plt.subplots()` | 4-plot, 6-plot, linear-plots, complex-demodulation, scatterplot-matrix |
-| Conditional | `seaborn` | `sns.FacetGrid()` | conditioning-plot |
-| Bootstrap | `numpy` + `matplotlib` | `np.random.choice()` + `plt.hist()` | bootstrap-plot |
-| Box-Cox | `scipy.stats` | `scipy.stats.boxcox()`, `scipy.stats.boxcox_normplot()` | box-cox-linearity, box-cox-normality |
-
-**Python code template pattern (matching quantitative pages):**
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-# technique-specific imports
-
-# Generate or load sample data
-data = np.random.normal(0, 1, 200)
-
-# Create the plot
-fig, ax = plt.subplots(figsize=(8, 5))
-# technique-specific plot code
-ax.set_title('Technique Name')
-ax.set_xlabel('X Label')
-ax.set_ylabel('Y Label')
-plt.tight_layout()
-plt.show()
-```
-
-**Implementation:**
-- Add `pythonCode?: string` field to `TechniqueContent` interface
-- Update `[slug].astro` to import `Code` from `astro-expressive-code/components` and render in `code` slot (pattern already exists in `quantitative/[slug].astro`)
-- Each code example is 10-25 lines, self-contained, generates synthetic data
-- Total: 29 Python code strings
-
-**Complexity: MEDIUM** -- Template change is trivial (copy from quantitative), but authoring 29 correct, runnable Python snippets requires validation.
-
----
-
-### Feature 6: Variant Interpretation Captions (Differentiator)
-
-**NIST source pattern:** NIST's "Examples" sections describe what each pattern looks like and what it means. Our Tier B variants show the visual patterns but lack interpretive text.
-
-**Current Tier B variant coverage:**
-
-| Technique | # Variants | Current State | Enhancement Needed |
-|-----------|-----------|---------------|-------------------|
-| Histogram | 8 | Label only ("Symmetric", "Right Skewed", etc.) | Add 1-2 sentence interpretation per variant |
-| Scatter Plot | 12 | Label only ("Strong Positive", "Quadratic", etc.) | Add 1-2 sentence interpretation per variant |
-| Normal Probability Plot | 4 | Label only ("Normal", "Right Skewed", etc.) | Add 1-2 sentence interpretation per variant |
-| Lag Plot | 4 | Label only ("Random", "Autoregressive", etc.) | Add 1-2 sentence interpretation per variant |
-| Autocorrelation Plot | 4 | Label only ("White Noise", "AR(1)", etc.) | Add 1-2 sentence interpretation per variant |
-| Spectral Plot | 3 | Label only ("Single Frequency", "Multiple Frequencies", etc.) | Add 1-2 sentence interpretation per variant |
-
-**Total: 35 interpretation captions**
-
-**Implementation:**
-- Extend variant data structure to include `interpretation: string`
-- Render caption below each variant plot in `PlotVariantSwap.astro`
-- Example: "Right Skewed -- The long right tail suggests a lognormal or exponential underlying distribution. Consider a log transformation before applying normal-theory tests."
-
-**Complexity: MEDIUM** -- Requires changes to `PlotVariantSwap.astro` and `technique-renderer.ts` variant data structures, plus 35 content strings.
+These scores produce distinct radar chart shapes: Circuit Breaker has a resilience spike, CQRS has a scalability spike with a complexity trough, Retry is balanced and simple. This confirms the dimensions differentiate patterns effectively.
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Questions Answered]         (standalone, no deps)
+Content Collection (Zod schema + JSON data file)
+    |-- required by --> Catalog Page (/patterns/)
+    |                       |-- requires --> Category Filter (React island)
+    |                       |-- requires --> Complexity Spectrum
+    |                       |-- requires --> Pattern Card Grid
+    |                       |-- requires --> Scoring Table
+    |
+    |-- required by --> Detail Pages (/patterns/[slug]/)
+    |                       |-- requires --> Radar Chart
+    |                       |-- requires --> Score Breakdown
+    |                       |-- requires --> SVG Architecture Diagrams (per-pattern)
+    |                       |-- requires --> Share Controls
+    |                       |-- requires --> Prev/Next Nav
+    |                       |-- requires --> JSON-LD structured data
+    |
+    |-- required by --> Comparison Pages (/patterns/vs/[slug]/)
+                            |-- requires --> Overlay Radar Chart
+                            |-- requires --> Compare Picker (React island)
 
-[Importance Section]         (standalone, no deps)
+SVG Architecture Diagrams ──blocks──> Detail Pages (cannot ship detail pages without diagrams)
 
-[Case Study Cross-Links]
-    requires: Case study slugs exist (DONE -- 10 case studies built)
-    requires: technique-to-case-study mapping (NEW)
-
-[Formulas (KaTeX)]
-    requires: KaTeX already installed (DONE -- used by quantitative pages)
-    requires: TechniqueContent interface extension (NEW)
-    requires: [slug].astro template update (NEW)
-
-[Python Code Examples]
-    requires: astro-expressive-code installed (DONE -- used by quantitative pages)
-    requires: TechniqueContent interface extension (NEW -- same as Formulas)
-    requires: [slug].astro template update (NEW -- same as Formulas)
-
-[Variant Interpretation Captions]
-    requires: PlotVariantSwap.astro update (NEW)
-    requires: technique-renderer.ts variant data extension (NEW)
-    enhances: [Formulas] and [Python Code] (more context for pattern recognition)
-
-[Formulas] + [Python Code]
-    share: TechniqueContent interface extension
-    share: [slug].astro template update
-    SHOULD be done together to avoid two template changes
+Category Filter ──reuses──> UseCaseFilter pattern (nanostores + React)
+Radar Chart ──reuses──> CompassRadarChart (DB Compass)
+Compare Picker ──reuses──> VsComparePicker (Beauty Index)
+Scoring Table ──reuses──> CompassScoringTable (DB Compass)
+Complexity Spectrum ──reuses──> ComplexitySpectrum (DB Compass)
 ```
 
 ### Dependency Notes
 
-- **Formulas and Python Code share infrastructure**: Both require extending `TechniqueContent` and updating `[slug].astro`. Doing them in the same phase avoids duplicate template work.
-- **Questions Answered and Importance are independent**: Pure content additions with no infrastructure changes beyond a new field each.
-- **Case Study Cross-Links depend on existing case studies**: All 10 case studies are already built. The only new work is the mapping data and a render section.
-- **Variant Captions enhance but don't require Formulas/Code**: They can be done independently but are more valuable when users can also see the formula and reproduce in Python.
+- **Content Collection must come first:** Everything depends on the Zod schema and JSON data file. This is the foundation.
+- **SVG diagrams block detail page launch:** Detail pages without architecture diagrams are the single biggest quality gap. These are the highest-effort individual items.
+- **Catalog page can launch before detail pages:** The catalog page with cards, filtering, and the scoring table provides value even if detail pages are still in progress. Ship catalog first.
+- **Comparison pages depend on detail pages:** Cannot compare patterns that do not have detail pages yet. Ship comparisons last.
+- **All React islands reuse existing patterns:** No new React component architecture. Adapt existing UseCaseFilter, VsComparePicker, and nanostores infrastructure.
 
 ---
 
 ## MVP Definition
 
-### Phase 1: Content Depth (Questions + Importance + Case Study Links)
+### Launch With (v1)
 
-The minimum viable enhancement that makes every page feel substantially richer.
+The minimum set that delivers a complete, usable pattern encyclopedia.
 
-- [x] Add `questionsAnswered: string[]` to `TechniqueContent` -- ~95 question strings
-- [x] Add `importance: string` to `TechniqueContent` -- 29 importance paragraphs
-- [x] Add case study cross-link mapping and render section -- ~22 techniques get links
-- [x] Update `[slug].astro` template to render 3 new sections
+- [ ] **Content collection** -- Zod schema, JSON data file with all 13 patterns, content.config.ts registration
+- [ ] **Catalog page** (`/patterns/`) -- Pattern card grid grouped by category, scoring table, complexity spectrum
+- [ ] **Category filter** -- React island with 5 toggle pills (Resilience, Data Management, Communication, Structural, Scaling)
+- [ ] **Detail pages** (`/patterns/[slug]/`) -- All 13 patterns with: summary, character sketch, radar chart, score breakdown, strengths/weaknesses, when to use/avoid, related patterns, prev/next nav
+- [ ] **SVG architecture diagrams** -- One custom SVG per pattern (13 total)
+- [ ] **SEO metadata** -- JSON-LD CreativeWork per pattern, BreadcrumbList, OG meta tags
+- [ ] **Header navigation** -- Add "Patterns" to site navigation
 
-**Rationale:** These three features are all LOW complexity, pure content additions that triple the section count on each page (from 5 to 8 sections). They bring every page to content parity with the NIST canonical structure minus formulas/code.
+### Add After Validation (v1.x)
 
-### Phase 2: Formulas + Python Code (Technical Depth)
+Features to add once the core 13 patterns are live and generating traffic.
 
-Add the technical content that matches quantitative technique pages.
+- [ ] **Pattern comparison pages** (`/patterns/vs/[slug]/`) -- Side-by-side radar chart overlay. Trigger: after all 13 detail pages are live
+- [ ] **Interactive SVG diagrams** -- Hover states, flow animation, clickable components. Trigger: after base SVGs are solid and user feedback confirms demand
+- [ ] **Scoring justifications** -- Written paragraph per dimension per pattern (91 paragraphs total). Trigger: when organic search traffic confirms the pillar is worth the investment
+- [ ] **OG images per pattern** -- Auto-generated social sharing images. Trigger: before any social promotion campaign
+- [ ] **Additional patterns** (expand to 18-20) -- Add Event-Driven Architecture (as a style overview), Service Mesh, Outbox, Materialized View, Throttling. Trigger: when initial 13 are fully polished
 
-- [x] Extend `TechniqueContent` with `formulas` and `pythonCode` optional fields
-- [x] Update `[slug].astro` to render formula and code slots (copy from quantitative)
-- [x] Author ~40 KaTeX formula blocks for 12 techniques
-- [x] Author 29 Python code examples
+### Future Consideration (v2+)
 
-**Rationale:** Formulas and code share infrastructure changes. The quantitative pages already prove the pattern works. This phase makes graphical pages first-class citizens matching quantitative page depth.
-
-### Phase 3: Variant Enrichment (Polish)
-
-Enhance the 6 Tier B techniques with interpretive captions.
-
-- [x] Extend variant data structure with `interpretation` field
-- [x] Update `PlotVariantSwap.astro` to render captions
-- [x] Author 35 interpretation strings
-
-**Rationale:** This is polish that builds on Phase 2. The captions reference concepts from formulas and connect to "what model to use" guidance that Python code demonstrates.
+- [ ] **Decision flowchart** (`/patterns/decide/`) -- Interactive wizard: "I need to handle [problem]" leads to pattern recommendation. Defer because it requires significant UX design and testing.
+- [ ] **Pattern relationship graph** -- D3.js force-directed graph showing how patterns connect. Defer because it is visually impressive but low practical utility compared to inline related-pattern links.
+- [ ] **Blog series tie-in** -- "Pattern of the Month" deep-dive posts linking back to encyclopedia entries. Defer until encyclopedia is established.
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority | Phase |
-|---------|------------|---------------------|----------|-------|
-| Questions Answered | HIGH | LOW | P1 | 1 |
-| Importance Section | HIGH | LOW | P1 | 1 |
-| Case Study Cross-Links | HIGH | LOW | P1 | 1 |
-| Formulas (KaTeX) | HIGH | MEDIUM | P1 | 2 |
-| Python Code Examples | HIGH | MEDIUM | P1 | 2 |
-| Variant Interpretation Captions | MEDIUM | MEDIUM | P2 | 3 |
-| Technique Decision Guidance | MEDIUM | MEDIUM | P3 | Future |
-| Formula-to-Code Visual Pairing | LOW | LOW | P3 | Future |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Content collection + schema | HIGH | LOW | P1 |
+| Catalog page with grid | HIGH | LOW | P1 |
+| Category filter | HIGH | LOW | P1 |
+| Detail pages (13) | HIGH | MEDIUM | P1 |
+| SVG diagrams (13) | HIGH | HIGH | P1 |
+| Radar charts | HIGH | LOW | P1 |
+| Score breakdown | MEDIUM | LOW | P1 |
+| Prev/next navigation | MEDIUM | LOW | P1 |
+| SEO metadata + JSON-LD | HIGH | LOW | P1 |
+| Complexity spectrum | MEDIUM | LOW | P1 |
+| Scoring table | MEDIUM | LOW | P1 |
+| Share controls | LOW | LOW | P1 |
+| Character sketches | MEDIUM | LOW | P1 |
+| Pattern comparison pages | MEDIUM | MEDIUM | P2 |
+| Interactive SVG animations | MEDIUM | HIGH | P2 |
+| Scoring justifications | MEDIUM | MEDIUM | P2 |
+| OG images per pattern | MEDIUM | MEDIUM | P2 |
+| Additional patterns (18-20) | MEDIUM | HIGH | P2 |
+| Decision flowchart | HIGH | HIGH | P3 |
+| Pattern relationship graph | LOW | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for NIST parity
-- P2: Should have, adds pedagogical depth
-- P3: Nice to have, future consideration
+- P1: Must have for launch (13 patterns with full detail pages, catalog, filtering, radar charts)
+- P2: Should have, add after initial launch validates the pillar
+- P3: Nice to have, future consideration after traffic and engagement data
 
 ---
 
-## Competitor/Reference Feature Analysis
+## Competitor Feature Analysis
 
-| Feature | NIST Handbook | Wikipedia | Khan Academy | Our Approach |
-|---------|--------------|-----------|--------------|--------------|
-| Definition | Plain text, often verbose | Comprehensive, with history | Simple, video-first | Concise 2-sentence definition (DONE) |
-| Questions Answered | Bulleted list, 2-9 items | Not structured this way | Not structured this way | Bulleted list matching NIST (TO ADD) |
-| Importance | 1-3 paragraphs | Implicit in "Applications" | Not explicit | Focused paragraph (TO ADD) |
-| Formulas | Inline in text, sometimes images | Full derivations | Step-by-step | Display-mode KaTeX with explanations (TO ADD) |
-| Code Examples | Dataplot (obsolete) + R | None | None | Modern Python with matplotlib/scipy (TO ADD) |
-| Interactive plots | None (static images) | None | Yes (JS widgets) | Build-time SVG (DONE, deliberately static) |
-| Visual variants | Links to sub-pages | None | Some | PlotVariantSwap tabs (DONE for 6 techniques) |
-| Case study links | Links to section 1.4.2 | External links | Worked examples | Cross-links to our 10 case studies (TO ADD) |
+| Feature | Azure Architecture Center | microservices.io | AWS Prescriptive Guidance | Our Approach |
+|---------|--------------------------|-----------------|--------------------------|--------------|
+| Pattern count | ~40 | ~44 | ~14 | 13 (curated, not exhaustive) |
+| Visual diagrams | Static SVG per pattern | Minimal/none | Minimal | Custom SVG per pattern, interactive in v1.x |
+| Scoring/comparison | Binary pillar tags | None | None | 7-dimension quantitative scoring with radar charts -- **unique** |
+| Filtering | None | None | None | Category toggle filter -- **unique** |
+| Side-by-side comparison | None | None | None | Pattern vs pattern with overlay radar -- **unique** |
+| Character/personality | None (dry technical prose) | None | None | Opinionated character sketches -- **unique** |
+| Code examples | Yes (C#/Azure specific) | Yes (Java) | Yes (AWS specific) | No (vendor-agnostic by design) |
+| When to use/avoid | Yes | Partial | Partial | Yes, with structured data |
+| Related patterns | Yes | Yes | Partial | Yes, bidirectional links |
+| Complexity indicator | No | No | No | Complexity spectrum bar -- **unique** |
+| Mobile responsive | Yes | Partial | Yes | Yes |
+| Social sharing | No | No | No | Per-pattern share controls -- **unique** |
+| SEO structured data | Minimal | No | No | Full JSON-LD per pattern -- **unique** |
 
-**Our unique position:** We are the only resource combining NIST's authoritative section structure with modern Python code, build-time SVG visualization, and interactive variant switching in a single, fast-loading static page. Wikipedia has depth but no code. Khan Academy has interactivity but not for EDA techniques. NIST has authority but uses obsolete tools and static GIF images.
-
----
-
-## Technique-Specific Formula Inventory
-
-For Phase 2 planning, here is the complete formula inventory per technique:
-
-### Techniques WITH formulas needed (12)
-
-**Autocorrelation Plot (5 formulas):**
-1. Autocorrelation coefficient: `r_h = C_h / C_0`
-2. Autocovariance: `C_h = (1/N) sum((Y_t - Ybar)(Y_{t+h} - Ybar))`
-3. Variance: `C_0 = (1/N) sum((Y_t - Ybar)^2)`
-4. Confidence band (randomness): `+/- z_{1-alpha/2} / sqrt(N)`
-5. Standard error of mean: `s_Ybar = s / sqrt(N)`
-
-**Box-Cox Linearity Plot (1 formula):**
-1. Box-Cox transform: `T(X) = (X^lambda - 1) / lambda; ln(X) when lambda = 0`
-
-**Box-Cox Normality Plot (1 formula):**
-1. Same Box-Cox transform applied to Y
-
-**Box Plot (4 formulas):**
-1. Inner fence lower: `L1 = Q1 - 1.5 * IQR`
-2. Inner fence upper: `U1 = Q3 + 1.5 * IQR`
-3. Outer fence lower: `L2 = Q1 - 3.0 * IQR`
-4. Outer fence upper: `U2 = Q3 + 3.0 * IQR`
-
-**Normal Probability Plot (3 formulas):**
-1. Normal order statistics: `N_i = G(U_i)`
-2. Filliben approximation for U_1: `U_1 = 1 - 0.5^(1/n)`
-3. Filliben approximation for U_i: `U_i = (i - 0.3175) / (n + 0.365)`
-
-**Probability Plot (2 formulas):**
-1. Generalized order statistics: `M_i = G(U_i)` for distribution G
-2. Same Filliben approximation
-
-**PPCC Plot (1 formula):**
-1. PPCC = correlation coefficient between ordered data and order statistic medians
-
-**Q-Q Plot (1 formula):**
-1. Quantile mapping: plot `Q1(p)` vs `Q2(p)` for p in (0,1)
-
-**Spectral Plot (2 formulas):**
-1. Sinusoidal model: `Y_i = C + alpha * sin(2*pi*omega*t_i + phi) + E_i`
-2. Power spectral density definition
-
-**Weibull Plot (3 formulas):**
-1. Weibull CDF: `F(x) = 1 - exp(-(x/beta)^gamma)`
-2. Log-log linearization
-3. Shape/scale parameter extraction from slope/intercept
-
-**Bootstrap Plot (1 formula):**
-1. Bootstrap resample definition
-
-**6-Plot (1 formula):**
-1. Regression model: `Y_i = f(X_i) + E_i`
-
-### Techniques WITHOUT formulas (17)
-
-Bihistogram, Block Plot, Complex Demodulation, Contour Plot, DOE Plots, Histogram, Lag Plot, Linear Plots, Mean Plot, Run-Sequence Plot, Scatter Plot, Std Deviation Plot, Star Plot, Youden Plot, 4-Plot, Scatterplot Matrix, Conditioning Plot
-
-These 17 techniques are purely visual/graphical with no defining formula on the NIST page. Their Python code examples will demonstrate the plotting functions directly.
-
----
-
-## Python Code Library Mapping (Complete)
-
-| Technique | Import | Key Function | Lines Est. |
-|-----------|--------|-------------|-----------|
-| autocorrelation-plot | `from statsmodels.graphics.tsaplots import plot_acf` | `plot_acf(data, lags=40)` | 12 |
-| bihistogram | `import matplotlib.pyplot as plt` | Two `plt.subplot()` + `plt.hist()` | 18 |
-| block-plot | `import matplotlib.pyplot as plt` | `plt.bar()` with grouped means | 15 |
-| bootstrap-plot | `import numpy as np; import matplotlib.pyplot as plt` | `np.random.choice()` loop + `plt.hist()` | 18 |
-| box-cox-linearity | `from scipy.stats import boxcox` | `boxcox()` sweep + `plt.plot()` | 15 |
-| box-cox-normality | `from scipy.stats import boxcox_normplot` | `boxcox_normplot(data)` | 12 |
-| box-plot | `import seaborn as sns` | `sns.boxplot()` | 10 |
-| complex-demodulation | `import numpy as np; import matplotlib.pyplot as plt` | Custom amplitude/phase extraction + `plt.subplot()` | 22 |
-| contour-plot | `import matplotlib.pyplot as plt` | `plt.contour()` or `plt.contourf()` | 15 |
-| conditioning-plot | `import seaborn as sns` | `sns.FacetGrid()` | 15 |
-| doe-plots | `import matplotlib.pyplot as plt` | 3 subplots: scatter, mean bar, SD bar | 20 |
-| histogram | `import seaborn as sns` | `sns.histplot(data, kde=True)` | 10 |
-| lag-plot | `import pandas as pd` | `pd.plotting.lag_plot(series)` | 10 |
-| linear-plots | `import matplotlib.pyplot as plt; from scipy.stats import linregress` | 4 subplots with `linregress()` | 25 |
-| mean-plot | `import matplotlib.pyplot as plt` | `plt.bar()` + `plt.axhline()` | 12 |
-| normal-probability-plot | `from scipy import stats` | `stats.probplot(data, plot=plt)` | 10 |
-| ppcc-plot | `from scipy.stats import ppcc_plot` | `ppcc_plot(data)` | 12 |
-| probability-plot | `from scipy import stats` | `stats.probplot(data, dist='weibull_min')` | 12 |
-| qq-plot | `from scipy import stats` | `stats.probplot()` for two samples | 15 |
-| run-sequence-plot | `import matplotlib.pyplot as plt` | `plt.plot(data)` | 10 |
-| scatter-plot | `import seaborn as sns` | `sns.scatterplot()` or `sns.regplot()` | 12 |
-| scatterplot-matrix | `import seaborn as sns` | `sns.pairplot()` | 10 |
-| spectral-plot | `from scipy.signal import periodogram` | `periodogram(data)` + `plt.semilogy()` | 15 |
-| star-plot | `import matplotlib.pyplot as plt` | Polar axes `plt.subplot(polar=True)` | 18 |
-| std-deviation-plot | `import matplotlib.pyplot as plt` | `plt.bar()` + `plt.axhline()` | 12 |
-| weibull-plot | `from scipy import stats` | `stats.probplot(data, dist='weibull_min')` | 12 |
-| youden-plot | `import matplotlib.pyplot as plt` | `plt.scatter()` + `plt.axhline()` + `plt.axvline()` | 15 |
-| 4-plot | `import matplotlib.pyplot as plt; from scipy import stats` | `fig, axes = plt.subplots(2, 2)` | 22 |
-| 6-plot | `import matplotlib.pyplot as plt; from scipy import stats` | `fig, axes = plt.subplots(2, 3)` | 25 |
-
-**Total estimated: ~420 lines of Python across 29 techniques**
+**Competitive advantage summary:** The major pattern references are text-heavy documentation sites with no quantitative comparison, no filtering, no interactivity, and no visual personality. Our approach brings the DB Compass treatment (scoring + radar charts + character sketches + filtering) to architecture patterns, creating the only pattern reference that lets you visually compare tradeoffs across dimensions.
 
 ---
 
 ## Sources
 
-- NIST/SEMATECH e-Handbook of Statistical Methods, Section 1.3.3 (graphical techniques index): https://www.itl.nist.gov/div898/handbook/eda/section3/eda33.htm
-- NIST Histogram page: https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm
-- NIST Autocorrelation Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/autocopl.htm
-- NIST Box Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/boxplot.htm
-- NIST Normal Probability Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/normprpl.htm
-- NIST Lag Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/lagplot.htm
-- NIST Run-Sequence Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/runseqpl.htm
-- NIST Weibull Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/weibplot.htm
-- NIST Spectral Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/spectrum.htm
-- NIST Box-Cox Normality Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/eda336.htm
-- NIST 6-Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/6plot.htm
-- NIST Scatter Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/scatplot.htm
-- NIST PPCC Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/ppccplot.htm
-- NIST Q-Q Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/qqplot.htm
-- NIST Mean Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/meanplot.htm
-- NIST Contour Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/contour.htm
-- NIST Bootstrap Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/bootplot.htm
-- NIST Star Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/starplot.htm
-- NIST Bihistogram page: https://www.itl.nist.gov/div898/handbook/eda/section3/bihistog.htm
-- NIST DOE Scatter Plot page: https://www.itl.nist.gov/div898/handbook/eda/section3/eda33b.htm
-- statsmodels plot_acf documentation: https://www.statsmodels.org/stable/generated/statsmodels.graphics.tsaplots.plot_acf.html
-- Existing codebase: `src/lib/eda/technique-content.ts`, `src/lib/eda/quantitative-content.ts`, `src/pages/eda/techniques/[slug].astro`, `src/pages/eda/quantitative/[slug].astro`
+- [Azure Architecture Center - Cloud Design Patterns](https://learn.microsoft.com/en-us/azure/architecture/patterns/) -- 40+ patterns, 8 categories, per-pattern pages with Context/Problem, Solution, When to Use, Considerations, Example
+- [microservices.io - Pattern Language](https://microservices.io/patterns/) -- 44+ patterns by Chris Richardson, organized by decomposition, data, communication, deployment, testing, observability
+- [AWS Prescriptive Guidance - Cloud Design Patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html) -- 14 patterns focused on modernization and microservices
+- [Martin Fowler - Patterns of Distributed Systems](https://martinfowler.com/articles/patterns-of-distributed-systems/) -- Distributed systems pattern catalog with academic rigor
+- [FreeCodeCamp - Design Patterns for Distributed Systems Handbook](https://www.freecodecamp.org/news/design-patterns-for-distributed-systems/) -- Community overview of core patterns and tradeoffs
+- [Cloud Native Architecture Patterns 2026 Guide](https://clearfuze.com/blog/cloud-native-architecture-patterns/) -- Contemporary pattern overview with current relevance
+- [Azure Circuit Breaker Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker) -- Detailed reference for pattern page structure (Context/Problem, Solution, Considerations, When to Use, Example)
+- [Azure CQRS Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) -- Detailed reference for data management pattern depth
+- Existing site pillars (DB Compass, Beauty Index) analyzed for reusable component patterns, data model structure, and interaction patterns
 
 ---
-*Feature research for: EDA Graphical Techniques NIST Section Parity*
-*Researched: 2026-02-27*
+*Feature research for: Cloud Architecture Patterns Visual Encyclopedia*
+*Researched: 2026-03-01*
