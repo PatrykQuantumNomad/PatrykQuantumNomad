@@ -17,7 +17,7 @@ import { PG009 } from './security/PG009-remove-unnecessary-tools';
 import { PG010 } from './security/PG010-detect-tool-usage';
 import { PG011 } from './security/PG011-missing-user-directive';
 
-// Efficiency rules (8)
+// Efficiency rules (9)
 import { DL3059 } from './efficiency/DL3059-consolidate-runs';
 import { DL3014 } from './efficiency/DL3014-use-apt-y';
 import { DL3015 } from './efficiency/DL3015-no-install-recommends';
@@ -26,6 +26,7 @@ import { DL3009 } from './efficiency/DL3009-remove-apt-lists';
 import { DL4006 } from './efficiency/DL4006-set-pipefail';
 import { DL3042 } from './efficiency/DL3042-pip-no-cache-dir';
 import { DL3019 } from './efficiency/DL3019-use-apk-no-cache';
+import { PG012 } from './efficiency/PG012-node-caged-pointer-compression';
 
 // Maintainability rules (7)
 import { DL4000 } from './maintainability/DL4000-no-maintainer';
@@ -73,7 +74,7 @@ export const allRules: LintRule[] = [
   PG009,
   PG010,
   PG011,
-  // Efficiency (8)
+  // Efficiency (9)
   DL3059,
   DL3014,
   DL3015,
@@ -82,6 +83,7 @@ export const allRules: LintRule[] = [
   DL4006,
   DL3042,
   DL3019,
+  PG012,
   // Maintainability (7)
   DL4000,
   DL3025,
