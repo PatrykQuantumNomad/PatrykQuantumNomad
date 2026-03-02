@@ -13,7 +13,7 @@
 - ~~v1.8 EDA Visual Encyclopedia~~ - Phases 48-55 (shipped 2026-02-25)
 - ~~v1.9 EDA Case Study Deep Dive~~ - Phases 56-63 (shipped 2026-02-27)
 - ~~v1.10 EDA Graphical Techniques — NIST Parity & Validation~~ - Phases 64-68 (shipped 2026-02-27)
-- [ ] **v1.11 Beauty Index: Lisp** - Phases 69-71 (in progress)
+- ~~v1.11 Beauty Index: Lisp~~ - Phases 69-71 (shipped 2026-03-02)
 
 ## Phases
 
@@ -25,13 +25,13 @@ See `.planning/milestones/` for detailed archives.
 
 </details>
 
-### v1.11 Beauty Index: Lisp (In Progress)
+### v1.11 Beauty Index: Lisp (Complete)
 
 **Milestone Goal:** Add Lisp (Common Lisp / Scheme family) as the 26th language to the Beauty Index, with full scoring, content, code snippets, and site integration.
 
 - [x] **Phase 69: Lisp Data Foundation** - Lisp entry in languages.json, signature snippet, dimension justifications, and ALL_LANGS registration
 - [x] **Phase 70: Code Comparison Snippets** - All 10 code feature snippets for Lisp with Clojure differentiation
-- [ ] **Phase 71: Site-Wide Integration** - Update all hardcoded counts from 25 to 26 and verify full production build
+- [x] **Phase 71: Site-Wide Integration** - Update all hardcoded counts from 25 to 26 and verify full production build
 
 ## Phase Details
 
@@ -76,7 +76,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 71-01-PLAN.md -- Update all hardcoded 25->26 references, PROJECT.md documentation, and build verification
+- [x] 71-01-PLAN.md -- Update all hardcoded 25->26 references, PROJECT.md documentation, and build verification
 
 ## Progress
 
@@ -98,4 +98,4 @@ Phases execute in numeric order: 69 -> 70 -> 71
 | 64-68 | v1.10 EDA Graphical NIST Parity | 12/12 | Complete | 2026-02-27 |
 | 69 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
 | 70 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |
-| 71 | v1.11 Beauty Index: Lisp | 0/1 | Not started | - |
+| 71 | v1.11 Beauty Index: Lisp | 1/1 | Complete | 2026-03-02 |

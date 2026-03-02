@@ -29,13 +29,13 @@ Requirements for Beauty Index: Lisp milestone. Each maps to roadmap phases.
 
 ### Site Integration
 
-- [ ] **SITE-01**: All hardcoded "25 languages" references updated to "26 languages" across pages, components, and meta descriptions
-- [ ] **SITE-02**: Blog post referencing "25 languages" updated to "26 languages"
-- [ ] **SITE-03**: OG image text references updated from 25 to 26
-- [ ] **SITE-04**: JSON-LD structured data updated with correct language count
-- [ ] **SITE-05**: LLMs.txt updated with correct language count
-- [ ] **SITE-06**: PROJECT.md updated with Lisp-related validated requirements
-- [ ] **SITE-07**: Full `astro build` passes with Lisp detail page, OG image, and all VS comparison pages generated
+- [x] **SITE-01**: All hardcoded "25 languages" references updated to "26 languages" across pages, components, and meta descriptions
+- [x] **SITE-02**: Blog post referencing "25 languages" updated to "26 languages"
+- [x] **SITE-03**: OG image text references updated from 25 to 26
+- [x] **SITE-04**: JSON-LD structured data updated with correct language count
+- [x] **SITE-05**: LLMs.txt updated with correct language count
+- [x] **SITE-06**: PROJECT.md updated with Lisp-related validated requirements
+- [x] **SITE-07**: Full `astro build` passes with Lisp detail page, OG image, and all VS comparison pages generated
 
 ## Future Requirements
 
@@ -70,13 +70,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CODE-08 | Phase 70 | Complete |
 | CODE-09 | Phase 70 | Complete |
 | CODE-10 | Phase 70 | Complete |
-| SITE-01 | Phase 71 | Pending |
-| SITE-02 | Phase 71 | Pending |
-| SITE-03 | Phase 71 | Pending |
-| SITE-04 | Phase 71 | Pending |
-| SITE-05 | Phase 71 | Pending |
-| SITE-06 | Phase 71 | Pending |
-| SITE-07 | Phase 71 | Pending |
+| SITE-01 | Phase 71 | Complete |
+| SITE-02 | Phase 71 | Complete |
+| SITE-03 | Phase 71 | Complete |
+| SITE-04 | Phase 71 | Complete |
+| SITE-05 | Phase 71 | Complete |
+| SITE-06 | Phase 71 | Complete |
+| SITE-07 | Phase 71 | Complete |
 
 **Coverage:**
 - v1.11 requirements: 21 total
@@ -85,4 +85,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after roadmap creation*
+*Last updated: 2026-03-02 after Phase 71 completion*
