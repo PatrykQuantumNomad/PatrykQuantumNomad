@@ -12,14 +12,14 @@ Requirements for Dockerfile Rules Expansion milestone. Each maps to roadmap phas
 - [x] **RULES-01**: PG011 security rule flags Dockerfiles with no USER directive in final build stage
 - [x] **RULES-02**: PG011 only checks final stage (skips builder stages and FROM scratch)
 - [x] **RULES-03**: PG011 has no overlap with DL3002 (fires only when no USER instruction exists at all)
-- [ ] **RULES-04**: PG012 efficiency rule suggests platformatic/node-caged for Node.js base images
-- [ ] **RULES-05**: PG012 matches official node images correctly (not substrings or custom namespaces)
-- [ ] **RULES-06**: PG012 explanation includes Node 25+ version requirement and ~50% memory benefit
+- [x] **RULES-04**: PG012 efficiency rule suggests platformatic/node-caged for Node.js base images
+- [x] **RULES-05**: PG012 matches official node images correctly (not substrings or custom namespaces)
+- [x] **RULES-06**: PG012 explanation includes Node 25+ version requirement and ~50% memory benefit
 
 ### Documentation
 
 - [x] **DOCS-01**: PG011 rule page includes expert explanation, fix with before/after code, and related rules
-- [ ] **DOCS-02**: PG012 rule page includes expert explanation, fix with before/after code, and related rules
+- [x] **DOCS-02**: PG012 rule page includes expert explanation, fix with before/after code, and related rules
 
 ### Integration
 
@@ -48,11 +48,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RULES-01 | Phase 72 | Complete |
 | RULES-02 | Phase 72 | Complete |
 | RULES-03 | Phase 72 | Complete |
-| RULES-04 | Phase 73 | Pending |
-| RULES-05 | Phase 73 | Pending |
-| RULES-06 | Phase 73 | Pending |
+| RULES-04 | Phase 73 | Complete |
+| RULES-05 | Phase 73 | Complete |
+| RULES-06 | Phase 73 | Complete |
 | DOCS-01 | Phase 72 | Complete |
-| DOCS-02 | Phase 73 | Pending |
+| DOCS-02 | Phase 73 | Complete |
 | INTG-01 | Phase 74 | Pending |
 | INTG-02 | Phase 74 | Pending |
 | INTG-03 | Phase 74 | Pending |

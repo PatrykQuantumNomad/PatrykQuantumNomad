@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Dockerfile Rules Expansion
 status: active
-last_updated: "2026-03-02T17:58:17Z"
+last_updated: "2026-03-02T18:36:09Z"
 progress:
   total_phases: 74
-  completed_phases: 72
+  completed_phases: 73
   total_plans: 165
-  completed_plans: 163
+  completed_plans: 164
 ---
 
 # Project State
@@ -22,17 +22,17 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 72 (1 of 3 in v1.12 Dockerfile Rules Expansion)
+Phase: 73 (2 of 3 in v1.12 Dockerfile Rules Expansion)
 Plan: 1 of 1 in current phase
-Status: Phase 72 complete
-Last activity: 2026-03-02 — Completed 72-01-PLAN.md (PG011 rule)
+Status: Phase 73 complete
+Last activity: 2026-03-02 — Completed 73-01-PLAN.md (PG012 rule)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 163 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11 + 1 v1.12)
+- Total plans completed: 164 (15 v1.0 + 7 v1.1 + 6 v1.2 + 15 v1.3 + 13 v1.4 + 10 v1.5 + 14 v1.6 + 23 v1.7 + 24 v1.8 + 19 v1.9 + 13 v1.10 + 3 v1.11 + 2 v1.12)
 
 **Cumulative Stats:**
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 Full decision log in PROJECT.md Key Decisions table.
 
 - **Phase 72:** PG011 uses warning severity matching DL3002 convention; non-overlap boundary with DL3002 ensures PG011 fires only when zero USER instructions exist in final stage
+- **Phase 73:** PG012 uses info severity (not warning) because pointer compression is an optimization suggestion; exact image name matching with registry check prevents false positives on custom registries
 
 ### Pending Todos
 
@@ -78,6 +79,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 72-01-PLAN.md (PG011 missing USER directive rule)
+Stopped at: Completed 73-01-PLAN.md (PG012 pointer compression rule)
 Resume file: None
-Next: `/gsd:plan-phase 73`
+Next: `/gsd:plan-phase 74`
