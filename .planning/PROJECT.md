@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (26 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 39 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (26 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 46 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations).
 
 ## Reference Data
 
@@ -219,17 +219,21 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ LLMs.txt files updated with 26 languages and derived counts — v1.11
 - ✓ Full production build passes with Lisp detail page, OG image, and 650 VS pages — v1.11
 
+- ✓ PG011 security rule flags Dockerfiles with no USER directive in final build stage — v1.12
+- ✓ PG011 only checks final stage (skips builder stages and FROM scratch) — v1.12
+- ✓ PG011 has no overlap with DL3002 (fires only when no USER instruction exists at all) — v1.12
+- ✓ PG012 efficiency rule suggests platformatic/node-caged for Node.js base images — v1.12
+- ✓ PG012 matches official node images correctly (not substrings or custom namespaces) — v1.12
+- ✓ PG012 explanation includes Node 25+ version requirement and ~50% memory benefit — v1.12
+- ✓ PG011 rule page includes expert explanation, fix with before/after code, and related rules — v1.12
+- ✓ PG012 rule page includes expert explanation, fix with before/after code, and related rules — v1.12
+- ✓ Both rules registered in allRules array in rules/index.ts — v1.12
+- ✓ All hardcoded rule counts updated site-wide to reflect 46 total rules — v1.12
+- ✓ Full production build passes with 46 rules and both new documentation pages — v1.12
+
 ### Active
 
-## Current Milestone: v1.12 Dockerfile Rules Expansion
-
-**Goal:** Add 2 new custom lint rules to the Dockerfile Analyzer — missing USER directive (security) and Node.js pointer compression (efficiency) — with documentation pages and updated rule counts site-wide.
-
-**Target features:**
-- PG011: Missing USER directive security rule
-- PG012: Node.js pointer compression efficiency rule
-- Rule documentation pages for both new rules
-- Updated rule counts across all site references (44 → 46)
+(None — next milestone not yet defined)
 
 ### Out of Scope
 
@@ -258,10 +262,10 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.11 Beauty Index: Lisp on top of v1.10 EDA Graphical Techniques NIST Parity, v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test validation.
+Shipped v1.12 Dockerfile Rules Expansion on top of v1.11 Beauty Index: Lisp, v1.10 EDA Graphical Techniques NIST Parity, v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test and rule validation.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 requirements delivered (630 total). 1007 pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 requirements delivered (641 total). 1009 pages total. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
@@ -364,6 +368,12 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | Condition/restart for Lisp Error Handling | handler-bind + restart-case instead of handler-case alone | ✓ Good — showcases unique CL capability |
 | Lisp after Clojure in data files | Editorial proximity for Lisp-family languages | ✓ Good — logical grouping |
 | Preserve anti-patterns during 25→26 update | RedMonk URL date, C# age, scoring weight are not language counts | ✓ Good — no false positives in count update |
+| PG011 warning severity matching DL3002 | USER-related rules should share severity level | ✓ Good — consistent severity for USER directive issues |
+| PG011/DL3002 non-overlap boundary | PG011 fires only when zero USER instructions exist; DL3002 handles rest | ✓ Good — no duplicate violations |
+| PG012 info severity (not warning) | Pointer compression is optimization suggestion, not correctness issue | ✓ Good — appropriate 3-point deduction vs 8-point warning |
+| Exact image name matching for PG012 | Prevents false positives on nodeconfig, nodejs-slim, etc. | ✓ Good — zero false positives |
+| Registry check for PG012 | getRegistry() must be null or docker.io to exclude custom registries | ✓ Good — respects enterprise image policies |
+| SKILL.md entries from TypeScript source | Authoritative rule source files ensure accuracy | ✓ Good — consistent with runtime behavior |
 
 ## Constraints
 
@@ -378,4 +388,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-02 after v1.12 milestone start*
+*Last updated: 2026-03-02 after v1.12 milestone*

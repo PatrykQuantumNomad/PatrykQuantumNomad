@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Dockerfile Rules Expansion
-status: active
-last_updated: "2026-03-02T20:33:43Z"
+status: completed
+last_updated: "2026-03-02T21:45:00Z"
 progress:
   total_phases: 74
   completed_phases: 74
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 74 - Site-Wide Integration (v1.12 complete)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 74 (3 of 3 in v1.12 Dockerfile Rules Expansion)
-Plan: 1 of 1 in current phase
-Status: v1.12 milestone complete
-Last activity: 2026-03-02 — Completed 74-01-PLAN.md (site-wide integration)
+Phase: Next milestone not yet started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-02 — v1.12 milestone complete
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (12 milestones shipped)
 
 ## Performance Metrics
 
@@ -59,9 +59,7 @@ Progress: [██████████] 100%
 
 Full decision log in PROJECT.md Key Decisions table.
 
-- **Phase 72:** PG011 uses warning severity matching DL3002 convention; non-overlap boundary with DL3002 ensures PG011 fires only when zero USER instructions exist in final stage
-- **Phase 73:** PG012 uses info severity (not warning) because pointer compression is an optimization suggestion; exact image name matching with registry check prevents false positives on custom registries
-- **Phase 74:** SKILL.md entries sourced from authoritative TypeScript rule files for accuracy; site-wide count update pattern with exhaustive file inventory and grep-based verification
+Summary cleared at milestone completion. See milestones/v1.12-ROADMAP.md for v1.12 decisions.
 
 ### Pending Todos
 
@@ -81,6 +79,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 74-01-PLAN.md (site-wide integration)
+Stopped at: v1.12 milestone archived
 Resume file: None
-Next: v1.12 milestone complete. Start next milestone.
+Next: Start next milestone with `/gsd:new-milestone`

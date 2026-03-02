@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.12 Dockerfile Rules Expansion (Shipped: 2026-03-02)
+
+**Delivered:** Added 2 new custom lint rules to the Dockerfile Analyzer — PG011 (missing USER directive security rule) and PG012 (Node.js pointer compression efficiency rule) — with documentation pages, 12 test scenarios, and site-wide rule count updates from 44 to 46
+
+**Phases completed:** 72-74 (3 plans total)
+
+**Key accomplishments:**
+- PG011 security rule detects missing USER directive in final Dockerfile stage with CIS Docker Benchmark 4.1 reference and clean DL3002 non-overlap boundary
+- PG012 efficiency rule suggests platformatic/node-caged for Node.js images with V8 pointer compression (~50% memory reduction), registry-aware matching preventing false positives
+- 12 Vitest test scenarios (5 PG011 + 7 PG012) covering multi-stage, FROM scratch, custom registries, and alias references
+- All 9 site-wide references across 7 files updated to 46 rules, SKILL.md expanded with PG007-PG012 entries
+- Zero deviations across all 3 phases, clean 1009-page production build
+
+**Stats:**
+- 35 files created/modified (+3,910 / -1,221 lines)
+- 63,532 total LOC (TypeScript/Astro/MDX)
+- 3 phases, 3 plans, 22 commits
+- 1 day (2026-03-02)
+
+**Git range:** `feat(72-01)` → `docs(v1.12)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.11 Beauty Index: Lisp (Shipped: 2026-03-02)
 
 **Delivered:** Added Lisp (Common Lisp) as the 26th language to the Beauty Index with full scoring, 10 code comparison snippets showcasing CLOS and condition/restart system, and site-wide count updates across all pages, metadata, and blog posts
