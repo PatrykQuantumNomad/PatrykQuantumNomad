@@ -1,5 +1,29 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.11 Beauty Index: Lisp (Shipped: 2026-03-02)
+
+**Delivered:** Added Lisp (Common Lisp) as the 26th language to the Beauty Index with full scoring, 10 code comparison snippets showcasing CLOS and condition/restart system, and site-wide count updates across all pages, metadata, and blog posts
+
+**Phases completed:** 69-71 (3 plans total)
+
+**Key accomplishments:**
+- Added Lisp as 26th Beauty Index language with score 44 (Handsome tier), defmacro signature snippet, and 6 dimension justifications differentiating from Clojure
+- 9 Common Lisp code snippets across all 10 feature tabs showcasing CLOS (defclass/defgeneric/defmethod), condition/restart system, loop macro, and format directives
+- Updated 34+ hardcoded "25 languages" references to "26" across 16 source files (pages, blog posts, OG images, JSON-LD, LLMs.txt)
+- Full production build verified: 1007 pages generated including Lisp detail page, OG image, and 650 VS comparison pages
+- All 21 milestone requirements delivered with zero deviations from plan
+
+**Stats:**
+- 40 files created/modified (+4,708 / -67 lines)
+- 3 phases, 3 plans, 6 tasks
+- 2 days from start to ship (2026-03-01 → 2026-03-02)
+
+**Git range:** `feat(69-01)` → `feat(71-01)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.9 EDA Case Study Deep Dive (Shipped: 2026-02-27)
 
 **Delivered:** Enhanced all 9 EDA case studies to full NIST/SEMATECH source depth with individual named plot subsections, detailed quantitative test batteries, interpretation sections, and develop/validate model sections — plus a new Standard Resistor case study, 4 new DOE-specific SVG generators, gamma probability plot engineering, and uniform PDF histogram overlay
