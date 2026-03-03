@@ -195,6 +195,18 @@ export const projects: Project[] = [
 
   // Open Source Tools
   {
+    name: 'Kinder',
+    description:
+      'Kubernetes IN Docker Enhanced Runtime — extends kind with MetalLB, Envoy Gateway, Metrics Server, tuned CoreDNS, and Headlamp dashboard pre-installed for production-like local development',
+    url: 'https://github.com/PatrykQuantumNomad/kinder',
+    liveUrl: 'https://kinder.patrykgolabek.dev/',
+    language: 'Go',
+    category: 'Open Source Tools',
+    technologies: ['Go', 'Kubernetes', 'Docker', 'MetalLB', 'Envoy Gateway'],
+    status: 'active',
+    gridSize: 'large',
+  },
+  {
     name: 'financial-data-extractor',
     description:
       'Full-stack financial statement extraction — FastAPI backend, Next.js 15 frontend, and LLM-powered PDF parsing targeting European companies',

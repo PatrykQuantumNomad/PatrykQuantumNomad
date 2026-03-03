@@ -39,13 +39,21 @@ const wordCount = remarkPluginFrontmatter.words as number | undefined;
 
 const isBeautyIndexPost = post.id === 'the-beauty-index';
 const isK8sPost = post.id === 'kubernetes-manifest-best-practices';
+const isComposePost = post.id === 'docker-compose-best-practices';
+const isDockerfilePost = post.id === 'dockerfile-best-practices';
 const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isK8sPost ? 'Kubernetes Security'
+  : isComposePost ? 'Docker Best Practices'
+  : isDockerfilePost ? 'Docker Security'
   : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
   : isK8sPost
     ? { type: 'SoftwareApplication', name: 'Kubernetes Manifest Analyzer', url: 'https://patrykgolabek.dev/tools/k8s-analyzer/' }
+  : isComposePost
+    ? { type: 'SoftwareApplication', name: 'Docker Compose Validator', url: 'https://patrykgolabek.dev/tools/compose-validator/' }
+  : isDockerfilePost
+    ? { type: 'SoftwareApplication', name: 'Dockerfile Analyzer', url: 'https://patrykgolabek.dev/tools/dockerfile-analyzer/' }
     : undefined;
 
 const beautyIndexFAQ = isBeautyIndexPost ? [
@@ -87,6 +95,36 @@ const k8sFAQ = isK8sPost ? [
   {
     question: 'How should I configure RBAC in Kubernetes?',
     answer: 'Follow the principle of least privilege: never use wildcard (*) in apiGroups, resources, or verbs. Never bind service accounts to cluster-admin. Use namespace-scoped Roles instead of ClusterRoles when possible. Restrict pod exec/attach permissions and limit Secret access to specific service accounts. These rules align with CIS Kubernetes Benchmark Section 5.1.',
+  },
+] : [];
+
+const composeFAQ = isComposePost ? [
+  {
+    question: 'What is Docker Compose validation?',
+    answer: 'Docker Compose validation checks docker-compose.yml files for schema compliance, security vulnerabilities, semantic errors, and best-practice violations. The Docker Compose Validator at patrykgolabek.dev/tools/compose-validator/ runs 52 rules across these categories with category-weighted scoring.',
+  },
+  {
+    question: 'How do I find security issues in a docker-compose.yml file?',
+    answer: 'Check for privileged mode containers, Docker socket mounts (/var/run/docker.sock), hardcoded secrets in environment variables, excessive Linux capabilities, and shared host namespaces (pid, ipc, network). The Compose Validator catches 14 security-specific rules.',
+  },
+  {
+    question: 'What is a free Docker Compose validator?',
+    answer: 'The Docker Compose Validator at patrykgolabek.dev/tools/compose-validator/ is a free online tool that checks 52 rules for schema compliance, security issues, semantic errors, best-practice violations, and style consistency. It runs 100% in the browser with no server-side processing.',
+  },
+] : [];
+
+const dockerfileFAQ = isDockerfilePost ? [
+  {
+    question: 'How do I write a secure Dockerfile?',
+    answer: 'Use multi-stage builds to minimize attack surface, never expose secrets via ENV or ARG, use a non-root USER, pin base image versions with digest or specific tags, drop all Linux capabilities, use HEALTHCHECK for container orchestration, and install packages with pinned versions.',
+  },
+  {
+    question: 'What is a Dockerfile linter?',
+    answer: 'A Dockerfile linter is a static analysis tool that checks Dockerfiles for security vulnerabilities, efficiency issues, and best-practice violations. The Dockerfile Analyzer at patrykgolabek.dev/tools/dockerfile-analyzer/ checks 46 rules based on Hadolint DL codes plus custom production Kubernetes rules.',
+  },
+  {
+    question: 'What is a free online Dockerfile analyzer?',
+    answer: 'The Dockerfile Analyzer at patrykgolabek.dev/tools/dockerfile-analyzer/ is a free tool that checks 46 rules for security, efficiency, maintainability, reliability, and best practices. It runs 100% in the browser — your Dockerfile never leaves your device.',
   },
 ] : [];
 
@@ -166,6 +204,8 @@ const titleTag = (title.length + suffix.length > 65)
     />
     {beautyIndexFAQ.length > 0 && <FAQPageJsonLd items={beautyIndexFAQ} />}
     {k8sFAQ.length > 0 && <FAQPageJsonLd items={k8sFAQ} />}
+    {composeFAQ.length > 0 && <FAQPageJsonLd items={composeFAQ} />}
+    {dockerfileFAQ.length > 0 && <FAQPageJsonLd items={dockerfileFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },

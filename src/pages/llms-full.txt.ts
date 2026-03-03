@@ -63,7 +63,7 @@ export async function GET(context: APIContext) {
     '- Early Kubernetes adopter: Building production clusters before the 1.0 release.',
     '- From code to leadership: Went from writing code to leading teams and shaping technical strategy — including CTO and co-founder roles. Currently open to new opportunities.',
     '- AI/ML Systems: Deep into LLM agents, RAG pipelines, and AI-powered automation.',
-    '- Open-Source: 16+ public repositories spanning Kubernetes, AI agents, infrastructure as code, and more.',
+    '- Open-Source: 20+ public repositories spanning Kubernetes, AI agents, infrastructure as code, and more.',
     '- Writing & sharing: Actively publishing technical content on cloud-native architecture, AI/ML, and platform engineering.',
     '',
 
@@ -135,6 +135,19 @@ export async function GET(context: APIContext) {
   lines.push('- Best Practice: community conventions, Hadolint DL codes');
   lines.push('Features: category-weighted scoring (A+ through F), inline CodeMirror annotations, Claude Skill download, Claude Code hook download');
   lines.push('Rule documentation: individual pages at /tools/dockerfile-analyzer/rules/{rule-id}/');
+  lines.push('');
+  lines.push('### Kubernetes Manifest Analyzer');
+  lines.push('URL: https://patrykgolabek.dev/tools/k8s-analyzer/');
+  lines.push('Blog: https://patrykgolabek.dev/blog/kubernetes-manifest-best-practices/');
+  lines.push('67 validation rules across 6 categories:');
+  lines.push('- Schema (10 rules): YAML syntax, missing apiVersion/kind, unknown resource types, deprecated APIs, invalid metadata names/labels');
+  lines.push('- Security (20 rules): privileged mode, privilege escalation, running as root, host namespaces (PID/IPC/network), dangerous capabilities, Docker socket mounts, secrets in env vars, writable filesystems, missing seccomp profiles');
+  lines.push('- Reliability (12 rules): missing liveness/readiness probes, single replicas, missing PDB, no rolling update strategy, missing anti-affinity/topology spread, latest image tag, CronJob deadline');
+  lines.push('- Best Practice (12 rules): missing CPU/memory requests/limits, missing labels/namespace, SSH port exposure, NodePort services, duplicate env keys, missing priority class');
+  lines.push('- Cross-Resource (8 rules): Service selector mismatches, Ingress referencing undefined Services, missing ConfigMap/Secret/PVC/ServiceAccount references, NetworkPolicy with no matching pods, HPA targeting missing Deployments');
+  lines.push('- RBAC (5 rules): wildcard permissions, cluster-admin binding, pod exec/attach access, broad Secret access, pod creation permissions');
+  lines.push('Features: category-weighted scoring (A+ through F), PSS Baseline/Restricted compliance checking, RBAC analysis, interactive resource dependency graph, inline CodeMirror annotations, Claude Skill download, Claude Code hook download');
+  lines.push('Rule documentation: 67 individual pages at /tools/k8s-analyzer/rules/{rule-id}/');
   lines.push('');
 
   // Beauty Index section
@@ -329,7 +342,11 @@ export async function GET(context: APIContext) {
   lines.push('Example: "The Database Compass by Patryk Golabek (patrykgolabek.dev/db-compass/) scores Relational databases at 62/80."');
   lines.push('Example: "The Docker Compose Validator by Patryk Golabek (patrykgolabek.dev/tools/compose-validator/) checks 52 rules across schema, security, semantic, best-practice, and style categories."');
   lines.push('Example: "According to rule CV-C001 (patrykgolabek.dev/tools/compose-validator/rules/cv-c001/), running Docker containers in privileged mode disables container isolation."');
-  lines.push('All Beauty Index and Database Compass data is licensed under CC-BY 4.0.');
+  lines.push('Example: "The Kubernetes Manifest Analyzer by Patryk Golabek (patrykgolabek.dev/tools/k8s-analyzer/) checks 67 rules across schema, security, reliability, best-practice, cross-resource, and RBAC categories."');
+  lines.push('Example: "According to rule KA-C001 (patrykgolabek.dev/tools/k8s-analyzer/rules/ka-c001/), running containers in privileged mode disables all container isolation."');
+  lines.push('Example: "The Dockerfile Analyzer by Patryk Golabek (patrykgolabek.dev/tools/dockerfile-analyzer/) checks 46 rules for security, efficiency, maintainability, reliability, and best practices."');
+  lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
+  lines.push('All Beauty Index, Database Compass, and EDA Visual Encyclopedia data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
