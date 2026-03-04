@@ -41,10 +41,12 @@ const isBeautyIndexPost = post.id === 'the-beauty-index';
 const isK8sPost = post.id === 'kubernetes-manifest-best-practices';
 const isComposePost = post.id === 'docker-compose-best-practices';
 const isDockerfilePost = post.id === 'dockerfile-best-practices';
+const isGhaPost = post.id === 'github-actions-best-practices';
 const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isK8sPost ? 'Kubernetes Security'
   : isComposePost ? 'Docker Best Practices'
   : isDockerfilePost ? 'Docker Security'
+  : isGhaPost ? 'GitHub Actions Security'
   : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
@@ -54,6 +56,8 @@ const aboutDataset = isBeautyIndexPost
     ? { type: 'SoftwareApplication', name: 'Docker Compose Validator', url: 'https://patrykgolabek.dev/tools/compose-validator/' }
   : isDockerfilePost
     ? { type: 'SoftwareApplication', name: 'Dockerfile Analyzer', url: 'https://patrykgolabek.dev/tools/dockerfile-analyzer/' }
+  : isGhaPost
+    ? { type: 'SoftwareApplication', name: 'GitHub Actions Workflow Validator', url: 'https://patrykgolabek.dev/tools/gha-validator/' }
     : undefined;
 
 const beautyIndexFAQ = isBeautyIndexPost ? [
@@ -125,6 +129,21 @@ const dockerfileFAQ = isDockerfilePost ? [
   {
     question: 'What is a free online Dockerfile analyzer?',
     answer: 'The Dockerfile Analyzer at patrykgolabek.dev/tools/dockerfile-analyzer/ is a free tool that checks 46 rules for security, efficiency, maintainability, reliability, and best practices. It runs 100% in the browser — your Dockerfile never leaves your device.',
+  },
+] : [];
+
+const ghaFAQ = isGhaPost ? [
+  {
+    question: 'What is a GitHub Actions workflow validator?',
+    answer: 'A GitHub Actions workflow validator checks your .github/workflows/*.yml files for schema compliance, security vulnerabilities, semantic errors, and best-practice violations. The GitHub Actions Validator at patrykgolabek.dev/tools/gha-validator/ runs 48 rules with two-pass analysis including actionlint WASM. It runs 100% in the browser.',
+  },
+  {
+    question: 'How do I secure my GitHub Actions workflows?',
+    answer: 'Pin all third-party actions to full SHA commits instead of mutable tags. Set explicit permissions with least-privilege scopes instead of write-all. Never use untrusted input in run: scripts to prevent script injection. Avoid pull_request_target with checkout of PR code. Use environment secrets instead of hardcoded credentials.',
+  },
+  {
+    question: 'What is a free online GitHub Actions linter?',
+    answer: 'The GitHub Actions Workflow Validator at patrykgolabek.dev/tools/gha-validator/ is a free online tool that checks 48 rules across schema, security, semantic, best-practice, style, and actionlint categories. It uses two-pass analysis with actionlint WASM for deep semantic checking. 100% browser-based.',
   },
 ] : [];
 
@@ -206,6 +225,7 @@ const titleTag = (title.length + suffix.length > 65)
     {k8sFAQ.length > 0 && <FAQPageJsonLd items={k8sFAQ} />}
     {composeFAQ.length > 0 && <FAQPageJsonLd items={composeFAQ} />}
     {dockerfileFAQ.length > 0 && <FAQPageJsonLd items={dockerfileFAQ} />}
+    {ghaFAQ.length > 0 && <FAQPageJsonLd items={ghaFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },
