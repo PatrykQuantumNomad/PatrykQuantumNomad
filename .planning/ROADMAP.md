@@ -144,11 +144,11 @@ Plans:
   2. Header navigation includes a link to the validator, homepage has a callout card, and tools page has an entry
   3. JSON-LD SoftwareApplication structured data, build-time OG image, breadcrumb navigation, sitemap entries, SEO meta descriptions, and LLMs.txt entry are all present
   4. Companion blog post covers GitHub Actions best practices and tool architecture with bidirectional cross-links to the tool page and individual rule documentation pages
-**Plans**: TBD
+**Plans**: 2 plans (1 wave, parallel)
 
 Plans:
-- [ ] 81-01: TBD
-- [ ] 81-02: TBD
+- [ ] 81-01-PLAN.md — Site integration: JSON-LD, OG image, tool page enhancement, homepage card, tools page card, LLMs.txt
+- [ ] 81-02-PLAN.md — Companion blog post with bidirectional cross-links and [slug].astro structured data wiring
 
 ## Progress
 
