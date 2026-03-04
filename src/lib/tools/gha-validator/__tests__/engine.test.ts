@@ -426,3 +426,66 @@ jobs:
     }
   });
 });
+
+describe('ACTIONLINT_KIND_MAP completeness', () => {
+  it('mapActionlintError maps deprecated-commands to GA-L015 with best-practice category', () => {
+    const result = mapActionlintError({
+      kind: 'deprecated-commands',
+      message: 'set-output is deprecated',
+      line: 5,
+      column: 3,
+    });
+    expect(result.ruleId).toBe('GA-L015');
+    expect(result.category).toBe('best-practice');
+    expect(result.severity).toBe('warning');
+  });
+
+  it('mapActionlintError maps if-cond to GA-L016 with semantic category', () => {
+    const result = mapActionlintError({
+      kind: 'if-cond',
+      message: 'unnecessary expression wrapper',
+      line: 10,
+      column: 7,
+    });
+    expect(result.ruleId).toBe('GA-L016');
+    expect(result.category).toBe('semantic');
+    expect(result.severity).toBe('warning');
+  });
+
+  it('mapActionlintError enriches message with rule title', () => {
+    const result = mapActionlintError({
+      kind: 'syntax-check',
+      message: 'unexpected key "foo"',
+      line: 1,
+      column: 1,
+    });
+    expect(result.message).toContain('Syntax error');
+    expect(result.message).toContain('unexpected key "foo"');
+  });
+
+  it('all 18 known kinds map to non-fallback ruleIds', () => {
+    const kinds = [
+      'syntax-check', 'expression', 'job-needs', 'matrix', 'events',
+      'glob', 'action', 'runner-label', 'shell-name', 'id',
+      'credentials', 'env-var', 'permissions', 'workflow-call',
+      'deprecated-commands', 'if-cond', 'shellcheck', 'pyflakes',
+    ];
+    for (const kind of kinds) {
+      const result = mapActionlintError({
+        kind, message: 'test', line: 1, column: 1,
+      });
+      expect(result.ruleId).not.toBe('GA-L000');
+      expect(result.ruleId).toMatch(/^GA-L\d{3}$/);
+    }
+  });
+
+  it('unknown kind still falls back to GA-L000', () => {
+    const result = mapActionlintError({
+      kind: 'future-unknown-kind',
+      message: 'test',
+      line: 1,
+      column: 1,
+    });
+    expect(result.ruleId).toBe('GA-L000');
+  });
+});
