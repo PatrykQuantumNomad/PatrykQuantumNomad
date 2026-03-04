@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "gha-mixed-improvements",
+  "prompt": "Analyze this CI workflow and suggest improvements.",
+  "assertions": [
+    {"text": "Identifies unpinned actions (semver not SHA) (GA-C001)", "type": "content_check"},
+    {"text": "Identifies unnamed run steps (GA-B003)", "type": "content_check"},
+    {"text": "Identifies duplicate step name 'Run linter' (GA-B004)", "type": "content_check"},
+    {"text": "Identifies missing timeout-minutes (GA-B001)", "type": "content_check"},
+    {"text": "Identifies inconsistent uses: quoting (GA-F002)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs to reference specific violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"}
+  ]
+}

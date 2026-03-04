@@ -1,0 +1,58 @@
+{
+  "eval_id": 0,
+  "eval_name": "compose-insecure-config",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Identifies privileged mode as a security issue",
+      "passed": true,
+      "evidence": "Issue #1 Privileged Mode (Line 5) explicitly identified as CRITICAL severity"
+    },
+    {
+      "text": "Identifies Docker socket mount as a security issue",
+      "passed": true,
+      "evidence": "Issue #2 Docker Socket Mount (Line 9) identified as CRITICAL severity"
+    },
+    {
+      "text": "Identifies hardcoded secrets/passwords in environment variables",
+      "passed": true,
+      "evidence": "Issue #3 Secrets in Environment Variables (Lines 11-12, 20) identified as CRITICAL with DB_PASSWORD, API_KEY, POSTGRES_PASSWORD"
+    },
+    {
+      "text": "Identifies host network mode as a security issue",
+      "passed": true,
+      "evidence": "Issue #4 Host Network Mode (Line 13) identified as HIGH severity"
+    },
+    {
+      "text": "Identifies untagged/latest image as an issue",
+      "passed": true,
+      "evidence": "Issue #5 No Image Tags (Lines 4, 16) identified as HIGH severity - nginx and postgres:latest"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": false,
+      "evidence": "No numeric score or letter grade provided. Output uses a summary table with severity levels (CRITICAL/HIGH/MEDIUM) but no 0-100 score"
+    },
+    {
+      "text": "Uses rule IDs (e.g. CV-C001, CV-C002) to reference specific violations",
+      "passed": false,
+      "evidence": "No rule IDs (CV-C001 style) used anywhere in the output. Issues are numbered 1-11 with plain text descriptions"
+    },
+    {
+      "text": "Groups issues by severity (error/warning/info)",
+      "passed": false,
+      "evidence": "Issues grouped by Critical/High/Medium/Low severity not the error/warning/info format. Summary table uses CRITICAL/HIGH/MEDIUM/LOW labels"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": false,
+      "evidence": "No category breakdown table with weighted scores. Only a summary table listing issues by severity is included"
+    },
+    {
+      "text": "Provides fix recommendations for identified issues",
+      "passed": true,
+      "evidence": "Each issue includes a Recommendation section with YAML examples and specific guidance"
+    }
+  ],
+  "pass_rate": 0.6
+}

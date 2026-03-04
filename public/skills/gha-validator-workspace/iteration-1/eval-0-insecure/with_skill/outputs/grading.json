@@ -1,0 +1,58 @@
+{
+  "eval_id": 0,
+  "eval_name": "gha-insecure-workflow",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies unpinned action versions (GA-C001)",
+      "passed": true,
+      "evidence": "Line 9 [GA-C001] and Line 10 [GA-C001]: Unpinned Action Version - actions/checkout@v3 and actions/setup-node@v3 use mutable semver tags"
+    },
+    {
+      "text": "Identifies mutable branch ref @main (GA-C002)",
+      "passed": true,
+      "evidence": "Line 11 [GA-C008]: Third-Party Action Without SHA Pinning - some-org/risky-action@main pinned to branch reference @main flagged as supply chain risk"
+    },
+    {
+      "text": "Identifies script injection risk with github.event (GA-C005)",
+      "passed": true,
+      "evidence": "Line 13 [GA-C005] and Lines 15-17 [GA-C005]: Script Injection Risk - github.event.issue.title and github.event.pull_request.body direct interpolation flagged"
+    },
+    {
+      "text": "Identifies unrestricted pull_request_target (GA-C006)",
+      "passed": true,
+      "evidence": "Line 2 [GA-C006]: Unrestricted pull_request_target - uses pull_request_target without branch or path restrictions flagged as Error"
+    },
+    {
+      "text": "Identifies hardcoded token/secret (GA-C007)",
+      "passed": true,
+      "evidence": "Line 21 [GA-C007] and Line 23 [GA-C007]: Hardcoded Secret - GitHub PAT and Slack webhook URL hardcoded in workflow flagged"
+    },
+    {
+      "text": "Identifies write-all permissions (GA-C003)",
+      "passed": true,
+      "evidence": "Line 28 [GA-C003]: Overly Permissive Permissions - deploy job uses permissions: write-all flagged as Warning"
+    },
+    {
+      "text": "Identifies missing workflow name (GA-F004)",
+      "passed": false,
+      "evidence": "No GA-F004 or missing workflow name issue flagged in the output. The 18 issues found include GA-C001 through GA-B003 but not GA-F004"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 39/100 (Grade: F) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. GA-C001, GA-C005) to reference violations",
+      "passed": true,
+      "evidence": "Rule IDs used throughout: GA-C006, GA-C001, GA-C008, GA-C005, GA-C007, GA-C003, GA-B001, GA-C010, GA-C004, GA-B002, GA-B003"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Semantic/Best Practice/Schema/Style scores and weights with weighted calculation"
+    }
+  ],
+  "pass_rate": 0.9
+}

@@ -218,15 +218,25 @@ if echo "$CONTENT" | grep -qE '^version:'; then
   VIOLATIONS+=("CV-B006 (warning): Deprecated top-level 'version' field. Remove it. Docker Compose V2 ignores it.")
 fi
 
+# --- Deduplicate violations ---
+declare -A SEEN_VIOLATIONS
+UNIQUE_VIOLATIONS=()
+for V in "${VIOLATIONS[@]}"; do
+  if [[ -z "${SEEN_VIOLATIONS[$V]+x}" ]]; then
+    SEEN_VIOLATIONS["$V"]=1
+    UNIQUE_VIOLATIONS+=("$V")
+  fi
+done
+
 # --- Report results ---
-if [[ ${#VIOLATIONS[@]} -eq 0 ]]; then
+if [[ ${#UNIQUE_VIOLATIONS[@]} -eq 0 ]]; then
   exit 0
 fi
 
 {
-  echo "Docker Compose validation found ${#VIOLATIONS[@]} issue(s) in $FILE_PATH:"
+  echo "Docker Compose validation found ${#UNIQUE_VIOLATIONS[@]} issue(s) in $FILE_PATH:"
   echo ""
-  for V in "${VIOLATIONS[@]}"; do
+  for V in "${UNIQUE_VIOLATIONS[@]}"; do
     echo "  - $V"
   done
   echo ""

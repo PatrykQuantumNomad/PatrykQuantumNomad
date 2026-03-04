@@ -1,0 +1,31 @@
+on:
+  pull_request_target:
+  issue_comment:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - uses: some-org/risky-action@main
+
+      - run: echo "Processing ${{ github.event.issue.title }}"
+
+      - run: |
+          echo "PR body: ${{ github.event.pull_request.body }}"
+          npm test
+
+      - name: Deploy
+        run: |
+          curl -H "Authorization: token ghp_1234567890abcdefghij" https://api.github.com/repos
+        env:
+          SLACK_WEBHOOK: https://hooks.slack.com/services/T00/B00/xxx
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v3
+      - run: deploy.sh

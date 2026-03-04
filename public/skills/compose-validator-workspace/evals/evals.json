@@ -1,0 +1,17 @@
+{
+  "skill_name": "compose-validator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Can you review this Docker Compose file for any security or configuration issues? The file is at compose-validator-workspace/test-insecure.yml",
+      "expected_output": "Should identify privileged mode, docker socket mount, host network, hardcoded secrets, unpinned images, missing healthchecks, missing resource limits, and produce a score below 60 (grade F or D range)",
+      "files": ["compose-validator-workspace/test-insecure.yml"]
+    },
+    {
+      "id": 1,
+      "prompt": "Please analyze this docker-compose configuration and let me know if there are improvements I should make. The file is at compose-validator-workspace/test-mixed.yml",
+      "expected_output": "Should identify orphan network, both build+image, healthcheck timeout>=interval, missing security opts, unbound ports, missing resource limits, and produce a score in the 50-75 range",
+      "files": ["compose-validator-workspace/test-mixed.yml"]
+    }
+  ]
+}

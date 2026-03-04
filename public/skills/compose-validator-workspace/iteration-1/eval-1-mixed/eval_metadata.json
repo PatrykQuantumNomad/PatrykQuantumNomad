@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "compose-mixed-issues",
+  "prompt": "Please analyze this docker-compose configuration and let me know if there are improvements I should make.",
+  "assertions": [
+    {"text": "Identifies orphan network (backend defined but unused)", "type": "content_check"},
+    {"text": "Identifies both build and image specified on api service", "type": "content_check"},
+    {"text": "Identifies healthcheck timeout >= interval issue on db", "type": "content_check"},
+    {"text": "Identifies missing security options (cap_drop, read_only, no-new-privileges)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs (e.g. CV-M007, CV-B008) to reference violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"},
+    {"text": "Provides fix recommendations with before/after examples", "type": "content_check"}
+  ]
+}

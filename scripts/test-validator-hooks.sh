@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMPOSE_HOOK="$REPO_ROOT/public/skills/compose-validator/hooks/validate-compose.sh"
 DOCKERFILE_HOOK="$REPO_ROOT/public/skills/dockerfile-analyzer/hooks/validate-dockerfile.sh"
 K8S_HOOK="$REPO_ROOT/public/skills/k8s-analyzer/hooks/validate-k8s.sh"
+GHA_HOOK="$REPO_ROOT/public/skills/gha-validator/hooks/validate-gha.sh"
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -74,6 +75,7 @@ assert_cmd_exists jq
 assert_file_exists "$COMPOSE_HOOK"
 assert_file_exists "$DOCKERFILE_HOOK"
 assert_file_exists "$K8S_HOOK"
+assert_file_exists "$GHA_HOOK"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -234,6 +236,69 @@ YAML
 
 # Reuse compose bad file for K8s compose-exclusion test (already created above as COMPOSE_BAD)
 
+GHA_GOOD="$TMP_DIR/.github/workflows/ci.yml"
+GHA_BAD="$TMP_DIR/.github/workflows/insecure.yml"
+GHA_BAD_INJECTION="$TMP_DIR/.github/workflows/injection.yaml"
+NON_GHA="$TMP_DIR/random-workflow.yml"
+
+mkdir -p "$TMP_DIR/.github/workflows"
+
+cat > "$GHA_GOOD" <<'YAML'
+name: CI
+on: push
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - name: Run tests
+        run: npm test
+YAML
+
+cat > "$GHA_BAD" <<'YAML'
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: some-org/custom-action@main
+      - run: npm test
+YAML
+
+cat > "$GHA_BAD_INJECTION" <<'YAML'
+name: PR Handler
+on: pull_request_target
+permissions:
+  contents: read
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Echo title
+        run: echo "${{ github.event.pull_request.title }}"
+YAML
+
+cat > "$NON_GHA" <<'YAML'
+name: not in .github/workflows
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo hello
+YAML
+
 echo "Running Compose hook tests..."
 run_hook_case \
   "compose: valid file passes" \
@@ -384,6 +449,66 @@ run_hook_case \
   "{\"session_id\":\"abc\",\"cwd\":\"/tmp\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$K8S_BAD\"}}" \
   2 \
   "KA-C001"
+
+echo "Running GHA hook tests..."
+run_hook_case \
+  "gha: valid workflow passes" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$GHA_GOOD\"}}" \
+  0
+
+run_hook_case \
+  "gha: unpinned action fails with GA-C001" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$GHA_BAD\"}}" \
+  2 \
+  "GA-C001"
+
+run_hook_case \
+  "gha: mutable branch ref fails with GA-C002" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$GHA_BAD\"}}" \
+  2 \
+  "GA-C002"
+
+run_hook_case \
+  "gha: missing timeout fails with GA-B001" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$GHA_BAD\"}}" \
+  2 \
+  "GA-B001"
+
+run_hook_case \
+  "gha: script injection fails with GA-C005" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$GHA_BAD_INJECTION\"}}" \
+  2 \
+  "GA-C005"
+
+run_hook_case \
+  "gha: non-workflow file ignored" \
+  "$GHA_HOOK" \
+  "{\"tool_input\":{\"file_path\":\"$NON_GHA\"}}" \
+  0
+
+run_hook_case \
+  "gha: missing file_path ignored" \
+  "$GHA_HOOK" \
+  "{}" \
+  0
+
+run_hook_case \
+  "gha: malformed JSON input ignored" \
+  "$GHA_HOOK" \
+  "not-json-at-all" \
+  0
+
+run_hook_case \
+  "gha: full PostToolUse payload shape" \
+  "$GHA_HOOK" \
+  "{\"session_id\":\"abc\",\"cwd\":\"/tmp\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$GHA_BAD\"}}" \
+  2 \
+  "GA-C001"
 
 echo
 echo "Test results: $PASS_COUNT passed, $FAIL_COUNT failed"

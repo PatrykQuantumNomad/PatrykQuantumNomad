@@ -1,0 +1,16 @@
+{
+  "eval_id": 1,
+  "eval_name": "dockerfile-mixed-issues",
+  "prompt": "Can you analyze this Dockerfile and suggest improvements?",
+  "assertions": [
+    {"text": "Identifies duplicate FROM alias (DL3024)", "type": "content_check"},
+    {"text": "Identifies duplicate ENTRYPOINT (DL4004)", "type": "content_check"},
+    {"text": "Identifies duplicate CMD (DL4003)", "type": "content_check"},
+    {"text": "Identifies lowercase run instruction (PG005)", "type": "content_check"},
+    {"text": "Identifies COPY --from numeric reference (DL3022)", "type": "content_check"},
+    {"text": "Identifies legacy ENV syntax (PG004)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs to reference specific violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"}
+  ]
+}

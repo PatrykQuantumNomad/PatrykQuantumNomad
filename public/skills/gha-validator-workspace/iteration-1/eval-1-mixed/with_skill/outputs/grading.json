@@ -1,0 +1,48 @@
+{
+  "eval_id": 1,
+  "eval_name": "gha-mixed-improvements",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies unpinned actions (semver not SHA) (GA-C001)",
+      "passed": true,
+      "evidence": "Line 19 [GA-C001] and Line 20 [GA-C001]: Unpinned Action Version - actions/checkout@v4 and actions/setup-node@v4 use mutable semver tags"
+    },
+    {
+      "text": "Identifies unnamed run steps (GA-B003)",
+      "passed": true,
+      "evidence": "Lines 24, 25, 36 [GA-B003]: Unnamed Step - steps with no name: field identified across test and lint jobs"
+    },
+    {
+      "text": "Identifies duplicate step name 'Run linter' (GA-B004)",
+      "passed": true,
+      "evidence": "Lines 37 & 39 [GA-B004]: Duplicate Step Name - both steps named 'Run linter' identified as confusing log output"
+    },
+    {
+      "text": "Identifies missing timeout-minutes (GA-B001)",
+      "passed": true,
+      "evidence": "Lines 29-40 [GA-B001]: Missing timeout-minutes in lint job (Warning) and Lines 16, 42 [GA-B001] in test/deploy jobs (Info)"
+    },
+    {
+      "text": "Identifies inconsistent uses: quoting (GA-F002)",
+      "passed": true,
+      "evidence": "Line 32 [GA-F002]: Inconsistent uses: Quoting - uses: value double-quoted while others are unquoted identified as Warning"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 71/100 (Grade: C-) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs to reference specific violations",
+      "passed": true,
+      "evidence": "Rule IDs used throughout: GA-C001, GA-B001, GA-B004, GA-F002, GA-B003, GA-B008, GA-F001"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Semantic/Best Practice/Schema/Style scores and weights with weighted calculation"
+    }
+  ],
+  "pass_rate": 1.0
+}

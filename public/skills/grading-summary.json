@@ -1,0 +1,20 @@
+{
+  "skills": {
+    "compose-validator": {
+      "eval-0-insecure": {"with_skill": 1.0, "without_skill": 0.6},
+      "eval-1-mixed": {"with_skill": 1.0, "without_skill": 0.375}
+    },
+    "dockerfile-analyzer": {
+      "eval-0-insecure": {"with_skill": 1.0, "without_skill": 0.7},
+      "eval-1-mixed": {"with_skill": 1.0, "without_skill": 0.667}
+    },
+    "k8s-analyzer": {
+      "eval-0-insecure": {"with_skill": 1.0, "without_skill": 0.636},
+      "eval-1-mixed": {"with_skill": 1.0, "without_skill": 0.556}
+    },
+    "gha-validator": {
+      "eval-0-insecure": {"with_skill": 0.9, "without_skill": 0.6},
+      "eval-1-mixed": {"with_skill": 1.0, "without_skill": 0.375}
+    }
+  }
+}

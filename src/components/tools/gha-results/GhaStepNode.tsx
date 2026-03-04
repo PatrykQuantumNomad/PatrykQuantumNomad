@@ -32,7 +32,7 @@ export function GhaStepNode({ data }: NodeProps<GhaStepNodeType>) {
       style={{
         backgroundColor: STATUS_BG[data.violationStatus],
         borderLeft: `3px solid ${STATUS_BORDER[data.violationStatus]}`,
-        width: 'calc(100% - 16px)',
+        width: '100%',
       }}
       title={data.label}
     >

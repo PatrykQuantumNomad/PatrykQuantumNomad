@@ -1,0 +1,17 @@
+{
+  "skill_name": "gha-validator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Review this GitHub Actions workflow for security vulnerabilities. The file is at gha-validator-workspace/test-insecure.yml",
+      "expected_output": "Should identify: unpinned actions, branch ref action (@main), script injection (${{ github.event }}), unrestricted pull_request_target, hardcoded token, write-all permissions, self-hosted runner, missing timeout-minutes, missing workflow name, missing permissions. Score should be below 45 (F grade)",
+      "files": ["gha-validator-workspace/test-insecure.yml"]
+    },
+    {
+      "id": 1,
+      "prompt": "Analyze this CI workflow and suggest improvements. The file is at gha-validator-workspace/test-mixed.yml",
+      "expected_output": "Should identify: unpinned actions (semver tags not SHAs), unnamed run steps, duplicate step name, missing timeout-minutes, inconsistent uses: quoting, missing continue-on-error on curl step. Score should be in 55-75 range",
+      "files": ["gha-validator-workspace/test-mixed.yml"]
+    }
+  ]
+}

@@ -49,34 +49,14 @@ export function K8sShareActions() {
 
     const url = buildShareUrl(content);
 
-    // Tier 1: Web Share API (mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `K8s Score: ${result.score.grade} (${result.score.overall}/100)`,
-          url,
-        });
-        return;
-      } catch (err) {
-        // User cancelled; silently return
-        if (err instanceof Error && err.name === 'AbortError') return;
-        // Other error: fall through to clipboard
-      }
-    }
-
-    // Tier 2: Clipboard API (desktop)
     try {
       await navigator.clipboard.writeText(url);
       history.replaceState(null, '', url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      return;
-    } catch {
-      // Clipboard unavailable: fall through to prompt
+    } catch (err) {
+      console.error('Clipboard write failed:', err);
     }
-
-    // Tier 3: Prompt fallback
-    prompt('Copy this URL:', url);
   };
 
   return (

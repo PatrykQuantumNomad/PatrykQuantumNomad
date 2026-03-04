@@ -1,0 +1,58 @@
+{
+  "eval_id": 0,
+  "eval_name": "dockerfile-insecure",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies untagged FROM (DL3006)",
+      "passed": true,
+      "evidence": "Line 1 — DL3006: Always tag the version of an image explicitly - flagged as Warning"
+    },
+    {
+      "text": "Identifies curl pipe to bash (PG002)",
+      "passed": true,
+      "evidence": "Line 4 — PG002: Avoid piping remote scripts to shell - flagged as Error"
+    },
+    {
+      "text": "Identifies secrets in ENV (PG001)",
+      "passed": true,
+      "evidence": "Line 5 — PG001 and Line 6 — PG001: Secrets detected in ENV or ARG - API_KEY and DB_PASSWORD both flagged as Errors"
+    },
+    {
+      "text": "Identifies ADD instead of COPY (DL3020)",
+      "passed": true,
+      "evidence": "Line 7 — DL3020: Use COPY instead of ADD for files and folders - flagged as Error"
+    },
+    {
+      "text": "Identifies sudo usage (DL3004)",
+      "passed": true,
+      "evidence": "Line 9 — DL3004: Do not use sudo - flagged as Error"
+    },
+    {
+      "text": "Identifies missing USER instruction (PG011/DL3002)",
+      "passed": true,
+      "evidence": "Line 11 — PG011: Add a USER directive to avoid running as root - flagged as Warning"
+    },
+    {
+      "text": "Identifies consecutive RUN instructions (DL3059)",
+      "passed": true,
+      "evidence": "Line 2 — DL3059: Multiple consecutive RUN instructions - flagged as Info with fix showing combined && usage"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 38/100 (Grade: F) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. DL3006, PG001) to reference violations",
+      "passed": true,
+      "evidence": "Rule IDs used throughout: PG002, PG001, DL3020, DL3004, DL3006, DL3008, PG009, PG003, DL3025, PG011, DL3059, DL3009, DL3015, PG010, DL3057"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Efficiency/Maintainability/Reliability/Best Practice scores and weights with weighted calculation"
+    }
+  ],
+  "pass_rate": 1.0
+}

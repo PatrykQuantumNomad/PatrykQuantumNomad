@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  web:
+    image: nginx
+    privileged: true
+    ports:
+      - 8080:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DB_PASSWORD: supersecret123
+      API_KEY: sk-live-abc123def456
+    network_mode: host
+
+  db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

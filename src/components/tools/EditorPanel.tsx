@@ -140,6 +140,9 @@ export default function EditorPanel({ onToggleFullscreen, isFullscreen }: Editor
     analysisResult.set(null);
     resultsStale.set(false);
     try { localStorage.removeItem('dockerfile-editor-content'); } catch { /* ignore */ }
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
     view.focus();
   }, [viewRef]);
 

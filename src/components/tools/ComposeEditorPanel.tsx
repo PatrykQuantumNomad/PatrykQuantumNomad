@@ -163,6 +163,9 @@ export default function ComposeEditorPanel({ onToggleFullscreen, isFullscreen }:
     composeResult.set(null);
     composeResultsStale.set(false);
     try { localStorage.removeItem('compose-editor-content'); } catch { /* ignore */ }
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
     view.focus();
   }, [viewRef]);
 

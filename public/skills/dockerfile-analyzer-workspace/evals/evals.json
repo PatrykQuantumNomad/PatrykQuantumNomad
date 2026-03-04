@@ -1,0 +1,17 @@
+{
+  "skill_name": "dockerfile-analyzer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Review this Dockerfile for security and best practice issues. The file is at dockerfile-analyzer-workspace/test-insecure.Dockerfile",
+      "expected_output": "Should identify: untagged FROM, curl|bash pipe, secrets in ENV, ADD instead of COPY, sudo usage, no USER instruction, consecutive RUNs, missing --no-install-recommends, network tools in final stage. Score should be below 50 (F grade)",
+      "files": ["dockerfile-analyzer-workspace/test-insecure.Dockerfile"]
+    },
+    {
+      "id": 1,
+      "prompt": "Can you analyze this Dockerfile and suggest improvements? The file is at dockerfile-analyzer-workspace/test-mixed.Dockerfile",
+      "expected_output": "Should identify: duplicate FROM alias, COPY --from numeric reference, lowercase 'run', duplicate ENTRYPOINT, duplicate CMD, legacy ENV syntax, no USER instruction, no HEALTHCHECK. Score should be in 40-65 range",
+      "files": ["dockerfile-analyzer-workspace/test-mixed.Dockerfile"]
+    }
+  ]
+}

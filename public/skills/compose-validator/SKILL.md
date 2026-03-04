@@ -6,9 +6,12 @@ description: >
   across 5 categories (security, semantic, schema, best-practice, style).
   Scores Compose files on a 0-100 scale with letter grades (A+ through F).
   Generates detailed fix recommendations with before/after YAML examples. Use
-  when a user shares a docker-compose.yml for review, asks about Docker Compose
-  best practices, or wants to improve their container orchestration security
-  posture.
+  this skill PROACTIVELY whenever a user shares a docker-compose.yml or
+  compose.yaml for review, pastes Docker Compose YAML, asks about Docker
+  Compose best practices or security hardening, wants to improve their
+  container orchestration security posture, mentions docker-compose or compose
+  files, or asks about multi-container Docker setups — even if they don't
+  explicitly say "validate" or "analyze".
 ---
 
 # Docker Compose Validator

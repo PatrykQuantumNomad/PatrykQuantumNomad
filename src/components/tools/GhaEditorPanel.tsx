@@ -23,7 +23,7 @@ import { computeGhaScore } from '../../lib/tools/gha-validator/scorer';
 import { createActionlintWorker } from '../../lib/tools/gha-validator/worker/worker-client';
 import { SAMPLE_GHA_WORKFLOW } from '../../lib/tools/gha-validator/sample-workflow';
 import type { GhaUnifiedViolation } from '../../lib/tools/gha-validator/types';
-import { decodeGhaState, encodeGhaState } from '../../lib/tools/gha-validator/share/url-state';
+import { decodeGhaState } from '../../lib/tools/gha-validator/share/url-state';
 import {
   ghaResult,
   ghaAnalyzing,
@@ -133,15 +133,6 @@ export default function GhaEditorPanel({
 
     // Pass 1 complete -- UI is responsive
     ghaAnalyzing.set(false);
-
-    // Update URL hash for shareable link (skip if this was a hash-decode load)
-    if (!isHashLoadRef.current) {
-      try {
-        window.history.replaceState(null, '', encodeGhaState(yaml));
-      } catch {
-        /* replaceState may throw if URL is too long -- ignore */
-      }
-    }
     isHashLoadRef.current = false;
 
     // Store Pass 1 violations and view for Pass 2 merge callback
@@ -267,13 +258,11 @@ export default function GhaEditorPanel({
     } catch {
       /* ignore */
     }
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
     view.focus();
   }, [viewRef]);
-
-  // Detect platform for shortcut hint
-  const isMac =
-    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
-  const shortcutHint = isMac ? 'Cmd+Enter' : 'Ctrl+Enter';
 
   return (
     <div>
@@ -293,9 +282,6 @@ export default function GhaEditorPanel({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden sm:inline text-xs text-[var(--color-text-secondary)]">
-            {shortcutHint}
-          </span>
           <button
             onClick={handleClear}
             className="px-4 py-2 rounded-lg font-semibold text-sm transition-all

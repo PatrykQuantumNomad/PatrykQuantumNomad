@@ -1,0 +1,17 @@
+{
+  "eval_id": 0,
+  "eval_name": "gha-insecure-workflow",
+  "prompt": "Review this GitHub Actions workflow for security vulnerabilities.",
+  "assertions": [
+    {"text": "Identifies unpinned action versions (GA-C001)", "type": "content_check"},
+    {"text": "Identifies mutable branch ref @main (GA-C002)", "type": "content_check"},
+    {"text": "Identifies script injection risk with github.event (GA-C005)", "type": "content_check"},
+    {"text": "Identifies unrestricted pull_request_target (GA-C006)", "type": "content_check"},
+    {"text": "Identifies hardcoded token/secret (GA-C007)", "type": "content_check"},
+    {"text": "Identifies write-all permissions (GA-C003)", "type": "content_check"},
+    {"text": "Identifies missing workflow name (GA-F004)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs (e.g. GA-C001, GA-C005) to reference violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"}
+  ]
+}

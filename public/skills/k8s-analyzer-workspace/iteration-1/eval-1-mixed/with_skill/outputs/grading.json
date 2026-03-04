@@ -1,0 +1,53 @@
+{
+  "eval_id": 1,
+  "eval_name": "k8s-cross-resource-issues",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies Service selector mismatch (app:backend vs app:api) (KA-X001)",
+      "passed": true,
+      "evidence": "api-service [KA-X001]: Service selector matches no Pod template - selector app: backend vs Deployment pods labeled app: api flagged as Error"
+    },
+    {
+      "text": "Identifies Ingress referencing missing-service (KA-X002)",
+      "passed": true,
+      "evidence": "api-ingress [KA-X002]: Ingress references undefined Service - backend references missing-service which does not exist flagged as Error"
+    },
+    {
+      "text": "Identifies NodePort service type (KA-B008)",
+      "passed": true,
+      "evidence": "api-service [KA-B008]: NodePort service type - Service uses type: NodePort flagged as Warning"
+    },
+    {
+      "text": "Identifies missing security context (KA-C020)",
+      "passed": true,
+      "evidence": "api-server [KA-C020]: Missing security context entirely - container spec has no securityContext defined flagged as Warning"
+    },
+    {
+      "text": "Identifies missing probes (KA-R001, KA-R002)",
+      "passed": true,
+      "evidence": "api-server [KA-R001]: Missing liveness probe and api-server [KA-R002]: Missing readiness probe both flagged as Warnings"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 72/100 (Grade: C-) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs to reference specific violations",
+      "passed": true,
+      "evidence": "Rule IDs used: KA-X001, KA-X002, KA-R001, KA-R002, KA-C020, KA-B008, KA-C016, KA-B005"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Reliability/Best Practice/Schema/Cross-Resource scores and weights with weighted calculation"
+    },
+    {
+      "text": "Includes PSS compliance summary",
+      "passed": true,
+      "evidence": "PSS Compliance section listing Baseline violations (1) and Restricted violations (4) with compliance status: Non-compliant"
+    }
+  ],
+  "pass_rate": 1.0
+}

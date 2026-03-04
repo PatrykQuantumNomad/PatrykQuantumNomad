@@ -301,15 +301,25 @@ if [[ -n "$FINAL_STAGE_USER" ]] && [[ "$FINAL_STAGE_USER" == "root" ]]; then
   VIOLATIONS+=("DL3002 (warning): Last USER in the final stage is root. Switch to a non-root user for production security.")
 fi
 
+# --- Deduplicate violations ---
+declare -A SEEN_VIOLATIONS
+UNIQUE_VIOLATIONS=()
+for V in "${VIOLATIONS[@]}"; do
+  if [[ -z "${SEEN_VIOLATIONS[$V]+x}" ]]; then
+    SEEN_VIOLATIONS["$V"]=1
+    UNIQUE_VIOLATIONS+=("$V")
+  fi
+done
+
 # --- Report results ---
-if [[ ${#VIOLATIONS[@]} -eq 0 ]]; then
+if [[ ${#UNIQUE_VIOLATIONS[@]} -eq 0 ]]; then
   exit 0
 fi
 
 {
-  echo "Dockerfile validation found ${#VIOLATIONS[@]} issue(s) in $FILE_PATH:"
+  echo "Dockerfile validation found ${#UNIQUE_VIOLATIONS[@]} issue(s) in $FILE_PATH:"
   echo ""
-  for V in "${VIOLATIONS[@]}"; do
+  for V in "${UNIQUE_VIOLATIONS[@]}"; do
     echo "  - $V"
   done
   echo ""

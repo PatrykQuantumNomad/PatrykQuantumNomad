@@ -46,7 +46,7 @@ const edgeTypes = {
 
 // Layout constants
 const JOB_WIDTH = 240;
-const JOB_HEADER_HEIGHT = 50;
+const JOB_HEADER_HEIGHT = 58;
 const STEP_HEIGHT = 32;
 const STEP_PADDING = 8;
 const TRIGGER_WIDTH = 140;
@@ -136,6 +136,7 @@ function layoutGraph(
   }
 
   // Phase 2: manual positioning for step nodes inside job containers
+  const stepWidth = JOB_WIDTH - STEP_PADDING_X * 2;
   for (const n of gNodes) {
     if (n.type !== 'step') continue;
     rfNodes.push({
@@ -145,8 +146,9 @@ function layoutGraph(
       extent: 'parent' as const,
       position: {
         x: STEP_PADDING_X,
-        y: JOB_HEADER_HEIGHT + (n.stepIndex ?? 0) * STEP_HEIGHT,
+        y: JOB_HEADER_HEIGHT + STEP_PADDING + (n.stepIndex ?? 0) * STEP_HEIGHT,
       },
+      style: { width: stepWidth },
       data: {
         label: n.label,
         violationStatus: n.violationStatus,

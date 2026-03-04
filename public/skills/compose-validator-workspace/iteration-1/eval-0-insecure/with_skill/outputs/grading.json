@@ -1,0 +1,58 @@
+{
+  "eval_id": 0,
+  "eval_name": "compose-insecure-config",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies privileged mode as a security issue",
+      "passed": true,
+      "evidence": "Line 5 [CV-C001]: Privileged mode enabled - explicitly flagged as a critical error"
+    },
+    {
+      "text": "Identifies Docker socket mount as a security issue",
+      "passed": true,
+      "evidence": "Line 9 [CV-C002]: Docker socket mounted - flagged as a critical error with CWE-250 reference"
+    },
+    {
+      "text": "Identifies hardcoded secrets/passwords in environment variables",
+      "passed": true,
+      "evidence": "Lines 11-12 [CV-C008]: Secrets in environment variables - DB_PASSWORD and API_KEY flagged"
+    },
+    {
+      "text": "Identifies host network mode as a security issue",
+      "passed": true,
+      "evidence": "Line 13 [CV-C003]: Host network mode - flagged as a critical error"
+    },
+    {
+      "text": "Identifies untagged/latest image as an issue",
+      "passed": true,
+      "evidence": "Line 4 [CV-C014] and Line 16 [CV-C014]: Image uses latest or no tag - both nginx and postgres:latest flagged"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 26/100 (Grade: F) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. CV-C001, CV-C002) to reference specific violations",
+      "passed": true,
+      "evidence": "Rule IDs used throughout: CV-C001, CV-C002, CV-C003, CV-C007, CV-C008, CV-C009, CV-C010, CV-C011, CV-C014, CV-B001, CV-B002, CV-B003, CV-B004, CV-B005, CV-B006, CV-B007, CV-B012, CV-F001, CV-F002, CV-F003"
+    },
+    {
+      "text": "Groups issues by severity (error/warning/info)",
+      "passed": true,
+      "evidence": "Issues explicitly grouped under ### Errors, ### Warnings, ### Info sections with counts (3 errors, 16 warnings, 9 info)"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Semantic/Best Practice/Schema/Style scores and weights, plus weighted calculation"
+    },
+    {
+      "text": "Provides fix recommendations for identified issues",
+      "passed": true,
+      "evidence": "Each issue includes a **Fix:** section with specific remediation guidance"
+    }
+  ],
+  "pass_rate": 1.0
+}

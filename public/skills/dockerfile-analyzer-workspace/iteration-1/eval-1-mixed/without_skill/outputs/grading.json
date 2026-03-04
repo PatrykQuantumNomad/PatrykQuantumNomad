@@ -1,0 +1,53 @@
+{
+  "eval_id": 1,
+  "eval_name": "dockerfile-mixed-issues",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Identifies duplicate FROM alias (DL3024)",
+      "passed": true,
+      "evidence": "Issue #1 Duplicate Build Stage Declaration (CRITICAL) - both first and second stage named build identified"
+    },
+    {
+      "text": "Identifies duplicate ENTRYPOINT (DL4004)",
+      "passed": true,
+      "evidence": "Issue #3 Multiple ENTRYPOINT Declarations (CRITICAL) - lines 16-17 both define ENTRYPOINT identified"
+    },
+    {
+      "text": "Identifies duplicate CMD (DL4003)",
+      "passed": true,
+      "evidence": "Issue #4 Multiple CMD Declarations (CRITICAL) - lines 18-19 both define CMD identified"
+    },
+    {
+      "text": "Identifies lowercase run instruction (PG005)",
+      "passed": true,
+      "evidence": "Issue #2 Lowercase run Instruction (CRITICAL) - run npm prune --production identified as critical"
+    },
+    {
+      "text": "Identifies COPY --from numeric reference (DL3022)",
+      "passed": true,
+      "evidence": "Issue #6 Inconsistent Reference Strategy - COPY --from=0 numeric reference identified, recommendation to use stage names"
+    },
+    {
+      "text": "Identifies legacy ENV syntax (PG004)",
+      "passed": true,
+      "evidence": "Issue #5 Environment Variable with Spaces (HIGH) and corrected Dockerfile shows ENV MY_VAR='some value with spaces' - legacy syntax partially identified via unquoted value concern, and corrected version shows key=value format"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": false,
+      "evidence": "No numeric score or letter grade provided. Output uses CRITICAL/HIGH/MEDIUM/LOW severity labels with a summary table"
+    },
+    {
+      "text": "Uses rule IDs to reference specific violations",
+      "passed": false,
+      "evidence": "No rule IDs (DL3024, DL4004 style) used anywhere. Issues are numbered 1-10 with plain text descriptions"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": false,
+      "evidence": "No category breakdown table. Only a summary of changes table is included without weighted scores"
+    }
+  ],
+  "pass_rate": 0.667
+}

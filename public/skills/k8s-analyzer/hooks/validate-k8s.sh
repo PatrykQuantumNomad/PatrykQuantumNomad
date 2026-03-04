@@ -107,46 +107,41 @@ IS_K8S=true
 # --- Validate the K8s manifest ---
 VIOLATIONS=()
 
-# --- Helper: extract pod spec sections from workload resources ---
-# Lightweight line-by-line parser. We look for container-level and pod-level
-# security context fields, probes, resources, etc.
-
-# Track which resources we've found
+# --- Split multi-doc YAML into per-resource sections ---
+# This ensures checks run against individual resources, not the whole file.
 declare -a RESOURCE_KINDS=()
 declare -a RESOURCE_NAMES=()
-CURRENT_KIND=""
-CURRENT_NAME=""
+declare -a RESOURCE_BODIES=()
 
-while IFS= read -r LINE; do
-  # Detect kind
-  if [[ "$LINE" =~ ^kind:[[:space:]]*(.+) ]]; then
-    CURRENT_KIND="${BASH_REMATCH[1]}"
-    CURRENT_KIND=$(echo "$CURRENT_KIND" | xargs)
-  fi
-  # Detect name
-  if [[ "$LINE" =~ ^[[:space:]]*name:[[:space:]]*(.+) ]] && [[ -z "$CURRENT_NAME" || "$LINE" =~ ^[[:space:]]{2}name: ]]; then
-    # Only capture metadata.name (indented under metadata)
-    INDENT="${LINE%%[^[:space:]]*}"
-    if [[ ${#INDENT} -le 4 ]]; then
-      CURRENT_NAME="${BASH_REMATCH[1]}"
-      CURRENT_NAME=$(echo "$CURRENT_NAME" | xargs | tr -d '"' | tr -d "'")
-    fi
-  fi
-  # On document separator, save and reset
+# Split by --- separator, accumulate each document
+CURRENT_BODY=""
+while IFS= read -r LINE || [[ -n "$LINE" ]]; do
   if [[ "$LINE" == "---" ]]; then
-    if [[ -n "$CURRENT_KIND" ]]; then
-      RESOURCE_KINDS+=("$CURRENT_KIND")
-      RESOURCE_NAMES+=("${CURRENT_NAME:-unnamed}")
+    if [[ -n "$CURRENT_BODY" ]]; then
+      # Extract kind and name from this document
+      DOC_KIND=$(echo "$CURRENT_BODY" | grep -E '^\s*kind:\s*\S' | head -1 | sed 's/^[^:]*:\s*//' | xargs)
+      DOC_NAME=$(echo "$CURRENT_BODY" | grep -E '^\s{0,4}name:\s*\S' | head -1 | sed 's/^[^:]*:\s*//' | xargs | tr -d '"' | tr -d "'")
+      if [[ -n "$DOC_KIND" ]]; then
+        RESOURCE_KINDS+=("$DOC_KIND")
+        RESOURCE_NAMES+=("${DOC_NAME:-unnamed}")
+        RESOURCE_BODIES+=("$CURRENT_BODY")
+      fi
     fi
-    CURRENT_KIND=""
-    CURRENT_NAME=""
+    CURRENT_BODY=""
+  else
+    CURRENT_BODY+="$LINE"$'\n'
   fi
 done <<< "$CONTENT"
 
-# Save last resource
-if [[ -n "$CURRENT_KIND" ]]; then
-  RESOURCE_KINDS+=("$CURRENT_KIND")
-  RESOURCE_NAMES+=("${CURRENT_NAME:-unnamed}")
+# Save last document
+if [[ -n "$CURRENT_BODY" ]]; then
+  DOC_KIND=$(echo "$CURRENT_BODY" | grep -E '^\s*kind:\s*\S' | head -1 | sed 's/^[^:]*:\s*//' | xargs)
+  DOC_NAME=$(echo "$CURRENT_BODY" | grep -E '^\s{0,4}name:\s*\S' | head -1 | sed 's/^[^:]*:\s*//' | xargs | tr -d '"' | tr -d "'")
+  if [[ -n "$DOC_KIND" ]]; then
+    RESOURCE_KINDS+=("$DOC_KIND")
+    RESOURCE_NAMES+=("${DOC_NAME:-unnamed}")
+    RESOURCE_BODIES+=("$CURRENT_BODY")
+  fi
 fi
 
 # --- Pod-level security checks (apply to workload kinds) ---
@@ -155,57 +150,56 @@ WORKLOAD_KINDS="Deployment|StatefulSet|DaemonSet|Job|CronJob|Pod"
 for i in "${!RESOURCE_KINDS[@]}"; do
   KIND="${RESOURCE_KINDS[$i]}"
   NAME="${RESOURCE_NAMES[$i]}"
+  BODY="${RESOURCE_BODIES[$i]}"
 
   # Only check workload resources for security
   if ! echo "$KIND" | grep -qE "^($WORKLOAD_KINDS)$"; then
     continue
   fi
 
-  # Extract the section of YAML for this resource (between --- markers)
-  # For simplicity, we grep the full content for patterns per resource
-
   # KA-C001: Privileged container
-  if echo "$CONTENT" | grep -qE '^\s*privileged:\s*true'; then
+  if echo "$BODY" | grep -qE '^\s*privileged:\s*true'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C001] (error): Container runs as privileged. Remove privileged: true and use specific capabilities.")
   fi
 
   # KA-C006: Host PID
-  if echo "$CONTENT" | grep -qE '^\s*hostPID:\s*true'; then
+  if echo "$BODY" | grep -qE '^\s*hostPID:\s*true'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C006] (error): Host PID namespace shared. Remove hostPID: true.")
   fi
 
   # KA-C007: Host IPC
-  if echo "$CONTENT" | grep -qE '^\s*hostIPC:\s*true'; then
+  if echo "$BODY" | grep -qE '^\s*hostIPC:\s*true'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C007] (error): Host IPC namespace shared. Remove hostIPC: true.")
   fi
 
   # KA-C008: Host network
-  if echo "$CONTENT" | grep -qE '^\s*hostNetwork:\s*true'; then
+  if echo "$BODY" | grep -qE '^\s*hostNetwork:\s*true'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C008] (warning): Host network enabled. Use Services/Ingress instead.")
   fi
 
   # KA-C014: Sensitive host path
-  if echo "$CONTENT" | grep -qE '^\s*path:\s*(/etc|/proc|/sys|/var/run|/root|/var/log)'; then
+  if echo "$BODY" | grep -qE '^\s*path:\s*(/etc|/proc|/sys|/var/run|/root|/var/log)'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C014] (error): Sensitive host path mounted. Use ConfigMaps/Secrets instead.")
   fi
 
   # KA-C015: Docker socket
-  if echo "$CONTENT" | grep -qE '/var/run/docker\.sock'; then
+  if echo "$BODY" | grep -qE '/var/run/docker\.sock'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C015] (error): Docker socket mounted. This grants root-level host access.")
   fi
 
   # KA-C010: Dangerous capabilities
-  if echo "$CONTENT" | grep -qE '^\s*-\s*(SYS_ADMIN|ALL|NET_RAW)'; then
+  if echo "$BODY" | grep -qE '^\s*-\s*(SYS_ADMIN|ALL|NET_RAW)'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C010] (error): Dangerous capability added. Remove SYS_ADMIN/ALL/NET_RAW.")
   fi
 
   # KA-C020: Missing securityContext entirely
-  if ! echo "$CONTENT" | grep -qE '^\s*securityContext:'; then
+  if ! echo "$BODY" | grep -qE '^\s*securityContext:'; then
     VIOLATIONS+=("$KIND/$NAME [KA-C020] (warning): Missing securityContext. Add runAsNonRoot, readOnlyRootFilesystem, allowPrivilegeEscalation: false.")
   fi
 
   # KA-R009: Image uses latest or no tag
   while IFS= read -r IMG_LINE; do
+    [[ -z "$IMG_LINE" ]] && continue
     IMAGE_VAL=$(echo "$IMG_LINE" | sed 's/^[^:]*:\s*//' | xargs)
     # Skip variable references
     if [[ "$IMAGE_VAL" != *'$'* ]]; then
@@ -215,36 +209,35 @@ for i in "${!RESOURCE_KINDS[@]}"; do
         VIOLATIONS+=("$KIND/$NAME [KA-R009] (warning): Image uses :latest tag. Pin to a specific version.")
       fi
     fi
-  done < <(echo "$CONTENT" | grep -E '^\s*image:\s*\S' || true)
+  done < <(echo "$BODY" | grep -E '^\s*image:\s*\S' || true)
 
   # KA-B001/B003: Missing resource requests
-  if ! echo "$CONTENT" | grep -qE '^\s*requests:'; then
+  if ! echo "$BODY" | grep -qE '^\s*requests:'; then
     VIOLATIONS+=("$KIND/$NAME [KA-B001] (warning): Missing resource requests. Add resources.requests.cpu and memory.")
   fi
 
   # KA-B002/B004: Missing resource limits
-  if ! echo "$CONTENT" | grep -qE '^\s*limits:'; then
+  if ! echo "$BODY" | grep -qE '^\s*limits:'; then
     VIOLATIONS+=("$KIND/$NAME [KA-B002] (warning): Missing resource limits. Add resources.limits.cpu and memory.")
   fi
-
-  break  # For single-resource manifests, avoid duplicate checking
 done
 
-# --- RBAC checks ---
+# --- RBAC checks (per-resource) ---
 for i in "${!RESOURCE_KINDS[@]}"; do
   KIND="${RESOURCE_KINDS[$i]}"
   NAME="${RESOURCE_NAMES[$i]}"
+  BODY="${RESOURCE_BODIES[$i]}"
 
   if [[ "$KIND" == "Role" ]] || [[ "$KIND" == "ClusterRole" ]]; then
     # KA-A001: Wildcard permissions
-    if echo "$CONTENT" | grep -qE '^\s*-\s*"\*"' || echo "$CONTENT" | grep -qE "^\s*-\s*'\*'" || echo "$CONTENT" | grep -qE '^\s*-\s*\*\s*$'; then
+    if echo "$BODY" | grep -qE '^\s*-\s*"\*"' || echo "$BODY" | grep -qE "^\s*-\s*'\*'" || echo "$BODY" | grep -qE '^\s*-\s*\*\s*$'; then
       VIOLATIONS+=("$KIND/$NAME [KA-A001] (error): Wildcard permissions detected. Use specific resources and verbs. CIS 5.1.3.")
     fi
   fi
 
   if [[ "$KIND" == "RoleBinding" ]] || [[ "$KIND" == "ClusterRoleBinding" ]]; then
     # KA-A002: cluster-admin binding
-    if echo "$CONTENT" | grep -qE '^\s*name:\s*cluster-admin'; then
+    if echo "$BODY" | grep -qE '^\s*name:\s*cluster-admin'; then
       VIOLATIONS+=("$KIND/$NAME [KA-A002] (error): cluster-admin RoleBinding. Use a custom Role with minimal permissions. CIS 5.1.1.")
     fi
   fi

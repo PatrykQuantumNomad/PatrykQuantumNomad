@@ -1,0 +1,17 @@
+{
+  "eval_id": 0,
+  "eval_name": "dockerfile-insecure",
+  "prompt": "Review this Dockerfile for security and best practice issues.",
+  "assertions": [
+    {"text": "Identifies untagged FROM (DL3006)", "type": "content_check"},
+    {"text": "Identifies curl pipe to bash (PG002)", "type": "content_check"},
+    {"text": "Identifies secrets in ENV (PG001)", "type": "content_check"},
+    {"text": "Identifies ADD instead of COPY (DL3020)", "type": "content_check"},
+    {"text": "Identifies sudo usage (DL3004)", "type": "content_check"},
+    {"text": "Identifies missing USER instruction (PG011/DL3002)", "type": "content_check"},
+    {"text": "Identifies consecutive RUN instructions (DL3059)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs (e.g. DL3006, PG001) to reference violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"}
+  ]
+}

@@ -180,6 +180,9 @@ export default function K8sEditorPanel({ onToggleFullscreen, isFullscreen }: K8s
     k8sResult.set(null);
     k8sResultsStale.set(false);
     try { localStorage.removeItem('k8s-editor-content'); } catch { /* ignore */ }
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
     view.focus();
   }, [viewRef]);
 

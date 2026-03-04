@@ -1,0 +1,58 @@
+{
+  "eval_id": 0,
+  "eval_name": "gha-insecure-workflow",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Identifies unpinned action versions (GA-C001)",
+      "passed": true,
+      "evidence": "Issue #4 Unsafe Third-Party Action with @main Reference (HIGH) - identifies unpinned action; also implies version pinning concern for other actions"
+    },
+    {
+      "text": "Identifies mutable branch ref @main (GA-C002)",
+      "passed": true,
+      "evidence": "Issue #4 Unsafe Third-Party Action with @main Reference (HIGH) - some-org/risky-action@main pinned to main branch identified as supply chain risk"
+    },
+    {
+      "text": "Identifies script injection risk with github.event (GA-C005)",
+      "passed": true,
+      "evidence": "Issue #5 Unvalidated User Input in Script (HIGH) - github.event.issue.title and github.event.pull_request.body direct interpolation identified at Lines 13, 16"
+    },
+    {
+      "text": "Identifies unrestricted pull_request_target (GA-C006)",
+      "passed": true,
+      "evidence": "Issue #1 Dangerous Event Trigger: pull_request_target (CRITICAL) - identified as attack vector for malicious actors"
+    },
+    {
+      "text": "Identifies hardcoded token/secret (GA-C007)",
+      "passed": true,
+      "evidence": "Issue #2 Hardcoded GitHub Token in Script (CRITICAL) and Issue #3 Exposed Webhook URL (CRITICAL) - GitHub PAT and Slack webhook both identified"
+    },
+    {
+      "text": "Identifies write-all permissions (GA-C003)",
+      "passed": true,
+      "evidence": "Issue #6 Excessive Permissions: write-all (HIGH) - deploy job permissions: write-all identified"
+    },
+    {
+      "text": "Identifies missing workflow name (GA-F004)",
+      "passed": false,
+      "evidence": "No mention of missing workflow name in the output. The 8 issues identified do not include missing name field"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": false,
+      "evidence": "No numeric score or letter grade provided. Output uses CRITICAL/HIGH/MEDIUM severity labels only"
+    },
+    {
+      "text": "Uses rule IDs (e.g. GA-C001, GA-C005) to reference violations",
+      "passed": false,
+      "evidence": "No rule IDs (GA-C001 style) used anywhere. Issues are numbered 1-8 with plain text descriptions"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": false,
+      "evidence": "No category breakdown table with weighted scores. Only a summary table with line/severity/issue/type is provided"
+    }
+  ],
+  "pass_rate": 0.6
+}

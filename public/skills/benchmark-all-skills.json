@@ -1,0 +1,91 @@
+{
+  "model": "claude-haiku-4-5",
+  "date": "2026-03-04",
+  "skills": [
+    {
+      "name": "compose-validator",
+      "evals": [
+        {
+          "eval_name": "compose-insecure-config",
+          "with_skill": {"pass_rate": 1.0, "passed": 10, "total": 10, "tokens": 37495, "duration_s": 47.1},
+          "without_skill": {"pass_rate": 0.6, "passed": 6, "total": 10, "tokens": 24166, "duration_s": 24.9}
+        },
+        {
+          "eval_name": "compose-mixed-issues",
+          "with_skill": {"pass_rate": 1.0, "passed": 8, "total": 8, "tokens": 33257, "duration_s": 38.0},
+          "without_skill": {"pass_rate": 0.375, "passed": 3, "total": 8, "tokens": 23943, "duration_s": 21.0}
+        }
+      ],
+      "aggregate": {
+        "with_skill": {"avg_pass_rate": 1.0, "avg_tokens": 35376, "avg_duration_s": 42.6},
+        "without_skill": {"avg_pass_rate": 0.488, "avg_tokens": 24055, "avg_duration_s": 23.0},
+        "delta_pass_rate": "+51.2%"
+      }
+    },
+    {
+      "name": "dockerfile-analyzer",
+      "evals": [
+        {
+          "eval_name": "dockerfile-insecure",
+          "with_skill": {"pass_rate": 1.0, "passed": 10, "total": 10, "tokens": 36274, "duration_s": 40.6},
+          "without_skill": {"pass_rate": 0.7, "passed": 7, "total": 10, "tokens": 23587, "duration_s": 20.1}
+        },
+        {
+          "eval_name": "dockerfile-mixed-issues",
+          "with_skill": {"pass_rate": 1.0, "passed": 9, "total": 9, "tokens": 37252, "duration_s": 32.6},
+          "without_skill": {"pass_rate": 0.667, "passed": 6, "total": 9, "tokens": 23823, "duration_s": 20.5}
+        }
+      ],
+      "aggregate": {
+        "with_skill": {"avg_pass_rate": 1.0, "avg_tokens": 36763, "avg_duration_s": 36.6},
+        "without_skill": {"avg_pass_rate": 0.684, "avg_tokens": 23705, "avg_duration_s": 20.3},
+        "delta_pass_rate": "+31.6%"
+      }
+    },
+    {
+      "name": "k8s-analyzer",
+      "evals": [
+        {
+          "eval_name": "k8s-insecure-manifest",
+          "with_skill": {"pass_rate": 1.0, "passed": 11, "total": 11, "tokens": 35690, "duration_s": 39.3},
+          "without_skill": {"pass_rate": 0.636, "passed": 7, "total": 11, "tokens": 25457, "duration_s": 31.2}
+        },
+        {
+          "eval_name": "k8s-cross-resource-issues",
+          "with_skill": {"pass_rate": 1.0, "passed": 9, "total": 9, "tokens": 33061, "duration_s": 20.5},
+          "without_skill": {"pass_rate": 0.556, "passed": 5, "total": 9, "tokens": 24734, "duration_s": 27.1}
+        }
+      ],
+      "aggregate": {
+        "with_skill": {"avg_pass_rate": 1.0, "avg_tokens": 34376, "avg_duration_s": 29.9},
+        "without_skill": {"avg_pass_rate": 0.596, "avg_tokens": 25096, "avg_duration_s": 29.2},
+        "delta_pass_rate": "+40.4%"
+      }
+    },
+    {
+      "name": "gha-validator",
+      "evals": [
+        {
+          "eval_name": "gha-insecure-workflow",
+          "with_skill": {"pass_rate": 0.9, "passed": 9, "total": 10, "tokens": 31158, "duration_s": 26.8},
+          "without_skill": {"pass_rate": 0.6, "passed": 6, "total": 10, "tokens": 24569, "duration_s": 28.4}
+        },
+        {
+          "eval_name": "gha-mixed-improvements",
+          "with_skill": {"pass_rate": 1.0, "passed": 8, "total": 8, "tokens": 32756, "duration_s": 39.0},
+          "without_skill": {"pass_rate": 0.375, "passed": 3, "total": 8, "tokens": 24434, "duration_s": 24.8}
+        }
+      ],
+      "aggregate": {
+        "with_skill": {"avg_pass_rate": 0.95, "avg_tokens": 31957, "avg_duration_s": 32.9},
+        "without_skill": {"avg_pass_rate": 0.488, "avg_tokens": 24502, "avg_duration_s": 26.6},
+        "delta_pass_rate": "+46.2%"
+      }
+    }
+  ],
+  "overall": {
+    "with_skill": {"avg_pass_rate": 0.988, "avg_tokens": 34618, "avg_duration_s": 35.5},
+    "without_skill": {"avg_pass_rate": 0.564, "avg_tokens": 24340, "avg_duration_s": 24.8},
+    "delta_pass_rate": "+42.4%"
+  }
+}

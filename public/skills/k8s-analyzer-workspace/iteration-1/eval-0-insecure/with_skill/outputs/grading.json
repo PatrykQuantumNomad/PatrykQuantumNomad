@@ -1,0 +1,63 @@
+{
+  "eval_id": 0,
+  "eval_name": "k8s-insecure-manifest",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies privileged container (KA-C001)",
+      "passed": true,
+      "evidence": "web-app [KA-C001]: Container runs as privileged - Line 21 securityContext.privileged: true flagged as Error"
+    },
+    {
+      "text": "Identifies runAsUser 0 (KA-C005)",
+      "passed": true,
+      "evidence": "web-app [KA-C005]: Running with UID 0 - Line 22 securityContext.runAsUser: 0 flagged as Error"
+    },
+    {
+      "text": "Identifies hostPID (KA-C006)",
+      "passed": true,
+      "evidence": "web-app [KA-C006]: Host PID namespace shared - Line 15 hostPID: true flagged as Error"
+    },
+    {
+      "text": "Identifies Docker socket mount (KA-C015)",
+      "passed": true,
+      "evidence": "web-app [KA-C015]: Docker socket mounted - Lines 32-37 mounting /var/run/docker.sock flagged as Error"
+    },
+    {
+      "text": "Identifies wildcard RBAC permissions (KA-A001)",
+      "passed": true,
+      "evidence": "admin-role [KA-A001]: Wildcard permissions in Role/ClusterRole - Lines 44-46 using * flagged as Error"
+    },
+    {
+      "text": "Identifies cluster-admin binding (KA-A002)",
+      "passed": true,
+      "evidence": "admin-binding [KA-A002]: cluster-admin RoleBinding - Line 58 binding to cluster-admin flagged as Error"
+    },
+    {
+      "text": "Identifies inline secrets in env vars (KA-C018)",
+      "passed": true,
+      "evidence": "web-app [KA-C018]: Secrets in environment variables - Lines 27-30 inline secrets flagged as Warning"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 54/100 (Grade: F) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. KA-C001, KA-A001) to reference violations",
+      "passed": true,
+      "evidence": "Rule IDs used throughout: KA-C006, KA-C001, KA-C005, KA-C015, KA-A001, KA-A002, KA-C008, KA-C018, KA-C004, KA-C011, KA-C012, KA-C013, KA-C016, KA-R001, KA-R002, KA-R004, KA-R009, KA-B001-B004, KA-C009, KA-B005, KA-B006"
+    },
+    {
+      "text": "Includes PSS compliance summary",
+      "passed": true,
+      "evidence": "PSS Compliance section with Baseline violations (8) and Restricted violations (4) with specific rule IDs listed"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Reliability/Best Practice/Schema/Cross-Resource scores and weights"
+    }
+  ],
+  "pass_rate": 1.0
+}

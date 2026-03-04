@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   ghaResult,
@@ -10,12 +10,10 @@ import { ScoreGauge } from './results/ScoreGauge';
 import { GhaCategoryBreakdown } from './gha-results/GhaCategoryBreakdown';
 import { GhaViolationList } from './gha-results/GhaViolationList';
 import { GhaEmptyState } from './gha-results/GhaEmptyState';
+import { GhaShareActions } from './gha-results/GhaShareActions';
 import { FullscreenToggle } from './results/FullscreenToggle';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
 import { GhaGraphSkeleton } from './gha-results/GhaGraphSkeleton';
-import { downloadScoreBadge } from '../../lib/tools/gha-validator/share/badge-png';
-import { shareUrl } from '../../lib/tools/gha-validator/share/share-fallback';
-import { isUrlTooLong } from '../../lib/tools/gha-validator/share/url-state';
 import '@xyflow/react/dist/style.css';
 
 const LazyGhaWorkflowGraph = lazy(() => import('./gha-results/GhaWorkflowGraph'));
@@ -48,7 +46,6 @@ export default function GhaResultsPanel({ onToggleFullscreen, isFullscreen }: Gh
   const stale = useStore(ghaResultsStale);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
 
   const violationCounts = useMemo(() => {
     if (!result?.violations) return {};
@@ -62,23 +59,6 @@ export default function GhaResultsPanel({ onToggleFullscreen, isFullscreen }: Gh
     if (!view) return;
     highlightAndScroll(view, line);
   };
-
-  const handleDownloadBadge = useCallback(() => {
-    if (!result) return;
-    downloadScoreBadge(result.score.overall, result.score.grade);
-  }, [result]);
-
-  const handleShare = useCallback(async () => {
-    const url = window.location.href;
-    if (isUrlTooLong(window.location.hash)) {
-      console.warn('[GHA Validator] URL hash exceeds soft limit, sharing may be truncated on some platforms');
-    }
-    const tier = await shareUrl(url, 'GitHub Actions Validator Score');
-    if (tier === 'copied') {
-      setShareFeedback('Copied!');
-      setTimeout(() => setShareFeedback(null), 2000);
-    }
-  }, []);
 
   return (
     <div>
@@ -141,21 +121,7 @@ export default function GhaResultsPanel({ onToggleFullscreen, isFullscreen }: Gh
                 </div>
               )}
               <GhaEmptyState score={result.score.overall} grade={result.score.grade} />
-              {/* Share + Download buttons */}
-              <div className="flex items-center gap-2 mt-3">
-                <button
-                  onClick={handleDownloadBadge}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-transparent hover:border-[var(--color-accent)] transition-colors text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                >
-                  Download Badge
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-transparent hover:border-[var(--color-accent)] transition-colors text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                >
-                  {shareFeedback ?? 'Share Link'}
-                </button>
-              </div>
+              <GhaShareActions />
             </div>
           ) : (
             <div className={stale ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
@@ -184,24 +150,10 @@ export default function GhaResultsPanel({ onToggleFullscreen, isFullscreen }: Gh
                 </div>
               </div>
 
-              {/* Share + Download buttons */}
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  onClick={handleDownloadBadge}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-transparent hover:border-[var(--color-accent)] transition-colors text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                >
-                  Download Badge
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-transparent hover:border-[var(--color-accent)] transition-colors text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                >
-                  {shareFeedback ?? 'Share Link'}
-                </button>
-              </div>
+              <GhaShareActions />
 
               {/* Pass indicator */}
-              <p className="text-xs text-[var(--color-text-secondary)] mb-2">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-3 mb-2">
                 {result.pass === 1 ? 'Pass 1 of 2' : 'Complete'}
               </p>
 

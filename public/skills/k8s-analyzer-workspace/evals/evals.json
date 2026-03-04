@@ -1,0 +1,17 @@
+{
+  "skill_name": "k8s-analyzer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Please analyze this Kubernetes manifest for security issues. The file is at k8s-analyzer-workspace/test-insecure.yaml",
+      "expected_output": "Should identify: privileged container, runAsUser 0, hostPID, hostNetwork, docker socket mount, wildcard RBAC, cluster-admin binding, inline secrets, missing probes, single replica, no resource limits. Score should be below 40 (F grade)",
+      "files": ["k8s-analyzer-workspace/test-insecure.yaml"]
+    },
+    {
+      "id": 1,
+      "prompt": "Review this K8s manifest for best practices and cross-resource issues. The file is at k8s-analyzer-workspace/test-mixed.yaml",
+      "expected_output": "Should identify: Service selector mismatch (app:backend vs app:api), Ingress referencing missing-service, NodePort usage, missing probes, missing security context, missing PDB. Score should be in 50-70 range",
+      "files": ["k8s-analyzer-workspace/test-mixed.yaml"]
+    }
+  ]
+}

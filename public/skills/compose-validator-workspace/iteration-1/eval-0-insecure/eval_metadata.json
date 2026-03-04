@@ -1,0 +1,17 @@
+{
+  "eval_id": 0,
+  "eval_name": "compose-insecure-config",
+  "prompt": "Can you review this Docker Compose file for any security or configuration issues?",
+  "assertions": [
+    {"text": "Identifies privileged mode as a security issue", "type": "content_check"},
+    {"text": "Identifies Docker socket mount as a security issue", "type": "content_check"},
+    {"text": "Identifies hardcoded secrets/passwords in environment variables", "type": "content_check"},
+    {"text": "Identifies host network mode as a security issue", "type": "content_check"},
+    {"text": "Identifies untagged/latest image as an issue", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs (e.g. CV-C001, CV-C002) to reference specific violations", "type": "content_check"},
+    {"text": "Groups issues by severity (error/warning/info)", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"},
+    {"text": "Provides fix recommendations for identified issues", "type": "content_check"}
+  ]
+}

@@ -5,9 +5,12 @@ description: >
   best-practice violations using 46 rules across 5 categories (security,
   efficiency, maintainability, reliability, best-practice). Scores Dockerfiles
   on a 0-100 scale with letter grades (A+ through F). Generates detailed fix
-  recommendations with before/after code examples. Use when a user shares a
-  Dockerfile for review, asks about Dockerfile best practices, or wants to
-  improve their container security posture.
+  recommendations with before/after code examples. Use this skill PROACTIVELY
+  whenever a user shares a Dockerfile for review, pastes Dockerfile content,
+  asks about Dockerfile best practices or security hardening, wants to improve
+  their container image security posture, mentions Dockerfile or Docker image
+  builds, or asks about multi-stage builds or image optimization — even if
+  they don't explicitly say "validate" or "analyze".
 ---
 
 # Dockerfile Analyzer

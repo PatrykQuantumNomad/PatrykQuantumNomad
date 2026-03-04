@@ -28,7 +28,8 @@ export function GhaJobNode({ data }: NodeProps<GhaJobNodeType>) {
       style={{
         borderColor,
         backgroundColor: 'var(--color-surface-alt, rgba(0,0,0,0.4))',
-        minWidth: 180,
+        width: '100%',
+        height: '100%',
       }}
     >
       <Handle

@@ -1,0 +1,48 @@
+{
+  "eval_id": 1,
+  "eval_name": "compose-mixed-issues",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Identifies orphan network (backend defined but unused)",
+      "passed": true,
+      "evidence": "Issue #1 Network Not Assigned (HIGH PRIORITY) - backend network is defined but no services are assigned to it"
+    },
+    {
+      "text": "Identifies both build and image specified on api service",
+      "passed": true,
+      "evidence": "Issue #9 API Service Has Both build and image (LOW PRIORITY) - API service specifies both build: ./api and image: my-api:latest"
+    },
+    {
+      "text": "Identifies healthcheck timeout >= interval issue on db",
+      "passed": false,
+      "evidence": "Issue #5 mentions missing Redis healthcheck and Issue #6 mentions dependency on unhealthy services but no specific timeout >= interval issue on db is identified. The db healthcheck configuration error is not caught."
+    },
+    {
+      "text": "Identifies missing security options (cap_drop, read_only, no-new-privileges)",
+      "passed": false,
+      "evidence": "No mention of cap_drop, read_only, or no-new-privileges security options. The analysis focuses on network, ports, and healthchecks but misses security context options"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": false,
+      "evidence": "No numeric score or letter grade provided anywhere in the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. CV-M007, CV-B008) to reference violations",
+      "passed": false,
+      "evidence": "No rule IDs used. Issues are numbered 1-10 with plain text descriptions, no CV- prefix identifiers"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": false,
+      "evidence": "No category breakdown table. Output has a summary table of priorities but no weighted score categories"
+    },
+    {
+      "text": "Provides fix recommendations with before/after examples",
+      "passed": true,
+      "evidence": "Each issue includes YAML code blocks showing recommended configurations (before/after examples)"
+    }
+  ],
+  "pass_rate": 0.375
+}

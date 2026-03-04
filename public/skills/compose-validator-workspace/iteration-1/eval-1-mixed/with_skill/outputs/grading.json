@@ -1,0 +1,48 @@
+{
+  "eval_id": 1,
+  "eval_name": "compose-mixed-issues",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Identifies orphan network (backend defined but unused)",
+      "passed": true,
+      "evidence": "Line 43 [CV-M007]: Orphan network definition - backend network defined but not referenced by any service"
+    },
+    {
+      "text": "Identifies both build and image specified on api service",
+      "passed": true,
+      "evidence": "Line 5 [CV-B008]: Both build and image specified - api service specifies both build: ./api and image: my-api:latest"
+    },
+    {
+      "text": "Identifies healthcheck timeout >= interval issue on db",
+      "passed": true,
+      "evidence": "Line 29 [CV-B011]: Healthcheck timeout exceeds interval - db service has timeout: 30s but interval: 10s"
+    },
+    {
+      "text": "Identifies missing security options (cap_drop, read_only, no-new-privileges)",
+      "passed": true,
+      "evidence": "Line 3-44 [CV-C007]: Default capabilities not dropped - services lack cap_drop: [ALL]; also references security options in recommendations"
+    },
+    {
+      "text": "Provides a numeric score (0-100) with letter grade",
+      "passed": true,
+      "evidence": "Score: 68/100 (Grade: D+) shown at the top of the output"
+    },
+    {
+      "text": "Uses rule IDs (e.g. CV-M007, CV-B008) to reference violations",
+      "passed": true,
+      "evidence": "Rule IDs used: CV-B008, CV-C014, CV-C009, CV-C007, CV-M007, CV-B001, CV-B011, CV-B003, CV-F001, CV-B005"
+    },
+    {
+      "text": "Includes category breakdown table with weighted scores",
+      "passed": true,
+      "evidence": "Category Breakdown table with Security/Semantic/Best Practice/Schema/Style scores, weights, and weighted calculation"
+    },
+    {
+      "text": "Provides fix recommendations with before/after examples",
+      "passed": true,
+      "evidence": "Each issue includes a Fix: section with YAML code examples showing recommended configuration"
+    }
+  ],
+  "pass_rate": 1.0
+}

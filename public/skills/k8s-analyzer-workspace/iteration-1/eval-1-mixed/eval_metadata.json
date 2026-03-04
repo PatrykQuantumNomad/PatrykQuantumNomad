@@ -1,0 +1,16 @@
+{
+  "eval_id": 1,
+  "eval_name": "k8s-cross-resource-issues",
+  "prompt": "Review this K8s manifest for best practices and cross-resource issues.",
+  "assertions": [
+    {"text": "Identifies Service selector mismatch (app:backend vs app:api) (KA-X001)", "type": "content_check"},
+    {"text": "Identifies Ingress referencing missing-service (KA-X002)", "type": "content_check"},
+    {"text": "Identifies NodePort service type (KA-B008)", "type": "content_check"},
+    {"text": "Identifies missing security context (KA-C020)", "type": "content_check"},
+    {"text": "Identifies missing probes (KA-R001, KA-R002)", "type": "content_check"},
+    {"text": "Provides a numeric score (0-100) with letter grade", "type": "content_check"},
+    {"text": "Uses rule IDs to reference specific violations", "type": "content_check"},
+    {"text": "Includes category breakdown table with weighted scores", "type": "content_check"},
+    {"text": "Includes PSS compliance summary", "type": "content_check"}
+  ]
+}
