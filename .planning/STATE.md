@@ -101,6 +101,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 78]: Violations grouped by category (not severity) in GHA ViolationList -- different from K8s/Dockerfile pattern per UI-07
 - [Phase 78]: Rule metadata looked up lazily via getGhaRuleById() only when violation expanded
 - [Phase 78]: Graph tab placeholder for Phase 79 -- "Workflow graph visualization coming soon"
+- [Phase 78]: Cmd/Ctrl+Enter keyboard shortcut removed post-verification -- analysis triggered by button only
 
 ### Pending Todos
 
