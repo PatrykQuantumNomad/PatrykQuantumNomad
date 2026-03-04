@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: milestone
 status: completed
-stopped_at: Completed 79-02-PLAN.md
-last_updated: "2026-03-04T18:10:50.120Z"
+stopped_at: Completed 79-01-PLAN.md
+last_updated: "2026-03-04T18:11:19.171Z"
 last_activity: 2026-03-04 -- Phase 79 Plan 01 graph data extractor (TDD)
 progress:
   total_phases: 7
@@ -66,6 +66,7 @@ Progress (v1.13): [██████████] 99%
 | Phase 78 P01 | 4min | 2 tasks | 3 files |
 | Phase 78 P02 | 4min | 2 tasks | 3 files |
 | Phase 78 P03 | 4min | 2 tasks | 6 files |
+| Phase 79 P01 | 2min | 2 tasks | 2 files |
 | Phase 79 P02 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
@@ -103,6 +104,10 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 78]: Rule metadata looked up lazily via getGhaRuleById() only when violation expanded
 - [Phase 78]: Graph tab placeholder for Phase 79 -- "Workflow graph visualization coming soon"
 - [Phase 78]: Cmd/Ctrl+Enter keyboard shortcut removed post-verification -- analysis triggered by button only
+- [Phase 79]: Violation-to-job matching uses job key substring in message (e.g., 'build:' prefix)
+- [Phase 79]: Info-severity violations treated as clean -- only error/warning affect job status
+- [Phase 79]: Step label priority: name > uses > run[:30] > fallback
+- [Phase 79]: Cycle edges flagged by marking all needs edges between Kahn's cycle participants
 - [Phase 79]: STATUS_COLORS/STATUS_BG/STATUS_BORDER maps as module-level consts for shared status coloring
 - [Phase 79]: GhaStepNode has no handles -- purely visual children within job container group nodes
 - [Phase 79]: Edge labels only for trigger events, not needs: edges, for cleaner visual
@@ -126,7 +131,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T18:10:50.118Z
-Stopped at: Completed 79-02-PLAN.md
+Last session: 2026-03-04T18:11:19.168Z
+Stopped at: Completed 79-01-PLAN.md
 Resume file: None
 Next: Phase 79 (workflow graph visualization)
