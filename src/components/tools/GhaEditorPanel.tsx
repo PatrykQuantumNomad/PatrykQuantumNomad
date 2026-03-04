@@ -23,6 +23,7 @@ import { computeGhaScore } from '../../lib/tools/gha-validator/scorer';
 import { createActionlintWorker } from '../../lib/tools/gha-validator/worker/worker-client';
 import { SAMPLE_GHA_WORKFLOW } from '../../lib/tools/gha-validator/sample-workflow';
 import type { GhaUnifiedViolation } from '../../lib/tools/gha-validator/types';
+import { decodeGhaState, encodeGhaState } from '../../lib/tools/gha-validator/share/url-state';
 import {
   ghaResult,
   ghaAnalyzing,
@@ -93,6 +94,9 @@ export default function GhaEditorPanel({
   // Store the current EditorView for Pass 2 callback
   const viewForPass2Ref = useRef<EditorView | null>(null);
 
+  // Whether current analysis was triggered by hash-decode (prevents hash-write loop)
+  const isHashLoadRef = useRef(false);
+
   // Stable ref for analyze function so hook keymap closure always calls latest
   const analyzeRef = useRef<(view: EditorView) => void>(() => {});
 
@@ -129,6 +133,16 @@ export default function GhaEditorPanel({
 
     // Pass 1 complete -- UI is responsive
     ghaAnalyzing.set(false);
+
+    // Update URL hash for shareable link (skip if this was a hash-decode load)
+    if (!isHashLoadRef.current) {
+      try {
+        window.history.replaceState(null, '', encodeGhaState(yaml));
+      } catch {
+        /* replaceState may throw if URL is too long -- ignore */
+      }
+    }
+    isHashLoadRef.current = false;
 
     // Store Pass 1 violations and view for Pass 2 merge callback
     pass1ViolationsRef.current = pass1.violations;
@@ -195,6 +209,23 @@ export default function GhaEditorPanel({
     initialDoc: SAMPLE_GHA_WORKFLOW,
     onAnalyze: handleAnalyze,
   });
+
+  // Decode URL hash on mount -- load shared workflow and auto-analyze
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    const hash = window.location.hash;
+    const decoded = decodeGhaState(hash);
+    if (decoded) {
+      isHashLoadRef.current = true;
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: decoded },
+      });
+      // Auto-trigger analysis for the decoded workflow
+      analyzeRef.current(view);
+    }
+  }, [viewRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for re-analyze requests from the stale results banner
   useEffect(() => {
