@@ -99,9 +99,9 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Sharing
 
-- [ ] **SHARE-01**: Score badge download as PNG image for social media sharing
-- [ ] **SHARE-02**: URL state encoding with `#gha=` hash prefix (lz-string compression)
-- [ ] **SHARE-03**: 3-tier share fallback (Web Share API > Clipboard API > prompt())
+- [x] **SHARE-01**: Score badge download as PNG image for social media sharing
+- [x] **SHARE-02**: URL state encoding with `#gha=` hash prefix (lz-string compression)
+- [x] **SHARE-03**: 3-tier share fallback (Web Share API > Clipboard API > prompt())
 
 ### Rule Documentation
 
@@ -217,9 +217,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | GRAPH-05 | Phase 79 | Complete |
 | GRAPH-06 | Phase 79 | Complete |
 | GRAPH-07 | Phase 79 | Complete |
-| SHARE-01 | Phase 80 | Pending |
-| SHARE-02 | Phase 80 | Pending |
-| SHARE-03 | Phase 80 | Pending |
+| SHARE-01 | Phase 80 | Complete |
+| SHARE-02 | Phase 80 | Complete |
+| SHARE-03 | Phase 80 | Complete |
 | DOC-01 | Phase 80 | Complete |
 | DOC-02 | Phase 80 | Complete |
 | DOC-03 | Phase 80 | Complete |
