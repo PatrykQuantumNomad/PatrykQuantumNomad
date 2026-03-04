@@ -6,7 +6,7 @@
  *
  * Also verifies the master registry integration:
  * - allGhaRules has 22 entries (10 security + 8 best practice + 4 style)
- * - allDocumentedGhaRules has 40 entries (22 custom + 18 actionlint metadata)
+ * - allDocumentedGhaRules has 48 entries (22 custom + 18 actionlint metadata + 8 schema)
  * - getGhaRuleById works across all categories
  */
 
@@ -330,8 +330,14 @@ describe('Master registry integration', () => {
     expect(allGhaRules).toHaveLength(22);
   });
 
-  it('allDocumentedGhaRules has 40 documented rules', () => {
-    expect(allDocumentedGhaRules).toHaveLength(40);
+  it('allDocumentedGhaRules has 48 documented rules', () => {
+    expect(allDocumentedGhaRules).toHaveLength(48);
+  });
+
+  it('getGhaRuleById finds schema rule', () => {
+    const rule = getGhaRuleById('GA-S001');
+    expect(rule).toBeDefined();
+    expect(rule!.category).toBe('schema');
   });
 
   it('getGhaRuleById finds security rule', () => {
