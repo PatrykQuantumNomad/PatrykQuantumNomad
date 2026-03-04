@@ -112,10 +112,12 @@ Plans:
   2. Job dependency edges from `needs:` declarations are rendered with cycle detection
   3. Nodes are color-coded by violation status (clean/warning/error)
   4. React Flow loads lazily via React.lazy as a separate chunk to maintain Lighthouse 90+ performance
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
 
 Plans:
-- [ ] 79-01: TBD
+- [ ] 79-01-PLAN.md — TDD graph data extractor with cycle detection, three node types, trigger-to-job edges, violation status
+- [ ] 79-02-PLAN.md — Custom React Flow node/edge components, graph skeleton, dark theme CSS
+- [ ] 79-03-PLAN.md — GhaWorkflowGraph dagre LR layout and lazy-loaded integration into GhaResultsPanel
 
 ### Phase 80: Sharing and Rule Documentation Pages
 **Goal**: Users can share their validation results and browse per-rule SEO documentation pages for all rules
@@ -158,6 +160,6 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | 76. Two-Pass Engine and Security Rules | 3/3 | Complete   | 2026-03-04 |
 | 77. Semantic, Best Practice, and Style Rules | 3/3 | Complete   | 2026-03-04 |
 | 78. Scoring, Editor, and Results Panel | 3/3 | Complete   | 2026-03-04 |
-| 79. Workflow Graph Visualization | 0/1 | Not started | - |
+| 79. Workflow Graph Visualization | 0/3 | Not started | - |
 | 80. Sharing and Rule Documentation Pages | 0/2 | Not started | - |
 | 81. Site Integration and Blog Post | 0/2 | Not started | - |
