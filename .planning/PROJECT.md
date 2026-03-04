@@ -231,28 +231,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ All hardcoded rule counts updated site-wide to reflect 46 total rules — v1.12
 - ✓ Full production build passes with 46 rules and both new documentation pages — v1.12
 
-## Current Milestone: v1.13 GitHub Actions Workflow Validator
-
-**Goal:** Build a browser-based GitHub Actions workflow validator with two-pass linting (SchemaStore JSON Schema + actionlint WASM), full workflow graph visualization, category-weighted scoring, and per-rule SEO documentation pages.
-
-**Target features:**
-- Two-pass linting engine: JSON Schema structural validation + actionlint WASM deep analysis
-- actionlint WASM compiled from Go source (first WASM-based tool)
-- CodeMirror 6 YAML editor with inline annotations
-- Category-weighted scoring with letter grades
-- Full workflow graph (triggers → jobs → steps) via React Flow + dagre
-- Per-rule SEO documentation pages
-- Full site integration (header nav, homepage, tools page, JSON-LD, OG image, blog post)
+- ✓ Two-pass linting engine (SchemaStore JSON Schema + actionlint WASM via Web Worker) — v1.13
+- ✓ 48 rules across 6 categories (10 security, 18 actionlint semantic, 8 best practice, 4 style, 8 schema) — v1.13
+- ✓ CodeMirror 6 YAML editor with inline annotations and category-weighted scoring — v1.13
+- ✓ Full workflow graph visualization (triggers → jobs → steps) via React Flow + dagre — v1.13
+- ✓ 48 per-rule SEO documentation pages with sharing (URL hash, PNG badge, 3-tier fallback) — v1.13
+- ✓ Full site integration (header nav, homepage, tools page, JSON-LD, OG image, LLMs.txt, companion blog post) — v1.13
+- ✓ 80/80 v1.13 requirements delivered — v1.13
 
 ### Active
 
-- [ ] Two-pass linting engine (SchemaStore schema + actionlint WASM)
-- [ ] actionlint Go-to-WASM compilation pipeline
-- [ ] CodeMirror 6 YAML editor with inline annotations
-- [ ] Category-weighted scoring with letter grades
-- [ ] Full workflow graph visualization (triggers → jobs → steps)
-- [ ] Per-rule SEO documentation pages
-- [ ] Site integration and companion blog post
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -281,10 +270,10 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Building v1.13 GitHub Actions Workflow Validator on top of v1.12 Dockerfile Rules Expansion, v1.11 Beauty Index: Lisp, v1.10 EDA Graphical Techniques NIST Parity, v1.9 Case Study Deep Dive, v1.8 EDA Visual Encyclopedia, v1.7 Kubernetes Manifest Analyzer, v1.6 Docker Compose Validator, v1.5 Database Compass, v1.4 Dockerfile Analyzer, v1.3 The Beauty Index, v1.2 Projects Page Redesign, v1.1 Content Refresh, and v1.0 MVP.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (d3-scale, d3-shape, d3-axis, d3-selection ~17KB gzipped) for distribution parameter explorers, Vitest for hypothesis test and rule validation. New for v1.13: actionlint Go-to-WASM compilation, vite-plugin-wasm + vite-plugin-top-level-await for WASM bundling in Astro.
+Shipped v1.13 GitHub Actions Workflow Validator on top of 12 previous milestones (v1.0 through v1.12).
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 requirements delivered (641 total). 1009 pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 requirements delivered (721 total). ~1010+ pages total. Lighthouse 90+ on mobile.
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
@@ -294,6 +283,7 @@ Database Compass: interactive database model explorer with 12 categories scored 
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
 Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
 EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies at full NIST depth with quantitative test batteries and interpretation sections, 6 foundations, 4 reference pages, filterable landing page, 17 build-time SVG generators, and companion blog post.
+GitHub Actions Workflow Validator: browser-based two-pass linter with actionlint WASM via Web Worker + SchemaStore JSON Schema, 48 rules across 6 categories (10 security, 18 semantic, 8 best practice, 4 style, 8 schema), CodeMirror 6 YAML editor, category-weighted scoring, interactive React Flow workflow graph with dagre layout, 48 rule documentation pages, shareable results, and companion blog post.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -407,4 +397,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-04 after v1.13 milestone started*
+*Last updated: 2026-03-04 after v1.13 milestone*

@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.13 GitHub Actions Workflow Validator (Shipped: 2026-03-04)
+
+**Delivered:** Browser-based GitHub Actions workflow validator with two-pass linting (SchemaStore JSON Schema + actionlint WASM via Web Worker), 48 rules across 6 categories, category-weighted scoring, interactive workflow graph visualization, 48 per-rule SEO documentation pages, and companion blog post
+
+**Phases completed:** 75-81 (19 plans total)
+
+**Key accomplishments:**
+- Built WASM-powered two-pass validation engine: Pass 1 (schema + custom rules) runs instantly, Pass 2 (actionlint WASM) merges asynchronously via Web Worker
+- Implemented 48 rules across 6 categories: 10 security (supply-chain attacks, script injection, permission scoping), 18 actionlint semantic mappings, 8 best practice, 4 style, 8 schema
+- Created CodeMirror 6 YAML editor with category-weighted scoring (Security 35%, Semantic 20%, Best Practice 20%, Schema 15%, Style 10%), SVG gauge, and tabbed results panel
+- Built interactive React Flow workflow graph with dagre layout, cycle detection via Kahn's algorithm, 3 node types (trigger/job/step), and status-aware coloring
+- Generated 48 per-rule SEO documentation pages with sharing (lz-string URL hash, PNG badge, 3-tier fallback)
+- Full site integration with JSON-LD SoftwareApplication, OG image, homepage/tools cards, LLMs.txt, and companion blog post with 21 rule links
+
+**Stats:**
+- 151 files created/modified (+25,956 / -215 lines)
+- 7 phases, 19 plans, 48 tasks, 84 commits
+- 1 day (2026-03-04)
+
+**Git range:** `feat(75-01)` → `docs(phase-81)`
+
+**What's next:** TBD — next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.12 Dockerfile Rules Expansion (Shipped: 2026-03-02)
 
 **Delivered:** Added 2 new custom lint rules to the Dockerfile Analyzer — PG011 (missing USER directive security rule) and PG012 (Node.js pointer compression efficiency rule) — with documentation pages, 12 test scenarios, and site-wide rule count updates from 44 to 46

@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.13
-milestone_name: milestone
-status: completed
-stopped_at: Completed 81-02-PLAN.md
-last_updated: "2026-03-04T20:00:23Z"
-last_activity: 2026-03-04 -- Phase 81 Plan 02 companion blog post (GHA best practices, structured data wiring)
+milestone_name: GitHub Actions Workflow Validator
+status: milestone_complete
+stopped_at: v1.13 milestone archived
+last_updated: "2026-03-04T21:00:00Z"
+last_activity: 2026-03-04 -- v1.13 milestone complete, archived to milestones/
 progress:
   total_phases: 7
   completed_phases: 7
-  total_plans: 17
+  total_plans: 19
   completed_plans: 19
 ---
 
@@ -20,22 +20,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 81 complete (site integration and blog post). All 2 plans done. v1.13 milestone complete.
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 81 (7 of 7 in v1.13)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: All plans complete. Phase 81 done. v1.13 milestone complete.
-Last activity: 2026-03-04 -- Phase 81 Plan 02 companion blog post (GHA best practices, structured data wiring)
+Phase: Next milestone not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-04 — v1.13 milestone complete
 
-Progress (v1.13): [██████████] 100%
+Progress: v1.13 shipped. 14 milestones complete (81 phases, 184 plans, 721 requirements).
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 170 (across 13 milestones)
-- v1.13 plans completed: 12
+- Total plans completed: 184 (across 14 milestones)
+- v1.13 plans completed: 19
 
 **Cumulative Stats:**
 
@@ -54,26 +54,8 @@ Progress (v1.13): [██████████] 100%
 | v1.10 EDA Graphical NIST Parity | 64-68 | 13 | 20 | 2026-02-27 |
 | v1.11 Beauty Index: Lisp | 69-71 | 3 | 21 | 2026-03-02 |
 | v1.12 Dockerfile Rules Expansion | 72-74 | 3 | 11 | 2026-03-02 |
-| **Total** | **74** | **165** | **641** | |
-| Phase 75 P01 | 3min | 2 tasks | 6 files |
-| Phase 75 P02 | 4min | 2 tasks | 6 files |
-| Phase 76 P01 | 4min | 2 tasks | 5 files |
-| Phase 76 P02 | 3min | 2 tasks | 7 files |
-| Phase 76 P03 | 6min | 2 tasks | 9 files |
-| Phase 77 P01 | 4min | 2 tasks | 6 files |
-| Phase 77 P02 | 4min | 2 tasks | 10 files |
-| Phase 77 P03 | 5min | 2 tasks | 8 files |
-| Phase 78 P01 | 4min | 2 tasks | 3 files |
-| Phase 78 P02 | 4min | 2 tasks | 3 files |
-| Phase 78 P03 | 4min | 2 tasks | 6 files |
-| Phase 79 P01 | 2min | 2 tasks | 2 files |
-| Phase 79 P02 | 2min | 2 tasks | 6 files |
-| Phase 79 P03 | 3min | 2 tasks | 2 files |
-| Phase 80 P01 | 2min | 2 tasks | 14 files |
-| Phase 80 P02 | 1min | 1 tasks | 1 files |
-| Phase 80 P03 | 4min | 2 tasks | 6 files |
-| Phase 81 P01 | 4min | 2 tasks | 8 files |
-| Phase 81 P02 | 5min | 2 tasks | 2 files |
+| v1.13 GHA Workflow Validator | 75-81 | 19 | 80 | 2026-03-04 |
+| **Total** | **81** | **184** | **721** | |
 
 ## Accumulated Context
 
@@ -81,65 +63,12 @@ Progress (v1.13): [██████████] 100%
 
 Full decision log in PROJECT.md Key Decisions table.
 
-- [v1.13 scoping]: Option B chosen -- actionlint WASM via Web Worker for deepest semantic analysis
-- [v1.13 scoping]: Pre-built playground WASM binary downloaded, no Go toolchain required
-- [v1.13 scoping]: Classic Worker (not module worker) with importScripts() for wasm_exec.js
-- [Phase 75]: Classic Worker with importScripts for wasm_exec.js; streaming fetch for 9.4MB WASM; go.run() without await
-- [Phase 75]: Inlined ucs2length runtime function to eliminate all require() from compiled GHA schema validator
-- [Phase 76]: Custom rules injected via parameter to avoid circular deps; dedup keys on line:column not ruleId; engine independent of rule registry
-- [Phase 76]: AST helpers shared in ast-helpers.ts (resolveKey, forEachUsesNode, forEachRunNode) for DRY security rule implementation
-- [Phase 76]: GA-C004 uses info severity (not warning) for missing permissions -- informational reminder, not confirmed vulnerability
-- [Phase 76]: GA-C005 builds injection regex from 17-entry DANGEROUS_CONTEXTS array -- extensible pattern
-- [Phase 76]: GA-C007 walkScalars recursive helper traverses all YAML values for secret detection, not just env: blocks
-- [Phase 76]: GA-C009 dangerous combos are opinionated (contents+actions, packages+contents, id-token+any) -- documented in rule explanation
-- [Phase 76]: GA-C010 uses info severity -- self-hosted runners are a valid pattern, informational reminder only
-- [Phase 76]: Rule registry allGhaRules aggregates all 10 security rules; getGhaRuleById for lookup
-- [Phase 77]: actionlintMeta factory returns no-op check() -- metadata rules for documentation/enrichment only
-- [Phase 77]: Engine enrichment prepends rule title to raw actionlint message for user-friendly diagnostics
-- [Phase 77]: GA-B007 static KNOWN_CURRENT_VERSIONS map with 10 well-known actions; date-stamped comment for maintainability
-- [Phase 77]: GA-B008 network detection uses regex with word boundaries to avoid false positives on substrings
-- [Phase 77]: GA-B006 only fires on PR-only workflows with 2+ jobs to reduce noise
-- [Phase 77]: GA-F001 reports first out-of-order job only; single-violation pattern for style rules
-- [Phase 77]: GA-F002 uses Scalar.type (PLAIN/QUOTE_SINGLE/QUOTE_DOUBLE) for quoting detection
-- [Phase 77]: SAMPLE_GHA_WORKFLOW changed from clean to comprehensive -- triggers all rule categories
-- [Phase 78]: GHA scorer reads severity directly from GhaUnifiedViolation (no rule lookup map needed unlike Dockerfile scorer)
-- [Phase 78]: Actionlint category excluded entirely from scoring (not mapped to another category)
-- [Phase 78]: Worker onResult callback uses refs (workerGenerationRef, pass1ViolationsRef) not closures for correct Worker reuse
-- [Phase 78]: ghaAnalyzing set false after Pass 1 (not Pass 2) for responsive UI -- Pass 2 merges silently
-- [Phase 78]: Violations grouped by category (not severity) in GHA ViolationList -- different from K8s/Dockerfile pattern per UI-07
-- [Phase 78]: Rule metadata looked up lazily via getGhaRuleById() only when violation expanded
-- [Phase 78]: Graph tab placeholder for Phase 79 -- "Workflow graph visualization coming soon"
-- [Phase 78]: Cmd/Ctrl+Enter keyboard shortcut removed post-verification -- analysis triggered by button only
-- [Phase 79]: Violation-to-job matching uses job key substring in message (e.g., 'build:' prefix)
-- [Phase 79]: Info-severity violations treated as clean -- only error/warning affect job status
-- [Phase 79]: Step label priority: name > uses > run[:30] > fallback
-- [Phase 79]: Cycle edges flagged by marking all needs edges between Kahn's cycle participants
-- [Phase 79]: STATUS_COLORS/STATUS_BG/STATUS_BORDER maps as module-level consts for shared status coloring
-- [Phase 79]: GhaStepNode has no handles -- purely visual children within job container group nodes
-- [Phase 79]: Edge labels only for trigger events, not needs: edges, for cleaner visual
-- [Phase 79]: Two-pass dagre layout: dagre LR for triggers+jobs, manual steps inside job group containers
-- [Phase 79]: React Flow CSS eagerly imported in parent GhaResultsPanel, not in lazy-loaded GhaWorkflowGraph
-- [Phase 80]: schemaMeta factory mirrors actionlintMeta with hardcoded category:'schema' for consistency
-- [Phase 80]: Schema rule severities match categoriseSingleError() mapping: S001-S004 error, S005-S007 warning, S008 info
-- [Phase 80]: getRelatedGhaRules follows compose-validator pattern exactly: same-category filter, severity sort, configurable limit
-- [Phase 80]: GHA rule page pattern mirrors compose-validator [code].astro for cross-tool consistency
-- [Phase 80]: WASM limitation callout amber styling with warning icon for GA-L017 (ShellCheck) and GA-L018 (pyflakes)
-- [Phase 80]: Null byte check for garbage lz-string decompression (lz-string returns non-null garbage, not null)
-- [Phase 80]: replaceState for URL hash updates (not pushState) to avoid polluting browser history
-- [Phase 80]: isHashLoadRef prevents infinite loop between hash-decode and hash-write in editor panel
-- [Phase 81]: GHA Validator JSON-LD and OG image patterns mirror K8s Analyzer exactly for cross-tool consistency
-- [Phase 81]: GHA Validator OG image subtitle uses pipe-separated format: 48 Rules | 6 Categories | actionlint WASM
-- [Phase 81]: Blog post covers all 6 rule categories with 21 individual rule links and 3 tool CTA links
-- [Phase 81]: GHA FAQ items follow existing pattern (K8s, Compose, Dockerfile) with 3 questions targeting search intent
-
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- [Phase 75]: Needs `/gsd:research-phase` for WASM binary acquisition (download URL, version pinning)
-- [Phase 76]: Two-pass diagnostic overlap not empirically mapped -- build test corpus during planning
 - [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification (monitor post-deploy)
 
 ### Quick Tasks Completed
@@ -151,7 +80,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T20:00:23Z
-Stopped at: Completed 81-02-PLAN.md
+Last session: 2026-03-04T21:00:00Z
+Stopped at: v1.13 milestone archived
 Resume file: None
-Next: Phase 81 complete. v1.13 milestone complete -- all 7 phases done.
+Next: Start next milestone via /gsd:new-milestone
