@@ -112,16 +112,16 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Site Integration
 
-- [ ] **SITE-01**: Tool page at `/tools/gha-validator/` with full editor and results
-- [ ] **SITE-02**: Header navigation link for GitHub Actions Validator
-- [ ] **SITE-03**: Homepage callout linking to the validator
-- [ ] **SITE-04**: Tools page card entry
-- [ ] **SITE-05**: JSON-LD structured data (SoftwareApplication schema) on tool page
-- [ ] **SITE-06**: Build-time OG image via Satori + Sharp
-- [ ] **SITE-07**: Breadcrumb navigation on tool page and rule documentation pages
-- [ ] **SITE-08**: All tool and rule pages in sitemap
-- [ ] **SITE-09**: SEO-optimized meta descriptions for tool page and all rule pages
-- [ ] **SITE-10**: LLMs.txt updated with GitHub Actions Validator entry
+- [x] **SITE-01**: Tool page at `/tools/gha-validator/` with full editor and results
+- [x] **SITE-02**: Header navigation link for GitHub Actions Validator
+- [x] **SITE-03**: Homepage callout linking to the validator
+- [x] **SITE-04**: Tools page card entry
+- [x] **SITE-05**: JSON-LD structured data (SoftwareApplication schema) on tool page
+- [x] **SITE-06**: Build-time OG image via Satori + Sharp
+- [x] **SITE-07**: Breadcrumb navigation on tool page and rule documentation pages
+- [x] **SITE-08**: All tool and rule pages in sitemap
+- [x] **SITE-09**: SEO-optimized meta descriptions for tool page and all rule pages
+- [x] **SITE-10**: LLMs.txt updated with GitHub Actions Validator entry
 
 ### Blog Post
 
@@ -224,16 +224,16 @@ Deferred to future release. Tracked but not in current roadmap.
 | DOC-02 | Phase 80 | Complete |
 | DOC-03 | Phase 80 | Complete |
 | DOC-04 | Phase 80 | Complete |
-| SITE-01 | Phase 81 | Pending |
-| SITE-02 | Phase 81 | Pending |
-| SITE-03 | Phase 81 | Pending |
-| SITE-04 | Phase 81 | Pending |
-| SITE-05 | Phase 81 | Pending |
-| SITE-06 | Phase 81 | Pending |
-| SITE-07 | Phase 81 | Pending |
-| SITE-08 | Phase 81 | Pending |
-| SITE-09 | Phase 81 | Pending |
-| SITE-10 | Phase 81 | Pending |
+| SITE-01 | Phase 81 | Complete |
+| SITE-02 | Phase 81 | Complete |
+| SITE-03 | Phase 81 | Complete |
+| SITE-04 | Phase 81 | Complete |
+| SITE-05 | Phase 81 | Complete |
+| SITE-06 | Phase 81 | Complete |
+| SITE-07 | Phase 81 | Complete |
+| SITE-08 | Phase 81 | Complete |
+| SITE-09 | Phase 81 | Complete |
+| SITE-10 | Phase 81 | Complete |
 | BLOG-01 | Phase 81 | Pending |
 | BLOG-02 | Phase 81 | Pending |
 | BLOG-03 | Phase 81 | Pending |

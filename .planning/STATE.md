@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: milestone
 status: completed
-stopped_at: Completed 80-03-PLAN.md
-last_updated: "2026-03-04T18:59:35Z"
-last_activity: 2026-03-04 -- Phase 80 Plan 03 sharing capabilities (URL state, badge, share fallback)
+stopped_at: Completed 81-02-PLAN.md
+last_updated: "2026-03-04T20:00:23Z"
+last_activity: 2026-03-04 -- Phase 81 Plan 02 companion blog post (GHA best practices, structured data wiring)
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 17
-  completed_plans: 17
+  completed_plans: 19
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 80 complete (sharing and rule documentation pages). All 3 plans done.
+**Current focus:** Phase 81 complete (site integration and blog post). All 2 plans done. v1.13 milestone complete.
 
 ## Current Position
 
-Phase: 80 (6 of 7 in v1.13)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: All plans complete. Phase 80 done.
-Last activity: 2026-03-04 -- Phase 80 Plan 03 sharing capabilities (URL state, badge, share fallback)
+Phase: 81 (7 of 7 in v1.13)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: All plans complete. Phase 81 done. v1.13 milestone complete.
+Last activity: 2026-03-04 -- Phase 81 Plan 02 companion blog post (GHA best practices, structured data wiring)
 
 Progress (v1.13): [██████████] 100%
 
@@ -72,6 +72,8 @@ Progress (v1.13): [██████████] 100%
 | Phase 80 P01 | 2min | 2 tasks | 14 files |
 | Phase 80 P02 | 1min | 1 tasks | 1 files |
 | Phase 80 P03 | 4min | 2 tasks | 6 files |
+| Phase 81 P01 | 4min | 2 tasks | 8 files |
+| Phase 81 P02 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -125,6 +127,10 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 80]: Null byte check for garbage lz-string decompression (lz-string returns non-null garbage, not null)
 - [Phase 80]: replaceState for URL hash updates (not pushState) to avoid polluting browser history
 - [Phase 80]: isHashLoadRef prevents infinite loop between hash-decode and hash-write in editor panel
+- [Phase 81]: GHA Validator JSON-LD and OG image patterns mirror K8s Analyzer exactly for cross-tool consistency
+- [Phase 81]: GHA Validator OG image subtitle uses pipe-separated format: 48 Rules | 6 Categories | actionlint WASM
+- [Phase 81]: Blog post covers all 6 rule categories with 21 individual rule links and 3 tool CTA links
+- [Phase 81]: GHA FAQ items follow existing pattern (K8s, Compose, Dockerfile) with 3 questions targeting search intent
 
 ### Pending Todos
 
@@ -145,7 +151,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T18:59:35Z
-Stopped at: Completed 80-03-PLAN.md
+Last session: 2026-03-04T20:00:23Z
+Stopped at: Completed 81-02-PLAN.md
 Resume file: None
-Next: Phase 80 complete -- proceed to next phase or milestone wrap-up
+Next: Phase 81 complete. v1.13 milestone complete -- all 7 phases done.
