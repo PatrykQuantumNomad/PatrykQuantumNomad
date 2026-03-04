@@ -96,11 +96,12 @@ Plans:
   3. Tabbed results panel shows an SVG score gauge with letter grade, per-category sub-scores, and violation list grouped by category with expandable details
   4. Clicking a violation in the results panel scrolls the editor to the corresponding line
   5. A clean workflow shows a congratulatory "No issues found" empty state
-**Plans**: TBD
+**Plans**: 3 plans (3 waves, sequential)
 
 Plans:
-- [ ] 78-01: TBD
-- [ ] 78-02: TBD
+- [ ] 78-01-PLAN.md — TDD scoring engine with category weights, diminishing returns, letter grades
+- [ ] 78-02-PLAN.md — CodeMirror YAML editor with two-pass analysis orchestration and inline annotations
+- [ ] 78-03-PLAN.md — Results panel with score gauge, category breakdown, violation list, empty state, and Astro page
 
 ### Phase 79: Workflow Graph Visualization
 **Goal**: Users can see their workflow rendered as an interactive graph showing triggers flowing to jobs flowing to steps, with color-coded violation status
@@ -156,7 +157,7 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | 75. WASM Infrastructure and Schema Foundation | 2/2 | Complete   | 2026-03-04 |
 | 76. Two-Pass Engine and Security Rules | 3/3 | Complete   | 2026-03-04 |
 | 77. Semantic, Best Practice, and Style Rules | 3/3 | Complete   | 2026-03-04 |
-| 78. Scoring, Editor, and Results Panel | 0/2 | Not started | - |
+| 78. Scoring, Editor, and Results Panel | 0/3 | Not started | - |
 | 79. Workflow Graph Visualization | 0/1 | Not started | - |
 | 80. Sharing and Rule Documentation Pages | 0/2 | Not started | - |
 | 81. Site Integration and Blog Post | 0/2 | Not started | - |
