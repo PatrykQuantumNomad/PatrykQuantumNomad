@@ -258,8 +258,9 @@ describe('SCORE-03: Per-category sub-scores', () => {
   });
 
   it('category score floors at 0', () => {
-    // 10 error violations in style category
-    const manyStyleErrors = Array.from({ length: 10 }, (_, i) =>
+    // 30 error violations in style category -- enough that diminishing-returns
+    // deductions exceed 100 total points, exercising the Math.max(0, ...) floor.
+    const manyStyleErrors = Array.from({ length: 30 }, (_, i) =>
       makeViolation({
         ruleId: `GA-F${String(i + 1).padStart(3, '0')}`,
         category: 'style',
