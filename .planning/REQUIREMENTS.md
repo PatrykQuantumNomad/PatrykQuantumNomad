@@ -69,9 +69,9 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Scoring
 
-- [ ] **SCORE-01**: Category-weighted scoring: Schema 15%, Security 35%, Semantic 20%, Best Practice 20%, Style 10%
-- [ ] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F) using diminishing-returns formula
-- [ ] **SCORE-03**: Per-category sub-scores alongside aggregate score
+- [x] **SCORE-01**: Category-weighted scoring: Schema 15%, Security 35%, Semantic 20%, Best Practice 20%, Style 10%
+- [x] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F) using diminishing-returns formula
+- [x] **SCORE-03**: Per-category sub-scores alongside aggregate score
 - [ ] **SCORE-04**: Score gauge component (SVG circular gauge with letter grade)
 
 ### Editor & Results
@@ -196,9 +196,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | STYLE-02 | Phase 77 | Complete |
 | STYLE-03 | Phase 77 | Complete |
 | STYLE-04 | Phase 77 | Complete |
-| SCORE-01 | Phase 78 | Pending |
-| SCORE-02 | Phase 78 | Pending |
-| SCORE-03 | Phase 78 | Pending |
+| SCORE-01 | Phase 78 | Complete |
+| SCORE-02 | Phase 78 | Complete |
+| SCORE-03 | Phase 78 | Complete |
 | SCORE-04 | Phase 78 | Pending |
 | UI-01 | Phase 78 | Pending |
 | UI-02 | Phase 78 | Pending |
