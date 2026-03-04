@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: GitHub Actions Workflow Validator
 status: active
-stopped_at: Completed 76-02-PLAN.md
-last_updated: "2026-03-04T14:39:11Z"
-last_activity: 2026-03-04 -- Completed 76-02 Security Rules 1-5
+stopped_at: Completed 76-03-PLAN.md (Phase 76 complete)
+last_updated: "2026-03-04T14:49:27Z"
+last_activity: 2026-03-04 -- Completed 76-03 Security Rules 6-10 and Registry
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -20,22 +20,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 76 - Two-Pass Engine and Security Rules (plan 02 complete)
+**Current focus:** Phase 76 complete. Next: Phase 77 - Semantic, Best Practice, and Style Rules
 
 ## Current Position
 
-Phase: 76 in progress (2 of 7 in v1.13)
-Plan: 2 of 3 in current phase
-Status: Executing phase 76
-Last activity: 2026-03-04 -- Completed 76-02 Security Rules 1-5
+Phase: 76 complete (2 of 7 in v1.13)
+Plan: 3 of 3 in current phase (phase complete)
+Status: Phase 76 complete, ready for Phase 77
+Last activity: 2026-03-04 -- Completed 76-03 Security Rules 6-10 and Registry
 
-Progress (v1.13): [██░░░░░░░░] 21%
+Progress (v1.13): [███░░░░░░░] 29%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 166 (across 13 milestones)
-- v1.13 plans completed: 3
+- Total plans completed: 167 (across 13 milestones)
+- v1.13 plans completed: 5
 
 **Cumulative Stats:**
 
@@ -59,6 +59,7 @@ Progress (v1.13): [██░░░░░░░░] 21%
 | Phase 75 P02 | 4min | 2 tasks | 6 files |
 | Phase 76 P01 | 4min | 2 tasks | 5 files |
 | Phase 76 P02 | 3min | 2 tasks | 7 files |
+| Phase 76 P03 | 6min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,10 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 76]: AST helpers shared in ast-helpers.ts (resolveKey, forEachUsesNode, forEachRunNode) for DRY security rule implementation
 - [Phase 76]: GA-C004 uses info severity (not warning) for missing permissions -- informational reminder, not confirmed vulnerability
 - [Phase 76]: GA-C005 builds injection regex from 17-entry DANGEROUS_CONTEXTS array -- extensible pattern
+- [Phase 76]: GA-C007 walkScalars recursive helper traverses all YAML values for secret detection, not just env: blocks
+- [Phase 76]: GA-C009 dangerous combos are opinionated (contents+actions, packages+contents, id-token+any) -- documented in rule explanation
+- [Phase 76]: GA-C010 uses info severity -- self-hosted runners are a valid pattern, informational reminder only
+- [Phase 76]: Rule registry allGhaRules aggregates all 10 security rules; getGhaRuleById for lookup
 
 ### Pending Todos
 
@@ -95,7 +100,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:39:11Z
-Stopped at: Completed 76-02-PLAN.md
+Last session: 2026-03-04T14:49:27Z
+Stopped at: Completed 76-03-PLAN.md (Phase 76 complete)
 Resume file: None
-Next: `/gsd:execute-plan 76-03`
+Next: `/gsd:plan-phase 77` or `/gsd:research-phase 77`

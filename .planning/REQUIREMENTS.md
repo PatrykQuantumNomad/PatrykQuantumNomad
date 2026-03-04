@@ -36,11 +36,11 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 - [x] **SEC-03**: GA-C003 flags overly permissive permissions (`permissions: write-all`)
 - [x] **SEC-04**: GA-C004 flags missing permissions block at workflow level
 - [x] **SEC-05**: GA-C005 flags script injection risk (`${{ github.event.*.title }}` in `run:` blocks)
-- [ ] **SEC-06**: GA-C006 flags `pull_request_target` without path/branch restrictions
-- [ ] **SEC-07**: GA-C007 flags hardcoded secrets in workflow file
-- [ ] **SEC-08**: GA-C008 flags third-party actions without SHA pinning
-- [ ] **SEC-09**: GA-C009 flags dangerous combined GITHUB_TOKEN permission scopes
-- [ ] **SEC-10**: GA-C010 flags self-hosted runner usage (informational security reminder)
+- [x] **SEC-06**: GA-C006 flags `pull_request_target` without path/branch restrictions
+- [x] **SEC-07**: GA-C007 flags hardcoded secrets in workflow file
+- [x] **SEC-08**: GA-C008 flags third-party actions without SHA pinning
+- [x] **SEC-09**: GA-C009 flags dangerous combined GITHUB_TOKEN permission scopes
+- [x] **SEC-10**: GA-C010 flags self-hosted runner usage (informational security reminder)
 
 ### Semantic Rules (actionlint)
 
@@ -175,11 +175,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | SEC-03 | Phase 76 | Complete |
 | SEC-04 | Phase 76 | Complete |
 | SEC-05 | Phase 76 | Complete |
-| SEC-06 | Phase 76 | Pending |
-| SEC-07 | Phase 76 | Pending |
-| SEC-08 | Phase 76 | Pending |
-| SEC-09 | Phase 76 | Pending |
-| SEC-10 | Phase 76 | Pending |
+| SEC-06 | Phase 76 | Complete |
+| SEC-07 | Phase 76 | Complete |
+| SEC-08 | Phase 76 | Complete |
+| SEC-09 | Phase 76 | Complete |
+| SEC-10 | Phase 76 | Complete |
 | SEM-01 | Phase 77 | Pending |
 | SEM-02 | Phase 77 | Pending |
 | SEM-03 | Phase 77 | Pending |

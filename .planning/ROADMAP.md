@@ -29,7 +29,7 @@ Build a browser-based GitHub Actions workflow validator with two-pass linting (S
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 75: WASM Infrastructure and Schema Foundation** - De-risk actionlint WASM in Web Worker and pre-compile SchemaStore schema validator (completed 2026-03-04)
-- [ ] **Phase 76: Two-Pass Engine and Security Rules** - Build validation orchestrator with deduplication and all 10 security rules
+- [x] **Phase 76: Two-Pass Engine and Security Rules** - Build validation orchestrator with deduplication and all 10 security rules (completed 2026-03-04)
 - [ ] **Phase 77: Semantic, Best Practice, and Style Rules** - Complete all remaining rule categories (18 actionlint mappings + 8 best practice + 4 style)
 - [ ] **Phase 78: Scoring, Editor, and Results Panel** - Category-weighted scoring engine with CodeMirror 6 editor and tabbed results UI
 - [ ] **Phase 79: Workflow Graph Visualization** - React Flow workflow graph with trigger, job, and step nodes using dagre layout
@@ -153,7 +153,7 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 75. WASM Infrastructure and Schema Foundation | 2/2 | Complete   | 2026-03-04 |
-| 76. Two-Pass Engine and Security Rules | 2/3 | In Progress|  |
+| 76. Two-Pass Engine and Security Rules | 3/3 | Complete   | 2026-03-04 |
 | 77. Semantic, Best Practice, and Style Rules | 0/2 | Not started | - |
 | 78. Scoring, Editor, and Results Panel | 0/2 | Not started | - |
 | 79. Workflow Graph Visualization | 0/1 | Not started | - |
