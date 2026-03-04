@@ -62,11 +62,12 @@ Plans:
   2. Duplicate diagnostics from both passes on the same (line, column) are merged into a single violation
   3. All violations carry a unified format with ruleId, message, line, column, severity, and category
   4. Security rules detect unpinned actions, script injection, overly permissive permissions, pull_request_target misuse, hardcoded secrets, and self-hosted runner usage
-**Plans**: TBD
+**Plans**: 3 plans (3 waves, sequential)
 
 Plans:
-- [ ] 76-01: TBD
-- [ ] 76-02: TBD
+- [ ] 76-01-PLAN.md — Unified types, two-pass engine with runPass1/mergePass2, deduplication, and actionlint error mapping
+- [ ] 76-02-PLAN.md — Security rules GA-C001 through GA-C005 (action pinning, permissions, script injection) with AST helpers
+- [ ] 76-03-PLAN.md — Security rules GA-C006 through GA-C010 (pull_request_target, secrets, third-party, scopes, self-hosted) with rule registry and security sample
 
 ### Phase 77: Semantic, Best Practice, and Style Rules
 **Goal**: All 30 remaining lint rules are implemented -- actionlint semantic mappings, best practice checks, and style conventions -- completing the full 48-rule registry
@@ -152,7 +153,7 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 75. WASM Infrastructure and Schema Foundation | 2/2 | Complete   | 2026-03-04 |
-| 76. Two-Pass Engine and Security Rules | 0/2 | Not started | - |
+| 76. Two-Pass Engine and Security Rules | 0/3 | Not started | - |
 | 77. Semantic, Best Practice, and Style Rules | 0/2 | Not started | - |
 | 78. Scoring, Editor, and Results Panel | 0/2 | Not started | - |
 | 79. Workflow Graph Visualization | 0/1 | Not started | - |
