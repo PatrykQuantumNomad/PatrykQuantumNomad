@@ -17,10 +17,10 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Schema Validation
 
-- [ ] **SCHEMA-01**: SchemaStore `github-workflow.json` pre-compiled into ajv standalone validator at build time
-- [ ] **SCHEMA-02**: Schema validation runs synchronously on main thread for instant structural feedback
-- [ ] **SCHEMA-03**: 8 schema rules (GA-S001 through GA-S008) mapped from ajv validation errors with line numbers
-- [ ] **SCHEMA-04**: Schema rules cover: YAML syntax, unknown properties, type mismatches, missing required fields, invalid enum values
+- [x] **SCHEMA-01**: SchemaStore `github-workflow.json` pre-compiled into ajv standalone validator at build time
+- [x] **SCHEMA-02**: Schema validation runs synchronously on main thread for instant structural feedback
+- [x] **SCHEMA-03**: 8 schema rules (GA-S001 through GA-S008) mapped from ajv validation errors with line numbers
+- [x] **SCHEMA-04**: Schema rules cover: YAML syntax, unknown properties, type mismatches, missing required fields, invalid enum values
 
 ### Two-Pass Engine
 
@@ -162,10 +162,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | WASM-03 | Phase 75 | Complete |
 | WASM-04 | Phase 75 | Complete |
 | WASM-05 | Phase 75 | Complete |
-| SCHEMA-01 | Phase 75 | Pending |
-| SCHEMA-02 | Phase 75 | Pending |
-| SCHEMA-03 | Phase 75 | Pending |
-| SCHEMA-04 | Phase 75 | Pending |
+| SCHEMA-01 | Phase 75 | Complete |
+| SCHEMA-02 | Phase 75 | Complete |
+| SCHEMA-03 | Phase 75 | Complete |
+| SCHEMA-04 | Phase 75 | Complete |
 | ENGINE-01 | Phase 76 | Pending |
 | ENGINE-02 | Phase 76 | Pending |
 | ENGINE-03 | Phase 76 | Pending |
