@@ -75,7 +75,9 @@ jobs:
     expect(result).toBeNull();
   });
 
-  it('returns null for invalid compressed data', () => {
+  it('returns null for garbage compressed data (non-printable output)', () => {
+    // lz-string decompresses garbage input into non-printable bytes.
+    // decodeGhaState detects this and returns null.
     expect(decodeGhaState('#gha=!!!invalid!!!')).toBeNull();
   });
 });
