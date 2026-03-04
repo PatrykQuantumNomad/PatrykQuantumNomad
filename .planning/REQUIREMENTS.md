@@ -89,11 +89,11 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Workflow Graph
 
-- [ ] **GRAPH-01**: Full workflow graph with 3 node types: trigger events, jobs, steps
+- [x] **GRAPH-01**: Full workflow graph with 3 node types: trigger events, jobs, steps
 - [ ] **GRAPH-02**: Job dependency edges from `needs:` declarations with cycle detection
 - [ ] **GRAPH-03**: Trigger-to-job edges from `on:` event definitions
-- [ ] **GRAPH-04**: Steps displayed as sequential nodes within job containers
-- [ ] **GRAPH-05**: Color-coded nodes by violation status (clean/warning/error)
+- [x] **GRAPH-04**: Steps displayed as sequential nodes within job containers
+- [x] **GRAPH-05**: Color-coded nodes by violation status (clean/warning/error)
 - [ ] **GRAPH-06**: React Flow lazy-loaded via React.lazy (separate chunk for Lighthouse 90+)
 - [ ] **GRAPH-07**: dagre hierarchical layout (left-to-right) with grouped dependency levels
 
@@ -210,11 +210,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | UI-08 | Phase 78 | Complete |
 | UI-09 | Phase 78 | Complete |
 | UI-10 | Phase 78 | Complete |
-| GRAPH-01 | Phase 79 | Pending |
+| GRAPH-01 | Phase 79 | Complete |
 | GRAPH-02 | Phase 79 | Pending |
 | GRAPH-03 | Phase 79 | Pending |
-| GRAPH-04 | Phase 79 | Pending |
-| GRAPH-05 | Phase 79 | Pending |
+| GRAPH-04 | Phase 79 | Complete |
+| GRAPH-05 | Phase 79 | Complete |
 | GRAPH-06 | Phase 79 | Pending |
 | GRAPH-07 | Phase 79 | Pending |
 | SHARE-01 | Phase 80 | Pending |
