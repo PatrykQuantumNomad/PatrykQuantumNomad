@@ -62,10 +62,10 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Style Rules
 
-- [ ] **STYLE-01**: GA-F001 flags jobs not alphabetically ordered
-- [ ] **STYLE-02**: GA-F002 flags inconsistent `uses:` quoting
-- [ ] **STYLE-03**: GA-F003 flags step names exceeding 80 characters
-- [ ] **STYLE-04**: GA-F004 flags workflows missing `name:` at top level
+- [x] **STYLE-01**: GA-F001 flags jobs not alphabetically ordered
+- [x] **STYLE-02**: GA-F002 flags inconsistent `uses:` quoting
+- [x] **STYLE-03**: GA-F003 flags step names exceeding 80 characters
+- [x] **STYLE-04**: GA-F004 flags workflows missing `name:` at top level
 
 ### Scoring
 
@@ -192,10 +192,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | BP-06 | Phase 77 | Complete |
 | BP-07 | Phase 77 | Complete |
 | BP-08 | Phase 77 | Complete |
-| STYLE-01 | Phase 77 | Pending |
-| STYLE-02 | Phase 77 | Pending |
-| STYLE-03 | Phase 77 | Pending |
-| STYLE-04 | Phase 77 | Pending |
+| STYLE-01 | Phase 77 | Complete |
+| STYLE-02 | Phase 77 | Complete |
+| STYLE-03 | Phase 77 | Complete |
+| STYLE-04 | Phase 77 | Complete |
 | SCORE-01 | Phase 78 | Pending |
 | SCORE-02 | Phase 78 | Pending |
 | SCORE-03 | Phase 78 | Pending |
