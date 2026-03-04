@@ -76,10 +76,10 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Editor & Results
 
-- [ ] **UI-01**: CodeMirror 6 YAML editor with syntax highlighting and line numbers
-- [ ] **UI-02**: Analyze button triggers validation cycle (Cmd/Ctrl+Enter shortcut)
-- [ ] **UI-03**: Pre-loaded sample workflow with deliberate issues across all rule categories
-- [ ] **UI-04**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
+- [x] **UI-01**: CodeMirror 6 YAML editor with syntax highlighting and line numbers
+- [x] **UI-02**: Analyze button triggers validation cycle (Cmd/Ctrl+Enter shortcut)
+- [x] **UI-03**: Pre-loaded sample workflow with deliberate issues across all rule categories
+- [x] **UI-04**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
 - [ ] **UI-05**: Tabbed results panel with score gauge, category breakdown, and violation list
 - [ ] **UI-06**: Click-to-navigate from results panel to corresponding editor line
 - [ ] **UI-07**: Violation list grouped by category with expandable details and rule ID links
@@ -200,10 +200,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | SCORE-02 | Phase 78 | Complete |
 | SCORE-03 | Phase 78 | Complete |
 | SCORE-04 | Phase 78 | Pending |
-| UI-01 | Phase 78 | Pending |
-| UI-02 | Phase 78 | Pending |
-| UI-03 | Phase 78 | Pending |
-| UI-04 | Phase 78 | Pending |
+| UI-01 | Phase 78 | Complete |
+| UI-02 | Phase 78 | Complete |
+| UI-03 | Phase 78 | Complete |
+| UI-04 | Phase 78 | Complete |
 | UI-05 | Phase 78 | Pending |
 | UI-06 | Phase 78 | Pending |
 | UI-07 | Phase 78 | Pending |
