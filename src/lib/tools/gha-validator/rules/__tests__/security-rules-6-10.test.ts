@@ -234,7 +234,7 @@ jobs:
     steps:
       - name: Deploy
         env:
-          OPENAI_KEY: sk-abcdefghijklmnopqrstuvwxyz012345678901234567890
+          OPENAI_KEY: sk-abcdefghijklmnopqrstuvwxyz0123456789012345678901
         run: echo deploy
 `);
     const violations = GAC007.check(ctx);
