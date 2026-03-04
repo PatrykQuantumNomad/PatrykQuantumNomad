@@ -128,11 +128,12 @@ Plans:
   2. Workflow content is encoded in the URL hash with `#gha=` prefix for shareable analysis links
   3. Per-rule documentation pages exist at `/tools/gha-validator/rules/[code]` with expert explanation, fix suggestion, before/after YAML code, severity badge, and related rules
   4. GA-L017 and GA-L018 rule pages note the browser WASM limitation with CLI recommendation
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
 
 Plans:
-- [ ] 80-01: TBD
-- [ ] 80-02: TBD
+- [ ] 80-01-PLAN.md — TDD schema rule metadata (GA-S001--GA-S008), related rules function, registry update to 48 entries
+- [ ] 80-02-PLAN.md — Per-rule SEO documentation pages at /tools/gha-validator/rules/[code]/ with WASM limitation callout
+- [ ] 80-03-PLAN.md — Sharing utilities (badge PNG, URL state encoding, share fallback) and UI wiring
 
 ### Phase 81: Site Integration and Blog Post
 **Goal**: The GitHub Actions Validator is fully integrated into the site with navigation, homepage presence, SEO metadata, and a companion blog post driving organic traffic
@@ -161,5 +162,5 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | 77. Semantic, Best Practice, and Style Rules | 3/3 | Complete   | 2026-03-04 |
 | 78. Scoring, Editor, and Results Panel | 3/3 | Complete   | 2026-03-04 |
 | 79. Workflow Graph Visualization | 3/3 | Complete   | 2026-03-04 |
-| 80. Sharing and Rule Documentation Pages | 0/2 | Not started | - |
+| 80. Sharing and Rule Documentation Pages | 0/3 | Not started | - |
 | 81. Site Integration and Blog Post | 0/2 | Not started | - |
