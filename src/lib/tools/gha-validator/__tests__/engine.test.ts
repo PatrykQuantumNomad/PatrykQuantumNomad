@@ -54,7 +54,7 @@ describe('mapActionlintError', () => {
     expect(unified.ruleId).toBe('GA-L001');
     expect(unified.severity).toBe('error');
     expect(unified.category).toBe('semantic');
-    expect(unified.message).toBe('unexpected key "foo"');
+    expect(unified.message).toBe('Syntax error: unexpected key "foo"');
     expect(unified.line).toBe(3);
     expect(unified.column).toBe(7);
   });

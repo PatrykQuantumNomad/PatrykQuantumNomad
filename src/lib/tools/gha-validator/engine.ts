@@ -12,6 +12,7 @@
 
 import { parseGhaWorkflow } from './parser';
 import { validateGhaSchema, categorizeSchemaErrors } from './schema-validator';
+import { getActionlintRuleTitle } from './rules/semantic';
 import type {
   GhaUnifiedViolation,
   GhaLintRule,
@@ -25,10 +26,10 @@ import type {
 // ── Actionlint error kind -> GA-L* rule ID mapping ──────────────────
 
 /**
- * Maps all 16 actionlint error kinds to stable GA-L* rule IDs with
+ * Maps all 18 actionlint error kinds to stable GA-L* rule IDs with
  * appropriate severity and category.
  *
- * Source: actionlint docs/checks.md
+ * Source: actionlint docs/checks.md, linter.go
  */
 const ACTIONLINT_KIND_MAP: Record<
   string,
@@ -48,6 +49,8 @@ const ACTIONLINT_KIND_MAP: Record<
   'env-var': { ruleId: 'GA-L012', severity: 'warning', category: 'semantic' },
   permissions: { ruleId: 'GA-L013', severity: 'error', category: 'security' },
   'workflow-call': { ruleId: 'GA-L014', severity: 'error', category: 'semantic' },
+  'deprecated-commands': { ruleId: 'GA-L015', severity: 'warning', category: 'best-practice' },
+  'if-cond': { ruleId: 'GA-L016', severity: 'warning', category: 'semantic' },
   shellcheck: { ruleId: 'GA-L017', severity: 'warning', category: 'actionlint' },
   pyflakes: { ruleId: 'GA-L018', severity: 'warning', category: 'actionlint' },
 };
@@ -98,9 +101,10 @@ export function toUnified(
  */
 export function mapActionlintError(err: ActionlintError): GhaUnifiedViolation {
   const mapping = ACTIONLINT_KIND_MAP[err.kind] ?? ACTIONLINT_FALLBACK;
+  const title = getActionlintRuleTitle(mapping.ruleId);
   return {
     ruleId: mapping.ruleId,
-    message: err.message,
+    message: title ? `${title}: ${err.message}` : err.message,
     line: err.line,
     column: err.column,
     severity: mapping.severity,

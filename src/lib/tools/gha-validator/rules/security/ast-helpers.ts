@@ -1,11 +1,11 @@
 /**
- * Shared AST traversal helpers for GitHub Actions security rules.
+ * Shared AST traversal helpers for GitHub Actions workflow rules.
  *
- * Provides functions to iterate over `uses:` and `run:` values in workflow
- * YAML ASTs, plus a key-resolution utility for YAML Map nodes.
+ * Provides functions to iterate over `uses:`, `run:`, jobs, and steps in
+ * workflow YAML ASTs, plus a key-resolution utility for YAML Map nodes.
  *
- * Used by GA-C001, GA-C002, GA-C005, and other security rules that need
- * to inspect specific workflow step properties.
+ * Used by security rules (GA-C*), best-practice rules, and style rules
+ * that need to inspect specific workflow properties.
  */
 
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
@@ -101,6 +101,47 @@ export function forEachRunNode(
           callback(String(stepPair.value.value), stepPair.value, jobName, stepIndex);
         }
       }
+    }
+  }
+}
+
+/**
+ * Iterate over all jobs in the workflow.
+ *
+ * Traverses: jobs -> [jobName]
+ *
+ * Callback receives the job name (string), the job Map node (value),
+ * and the job key Scalar node (for line resolution).
+ */
+export function forEachJobNode(
+  ctx: GhaRuleContext,
+  callback: (jobName: string, jobNode: any, jobKeyNode: any) => void,
+): void {
+  const jobsNode = resolveKey(ctx.doc.contents, 'jobs');
+  if (!isMap(jobsNode)) return;
+  for (const jobPair of jobsNode.items) {
+    if (!isPair(jobPair) || !isScalar(jobPair.key)) continue;
+    callback(String(jobPair.key.value), jobPair.value, jobPair.key);
+  }
+}
+
+/**
+ * Iterate over all steps in a job node.
+ *
+ * Traverses: [jobNode] -> steps -> [n]
+ *
+ * Callback receives the step Map node and its zero-based index.
+ * Non-Map items in the steps sequence are skipped.
+ */
+export function forEachStepNode(
+  jobNode: any,
+  callback: (stepNode: any, stepIndex: number) => void,
+): void {
+  const stepsNode = resolveKey(jobNode, 'steps');
+  if (!isSeq(stepsNode)) return;
+  for (let i = 0; i < stepsNode.items.length; i++) {
+    if (isMap(stepsNode.items[i])) {
+      callback(stepsNode.items[i], i);
     }
   }
 }
