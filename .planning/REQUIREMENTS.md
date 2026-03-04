@@ -31,11 +31,11 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Security Rules
 
-- [ ] **SEC-01**: GA-C001 flags unpinned action versions (`actions/checkout@v4` instead of SHA)
-- [ ] **SEC-02**: GA-C002 flags mutable action tags (branch refs like `@main`)
-- [ ] **SEC-03**: GA-C003 flags overly permissive permissions (`permissions: write-all`)
-- [ ] **SEC-04**: GA-C004 flags missing permissions block at workflow level
-- [ ] **SEC-05**: GA-C005 flags script injection risk (`${{ github.event.*.title }}` in `run:` blocks)
+- [x] **SEC-01**: GA-C001 flags unpinned action versions (`actions/checkout@v4` instead of SHA)
+- [x] **SEC-02**: GA-C002 flags mutable action tags (branch refs like `@main`)
+- [x] **SEC-03**: GA-C003 flags overly permissive permissions (`permissions: write-all`)
+- [x] **SEC-04**: GA-C004 flags missing permissions block at workflow level
+- [x] **SEC-05**: GA-C005 flags script injection risk (`${{ github.event.*.title }}` in `run:` blocks)
 - [ ] **SEC-06**: GA-C006 flags `pull_request_target` without path/branch restrictions
 - [ ] **SEC-07**: GA-C007 flags hardcoded secrets in workflow file
 - [ ] **SEC-08**: GA-C008 flags third-party actions without SHA pinning
@@ -170,11 +170,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | ENGINE-02 | Phase 76 | Complete |
 | ENGINE-03 | Phase 76 | Complete |
 | ENGINE-04 | Phase 76 | Complete |
-| SEC-01 | Phase 76 | Pending |
-| SEC-02 | Phase 76 | Pending |
-| SEC-03 | Phase 76 | Pending |
-| SEC-04 | Phase 76 | Pending |
-| SEC-05 | Phase 76 | Pending |
+| SEC-01 | Phase 76 | Complete |
+| SEC-02 | Phase 76 | Complete |
+| SEC-03 | Phase 76 | Complete |
+| SEC-04 | Phase 76 | Complete |
+| SEC-05 | Phase 76 | Complete |
 | SEC-06 | Phase 76 | Pending |
 | SEC-07 | Phase 76 | Pending |
 | SEC-08 | Phase 76 | Pending |

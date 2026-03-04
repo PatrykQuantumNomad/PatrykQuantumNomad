@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: GitHub Actions Workflow Validator
 status: active
-stopped_at: Completed 76-01-PLAN.md
-last_updated: "2026-03-04T14:05:39Z"
-last_activity: 2026-03-04 -- Completed 76-01 Two-Pass Engine
+stopped_at: Completed 76-02-PLAN.md
+last_updated: "2026-03-04T14:39:11Z"
+last_activity: 2026-03-04 -- Completed 76-02 Security Rules 1-5
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 76 - Two-Pass Engine and Security Rules (plan 01 complete)
+**Current focus:** Phase 76 - Two-Pass Engine and Security Rules (plan 02 complete)
 
 ## Current Position
 
 Phase: 76 in progress (2 of 7 in v1.13)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing phase 76
-Last activity: 2026-03-04 -- Completed 76-01 Two-Pass Engine
+Last activity: 2026-03-04 -- Completed 76-02 Security Rules 1-5
 
 Progress (v1.13): [██░░░░░░░░] 21%
 
@@ -58,6 +58,7 @@ Progress (v1.13): [██░░░░░░░░] 21%
 | Phase 75 P01 | 3min | 2 tasks | 6 files |
 | Phase 75 P02 | 4min | 2 tasks | 6 files |
 | Phase 76 P01 | 4min | 2 tasks | 5 files |
+| Phase 76 P02 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 75]: Classic Worker with importScripts for wasm_exec.js; streaming fetch for 9.4MB WASM; go.run() without await
 - [Phase 75]: Inlined ucs2length runtime function to eliminate all require() from compiled GHA schema validator
 - [Phase 76]: Custom rules injected via parameter to avoid circular deps; dedup keys on line:column not ruleId; engine independent of rule registry
+- [Phase 76]: AST helpers shared in ast-helpers.ts (resolveKey, forEachUsesNode, forEachRunNode) for DRY security rule implementation
+- [Phase 76]: GA-C004 uses info severity (not warning) for missing permissions -- informational reminder, not confirmed vulnerability
+- [Phase 76]: GA-C005 builds injection regex from 17-entry DANGEROUS_CONTEXTS array -- extensible pattern
 
 ### Pending Todos
 
@@ -91,7 +95,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:05:39Z
-Stopped at: Completed 76-01-PLAN.md
+Last session: 2026-03-04T14:39:11Z
+Stopped at: Completed 76-02-PLAN.md
 Resume file: None
-Next: `/gsd:execute-plan 76-02`
+Next: `/gsd:execute-plan 76-03`

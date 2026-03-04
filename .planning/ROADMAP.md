@@ -153,7 +153,7 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 75. WASM Infrastructure and Schema Foundation | 2/2 | Complete   | 2026-03-04 |
-| 76. Two-Pass Engine and Security Rules | 1/3 | In Progress|  |
+| 76. Two-Pass Engine and Security Rules | 2/3 | In Progress|  |
 | 77. Semantic, Best Practice, and Style Rules | 0/2 | Not started | - |
 | 78. Scoring, Editor, and Results Panel | 0/2 | Not started | - |
 | 79. Workflow Graph Visualization | 0/1 | Not started | - |
