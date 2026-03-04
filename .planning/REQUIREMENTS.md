@@ -72,7 +72,7 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 - [x] **SCORE-01**: Category-weighted scoring: Schema 15%, Security 35%, Semantic 20%, Best Practice 20%, Style 10%
 - [x] **SCORE-02**: Overall 0-100 score with letter grade (A+ through F) using diminishing-returns formula
 - [x] **SCORE-03**: Per-category sub-scores alongside aggregate score
-- [ ] **SCORE-04**: Score gauge component (SVG circular gauge with letter grade)
+- [x] **SCORE-04**: Score gauge component (SVG circular gauge with letter grade)
 
 ### Editor & Results
 
@@ -80,12 +80,12 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 - [x] **UI-02**: Analyze button triggers validation cycle (Cmd/Ctrl+Enter shortcut)
 - [x] **UI-03**: Pre-loaded sample workflow with deliberate issues across all rule categories
 - [x] **UI-04**: Inline CodeMirror annotations (squiggly underlines + gutter severity markers)
-- [ ] **UI-05**: Tabbed results panel with score gauge, category breakdown, and violation list
-- [ ] **UI-06**: Click-to-navigate from results panel to corresponding editor line
-- [ ] **UI-07**: Violation list grouped by category with expandable details and rule ID links
-- [ ] **UI-08**: Clean workflow empty state ("No issues found" with congratulatory message)
-- [ ] **UI-09**: Responsive layout — stacked on mobile, side-by-side on desktop
-- [ ] **UI-10**: React island with `client:only="react"` directive
+- [x] **UI-05**: Tabbed results panel with score gauge, category breakdown, and violation list
+- [x] **UI-06**: Click-to-navigate from results panel to corresponding editor line
+- [x] **UI-07**: Violation list grouped by category with expandable details and rule ID links
+- [x] **UI-08**: Clean workflow empty state ("No issues found" with congratulatory message)
+- [x] **UI-09**: Responsive layout — stacked on mobile, side-by-side on desktop
+- [x] **UI-10**: React island with `client:only="react"` directive
 
 ### Workflow Graph
 
@@ -199,17 +199,17 @@ Deferred to future release. Tracked but not in current roadmap.
 | SCORE-01 | Phase 78 | Complete |
 | SCORE-02 | Phase 78 | Complete |
 | SCORE-03 | Phase 78 | Complete |
-| SCORE-04 | Phase 78 | Pending |
+| SCORE-04 | Phase 78 | Complete |
 | UI-01 | Phase 78 | Complete |
 | UI-02 | Phase 78 | Complete |
 | UI-03 | Phase 78 | Complete |
 | UI-04 | Phase 78 | Complete |
-| UI-05 | Phase 78 | Pending |
-| UI-06 | Phase 78 | Pending |
-| UI-07 | Phase 78 | Pending |
-| UI-08 | Phase 78 | Pending |
-| UI-09 | Phase 78 | Pending |
-| UI-10 | Phase 78 | Pending |
+| UI-05 | Phase 78 | Complete |
+| UI-06 | Phase 78 | Complete |
+| UI-07 | Phase 78 | Complete |
+| UI-08 | Phase 78 | Complete |
+| UI-09 | Phase 78 | Complete |
+| UI-10 | Phase 78 | Complete |
 | GRAPH-01 | Phase 79 | Pending |
 | GRAPH-02 | Phase 79 | Pending |
 | GRAPH-03 | Phase 79 | Pending |
