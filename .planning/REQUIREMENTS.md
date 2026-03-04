@@ -9,11 +9,11 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### WASM Infrastructure
 
-- [ ] **WASM-01**: actionlint WASM binary served as static asset from `public/wasm/` directory
-- [ ] **WASM-02**: Web Worker loads and initializes actionlint WASM with `wasm_exec.js` bridge
-- [ ] **WASM-03**: Worker exposes `runActionlint(yamlSource)` returning `ActionlintError[]` with `{kind, message, line, column}`
-- [ ] **WASM-04**: WASM loading shows progress indicator while binary downloads (~3MB gzipped)
-- [ ] **WASM-05**: Worker message protocol handles analyze requests and returns results to main thread
+- [x] **WASM-01**: actionlint WASM binary served as static asset from `public/wasm/` directory
+- [x] **WASM-02**: Web Worker loads and initializes actionlint WASM with `wasm_exec.js` bridge
+- [x] **WASM-03**: Worker exposes `runActionlint(yamlSource)` returning `ActionlintError[]` with `{kind, message, line, column}`
+- [x] **WASM-04**: WASM loading shows progress indicator while binary downloads (~3MB gzipped)
+- [x] **WASM-05**: Worker message protocol handles analyze requests and returns results to main thread
 
 ### Schema Validation
 
@@ -157,11 +157,11 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WASM-01 | Phase 75 | Pending |
-| WASM-02 | Phase 75 | Pending |
-| WASM-03 | Phase 75 | Pending |
-| WASM-04 | Phase 75 | Pending |
-| WASM-05 | Phase 75 | Pending |
+| WASM-01 | Phase 75 | Complete |
+| WASM-02 | Phase 75 | Complete |
+| WASM-03 | Phase 75 | Complete |
+| WASM-04 | Phase 75 | Complete |
+| WASM-05 | Phase 75 | Complete |
 | SCHEMA-01 | Phase 75 | Pending |
 | SCHEMA-02 | Phase 75 | Pending |
 | SCHEMA-03 | Phase 75 | Pending |
