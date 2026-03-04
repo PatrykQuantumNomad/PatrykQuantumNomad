@@ -47,11 +47,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. A progress indicator is visible while the WASM binary downloads and initializes
   3. SchemaStore github-workflow.json is pre-compiled into a standalone ajv validator that runs synchronously and returns structural errors with line numbers
   4. Both validation paths can be invoked independently from the browser console with correct error output
-**Plans**: TBD
+**Plans**: 2 plans (1 wave, parallel)
 
 Plans:
-- [ ] 75-01: TBD
-- [ ] 75-02: TBD
+- [ ] 75-01-PLAN.md — WASM Worker infrastructure (download script, Worker, client, types, store)
+- [ ] 75-02-PLAN.md — Schema compilation pipeline (compile script, parser, schema-validator, sample workflow)
 
 ### Phase 76: Two-Pass Engine and Security Rules
 **Goal**: Users get merged, deduplicated validation results from both schema and WASM passes, with all 10 security rules detecting dangerous workflow patterns
