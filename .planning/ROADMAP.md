@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 76: Two-Pass Engine and Security Rules** - Build validation orchestrator with deduplication and all 10 security rules (completed 2026-03-04)
 - [x] **Phase 77: Semantic, Best Practice, and Style Rules** - Complete all remaining rule categories (18 actionlint mappings + 8 best practice + 4 style) (completed 2026-03-04)
 - [x] **Phase 78: Scoring, Editor, and Results Panel** - Category-weighted scoring engine with CodeMirror 6 editor and tabbed results UI (completed 2026-03-04)
-- [ ] **Phase 79: Workflow Graph Visualization** - React Flow workflow graph with trigger, job, and step nodes using dagre layout
+- [x] **Phase 79: Workflow Graph Visualization** - React Flow workflow graph with trigger, job, and step nodes using dagre layout (completed 2026-03-04)
 - [ ] **Phase 80: Sharing and Rule Documentation Pages** - Shareable results and per-rule SEO documentation pages for all rules
 - [ ] **Phase 81: Site Integration and Blog Post** - Full site integration with navigation, homepage callout, JSON-LD, OG image, and companion blog post
 
@@ -160,6 +160,6 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 | 76. Two-Pass Engine and Security Rules | 3/3 | Complete   | 2026-03-04 |
 | 77. Semantic, Best Practice, and Style Rules | 3/3 | Complete   | 2026-03-04 |
 | 78. Scoring, Editor, and Results Panel | 3/3 | Complete   | 2026-03-04 |
-| 79. Workflow Graph Visualization | 2/3 | In Progress|  |
+| 79. Workflow Graph Visualization | 3/3 | Complete   | 2026-03-04 |
 | 80. Sharing and Rule Documentation Pages | 0/2 | Not started | - |
 | 81. Site Integration and Blog Post | 0/2 | Not started | - |

@@ -94,8 +94,8 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 - [x] **GRAPH-03**: Trigger-to-job edges from `on:` event definitions
 - [x] **GRAPH-04**: Steps displayed as sequential nodes within job containers
 - [x] **GRAPH-05**: Color-coded nodes by violation status (clean/warning/error)
-- [ ] **GRAPH-06**: React Flow lazy-loaded via React.lazy (separate chunk for Lighthouse 90+)
-- [ ] **GRAPH-07**: dagre hierarchical layout (left-to-right) with grouped dependency levels
+- [x] **GRAPH-06**: React Flow lazy-loaded via React.lazy (separate chunk for Lighthouse 90+)
+- [x] **GRAPH-07**: dagre hierarchical layout (left-to-right) with grouped dependency levels
 
 ### Sharing
 
@@ -215,8 +215,8 @@ Deferred to future release. Tracked but not in current roadmap.
 | GRAPH-03 | Phase 79 | Complete |
 | GRAPH-04 | Phase 79 | Complete |
 | GRAPH-05 | Phase 79 | Complete |
-| GRAPH-06 | Phase 79 | Pending |
-| GRAPH-07 | Phase 79 | Pending |
+| GRAPH-06 | Phase 79 | Complete |
+| GRAPH-07 | Phase 79 | Complete |
 | SHARE-01 | Phase 80 | Pending |
 | SHARE-02 | Phase 80 | Pending |
 | SHARE-03 | Phase 80 | Pending |
