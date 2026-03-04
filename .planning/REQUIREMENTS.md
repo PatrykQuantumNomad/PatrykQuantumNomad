@@ -105,9 +105,9 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Rule Documentation
 
-- [ ] **DOC-01**: Per-rule SEO documentation pages at `/tools/gha-validator/rules/[code]`
-- [ ] **DOC-02**: Each rule page includes expert explanation, fix suggestion, before/after YAML code
-- [ ] **DOC-03**: Rule pages include severity badge, category tag, and related rules links
+- [x] **DOC-01**: Per-rule SEO documentation pages at `/tools/gha-validator/rules/[code]`
+- [x] **DOC-02**: Each rule page includes expert explanation, fix suggestion, before/after YAML code
+- [x] **DOC-03**: Rule pages include severity badge, category tag, and related rules links
 - [ ] **DOC-04**: GA-L017/GA-L018 rule pages note browser WASM limitation with CLI recommendation
 
 ### Site Integration
@@ -220,9 +220,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | SHARE-01 | Phase 80 | Pending |
 | SHARE-02 | Phase 80 | Pending |
 | SHARE-03 | Phase 80 | Pending |
-| DOC-01 | Phase 80 | Pending |
-| DOC-02 | Phase 80 | Pending |
-| DOC-03 | Phase 80 | Pending |
+| DOC-01 | Phase 80 | Complete |
+| DOC-02 | Phase 80 | Complete |
+| DOC-03 | Phase 80 | Complete |
 | DOC-04 | Phase 80 | Pending |
 | SITE-01 | Phase 81 | Pending |
 | SITE-02 | Phase 81 | Pending |

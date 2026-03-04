@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: milestone
-status: completed
-stopped_at: Completed 79-03-PLAN.md
-last_updated: "2026-03-04T18:17:03.415Z"
-last_activity: 2026-03-04 -- Phase 79 Plan 01 graph data extractor (TDD)
+status: in-progress
+stopped_at: Completed 80-01-PLAN.md
+last_updated: "2026-03-04T18:51:00.000Z"
+last_activity: 2026-03-04 -- Phase 80 Plan 01 schema rule metadata and related rules (TDD)
 progress:
   total_phases: 7
   completed_phases: 5
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 17
+  completed_plans: 15
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 79 in progress (workflow graph visualization). Plan 01 complete (graph data extractor).
+**Current focus:** Phase 80 in progress (sharing and rule documentation pages). Plan 01 complete (schema rule metadata).
 
 ## Current Position
 
-Phase: 79 (5 of 7 in v1.13)
+Phase: 80 (6 of 7 in v1.13)
 Plan: 1 of 3 in current phase
-Status: Plan 01 complete. Next: Plan 02 (React Flow rendering)
-Last activity: 2026-03-04 -- Phase 79 Plan 01 graph data extractor (TDD)
+Status: Plan 01 complete. Next: Plan 02 (per-rule documentation pages)
+Last activity: 2026-03-04 -- Phase 80 Plan 01 schema rule metadata and related rules (TDD)
 
 Progress (v1.13): [██████████] 99%
 
@@ -69,6 +69,7 @@ Progress (v1.13): [██████████] 99%
 | Phase 79 P01 | 2min | 2 tasks | 2 files |
 | Phase 79 P02 | 2min | 2 tasks | 6 files |
 | Phase 79 P03 | 3min | 2 tasks | 2 files |
+| Phase 80 P01 | 2min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 79]: Edge labels only for trigger events, not needs: edges, for cleaner visual
 - [Phase 79]: Two-pass dagre layout: dagre LR for triggers+jobs, manual steps inside job group containers
 - [Phase 79]: React Flow CSS eagerly imported in parent GhaResultsPanel, not in lazy-loaded GhaWorkflowGraph
+- [Phase 80]: schemaMeta factory mirrors actionlintMeta with hardcoded category:'schema' for consistency
+- [Phase 80]: Schema rule severities match categoriseSingleError() mapping: S001-S004 error, S005-S007 warning, S008 info
+- [Phase 80]: getRelatedGhaRules follows compose-validator pattern exactly: same-category filter, severity sort, configurable limit
 
 ### Pending Todos
 
@@ -134,7 +138,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T18:17:03.413Z
-Stopped at: Completed 79-03-PLAN.md
+Last session: 2026-03-04T18:51:00.000Z
+Stopped at: Completed 80-01-PLAN.md
 Resume file: None
-Next: Phase 79 (workflow graph visualization)
+Next: Phase 80 Plan 02 (per-rule documentation pages)
