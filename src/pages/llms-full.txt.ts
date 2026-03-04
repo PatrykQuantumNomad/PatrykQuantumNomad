@@ -149,6 +149,19 @@ export async function GET(context: APIContext) {
   lines.push('Features: category-weighted scoring (A+ through F), PSS Baseline/Restricted compliance checking, RBAC analysis, interactive resource dependency graph, inline CodeMirror annotations, Claude Skill download, Claude Code hook download');
   lines.push('Rule documentation: 67 individual pages at /tools/k8s-analyzer/rules/{rule-id}/');
   lines.push('');
+  lines.push('### GitHub Actions Workflow Validator');
+  lines.push('URL: https://patrykgolabek.dev/tools/gha-validator/');
+  lines.push('Blog: https://patrykgolabek.dev/blog/github-actions-best-practices/');
+  lines.push('48 validation rules across 6 categories:');
+  lines.push('- Schema (8 rules): JSON Schema validation of workflow structure, required fields, event triggers, and job configuration');
+  lines.push('- Security (10 rules): script injection via expression contexts, unpinned third-party actions, excessive permissions, hardcoded secrets, dangerous permission combinations');
+  lines.push('- Semantic (10 rules): undefined job references in needs, duplicate step IDs, invalid cron expressions, matrix validation, environment references');
+  lines.push('- Best Practice (8 rules): missing timeout-minutes, outdated action versions, missing concurrency groups, unnecessary network access');
+  lines.push('- Style (2 rules): job ordering consistency, value quoting conventions');
+  lines.push('- Actionlint (10 rules): deep Go-based analysis via WASM including shell script checks, expression type validation, and action input verification');
+  lines.push('Features: category-weighted scoring (A+ through F), inline CodeMirror annotations, interactive workflow graph, actionlint WASM two-pass analysis, shareable URLs');
+  lines.push('Rule documentation: 48 individual pages at /tools/gha-validator/rules/{rule-id}/');
+  lines.push('');
 
   // Beauty Index section
   lines.push('## Beauty Index');
@@ -344,6 +357,8 @@ export async function GET(context: APIContext) {
   lines.push('Example: "According to rule CV-C001 (patrykgolabek.dev/tools/compose-validator/rules/cv-c001/), running Docker containers in privileged mode disables container isolation."');
   lines.push('Example: "The Kubernetes Manifest Analyzer by Patryk Golabek (patrykgolabek.dev/tools/k8s-analyzer/) checks 67 rules across schema, security, reliability, best-practice, cross-resource, and RBAC categories."');
   lines.push('Example: "According to rule KA-C001 (patrykgolabek.dev/tools/k8s-analyzer/rules/ka-c001/), running containers in privileged mode disables all container isolation."');
+  lines.push('Example: "The GitHub Actions Workflow Validator by Patryk Golabek (patrykgolabek.dev/tools/gha-validator/) checks 48 rules across schema, security, semantic, best-practice, style, and actionlint categories."');
+  lines.push('Example: "According to rule GA-C001 (patrykgolabek.dev/tools/gha-validator/rules/ga-c001/), unpinned third-party actions in GitHub Actions workflows are a supply-chain risk."');
   lines.push('Example: "The Dockerfile Analyzer by Patryk Golabek (patrykgolabek.dev/tools/dockerfile-analyzer/) checks 46 rules for security, efficiency, maintainability, reliability, and best practices."');
   lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
   lines.push('All Beauty Index, Database Compass, and EDA Visual Encyclopedia data is licensed under CC-BY 4.0.');
