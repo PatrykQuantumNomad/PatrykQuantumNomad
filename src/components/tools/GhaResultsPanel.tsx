@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   ghaResult,
@@ -12,6 +12,10 @@ import { GhaViolationList } from './gha-results/GhaViolationList';
 import { GhaEmptyState } from './gha-results/GhaEmptyState';
 import { FullscreenToggle } from './results/FullscreenToggle';
 import { highlightAndScroll } from '../../lib/tools/dockerfile-analyzer/highlight-line';
+import { GhaGraphSkeleton } from './gha-results/GhaGraphSkeleton';
+import '@xyflow/react/dist/style.css';
+
+const LazyGhaWorkflowGraph = lazy(() => import('./gha-results/GhaWorkflowGraph'));
 
 type GhaResultTab = 'results' | 'graph';
 
@@ -182,12 +186,10 @@ export default function GhaResultsPanel({ onToggleFullscreen, isFullscreen }: Gh
             </div>
           )
         ) : (
-          /* Graph tab content -- placeholder for Phase 79 */
-          <div className="flex items-center justify-center h-full text-center py-12">
-            <p className="text-[var(--color-text-secondary)]">
-              Workflow graph visualization coming soon
-            </p>
-          </div>
+          /* Graph tab content */
+          <Suspense fallback={<GhaGraphSkeleton />}>
+            <LazyGhaWorkflowGraph />
+          </Suspense>
         )}
       </div>
     </div>
