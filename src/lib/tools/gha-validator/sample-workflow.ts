@@ -1,54 +1,53 @@
 /**
  * Sample GitHub Actions workflow YAML strings for the validator tool.
  *
- * SAMPLE_GHA_WORKFLOW: A clean, valid workflow shown by default.
+ * SAMPLE_GHA_WORKFLOW: Comprehensive sample with deliberate violations from all
+ *   rule categories (security, best-practice, style) for demonstrating the validator.
  * SAMPLE_GHA_WORKFLOW_BAD: A broken workflow with deliberate schema errors for testing.
  * SAMPLE_GHA_WORKFLOW_SECURITY: A workflow with deliberate security violations for all 10 rules.
  */
 
-/** Clean CI/CD workflow -- validates without errors. */
-export const SAMPLE_GHA_WORKFLOW = `name: CI Pipeline
-on:
+/**
+ * Comprehensive sample workflow with deliberate violations from all rule categories.
+ *
+ * Security violations:
+ * - GA-C001: actions/checkout@v4 (unpinned semver tag)
+ * - GA-C008: third-party/tool@v2 (third-party without SHA)
+ *
+ * Best practice violations:
+ * - GA-B001: missing timeout-minutes on jobs
+ * - GA-B002: missing concurrency group
+ * - GA-B003: unnamed run: step
+ *
+ * Style violations:
+ * - GA-F001: jobs not alphabetical (deploy before build)
+ * - GA-F004: missing workflow name
+ */
+export const SAMPLE_GHA_WORKFLOW = `on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
-permissions:
-  contents: write
-  actions: write
-  issues: write
-
-env:
-  NODE_VERSION: "20"
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: \${{ env.NODE_VERSION }}
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test
-      - name: Build
-        run: npm run build
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    needs: build
     steps:
       - uses: actions/checkout@v4
       - name: Deploy to production
-        run: |
-          echo "Deploying \${{ github.sha }}"
-          ./deploy.sh
+        run: ./deploy.sh
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: third-party/tool@v2
+      - name: Install dependencies
+        run: npm ci
+      - run: npm test
+      - name: Build
+        run: npm run build
 `;
 
 /**
