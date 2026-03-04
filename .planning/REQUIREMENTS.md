@@ -157,92 +157,92 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WASM-01 | — | Pending |
-| WASM-02 | — | Pending |
-| WASM-03 | — | Pending |
-| WASM-04 | — | Pending |
-| WASM-05 | — | Pending |
-| SCHEMA-01 | — | Pending |
-| SCHEMA-02 | — | Pending |
-| SCHEMA-03 | — | Pending |
-| SCHEMA-04 | — | Pending |
-| ENGINE-01 | — | Pending |
-| ENGINE-02 | — | Pending |
-| ENGINE-03 | — | Pending |
-| ENGINE-04 | — | Pending |
-| SEC-01 | — | Pending |
-| SEC-02 | — | Pending |
-| SEC-03 | — | Pending |
-| SEC-04 | — | Pending |
-| SEC-05 | — | Pending |
-| SEC-06 | — | Pending |
-| SEC-07 | — | Pending |
-| SEC-08 | — | Pending |
-| SEC-09 | — | Pending |
-| SEC-10 | — | Pending |
-| SEM-01 | — | Pending |
-| SEM-02 | — | Pending |
-| SEM-03 | — | Pending |
-| SEM-04 | — | Pending |
-| BP-01 | — | Pending |
-| BP-02 | — | Pending |
-| BP-03 | — | Pending |
-| BP-04 | — | Pending |
-| BP-05 | — | Pending |
-| BP-06 | — | Pending |
-| BP-07 | — | Pending |
-| BP-08 | — | Pending |
-| STYLE-01 | — | Pending |
-| STYLE-02 | — | Pending |
-| STYLE-03 | — | Pending |
-| STYLE-04 | — | Pending |
-| SCORE-01 | — | Pending |
-| SCORE-02 | — | Pending |
-| SCORE-03 | — | Pending |
-| SCORE-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
-| UI-05 | — | Pending |
-| UI-06 | — | Pending |
-| UI-07 | — | Pending |
-| UI-08 | — | Pending |
-| UI-09 | — | Pending |
-| UI-10 | — | Pending |
-| GRAPH-01 | — | Pending |
-| GRAPH-02 | — | Pending |
-| GRAPH-03 | — | Pending |
-| GRAPH-04 | — | Pending |
-| GRAPH-05 | — | Pending |
-| GRAPH-06 | — | Pending |
-| GRAPH-07 | — | Pending |
-| SHARE-01 | — | Pending |
-| SHARE-02 | — | Pending |
-| SHARE-03 | — | Pending |
-| DOC-01 | — | Pending |
-| DOC-02 | — | Pending |
-| DOC-03 | — | Pending |
-| DOC-04 | — | Pending |
-| SITE-01 | — | Pending |
-| SITE-02 | — | Pending |
-| SITE-03 | — | Pending |
-| SITE-04 | — | Pending |
-| SITE-05 | — | Pending |
-| SITE-06 | — | Pending |
-| SITE-07 | — | Pending |
-| SITE-08 | — | Pending |
-| SITE-09 | — | Pending |
-| SITE-10 | — | Pending |
-| BLOG-01 | — | Pending |
-| BLOG-02 | — | Pending |
-| BLOG-03 | — | Pending |
+| WASM-01 | Phase 75 | Pending |
+| WASM-02 | Phase 75 | Pending |
+| WASM-03 | Phase 75 | Pending |
+| WASM-04 | Phase 75 | Pending |
+| WASM-05 | Phase 75 | Pending |
+| SCHEMA-01 | Phase 75 | Pending |
+| SCHEMA-02 | Phase 75 | Pending |
+| SCHEMA-03 | Phase 75 | Pending |
+| SCHEMA-04 | Phase 75 | Pending |
+| ENGINE-01 | Phase 76 | Pending |
+| ENGINE-02 | Phase 76 | Pending |
+| ENGINE-03 | Phase 76 | Pending |
+| ENGINE-04 | Phase 76 | Pending |
+| SEC-01 | Phase 76 | Pending |
+| SEC-02 | Phase 76 | Pending |
+| SEC-03 | Phase 76 | Pending |
+| SEC-04 | Phase 76 | Pending |
+| SEC-05 | Phase 76 | Pending |
+| SEC-06 | Phase 76 | Pending |
+| SEC-07 | Phase 76 | Pending |
+| SEC-08 | Phase 76 | Pending |
+| SEC-09 | Phase 76 | Pending |
+| SEC-10 | Phase 76 | Pending |
+| SEM-01 | Phase 77 | Pending |
+| SEM-02 | Phase 77 | Pending |
+| SEM-03 | Phase 77 | Pending |
+| SEM-04 | Phase 77 | Pending |
+| BP-01 | Phase 77 | Pending |
+| BP-02 | Phase 77 | Pending |
+| BP-03 | Phase 77 | Pending |
+| BP-04 | Phase 77 | Pending |
+| BP-05 | Phase 77 | Pending |
+| BP-06 | Phase 77 | Pending |
+| BP-07 | Phase 77 | Pending |
+| BP-08 | Phase 77 | Pending |
+| STYLE-01 | Phase 77 | Pending |
+| STYLE-02 | Phase 77 | Pending |
+| STYLE-03 | Phase 77 | Pending |
+| STYLE-04 | Phase 77 | Pending |
+| SCORE-01 | Phase 78 | Pending |
+| SCORE-02 | Phase 78 | Pending |
+| SCORE-03 | Phase 78 | Pending |
+| SCORE-04 | Phase 78 | Pending |
+| UI-01 | Phase 78 | Pending |
+| UI-02 | Phase 78 | Pending |
+| UI-03 | Phase 78 | Pending |
+| UI-04 | Phase 78 | Pending |
+| UI-05 | Phase 78 | Pending |
+| UI-06 | Phase 78 | Pending |
+| UI-07 | Phase 78 | Pending |
+| UI-08 | Phase 78 | Pending |
+| UI-09 | Phase 78 | Pending |
+| UI-10 | Phase 78 | Pending |
+| GRAPH-01 | Phase 79 | Pending |
+| GRAPH-02 | Phase 79 | Pending |
+| GRAPH-03 | Phase 79 | Pending |
+| GRAPH-04 | Phase 79 | Pending |
+| GRAPH-05 | Phase 79 | Pending |
+| GRAPH-06 | Phase 79 | Pending |
+| GRAPH-07 | Phase 79 | Pending |
+| SHARE-01 | Phase 80 | Pending |
+| SHARE-02 | Phase 80 | Pending |
+| SHARE-03 | Phase 80 | Pending |
+| DOC-01 | Phase 80 | Pending |
+| DOC-02 | Phase 80 | Pending |
+| DOC-03 | Phase 80 | Pending |
+| DOC-04 | Phase 80 | Pending |
+| SITE-01 | Phase 81 | Pending |
+| SITE-02 | Phase 81 | Pending |
+| SITE-03 | Phase 81 | Pending |
+| SITE-04 | Phase 81 | Pending |
+| SITE-05 | Phase 81 | Pending |
+| SITE-06 | Phase 81 | Pending |
+| SITE-07 | Phase 81 | Pending |
+| SITE-08 | Phase 81 | Pending |
+| SITE-09 | Phase 81 | Pending |
+| SITE-10 | Phase 81 | Pending |
+| BLOG-01 | Phase 81 | Pending |
+| BLOG-02 | Phase 81 | Pending |
+| BLOG-03 | Phase 81 | Pending |
 
 **Coverage:**
-- v1.13 requirements: 76 total
-- Mapped to phases: 0
-- Unmapped: 76
+- v1.13 requirements: 80 total
+- Mapped to phases: 80
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*
