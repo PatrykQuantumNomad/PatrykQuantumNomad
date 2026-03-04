@@ -44,10 +44,10 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Semantic Rules (actionlint)
 
-- [ ] **SEM-01**: 18 actionlint rule kinds mapped to GA-L001 through GA-L018 with stable rule IDs
-- [ ] **SEM-02**: Each actionlint kind assigned to appropriate scoring category (Security, Semantic, or Best Practice)
-- [ ] **SEM-03**: GA-L017 (shellcheck) and GA-L018 (pyflakes) documented as unavailable in browser WASM build
-- [ ] **SEM-04**: actionlint error messages enriched with rule-specific explanations and fix suggestions
+- [x] **SEM-01**: 18 actionlint rule kinds mapped to GA-L001 through GA-L018 with stable rule IDs
+- [x] **SEM-02**: Each actionlint kind assigned to appropriate scoring category (Security, Semantic, or Best Practice)
+- [x] **SEM-03**: GA-L017 (shellcheck) and GA-L018 (pyflakes) documented as unavailable in browser WASM build
+- [x] **SEM-04**: actionlint error messages enriched with rule-specific explanations and fix suggestions
 
 ### Best Practice Rules
 
@@ -180,10 +180,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | SEC-08 | Phase 76 | Complete |
 | SEC-09 | Phase 76 | Complete |
 | SEC-10 | Phase 76 | Complete |
-| SEM-01 | Phase 77 | Pending |
-| SEM-02 | Phase 77 | Pending |
-| SEM-03 | Phase 77 | Pending |
-| SEM-04 | Phase 77 | Pending |
+| SEM-01 | Phase 77 | Complete |
+| SEM-02 | Phase 77 | Complete |
+| SEM-03 | Phase 77 | Complete |
+| SEM-04 | Phase 77 | Complete |
 | BP-01 | Phase 77 | Pending |
 | BP-02 | Phase 77 | Pending |
 | BP-03 | Phase 77 | Pending |
