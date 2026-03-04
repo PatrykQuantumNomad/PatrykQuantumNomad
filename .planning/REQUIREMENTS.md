@@ -51,14 +51,14 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Best Practice Rules
 
-- [ ] **BP-01**: GA-B001 flags jobs missing `timeout-minutes` (default is 6 hours)
-- [ ] **BP-02**: GA-B002 flags workflows missing `concurrency:` group
-- [ ] **BP-03**: GA-B003 flags steps without `name:` field
-- [ ] **BP-04**: GA-B004 flags duplicate step names within same job
-- [ ] **BP-05**: GA-B005 flags empty `env:` blocks
-- [ ] **BP-06**: GA-B006 flags jobs without conditional on PR-only workflows
-- [ ] **BP-07**: GA-B007 flags outdated major versions of well-known actions
-- [ ] **BP-08**: GA-B008 flags steps fetching external data without `continue-on-error`
+- [x] **BP-01**: GA-B001 flags jobs missing `timeout-minutes` (default is 6 hours)
+- [x] **BP-02**: GA-B002 flags workflows missing `concurrency:` group
+- [x] **BP-03**: GA-B003 flags steps without `name:` field
+- [x] **BP-04**: GA-B004 flags duplicate step names within same job
+- [x] **BP-05**: GA-B005 flags empty `env:` blocks
+- [x] **BP-06**: GA-B006 flags jobs without conditional on PR-only workflows
+- [x] **BP-07**: GA-B007 flags outdated major versions of well-known actions
+- [x] **BP-08**: GA-B008 flags steps fetching external data without `continue-on-error`
 
 ### Style Rules
 
@@ -184,14 +184,14 @@ Deferred to future release. Tracked but not in current roadmap.
 | SEM-02 | Phase 77 | Complete |
 | SEM-03 | Phase 77 | Complete |
 | SEM-04 | Phase 77 | Complete |
-| BP-01 | Phase 77 | Pending |
-| BP-02 | Phase 77 | Pending |
-| BP-03 | Phase 77 | Pending |
-| BP-04 | Phase 77 | Pending |
-| BP-05 | Phase 77 | Pending |
-| BP-06 | Phase 77 | Pending |
-| BP-07 | Phase 77 | Pending |
-| BP-08 | Phase 77 | Pending |
+| BP-01 | Phase 77 | Complete |
+| BP-02 | Phase 77 | Complete |
+| BP-03 | Phase 77 | Complete |
+| BP-04 | Phase 77 | Complete |
+| BP-05 | Phase 77 | Complete |
+| BP-06 | Phase 77 | Complete |
+| BP-07 | Phase 77 | Complete |
+| BP-08 | Phase 77 | Complete |
 | STYLE-01 | Phase 77 | Pending |
 | STYLE-02 | Phase 77 | Pending |
 | STYLE-03 | Phase 77 | Pending |

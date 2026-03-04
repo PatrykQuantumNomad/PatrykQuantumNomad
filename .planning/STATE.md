@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: GitHub Actions Workflow Validator
 status: active
-stopped_at: Completed 77-01-PLAN.md
-last_updated: "2026-03-04T15:26:21Z"
-last_activity: 2026-03-04 -- Completed 77-01 Actionlint Mapping and Semantic Metadata
+stopped_at: Completed 77-02-PLAN.md
+last_updated: "2026-03-04T15:34:31Z"
+last_activity: 2026-03-04 -- Completed 77-02 Best Practice Rules (GA-B001 through GA-B008)
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 6
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -20,22 +20,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 77 - Semantic, Best Practice, and Style Rules (Plan 01 complete)
+**Current focus:** Phase 77 - Semantic, Best Practice, and Style Rules (Plan 02 complete)
 
 ## Current Position
 
 Phase: 77 in progress (3 of 7 in v1.13)
-Plan: 1 of 3 in current phase
-Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-03-04 -- Completed 77-01 Actionlint Mapping and Semantic Metadata
+Plan: 2 of 3 in current phase
+Status: Plan 02 complete, ready for Plan 03
+Last activity: 2026-03-04 -- Completed 77-02 Best Practice Rules (GA-B001 through GA-B008)
 
-Progress (v1.13): [███░░░░░░░] 35%
+Progress (v1.13): [████░░░░░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 167 (across 13 milestones)
-- v1.13 plans completed: 5
+- Total plans completed: 168 (across 13 milestones)
+- v1.13 plans completed: 6
 
 **Cumulative Stats:**
 
@@ -61,6 +61,7 @@ Progress (v1.13): [███░░░░░░░] 35%
 | Phase 76 P02 | 3min | 2 tasks | 7 files |
 | Phase 76 P03 | 6min | 2 tasks | 9 files |
 | Phase 77 P01 | 4min | 2 tasks | 6 files |
+| Phase 77 P02 | 4min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 76]: Rule registry allGhaRules aggregates all 10 security rules; getGhaRuleById for lookup
 - [Phase 77]: actionlintMeta factory returns no-op check() -- metadata rules for documentation/enrichment only
 - [Phase 77]: Engine enrichment prepends rule title to raw actionlint message for user-friendly diagnostics
+- [Phase 77]: GA-B007 static KNOWN_CURRENT_VERSIONS map with 10 well-known actions; date-stamped comment for maintainability
+- [Phase 77]: GA-B008 network detection uses regex with word boundaries to avoid false positives on substrings
+- [Phase 77]: GA-B006 only fires on PR-only workflows with 2+ jobs to reduce noise
 
 ### Pending Todos
 
@@ -103,7 +107,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T15:26:21Z
-Stopped at: Completed 77-01-PLAN.md
+Last session: 2026-03-04T15:34:31Z
+Stopped at: Completed 77-02-PLAN.md
 Resume file: None
-Next: `/gsd:execute-phase 77` to continue with Plan 02
+Next: `/gsd:execute-phase 77` to continue with Plan 03
