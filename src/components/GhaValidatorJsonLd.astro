@@ -1,0 +1,63 @@
+---
+/**
+ * GhaValidatorJsonLd.astro -- SoftwareApplication JSON-LD structured data
+ * for the GitHub Actions Workflow Validator tool page. Helps search engines understand
+ * the tool's purpose, features, and authorship.
+ */
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "GitHub Actions Workflow Validator",
+  "description": "Free browser-based GitHub Actions workflow validator and linter by a cloud-native architect. 48 rules across 6 categories: schema, security, semantic, best-practice, style, and actionlint. Two-pass analysis with actionlint WASM for deep semantic checks. 100% client-side -- your code never leaves your device.",
+  "url": "https://patrykgolabek.dev/tools/gha-validator/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web Browser",
+  "softwareVersion": "1.0",
+  "datePublished": "2026-03-04",
+  "screenshot": "https://patrykgolabek.dev/open-graph/tools/gha-validator.png",
+  "softwareHelp": {
+    "@type": "CreativeWork",
+    "name": "GitHub Actions Best Practices",
+    "url": "https://patrykgolabek.dev/blog/github-actions-best-practices/",
+  },
+  "keywords": [
+    "github actions validator",
+    "github actions linter",
+    "github actions best practices",
+    "workflow validator",
+    "github actions security",
+    "actionlint online",
+    "github actions checker",
+    "workflow yaml validator",
+  ],
+  "featureList": [
+    "48 validation rules across 6 categories (schema, security, semantic, best-practice, style, actionlint)",
+    "Two-pass analysis: instant schema + custom rules, then deep actionlint WASM",
+    "Category-weighted scoring with letter grades (A+ through F)",
+    "Security rules detecting injection risks, unpinned actions, and excessive permissions",
+    "Semantic rules for undefined references, duplicate keys, and matrix validation",
+    "Inline CodeMirror annotations with severity-colored gutter markers",
+    "Interactive workflow graph with trigger, job, and step visualization",
+    "Shareable results via URL hash encoding",
+    "actionlint WASM integration for deep Go-based analysis",
+    "100% client-side analysis -- no data transmitted",
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://patrykgolabek.dev/#person",
+    "name": "Patryk Golabek",
+    "url": "https://patrykgolabek.dev/",
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://patrykgolabek.dev/#website",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

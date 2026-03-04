@@ -1,11 +1,15 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import GhaValidator from '../../../components/tools/GhaValidator';
+import GhaValidatorJsonLd from '../../../components/GhaValidatorJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 ---
 
 <Layout
   title="GitHub Actions Workflow Validator | Patryk Golabek"
-  description="Free online GitHub Actions workflow linter and validator. 40 rules for security, semantic correctness, best practices, and style. Category-weighted scoring with actionlint WASM. 100% browser-based."
+  description="Free online GitHub Actions workflow linter and validator. 48 rules for security, semantic correctness, best practices, and style. Category-weighted scoring with actionlint WASM. 100% browser-based."
+  ogImage={new URL('/open-graph/tools/gha-validator.png', Astro.site).toString()}
+  ogImageAlt="GitHub Actions Workflow Validator - 48 rules across schema, security, semantic, best-practice, style, and actionlint categories"
 >
   <section class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,7 +17,7 @@ import GhaValidator from '../../../components/tools/GhaValidator';
         GitHub Actions Workflow Validator
       </h1>
       <p class="text-sm text-[var(--color-text-secondary)] mb-8 max-w-3xl">
-        Paste your GitHub Actions workflow YAML to analyze it against 40 rules across security,
+        Paste your GitHub Actions workflow YAML to analyze it against 48 rules across security,
         semantic correctness, best practices, and style. Two-pass analysis: instant schema and
         custom rules, plus deep actionlint WASM analysis. 100% browser-based -- your code never
         leaves your device.
@@ -23,5 +27,22 @@ import GhaValidator from '../../../components/tools/GhaValidator';
     <div class="px-4 sm:px-6 lg:px-8">
       <GhaValidator client:only="react" />
     </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <p class="mt-8 text-sm text-[var(--color-text-secondary)]">
+      Paste your workflow YAML and click <strong>Analyze</strong>. 100% client-side, your code never leaves your browser.
+      Want to learn the rules in depth? Read the
+      <a href="/blog/github-actions-best-practices/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">companion guide</a>
+      or browse
+      <a href="/tools/gha-validator/rules/ga-c001/" class="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors font-medium">individual rule docs</a>.
+    </p>
+    </div>
   </section>
+
+  <GhaValidatorJsonLd />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Tools', url: 'https://patrykgolabek.dev/tools/' },
+    { name: 'GHA Validator', url: 'https://patrykgolabek.dev/tools/gha-validator/' },
+  ]} />
 </Layout>
