@@ -1,207 +1,355 @@
 # Feature Research
 
-**Domain:** Dockerfile lint rule expansion (PG011, PG012)
-**Researched:** 2026-03-02
+**Domain:** Browser-based GitHub Actions Workflow Validator
+**Researched:** 2026-03-04
 **Confidence:** HIGH
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-For a lint rule flagging missing USER directives, users expect behavior consistent with how other "absence detection" rules work in the existing analyzer (e.g., DL3057 for missing HEALTHCHECK).
+Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **PG011: Flag missing USER in final stage** | Hadolint DL3002 only flags explicit `USER root`, leaving a critical gap: Dockerfiles with NO `USER` instruction silently run as root. Hadolint community requested this as DL3063. Users of any Dockerfile linter expect the tool to catch implicit-root-as-default. | LOW | The existing DL3002 code already scopes to the final stage and filters USER instructions -- PG011 inverts the empty-check branch to flag instead of skip. |
-| **PG011: Skip `FROM scratch` images** | `scratch` has no filesystem, no `/etc/passwd`, no shell -- USER cannot work without a multi-stage copy of passwd. Flagging scratch is a false positive. | LOW | Check `getImageName() === 'scratch'` on the last FROM. |
-| **PG011: Skip build-stage aliases** | In multi-stage builds, intermediate stages (e.g., `FROM node:22 AS builder`) often run as root intentionally for `apt-get install` / compilation. Only the final runtime stage matters. | LOW | Already handled: scope to instructions after the last FROM, matching DL3002's existing pattern. |
-| **PG012: Detect `node:*` base images** | When `FROM node:20-alpine` or `FROM node:22-slim` is used, suggest `platformatic/node-caged` for V8 pointer compression. Users expect the rule to match all official Node.js image variants. | MEDIUM | Must match: `node`, `node:TAG`, `docker.io/library/node:TAG`, and variable tags like `node:${VERSION}`. The From class provides `getImageName()` and `getImageTag()` methods. |
-| **PG012: Before/after code examples** | Every existing rule provides `fix.beforeCode` and `fix.afterCode`. Users expect concrete Dockerfile snippets showing what to change. | LOW | `FROM node:22-alpine` -> `FROM platformatic/node-caged:22-alpine` |
-| **PG011 + PG012: Rule documentation pages** | The `[code].astro` page auto-generates from `allRules`. Adding rules to the index automatically creates rule doc pages with explanation, fix, severity badge, and related rules. | LOW | No new page code needed -- just export from `rules/index.ts`. |
+| **YAML syntax validation** | Invalid YAML is the #1 cause of workflow failures. Every validator starts here. Snyk 2024 survey: 19% of pipeline errors from malformed YAML. | LOW | Existing pattern: `yaml` library parser + error recovery, already proven in Compose Validator and K8s Analyzer. |
+| **SchemaStore JSON Schema structural validation** | SchemaStore's `github-workflow.json` (~97KB) is the authoritative structural schema. IDEs (VS Code, JetBrains) already use it. Users expect equivalent coverage. Validates `on:`, `jobs:`, `steps:`, `permissions:`, `concurrency:`, `env:`, event types, required properties. | MEDIUM | Two-pass architecture: Pass 1. Parse YAML to JSON, validate against SchemaStore schema with ajv. Same pattern as K8s Analyzer's `schema-validator.ts` using pre-compiled ajv standalone. |
+| **actionlint deep analysis (WASM)** | actionlint is the gold standard for GitHub Actions linting. 17 rule categories, expression type checking, context validation, security checks. Users who know actionlint expect its coverage. | HIGH | Pass 2. Load actionlint WASM binary (~8.9MB uncompressed, ~3MB gzipped). Go compiled to WASM via `GOOS=js GOARCH=wasm`. Returns `ActionlintError[]` with `{kind, message, line, column}`. First WASM tool in the suite. |
+| **CodeMirror YAML editor** | All three existing tools use CodeMirror 6 with YAML highlighting. Users expect consistent editing experience with syntax highlighting, line numbers, inline error annotations. | LOW | Reuse existing CodeMirror YAML setup from Compose Validator / K8s Analyzer. Identical component structure. |
+| **Inline error annotations** | CodeMirror Diagnostic API integration showing squiggly underlines at violation locations. All existing tools have this. | LOW | Existing pattern: map violations to `Diagnostic[]` with `from/to` positions and severity levels. |
+| **Category-weighted scoring with letter grades** | All three existing tools produce A+ through F scores. Users of the tool suite expect this consistency. | LOW | Existing pattern from `scorer.ts`. Need new category weights appropriate for GitHub Actions (see Rule Categories below). |
+| **Score badge PNG generation** | Dockerfile Analyzer and K8s Analyzer generate shareable score badge images. Users expect to embed these in READMEs. | LOW | Existing pattern from `badge-generator.ts`. Reuse with new tool name/colors. |
+| **Per-rule documentation pages** | Every rule in existing tools has a dedicated `/tools/[tool]/rules/[code]` page with explanation, fix examples, severity badge, and related rules. Auto-generated from rule metadata. | LOW | Existing `[code].astro` dynamic route pattern. Rule metadata drives page generation automatically. |
+| **Results panel with violation list** | Grouped-by-category results display showing each violation with line number, message, severity icon, and rule link. | LOW | Existing pattern from all three tools. |
+| **Sample workflow file** | Default content in the editor demonstrating common issues so first-time visitors see the tool in action immediately. | LOW | Craft a sample `.github/workflows/ci.yml` with intentional issues across all categories. |
+| **URL state persistence** | Shareable URLs encoding editor content so users can share specific workflow analyses. | LOW | Existing pattern from `url-state.ts` in Dockerfile Analyzer. |
 
 ### Differentiators (Competitive Advantage)
 
-These features go beyond what Hadolint and other linters offer, positioning this analyzer as uniquely valuable.
+Features that set the product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **PG012: Node-caged memory savings suggestion** | No other Dockerfile linter suggests `platformatic/node-caged` as an optimization. This is a novel, opinionated recommendation that demonstrates deep Node.js expertise -- exactly the kind of insight a "Cloud-Native Software Architect" portfolio tool should showcase. | MEDIUM | The Platformatic blog documents ~50% memory savings with 2-4% avg latency increase. This is a genuine production optimization, not theoretical. |
-| **PG011: Expert explanation of implicit root danger** | Hadolint's proposed DL3063 defaults to "ignore" severity. PG011 as a `warning` with a rich explanation (container escape risk, Kubernetes securityContext implications, Pod Security Standards enforcement) goes further than any existing linter. | LOW | Leverage the existing explanation style from DL3002 and PG007 to create a cohesive security narrative across the three USER-related rules. |
-| **PG012: Compatibility caveat in explanation** | Mentioning the 4GB heap-per-isolate limit and native addon compatibility (N-API works, legacy V8 API like better-sqlite3 does not) in the explanation prevents users from blindly adopting the suggestion. This nuance builds trust. | LOW | Include in the `explanation` field, not as a separate feature. |
-| **PG011: Correct line reporting on last FROM** | When USER is missing, report the violation on the last `FROM` line (where the final stage begins). This mirrors DL3057's pattern for missing HEALTHCHECK and gives users a clear anchor point for the fix location. | LOW | `lastFrom.getRange().start.line + 1` -- identical to DL3057 pattern. |
+| **Workflow graph visualization (triggers -> jobs -> steps)** | No existing browser-based GitHub Actions validator visualizes the workflow as a graph. GitHub's built-in visualization only appears for *running* workflows, not during authoring. The FOSSA GitHub Actions Visualizer only shows job dependencies, not steps or triggers. This tool shows the full DAG: event triggers -> jobs (with `needs:` edges) -> steps (sequential). | HIGH | Use React Flow (already in Compose Validator and K8s Analyzer). Extract `on:` events as trigger nodes, `jobs:` as job nodes with `needs:` edges, `steps:` as child nodes within jobs. Color-code by status (valid/warning/error). Phantom nodes for unresolved `needs:` references. |
+| **Two-pass architecture (SchemaStore + actionlint)** | No existing tool combines SchemaStore schema validation with actionlint's deep analysis. The official actionlint playground only runs actionlint. SchemaStore catches structural issues (unknown properties, missing required fields, type mismatches) that actionlint may not flag. actionlint catches semantic issues (expression types, context availability, security) that schema validation cannot. Together they provide the most comprehensive validation available. | HIGH | Deduplicate overlapping findings between passes. SchemaStore catches ~15 structural rule types; actionlint catches ~18 semantic rule types. Map both to unified violation format with consistent severity/category. |
+| **Custom rules beyond actionlint (GA-* prefix)** | actionlint is comprehensive but focused on correctness, not best practices or security hardening. Custom rules can flag: unpinned action versions (not using SHA), overly permissive `permissions:`, missing `timeout-minutes`, `pull_request_target` without input validation, mutable tag references. These fill gaps that actionlint deliberately leaves out. | MEDIUM | 10-15 custom rules in the `security` and `best-practice` categories. Same rule interface pattern as Dockerfile Analyzer (`id`, `title`, `severity`, `category`, `explanation`, `fix`, `check()`). |
+| **Security hardening score** | Dedicated security subscore analyzing: permissions scope, action pinning strategy, secret handling, injection risk surface, `pull_request_target` usage. Inspired by StepSecurity's approach but as a real-time browser-based analysis, not a CI-only tool. | MEDIUM | Security category weight at 30-35% of total score. Custom rules + actionlint `[credentials]` and `[expression]` (script injection) findings contribute. |
+| **Unified rule ID namespace (GA-* prefix)** | Consistent with existing suite: Dockerfile uses `DL*/PG*`, Compose uses `CV-*`, K8s uses `KA-*`. GitHub Actions gets `GA-*` prefix. Schema rules: `GA-S*`, Security: `GA-C*`, Semantic: `GA-M*`, Best Practice: `GA-B*`, Style: `GA-F*`. actionlint errors mapped to `GA-L*` namespace. | LOW | Rule ID mapping layer between actionlint's `kind` strings and the `GA-L*` namespace. Each actionlint kind (18 kinds) gets a stable `GA-L` ID. |
+| **Rich explanations with "why it matters"** | actionlint gives terse one-line messages. The existing tool suite provides multi-paragraph explanations with before/after code, security implications, and links to official docs. This is the key UX differentiator across all tools in the suite. | MEDIUM | Each `GA-*` rule includes `explanation` (Markdown), `fix.description`, `fix.beforeCode`, `fix.afterCode`. actionlint errors get enriched explanations layered on top of the raw message. |
+| **Cross-job dependency validation visualization** | Show `needs:` graph with cycle detection (same Kahn's algorithm from Compose Validator). Highlight circular dependencies, missing job references, and unreachable jobs. No browser-based tool does this with visual feedback during authoring. | MEDIUM | Reuse `detectCycles()` from `compose-validator/graph-builder.ts`. Adapt for `jobs[*].needs` instead of `services[*].depends_on`. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Auto-detect which stage is the "runtime" stage** | In complex multi-stage builds, the final FROM is not always the runtime stage (some Dockerfiles have test/debug stages after runtime). | Requires semantic analysis of the entire build graph to determine which stage is "runtime." The `dockerfile-ast` library has no concept of "target stage" -- that is a `docker build --target` flag at build time, not parseable from the Dockerfile alone. | Scope to the **last** FROM, matching Hadolint's convention. Document that `--target` overrides are not detectable. |
-| **PG012: Suggest node-caged for ALL stages** | Users might want memory optimization everywhere. | Builder stages run `npm install`, `npm run build`, then discard. Memory savings in ephemeral build stages are irrelevant. Flagging every `FROM node:*` creates noise. | Only flag the **final stage** FROM that uses a node image. |
-| **PG012: Auto-rewrite the FROM line** | Users want one-click fixes. | `platformatic/node-caged` tags may not have exact parity with every official `node:*` variant. Auto-rewrite could introduce a non-existent tag. The tool is a static analyzer, not an editor with write access. | Provide clear before/after examples in the fix. Let the user make the conscious decision. |
-| **PG011: Flag ALL stages without USER** | Seems thorough. | Builder stages (`FROM node:22 AS builder`) intentionally run as root for package installation and compilation. Flagging them creates false positives that train users to ignore warnings. | Only flag the final stage, consistent with DL3002 behavior. |
-| **PG012: Suggest node-caged for non-Docker Hub node images** | Images like `gcr.io/distroless/nodejs` or `mcr.microsoft.com/node` also run Node.js. | These are fundamentally different images with different base layers, security profiles, and purposes. node-caged is a drop-in for the official `node:*` image only. | Only match image names that resolve to the official Docker Hub `node` image: bare `node`, `library/node`, `docker.io/library/node`. |
+| **Live GitHub API validation** | Validate action versions exist, check runner labels against org's actual runners, verify secret names exist. | Requires GitHub API token (security risk in a browser tool), rate limiting, network dependency breaks offline use, CORS issues. The tool must work entirely client-side. | Validate action reference *format* (owner/repo@ref syntax) and flag common issues (mutable tags, missing version pin) without API calls. Use actionlint's built-in popular action metadata for known actions. |
+| **Auto-fix / rewrite workflow** | Users want one-click fixes for common issues. | Many fixes are context-dependent (e.g., "pin this action" requires knowing which SHA to pin to, which needs API access). Auto-fix could introduce breaking changes. The tool is an analyzer, not an editor. | Provide clear before/after code examples in rule documentation. Show the exact YAML change needed. Let users make the conscious decision. |
+| **Real-time validation as you type** | Immediate feedback on every keystroke. | actionlint WASM takes 50-200ms per run. On fast typing, this creates janky UX with rapid re-renders, stale results, and wasted computation. SchemaStore + actionlint = two validation passes per keystroke. | Debounce validation (300-500ms after last keystroke). Show "Analyzing..." indicator during debounce. Same pattern as actionlint's official playground ("results updated on the fly when editing"). |
+| **shellcheck/pyflakes integration** | actionlint integrates shellcheck for `run:` scripts and pyflakes for Python scripts. Users might expect this in the browser version. | shellcheck and pyflakes are native binaries, not available as WASM. actionlint's WASM build explicitly disables these integrations. Adding them would require separate WASM compilations of shellcheck (Haskell -> WASM, not straightforward) and pyflakes (Python -> WASM, massive binary). | Document that shell/Python script linting is not available in the browser version. Suggest running actionlint locally for full coverage. Flag this clearly in the tool's description. |
+| **Custom rule configuration UI** | Let users enable/disable rules, change severities, configure thresholds. | Adds significant UI complexity for a feature most users won't use. Rule configuration is a power-user feature better served by local `.actionlintrc` files. Breaks the "paste and validate" simplicity. | Ship with opinionated defaults. All rules enabled. Fixed severities matching industry consensus. If rule configuration is needed later, it's a v2+ feature. |
+| **Validate entire repository's workflows** | Upload multiple workflow files for cross-workflow analysis. | Multi-file upload UX is complex. Cross-workflow analysis (reusable workflow calls) requires resolving file references that may not be present. Dramatically increases scope. | Validate one workflow file at a time. For reusable workflow calls (`uses: ./.github/workflows/reusable.yml`), flag the reference format but don't attempt to resolve it. |
+| **GitHub Actions Marketplace integration** | Show action descriptions, badges, popularity metrics for referenced actions. | Requires GitHub API, adds network dependency, stale data risk, scope creep into "action discovery" rather than "workflow validation." | Use actionlint's built-in popular actions metadata (covers ~200 well-known actions with input/output type information). Flag unknown actions as info-level, not errors. |
+
+## Rule Categories and Counts
+
+### Category Architecture (Matching Existing Tools)
+
+| Category | Weight | Purpose | Source | Estimated Rules |
+|----------|--------|---------|--------|-----------------|
+| **Schema** (`GA-S*`) | 15% | YAML syntax, structural validation from SchemaStore JSON Schema | SchemaStore ajv validation | 8-12 rules |
+| **Security** (`GA-C*`) | 35% | Permissions, action pinning, secret handling, injection risks, `pull_request_target` safety | Custom rules + actionlint `[credentials]`, `[expression]` | 12-16 rules |
+| **Semantic** (`GA-M*`) | 20% | Expression types, context availability, `needs:` graph validity, event/input consistency | actionlint WASM (all 18 kinds mapped) | 18 rules (1:1 with actionlint kinds) |
+| **Best Practice** (`GA-B*`) | 20% | `timeout-minutes`, concurrency groups, job naming, step IDs, caching strategy | Custom rules | 8-12 rules |
+| **Style** (`GA-F*`) | 10% | Key ordering, consistent quoting, YAML formatting conventions | Custom rules | 4-6 rules |
+| **TOTAL** | 100% | | | **50-64 rules** |
+
+### actionlint Kind-to-Rule Mapping (18 kinds -> GA-L* IDs)
+
+actionlint returns errors with a `kind` string. Each kind maps to one `GA-L*` rule ID for documentation and scoring.
+
+| actionlint Kind | Mapped Rule ID | Category | Description |
+|-----------------|---------------|----------|-------------|
+| `syntax-check` | `GA-L001` | Schema | Unexpected keys, missing required keys, empty mappings, type mismatches |
+| `expression` | `GA-L002` | Semantic | Expression syntax, type checking, context/function validation, format() args |
+| `action` | `GA-L003` | Semantic | Action input/output validation, metadata checking |
+| `workflow-call` | `GA-L004` | Semantic | Reusable workflow input/output/secret validation |
+| `credentials` | `GA-L005` | Security | Hard-coded credentials detection |
+| `runner-label` | `GA-L006` | Semantic | Invalid runner label validation |
+| `events` | `GA-L007` | Semantic | Webhook event names, cron syntax, workflow_dispatch inputs |
+| `glob` | `GA-L008` | Semantic | Glob pattern syntax in paths/branches filters |
+| `job-needs` | `GA-L009` | Semantic | Job dependency graph validation |
+| `matrix` | `GA-L010` | Semantic | Matrix strategy configuration |
+| `permissions` | `GA-L011` | Security | Permission scope validation |
+| `id` | `GA-L012` | Semantic | Job/step ID uniqueness and naming |
+| `shell-name` | `GA-L013` | Semantic | Shell name validation (bash, sh, pwsh, etc.) |
+| `if-cond` | `GA-L014` | Semantic | Conditional expression validation |
+| `env-var` | `GA-L015` | Semantic | Environment variable naming |
+| `deprecated-commands` | `GA-L016` | Best Practice | Deprecated workflow commands (set-output -> GITHUB_OUTPUT) |
+| `shellcheck` | `GA-L017` | Semantic | Shell script errors (disabled in WASM, documented) |
+| `pyflakes` | `GA-L018` | Semantic | Python script errors (disabled in WASM, documented) |
+
+Note: `GA-L017` and `GA-L018` will never fire in the browser WASM build. They exist in the rule registry for documentation completeness, with explanations noting they require the CLI version.
+
+### Custom Security Rules (GA-C* prefix)
+
+| Rule ID | Title | Severity | What It Checks |
+|---------|-------|----------|----------------|
+| `GA-C001` | Unpinned action version | warning | `uses: actions/checkout@v4` instead of `uses: actions/checkout@<sha>` |
+| `GA-C002` | Mutable action tag | warning | `uses: actions/checkout@main` (branch ref, not tag or SHA) |
+| `GA-C003` | Overly permissive permissions | warning | `permissions: write-all` or no permissions block (defaults to write-all) |
+| `GA-C004` | Missing permissions block | info | No `permissions:` key at workflow or job level |
+| `GA-C005` | Script injection risk | error | `${{ github.event.pull_request.title }}` in `run:` without env var intermediary |
+| `GA-C006` | `pull_request_target` without restrictions | warning | `on: pull_request_target` without `paths:`/`branches:` filters |
+| `GA-C007` | Secrets in workflow file | error | Hardcoded tokens, passwords, API keys in env values |
+| `GA-C008` | Third-party action without SHA pin | info | Non-official actions (not `actions/*`) without commit SHA pinning |
+| `GA-C009` | Dangerous `GITHUB_TOKEN` permissions | warning | `permissions: { contents: write, pull-requests: write }` combined scope |
+| `GA-C010` | Self-hosted runner in public repo pattern | info | `runs-on: self-hosted` (informational security reminder) |
+
+### Custom Best Practice Rules (GA-B* prefix)
+
+| Rule ID | Title | Severity | What It Checks |
+|---------|-------|----------|----------------|
+| `GA-B001` | Missing timeout-minutes | info | Jobs without `timeout-minutes` (default is 6 hours) |
+| `GA-B002` | Missing concurrency group | info | Workflow without `concurrency:` for branches that should cancel stale runs |
+| `GA-B003` | Step without name | info | Steps missing the `name:` field, making logs harder to read |
+| `GA-B004` | Duplicate step names | warning | Multiple steps with identical `name:` values in same job |
+| `GA-B005` | Empty `env:` block | info | Empty environment variable blocks |
+| `GA-B006` | Job without conditional | info | Jobs that always run (no `if:` condition on PR-only workflows) |
+| `GA-B007` | Outdated well-known action | warning | Using older major versions of popular actions (e.g., `actions/checkout@v3` when v4 exists) |
+| `GA-B008` | Missing `continue-on-error` consideration | info | Steps that fetch external data without error handling |
+
+### Schema Rules (GA-S* prefix, from SchemaStore)
+
+| Rule ID | Title | Severity | What It Checks |
+|---------|-------|----------|----------------|
+| `GA-S001` | Invalid YAML syntax | error | YAML parse errors (indentation, illegal characters, tabs vs spaces) |
+| `GA-S002` | Unknown top-level property | error | Properties not in the workflow schema (typos like `job:` instead of `jobs:`) |
+| `GA-S003` | Unknown job property | warning | Properties not valid in a job definition |
+| `GA-S004` | Unknown step property | warning | Properties not valid in a step definition |
+| `GA-S005` | Invalid event type | error | Unknown event name in `on:` block |
+| `GA-S006` | Type mismatch | error | Wrong value type (string where boolean expected, etc.) |
+| `GA-S007` | Missing required property | error | Required fields missing (e.g., `jobs:` is mandatory) |
+| `GA-S008` | Invalid enum value | warning | Value not in allowed set (e.g., invalid `shell:` value) |
+
+### Style Rules (GA-F* prefix)
+
+| Rule ID | Title | Severity | What It Checks |
+|---------|-------|----------|----------------|
+| `GA-F001` | Jobs not alphabetically ordered | info | Job keys not in alphabetical order |
+| `GA-F002` | Inconsistent `uses:` quoting | info | Mixed quoting styles for action references |
+| `GA-F003` | Long step name | info | Step names exceeding 80 characters |
+| `GA-F004` | Workflow name missing | info | No `name:` at workflow level |
 
 ## Feature Dependencies
 
 ```
-PG011 (missing USER)
-    depends on ──> existing DL3002 pattern (final-stage scoping logic)
-    depends on ──> existing PG007 pattern (USER instruction detection)
-    enhances ──> DL3002 (fills the "no USER at all" gap)
-    enhances ──> PG007 (PG007 checks UID/GID quality, PG011 checks USER existence)
+YAML Parser (yaml library)
+    required by ──> SchemaStore JSON Schema Validation (GA-S*)
+    required by ──> Custom Rule Engine (GA-C*, GA-B*, GA-F*)
+    required by ──> Graph Data Extractor
+    required by ──> CodeMirror Editor Integration
 
-PG012 (node-caged suggestion)
-    depends on ──> existing PG006 pattern (FROM instruction iteration, image name parsing)
-    depends on ──> From.getImageName() / From.getImageTag() API from dockerfile-ast
-    independent of ──> PG011 (no dependency between the two new rules)
+SchemaStore JSON Schema Validation (GA-S*)
+    required by ──> Two-Pass Engine (must complete before actionlint pass)
+    provides ──> Structural violations for scoring
 
-Both rules
-    depend on ──> rules/index.ts (must be added to allRules array)
-    depend on ──> rules/related.ts (auto-generates related rules by category)
-    enhance ──> scorer.ts (more rules = more granular scoring, no changes needed)
-    enhance ──> [code].astro (auto-generates documentation pages, no changes needed)
+actionlint WASM Binary
+    required by ──> Semantic Validation (GA-L*)
+    independent of ──> SchemaStore validation (can run in parallel)
+    NOTE: ~8.9MB binary, async load with progress indicator
+
+Two-Pass Engine
+    requires ──> YAML Parser
+    requires ──> SchemaStore Validator
+    requires ──> actionlint WASM
+    requires ──> Custom Rule Engine
+    provides ──> Unified violation list for Scorer
+
+Custom Rule Engine (GA-C*, GA-B*, GA-F*)
+    requires ──> Parsed YAML (JSON object)
+    independent of ──> actionlint WASM
+    follows ──> Same rule interface pattern as Dockerfile/Compose/K8s tools
+
+Graph Data Extractor
+    requires ──> Parsed YAML (on: events, jobs: with needs:, steps:)
+    independent of ──> Validation engine
+    provides ──> React Flow node/edge data
+
+Scorer
+    requires ──> Unified violation list from Two-Pass Engine
+    follows ──> Existing scorer pattern (category weights, diminishing returns)
+
+Badge Generator
+    requires ──> Score result from Scorer
+
+Rule Documentation Pages
+    requires ──> Rule metadata registry (all GA-* rules)
+    follows ──> Existing [code].astro pattern
+
+CodeMirror Editor
+    requires ──> YAML language support (existing)
+    requires ──> Diagnostic annotations from violation list
+
+React Flow Graph
+    requires ──> Graph Data Extractor output
+    follows ──> Existing compose-validator/k8s-analyzer graph patterns
 ```
 
 ### Dependency Notes
 
-- **PG011 depends on DL3002 pattern:** The final-stage scoping logic (find last FROM, filter instructions after it) is already proven in DL3002. PG011 should reuse the same approach for consistency.
-- **PG012 depends on PG006 pattern:** PG006 already iterates `getFROMs()`, checks `getImageName()`, skips `scratch`, and skips build-stage aliases. PG012 needs the same iteration with a different check (image name match instead of digest check).
-- **PG011 enhances DL3002 + PG007:** Together, the three rules form a complete USER security story: PG011 checks presence, DL3002 checks the value is not root, PG007 checks UID/GID quality.
-- **Both rules are independent:** PG011 and PG012 have zero dependencies on each other and can be implemented in any order or in parallel.
+- **SchemaStore and actionlint are independent passes:** They can run in parallel after YAML parsing. Deduplicate overlapping findings (e.g., both may flag unknown properties). SchemaStore runs first for immediate feedback while WASM loads.
+- **Custom rules are independent of actionlint:** Custom rules (GA-C*, GA-B*, GA-F*) run against the parsed YAML JSON object, not through actionlint. They execute synchronously and return results immediately.
+- **Graph extraction is independent of validation:** The workflow graph can be built from parsed YAML regardless of validation results. Graph and validation can run in parallel.
+- **actionlint WASM is the critical-path dependency:** The ~8.9MB binary must be loaded and initialized before semantic validation can run. Lazy-load with code splitting. Show SchemaStore + custom rule results immediately while WASM loads.
+- **Rule documentation depends on the full rule registry:** All GA-* rules (schema, lint, custom, style) must be in a single registry for the [code].astro page generator.
 
 ## MVP Definition
 
 ### Launch With (v1)
 
-Since this is a subsequent milestone adding 2 rules to an existing 44-rule analyzer, "MVP" means both rules are complete and consistent with existing patterns.
+Minimum viable product that matches the quality bar of the existing three tools.
 
-- [ ] **PG011 rule file** (`rules/security/PG011-require-user.ts`) -- Flag final stage with no USER instruction
-- [ ] **PG011 edge cases** -- Skip `FROM scratch`, skip build-stage alias references in final FROM
-- [ ] **PG012 rule file** (`rules/efficiency/PG012-node-caged.ts` or `rules/best-practice/PG012-node-caged.ts`) -- Flag `node:*` in final stage FROM
-- [ ] **PG012 image name matching** -- Match `node`, `library/node`, `docker.io/library/node`; skip variable-only image names
-- [ ] **Register both in `rules/index.ts`** -- Add to `allRules` array in correct category sections
-- [ ] **Rule documentation** -- Automatic via `[code].astro` static paths; no new code needed
-- [ ] **Related rules** -- Automatic via `related.ts` category matching; no new code needed
+- [ ] **YAML parser with error recovery** -- Parse workflow YAML to JSON, handle malformed input gracefully
+- [ ] **SchemaStore JSON Schema validation (Pass 1)** -- Pre-compile `github-workflow.json` with ajv standalone, same pattern as K8s Analyzer
+- [ ] **actionlint WASM integration (Pass 2)** -- Load WASM binary, expose `runActionlint(src)` -> `ActionlintError[]`, map to GA-L* violations
+- [ ] **Two-pass deduplication engine** -- Merge SchemaStore and actionlint findings, suppress duplicates, sort by line number
+- [ ] **Core custom rules (10 security + 8 best practice)** -- GA-C001 through GA-C010, GA-B001 through GA-B008
+- [ ] **Category-weighted scorer** -- 5 categories with weights summing to 100%, same diminishing returns formula
+- [ ] **CodeMirror editor with inline annotations** -- YAML highlighting, Diagnostic integration, line numbers
+- [ ] **Results panel** -- Grouped by category, clickable to scroll to line, severity icons, rule ID links
+- [ ] **Workflow graph visualization** -- React Flow graph: trigger events -> jobs (with needs: edges) -> steps
+- [ ] **Rule documentation pages** -- Auto-generated [code].astro pages for all GA-* rules
+- [ ] **Sample workflow file** -- Default editor content demonstrating common issues
+- [ ] **Score badge PNG** -- Reuse badge generator pattern
+- [ ] **URL state persistence** -- Shareable URLs encoding workflow content
 
 ### Add After Validation (v1.x)
 
-- [ ] **Update sample Dockerfile** -- Add a scenario that triggers PG011 and/or PG012 in the default sample so new visitors see the rules in action
-- [ ] **Blog post update** -- Reference PG011 and PG012 in the existing `dockerfile-best-practices.mdx` blog post for SEO
-- [ ] **PG012 variant tag mapping** -- If platformatic/node-caged adds more variants, update the before/after examples to cover slim/alpine/bookworm
+Features to add once core is working and user feedback is collected.
+
+- [ ] **Style rules (GA-F*)** -- Lower priority, add 4 style rules after core categories are stable
+- [ ] **Blog post** -- "Free GitHub Actions Workflow Validator with 50+ Rules" for SEO
+- [ ] **Cross-tool comparison page** -- Landing page showing all 4 tools with feature matrix
+- [ ] **Enhanced graph interactivity** -- Click job/step nodes to scroll to source line, hover for details
+- [ ] **Export validation report** -- JSON/markdown export of findings for CI integration
 
 ### Future Consideration (v2+)
 
-- [ ] **PG012 expansion to other runtimes** -- If pointer-compression images emerge for Deno or Bun, add similar suggestions
-- [ ] **PG011 Kubernetes Pod Security Standards integration** -- Link to PSS restricted profile requirements in the explanation
-- [ ] **Rule severity customization** -- Allow users to override severity per rule (e.g., upgrade PG011 from warning to error for strict environments)
+- [ ] **Reusable workflow resolution** -- Parse referenced `.github/workflows/*.yml` files (requires multi-file upload UX)
+- [ ] **Custom rule configuration** -- UI for enabling/disabling rules and adjusting severities
+- [ ] **Action version update suggestions** -- When a pinned action has newer releases (requires API integration)
+- [ ] **Matrix expansion preview** -- Show all combinations a matrix strategy would generate
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| PG011: Missing USER detection | HIGH | LOW | P1 |
-| PG011: Skip scratch/alias edge cases | HIGH | LOW | P1 |
-| PG012: Node-caged suggestion | MEDIUM | MEDIUM | P1 |
-| PG012: Image name matching logic | MEDIUM | MEDIUM | P1 |
-| Register both in index.ts | HIGH | LOW | P1 |
-| Update sample Dockerfile | LOW | LOW | P2 |
-| Blog post cross-reference | LOW | LOW | P2 |
+| YAML parser + error recovery | HIGH | LOW | P1 |
+| SchemaStore JSON Schema validation | HIGH | MEDIUM | P1 |
+| actionlint WASM integration | HIGH | HIGH | P1 |
+| Two-pass deduplication engine | HIGH | MEDIUM | P1 |
+| Custom security rules (GA-C*) | HIGH | MEDIUM | P1 |
+| Custom best practice rules (GA-B*) | MEDIUM | MEDIUM | P1 |
+| Category-weighted scorer | HIGH | LOW | P1 |
+| CodeMirror editor + annotations | HIGH | LOW | P1 |
+| Results panel | HIGH | LOW | P1 |
+| Workflow graph visualization | HIGH | HIGH | P1 |
+| Rule documentation pages | HIGH | LOW | P1 |
+| Sample workflow file | MEDIUM | LOW | P1 |
+| Score badge PNG | MEDIUM | LOW | P1 |
+| URL state persistence | MEDIUM | LOW | P1 |
+| Style rules (GA-F*) | LOW | LOW | P2 |
+| Blog post for SEO | MEDIUM | LOW | P2 |
+| Cross-tool comparison page | LOW | LOW | P2 |
+| Enhanced graph interactivity | MEDIUM | MEDIUM | P2 |
+| Export validation report | LOW | MEDIUM | P3 |
+| Reusable workflow resolution | LOW | HIGH | P3 |
+| Custom rule configuration | LOW | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for this milestone
+- P1: Must have for launch (core tool parity with existing 3 tools)
 - P2: Should have, add when possible
 - P3: Nice to have, future consideration
 
 ## Competitor Feature Analysis
 
-| Feature | Hadolint | Dockle | Trivy | Our Approach (PG011/PG012) |
-|---------|----------|--------|-------|---------------------------|
-| Flag explicit `USER root` | DL3002 (warning) | CIS-DI-0001 | Dockerfile misconfiguration | DL3002 (already have) |
-| Flag missing USER entirely | DL3063 (ignore by default, in PR) | CIS-DI-0001 (checks both) | Not implemented | **PG011 (warning)** -- enabled by default, not hidden behind config |
-| Suggest alternative base image | Not implemented | Not implemented | Not implemented | **PG012 (info)** -- novel rule, no competitor offers this |
-| Memory optimization suggestions | Not implemented | Not implemented | Not implemented | **PG012** -- unique differentiator for Node.js-focused analysis |
-| Expert explanations with fix examples | Terse one-line messages | Brief descriptions | Brief descriptions | Rich multi-paragraph explanations with before/after code blocks |
+| Feature | actionlint Playground | Elysiate Validator | FOSSA Visualizer | action-validator | zizmor | Our Approach (GA-*) |
+|---------|----------------------|-------------------|------------------|-----------------|--------|---------------------|
+| YAML syntax check | Yes (via Go parser) | Basic | No | Yes (JSON Schema) | No | Yes (yaml library + SchemaStore) |
+| JSON Schema validation | No | No | No | Yes (SchemaStore) | No | **Yes (SchemaStore ajv, Pass 1)** |
+| Deep semantic analysis | Yes (18 rule kinds) | No | No | No | No (security only) | **Yes (actionlint WASM, Pass 2)** |
+| Expression type checking | Yes | No | No | No | No | **Yes (via actionlint)** |
+| Security hardening | Partial (credentials, injection) | No | No | No | Yes (24 rules, SARIF output) | **Yes (10 custom rules + actionlint security)** |
+| Action input validation | Yes (200+ popular actions) | No | No | No | No | **Yes (via actionlint)** |
+| Workflow graph visualization | No | No | Job DAG only | No | No | **Full DAG: triggers -> jobs -> steps** |
+| Category-weighted scoring | No | No | No | No | No | **Yes (5 categories, A+ through F)** |
+| Per-rule documentation | No (inline only) | No | No | No | Docs site | **Yes (auto-generated pages with SEO)** |
+| Rich fix explanations | Terse one-liners | None | N/A | None | Brief | **Multi-paragraph with before/after code** |
+| Score badge | No | No | No | No | No | **Yes (shareable PNG)** |
+| Browser-only (no install) | Yes | Yes | Yes | No (CLI) | No (CLI) | **Yes** |
+| Offline capable | Yes (WASM) | Unknown | Yes (client-side) | N/A | N/A | **Yes (all client-side)** |
+| Combined schema + lint | No | No | No | No | No | **Yes (unique two-pass architecture)** |
+| Rule count | 18 kinds (40+ sub-checks) | ~5 basic checks | 0 (visualization only) | SchemaStore only | 24 security rules | **50-64 rules across 5 categories** |
 
 ### Key Competitive Insights
 
-1. **Hadolint's DL3063 defaults to "ignore"** -- They added it but disabled it by default, likely due to false-positive concerns in multi-stage builds. Our PG011 avoids this by scoping strictly to the final stage and skipping scratch, making `warning` severity safe as default.
+1. **No tool combines SchemaStore + actionlint.** The actionlint playground only runs actionlint. action-validator only runs SchemaStore validation. Our two-pass architecture is the first to combine both, catching issues neither finds alone.
 
-2. **No linter suggests node-caged** -- PG012 is genuinely novel. Dockerfile linters focus on correctness and security, not runtime optimization. This positions the analyzer as going beyond "lint" into "optimization advisor."
+2. **No browser-based tool visualizes the full workflow graph.** The actionlint playground shows a text-only error list. FOSSA's visualizer shows only job dependencies (no triggers, no steps). GitHub's built-in visualization only appears for *running* workflows, not during authoring. Our React Flow graph showing triggers -> jobs -> steps is unique.
 
-3. **Dockle's CIS-DI-0001** is the closest competitor to PG011, as it checks both explicit root and missing USER. However, Dockle analyzes built images (not Dockerfiles), so it operates at a different layer.
+3. **No validator provides scored assessments with grades.** Every existing tool gives pass/fail or a flat error list. The category-weighted scoring with letter grades and shareable badges is exclusive to this tool suite.
 
-## Edge Cases Summary
+4. **zizmor is the closest security competitor** but it's CLI-only, focuses exclusively on security (no best practices, no schema validation, no scoring), and targets CI pipelines rather than developer authoring experience. Our security rules cover similar ground but integrate into a comprehensive browser-based tool.
 
-### PG011 Edge Cases
+5. **actionlint WASM is proven technology.** The official playground demonstrates that actionlint runs reliably in the browser via WASM. The binary is ~8.9MB uncompressed but compresses well with gzip/brotli. The `xing/actionlint` npm package provides a community-maintained WASM packaging with browser and Node.js entry points.
 
-| Scenario | Expected Behavior | Rationale |
-|----------|-------------------|-----------|
-| No USER instruction anywhere | Flag on last FROM line | Implicit root is the security risk |
-| `USER root` in final stage | Do NOT flag (DL3002 handles this) | Avoid double-flagging; DL3002 owns explicit root |
-| `USER node` in final stage | Do NOT flag | Non-root user is set correctly |
-| `FROM scratch` as final stage | Do NOT flag | scratch has no passwd; USER requires multi-stage setup that is too complex to prescribe |
-| `FROM builder` (alias) as final stage | Do NOT flag | Alias references inherit from their source stage; cannot determine USER from alias alone |
-| Multi-stage with USER only in builder | Flag on last FROM | Builder's USER does not carry into runtime stage |
-| `USER ${APP_USER}` (variable) | Do NOT flag | A USER instruction exists; variable may resolve to non-root at build time |
-| Single-stage Dockerfile, no USER | Flag on FROM line | Most common case; highest impact |
-| `FROM node:22` with USER in ONBUILD | Flag | ONBUILD USER only fires in child images, not in this image |
+6. **actionlint's WASM build disables shellcheck and pyflakes.** This is a known limitation that must be documented clearly. These integrations require native binaries that are not available as WASM. This is not a gap we can fill in the browser.
 
-### PG012 Edge Cases
+## Workflow Graph Specification
 
-| Scenario | Expected Behavior | Rationale |
-|----------|-------------------|-----------|
-| `FROM node:22-alpine` | Flag with suggestion | Standard node image, eligible for node-caged |
-| `FROM node:22-alpine AS builder` (not final) | Do NOT flag | Only flag the final stage; builder memory is ephemeral |
-| `FROM node` (no tag) | Flag with suggestion | Still an official node image |
-| `FROM node:${VERSION}` | Flag with suggestion, note variable tag | The base image IS node; the tag is unknown but suggestion is still valid |
-| `FROM platformatic/node-caged:22` | Do NOT flag | Already using node-caged |
-| `FROM myregistry.io/node:22` | Do NOT flag | Custom registry node images may be customized; only match official `node` |
-| `FROM docker.io/library/node:22` | Flag | This is the fully-qualified official node image |
-| `FROM gcr.io/distroless/nodejs22` | Do NOT flag | Different image entirely, not a drop-in replacement candidate |
-| `FROM node:22` in non-final stage only | Do NOT flag | Only the final stage matters for runtime memory |
-| `FROM scratch` with COPY from node stage | Do NOT flag | Final image is scratch, not node |
+### Node Types
 
-## Severity and Category Recommendations
+| Node Type | Visual | Source | Count |
+|-----------|--------|--------|-------|
+| **Trigger** | Rounded rectangle, blue | `on:` events (push, pull_request, schedule, workflow_dispatch, etc.) | 1-N per workflow |
+| **Job** | Rectangle, green/yellow/red based on violation count | `jobs:` entries | 1-N per workflow |
+| **Step** | Small rectangle, nested within job | `steps:` entries within each job | 1-N per job |
 
-### PG011: Require USER instruction
+### Edge Types
 
-- **Category:** `security` -- Aligns with DL3002 and PG007 (all three form the USER security chain)
-- **Severity:** `warning` -- Not `error` because some base images (e.g., bitnami) set non-root USER in their base layer. Not `info` because running as root is a genuine security risk that most users should fix.
-- **Rationale for warning over info:** Hadolint defaults their equivalent (DL3063) to "ignore", which means nobody sees it. The whole point of PG011 is to close the DL3002 gap where missing USER goes completely undetected. `warning` ensures visibility without blocking.
+| Edge Type | From -> To | Visual | Source |
+|-----------|-----------|--------|--------|
+| **triggers** | Trigger -> Job | Dashed arrow | All jobs are triggered by all events (unless filtered by `if:`) |
+| **needs** | Job -> Job | Solid arrow | `jobs.<id>.needs: [other_job]` |
+| **sequential** | Step -> Step | Thin solid line | Steps execute sequentially within a job |
 
-### PG012: Suggest node-caged
+### Graph Layout
 
-- **Category:** `efficiency` -- This is a memory optimization, not a security or correctness issue. The `efficiency` category (weight: 25%) is appropriate because it aligns with other resource-optimization rules.
-- **Severity:** `info` -- This is an optimization suggestion, not a problem. The Dockerfile is valid without node-caged. Using `info` (3-point deduction per the scorer) keeps the score impact minimal while still surfacing the recommendation.
-- **Rationale for info over warning:** node-caged has real limitations (4GB heap cap, native addon compatibility). Treating this as `warning` would imply the user is doing something wrong, when in fact they are doing something that could be better.
-
-## API Notes (dockerfile-ast)
-
-Key finding: `dockerfile-ast` does NOT provide a `getUSERs()` method (unlike `getFROMs()`, `getCMDs()`, `getENTRYPOINTs()`, `getHEALTHCHECKs()`). USER instructions must be found via:
-
-```typescript
-const userInstructions = dockerfile.getInstructions().filter(
-  (inst) => inst.getKeyword() === 'USER'
-);
-```
-
-This is already the pattern used by DL3002. The `From` class provides: `getImageName()`, `getImageTag()`, `getImageDigest()`, `getBuildStage()`, `getRegistry()` -- all needed for PG012's image matching.
+- Left-to-right (LR) layout matching React Flow patterns in existing tools
+- Trigger nodes on the left
+- Job nodes in the middle (grouped by dependency level using topological sort)
+- Step nodes nested within job nodes (collapsible)
+- Phantom nodes (dashed border) for `needs:` references to undefined jobs
 
 ## Sources
 
-- [Hadolint issue #1089: Warn if Dockerfile omits USER instruction](https://github.com/hadolint/hadolint/issues/1089) -- Feature request for missing USER detection
-- [Hadolint PR #1032: Adding rule DL3062/DL3063](https://github.com/hadolint/hadolint/pull/1032) -- Implementation of missing USER rule (default: ignore)
-- [Platformatic node-caged GitHub](https://github.com/platformatic/node-caged) -- V8 pointer compression Docker images
-- [Platformatic blog: We Cut Node.js Memory in Half](https://blog.platformatic.dev/we-cut-nodejs-memory-in-half) -- Technical details on memory savings
-- [node-caged memory reduction (Vinta Software)](https://www.vintasoftware.com/lessons-learned/node-caged-can-get-up-to-50-memory-reduction-in-nodejs-with-pointer-compression) -- Independent validation of ~50% savings
-- [Matteo Collina on V8 IsolateGroups](https://x.com/matteocollina/status/2023805916961800301) -- Technical background on V8 pointer compression in Node.js
-- [Snyk: Docker Security Best Practices](https://snyk.io/blog/10-docker-image-security-best-practices/) -- Industry standard for USER directive requirement
-- [Sysdig: Dockerfile Best Practices](https://sysdig.com/blog/dockerfile-best-practices/) -- USER instruction as security baseline
-- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) -- Authoritative security guidance
-- [Non-privileged containers from scratch](https://medium.com/@lizrice/non-privileged-containers-based-on-the-scratch-image-a80105d6d341) -- Edge case: USER in scratch images
-- [dockerfile-ast npm](https://www.npmjs.com/package/dockerfile-ast) -- Parser library API reference
-- [dockerfile-ast GitHub](https://github.com/rcjsuen/dockerfile-ast) -- TypeScript type definitions for API methods
-- [Docker Hub: node official image](https://hub.docker.com/_/node/) -- Official Node.js image tag variants
+- [actionlint - Static checker for GitHub Actions](https://rhysd.github.io/actionlint/) -- Official playground and documentation
+- [actionlint GitHub repository](https://github.com/rhysd/actionlint) -- Source code, checks.md, playground WASM architecture
+- [actionlint Go package documentation](https://pkg.go.dev/github.com/rhysd/actionlint) -- Complete list of 18 rule kinds and rule types
+- [actionlint playground TypeScript types](https://github.com/rhysd/actionlint/blob/main/playground/lib.d.ts) -- WASM interface: `ActionlintError { kind, message, line, column }`
+- [xing/actionlint](https://github.com/xing/actionlint) -- Community WASM packaging with npm distribution
+- [SchemaStore github-workflow.json](https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-workflow.json) -- ~97KB JSON Schema for structural validation
+- [action-validator](https://github.com/mpalmer/action-validator) -- SchemaStore-based CLI validator
+- [Elysiate GitHub Actions Validator](https://www.elysiate.com/tools/github-actions-validator) -- Basic browser-based structural checker
+- [FOSSA GitHub Actions Visualizer](https://fossa.com/resources/devops-tools/github-actions-visualizer/) -- Job dependency graph visualization
+- [zizmor](https://github.com/zizmorcore/zizmor) -- Rust-based security-focused GitHub Actions linter (CLI only)
+- [GitHub Docs: Script Injections](https://docs.github.com/en/actions/concepts/security/script-injections) -- Untrusted input contexts (head_ref, title, body, etc.)
+- [GitHub Actions Security Best Practices (StepSecurity)](https://www.stepsecurity.io/blog/github-actions-security-best-practices) -- Security hardening checklist
+- [GitHub Actions Security Cheat Sheet (GitGuardian)](https://blog.gitguardian.com/github-actions-security-cheat-sheet/) -- Comprehensive security reference
+- [GitHub Docs: Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) -- Official workflow YAML reference
+- [GitHub Docs: Using the visualization graph](https://docs.github.com/actions/managing-workflow-runs/using-the-visualization-graph) -- GitHub's built-in workflow run visualization
+- [tj-actions/changed-files supply chain attack](https://www.wiz.io/blog/github-actions-security-guide) -- 2025 incident demonstrating importance of action pinning
 
 ---
-*Feature research for: Dockerfile Analyzer rule expansion (PG011 + PG012)*
-*Researched: 2026-03-02*
+*Feature research for: GitHub Actions Workflow Validator*
+*Researched: 2026-03-04*
