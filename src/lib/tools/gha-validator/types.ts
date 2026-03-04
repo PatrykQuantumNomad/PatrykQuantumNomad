@@ -2,7 +2,8 @@
 export type GhaSeverity = 'error' | 'warning' | 'info';
 
 // GHA rule categories for grouping and scoring
-// Weights: Security 30%, Semantic 25%, Best Practice 15%, Schema 15%, Style 10%, Actionlint 5%
+// Weights: Security 35%, Semantic 20%, Best Practice 20%, Schema 15%, Style 10%
+// Note: 'actionlint' category excluded from scoring (0% weight)
 export type GhaCategory =
   | 'schema'
   | 'security'
@@ -83,4 +84,31 @@ export interface GhaRuleContext {
   rawText: string;
   lineCounter: import('yaml').LineCounter;
   json: Record<string, unknown>;
+}
+
+// ── Phase 78: Scoring types ─────────────────────────────────────
+
+/** A single point deduction within a category */
+export interface GhaScoreDeduction {
+  ruleId: string;
+  category: GhaCategory;
+  severity: GhaSeverity;
+  points: number;
+  line: number;
+}
+
+/** Per-category score with weight and deduction breakdown */
+export interface GhaCategoryScore {
+  category: string;
+  score: number; // 0-100
+  weight: number; // percentage weight
+  deductions: GhaScoreDeduction[];
+}
+
+/** Overall score result with grade and per-category breakdown */
+export interface GhaScoreResult {
+  overall: number; // 0-100
+  grade: string; // "A+" through "F"
+  categories: GhaCategoryScore[];
+  deductions: GhaScoreDeduction[];
 }
