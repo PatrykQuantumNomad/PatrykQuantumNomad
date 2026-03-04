@@ -51,3 +51,36 @@ export type WorkerOutMessage =
 
 // Main thread -> Worker message types
 export type WorkerInMessage = { type: 'analyze'; payload: string };
+
+// ── Phase 76: Rule engine types ──────────────────────────────────
+
+/** Unified violation format for all passes (ENGINE-04) */
+export interface GhaUnifiedViolation {
+  ruleId: string;
+  message: string;
+  line: number; // 1-based
+  column: number; // 1-based
+  severity: GhaSeverity;
+  category: GhaCategory;
+  endLine?: number;
+  endColumn?: number;
+}
+
+/** Custom lint rule interface (follows compose-validator ComposeLintRule pattern) */
+export interface GhaLintRule {
+  id: string;
+  title: string;
+  severity: GhaSeverity;
+  category: GhaCategory;
+  explanation: string;
+  fix: GhaRuleFix;
+  check(ctx: GhaRuleContext): GhaRuleViolation[];
+}
+
+/** Context passed to each custom rule's check() method */
+export interface GhaRuleContext {
+  doc: import('yaml').Document;
+  rawText: string;
+  lineCounter: import('yaml').LineCounter;
+  json: Record<string, unknown>;
+}
