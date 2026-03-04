@@ -24,10 +24,10 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Two-Pass Engine
 
-- [ ] **ENGINE-01**: Two-pass architecture: Pass 1 (schema + custom rules, synchronous) and Pass 2 (actionlint WASM, async via Worker)
-- [ ] **ENGINE-02**: Diagnostic deduplication merges findings from both passes, suppressing duplicates on `(line, column)` pairs
-- [ ] **ENGINE-03**: Results from Pass 1 displayed immediately while WASM loads and runs Pass 2
-- [ ] **ENGINE-04**: All violations mapped to unified format with `{ruleId, message, line, column, severity, category}`
+- [x] **ENGINE-01**: Two-pass architecture: Pass 1 (schema + custom rules, synchronous) and Pass 2 (actionlint WASM, async via Worker)
+- [x] **ENGINE-02**: Diagnostic deduplication merges findings from both passes, suppressing duplicates on `(line, column)` pairs
+- [x] **ENGINE-03**: Results from Pass 1 displayed immediately while WASM loads and runs Pass 2
+- [x] **ENGINE-04**: All violations mapped to unified format with `{ruleId, message, line, column, severity, category}`
 
 ### Security Rules
 
@@ -166,10 +166,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | SCHEMA-02 | Phase 75 | Complete |
 | SCHEMA-03 | Phase 75 | Complete |
 | SCHEMA-04 | Phase 75 | Complete |
-| ENGINE-01 | Phase 76 | Pending |
-| ENGINE-02 | Phase 76 | Pending |
-| ENGINE-03 | Phase 76 | Pending |
-| ENGINE-04 | Phase 76 | Pending |
+| ENGINE-01 | Phase 76 | Complete |
+| ENGINE-02 | Phase 76 | Complete |
+| ENGINE-03 | Phase 76 | Complete |
+| ENGINE-04 | Phase 76 | Complete |
 | SEC-01 | Phase 76 | Pending |
 | SEC-02 | Phase 76 | Pending |
 | SEC-03 | Phase 76 | Pending |
