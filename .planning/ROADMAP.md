@@ -79,11 +79,12 @@ Plans:
   3. Best practice rules detect missing timeout-minutes, missing concurrency groups, unnamed steps, duplicate step names, empty env blocks, missing conditionals, outdated actions, and missing continue-on-error
   4. Style rules detect non-alphabetical job ordering, inconsistent quoting, long step names, and missing workflow name
   5. All rules include enriched explanations and fix suggestions beyond raw actionlint messages
-**Plans**: TBD
+**Plans**: 3 plans (3 waves, sequential)
 
 Plans:
-- [ ] 77-01: TBD
-- [ ] 77-02: TBD
+- [ ] 77-01-PLAN.md — Actionlint semantic enrichment (18 GA-L* metadata rules, engine mapping completion, AST helpers)
+- [ ] 77-02-PLAN.md — Best practice rules GA-B001 through GA-B008
+- [ ] 77-03-PLAN.md — Style rules GA-F001 through GA-F004, master registry integration, comprehensive sample workflow
 
 ### Phase 78: Scoring, Editor, and Results Panel
 **Goal**: Users can paste a GitHub Actions workflow into a CodeMirror editor, trigger analysis, and see a scored results panel with inline annotations, category breakdowns, and violation details
@@ -154,7 +155,7 @@ Phases execute in numeric order: 75 -> 76 -> 77 -> 78 -> 79 -> 80 -> 81
 |-------|----------------|--------|-----------|
 | 75. WASM Infrastructure and Schema Foundation | 2/2 | Complete   | 2026-03-04 |
 | 76. Two-Pass Engine and Security Rules | 3/3 | Complete   | 2026-03-04 |
-| 77. Semantic, Best Practice, and Style Rules | 0/2 | Not started | - |
+| 77. Semantic, Best Practice, and Style Rules | 0/3 | Not started | - |
 | 78. Scoring, Editor, and Results Panel | 0/2 | Not started | - |
 | 79. Workflow Graph Visualization | 0/1 | Not started | - |
 | 80. Sharing and Rule Documentation Pages | 0/2 | Not started | - |
