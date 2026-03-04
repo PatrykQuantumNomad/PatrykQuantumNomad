@@ -125,9 +125,9 @@ Requirements for the GitHub Actions Workflow Validator. Each maps to roadmap pha
 
 ### Blog Post
 
-- [ ] **BLOG-01**: Companion blog post covering GitHub Actions best practices and tool architecture
-- [ ] **BLOG-02**: Cross-links between blog post and tool page (bidirectional)
-- [ ] **BLOG-03**: Blog post links to individual rule documentation pages
+- [x] **BLOG-01**: Companion blog post covering GitHub Actions best practices and tool architecture
+- [x] **BLOG-02**: Cross-links between blog post and tool page (bidirectional)
+- [x] **BLOG-03**: Blog post links to individual rule documentation pages
 
 ## v2 Requirements
 
@@ -234,9 +234,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | SITE-08 | Phase 81 | Complete |
 | SITE-09 | Phase 81 | Complete |
 | SITE-10 | Phase 81 | Complete |
-| BLOG-01 | Phase 81 | Pending |
-| BLOG-02 | Phase 81 | Pending |
-| BLOG-03 | Phase 81 | Pending |
+| BLOG-01 | Phase 81 | Complete |
+| BLOG-02 | Phase 81 | Complete |
+| BLOG-03 | Phase 81 | Complete |
 
 **Coverage:**
 - v1.13 requirements: 80 total
