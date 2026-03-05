@@ -18,11 +18,11 @@ Requirements for DevOps Skills Publishing milestone. Each maps to roadmap phases
 
 ### Discovery & Verification
 
-- [ ] **DSC-01**: `npx skills add --list PatrykQuantumNomad/PatrykQuantumNomad` discovers exactly 4 skills
-- [ ] **DSC-02**: Each skill installable individually via `--skill` flag
-- [ ] **DSC-03**: All 4 SKILL.md frontmatter passes name validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`
-- [ ] **DSC-04**: Directory name matches frontmatter `name` field for all 4 skills
-- [ ] **DSC-05**: First install seeded via `npx skills add` to trigger skills.sh telemetry listing
+- [x] **DSC-01**: `npx skills add --list PatrykQuantumNomad/PatrykQuantumNomad` discovers exactly 4 skills
+- [x] **DSC-02**: Each skill installable individually via `--skill` flag
+- [x] **DSC-03**: All 4 SKILL.md frontmatter passes name validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`
+- [x] **DSC-04**: Directory name matches frontmatter `name` field for all 4 skills
+- [x] **DSC-05**: First install seeded via `npx skills add` to trigger skills.sh telemetry listing
 
 ### Documentation
 
@@ -59,11 +59,11 @@ None currently deferred.
 | DIR-04 | Phase 82 | Complete |
 | DIR-05 | Phase 82 | Complete |
 | DIR-06 | Phase 82 | Complete |
-| DSC-01 | Phase 83 | Pending |
-| DSC-02 | Phase 83 | Pending |
-| DSC-03 | Phase 83 | Pending |
-| DSC-04 | Phase 83 | Pending |
-| DSC-05 | Phase 83 | Pending |
+| DSC-01 | Phase 83 | Complete |
+| DSC-02 | Phase 83 | Complete |
+| DSC-03 | Phase 83 | Complete |
+| DSC-04 | Phase 83 | Complete |
+| DSC-05 | Phase 83 | Complete |
 | DOC-01 | Phase 84 | Pending |
 | DOC-02 | Phase 84 | Pending |
 | DOC-03 | Phase 84 | Pending |
@@ -77,4 +77,4 @@ None currently deferred.
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 after Phase 82 completion*
+*Last updated: 2026-03-05 after Phase 83 completion*

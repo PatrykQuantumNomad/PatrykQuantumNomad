@@ -7,3 +7,8 @@ handbook/
 
 # actionlint WASM binary (downloaded by scripts/download-actionlint-wasm.mjs)
 public/wasm/
+
+# skills CLI install artifacts (created by npx skills add)
+.agents/
+.claude/skills/
+skills-lock.json
