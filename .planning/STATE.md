@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.13
-milestone_name: GitHub Actions Workflow Validator
-status: milestone_complete
-stopped_at: v1.13 milestone archived
-last_updated: "2026-03-04T21:00:00Z"
-last_activity: 2026-03-04 -- v1.13 milestone complete, archived to milestones/
+milestone: v1.14
+milestone_name: DevOps Skills Publishing
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-05T00:00:00Z"
+last_activity: 2026-03-05 -- Milestone v1.14 started
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 19
-  completed_plans: 19
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-04)
+See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.14 DevOps Skills Publishing
 
 ## Current Position
 
-Phase: Next milestone not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-04 — v1.13 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-05 — Milestone v1.14 started
 
 Progress: v1.13 shipped. 14 milestones complete (81 phases, 184 plans, 721 requirements).
 
@@ -35,7 +35,7 @@ Progress: v1.13 shipped. 14 milestones complete (81 phases, 184 plans, 721 requi
 
 **Velocity:**
 - Total plans completed: 184 (across 14 milestones)
-- v1.13 plans completed: 19
+- v1.14 plans completed: 0
 
 **Cumulative Stats:**
 
@@ -80,7 +80,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T21:00:00Z
-Stopped at: v1.13 milestone archived
+Last session: 2026-03-05T00:00:00Z
+Stopped at: Defining requirements for v1.14
 Resume file: None
-Next: Start next milestone via /gsd:new-milestone
+Next: Define requirements, create roadmap

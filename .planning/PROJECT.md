@@ -241,7 +241,15 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — planning next milestone)
+## Current Milestone: v1.14 DevOps Skills Publishing
+
+**Goal:** Package and publish the 4 DevOps validator skills (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator) for the skills.sh open agent skills ecosystem.
+
+**Target features:**
+- Skills directory structure at repo root for skills.sh CLI discovery
+- Profile README update with install commands and benchmark highlights
+- Verified installation via `npx skills add PatrykQuantumNomad/PatrykQuantumNomad`
+- Skills listed and discoverable on skills.sh
 
 ### Out of Scope
 
@@ -270,7 +278,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.13 GitHub Actions Workflow Validator on top of 12 previous milestones (v1.0 through v1.12).
+Shipped v1.13 GitHub Actions Workflow Validator on top of 12 previous milestones (v1.0 through v1.12). Now publishing 4 DevOps skills to skills.sh.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 requirements delivered (721 total). ~1010+ pages total. Lighthouse 90+ on mobile.
@@ -397,4 +405,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-04 after v1.13 milestone*
+*Last updated: 2026-03-05 after v1.14 milestone started*
