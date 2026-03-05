@@ -26,11 +26,11 @@ Requirements for DevOps Skills Publishing milestone. Each maps to roadmap phases
 
 ### Documentation
 
-- [ ] **DOC-01**: README.md includes Agent Skills section with `npx skills add` install command
-- [ ] **DOC-02**: README.md lists all 4 skills with descriptions and individual install commands
-- [ ] **DOC-03**: README.md includes benchmark highlight (98.8% pass rate, +42.4% improvement)
-- [ ] **DOC-04**: GitHub Actions Workflow Validator added to README Interactive Tools table
-- [ ] **DOC-05**: All repo references to `public/skills/` updated to reflect new structure
+- [x] **DOC-01**: README.md includes Agent Skills section with `npx skills add` install command
+- [x] **DOC-02**: README.md lists all 4 skills with descriptions and individual install commands
+- [x] **DOC-03**: README.md includes benchmark highlight (98.8% pass rate, +42.4% improvement)
+- [x] **DOC-04**: GitHub Actions Workflow Validator added to README Interactive Tools table
+- [x] **DOC-05**: All repo references to `public/skills/` updated to reflect new structure
 
 ## Future Requirements
 
@@ -64,11 +64,11 @@ None currently deferred.
 | DSC-03 | Phase 83 | Complete |
 | DSC-04 | Phase 83 | Complete |
 | DSC-05 | Phase 83 | Complete |
-| DOC-01 | Phase 84 | Pending |
-| DOC-02 | Phase 84 | Pending |
-| DOC-03 | Phase 84 | Pending |
-| DOC-04 | Phase 84 | Pending |
-| DOC-05 | Phase 84 | Pending |
+| DOC-01 | Phase 84 | Complete |
+| DOC-02 | Phase 84 | Complete |
+| DOC-03 | Phase 84 | Complete |
+| DOC-04 | Phase 84 | Complete |
+| DOC-05 | Phase 84 | Complete |
 
 **Coverage:**
 - v1.14 requirements: 16 total

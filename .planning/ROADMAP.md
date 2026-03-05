@@ -38,7 +38,7 @@ See MILESTONES.md for completed milestone details.
 
 - [x] **Phase 82: Directory Restructure** - Move skills to repo root with symlink bridge for Astro serving (shipped 2026-03-05)
 - [x] **Phase 83: Discovery Verification** - Verify CLI discovery, individual install, and seed skills.sh listing (shipped 2026-03-05)
-- [ ] **Phase 84: Documentation** - Update README with install commands, benchmark highlights, and tool references
+- [x] **Phase 84: Documentation** - Update README with install commands, benchmark highlights, and tool references (completed 2026-03-05)
 
 ## Phase Details
 
@@ -95,4 +95,4 @@ Phases execute in numeric order: 82 → 83 → 84
 |-------|-----------|----------------|--------|-----------|
 | 82. Directory Restructure | v1.14 | 1/1 | Complete | 2026-03-05 |
 | 83. Discovery Verification | v1.14 | 1/1 | Complete | 2026-03-05 |
-| 84. Documentation | v1.14 | 0/1 | Not started | - |
+| 84. Documentation | 1/1 | Complete   | 2026-03-05 | - |
