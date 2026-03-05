@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: DevOps Skills Publishing
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
 last_updated: "2026-03-05T00:00:00Z"
-last_activity: 2026-03-05 -- Milestone v1.14 started
+last_activity: 2026-03-05 -- Roadmap created for v1.14
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.14 DevOps Skills Publishing
+**Current focus:** Phase 82 - Directory Restructure (v1.14 DevOps Skills Publishing)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-05 — Milestone v1.14 started
+Phase: 82 (1 of 3 in v1.14) (Directory Restructure)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-03-05 — Roadmap created for v1.14
 
-Progress: v1.13 shipped. 14 milestones complete (81 phases, 184 plans, 721 requirements).
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -62,6 +62,12 @@ Progress: v1.13 shipped. 14 milestones complete (81 phases, 184 plans, 721 requi
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
+Recent decisions affecting current work:
+
+- [v1.14 Roadmap]: Single atomic commit for directory restructure (Phase 82) to avoid broken intermediate state
+- [v1.14 Roadmap]: Symlink bridge pattern (`public/skills` -> `../skills`) for dual-consumer architecture
+- [v1.14 Roadmap]: Discovery verification (Phase 83) requires push to remote before CLI can discover skills
+- [v1.14 Roadmap]: Seed install (DSC-05) must happen after push to trigger skills.sh telemetry listing
 
 ### Pending Todos
 
@@ -69,7 +75,7 @@ None.
 
 ### Blockers/Concerns
 
-- [SEO]: Bulk publishing 90+ template-similar pages risks SpamBrain classification (monitor post-deploy)
+- DSC-05 (seed install) requires Phase 82 changes pushed to remote first -- Phase 83 cannot run locally only
 
 ### Quick Tasks Completed
 
@@ -80,7 +86,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T00:00:00Z
-Stopped at: Defining requirements for v1.14
+Last session: 2026-03-05
+Stopped at: Roadmap created for v1.14 milestone
 Resume file: None
-Next: Define requirements, create roadmap
+Next: `/gsd:plan-phase 82`

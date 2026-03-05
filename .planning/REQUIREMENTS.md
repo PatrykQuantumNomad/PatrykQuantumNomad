@@ -53,28 +53,28 @@ None currently deferred.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIR-01 | Pending | Pending |
-| DIR-02 | Pending | Pending |
-| DIR-03 | Pending | Pending |
-| DIR-04 | Pending | Pending |
-| DIR-05 | Pending | Pending |
-| DIR-06 | Pending | Pending |
-| DSC-01 | Pending | Pending |
-| DSC-02 | Pending | Pending |
-| DSC-03 | Pending | Pending |
-| DSC-04 | Pending | Pending |
-| DSC-05 | Pending | Pending |
-| DOC-01 | Pending | Pending |
-| DOC-02 | Pending | Pending |
-| DOC-03 | Pending | Pending |
-| DOC-04 | Pending | Pending |
-| DOC-05 | Pending | Pending |
+| DIR-01 | Phase 82 | Pending |
+| DIR-02 | Phase 82 | Pending |
+| DIR-03 | Phase 82 | Pending |
+| DIR-04 | Phase 82 | Pending |
+| DIR-05 | Phase 82 | Pending |
+| DIR-06 | Phase 82 | Pending |
+| DSC-01 | Phase 83 | Pending |
+| DSC-02 | Phase 83 | Pending |
+| DSC-03 | Phase 83 | Pending |
+| DSC-04 | Phase 83 | Pending |
+| DSC-05 | Phase 83 | Pending |
+| DOC-01 | Phase 84 | Pending |
+| DOC-02 | Phase 84 | Pending |
+| DOC-03 | Phase 84 | Pending |
+| DOC-04 | Phase 84 | Pending |
+| DOC-05 | Phase 84 | Pending |
 
 **Coverage:**
 - v1.14 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 after initial definition*
+*Last updated: 2026-03-05 after roadmap creation*
