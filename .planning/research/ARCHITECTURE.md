@@ -1,781 +1,423 @@
-# Architecture Research
+# Architecture Research: skills.sh Publishing for DevOps Skills
 
-**Domain:** GitHub Actions Workflow Validator (WASM-based browser tool)
-**Researched:** 2026-03-04
-**Confidence:** HIGH (verified against actionlint source, Vite docs, existing codebase patterns)
+**Domain:** AI Agent Skill publishing from a GitHub profile repo that also serves an Astro static site
+**Researched:** 2026-03-05
+**Confidence:** HIGH
 
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Astro Page Layer                                    │
-│  ┌────────────────────────────┐  ┌────────────────────────────────────────┐ │
-│  │  GhaValidatorPage.astro    │  │  /tools/gha-validator/rules/[code]    │ │
-│  │  (client:only="react")     │  │  (getStaticPaths, build-time)         │ │
-│  └────────────┬───────────────┘  └────────────────────────────────────────┘ │
-├───────────────┼─────────────────────────────────────────────────────────────┤
-│               │              React Island Layer                             │
-│  ┌────────────▼───────────────┐  ┌────────────────────────────────────────┐ │
-│  │  GhaValidator.tsx          │  │  GhaResultsPanel.tsx                   │ │
-│  │  (EditorPanel + Results)   │  │  (Score, Categories, Violations,      │ │
-│  │                            │  │   Graph tab with React Flow)           │ │
-│  └────────────┬───────────────┘  └────────────┬───────────────────────────┘ │
-├───────────────┼───────────────────────────────┼─────────────────────────────┤
-│               │              Nanostore Bridge                               │
-│  ┌────────────▼───────────────────────────────▼───────────────────────────┐ │
-│  │  ghaValidatorStore.ts (atom<GhaAnalysisResult | null>)                │ │
-│  │  ghaAnalyzing, ghaEditorViewRef, ghaResultsStale                      │ │
-│  └────────────┬───────────────────────────────────────────────────────────┘ │
-├───────────────┼─────────────────────────────────────────────────────────────┤
-│               │              Engine Layer (Main Thread)                     │
-│  ┌────────────▼───────────────┐  ┌────────────────────────────────────────┐ │
-│  │  engine.ts                 │  │  scorer.ts                             │ │
-│  │  (Two-pass orchestrator)   │  │  (Category-weighted scoring)           │ │
-│  │  Pass 1: Schema (ajv)     │  │                                        │ │
-│  │  Pass 2: WASM (Worker)    │  │  graph-data-extractor.ts               │ │
-│  └──────┬──────────┬─────────┘  │  (triggers -> jobs -> steps)           │ │
-│         │          │             └────────────────────────────────────────┘ │
-├─────────┼──────────┼────────────────────────────────────────────────────────┤
-│         │          │             Worker Layer                                │
-│  ┌──────▼──────┐  ┌▼─────────────────────────────────────────────────────┐ │
-│  │ ajv schema  │  │  actionlint.worker.ts                                │ │
-│  │ validator   │  │  ┌─────────────────────────────────────────────────┐  │ │
-│  │ (sync,      │  │  │  wasm_exec.js (Go runtime bridge)              │  │ │
-│  │  main       │  │  │  actionlint.wasm (Go-compiled WASM binary)     │  │ │
-│  │  thread)    │  │  │  window.runActionlint -> postMessage results   │  │ │
-│  └─────────────┘  │  └─────────────────────────────────────────────────┘  │ │
-│                    └──────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                         Build Pipeline Layer                                │
-│  ┌──────────────────────────────────────┐  ┌──────────────────────────────┐ │
-│  │  Pre-built actionlint.wasm           │  │  public/wasm/ static assets │ │
-│  │  (downloaded from actionlint         │  │  served by Astro/Vite       │ │
-│  │   playground deployment)             │  │  No Vite WASM plugin needed │ │
-│  └──────────────────────────────────────┘  └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
+PatrykQuantumNomad/PatrykQuantumNomad (GitHub Profile Repo)
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Source of Truth                              │
+│                                                                     │
+│  skills/                          <- skills.sh CLI discovers here   │
+│  ├── compose-validator/              (Tier 2: priority directory)   │
+│  │   ├── SKILL.md                 <- skill definition               │
+│  │   └── hooks/validate-compose.sh                                  │
+│  ├── dockerfile-analyzer/                                           │
+│  │   ├── SKILL.md                                                   │
+│  │   └── hooks/validate-dockerfile.sh                               │
+│  ├── gha-validator/                                                 │
+│  │   ├── SKILL.md                                                   │
+│  │   └── hooks/validate-gha.sh                                      │
+│  └── k8s-analyzer/                                                  │
+│      ├── SKILL.md                                                   │
+│      └── hooks/validate-k8s.sh                                      │
+│                                                                     │
+│  public/skills -> ../skills       <- symlink for Astro serving      │
+│                                                                     │
+│  src/pages/tools/*/index.astro    <- interactive tool pages         │
+│  README.md                        <- GitHub profile page            │
+└─────────────────────────────────────────────────────────────────────┘
+         │                                    │
+         ▼                                    ▼
+┌─────────────────────┐          ┌──────────────────────┐
+│     skills.sh        │          │   GitHub Pages        │
+│  (CLI discovery)     │          │  patrykgolabek.dev    │
+│                      │          │                       │
+│ npx skills add       │          │ /skills/*/SKILL.md    │
+│ PatrykQuantumNomad/  │          │ (static downloads)    │
+│ PatrykQuantumNomad   │          │                       │
+│                      │          │ /tools/*/             │
+│ Scans: skills/       │          │ (interactive tools)   │
+│ (Tier 2 priority)    │          │                       │
+└─────────────────────┘          └──────────────────────┘
 ```
 
-### Component Responsibilities
+## The Core Question: `public/skills/` vs `skills/` at Root
 
-| Component | Responsibility | New vs Modified | Integration Point |
-|-----------|----------------|-----------------|-------------------|
-| `GhaValidator.tsx` | Top-level React island, layout (EditorPanel + ResultsPanel) | NEW | `client:only="react"` on Astro page |
-| `GhaEditorPanel.tsx` | CodeMirror 6 YAML editor, Analyze button, keyboard shortcut | NEW (follows K8sEditorPanel pattern) | Nanostore bridge |
-| `use-codemirror-gha.ts` | CodeMirror hook with YAML lang, localStorage, stale detection | NEW (follows use-codemirror-k8s.ts pattern) | Editor theme reuse |
-| `GhaResultsPanel.tsx` | Tabbed results (Score, Categories, Violations, Graph) | NEW (follows K8sResultsPanel pattern) | Nanostore bridge |
-| `ghaValidatorStore.ts` | Nanostores atoms for result, analyzing, editorViewRef, stale | NEW (follows k8sAnalyzerStore.ts pattern) | Cross-component state |
-| `engine.ts` | Two-pass orchestrator: schema pass + WASM pass, merge results | NEW (novel two-pass pattern) | Called from EditorPanel |
-| `schema-validator.ts` | ajv with SchemaStore github-workflow.json schema | NEW (follows compose schema-validator.ts) | Pass 1 of engine |
-| `actionlint.worker.ts` | Web Worker loading wasm_exec.js + actionlint.wasm | NEW (first Worker in codebase) | Pass 2 of engine |
-| `actionlint-bridge.ts` | Promise wrapper around Worker postMessage/onmessage | NEW | Engine calls this |
-| `scorer.ts` | Category-weighted scoring with diminishing returns | NEW (reuses formula from existing tools) | Engine output |
-| `graph-data-extractor.ts` | Parse workflow YAML into trigger/job/step graph | NEW (different graph model than K8s/Compose) | Results Graph tab |
-| `rules/index.ts` | Rule metadata registry mapping actionlint kinds to docs | NEW | Rule pages + scoring |
-| `badge-generator.ts` | SVG score badge for PNG download | NEW (follows existing pattern exactly) | Results panel |
-| `url-state.ts` | lz-string encoding with `#gha=` prefix | NEW (follows existing pattern) | Shareable URLs |
-| `sample-workflow.ts` | Pre-loaded sample with deliberate issues | NEW | Editor default content |
-| `astro.config.mjs` | No changes needed for WASM (static asset approach) | UNCHANGED | N/A |
-| Rule doc pages `[code].astro` | getStaticPaths for per-rule SEO pages | NEW (follows K8s pattern) | Site integration |
-| Editor theme (`editor-theme.ts`) | Shared dark theme, syntax highlighting, gutter markers | EXISTING (no changes) | Import reuse |
-| `highlight-line.ts` | Click-to-navigate line highlight field | EXISTING (no changes) | Import reuse |
+### Recommendation: Move skills to `skills/` at root, symlink from `public/skills/`
+
+**Verdict:** Move to root `skills/`. Both Astro static serving and skills.sh CLI discovery coexist via a single symlink.
+
+### Why Move
+
+The skills.sh CLI (powered by [vercel-labs/skills](https://github.com/vercel-labs/skills)) uses a three-tier search strategy when scanning a GitHub repository:
+
+1. **Tier 1 - Direct check:** Looks for `SKILL.md` at the repo root
+2. **Tier 2 - Priority directories:** Scans the `skills/` subdirectory specifically
+3. **Tier 3 - Recursive fallback:** Recursively searches the entire repo
+
+Skills in `public/skills/` would only be found via Tier 3 (recursive fallback). This works but is slower, less predictable, and signals unfamiliarity with the convention. Placing skills in `skills/` at root puts them in Tier 2 -- the standard, expected location that matches the convention used by [anthropics/skills](https://github.com/anthropics/skills), [vercel-labs/skills](https://github.com/vercel-labs/skills), and [microsoft/skills](https://github.com/microsoft/skills).
+
+**Confidence:** HIGH -- verified via [DeepWiki analysis of vercel-labs/skills](https://deepwiki.com/vercel-labs/skills) documenting the `discoverSkills()` function's three-tier strategy, and [Vercel KB guide](https://vercel.com/kb/guide/agent-skills-creating-installing-and-sharing-reusable-agent-context) confirming `skills/` as the conventional directory.
+
+### Why Astro Still Works
+
+Astro's `public/` directory copies contents verbatim to the build output. A symlink inside `public/` pointing to the root-level `skills/` directory is resolved during the Astro build process -- the skill files end up in `dist/skills/` exactly as before. The static URLs like `patrykgolabek.dev/skills/gha-validator/SKILL.md` continue to work unchanged.
+
+**Confidence:** HIGH -- verified through [Astro project structure docs](https://docs.astro.build/en/basics/project-structure/) that `public/` copies files as-is, and symlinks are standard filesystem operations resolved by Node.js during Astro's build.
+
+## Component Responsibilities
+
+| Component | Responsibility | Current State | Change Required |
+|-----------|---------------|---------------|-----------------|
+| `skills/` (root) | Source of truth for all 4 SKILL.md files + hooks | Does not exist | **NEW** -- move from `public/skills/` |
+| `public/skills` | Astro static serving gateway | Contains skills directly | **MODIFY** -- replace directory with symlink to `../skills/` |
+| `public/benchmarks/` | Benchmark data + workspace eval results | Does not exist | **NEW** -- moved from `public/skills/` |
+| `src/pages/tools/*/` | Interactive web tool pages | Links to `/skills/*/SKILL.md` for download | No change needed |
+| `.github/workflows/deploy.yml` | Astro build + GitHub Pages deploy | Uses `withastro/action@v3` | No change needed |
+| `README.md` | GitHub profile page | No skills.sh references | **MODIFY** -- add `npx skills add` install command |
 
 ## Recommended Project Structure
 
 ```
-src/
-├── lib/tools/gha-validator/
-│   ├── engine.ts                    # Two-pass orchestrator
-│   ├── schema-validator.ts          # ajv + SchemaStore schema (Pass 1)
-│   ├── actionlint-bridge.ts         # Worker message wrapper (Pass 2)
-│   ├── actionlint.worker.ts         # Web Worker (loads wasm_exec.js + .wasm)
-│   ├── types.ts                     # All TypeScript interfaces
-│   ├── scorer.ts                    # Category-weighted scoring
-│   ├── graph-data-extractor.ts      # Workflow graph: triggers -> jobs -> steps
-│   ├── sample-workflow.ts           # Pre-loaded sample YAML
-│   ├── badge-generator.ts           # SVG score badge -> PNG
-│   ├── url-state.ts                 # lz-string #gha= encoding
-│   ├── use-codemirror-gha.ts        # CodeMirror 6 React hook
-│   └── rules/
-│       ├── index.ts                 # allGhaRules + allDocumentedGhaRules
-│       ├── related.ts               # Related rule mappings
-│       ├── rule-metadata.ts         # Actionlint kind -> rule doc metadata
-│       ├── schema/                  # Schema rule metadata (ajv-driven)
-│       │   └── index.ts
-│       └── actionlint/              # Actionlint rule metadata (WASM-driven)
-│           └── index.ts
-├── components/tools/
-│   ├── GhaValidator.tsx             # Top-level layout component
-│   ├── GhaEditorPanel.tsx           # CodeMirror editor + Analyze button
-│   └── gha-results/
-│       ├── GhaResultsPanel.tsx      # Tabbed results container
-│       ├── GhaCategoryBreakdown.tsx  # Per-category scores
-│       ├── GhaViolationList.tsx      # Grouped violations
-│       ├── GhaEmptyState.tsx         # Clean workflow state
-│       ├── GhaShareActions.tsx       # Share/download actions
-│       ├── GhaPromptGenerator.tsx    # AI prompt export
-│       ├── GhaWorkflowGraph.tsx      # React Flow workflow DAG
-│       ├── GhaJobNode.tsx            # Custom React Flow node (job)
-│       ├── GhaTriggerNode.tsx        # Custom React Flow node (trigger)
-│       ├── GhaStepNode.tsx           # Custom React Flow node (step)
-│       └── GhaGraphSkeleton.tsx      # Loading skeleton
-├── stores/
-│   └── ghaValidatorStore.ts         # Nanostores atoms
-├── pages/tools/gha-validator/
-│   ├── index.astro                  # Main tool page
-│   └── rules/
-│       └── [code].astro             # Per-rule documentation pages
-└── public/wasm/
-    ├── actionlint.wasm              # Pre-built Go WASM binary (~2.5 MB)
-    └── wasm_exec.js                 # Go runtime bridge (~18 KB)
+PatrykQuantumNomad/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                # Astro build & deploy (unchanged)
+├── skills/                            # NEW: root-level skills directory
+│   ├── compose-validator/
+│   │   ├── SKILL.md                   # Skill definition (moved from public/)
+│   │   └── hooks/
+│   │       └── validate-compose.sh    # Shell hook (moved from public/)
+│   ├── dockerfile-analyzer/
+│   │   ├── SKILL.md
+│   │   └── hooks/
+│   │       └── validate-dockerfile.sh
+│   ├── gha-validator/
+│   │   ├── SKILL.md
+│   │   └── hooks/
+│   │       └── validate-gha.sh
+│   └── k8s-analyzer/
+│       ├── SKILL.md
+│       └── hooks/
+│           └── validate-k8s.sh
+├── public/
+│   ├── skills -> ../skills            # MODIFIED: symlink replaces directory
+│   ├── benchmarks/                    # NEW: benchmark + eval data
+│   │   ├── benchmark-all-skills.json
+│   │   ├── benchmark-all-skills.md
+│   │   ├── grading-summary.json
+│   │   ├── compose-validator-workspace/
+│   │   ├── dockerfile-analyzer-workspace/
+│   │   ├── gha-validator-workspace/
+│   │   └── k8s-analyzer-workspace/
+│   ├── images/
+│   ├── fonts/
+│   └── ...                            # other static assets (unchanged)
+├── src/
+│   ├── pages/
+│   │   ├── tools/                     # Interactive tool pages (unchanged)
+│   │   └── ...
+│   └── ...
+├── astro.config.mjs                   # Unchanged
+├── README.md                          # Add skills.sh install badge/command
+└── package.json                       # Unchanged
 ```
+
+### What NOT to Put in `skills/`
+
+The workspace and benchmark data must NOT live in the root `skills/` directory. These are Astro-served static content for the website, not part of the skill packages:
+
+| File/Directory | Current Location | New Location | Why Move |
+|---------------|-----------------|--------------|----------|
+| `benchmark-all-skills.json` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
+| `benchmark-all-skills.md` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
+| `grading-summary.json` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
+| `*-workspace/` directories | `public/skills/` | `public/benchmarks/` | Contain eval results, inflate download size |
+
+The workspace directories (`compose-validator-workspace/`, etc.) contain eval results and test fixtures. Keeping them inside `skills/` would cause problems:
+1. The CLI may attempt to treat workspace directories as skills during recursive scanning
+2. They inflate the clone size for skill consumers who just want SKILL.md + hooks
+3. They are website content (benchmark data), not agent skill content
 
 ### Structure Rationale
 
-- **`src/lib/tools/gha-validator/`:** Follows the exact pattern of `compose-validator/` and `k8s-analyzer/` -- engine, scorer, types, rules, URL state, badge generator, and CodeMirror hook all co-located.
-- **`src/components/tools/gha-results/`:** Follows the `k8s-results/` pattern with dedicated subcomponents per result tab section.
-- **`public/wasm/`:** Static assets served as-is by Astro/Vite. The WASM binary and wasm_exec.js are fetched at runtime by the Web Worker, not bundled through Vite's module system. This avoids plugin complexity entirely.
+- **`skills/` at root:** Matches the skills.sh Tier 2 convention. Every major skills repo uses `skills/` at root. This is the de facto standard.
+- **Symlink `public/skills`:** Zero-cost bridge between two consumers. One source of truth, two access paths. Git tracks symlinks natively (stored as text files pointing to target).
+- **`public/benchmarks/` separated:** Keeps the skills directory pristine for CLI consumers while preserving web-accessible benchmark data at new URLs.
 
 ## Architectural Patterns
 
-### Pattern 1: Two-Pass Validation Engine
+### Pattern 1: Symlink Bridge (Single Source of Truth)
 
-**What:** The engine runs validation in two sequential passes. Pass 1 (schema validation via ajv) runs synchronously on the main thread. Pass 2 (actionlint WASM) runs asynchronously in a Web Worker. Results from both passes are merged, deduplicated, and scored.
+**What:** Use a filesystem symlink to serve the same files through two channels (skills.sh CLI discovery + Astro static site) without duplication.
 
-**When to use:** When combining a fast structural validator (JSON Schema) with a deep semantic analyzer (actionlint WASM) that has different performance characteristics.
-
-**Trade-offs:**
-- PRO: Schema validation provides instant feedback even if WASM is still loading
-- PRO: WASM runs off-thread, no UI jank during deep analysis
-- PRO: Schema errors (missing required fields, wrong types) caught before WASM sees garbage
-- CON: Must deduplicate overlapping findings between schema and actionlint
-- CON: Two passes means slightly more total work, but Worker parallelism amortizes this
-
-**Example:**
-
-```typescript
-// engine.ts
-export async function runGhaEngine(rawText: string): Promise<GhaEngineResult> {
-  const violations: GhaRuleViolation[] = [];
-
-  // Pass 1: Schema validation (synchronous, main thread)
-  const parseResult = parseWorkflowYaml(rawText);
-  if (parseResult.parseErrors.length > 0) {
-    violations.push(...parseResult.parseErrors);
-  }
-  if (parseResult.json) {
-    const schemaViolations = validateWorkflowSchema(parseResult.json);
-    const mapped = mapSchemaErrors(
-      schemaViolations, parseResult.doc, parseResult.lineCounter
-    );
-    violations.push(...mapped);
-  }
-
-  // Pass 2: actionlint WASM (async, Web Worker)
-  const wasmViolations = await runActionlintWasm(rawText);
-  violations.push(...wasmViolations);
-
-  // Deduplicate: prefer actionlint finding when both report same line+issue
-  const deduped = deduplicateViolations(violations);
-  deduped.sort((a, b) => a.line - b.line || a.column - b.column);
-
-  return {
-    violations: deduped,
-    rulesRun: TOTAL_RULES,
-    rulesPassed: TOTAL_RULES - new Set(deduped.map(v => v.ruleId)).size,
-  };
-}
-```
-
-### Pattern 2: Web Worker WASM Bridge
-
-**What:** Go WASM cannot run on the main thread without blocking -- the Go runtime's `go.run()` call is blocking. A Web Worker isolates the Go runtime entirely. The bridge wraps the Worker postMessage/onmessage protocol in a Promise-based API.
-
-**When to use:** Any Go-compiled WASM in a browser application where UI responsiveness matters.
+**When to use:** When the same content must be discoverable by both a package manager (skills.sh scans the git repo) and a static site generator (Astro copies from `public/`).
 
 **Trade-offs:**
-- PRO: Zero UI jank during WASM execution
-- PRO: Worker lifecycle is independent of React component lifecycle
-- PRO: Can show a loading spinner while WASM initializes (~2-3 seconds first load)
-- CON: Cannot share memory with main thread (structured clone overhead)
-- CON: Worker initialization has one-time cost (fetch WASM binary, instantiate Go runtime)
-- CON: Must handle Worker not-yet-ready state gracefully
+- Pro: No file duplication, single edit point, guaranteed consistency
+- Pro: Git tracks symlinks natively (stored as a text file containing the target path)
+- Pro: GitHub Actions on Ubuntu resolves symlinks during Astro build
+- Con: Windows developers need `git config core.symlinks true` (not an issue for this project -- CI runs Ubuntu)
+- Con: Some CI environments may not resolve symlinks, but `withastro/action@v3` on `ubuntu-latest` does
 
-**Example:**
+**Implementation:**
+```bash
+# After moving skills to root
+cd /path/to/PatrykQuantumNomad
 
-```typescript
-// actionlint-bridge.ts
-let worker: Worker | null = null;
-let ready = false;
-let pendingResolve: ((errors: ActionlintError[]) => void) | null = null;
+# Create symlink (public/skills points to ../skills)
+ln -s ../skills public/skills
 
-export function initActionlintWorker(): Promise<void> {
-  return new Promise((resolve) => {
-    worker = new Worker(
-      new URL('./actionlint.worker.ts', import.meta.url),
-      { type: 'module' }
-    );
-    worker.onmessage = ({ data }) => {
-      if (data.action === 'ready') {
-        ready = true;
-        resolve();
-      } else if (data.action === 'result') {
-        pendingResolve?.(data.payload);
-        pendingResolve = null;
-      }
-    };
-  });
-}
-
-export function runActionlint(source: string): Promise<ActionlintError[]> {
-  return new Promise((resolve) => {
-    if (!worker || !ready) {
-      resolve([]); // Graceful fallback if Worker not ready
-      return;
-    }
-    pendingResolve = resolve;
-    worker.postMessage({ action: 'lint', payload: source });
-  });
-}
+# Git commits the symlink as a text file
+git add public/skills
+git status
+# modified:   public/skills (typechange from directory to symlink)
 ```
 
-```typescript
-// actionlint.worker.ts
-// Classic worker approach for Go WASM compatibility
-importScripts('/wasm/wasm_exec.js');
+### Pattern 2: Frontmatter-Only Discovery (Progressive Loading)
 
-declare const Go: any;
-const go = new Go();
+**What:** The skills.sh CLI uses progressive loading: only YAML frontmatter (`name` and `description`) is scanned during the browse phase. Full SKILL.md content loads on-demand when a user selects a skill. Supporting files (`hooks/`, `scripts/`) are accessed only during the use phase when the agent follows instructions referencing them.
 
-// Global callbacks that Go WASM will invoke
-(self as any).onCheckCompleted = (errors: any[]) => {
-  self.postMessage({ action: 'result', payload: errors });
-};
-(self as any).showError = (msg: string) => {
-  self.postMessage({ action: 'error', payload: msg });
-};
-(self as any).getYamlSource = () => currentSource;
-(self as any).dismissLoading = () => {};
-
-let currentSource = '';
-
-WebAssembly.instantiateStreaming(fetch('/wasm/actionlint.wasm'), go.importObject)
-  .then((result) => {
-    go.run(result.instance);
-    self.postMessage({ action: 'ready' });
-  });
-
-self.onmessage = ({ data }) => {
-  if (data.action === 'lint') {
-    currentSource = data.payload;
-    (self as any).runActionlint(data.payload);
-  }
-};
-```
-
-### Pattern 3: Workflow Graph Data Model (Triggers -> Jobs -> Steps)
-
-**What:** Unlike the K8s and Compose graph models (which show resource relationships), the GitHub Actions graph shows execution flow: event triggers connect to jobs, jobs have dependency edges (needs), and each job contains ordered steps. This is a fundamentally different DAG structure.
-
-**When to use:** Visualizing GitHub Actions workflow execution topology.
+**When to use:** Understanding this pattern means the existing large SKILL.md files (19-31 KB each) are perfectly fine. No need to split or truncate.
 
 **Trade-offs:**
-- PRO: Shows the actual execution order users care about
-- PRO: Highlights `needs` dependency chains and parallelism opportunities
-- PRO: Step-level detail shows action usage and script blocks
-- CON: Large workflows with many steps produce dense graphs
-- CON: Matrix strategy creates conceptual parallelism not easily shown in a flat DAG
+- Pro: Large, comprehensive SKILL.md files do not slow discovery or listing
+- Pro: The `description` field in frontmatter is the critical trigger -- it must be comprehensive enough for agents to know when to activate
+- Con: The `description` field must fit the browsing context (agents read it to decide relevance)
 
-**Example:**
-
-```typescript
-// graph-data-extractor.ts
-export type GhaNodeType = 'trigger' | 'job' | 'step';
-
-export interface GhaGraphNode {
-  id: string;
-  type: GhaNodeType;
-  label: string;
-  metadata: {
-    // Trigger: event name, filters
-    // Job: runs-on, matrix, if condition
-    // Step: uses/run, name, id
-    [key: string]: unknown;
-  };
-}
-
-export interface GhaGraphEdge {
-  sourceId: string;
-  targetId: string;
-  edgeType: 'triggers' | 'needs' | 'contains';
-  label?: string;
-}
-
-export interface GhaGraphData {
-  nodes: GhaGraphNode[];
-  edges: GhaGraphEdge[];
-}
-
-export function extractWorkflowGraph(
-  json: Record<string, unknown>
-): GhaGraphData {
-  const nodes: GhaGraphNode[] = [];
-  const edges: GhaGraphEdge[] = [];
-
-  // 1. Create trigger nodes from 'on' field
-  const on = json.on as Record<string, unknown> | string | string[];
-  const triggerEvents = normalizeTriggers(on);
-  for (const event of triggerEvents) {
-    nodes.push({
-      id: `trigger:${event}`,
-      type: 'trigger',
-      label: event,
-      metadata: {},
-    });
-  }
-
-  // 2. Create job nodes + needs edges
-  const jobs = json.jobs as Record<string, unknown>;
-  for (const [jobId, jobDef] of Object.entries(jobs)) {
-    const job = jobDef as Record<string, unknown>;
-    nodes.push({
-      id: `job:${jobId}`,
-      type: 'job',
-      label: (job.name as string) || jobId,
-      metadata: { runsOn: job['runs-on'], condition: job.if },
-    });
-
-    // Trigger -> job edges (jobs with no `needs` are triggered directly)
-    const needs = job.needs as string | string[] | undefined;
-    if (!needs) {
-      for (const event of triggerEvents) {
-        edges.push({
-          sourceId: `trigger:${event}`,
-          targetId: `job:${jobId}`,
-          edgeType: 'triggers',
-        });
-      }
-    } else {
-      const needsList = Array.isArray(needs) ? needs : [needs];
-      for (const dep of needsList) {
-        edges.push({
-          sourceId: `job:${dep}`,
-          targetId: `job:${jobId}`,
-          edgeType: 'needs',
-          label: 'needs',
-        });
-      }
-    }
-
-    // 3. Create step nodes within each job
-    const steps = job.steps as Record<string, unknown>[] | undefined;
-    if (Array.isArray(steps)) {
-      let prevStepId: string | null = null;
-      for (let i = 0; i < steps.length; i++) {
-        const step = steps[i];
-        const stepId = `step:${jobId}:${i}`;
-        nodes.push({
-          id: stepId,
-          type: 'step',
-          label: (step.name as string)
-            || (step.uses as string)
-            || `Step ${i + 1}`,
-          metadata: {
-            uses: step.uses,
-            run: step.run ? '(script)' : undefined,
-            stepIndex: i,
-          },
-        });
-
-        if (i === 0) {
-          edges.push({
-            sourceId: `job:${jobId}`,
-            targetId: stepId,
-            edgeType: 'contains',
-          });
-        }
-        if (prevStepId) {
-          edges.push({
-            sourceId: prevStepId,
-            targetId: stepId,
-            edgeType: 'contains',
-          });
-        }
-        prevStepId = stepId;
-      }
-    }
-  }
-
-  return { nodes, edges };
-}
+**Current frontmatter (already correct):**
+```yaml
+---
+name: gha-validator
+description: >
+  Analyze GitHub Actions workflow files for security vulnerabilities, semantic
+  errors, best-practice violations, schema issues, and style problems...
+---
 ```
 
-### Pattern 4: Static WASM Asset Loading (No Vite Plugin)
+### Pattern 3: Convention-Over-Configuration for Skill Layout
 
-**What:** Instead of using `vite-plugin-wasm` and `vite-plugin-top-level-await`, serve the WASM binary and wasm_exec.js as static assets from `public/wasm/`. The Web Worker fetches them via `fetch()` at runtime. This avoids Vite plugin complexity and works perfectly with Astro's static output mode.
+**What:** Each skill is a self-contained directory: `SKILL.md` at root, optional `hooks/`, `scripts/`, `templates/`, `resources/` subdirectories. The directory name must match the frontmatter `name` field (lowercase, hyphens allowed, no uppercase).
 
-**When to use:** When WASM is loaded in a Web Worker (not imported as an ES module in application code), and the project uses static site generation.
+**When to use:** Always follow this convention for skills.sh compatibility.
 
-**Trade-offs:**
-- PRO: Zero Vite plugin configuration -- no `vite-plugin-wasm`, no `vite-plugin-top-level-await`
-- PRO: Static assets are cache-friendly (immutable hashing via manual versioned filenames)
-- PRO: Works with any Vite version without plugin compatibility concerns
-- PRO: Simpler mental model -- Worker is self-contained
-- CON: No Vite-managed content hashing on the WASM binary (use manual versioning)
-- CON: WASM binary must be committed to repo or downloaded in CI
+**Current skill structure (already correct -- no changes needed within individual skills):**
+```
+gha-validator/          # directory name matches frontmatter name
+├── SKILL.md            # name: gha-validator
+└── hooks/
+    └── validate-gha.sh # referenced by SKILL.md instructions
+```
 
-**Rationale for this approach over vite-plugin-wasm:** The actionlint WASM binary is loaded by a Web Worker, not imported as an ES module in application code. The Worker uses `importScripts()` + `fetch()` to load Go's runtime bridge and the WASM binary. vite-plugin-wasm is designed for ES module WASM imports, which is not how Go WASM works (Go uses its own `wasm_exec.js` bridge, not standard ES WASM imports). Serving from `public/` is the correct architectural choice.
+All 4 existing skills already follow this convention perfectly.
 
 ## Data Flow
 
-### Analysis Request Flow
+### Skill Discovery Flow (skills.sh CLI)
 
 ```
-[User clicks Analyze / Cmd+Enter]
+User runs: npx skills add PatrykQuantumNomad/PatrykQuantumNomad
     |
-[GhaEditorPanel] -> reads editor content
+CLI clones repo to temp directory
     |
-[ghaAnalyzing.set(true)] <- nanostore
+discoverSkills() scans:
+  Tier 1: root SKILL.md?  -> NO
+  Tier 2: skills/ exists? -> YES, 4 subdirectories found
     |
-[engine.runGhaEngine(rawText)]
+Each subdirectory checked for SKILL.md with valid frontmatter
     |
-    +---> [Pass 1: parseWorkflowYaml + validateWorkflowSchema]
-    |        (synchronous, main thread, ~5ms)
-    |        Returns: schema violations with line/column
+CLI presents skill list:
+  1. compose-validator
+  2. dockerfile-analyzer
+  3. gha-validator
+  4. k8s-analyzer
     |
-    +---> [Pass 2: actionlintBridge.runActionlint(rawText)]
-             (async, Web Worker, ~50-200ms)
-             Worker.postMessage -> Go WASM -> onCheckCompleted -> postMessage
-             Returns: ActionlintError[] with kind/line/column/message
+User selects skill(s) or uses --skill flag
     |
-[Merge + deduplicate violations]
+CLI copies/symlinks to target:
+  ~/.agents/skills/{name}/    (canonical)
+  ~/.claude/skills/{name}/    (Claude Code symlink)
+  .codex/skills/{name}/       (Codex symlink)
     |
-[scorer.computeScore(violations)]
-    |
-[extractWorkflowGraph(parsedJson)]
-    |
-[ghaResult.set({ violations, score, graph, ... })] <- nanostore
-    |
-[GhaResultsPanel re-renders] <- subscribes to nanostore
-    |
-[setDiagnostics on EditorView] <- inline annotations
+Install telemetry -> skill appears on skills.sh directory
+  URL: skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/{skill-name}
 ```
 
-### WASM Worker Lifecycle
+### Astro Static Serving Flow
 
 ```
-[First Analyze click]
+npm run build (astro build)
     |
-[initActionlintWorker()]
+Astro scans public/ directory
     |
-[Worker created] -> importScripts('wasm_exec.js')
+Encounters public/skills (symlink -> ../skills/)
     |
-[WebAssembly.instantiateStreaming(fetch('actionlint.wasm'))]
+Resolves symlink, copies all skill files to dist/skills/
     |
-[go.run(instance)] -> Go runtime starts
+dist/skills/gha-validator/SKILL.md        -> served as static file
+dist/skills/gha-validator/hooks/validate-gha.sh -> served as static file
     |
-[Worker.postMessage({ action: 'ready' })]
+GitHub Pages deploys dist/
     |
-[ready = true] -> subsequent lint requests processed instantly
-    |
-[Worker persists for page lifetime] -> no re-initialization cost
+patrykgolabek.dev/skills/gha-validator/SKILL.md -> downloadable
 ```
 
-### State Management
+### Cross-Reference Flow (Tool Pages to Skills)
 
 ```
-[ghaValidatorStore.ts]
+User visits: patrykgolabek.dev/tools/gha-validator/
     |
-    +-- ghaResult: atom<GhaAnalysisResult | null>
-    |       | (subscribe)
-    |   [GhaResultsPanel] <-> [GhaCategoryBreakdown]
-    |                     <-> [GhaViolationList]
-    |                     <-> [GhaWorkflowGraph]
+src/pages/tools/gha-validator/index.astro renders
     |
-    +-- ghaAnalyzing: atom<boolean>
-    |       | (subscribe)
-    |   [GhaEditorPanel] -> disables button, shows spinner
-    |   [GhaResultsPanel] -> shows analyzing state
+Page includes download link:
+  <a href="/skills/gha-validator/SKILL.md" download="SKILL.md">
     |
-    +-- ghaEditorViewRef: atom<EditorView | null>
-    |       | (subscribe)
-    |   [GhaViolationList] -> click-to-navigate to line
+Link resolves to static file served from dist/skills/
     |
-    +-- ghaResultsStale: atom<boolean>
-            | (subscribe)
-        [GhaResultsPanel] -> "Results outdated" badge
+User can ALSO install via CLI:
+  npx skills add PatrykQuantumNomad/PatrykQuantumNomad -s gha-validator
 ```
 
 ### Key Data Flows
 
-1. **Schema validation flow:** Raw YAML string -> `yaml` library parse -> JSON object -> ajv validate against SchemaStore github-workflow.json -> map ajv errors to `GhaRuleViolation[]` with line numbers via LineCounter
-2. **WASM validation flow:** Raw YAML string -> Worker.postMessage -> Go's `actionlint.Lint()` -> `onCheckCompleted(errors)` -> Worker.postMessage back -> map `ActionlintError[]` to `GhaRuleViolation[]`
-3. **Graph extraction flow:** Parsed JSON object -> extract `on` triggers -> extract `jobs` with `needs` -> extract `steps` per job -> build `GhaGraphData` nodes/edges -> React Flow renders with dagre layout
-4. **Score computation flow:** Merged violations -> map each to `GhaCategory` -> apply category weights -> diminishing returns formula per category -> 0-100 score + letter grade
-
-## Critical Integration Details
-
-### WASM Binary Acquisition Strategy
-
-The actionlint playground (https://rhysd.github.io/actionlint/) already ships a pre-built WASM binary compiled with `GOOS=js GOARCH=wasm go build` and optimized with `wasm-opt -O --enable-bulk-memory`.
-
-**Recommended approach:** Download the pre-built actionlint WASM binary and wasm_exec.js from the actionlint playground deployment. This avoids requiring Go and Binaryen in the build environment.
-
-**Expected sizes:**
-- `actionlint.wasm`: ~2.5 MB uncompressed (standard Go WASM includes full runtime). After wasm-opt, expect ~2.0-2.2 MB. GitHub Pages serves with gzip compression, so effective download is ~800 KB-1 MB.
-- `wasm_exec.js`: ~18 KB (Go runtime JavaScript bridge from `$GOROOT/misc/wasm/wasm_exec.js`)
-
-**Alternative (if custom build needed):**
-
-```bash
-# Requires Go toolchain + Binaryen
-GOOS=js GOARCH=wasm go build -o public/wasm/actionlint.wasm ./path/to/main.go
-wasm-opt -O -o public/wasm/actionlint.wasm public/wasm/actionlint.wasm --enable-bulk-memory
-cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" public/wasm/wasm_exec.js
-```
-
-**Confidence: HIGH** -- Verified against actionlint's own playground Makefile and deploy.bash at github.com/rhysd/actionlint/playground/.
-
-### Actionlint WASM Interface
-
-The Go WASM bridge (from `playground/main.go`) works as follows:
-
-1. Go registers `window.runActionlint` via `js.FuncOf()` and `syscall/js`
-2. JavaScript calls `window.runActionlint(yamlSource)` with the YAML string
-3. Go runs `actionlint.Lint()` on the source
-4. Go calls `window.onCheckCompleted(errors)` with results
-5. Each error is a JS object: `{ message: string, line: number, column: number, kind: string }`
-
-**The `kind` field** is the rule name that found the error. Complete list of kinds from actionlint source:
-
-| actionlint `kind` | Description | WASM Available |
-|-------------------|-------------|----------------|
-| `syntax-check` | YAML/workflow syntax errors | Yes |
-| `expression` | Expression type safety, injection detection | Yes |
-| `events` | Event configuration validity | Yes |
-| `job-needs` | Job dependency graph validation | Yes |
-| `matrix` | Matrix configuration validity | Yes |
-| `glob` | Branch/path filter pattern validation | Yes |
-| `runner-label` | Valid runner label validation | Yes |
-| `action` | Action version and input validation | Yes |
-| `shell-name` | Shell name validation | Yes |
-| `id` | Step/job ID uniqueness | Yes |
-| `credentials` | Hardcoded credential detection | Yes |
-| `env-var` | Environment variable naming | Yes |
-| `permissions` | Permission scope validation | Yes |
-| `workflow-call` | Reusable workflow syntax | Yes |
-| `shellcheck` | Shell script quality | NO (requires external binary) |
-| `pyflakes` | Python script quality | NO (requires external binary) |
-
-**Important:** `shellcheck` and `pyflakes` kinds will NOT appear in WASM mode because the browser has no access to these external tools. This is confirmed by the actionlint playground behavior.
-
-### Actionlint Kind to Scoring Category Mapping
-
-| actionlint `kind` | Scoring Category | Rationale |
-|-------------------|------------------|-----------|
-| `syntax-check` | schema | Structural YAML/workflow syntax |
-| `expression` | correctness | Expression type safety and injection |
-| `events` | correctness | Event configuration validity |
-| `job-needs` | correctness | Job dependency graph validity |
-| `matrix` | correctness | Matrix configuration validity |
-| `glob` | correctness | Branch/path filter patterns |
-| `runner-label` | best-practice | Valid runner selection |
-| `action` | best-practice | Action version and input validity |
-| `shell-name` | correctness | Shell name validation |
-| `id` | correctness | ID uniqueness |
-| `credentials` | security | Hardcoded credential detection |
-| `env-var` | best-practice | Environment variable naming |
-| `permissions` | security | Permission scope validation |
-| `workflow-call` | correctness | Reusable workflow syntax |
-
-### Schema Rule Mapping for Pass 1 (ajv)
-
-The SchemaStore github-workflow.json schema (JSON Schema draft-07, ~100 KB) catches structural issues that are validated before actionlint runs:
-
-| Schema Error | Rule Code | Category |
-|-------------|-----------|----------|
-| YAML parse error | GA-S001 | schema |
-| Missing required `on` field | GA-S002 | schema |
-| Missing required `jobs` field | GA-S003 | schema |
-| Unknown top-level property | GA-S004 | schema |
-| Invalid event type | GA-S005 | schema |
-| Invalid job property | GA-S006 | schema |
-| Invalid step property | GA-S007 | schema |
-| Invalid permission value | GA-S008 | schema |
-
-### Deduplication Strategy
-
-Both passes may flag the same issue. Deduplication rules:
-
-1. **Same line + overlapping message:** Keep the actionlint finding (richer context, includes `kind`)
-2. **Schema-only finding:** Keep (actionlint may not catch structural issues it assumes are valid YAML)
-3. **Actionlint-only finding:** Keep (semantic checks beyond schema capability)
-4. **Collision heuristic:** Match on `(line, column)` pair. If both passes report on the same position, prefer the actionlint finding and discard the schema finding.
-
-### WASM Loading Strategy for Performance
-
-The WASM binary is large (~2.5 MB uncompressed). Loading strategy matters for UX:
-
-1. **Lazy initialization:** Do NOT load WASM on page load. Initialize the Worker only when the user first clicks "Analyze."
-2. **Show loading state:** Display "Loading analyzer..." spinner during first-time WASM initialization (~2-3 seconds).
-3. **Keep Worker alive:** After initialization, the Worker persists for the page lifetime. Subsequent analyses are near-instant (~50-200ms).
-4. **Graceful degradation:** If WASM fails to load (old browser, network error), fall back to schema-only validation with a notification banner: "Deep analysis unavailable -- showing structural validation only."
-5. **Pass 1 is instant:** Schema validation runs synchronously on the main thread regardless of WASM state. Users see schema results immediately, then WASM results merge when ready.
-
-### No Astro/Vite Configuration Changes Required
-
-```
-// astro.config.mjs -- NO changes needed for WASM loading
-//
-// The WASM binary lives in public/wasm/ and is served as a static asset.
-// The Web Worker fetches it via fetch(), bypassing Vite's module system.
-// No vite-plugin-wasm or vite-plugin-top-level-await required.
-```
-
-The only Vite interaction is Worker bundling. Since the Worker is created with `new Worker(new URL('./actionlint.worker.ts', import.meta.url))`, Vite automatically bundles it as a separate chunk. This is built-in Vite functionality requiring no configuration.
-
-**However:** If the Worker uses `importScripts()` (classic worker), it must NOT be a module worker. The `type: 'module'` option would prevent `importScripts()` from working. Use the classic worker pattern:
-
-```typescript
-// Option A: Classic worker (recommended for Go WASM)
-const worker = new Worker(
-  new URL('./actionlint.worker.ts', import.meta.url)
-);
-// Do NOT pass { type: 'module' } -- importScripts is classic-only
-```
-
-### React Flow Graph Architecture
-
-The workflow graph is structurally different from the K8s and Compose graphs:
-
-| Aspect | Compose Graph | K8s Graph | GHA Workflow Graph |
-|--------|--------------|-----------|-------------------|
-| Node types | Service | 6 K8s resource kinds | 3: trigger, job, step |
-| Edge types | depends_on + condition | 9 relationship types | 3: triggers, needs, contains |
-| Layout direction | Top-to-bottom (dagre) | Top-to-bottom (dagre) | Top-to-bottom (dagre rankdir=TB) |
-| Phantom nodes | No | Yes (unresolved refs) | No |
-| Cycle detection | Yes (compose allows cycles) | No | No (needs is acyclic by GitHub spec) |
-| Node content | Service name + image | Kind + name + namespace | Type-specific metadata |
-
-**Custom React Flow node components:**
-
-- `GhaTriggerNode`: Event icon + event name (push, pull_request, schedule, etc.). Colored differently from jobs (e.g., blue/cyan accent).
-- `GhaJobNode`: Job name + runs-on label + optional `if` condition badge. Primary node type, largest visual weight.
-- `GhaStepNode`: Step name + uses/run indicator + step index. Smaller than job nodes, visually subordinate.
-
-**Layout:** Use dagre with `rankdir: 'TB'` (top-to-bottom). Triggers at top, jobs in middle, steps at bottom. Steps are visually grouped within their parent job by proximity (dagre natural clustering via edge weights, not explicit subgraphs).
-
-**Lazy loading:** React Flow lazy-loaded via `React.lazy()` matching the existing Compose/K8s pattern (222 KB separate chunk, loads only on Graph tab click).
-
-## Scaling Considerations
-
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| Small workflows (1-3 jobs) | Default view shows all steps expanded in graph |
-| Medium workflows (4-10 jobs) | Collapse step details by default, expand on click |
-| Large workflows (10+ jobs, 50+ steps) | Default to job-level-only graph, expand steps on demand |
-
-### Scaling Priorities
-
-1. **First bottleneck:** WASM initialization time (~2-3 seconds). Mitigate with lazy loading + loading state UI. After first init, subsequent analyses are instant.
-2. **Second bottleneck:** Very large workflow files (1000+ lines). WASM analysis time scales linearly. Show a progress indicator for files > 500 lines.
-3. **Graph rendering:** React Flow handles hundreds of nodes well. Dagre layout may slow at 200+ nodes. For workflows that large, default to job-level-only view.
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Importing WASM via Vite Plugin
-
-**What people do:** Add `vite-plugin-wasm` and try to `import` the actionlint WASM binary as an ES module.
-**Why it's wrong:** Go WASM does not export standard ES module functions. It uses `syscall/js` to register callbacks on the `window` object via `wasm_exec.js`. The bridge expects the traditional `WebAssembly.instantiateStreaming` pattern, not ES module imports.
-**Do this instead:** Serve `actionlint.wasm` and `wasm_exec.js` as static assets from `public/wasm/`. Load them in a Web Worker using `importScripts()` + `fetch()`.
-
-### Anti-Pattern 2: Running Go WASM on the Main Thread
-
-**What people do:** Load `wasm_exec.js` and the WASM binary directly in the main thread, calling `go.run()` synchronously.
-**Why it's wrong:** `go.run()` is blocking -- it starts the Go runtime event loop and does not return until the Go program exits. This freezes the UI for the entire lifetime of the Go program.
-**Do this instead:** Run Go WASM exclusively in a Web Worker. Communicate via `postMessage`/`onmessage`.
-
-### Anti-Pattern 3: Reinitializing Worker on Every Analysis
-
-**What people do:** Create a new Worker, load WASM, run analysis, terminate Worker -- for every Analyze click.
-**Why it's wrong:** WASM initialization costs 2-3 seconds. Doing this on every analysis creates unacceptable latency.
-**Do this instead:** Initialize the Worker once (lazy, on first use). Keep it alive for the page lifetime. Subsequent analyses reuse the initialized Worker.
-
-### Anti-Pattern 4: Merging Schema and WASM Results Without Deduplication
-
-**What people do:** Concatenate violations from both passes without checking for overlaps.
-**Why it's wrong:** Both passes may flag the same issue (e.g., unknown event type), resulting in duplicate violations that inflate the issue count and distort the score.
-**Do this instead:** Deduplicate on `(line, column)` pairs, preferring the actionlint finding when both passes report at the same position.
-
-### Anti-Pattern 5: Using Module Workers with importScripts
-
-**What people do:** Create the Worker with `{ type: 'module' }` but also use `importScripts()` to load `wasm_exec.js`.
-**Why it's wrong:** `importScripts()` is not available in module workers. It is a classic worker API only.
-**Do this instead:** Use a classic worker (no `type: 'module'`) for the Go WASM bridge, since `wasm_exec.js` requires `importScripts()`. Vite will still bundle it correctly.
+1. **Skill authoring:** Edit `skills/*/SKILL.md` -> git push -> triggers Astro rebuild (GitHub Pages) AND makes skills available for CLI install (skills.sh scans the git repo directly)
+2. **Web serving:** `skills/` -> symlink -> `public/skills/` -> Astro build -> `dist/skills/` -> GitHub Pages
+3. **CLI install:** GitHub repo clone -> `npx skills add` -> scans `skills/` -> installs to user's agent config directories
+4. **Telemetry loop:** User installs via CLI -> anonymous telemetry -> skill appears on skills.sh leaderboard -> more visibility -> more installs
 
 ## Integration Points
 
-### Existing Components Reused (No Modification)
+### External Services
 
-| Component | Reuse Pattern |
-|-----------|---------------|
-| `editor-theme.ts` | Import `editorTheme`, `oneDarkTheme`, `a11ySyntaxHighlighting` |
-| `highlight-line.ts` | Import `highlightLineField` for click-to-navigate |
-| `ScoreGauge.tsx` | Import directly (generic score display component) |
-| `FullscreenToggle.tsx` | Import directly (generic toggle button) |
-| `@codemirror/lang-yaml` | Already installed for Compose/K8s tools |
-| `yaml` (eemeli) | Already installed for YAML parsing |
-| `ajv` + `ajv-formats` | Already installed for JSON Schema validation |
-| `@xyflow/react` + `@dagrejs/dagre` | Already installed for graph visualization |
-| `lz-string` | Already installed for URL state encoding |
-| `nanostores` | Already installed for cross-component state |
-
-### New Dependencies Required
-
-| Dependency | Purpose | Size Impact |
-|------------|---------|-------------|
-| `actionlint.wasm` | Pre-built Go WASM binary | ~2.5 MB in `public/` (gzipped ~800 KB-1 MB download) |
-| `wasm_exec.js` | Go runtime bridge | ~18 KB in `public/` |
-
-**No new npm packages required.** The entire WASM integration uses browser-native Web Worker and WebAssembly APIs. All other dependencies (CodeMirror, yaml, ajv, React Flow, nanostores, lz-string) are already installed.
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| skills.sh directory | Automatic via install telemetry | No registration or publish step. Skills appear at `skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/{skill-name}` when users install via CLI |
+| GitHub Pages | Astro static build via `withastro/action@v3` | Symlink resolved at build time. Existing workflow completely unchanged |
+| Claude Code | Users install with `npx skills add` | Skill lands in `.claude/skills/` or `~/.claude/skills/` |
+| OpenAI Codex CLI | Users install with `npx skills add` | Skill lands in `.codex/skills/` |
+| GitHub Copilot | Users install with `npx skills add` | Skill lands in `.github/skills/` |
+| Gemini CLI | Users install with `npx skills add` | Skill lands in `.agents/skills/` |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Astro page <-> React island | `client:only="react"` directive | Same pattern as K8s/Compose/Dockerfile tools |
-| React components <-> Engine | Nanostore atoms | Same pattern as existing tools |
-| Engine (main thread) <-> WASM Worker | `postMessage`/`onmessage` via bridge | NEW: first Worker in codebase |
-| Engine <-> Schema validator | Direct function call (synchronous) | Same pattern as Compose schema-validator |
-| Results panel <-> Graph tab | React.lazy for WorkflowGraph | Same pattern as K8s/Compose graph lazy loading |
+| `skills/` <-> `public/skills` | Filesystem symlink | One-way: `public/skills` reads from `skills/`. Never edit in `public/skills/` directly (it is a symlink) |
+| `src/pages/tools/` <-> static skills | HTTP URL reference (`/skills/*/SKILL.md`) | Tool pages link to skills for download. URL path unchanged after migration |
+| `public/benchmarks/` <-> skills | None (fully decoupled) | Benchmark data references skill names by convention but lives in separate directory |
+| `README.md` <-> skills.sh | Text reference | README should include `npx skills add` command and link to skills.sh pages |
 
-## Build Order Recommendations
+## Anti-Patterns
 
-Based on dependency analysis, the recommended build order is:
+### Anti-Pattern 1: Duplicating Files Instead of Symlinking
 
-1. **WASM infrastructure first:** Download pre-built WASM binary, create Worker, verify it loads and returns results. This is the highest-risk component and should be proven early.
-2. **Two-pass engine:** Schema validator (reuses ajv patterns), WASM bridge integration, deduplication logic.
-3. **Scoring and rules metadata:** Category mapping, scoring weights, rule documentation data.
-4. **UI components:** CodeMirror editor, results panel, following established patterns exactly.
-5. **Workflow graph:** React Flow visualization with custom nodes, separate from the core validation pipeline.
-6. **Rule documentation pages:** getStaticPaths, per-rule pages, related rules.
-7. **Site integration:** Header nav, homepage callout, tools page, JSON-LD, OG image, blog post.
+**What people do:** Copy SKILL.md files to both `skills/` and `public/skills/` to serve both purposes.
+**Why it's wrong:** Two copies drift out of sync. One edit fixes the CLI version but the website serves stale content (or vice versa). Git diff noise doubles. Merge conflicts multiply.
+**Do this instead:** Single source of truth in `skills/`, symlink from `public/skills`.
+
+### Anti-Pattern 2: Putting Workspace/Benchmark Data in `skills/`
+
+**What people do:** Keep `*-workspace/` directories and `benchmark-*.json` alongside SKILL.md files in the skills directory.
+**Why it's wrong:** `npx skills add` discovery scans subdirectories under `skills/`. Workspace directories would be listed as potential skills (they contain no `SKILL.md` so they would be skipped, but it adds noise and confusion). The workspace dirs contain eval results (JSON, timing data, model outputs) that are irrelevant to skill consumers and inflate clone/download size.
+**Do this instead:** Move benchmark/workspace data to `public/benchmarks/`. Keep `skills/` with only the 4 skill directories.
+
+### Anti-Pattern 3: Using `.claude-plugin/marketplace.json` for Discovery
+
+**What people do:** Create plugin manifest files to explicitly declare skill locations in non-standard paths.
+**Why it's wrong:** Unnecessary complexity. The standard `skills/` convention provides Tier 2 discovery automatically. A manifest is only useful for non-standard layouts and creates another file to maintain with no benefit.
+**Do this instead:** Put skills in `skills/` and let convention handle discovery.
+
+### Anti-Pattern 4: Leaving Skills in `public/skills/` Without Moving
+
+**What people do:** Leave skills in `public/skills/` and rely on the recursive fallback (Tier 3) to find them.
+**Why it's wrong:** Tier 3 is a fallback, not the expected path. It is slower (scans entire repo tree including `node_modules/`, `handbook/`, etc.). It signals unfamiliarity with the ecosystem convention. Future CLI versions could change recursive scanning behavior.
+**Do this instead:** Use `skills/` at root -- the standard, expected, documented location.
+
+### Anti-Pattern 5: Creating a Separate Repository for Skills
+
+**What people do:** Create `PatrykQuantumNomad/devops-skills` as a dedicated skills repository, separate from the profile repo.
+**Why it's wrong for this case:** With only 4 skills, a separate repo fragments discoverability. The profile repo URL (`PatrykQuantumNomad/PatrykQuantumNomad`) is memorable, directly associated with the author, and already has traffic. The skills add professional value to the profile repo. A separate repo would only make sense at 20+ skills.
+**Do this instead:** Keep skills in the profile repo. The `skills/` directory coexists cleanly with Astro, README.md, and other profile content.
+
+## Migration Checklist
+
+### New Components
+
+| Component | Type | Description |
+|-----------|------|-------------|
+| `skills/` (root directory) | **NEW** | Root-level skills directory containing 4 skill subdirectories |
+| `public/benchmarks/` | **NEW** | New home for benchmark data and workspace eval directories |
+
+### Modified Components
+
+| Component | Change | Risk |
+|-----------|--------|------|
+| `public/skills/` | Directory replaced by symlink to `../skills/` | LOW -- Astro resolves symlinks; `withastro/action@v3` runs on Ubuntu which handles symlinks natively |
+| `README.md` | Add skills.sh install instructions and badge | NONE -- additive text change |
+
+### Unmodified Components
+
+| Component | Why No Change |
+|-----------|---------------|
+| `astro.config.mjs` | Static output mode, no skills-specific config. `public/` handling is built-in |
+| `src/pages/tools/*/index.astro` | Download links use `/skills/*/SKILL.md` -- URL path unchanged |
+| `.github/workflows/deploy.yml` | `withastro/action@v3` handles symlinks in `public/` |
+| `package.json` | No new dependencies for skill publishing |
+| `.gitignore` | No new patterns needed |
+| Individual SKILL.md files | Content and frontmatter already follow skills.sh convention |
+| Individual hooks/*.sh files | Already correctly located within skill directories |
+
+## Build Order
+
+The migration has dependency ordering. Steps 1-3 must happen together in a single commit to avoid broken state.
+
+1. **Create `skills/` at root** -- `mkdir skills/`
+2. **Move the 4 skill directories** -- `mv public/skills/{compose-validator,dockerfile-analyzer,gha-validator,k8s-analyzer} skills/`
+3. **Create `public/benchmarks/`** and move non-skill files -- `mv public/skills/{benchmark-*,grading-summary.json,*-workspace} public/benchmarks/`
+4. **Replace `public/skills/` directory** with symlink -- `rm -rf public/skills && ln -s ../skills public/skills`
+5. **Update internal references** -- check if any code references `public/skills/benchmark-*` or `public/skills/grading-summary.json` and update paths to `public/benchmarks/`
+6. **Verify Astro build** -- `npm run build` should produce `dist/skills/` with all 4 skill directories
+7. **Verify skills.sh discovery** -- `npx skills add . --list` from repo root should find exactly 4 skills
+8. **Update README.md** -- add skills.sh install command block
+9. **Test download links** on local dev server -- `localhost:4321/skills/gha-validator/SKILL.md` should serve content
+
+## Scaling Considerations
+
+| Concern | Current (4 skills) | At 10-20 skills | At 50+ skills |
+|---------|---------------------|------------------|---------------|
+| Repo size | Negligible (~100KB total for all skills) | Still fine, SKILL.md files are text | Consider dedicated skills repo |
+| Astro build time | No impact (public/ files are copied, not processed) | No impact | Minimal impact |
+| skills.sh listing | 4 entries under one repo | Manageable, good for brand coherence | Split into themed repos |
+| Symlink approach | Clean and simple | Still clean | May want selective symlinks |
+
+### Scaling Priority
+
+The 4-skill profile repo is well within the sweet spot. The only inflection point would be at ~20+ skills, where a dedicated `PatrykQuantumNomad/devops-skills` repository might make sense for organizational clarity. For 4 skills, keeping them in the profile repo maximizes discoverability -- the profile repo URL is memorable and directly associated with the author identity.
+
+## Verification Steps
+
+After migration, confirm these three paths all work:
+
+1. **skills.sh CLI discovery:** `npx skills add . --list` from repo root shows exactly 4 skills
+2. **Astro static build:** `npm run build && ls dist/skills/*/SKILL.md` shows 4 SKILL.md files
+3. **Dev server:** `npm run dev` then visit `localhost:4321/skills/gha-validator/SKILL.md` returns content
+4. **Git status clean:** `git status` shows the symlink tracked correctly (typechange for `public/skills`)
 
 ## Sources
 
-- [actionlint GitHub repository](https://github.com/rhysd/actionlint) -- playground source, WASM build process, error structure
-- [actionlint playground](https://rhysd.github.io/actionlint/) -- live WASM implementation reference
-- [actionlint playground main.go](https://pkg.go.dev/github.com/rhysd/actionlint/playground) -- Go WASM bridge source
-- [actionlint checks documentation](https://github.com/rhysd/actionlint/blob/main/docs/checks.md) -- complete rule kind list
-- [Go Wiki: WebAssembly](https://go.dev/wiki/WebAssembly) -- Go WASM compilation reference
-- [Notes on running Go in the browser with WebAssembly](https://eli.thegreenplace.net/2024/notes-on-running-go-in-the-browser-with-webassembly/) -- binary size data (~2.5 MiB), best practices
-- [Using Go with Wasm and Web Workers](https://digitalflapjack.com/blog/go-wasm-workers/) -- Worker + Go WASM pattern with postMessage
-- [Vite Features: Web Workers](https://vite.dev/guide/features#web-workers) -- Worker bundling in Vite
-- [Vite Features: WebAssembly](https://vite.dev/guide/features#webassembly) -- Native WASM support limitations, ?init pattern
-- [vite-plugin-wasm](https://github.com/Menci/vite-plugin-wasm) -- Why NOT needed for Go WASM (ES module pattern incompatible with Go bridge)
-- [SchemaStore github-workflow.json](https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-workflow.json) -- JSON Schema draft-07 for workflow validation
-- [Binaryen wasm-opt](https://github.com/WebAssembly/binaryen) -- WASM binary optimization (10-20% size reduction)
-- [Go WASM in Web Worker with React](https://medium.com/@booimangang/how-i-ran-go-wasm-in-a-web-worker-with-next-js-without-freezing-the-browser-100bffa8630c) -- React + Worker + Go WASM pattern
+- [vercel-labs/skills -- The open agent skills tool](https://github.com/vercel-labs/skills) -- CLI source code and three-tier discovery strategy
+- [Vercel KB -- Agent Skills: Creating, Installing, and Sharing](https://vercel.com/kb/guide/agent-skills-creating-installing-and-sharing-reusable-agent-context) -- Publishing convention (`skills/` directory, no publish step)
+- [anthropics/skills -- Public skills repository](https://github.com/anthropics/skills) -- Reference implementation of `skills/` directory layout (84.5k stars)
+- [DeepWiki -- vercel-labs/skills](https://deepwiki.com/vercel-labs/skills) -- Three-tier search strategy: direct check, priority directories, recursive fallback
+- [DeepWiki -- Skill Directory Structure](https://deepwiki.com/heilcheng/awesome-agent-skills/2.3-skill-directory-structure) -- Required SKILL.md format, optional subdirectories (scripts/, templates/, resources/)
+- [skills.sh FAQ](https://skills.sh/docs/faq) -- Skills appear via install telemetry, no publish step
+- [Astro Docs -- Project Structure](https://docs.astro.build/en/basics/project-structure/) -- `public/` directory copies files verbatim to build output
+- [skills.sh -- find-skills listing page](https://skills.sh/vercel-labs/skills/find-skills) -- Reference for how skill pages appear (install command, stats, documentation)
 
 ---
-*Architecture research for: GitHub Actions Workflow Validator (v1.13)*
-*Researched: 2026-03-04*
+*Architecture research for: skills.sh publishing from Astro profile repo*
+*Researched: 2026-03-05*
