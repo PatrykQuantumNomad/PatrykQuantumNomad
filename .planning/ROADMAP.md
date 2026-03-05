@@ -15,7 +15,7 @@
 - ✅ **v1.11 Beauty Index: Lisp** - Phases 69-71 (shipped 2026-03-02)
 - ✅ **v1.12 Dockerfile Rules Expansion** - Phases 72-74 (shipped 2026-03-02)
 - ✅ **v1.13 GitHub Actions Workflow Validator** - Phases 75-81 (shipped 2026-03-04)
-- 🚧 **v1.14 DevOps Skills Publishing** - Phases 82-84 (in progress)
+- ✅ **v1.14 DevOps Skills Publishing** - Phases 82-84 (shipped 2026-03-05)
 
 ## Phases
 
@@ -32,7 +32,7 @@ See MILESTONES.md for completed milestone details.
 
 </details>
 
-### v1.14 DevOps Skills Publishing (In Progress)
+### v1.14 DevOps Skills Publishing (Shipped 2026-03-05)
 
 **Milestone Goal:** Package and publish 4 DevOps validator skills to the skills.sh open agent skills ecosystem
 
@@ -84,7 +84,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 84-01-PLAN.md — Add Agent Skills section, GHA Validator to Interactive Tools, and fix stale path references
+- [x] 84-01-PLAN.md — Add Agent Skills section, GHA Validator to Interactive Tools, and fix stale path references
 
 ## Progress
 
@@ -95,4 +95,4 @@ Phases execute in numeric order: 82 → 83 → 84
 |-------|-----------|----------------|--------|-----------|
 | 82. Directory Restructure | v1.14 | 1/1 | Complete | 2026-03-05 |
 | 83. Discovery Verification | v1.14 | 1/1 | Complete | 2026-03-05 |
-| 84. Documentation | 1/1 | Complete   | 2026-03-05 | - |
+| 84. Documentation | v1.14 | 1/1 | Complete | 2026-03-05 |
