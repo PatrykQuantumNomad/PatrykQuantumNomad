@@ -1,5 +1,29 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.14 DevOps Skills Publishing (Shipped: 2026-03-05)
+
+**Delivered:** Packaged and published 4 DevOps validator skills (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator) to the skills.sh open agent skills ecosystem with directory restructure, CLI verification, and README documentation
+
+**Phases completed:** 82-84 (3 plans total)
+
+**Key accomplishments:**
+- Restructured 4 skill directories to repo root with symlink bridge for dual-consumer architecture (skills.sh CLI + Astro build)
+- Verified all 4 skills discoverable and installable via skills.sh CLI (`npx skills add --list` and `--skill` flag)
+- Seeded skills.sh telemetry listing at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad
+- Added Agent Skills section to README with npx install commands, 4-skill table, and benchmark highlights (98.8% pass rate, +42.4% improvement)
+- Added GitHub Actions Workflow Validator to Interactive Tools table in README
+
+**Stats:**
+- 114 files created/modified (+3,777 / -1,254 lines)
+- 3 phases, 3 plans, 7 tasks, 18 commits
+- 1 day (2026-03-05)
+
+**Git range:** `feat(82-01)` -> `docs(phase-84)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.13 GitHub Actions Workflow Validator (Shipped: 2026-03-04)
 
 **Delivered:** Browser-based GitHub Actions workflow validator with two-pass linting (SchemaStore JSON Schema + actionlint WASM via Web Worker), 48 rules across 6 categories, category-weighted scoring, interactive workflow graph visualization, 48 per-rule SEO documentation pages, and companion blog post

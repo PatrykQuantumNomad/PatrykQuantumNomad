@@ -239,17 +239,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Full site integration (header nav, homepage, tools page, JSON-LD, OG image, LLMs.txt, companion blog post) — v1.13
 - ✓ 80/80 v1.13 requirements delivered — v1.13
 
+- Skills directory restructured to repo root with symlink bridge for dual-consumer architecture (skills.sh CLI + Astro build) -- v1.14
+- All 4 DevOps skills verified discoverable and installable via `npx skills add` CLI -- v1.14
+- Skills listed on skills.sh/PatrykQuantumNomad/PatrykQuantumNomad via seeded telemetry install -- v1.14
+- README Agent Skills section with install commands, 4-skill table, and benchmark highlights (98.8% pass rate, +42.4%) -- v1.14
+- GitHub Actions Workflow Validator added to README Interactive Tools table -- v1.14
+- All `public/skills/` references updated to `skills/` across repo -- v1.14
+
 ### Active
 
-## Current Milestone: v1.14 DevOps Skills Publishing
-
-**Goal:** Package and publish the 4 DevOps validator skills (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator) for the skills.sh open agent skills ecosystem.
-
-**Target features:**
-- Skills directory structure at repo root for skills.sh CLI discovery
-- Profile README update with install commands and benchmark highlights
-- Verified installation via `npx skills add PatrykQuantumNomad/PatrykQuantumNomad`
-- Skills listed and discoverable on skills.sh
+(None -- ready for next milestone)
 
 ### Out of Scope
 
@@ -278,10 +277,11 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.13 GitHub Actions Workflow Validator on top of 12 previous milestones (v1.0 through v1.12). Now publishing 4 DevOps skills to skills.sh.
+Shipped v1.14 DevOps Skills Publishing on top of 13 previous milestones (v1.0 through v1.13). 4 DevOps validator skills now published to skills.sh.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 requirements delivered (721 total). ~1010+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 requirements delivered (737 total). ~1010+ pages total. Lighthouse 90+ on mobile.
+Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
@@ -391,6 +391,10 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | Exact image name matching for PG012 | Prevents false positives on nodeconfig, nodejs-slim, etc. | ✓ Good — zero false positives |
 | Registry check for PG012 | getRegistry() must be null or docker.io to exclude custom registries | ✓ Good — respects enterprise image policies |
 | SKILL.md entries from TypeScript source | Authoritative rule source files ensure accuracy | ✓ Good — consistent with runtime behavior |
+| Symlink bridge for dual-consumer architecture | `public/skills -> ../skills` serves both skills.sh CLI and Astro build | ✓ Good — single source of truth |
+| Relative symlink for portability | `../skills` instead of absolute path | ✓ Good — works across clones |
+| Skills at repo root for Tier 2 discovery | skills.sh CLI requires `skills/` at repo root | ✓ Good — 4 skills discoverable and installable |
+| skills.sh links in README | Link to skills.sh pages not raw SKILL.md | ✓ Good — better discoverability |
 
 ## Constraints
 
@@ -405,4 +409,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-05 after v1.14 milestone started*
+*Last updated: 2026-03-05 after v1.14 milestone*

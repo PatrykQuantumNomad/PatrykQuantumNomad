@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: DevOps Skills Publishing
-status: completed
-stopped_at: Completed 84-01-PLAN.md (v1.14 complete)
-last_updated: "2026-03-05T14:44:32.115Z"
-last_activity: 2026-03-05 -- Completed Phase 84 documentation (1/1 plans)
+status: milestone_complete
+stopped_at: v1.14 milestone archived
+last_updated: "2026-03-05"
+last_activity: 2026-03-05 -- v1.14 milestone complete
 progress:
   total_phases: 3
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-05)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.14 DevOps Skills Publishing -- COMPLETE
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 84 (3 of 3 in v1.14) (Documentation)
-Plan: 1 of 1 in current phase
-Status: v1.14 complete -- all 3 phases and 3 plans finished
-Last activity: 2026-03-05 -- Completed Phase 84 documentation (1/1 plans)
+Phase: 84 of 84 total (all milestones)
+Plan: Complete
+Status: v1.14 milestone archived -- ready for next milestone
+Last activity: 2026-03-05 -- v1.14 milestone complete
 
 Progress: [##########] 100%
 
@@ -56,27 +56,14 @@ Progress: [##########] 100%
 | v1.11 Beauty Index: Lisp | 69-71 | 3 | 21 | 2026-03-02 |
 | v1.12 Dockerfile Rules Expansion | 72-74 | 3 | 11 | 2026-03-02 |
 | v1.13 GHA Workflow Validator | 75-81 | 19 | 80 | 2026-03-04 |
-| v1.14 DevOps Skills Publishing | 82-84 | 3 | 11 | 2026-03-05 |
-| **Total** | **84** | **187** | **732** | |
-| Phase 84 P01 | 2min | 2 tasks | 2 files |
+| v1.14 DevOps Skills Publishing | 82-84 | 3 | 16 | 2026-03-05 |
+| **Total** | **84** | **187** | **737** | |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [v1.14 Roadmap]: Single atomic commit for directory restructure (Phase 82) to avoid broken intermediate state
-- [v1.14 Roadmap]: Symlink bridge pattern (`public/skills` -> `../skills`) for dual-consumer architecture
-- [v1.14 Roadmap]: Discovery verification (Phase 83) requires push to remote before CLI can discover skills
-- [v1.14 Roadmap]: Seed install (DSC-05) must happen after push to trigger skills.sh telemetry listing
-- [Phase 82]: Relative symlink used for portability across clones
-- [Phase 82]: Script reference updates deferred to Phase 84 (DOC-05) -- symlink bridge resolves paths
-- [Phase 83]: Added .agents/, .claude/skills/, skills-lock.json to .gitignore for skills CLI artifact hygiene
-- [Phase 84]: Used 48 rules for GHA Validator in Interactive Tools (blog/codebase count) vs 46 in Agent Skills table (SKILL.md frontmatter)
-- [Phase 84]: Linked skills to skills.sh pages rather than raw GitHub SKILL.md files
-- [Phase 84]: Single --skill install example to keep README concise
 
 ### Pending Todos
 
@@ -95,7 +82,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T14:44:32.113Z
-Stopped at: Completed 84-01-PLAN.md (v1.14 complete)
+Last session: 2026-03-05
+Stopped at: v1.14 milestone archived
 Resume file: None
-Next: v1.14 milestone complete -- ready for next milestone
+Next: `/gsd:new-milestone` to start next milestone
