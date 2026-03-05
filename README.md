@@ -33,7 +33,31 @@ Free browser-based developer tools — 100% client-side, your code never leaves 
 |------|-------|-------|
 | Docker Compose Validator | 52 rules | [Try it](https://patrykgolabek.dev/tools/compose-validator/) · [Blog](https://patrykgolabek.dev/blog/docker-compose-best-practices/) |
 | Dockerfile Analyzer | 46 rules | [Try it](https://patrykgolabek.dev/tools/dockerfile-analyzer/) · [Blog](https://patrykgolabek.dev/blog/dockerfile-best-practices/) |
+| GitHub Actions Workflow Validator | 48 rules | [Try it](https://patrykgolabek.dev/tools/gha-validator/) · [Blog](https://patrykgolabek.dev/blog/github-actions-best-practices/) |
 | Kubernetes Manifest Analyzer | 67 rules | [Try it](https://patrykgolabek.dev/tools/k8s-analyzer/) · [Blog](https://patrykgolabek.dev/blog/kubernetes-manifest-best-practices/) |
+
+## Agent Skills
+
+DevOps validator skills for AI coding agents (Claude Code, Cursor, Copilot, Codex, and 17+ more). Install via [skills.sh](https://skills.sh):
+
+```bash
+npx skills add PatrykQuantumNomad/PatrykQuantumNomad
+```
+
+| Skill | Rules | Description |
+|-------|-------|-------------|
+| [dockerfile-analyzer](https://skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/dockerfile-analyzer) | 46 | Dockerfile security, efficiency, and best-practice analysis |
+| [compose-validator](https://skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/compose-validator) | 52 | Docker Compose security, semantic, and schema validation |
+| [gha-validator](https://skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/gha-validator) | 46 | GitHub Actions workflow security and best-practice analysis |
+| [k8s-analyzer](https://skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/k8s-analyzer) | 67 | Kubernetes manifest security, reliability, and RBAC analysis |
+
+Install a single skill:
+
+```bash
+npx skills add PatrykQuantumNomad/PatrykQuantumNomad --skill dockerfile-analyzer
+```
+
+**Benchmarked:** 98.8% pass rate across all skills (+42.4% improvement over baseline without skills). Tested with Claude Haiku 4.5.
 
 ## Recent Writing
 
