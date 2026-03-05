@@ -52,10 +52,10 @@ See MILESTONES.md for completed milestone details.
   3. Benchmark artifacts exist under `public/benchmarks/` and no benchmark/workspace files remain under `skills/`
   4. All shell scripts under `skills/*/hooks/` have executable permission (`chmod +x`)
   5. `npm run build` succeeds and `dist/skills/*/SKILL.md` exists for all 4 skills
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 82-01: TBD
+- [ ] 82-01-PLAN.md — Atomic directory restructure with symlink bridge + build verification
 
 ### Phase 83: Discovery Verification
 **Goal**: All 4 skills are discoverable and installable via the skills CLI, and the first install seeds skills.sh listing
