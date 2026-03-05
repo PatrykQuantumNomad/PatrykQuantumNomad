@@ -17,6 +17,10 @@
 declare const Go: any;
 declare function importScripts(...urls: string[]): void;
 
+// The Go WASM binary accesses globals via js.Global().Get("window").
+// In a Web Worker `window` is undefined, so alias `self` as `window`.
+(self as any).window = self;
+
 importScripts('/wasm/wasm_exec.js');
 
 const go = new Go();

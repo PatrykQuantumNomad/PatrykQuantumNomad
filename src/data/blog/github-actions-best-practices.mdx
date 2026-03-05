@@ -11,9 +11,9 @@ import TldrSummary from '../../components/blog/TldrSummary.astro';
 import KeyTakeaway from '../../components/blog/KeyTakeaway.astro';
 import Callout from '../../components/blog/Callout.astro';
 
-<OpeningStatement>Most GitHub Actions workflows in production have preventable security issues. Unpinned actions, overly permissive tokens, script injection vectors -- I built a validator to catch all 48 of them.</OpeningStatement>
+<OpeningStatement>Most GitHub Actions workflows in production have preventable security issues. Unpinned actions, overly permissive tokens, script injection vectors. I built a validator to catch all 48 of them.</OpeningStatement>
 
-After 17 years building CI/CD pipelines, I have reviewed hundreds of GitHub Actions workflows. They show up in onboarding audits, migration assessments, and incident reviews where a compromised dependency or a leaked secret turned out to be the root cause. The patterns keep repeating: actions pinned to mutable tags that silently change underneath you, workflows running with `write-all` permissions because someone copied the default and never scoped it down, `run:` blocks that inject untrusted pull request titles straight into shell commands. Every one of these is a supply-chain attack or a secret exfiltration waiting to happen.
+After 17 years building CI/CD pipelines, I've reviewed hundreds of GitHub Actions workflows. They show up in onboarding audits, migration assessments, and incident reviews where a compromised dependency or a leaked secret turned out to be the root cause. The patterns keep repeating: actions pinned to mutable tags that silently change underneath you, workflows running with `write-all` permissions because someone copied the default and never scoped it down, `run:` blocks that inject untrusted pull request titles straight into shell commands. Every one of these is a supply-chain attack or a secret exfiltration waiting to happen.
 
 I wrote the rules down. All 48 of them. Then I turned them into a [validator you can run right now](/tools/gha-validator/).
 
@@ -129,7 +129,7 @@ Rule [GA-C006](/tools/gha-validator/rules/ga-c006/) flags `pull_request_target` 
 
 Rule [GA-C007](/tools/gha-validator/rules/ga-c007/) scans the entire workflow file for patterns that look like hardcoded credentials: API keys, tokens, passwords, and connection strings embedded directly in YAML values. Hardcoded secrets in workflow files are visible to anyone with read access to the repository and appear in plain text in the git history. Always use GitHub Actions secrets (`${{ secrets.MY_SECRET }}`) or environment-level secrets instead.
 
-Additional security rules detect third-party actions without SHA pinning ([GA-C008](/tools/gha-validator/rules/ga-c008/)), dangerous combined GITHUB_TOKEN permission scopes like `contents: write` paired with `actions: write` ([GA-C009](/tools/gha-validator/rules/ga-c009/)), and self-hosted runner usage ([GA-C010](/tools/gha-validator/rules/ga-c010/)) as an informational security reminder since self-hosted runners share their host environment across workflow runs.
+Additional security rules detect third-party actions without SHA pinning ([GA-C008](/tools/gha-validator/rules/ga-c008/)), dangerous combined GITHUB_TOKEN permission scopes like `contents: write` paired with `actions: write` ([GA-C009](/tools/gha-validator/rules/ga-c009/)), and self-hosted runner usage ([GA-C010](/tools/gha-validator/rules/ga-c010/)). The self-hosted runner rule is informational since self-hosted runners share their host environment across workflow runs.
 
 <KeyTakeaway title="Top 3 Security Rules">
 Pin every action to a full SHA commit hash to prevent supply-chain hijacking ([GA-C001](/tools/gha-validator/rules/ga-c001/)). Set explicit least-privilege permissions on every workflow to limit GITHUB_TOKEN scope ([GA-C003](/tools/gha-validator/rules/ga-c003/), [GA-C004](/tools/gha-validator/rules/ga-c004/)). Never interpolate event payloads directly into shell commands to prevent script injection ([GA-C005](/tools/gha-validator/rules/ga-c005/)). These three rules alone prevent the majority of GitHub Actions security incidents.
@@ -137,7 +137,7 @@ Pin every action to a full SHA commit hash to prevent supply-chain hijacking ([G
 
 ## Best Practice Rules: Operational Excellence
 
-Best practice rules will not create security vulnerabilities, but they will create runaway jobs, wasted compute, confusing logs, and the kind of slow degradation that costs hours of debugging time.
+Best practice violations won't open security holes, but they will cause runaway jobs, wasted compute, confusing logs, and the kind of slow degradation that eats hours of debugging time.
 
 ### Always Set Timeout Minutes
 
@@ -218,7 +218,7 @@ Rule [GA-L001](/tools/gha-validator/rules/ga-l001/) catches invalid `${{ }}` exp
 
 ### Unknown Context Properties
 
-Rule [GA-L005](/tools/gha-validator/rules/ga-l005/) detects references to context properties that do not exist, such as `${{ github.events.pull_request }}` (the correct property is `github.event`, singular). These typos produce empty values at runtime with no error, leading to subtle bugs that are difficult to trace.
+Rule [GA-L005](/tools/gha-validator/rules/ga-l005/) detects references to context properties that don't exist, such as `${{ github.events.pull_request }}` (the correct property is `github.event`, singular). These typos produce empty values at runtime with no error, leading to subtle bugs that are difficult to trace.
 
 ### Type Checking
 
@@ -230,7 +230,7 @@ The semantic category includes 18 rules total ([GA-L001](/tools/gha-validator/ru
 
 Style rules carry the lowest weight (10%) but contribute to workflow maintainability and team consistency.
 
-Rule [GA-F001](/tools/gha-validator/rules/ga-f001/) flags jobs that are not alphabetically ordered. Alphabetical ordering makes it easier to locate jobs in large workflow files and reduces merge conflicts when multiple developers add jobs simultaneously. Rule [GA-F002](/tools/gha-validator/rules/ga-f002/) flags inconsistent `uses:` quoting -- mixing quoted and unquoted action references within the same workflow creates visual noise. Rule [GA-F004](/tools/gha-validator/rules/ga-f004/) flags workflows that omit the top-level `name:` field, which results in the filename appearing as the workflow name in the GitHub Actions UI. Rule [GA-F003](/tools/gha-validator/rules/ga-f003/) flags step names exceeding 80 characters, which truncate in the GitHub Actions UI and become hard to scan.
+Rule [GA-F001](/tools/gha-validator/rules/ga-f001/) flags jobs that are not alphabetically ordered. Alphabetical ordering makes it easier to locate jobs in large workflow files and reduces merge conflicts when multiple developers add jobs simultaneously. Rule [GA-F002](/tools/gha-validator/rules/ga-f002/) flags inconsistent `uses:` quoting. Mixing quoted and unquoted action references within the same workflow creates visual noise. Rule [GA-F004](/tools/gha-validator/rules/ga-f004/) flags workflows that omit the top-level `name:` field, which results in the filename appearing as the workflow name in the GitHub Actions UI. Rule [GA-F003](/tools/gha-validator/rules/ga-f003/) flags step names exceeding 80 characters, which truncate in the GitHub Actions UI and become hard to scan.
 
 ## Schema Rules: Structural Validation
 
@@ -238,7 +238,7 @@ Schema rules validate the workflow YAML against the GitHub Actions workflow sche
 
 Rule [GA-S001](/tools/gha-validator/rules/ga-s001/) catches YAML syntax errors: tabs instead of spaces, unclosed quotes, malformed anchors. Rule [GA-S002](/tools/gha-validator/rules/ga-s002/) catches unknown properties that are not part of the workflow schema. Rule [GA-S003](/tools/gha-validator/rules/ga-s003/) catches type mismatches (using a string where an object is expected). Rule [GA-S004](/tools/gha-validator/rules/ga-s004/) catches missing required fields. Rules [GA-S005](/tools/gha-validator/rules/ga-s005/) through [GA-S008](/tools/gha-validator/rules/ga-s008/) cover invalid enum values, pattern mismatches, array/object structural errors, and conditional schema violations.
 
-Schema validation runs first because there is no point analyzing security rules or best practices if the workflow cannot even be parsed by the GitHub Actions runner.
+Schema validation runs first because there's no point analyzing security rules or best practices if the workflow can't even be parsed by the GitHub Actions runner.
 
 ## Scoring Methodology
 
@@ -246,15 +246,15 @@ The validator aggregates all violations into a single 0-100 score using category
 
 <Callout title="Category Weights">
 
-- **Security: 35%** -- Vulnerabilities that can compromise the CI/CD pipeline or leak secrets
-- **Semantic: 20%** -- Deep expression and type errors caught by actionlint WASM
-- **Best Practice: 20%** -- Operational issues like missing timeouts, unnamed steps, outdated actions
-- **Schema: 15%** -- Structural errors that prevent the workflow from running
-- **Style: 10%** -- Consistency and readability conventions
+- **Security: 35%.** Vulnerabilities that can compromise the CI/CD pipeline or leak secrets
+- **Semantic: 20%.** Deep expression and type errors caught by actionlint WASM
+- **Best Practice: 20%.** Operational issues like missing timeouts, unnamed steps, outdated actions
+- **Schema: 15%.** Structural errors that prevent the workflow from running
+- **Style: 10%.** Consistency and readability conventions
 
 </Callout>
 
-Each category starts at 100 and deducts points per violation using a diminishing returns formula. Early violations within a category have the most impact; additional violations in the same category contribute progressively less. This prevents a workflow with 20 style violations from scoring dramatically worse than one with 5 style violations -- both indicate a style problem, but the severity difference is incremental.
+Each category starts at 100 and deducts points per violation using a diminishing returns formula. Early violations within a category have the most impact; additional violations in the same category contribute progressively less. This prevents a workflow with 20 style violations from scoring dramatically worse than one with 5. Both indicate a style problem, but the severity difference is incremental.
 
 The weighted category scores produce an overall score that maps to letter grades: A+ (95-100), A (90-94), A- (85-89), B+ (80-84), B (75-79), B- (70-74), C+ (65-69), C (60-64), C- (55-59), D (30-54), and F (below 30). A workflow with no violations scores 100 (A+). A workflow with a few minor style issues might score 92 (A). A workflow with unpinned actions, missing permissions, and no timeouts might score in the 40s (D).
 
@@ -264,9 +264,9 @@ If you have read this far, you know what good GitHub Actions workflows look like
 
 The [GitHub Actions Workflow Validator](/tools/gha-validator/) is a free online GitHub Actions linter and security scanner. Paste your workflow YAML, read the results, and follow the links to individual rule documentation pages for detailed fix guidance. Every rule page includes explanations of why the rule exists, what production issues it prevents, before/after code examples, and related rules.
 
-The entire analysis pipeline -- YAML parsing, schema validation, 48-rule analysis, actionlint WASM semantic checking, scoring, and workflow graph rendering -- runs in JavaScript and WebAssembly in your browser. No server receives your code. No API call is made. There is no backend, no telemetry, no logging. What you paste stays on your machine.
+The entire analysis pipeline (YAML parsing, schema validation, 48-rule analysis, actionlint WASM semantic checking, scoring, and workflow graph rendering) runs in JavaScript and WebAssembly in your browser. No server receives your code. No API call is made. There is no backend, no telemetry, no logging. What you paste stays on your machine.
 
-I built this validator because I got tired of finding the same issues in CI/CD security audits and pipeline debugging sessions. Unpinned actions, overly permissive tokens, script injection risks, missing timeouts -- the same patterns in every repository. If the validator catches even one of these before it reaches production, it was worth building.
+I built this validator because I got tired of finding the same issues in CI/CD security audits and pipeline debugging sessions. Unpinned actions, overly permissive tokens, script injection risks, missing timeouts. The same patterns in every repository. If the validator catches even one of these before it reaches production, it was worth building.
 
 Browse all 48 rules starting from [GA-C001: Unpinned Action Version](/tools/gha-validator/rules/ga-c001/), or paste your workflow and let the validator find the issues for you.
 
