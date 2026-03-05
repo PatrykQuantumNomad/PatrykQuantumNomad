@@ -66,10 +66,10 @@ Plans:
   2. Each of the 4 skills installs successfully when using the `--skill` flag individually
   3. All 4 SKILL.md `name` frontmatter values match the regex `^[a-z0-9]+(-[a-z0-9]+)*$` and match their directory names
   4. At least one `npx skills add` install has been executed against the live remote to trigger skills.sh telemetry
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 83-01: TBD
+- [ ] 83-01-PLAN.md — Local pre-validation, push to remote, CLI discovery and install verification
 
 ### Phase 84: Documentation
 **Goal**: README.md showcases the skills suite with install commands so visitors can discover and install them
