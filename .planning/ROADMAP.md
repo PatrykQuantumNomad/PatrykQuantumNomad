@@ -81,10 +81,10 @@ Plans:
   3. README includes benchmark highlight stats (98.8% pass rate, +42.4% improvement)
   4. GitHub Actions Workflow Validator appears in the Interactive Tools table in README
   5. No references to `public/skills/` remain anywhere in the repo (all updated to reflect new structure)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 84-01: TBD
+- [ ] 84-01-PLAN.md — Add Agent Skills section, GHA Validator to Interactive Tools, and fix stale path references
 
 ## Progress
 
