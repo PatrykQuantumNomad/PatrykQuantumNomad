@@ -4,10 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-COMPOSE_HOOK="$REPO_ROOT/public/skills/compose-validator/hooks/validate-compose.sh"
-DOCKERFILE_HOOK="$REPO_ROOT/public/skills/dockerfile-analyzer/hooks/validate-dockerfile.sh"
-K8S_HOOK="$REPO_ROOT/public/skills/k8s-analyzer/hooks/validate-k8s.sh"
-GHA_HOOK="$REPO_ROOT/public/skills/gha-validator/hooks/validate-gha.sh"
+COMPOSE_HOOK="$REPO_ROOT/skills/compose-validator/hooks/validate-compose.sh"
+DOCKERFILE_HOOK="$REPO_ROOT/skills/dockerfile-analyzer/hooks/validate-dockerfile.sh"
+K8S_HOOK="$REPO_ROOT/skills/k8s-analyzer/hooks/validate-k8s.sh"
+GHA_HOOK="$REPO_ROOT/skills/gha-validator/hooks/validate-gha.sh"
 
 PASS_COUNT=0
 FAIL_COUNT=0
