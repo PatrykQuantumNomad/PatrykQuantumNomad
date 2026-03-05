@@ -9,12 +9,12 @@ Requirements for DevOps Skills Publishing milestone. Each maps to roadmap phases
 
 ### Directory Structure
 
-- [ ] **DIR-01**: Skills directories moved from `public/skills/{name}/` to `skills/{name}/` at repo root
-- [ ] **DIR-02**: Symlink created at `public/skills` pointing to `../skills` for Astro static serving
-- [ ] **DIR-03**: Benchmark artifacts moved from `public/skills/` to `public/benchmarks/` (JSON, MD, workspace dirs)
-- [ ] **DIR-04**: Shell hook scripts retain executable permission after move
-- [ ] **DIR-05**: Astro build produces `dist/skills/*/SKILL.md` for all 4 skills via symlink
-- [ ] **DIR-06**: Stale `--help/` directory removed if present at repo root
+- [x] **DIR-01**: Skills directories moved from `public/skills/{name}/` to `skills/{name}/` at repo root
+- [x] **DIR-02**: Symlink created at `public/skills` pointing to `../skills` for Astro static serving
+- [x] **DIR-03**: Benchmark artifacts moved from `public/skills/` to `public/benchmarks/` (JSON, MD, workspace dirs)
+- [x] **DIR-04**: Shell hook scripts retain executable permission after move
+- [x] **DIR-05**: Astro build produces `dist/skills/*/SKILL.md` for all 4 skills via symlink
+- [x] **DIR-06**: Stale `--help/` directory removed if present at repo root
 
 ### Discovery & Verification
 
@@ -53,12 +53,12 @@ None currently deferred.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIR-01 | Phase 82 | Pending |
-| DIR-02 | Phase 82 | Pending |
-| DIR-03 | Phase 82 | Pending |
-| DIR-04 | Phase 82 | Pending |
-| DIR-05 | Phase 82 | Pending |
-| DIR-06 | Phase 82 | Pending |
+| DIR-01 | Phase 82 | Complete |
+| DIR-02 | Phase 82 | Complete |
+| DIR-03 | Phase 82 | Complete |
+| DIR-04 | Phase 82 | Complete |
+| DIR-05 | Phase 82 | Complete |
+| DIR-06 | Phase 82 | Complete |
 | DSC-01 | Phase 83 | Pending |
 | DSC-02 | Phase 83 | Pending |
 | DSC-03 | Phase 83 | Pending |
@@ -77,4 +77,4 @@ None currently deferred.
 
 ---
 *Requirements defined: 2026-03-05*
-*Last updated: 2026-03-05 after roadmap creation*
+*Last updated: 2026-03-05 after Phase 82 completion*

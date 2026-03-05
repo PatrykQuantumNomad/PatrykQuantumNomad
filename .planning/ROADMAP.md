@@ -36,7 +36,7 @@ See MILESTONES.md for completed milestone details.
 
 **Milestone Goal:** Package and publish 4 DevOps validator skills to the skills.sh open agent skills ecosystem
 
-- [ ] **Phase 82: Directory Restructure** - Move skills to repo root with symlink bridge for Astro serving
+- [x] **Phase 82: Directory Restructure** - Move skills to repo root with symlink bridge for Astro serving (shipped 2026-03-05)
 - [ ] **Phase 83: Discovery Verification** - Verify CLI discovery, individual install, and seed skills.sh listing
 - [ ] **Phase 84: Documentation** - Update README with install commands, benchmark highlights, and tool references
 
@@ -55,7 +55,7 @@ See MILESTONES.md for completed milestone details.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 82-01-PLAN.md — Atomic directory restructure with symlink bridge + build verification
+- [x] 82-01-PLAN.md — Atomic directory restructure with symlink bridge + build verification
 
 ### Phase 83: Discovery Verification
 **Goal**: All 4 skills are discoverable and installable via the skills CLI, and the first install seeds skills.sh listing
@@ -93,6 +93,6 @@ Phases execute in numeric order: 82 → 83 → 84
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 82. Directory Restructure | v1.14 | 0/1 | Not started | - |
+| 82. Directory Restructure | v1.14 | 1/1 | Complete | 2026-03-05 |
 | 83. Discovery Verification | v1.14 | 0/1 | Not started | - |
 | 84. Documentation | v1.14 | 0/1 | Not started | - |
