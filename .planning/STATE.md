@@ -4,8 +4,8 @@ milestone: v1.14
 milestone_name: DevOps Skills Publishing
 status: milestone_complete
 stopped_at: v1.14 milestone archived
-last_updated: "2026-03-05"
-last_activity: 2026-03-05 -- v1.14 milestone complete
+last_updated: "2026-03-06"
+last_activity: 2026-03-06 -- Quick task 012 completed (npm security fixes)
 progress:
   total_phases: 3
   completed_phases: 3
@@ -79,10 +79,11 @@ None.
 |---|-------------|------|--------|-----------|
 | 010 | Correctness validation | 2026-02-26 | 9d20b42 | [010-correctness-validation](./quick/010-correctness-validation/) |
 | 011 | EDA content correctness validation | 2026-02-26 | 958be19 | [011-eda-content-correctness-validation](./quick/011-eda-content-correctness-validation/) |
+| 012 | Fix Snyk security scan vulnerabilities (npm audit) | 2026-03-06 | 0097335 | [012-fix-snyk-security-scan-issue-on-gha-vali](./quick/012-fix-snyk-security-scan-issue-on-gha-vali/) |
 
 ## Session Continuity
 
-Last session: 2026-03-05
-Stopped at: v1.14 milestone archived
+Last session: 2026-03-06
+Stopped at: Quick task 012 completed
 Resume file: None
 Next: `/gsd:new-milestone` to start next milestone
