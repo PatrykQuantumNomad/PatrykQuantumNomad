@@ -10,11 +10,11 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 ### Guide Infrastructure
 
 - [ ] **INFRA-01**: Guide landing page at `/guides/fastapi-production/` with chapter card grid and AI agent narrative hero
-- [ ] **INFRA-02**: GuideLayout.astro extending Layout.astro with guide-specific navigation and reading progress
-- [ ] **INFRA-03**: Sidebar chapter navigation showing all chapters with current-page highlighting
-- [ ] **INFRA-04**: Breadcrumb navigation on all guide pages (Home > Guides > FastAPI Production > Chapter)
-- [ ] **INFRA-05**: Previous/next chapter navigation at bottom of each domain page
-- [ ] **INFRA-06**: Reading progress indicator (scroll-based progress bar at top of page)
+- [x] **INFRA-02**: GuideLayout.astro extending Layout.astro with guide-specific navigation and reading progress
+- [x] **INFRA-03**: Sidebar chapter navigation showing all chapters with current-page highlighting
+- [x] **INFRA-04**: Breadcrumb navigation on all guide pages (Home > Guides > FastAPI Production > Chapter)
+- [x] **INFRA-05**: Previous/next chapter navigation at bottom of each domain page
+- [x] **INFRA-06**: Reading progress indicator (scroll-based progress bar at top of page)
 - [x] **INFRA-07**: Zod-validated content collection for guide pages (MDX) and guide metadata (JSON)
 - [x] **INFRA-08**: Page generation via getStaticPaths for `/guides/fastapi-production/[slug]/`
 
@@ -90,11 +90,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 86 | Pending |
-| INFRA-02 | Phase 86 | Pending |
-| INFRA-03 | Phase 86 | Pending |
-| INFRA-04 | Phase 86 | Pending |
-| INFRA-05 | Phase 86 | Pending |
-| INFRA-06 | Phase 86 | Pending |
+| INFRA-02 | Phase 86 | Complete |
+| INFRA-03 | Phase 86 | Complete |
+| INFRA-04 | Phase 86 | Complete |
+| INFRA-05 | Phase 86 | Complete |
+| INFRA-06 | Phase 86 | Complete |
 | INFRA-07 | Phase 85 | Complete |
 | INFRA-08 | Phase 85 | Complete |
 | PAGE-01 | Phase 88 | Pending |

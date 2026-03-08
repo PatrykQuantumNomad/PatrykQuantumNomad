@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
 status: in_progress
-stopped_at: "Completed 85-01-PLAN.md"
+stopped_at: "Completed 86-01-PLAN.md"
 last_updated: "2026-03-08"
-last_activity: 2026-03-08 -- Completed Plan 01 of Phase 85 (Foundation and Content Schema)
+last_activity: 2026-03-08 -- Completed Plan 01 of Phase 86 (Route Helpers and Navigation Components)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 1
-  completed_plans: 1
-  percent: 20
+  total_plans: 2
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.15 FastAPI Production Guide -- Phase 85 (Foundation and Content Schema)
+**Current focus:** v1.15 FastAPI Production Guide -- Phase 86 (Page Infrastructure and Navigation)
 
 ## Current Position
 
-Phase: 85 of 89 (Foundation and Content Schema)
-Plan: 1 of 1 complete
+Phase: 86 of 89 (Page Infrastructure and Navigation)
+Plan: 1 of 2 complete
 Status: In progress
-Last activity: 2026-03-08 -- Completed Plan 01 (Foundation and Content Schema)
+Last activity: 2026-03-08 -- Completed Plan 01 (Route Helpers and Navigation Components)
 
-Progress: [##░░░░░░░░] 20%
+Progress: [####░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 188 (across 15 milestones)
-- v1.15 plans completed: 1
+- v1.15 plans completed: 2
 
 **Cumulative Stats:**
 
@@ -68,6 +68,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [85-01] Used astro/zod import (not bare zod) matching existing schema patterns
 - [85-01] guide.json is a JSON array with id field for file() loader compatibility
 - [85-01] Dynamic route uses page.data.slug (frontmatter) for URL params, not page.id
+- [86-01] Route helpers follow src/lib/eda/routes.ts pattern with GUIDE_ROUTES const + URL builders
+- [86-01] GuideLayout extends Layout.astro directly (two-column grid vs EDALayout simple wrapper)
+- [86-01] Sidebar uses CSS position:sticky (zero JS) with top offset for sticky header
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 85-01-PLAN.md
+Stopped at: Completed 86-01-PLAN.md
 Resume file: None
-Next: Phase 86 planning or next plan in Phase 85
+Next: Execute 86-02-PLAN.md (Landing page and [slug].astro GuideLayout integration)
