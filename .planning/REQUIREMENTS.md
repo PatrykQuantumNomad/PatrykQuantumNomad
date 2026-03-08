@@ -37,7 +37,7 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 - [x] **DIAG-01**: Build-time SVG diagram showing request flow through the 8-layer middleware stack
 - [x] **DIAG-02**: Build-time SVG diagram showing Builder pattern composition (setup_*() method chain)
 - [x] **DIAG-03**: Build-time SVG diagram showing JWT auth flow across 3 validation modes
-- [ ] **DIAG-04**: Interactive React Flow deployment topology diagram (app, Postgres, Redis, reverse proxy)
+- [x] **DIAG-04**: Interactive React Flow deployment topology diagram (app, Postgres, Redis, reverse proxy)
 
 ### AI Agent Narrative
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DIAG-01 | Phase 87 | Complete |
 | DIAG-02 | Phase 87 | Complete |
 | DIAG-03 | Phase 87 | Complete |
-| DIAG-04 | Phase 87 | Pending |
+| DIAG-04 | Phase 87 | Complete |
 | AGENT-01 | Phase 88 | Pending |
 | AGENT-02 | Phase 88 | Pending |
 | AGENT-03 | Phase 86 | Complete |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
 status: in_progress
-stopped_at: Completed 87-02-PLAN.md
-last_updated: "2026-03-08T15:45:55.292Z"
-last_activity: 2026-03-08 -- Completed Plan 02 of Phase 87 (CodeFromRepo Component)
+stopped_at: Completed 87-03-PLAN.md
+last_updated: "2026-03-08T15:56:02.698Z"
+last_activity: 2026-03-08 -- Completed Plan 03 of Phase 87 (Diagram Wrappers and Deployment Topology)
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
-  percent: 50
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 
 ## Current Position
 
-Phase: 87 of 89 (Guide-Specific Components)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-03-08 -- Completed Plan 02 of Phase 87 (CodeFromRepo Component)
+Phase: 87 of 89 (Guide-Specific Components) -- COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 87 complete, ready for Phase 88
+Last activity: 2026-03-08 -- Completed Plan 03 of Phase 87 (Diagram Wrappers and Deployment Topology)
 
-Progress: [#####░░░░░] 50%
+Progress: [##########] 100% (Phase 87)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 190 (across 15 milestones)
-- v1.15 plans completed: 4
+- Total plans completed: 191 (across 15 milestones)
+- v1.15 plans completed: 6
 
 **Cumulative Stats:**
 
@@ -80,6 +80,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [87-01] textLabel helper includes textAnchor option for flexible text positioning
 - [87-02] Default templateRepo and versionTag hardcoded in CodeFromRepo props (matching guide.json) rather than reading guide.json at build time
 - [87-02] CSS child selector overrides ([&_.expressive-code]) to join header bar seamlessly with code block
+- [87-03] Static dagre layout pre-computed at module level (not useMemo) since topology data is hardcoded
+- [87-03] TopologyNode uses emoji icons with color-coded borders per service type (no external icon deps)
+- [87-03] Followed DependencyGraph.tsx/dependency-graph.css patterns exactly for React Flow dark-theme integration
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 87-02-PLAN.md
+Stopped at: Completed 87-03-PLAN.md (Phase 87 complete)
 Resume file: None
-Next: Execute 87-03-PLAN.md (Astro diagram wrappers and React Flow deployment topology)
+Next: Plan Phase 88 (Content Authoring) -- 11 domain MDX pages with prose, code snippets, diagrams, and AI agent narrative
