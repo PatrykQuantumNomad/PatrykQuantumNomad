@@ -92,9 +92,9 @@ Plans:
   3. A companion blog post exists with bidirectional cross-links to all 11 domain pages
   4. Build-time OG images exist for the landing page and all 11 domain pages (12 total) with content-hash caching
   5. JSON-LD structured data (TechArticle + BreadcrumbList) is present on all guide pages, all pages appear in sitemap, and LLMs.txt includes guide section entries
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
-- [ ] 89-01-PLAN.md -- OG image pipeline (satori + sharp + content-hash caching) and JSON-LD structured data wiring
+- [x] 89-01-PLAN.md -- OG image pipeline (satori + sharp + content-hash caching) and JSON-LD structured data wiring
 - [x] 89-02-PLAN.md -- Header nav, /guides/ hub page, homepage callout card, and LLMs.txt entries
 - [ ] 89-03-PLAN.md -- Companion blog post with bidirectional cross-links to all 11 chapter pages
 
@@ -109,4 +109,4 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 | 86. Page Infrastructure and Navigation | 2/2 | Complete | 2026-03-08 |
 | 87. Guide-Specific Components | 3/3 | Complete | 2026-03-08 |
 | 88. Content Authoring | 4/4 | Complete   | 2026-03-08 |
-| 89. SEO, OG Images, and Site Integration | 1/3 | In Progress|  |
+| 89. SEO, OG Images, and Site Integration | 2/3 | In Progress|  |

@@ -56,10 +56,10 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 - [x] **SITE-01**: Header navigation link for Guides section
 - [x] **SITE-02**: Homepage callout card linking to the FastAPI Production Guide
 - [ ] **SITE-03**: Companion blog post with bidirectional cross-links to all 11 domain pages
-- [ ] **SITE-04**: Build-time OG images for landing page and all 11 domain pages (12 total) with content-hash caching
-- [ ] **SITE-05**: JSON-LD structured data (TechArticle + BreadcrumbList) on all guide pages
+- [x] **SITE-04**: Build-time OG images for landing page and all 11 domain pages (12 total) with content-hash caching
+- [x] **SITE-05**: JSON-LD structured data (TechArticle + BreadcrumbList) on all guide pages
 - [x] **SITE-06**: LLMs.txt entries for guide section
-- [ ] **SITE-07**: All guide pages included in sitemap
+- [x] **SITE-07**: All guide pages included in sitemap
 
 ## Future Requirements
 
@@ -121,10 +121,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SITE-01 | Phase 89 | Complete |
 | SITE-02 | Phase 89 | Complete |
 | SITE-03 | Phase 89 | Pending |
-| SITE-04 | Phase 89 | Pending |
-| SITE-05 | Phase 89 | Pending |
+| SITE-04 | Phase 89 | Complete |
+| SITE-05 | Phase 89 | Complete |
 | SITE-06 | Phase 89 | Complete |
-| SITE-07 | Phase 89 | Pending |
+| SITE-07 | Phase 89 | Complete |
 
 **Coverage:**
 - v1.15 requirements: 36 total

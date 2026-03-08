@@ -90,6 +90,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [88-02] Rate Limiting page at 271 lines to include both backend implementations and proxy-aware client identification
 - [88-04] Testing page covers root conftest + integration conftest as separate sections for clarity
 - [88-04] Caching page includes fenced-code usage example (not CodeFromRepo) to show DI pattern in route handlers
+- [89-01] Guide OG cache uses separate CACHE_DIR (og-guide) to avoid collisions with EDA cache
+- [89-01] Single generateGuideOgImage function for both landing and chapter pages, differentiated by chapterLabel param
+- [89-01] Geometric pattern (rectangles, lines, dots) for right column instead of importing external SVG
 - [89-02] Guides nav link at position 6 (after EDA, before Tools) to group content items together
 - [89-02] Created /guides/index.astro hub page instead of redirect for future-proofing
 - [89-02] Homepage card uses gradient background with watermark text (no SVG/image needed)
