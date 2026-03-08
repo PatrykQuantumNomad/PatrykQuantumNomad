@@ -20,17 +20,17 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 
 ### Domain Pages
 
-- [ ] **PAGE-01**: Builder Pattern page covering FastAPIAppBuilder, setup_*() composition, and factory function
+- [x] **PAGE-01**: Builder Pattern page covering FastAPIAppBuilder, setup_*() composition, and factory function
 - [ ] **PAGE-02**: Authentication page covering 3-mode JWT validation (shared secret, static key, JWKS)
-- [ ] **PAGE-03**: Middleware page covering 6 raw ASGI middlewares, ordering, and why not BaseHTTPMiddleware
+- [x] **PAGE-03**: Middleware page covering 6 raw ASGI middlewares, ordering, and why not BaseHTTPMiddleware
 - [ ] **PAGE-04**: Observability page covering OpenTelemetry, Prometheus metrics, and structured JSON logging
 - [ ] **PAGE-05**: Database page covering async SQLAlchemy, Alembic migrations, and multi-backend support
 - [ ] **PAGE-06**: Docker page covering multi-stage builds, tini, unprivileged user, digest-pinned images
-- [ ] **PAGE-07**: Testing page covering unit/integration architecture, hermetic helpers, and 98%+ coverage
-- [ ] **PAGE-08**: Health Checks page covering readiness vs liveness separation and dependency-aware registry
+- [x] **PAGE-07**: Testing page covering unit/integration architecture, hermetic helpers, and 98%+ coverage
+- [x] **PAGE-08**: Health Checks page covering readiness vs liveness separation and dependency-aware registry
 - [ ] **PAGE-09**: Security Headers page covering HSTS, CSP, permissions policy, and trusted hosts
 - [ ] **PAGE-10**: Rate Limiting page covering fixed-window algorithm, memory/Redis backends, and proxy trust
-- [ ] **PAGE-11**: Caching page covering optional memory/Redis cache layer with per-key TTL
+- [x] **PAGE-11**: Caching page covering optional memory/Redis cache layer with per-key TTL
 
 ### Architecture Diagrams
 
@@ -41,8 +41,8 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 
 ### AI Agent Narrative
 
-- [ ] **AGENT-01**: Each domain page opens with what the AI agent inherits from this production concern
-- [ ] **AGENT-02**: Each domain page closes with a summary of what the agent never needs to implement
+- [x] **AGENT-01**: Each domain page opens with what the AI agent inherits from this production concern
+- [x] **AGENT-02**: Each domain page closes with a summary of what the agent never needs to implement
 - [x] **AGENT-03**: Landing page hero frames the template as "production concerns handled, agent writes business logic"
 
 ### Code Snippets
@@ -97,23 +97,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-06 | Phase 86 | Complete |
 | INFRA-07 | Phase 85 | Complete |
 | INFRA-08 | Phase 85 | Complete |
-| PAGE-01 | Phase 88 | Pending |
+| PAGE-01 | Phase 88 | Complete |
 | PAGE-02 | Phase 88 | Pending |
-| PAGE-03 | Phase 88 | Pending |
+| PAGE-03 | Phase 88 | Complete |
 | PAGE-04 | Phase 88 | Pending |
 | PAGE-05 | Phase 88 | Pending |
 | PAGE-06 | Phase 88 | Pending |
-| PAGE-07 | Phase 88 | Pending |
-| PAGE-08 | Phase 88 | Pending |
+| PAGE-07 | Phase 88 | Complete |
+| PAGE-08 | Phase 88 | Complete |
 | PAGE-09 | Phase 88 | Pending |
 | PAGE-10 | Phase 88 | Pending |
-| PAGE-11 | Phase 88 | Pending |
+| PAGE-11 | Phase 88 | Complete |
 | DIAG-01 | Phase 87 | Complete |
 | DIAG-02 | Phase 87 | Complete |
 | DIAG-03 | Phase 87 | Complete |
 | DIAG-04 | Phase 87 | Complete |
-| AGENT-01 | Phase 88 | Pending |
-| AGENT-02 | Phase 88 | Pending |
+| AGENT-01 | Phase 88 | Complete |
+| AGENT-02 | Phase 88 | Complete |
 | AGENT-03 | Phase 86 | Complete |
 | CODE-01 | Phase 88 | Complete |
 | CODE-02 | Phase 88 | Complete |
