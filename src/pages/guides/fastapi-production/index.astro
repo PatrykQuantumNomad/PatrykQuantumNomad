@@ -6,11 +6,14 @@
  */
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
+import GuideJsonLd from '../../../components/guide/GuideJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import { guidePageUrl } from '../../../lib/guides/routes';
 
 const [guideMeta] = await getCollection('guides');
 const guidePages = await getCollection('guidePages');
 const existingSlugs = new Set(guidePages.map(p => p.data.slug));
+const ogImageURL = new URL('/open-graph/guides/fastapi-production.png', Astro.site).toString();
 
 const chapterDescriptions: Record<string, string> = {
   'builder-pattern': 'How the application factory composes middleware, routes, and lifecycle events',
@@ -30,8 +33,16 @@ const chapterDescriptions: Record<string, string> = {
 <Layout
   title="FastAPI Production Guide | Patryk Golabek"
   description={guideMeta.data.description}
+  ogImage={ogImageURL}
+  ogImageAlt="FastAPI Production Guide"
   ogType="website"
 >
+  <GuideJsonLd title={guideMeta.data.title} description={guideMeta.data.description} url="https://patrykgolabek.dev/guides/fastapi-production/" isLanding={true} />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
+    { name: 'FastAPI Production Guide', url: 'https://patrykgolabek.dev/guides/fastapi-production/' },
+  ]} />
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
     <!-- Hero Section -->
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">

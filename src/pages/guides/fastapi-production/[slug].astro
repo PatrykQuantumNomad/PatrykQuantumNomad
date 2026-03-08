@@ -18,11 +18,14 @@ interface Props {
 
 const { page, guideMeta } = Astro.props;
 const { Content } = await render(page);
+const ogImageURL = new URL('/open-graph/guides/fastapi-production/' + page.data.slug + '.png', Astro.site).toString();
 ---
 
 <GuideLayout
   title={`${page.data.title} | FastAPI Production Guide`}
   description={page.data.description}
+  ogImage={ogImageURL}
+  ogImageAlt={page.data.title + ' - FastAPI Production Guide'}
   guideTitle={guideMeta.data.title}
   guideSlug={guideMeta.data.slug}
   chapters={guideMeta.data.chapters}

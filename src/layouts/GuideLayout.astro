@@ -3,6 +3,8 @@ import Layout from './Layout.astro';
 import GuideSidebar from '../components/guide/GuideSidebar.astro';
 import GuideBreadcrumb from '../components/guide/GuideBreadcrumb.astro';
 import GuideChapterNav from '../components/guide/GuideChapterNav.astro';
+import GuideJsonLd from '../components/guide/GuideJsonLd.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 interface Props {
   title: string;
@@ -22,6 +24,13 @@ const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters
 <Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType="article">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
     <GuideBreadcrumb guideTitle={guideTitle} guideSlug={guideSlug} chapterTitle={chapterTitle} />
+    <GuideJsonLd title={title} description={description ?? ''} url={`https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/`} />
+    <BreadcrumbJsonLd crumbs={[
+      { name: 'Home', url: 'https://patrykgolabek.dev/' },
+      { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
+      { name: guideTitle, url: `https://patrykgolabek.dev/guides/${guideSlug}/` },
+      { name: chapterTitle, url: `https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/` },
+    ]} />
 
     <div class="lg:grid lg:grid-cols-[240px_1fr] lg:gap-8 mt-6">
       <!-- Sidebar (hidden on mobile, sticky on desktop) -->

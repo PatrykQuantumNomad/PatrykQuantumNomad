@@ -1,0 +1,53 @@
+---
+/**
+ * GuideJsonLd.astro — TechArticle or CollectionPage JSON-LD
+ * structured data for FastAPI Production Guide pages.
+ *
+ * Mode 1 (chapter page): @type "TechArticle" with isPartOf linking to guide landing
+ * Mode 2 (landing page): @type "CollectionPage" (when isLanding is true)
+ */
+
+interface Props {
+  title: string;
+  description: string;
+  url: string;
+  isLanding?: boolean;
+}
+
+const { title, description, url, isLanding = false } = Astro.props;
+
+const person = {
+  "@type": "Person",
+  "@id": "https://patrykgolabek.dev/#person",
+  "name": "Patryk Golabek",
+  "url": "https://patrykgolabek.dev/",
+};
+
+const schema = isLanding
+  ? {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": title,
+      "description": description,
+      "url": url,
+      "author": person,
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": title,
+      "description": description,
+      "url": url,
+      "inLanguage": "en",
+      "proficiencyLevel": "Expert",
+      "author": person,
+      "publisher": person,
+      "isPartOf": {
+        "@type": "WebPage",
+        "name": "FastAPI Production Guide",
+        "url": "https://patrykgolabek.dev/guides/fastapi-production/",
+      },
+    };
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
