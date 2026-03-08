@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 86: Page Infrastructure and Navigation** - GuideLayout, landing page, sidebar, breadcrumb, prev/next navigation, reading progress, and first chapter validation (completed 2026-03-08)
 - [x] **Phase 87: Guide-Specific Components** - CodeFromRepo component, 4 architecture diagram SVG generators, diagram-base module, and interactive deployment topology (completed 2026-03-08)
 - [x] **Phase 88: Content Authoring** - All 11 domain MDX pages with prose, code snippets, diagrams, and AI agent narrative (completed 2026-03-08)
-- [ ] **Phase 89: SEO, OG Images, and Site Integration** - JSON-LD, OG images, header nav, homepage callout, companion blog post, LLMs.txt, and sitemap
+- [x] **Phase 89: SEO, OG Images, and Site Integration** - JSON-LD, OG images, header nav, homepage callout, companion blog post, LLMs.txt, and sitemap (completed 2026-03-08)
 
 ## Phase Details
 
@@ -92,11 +92,11 @@ Plans:
   3. A companion blog post exists with bidirectional cross-links to all 11 domain pages
   4. Build-time OG images exist for the landing page and all 11 domain pages (12 total) with content-hash caching
   5. JSON-LD structured data (TechArticle + BreadcrumbList) is present on all guide pages, all pages appear in sitemap, and LLMs.txt includes guide section entries
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 89-01-PLAN.md -- OG image pipeline (satori + sharp + content-hash caching) and JSON-LD structured data wiring
 - [x] 89-02-PLAN.md -- Header nav, /guides/ hub page, homepage callout card, and LLMs.txt entries
-- [ ] 89-03-PLAN.md -- Companion blog post with bidirectional cross-links to all 11 chapter pages
+- [x] 89-03-PLAN.md -- Companion blog post with bidirectional cross-links to all 11 chapter pages
 
 ## Progress
 
@@ -109,4 +109,4 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 | 86. Page Infrastructure and Navigation | 2/2 | Complete | 2026-03-08 |
 | 87. Guide-Specific Components | 3/3 | Complete | 2026-03-08 |
 | 88. Content Authoring | 4/4 | Complete   | 2026-03-08 |
-| 89. SEO, OG Images, and Site Integration | 2/3 | In Progress|  |
+| 89. SEO, OG Images, and Site Integration | 3/3 | Complete | 2026-03-08 |

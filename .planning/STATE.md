@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
 status: in_progress
-stopped_at: Completed 89-02-PLAN.md (site integration)
-last_updated: "2026-03-08T17:11:18.000Z"
-last_activity: 2026-03-08 -- Completed 89-02 site integration (header nav, hub page, homepage card, LLMs.txt)
+stopped_at: Completed 89-03-PLAN.md (companion blog post)
+last_updated: "2026-03-08T17:19:34.000Z"
+last_activity: 2026-03-08 -- Completed 89-03 companion blog post with bidirectional cross-links
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 13
+  percent: 100
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 89 of 89 (SEO, OG Images, and Site Integration)
-Plan: 2 of 3 complete
-Status: Plan 89-02 complete, ready for 89-03
-Last activity: 2026-03-08 -- Completed 89-02 site integration (header nav, hub page, homepage card, LLMs.txt)
+Plan: 3 of 3 complete
+Status: Phase 89 complete, milestone v1.15 complete
+Last activity: 2026-03-08 -- Completed 89-03 companion blog post with bidirectional cross-links
 
-Progress: [#########-] 92% (Phase 89: 2/3 plans)
+Progress: [##########] 100% (Phase 89: 3/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 197 (across 15 milestones)
-- v1.15 plans completed: 12
+- v1.15 plans completed: 13
 
 **Cumulative Stats:**
 
@@ -96,6 +96,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [89-02] Guides nav link at position 6 (after EDA, before Tools) to group content items together
 - [89-02] Created /guides/index.astro hub page instead of redirect for future-proofing
 - [89-02] Homepage card uses gradient background with watermark text (no SVG/image needed)
+- [89-03] Pure MDX prose with standard markdown links (no component imports) for companion blog post
+- [89-03] Back-link added in GuideLayout.astro between slot and GuideChapterNav to avoid editing 11 MDX files
 
 ### Pending Todos
 
@@ -117,6 +119,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 89-02-PLAN.md (site integration)
+Stopped at: Completed 89-03-PLAN.md (companion blog post)
 Resume file: None
-Next: Execute 89-03-PLAN.md (companion blog post with bidirectional cross-links)
+Next: Milestone v1.15 complete. All 13 plans across 5 phases delivered.
