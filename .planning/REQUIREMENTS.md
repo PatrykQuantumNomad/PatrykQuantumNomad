@@ -80,7 +80,7 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 | Video walkthroughs | Different content format; consider separately |
 | Comments/discussion on guide pages | Requires moderation infrastructure; use "Reply via email" approach |
 | Mermaid.js for diagrams | ~200KB+ client bundle or Playwright SSR requirement; build-time SVG is lighter and proven |
-| Full tutorial/course format | Guide covers WHAT, WHY, HOW TO CONFIGURE — not step-by-step tutorial |
+| Full tutorial/course format | Guide covers WHAT, WHY, HOW TO CONFIGURE -- not step-by-step tutorial |
 | Template repo code auto-extraction | Fragile; curated excerpts with version annotations are more maintainable |
 
 ## Traceability
@@ -89,48 +89,48 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| INFRA-06 | — | Pending |
-| INFRA-07 | — | Pending |
-| INFRA-08 | — | Pending |
-| PAGE-01 | — | Pending |
-| PAGE-02 | — | Pending |
-| PAGE-03 | — | Pending |
-| PAGE-04 | — | Pending |
-| PAGE-05 | — | Pending |
-| PAGE-06 | — | Pending |
-| PAGE-07 | — | Pending |
-| PAGE-08 | — | Pending |
-| PAGE-09 | — | Pending |
-| PAGE-10 | — | Pending |
-| PAGE-11 | — | Pending |
-| DIAG-01 | — | Pending |
-| DIAG-02 | — | Pending |
-| DIAG-03 | — | Pending |
-| DIAG-04 | — | Pending |
-| AGENT-01 | — | Pending |
-| AGENT-02 | — | Pending |
-| AGENT-03 | — | Pending |
-| CODE-01 | — | Pending |
-| CODE-02 | — | Pending |
-| CODE-03 | — | Pending |
-| SITE-01 | — | Pending |
-| SITE-02 | — | Pending |
-| SITE-03 | — | Pending |
-| SITE-04 | — | Pending |
-| SITE-05 | — | Pending |
-| SITE-06 | — | Pending |
-| SITE-07 | — | Pending |
+| INFRA-01 | Phase 86 | Pending |
+| INFRA-02 | Phase 86 | Pending |
+| INFRA-03 | Phase 86 | Pending |
+| INFRA-04 | Phase 86 | Pending |
+| INFRA-05 | Phase 86 | Pending |
+| INFRA-06 | Phase 86 | Pending |
+| INFRA-07 | Phase 85 | Pending |
+| INFRA-08 | Phase 85 | Pending |
+| PAGE-01 | Phase 88 | Pending |
+| PAGE-02 | Phase 88 | Pending |
+| PAGE-03 | Phase 88 | Pending |
+| PAGE-04 | Phase 88 | Pending |
+| PAGE-05 | Phase 88 | Pending |
+| PAGE-06 | Phase 88 | Pending |
+| PAGE-07 | Phase 88 | Pending |
+| PAGE-08 | Phase 88 | Pending |
+| PAGE-09 | Phase 88 | Pending |
+| PAGE-10 | Phase 88 | Pending |
+| PAGE-11 | Phase 88 | Pending |
+| DIAG-01 | Phase 87 | Pending |
+| DIAG-02 | Phase 87 | Pending |
+| DIAG-03 | Phase 87 | Pending |
+| DIAG-04 | Phase 87 | Pending |
+| AGENT-01 | Phase 88 | Pending |
+| AGENT-02 | Phase 88 | Pending |
+| AGENT-03 | Phase 86 | Pending |
+| CODE-01 | Phase 88 | Pending |
+| CODE-02 | Phase 88 | Pending |
+| CODE-03 | Phase 87 | Pending |
+| SITE-01 | Phase 89 | Pending |
+| SITE-02 | Phase 89 | Pending |
+| SITE-03 | Phase 89 | Pending |
+| SITE-04 | Phase 89 | Pending |
+| SITE-05 | Phase 89 | Pending |
+| SITE-06 | Phase 89 | Pending |
+| SITE-07 | Phase 89 | Pending |
 
 **Coverage:**
 - v1.15 requirements: 36 total
-- Mapped to phases: 0
-- Unmapped: 36
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after initial definition*
+*Last updated: 2026-03-08 after roadmap creation*

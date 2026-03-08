@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
-status: defining_requirements
-stopped_at: defining requirements
+status: ready_to_plan
+stopped_at: roadmap created
 last_updated: "2026-03-08"
-last_activity: 2026-03-08 -- Milestone v1.15 started
+last_activity: 2026-03-08 -- Roadmap created for v1.15
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.15 FastAPI Production Guide
+**Current focus:** v1.15 FastAPI Production Guide -- Phase 85 (Foundation and Content Schema)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-08 — Milestone v1.15 started
+Phase: 85 of 89 (Foundation and Content Schema)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-08 -- Roadmap created with 5 phases (85-89), 36 requirements mapped
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -71,7 +71,8 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- Template repo tagging: fastapi-template needs a v1.0.0 tag before content authoring (Phase 88)
+- Header nav strategy: 10th nav item risk -- decide during Phase 85 planning whether to add "Guides" link or group under existing category
 
 ### Quick Tasks Completed
 
@@ -84,6 +85,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Milestone v1.15 started — defining requirements
+Stopped at: Roadmap created for v1.15 FastAPI Production Guide (5 phases, 36 requirements)
 Resume file: None
-Next: Complete requirements definition, then `/gsd:plan-phase 85`
+Next: `/gsd:plan-phase 85`
