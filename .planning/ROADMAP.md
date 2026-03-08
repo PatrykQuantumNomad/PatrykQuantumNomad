@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A stub MDX chapter file builds successfully through the full pipeline (collection -> page -> rendered HTML)
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 85-01-PLAN.md -- Zod schemas, content collections, stub MDX, dynamic page route, and schema unit tests
+- [x] 85-01-PLAN.md -- Zod schemas, content collections, stub MDX, dynamic page route, and schema unit tests
 
 ### Phase 86: Page Infrastructure and Navigation
 **Goal**: Users can navigate the guide with sidebar, breadcrumbs, prev/next links, and reading progress -- and the landing page introduces the guide
