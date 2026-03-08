@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
-status: ready_to_plan
-stopped_at: roadmap created
+status: in_progress
+stopped_at: "Completed 85-01-PLAN.md"
 last_updated: "2026-03-08"
-last_activity: 2026-03-08 -- Roadmap created for v1.15
+last_activity: 2026-03-08 -- Completed Plan 01 of Phase 85 (Foundation and Content Schema)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 1
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 85 of 89 (Foundation and Content Schema)
-Plan: --
-Status: Ready to plan
-Last activity: 2026-03-08 -- Roadmap created with 5 phases (85-89), 36 requirements mapped
+Plan: 1 of 1 complete
+Status: In progress
+Last activity: 2026-03-08 -- Completed Plan 01 (Foundation and Content Schema)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [##░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 187 (across 14 milestones)
-- v1.15 plans completed: 0
+- Total plans completed: 188 (across 15 milestones)
+- v1.15 plans completed: 1
 
 **Cumulative Stats:**
 
@@ -65,6 +65,10 @@ Progress: [░░░░░░░░░░] 0%
 
 Full decision log in PROJECT.md Key Decisions table.
 
+- [85-01] Used astro/zod import (not bare zod) matching existing schema patterns
+- [85-01] guide.json is a JSON array with id field for file() loader compatibility
+- [85-01] Dynamic route uses page.data.slug (frontmatter) for URL params, not page.id
+
 ### Pending Todos
 
 None.
@@ -85,6 +89,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Roadmap created for v1.15 FastAPI Production Guide (5 phases, 36 requirements)
+Stopped at: Completed 85-01-PLAN.md
 Resume file: None
-Next: `/gsd:plan-phase 85`
+Next: Phase 86 planning or next plan in Phase 85

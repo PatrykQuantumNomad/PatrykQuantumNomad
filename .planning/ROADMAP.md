@@ -13,7 +13,7 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 85: Foundation and Content Schema** - Zod schemas, content collections, guide metadata, route helpers, and page generation pipeline
+- [x] **Phase 85: Foundation and Content Schema** - Zod schemas, content collections, guide metadata, route helpers, and page generation pipeline (completed 2026-03-08)
 - [ ] **Phase 86: Page Infrastructure and Navigation** - GuideLayout, landing page, sidebar, breadcrumb, prev/next navigation, reading progress, and first chapter validation
 - [ ] **Phase 87: Guide-Specific Components** - CodeFromRepo component, 4 architecture diagram SVG generators, diagram-base module, and interactive deployment topology
 - [ ] **Phase 88: Content Authoring** - All 11 domain MDX pages with prose, code snippets, diagrams, and AI agent narrative
@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. A `guides` JSON collection loads guide-level metadata (guide.json) with chapter ordering, template repo URL, and version tag
   3. `getStaticPaths` at `/guides/fastapi-production/[slug]/` generates pages from the content collection
   4. A stub MDX chapter file builds successfully through the full pipeline (collection -> page -> rendered HTML)
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 85-01-PLAN.md -- Zod schemas, content collections, stub MDX, dynamic page route, and schema unit tests
 
@@ -88,7 +88,7 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 85. Foundation and Content Schema | 0/1 | Not started | - |
+| 85. Foundation and Content Schema | 1/1 | Complete   | 2026-03-08 |
 | 86. Page Infrastructure and Navigation | 0/TBD | Not started | - |
 | 87. Guide-Specific Components | 0/TBD | Not started | - |
 | 88. Content Authoring | 0/TBD | Not started | - |

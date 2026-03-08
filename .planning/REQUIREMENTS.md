@@ -15,8 +15,8 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 - [ ] **INFRA-04**: Breadcrumb navigation on all guide pages (Home > Guides > FastAPI Production > Chapter)
 - [ ] **INFRA-05**: Previous/next chapter navigation at bottom of each domain page
 - [ ] **INFRA-06**: Reading progress indicator (scroll-based progress bar at top of page)
-- [ ] **INFRA-07**: Zod-validated content collection for guide pages (MDX) and guide metadata (JSON)
-- [ ] **INFRA-08**: Page generation via getStaticPaths for `/guides/fastapi-production/[slug]/`
+- [x] **INFRA-07**: Zod-validated content collection for guide pages (MDX) and guide metadata (JSON)
+- [x] **INFRA-08**: Page generation via getStaticPaths for `/guides/fastapi-production/[slug]/`
 
 ### Domain Pages
 
@@ -95,8 +95,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 86 | Pending |
 | INFRA-05 | Phase 86 | Pending |
 | INFRA-06 | Phase 86 | Pending |
-| INFRA-07 | Phase 85 | Pending |
-| INFRA-08 | Phase 85 | Pending |
+| INFRA-07 | Phase 85 | Complete |
+| INFRA-08 | Phase 85 | Complete |
 | PAGE-01 | Phase 88 | Pending |
 | PAGE-02 | Phase 88 | Pending |
 | PAGE-03 | Phase 88 | Pending |
