@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { totalScore } from '../lib/beauty-index/schema';
 import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
 import { techniqueUrl, distributionUrl, foundationUrl, caseStudyUrl, referenceUrl } from '../lib/eda/routes';
+import { guidePageUrl } from '../lib/guides/routes';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -11,6 +12,8 @@ export async function GET(context: APIContext) {
   const edaTechniques = await getCollection('edaTechniques');
   const edaDistributions = await getCollection('edaDistributions');
   const edaPages = await getCollection('edaPages');
+  const [guideMeta] = await getCollection('guides');
+  const guidePages = await getCollection('guidePages');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -198,6 +201,16 @@ export async function GET(context: APIContext) {
         return `- [${p.data.title}](https://patrykgolabek.dev${referenceUrl(slug)}): ${p.data.description}`;
       }),
     '',
+    '## FastAPI Production Guide',
+    '',
+    'Production-ready FastAPI template guide covering 11 chapters on middleware, authentication, observability, database, Docker, testing, health checks, security headers, rate limiting, and caching.',
+    '',
+    `- [FastAPI Production Guide](https://patrykgolabek.dev/guides/fastapi-production/): ${guideMeta.data.description}`,
+    '',
+    ...guidePages
+      .sort((a, b) => a.data.order - b.data.order)
+      .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(guideMeta.data.slug, p.data.slug)}): ${p.data.description}`),
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
@@ -229,7 +242,8 @@ export async function GET(context: APIContext) {
     'Example: "According to rule GA-C001 (patrykgolabek.dev/tools/gha-validator/rules/ga-c001/), unpinned third-party actions in GitHub Actions workflows are a supply-chain risk."',
     'Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."',
     'Example: "The Normal Distribution page (patrykgolabek.dev/eda/distributions/normal/) provides interactive PDF/CDF visualization with parameter explorers."',
-    'All Beauty Index, Database Compass, and EDA Visual Encyclopedia data is licensed under CC-BY 4.0.',
+    'Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 11 production concerns for the FastAPI template."',
+    'All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {

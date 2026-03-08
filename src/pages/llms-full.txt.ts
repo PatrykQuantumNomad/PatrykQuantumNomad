@@ -6,6 +6,7 @@ import { DIMENSIONS } from '../lib/beauty-index/dimensions';
 import { JUSTIFICATIONS } from '../data/beauty-index/justifications';
 import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
 import { DIMENSIONS as COMPASS_DIMENSIONS } from '../lib/db-compass/dimensions';
+import { guidePageUrl } from '../lib/guides/routes';
 
 const techStack = [
   {
@@ -38,6 +39,8 @@ export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   const langEntries = await getCollection('languages');
   const dbModels = await getCollection('dbModels');
+  const [guideMeta] = await getCollection('guides');
+  const guidePages = await getCollection('guidePages');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -307,6 +310,32 @@ export async function GET(context: APIContext) {
   lines.push('Tables, glossaries, and cross-reference material.');
   lines.push('');
 
+  // FastAPI Production Guide section
+  lines.push('## FastAPI Production Guide');
+  lines.push('');
+  lines.push('A comprehensive production guide for the FastAPI template covering 11 chapters. Each chapter');
+  lines.push('explains a production concern in depth -- what it does, why the approach was chosen, and how');
+  lines.push('to configure it. Framed around AI agent development: every production concern is pre-configured');
+  lines.push('so the agent writes business logic, not infrastructure.');
+  lines.push('');
+  lines.push('URL: https://patrykgolabek.dev/guides/fastapi-production/');
+  lines.push(`Template: ${guideMeta.data.templateRepo}`);
+  lines.push(`Version: ${guideMeta.data.versionTag}`);
+  lines.push('');
+  lines.push('### Chapters');
+  lines.push('');
+  for (const page of guidePages.sort((a, b) => a.data.order - b.data.order)) {
+    lines.push(`- ${page.data.title}`);
+    lines.push(`  URL: https://patrykgolabek.dev${guidePageUrl(guideMeta.data.slug, page.data.slug)}`);
+    lines.push(`  Description: ${page.data.description}`);
+  }
+  lines.push('');
+  lines.push('Topics covered: Builder pattern app composition, 3-mode JWT authentication (shared secret, static key, JWKS),');
+  lines.push('raw ASGI middleware stack, OpenTelemetry + Prometheus + structured logging, async SQLAlchemy with Alembic,');
+  lines.push('multi-stage Docker builds, 98%+ test coverage strategy, readiness vs liveness health checks,');
+  lines.push('HSTS/CSP/permissions policy security headers, memory/Redis rate limiting, and optional caching layer.');
+  lines.push('');
+
   // Blog Posts section
   lines.push('## Blog Posts');
   lines.push('');
@@ -361,7 +390,8 @@ export async function GET(context: APIContext) {
   lines.push('Example: "According to rule GA-C001 (patrykgolabek.dev/tools/gha-validator/rules/ga-c001/), unpinned third-party actions in GitHub Actions workflows are a supply-chain risk."');
   lines.push('Example: "The Dockerfile Analyzer by Patryk Golabek (patrykgolabek.dev/tools/dockerfile-analyzer/) checks 46 rules for security, efficiency, maintainability, reliability, and best practices."');
   lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
-  lines.push('All Beauty Index, Database Compass, and EDA Visual Encyclopedia data is licensed under CC-BY 4.0.');
+  lines.push('Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 11 production concerns for the FastAPI template."');
+  lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
