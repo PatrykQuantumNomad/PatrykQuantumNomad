@@ -59,7 +59,11 @@ Plans:
   3. Build-time SVG diagram of the Builder pattern shows setup_*() method composition and factory function structure
   4. Build-time SVG diagram of JWT auth flow shows the 3 validation modes (shared secret, static key, JWKS) as distinct paths
   5. Interactive React Flow deployment topology diagram renders app, Postgres, Redis, and reverse proxy nodes with connection edges
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 87-01-PLAN.md -- TDD SVG diagram generators (diagram-base, middleware-stack, builder-pattern, jwt-auth-flow)
+- [ ] 87-02-PLAN.md -- CodeFromRepo component with source attribution and GitHub link
+- [ ] 87-03-PLAN.md -- Astro diagram wrappers and interactive React Flow deployment topology
 
 ### Phase 88: Content Authoring
 **Goal**: All 11 domain deep-dive pages are complete with full prose, code snippets, architecture diagrams, and AI agent narrative
@@ -93,6 +97,6 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 |-------|----------------|--------|-----------|
 | 85. Foundation and Content Schema | 1/1 | Complete   | 2026-03-08 |
 | 86. Page Infrastructure and Navigation | 2/2 | Complete | 2026-03-08 |
-| 87. Guide-Specific Components | 0/TBD | Not started | - |
+| 87. Guide-Specific Components | 0/3 | Not started | - |
 | 88. Content Authoring | 0/TBD | Not started | - |
 | 89. SEO, OG Images, and Site Integration | 0/TBD | Not started | - |
