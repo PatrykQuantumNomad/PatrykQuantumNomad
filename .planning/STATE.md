@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
 status: in_progress
-stopped_at: Completed Phase 88 (all 4 plans)
-last_updated: "2026-03-08T16:38:00.000Z"
-last_activity: 2026-03-08 -- Completed Phase 88 Content Authoring (all 11 domain MDX pages)
+stopped_at: Completed 89-02-PLAN.md (site integration)
+last_updated: "2026-03-08T17:11:18.000Z"
+last_activity: 2026-03-08 -- Completed 89-02 site integration (header nav, hub page, homepage card, LLMs.txt)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.15 FastAPI Production Guide -- Phase 88 (Content Authoring) COMPLETE
+**Current focus:** v1.15 FastAPI Production Guide -- Phase 89 (SEO, OG Images, and Site Integration)
 
 ## Current Position
 
-Phase: 88 of 89 (Content Authoring) -- COMPLETE
-Plan: 4 of 4 complete
-Status: Phase 88 complete, ready for Phase 89
-Last activity: 2026-03-08 -- Completed Phase 88 Content Authoring (all 11 domain MDX pages)
+Phase: 89 of 89 (SEO, OG Images, and Site Integration)
+Plan: 2 of 3 complete
+Status: Plan 89-02 complete, ready for 89-03
+Last activity: 2026-03-08 -- Completed 89-02 site integration (header nav, hub page, homepage card, LLMs.txt)
 
-Progress: [##########] 100% (Phase 88)
+Progress: [#########-] 92% (Phase 89: 2/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 195 (across 15 milestones)
-- v1.15 plans completed: 10
+- Total plans completed: 197 (across 15 milestones)
+- v1.15 plans completed: 12
 
 **Cumulative Stats:**
 
@@ -90,6 +90,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [88-02] Rate Limiting page at 271 lines to include both backend implementations and proxy-aware client identification
 - [88-04] Testing page covers root conftest + integration conftest as separate sections for clarity
 - [88-04] Caching page includes fenced-code usage example (not CodeFromRepo) to show DI pattern in route handlers
+- [89-02] Guides nav link at position 6 (after EDA, before Tools) to group content items together
+- [89-02] Created /guides/index.astro hub page instead of redirect for future-proofing
+- [89-02] Homepage card uses gradient background with watermark text (no SVG/image needed)
 
 ### Pending Todos
 
@@ -111,6 +114,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed Phase 88 (all 4 plans)
+Stopped at: Completed 89-02-PLAN.md (site integration)
 Resume file: None
-Next: Verify Phase 88, then plan Phase 89 (SEO, OG Images, and Site Integration)
+Next: Execute 89-03-PLAN.md (companion blog post with bidirectional cross-links)
