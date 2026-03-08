@@ -1,0 +1,343 @@
+---
+title: "Observability"
+description: "How the FastAPI template instruments every request with OpenTelemetry distributed tracing, Prometheus metrics, and structured JSON logging -- giving AI agents production visibility for free."
+order: 3
+slug: "observability"
+---
+
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Every HTTP request your agent handles is automatically traced with OpenTelemetry spans, counted by Prometheus metrics, and logged in structured JSON with request ID correlation. The agent never configures an exporter, registers a metric, or wires a log filter. It writes business logic; the template supplies observability.
+
+Three systems work in concert:
+
+- **Distributed tracing** propagates context across service boundaries so you can follow a single request through the FastAPI app, its database queries, and any outbound HTTP calls.
+- **Prometheus metrics** count requests, measure latencies, and track body sizes -- exposed on `/metrics` for any scraper to collect.
+- **Structured logging** emits every log record as JSON (or human-readable text in development) with `request_id` and `correlation_id` fields injected automatically via Python context variables.
+
+The result: when something goes wrong in production, the agent's operator can correlate a trace, a metric spike, and a log line back to the same request without touching a single line of application code.
+
+---
+
+## Distributed Tracing
+
+The tracing subsystem configures a global `TracerProvider` with the application's service metadata and ships spans via OTLP to any compatible collector (Jaeger, Tempo, Honeycomb, Datadog, etc.).
+
+### Provider Configuration
+
+<CodeFromRepo
+  code={`def configure_tracing(settings: Settings) -> None:
+    """Configure the global OpenTelemetry tracer provider once."""
+    global _provider_configured, _httpx_instrumented
+
+    if not settings.otel_enabled or _provider_configured:
+        return
+
+    provider = TracerProvider(
+        resource=Resource.create(
+            {
+                "service.name": settings.otel_service_name,
+                "service.version": settings.otel_service_version,
+                "deployment.environment": settings.otel_environment,
+            }
+        )
+    )
+    exporter = OTLPSpanExporter(
+        endpoint=settings.otel_exporter_otlp_endpoint,
+        headers=_parse_headers(settings.otel_exporter_otlp_headers),
+    )
+    provider.add_span_processor(BatchSpanProcessor(exporter))
+    trace.set_tracer_provider(provider)
+    _provider_configured = True
+
+    if not _httpx_instrumented:
+        HTTPXClientInstrumentor().instrument()
+        _httpx_instrumented = True`}
+  lang="python"
+  filePath="src/app/observability/tracing.py"
+  title="configure_tracing()"
+  startLine={23}
+  endLine={49}
+/>
+
+Key design decisions:
+
+- **Resource attributes** (`service.name`, `service.version`, `deployment.environment`) tag every span so you can filter traces by service and environment in your collector UI.
+- **BatchSpanProcessor** buffers spans and ships them in batches, keeping per-request overhead negligible.
+- **HTTPX instrumentation** is global and one-shot -- all outbound HTTP calls made through `httpx` automatically create child spans.
+- **Guard flag** (`_provider_configured`) prevents double-initialization when `create_app()` runs multiple times in tests.
+
+### FastAPI Auto-Instrumentation
+
+<CodeFromRepo
+  code={`def instrument_fastapi_app(app: Any, settings: Settings) -> None:
+    """Attach FastAPI instrumentation to an application instance."""
+    if not settings.otel_enabled:
+        return
+
+    FastAPIInstrumentor.instrument_app(
+        app,
+        excluded_urls=",".join(
+            [settings.health_check_path, settings.readiness_check_path, "/metrics", "/favicon.ico"]
+        ),
+    )`}
+  lang="python"
+  filePath="src/app/observability/tracing.py"
+  title="instrument_fastapi_app()"
+  startLine={52}
+  endLine={62}
+/>
+
+The instrumentor wraps every route handler with span creation automatically. Health checks, readiness probes, the metrics endpoint, and favicon requests are excluded to avoid polluting traces with infrastructure noise.
+
+### Database Tracing
+
+<CodeFromRepo
+  code={`def instrument_database_engine(engine: AsyncEngine, settings: Settings) -> None:
+    """Attach SQLAlchemy tracing to the engine when enabled."""
+    if not settings.otel_enabled:
+        return
+
+    SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)`}
+  lang="python"
+  filePath="src/app/observability/tracing.py"
+  title="instrument_database_engine()"
+  startLine={65}
+  endLine={70}
+/>
+
+Database queries appear as child spans beneath the HTTP request span, giving you timing and statement-level visibility for every query the agent executes.
+
+### Builder Integration
+
+<CodeFromRepo
+  code={`    def setup_tracing(self) -> Self:
+        """Configure OpenTelemetry tracing for the application."""
+        configure_tracing(self.settings)
+        instrument_fastapi_app(self.app, self.settings)
+        self.logger.info(
+            "Tracing %s",
+            (
+                "configured successfully"
+                if self.settings.otel_enabled
+                else "disabled by configuration"
+            ),
+        )
+        return self`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  title="FastAPIAppBuilder.setup_tracing()"
+  startLine={170}
+  endLine={182}
+/>
+
+The builder's `setup_tracing()` method calls both `configure_tracing()` and `instrument_fastapi_app()` as a single step in the build chain. Tracing is off by default (`APP_OTEL_ENABLED=false`) and activated with a single environment variable.
+
+---
+
+## Prometheus Metrics
+
+The template exposes request-level metrics at `/metrics` using `starlette-exporter`, a lightweight Prometheus middleware for ASGI applications.
+
+<CodeFromRepo
+  code={`    def setup_metrics(self) -> Self:
+        """Configure Prometheus metrics collection."""
+        if not self.settings.metrics_enabled:
+            self.logger.info("Metrics collection disabled by configuration")
+            return self
+
+        try:
+            from prometheus_client import REGISTRY, Info
+            from starlette_exporter import PrometheusMiddleware, handle_metrics
+            from starlette_exporter.optional_metrics import request_body_size, response_body_size
+
+            with contextlib.suppress(KeyError):
+                REGISTRY.unregister(REGISTRY._names_to_collectors["fastapi_app_info_info"])
+
+            app_info = Info("fastapi_app_info", "FastAPI application information")
+            app_info.info(
+                {
+                    "app_name": self.settings.app_name,
+                    "app_version": self.settings.app_version,
+                    "python_version": platform.python_version(),
+                    "fastapi_version": fastapi.__version__,
+                }
+            )
+
+            self.app.add_middleware(
+                PrometheusMiddleware,
+                app_name=self.settings.app_name,
+                prefix=self.settings.metrics_prefix,
+                group_paths=False,
+                optional_metrics=[response_body_size, request_body_size],
+                skip_paths=[
+                    self.settings.health_check_path,
+                    self.settings.readiness_check_path,
+                    METRICS_PATH,
+                ],
+                skip_methods=["OPTIONS"],
+            )
+            self.app.add_route(METRICS_PATH, handle_metrics)
+            self.logger.info("Prometheus metrics configured successfully")
+        except ImportError:
+            self.logger.warning(
+                "Prometheus dependencies not installed. "
+                "Install with: pip install prometheus-client starlette-exporter"
+            )
+        except Exception as exc:
+            self.logger.exception("Failed to configure metrics: %s", exc)
+            raise
+
+        return self`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  title="FastAPIAppBuilder.setup_metrics()"
+  startLine={184}
+  endLine={232}
+/>
+
+What this provides automatically:
+
+- **Request count and latency histograms** per method, path, and status code.
+- **Request and response body size** tracking via optional metrics.
+- **Application info gauge** exporting the app name, version, Python version, and FastAPI version as labels.
+- **Noise filtering** -- health checks, readiness probes, the metrics endpoint itself, and `OPTIONS` preflight requests are excluded from collection.
+
+Like tracing, metrics are off by default (`APP_METRICS_ENABLED=false`) and require no code changes to activate.
+
+---
+
+## Structured Logging
+
+The template emits logs in two formats: **JSON** for production (machine-parseable, compatible with any log aggregator) and **text** for local development (human-readable with color support). The format toggles with a single environment variable (`APP_LOG_FORMAT=json|text`).
+
+### Request Context Injection
+
+Every log record emitted during a request includes `request_id` and `correlation_id` fields, even though the application code never passes them explicitly. This works through Python's `contextvars` module:
+
+<CodeFromRepo
+  code={`from contextvars import ContextVar, Token
+
+_request_id: ContextVar[str] = ContextVar("request_id", default="-")
+_correlation_id: ContextVar[str] = ContextVar("correlation_id", default="-")
+
+type RequestContextTokens = tuple[Token[str], Token[str]]
+
+
+def get_request_id() -> str:
+    """Return the request ID for the current context, or '-' when absent."""
+    return _request_id.get()
+
+
+def get_correlation_id() -> str:
+    """Return the correlation ID for the current context, or '-' when absent."""
+    return _correlation_id.get()
+
+
+def set_request_context(request_id: str, correlation_id: str) -> RequestContextTokens:
+    """Set request-scoped tracing IDs and return reset tokens."""
+    return _request_id.set(request_id), _correlation_id.set(correlation_id)
+
+
+def reset_request_context(tokens: RequestContextTokens) -> None:
+    """Reset tracing context to the previous values."""
+    request_id_token, correlation_id_token = tokens
+    _request_id.reset(request_id_token)
+    _correlation_id.reset(correlation_id_token)`}
+  lang="python"
+  filePath="src/app/log_config/request_context.py"
+  title="Request context variables"
+/>
+
+The `RequestIDMiddleware` (covered in the Middleware chapter) calls `set_request_context()` at the start of every request and `reset_request_context()` when the response completes. Because `ContextVar` is async-safe, the correct IDs propagate through `await` chains, background tasks, and database callbacks without any thread-local hacks.
+
+### JSON Log Configuration
+
+<CodeFromRepo
+  code={`def configure_root_logging(settings: Settings) -> None:
+    """Bootstrap the root logger with the format specified in settings."""
+    level = getattr(logging, settings.log_level.upper(), logging.INFO)
+    root = logging.getLogger()
+    root.handlers.clear()
+    root.setLevel(level)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(level)
+    handler.addFilter(RequestContextFilter())
+
+    if settings.log_format == "json":
+        from pythonjsonlogger.json import JsonFormatter
+
+        handler.setFormatter(
+            JsonFormatter(
+                fmt=(
+                    "%(asctime)s %(levelname)s %(name)s"
+                    " %(request_id)s %(correlation_id)s %(message)s"
+                ),
+                datefmt="%Y-%m-%dT%H:%M:%S",
+                rename_fields={
+                    "asctime": "timestamp",
+                    "levelname": "level",
+                    "name": "logger",
+                },
+            )
+        )
+    else:
+        handler.setFormatter(
+            logging.Formatter(
+                fmt=settings.log_text_template,
+                datefmt=settings.log_date_format,
+            )
+        )
+
+    root.addHandler(handler)`}
+  lang="python"
+  filePath="src/app/logging_setup.py"
+  title="configure_root_logging()"
+/>
+
+The `RequestContextFilter` reads `get_request_id()` and `get_correlation_id()` from the context variables and injects them into every log record. In JSON mode, the output looks like:
+
+```json
+{
+  "timestamp": "2026-03-08T14:22:10",
+  "level": "INFO",
+  "logger": "app.routes.items",
+  "request_id": "a1b2c3d4",
+  "correlation_id": "x9y8z7w6",
+  "message": "Created item id=42"
+}
+```
+
+In text mode, the same request produces:
+
+```
+2026-03-08 14:22:10 | INFO     | app.routes.items | request_id=a1b2c3d4 | correlation_id=x9y8z7w6 | items:create:55 | Created item id=42
+```
+
+---
+
+## The Three Pillars Together
+
+Traces, metrics, and logs are independent subsystems, but the `request_id` ties them together:
+
+1. **A trace** captures the full request lifecycle -- the HTTP span, database query spans, and any outbound HTTP call spans -- all sharing a single trace ID.
+2. **A metric** increments the request counter and records the latency in the histogram, tagged by method, path, and status code.
+3. **A log line** records application-level events with the `request_id` and `correlation_id` fields.
+
+When a latency spike appears in your Prometheus dashboard, you search for the corresponding `request_id` in your log aggregator. That same ID links to the trace in your tracing backend, where you see exactly which database query or external call caused the delay. No manual instrumentation, no boilerplate -- just the correlation the template provides.
+
+---
+
+## What the Agent Never Implements
+
+The template handles all observability plumbing. The agent never needs to:
+
+- **Create or manage spans** -- the FastAPI and SQLAlchemy instrumentors handle span lifecycle automatically.
+- **Register Prometheus metrics or expose a `/metrics` endpoint** -- the middleware creates histograms, counters, and gauges from request traffic.
+- **Configure log formatters or filters** -- JSON vs text output toggles via environment variable.
+- **Propagate request IDs through async code** -- `ContextVar` handles propagation transparently.
+- **Exclude infrastructure paths from telemetry** -- health checks, readiness probes, and metrics endpoints are filtered by default.
+- **Bootstrap the tracing provider or exporter** -- one `APP_OTEL_ENABLED=true` environment variable activates the full OTLP pipeline.

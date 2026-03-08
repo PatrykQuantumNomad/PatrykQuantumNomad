@@ -1,0 +1,211 @@
+---
+title: "Testing"
+description: "How the FastAPI template structures its test suite with a two-tier unit/integration architecture, hermetic fixtures, JWT minting helpers, and enforced coverage thresholds"
+order: 6
+slug: "testing"
+---
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Your AI agent writes tests against a pre-built test infrastructure. Async fixtures, a test app factory, JWT minting helpers, and hermetic database isolation are already in place. Every new endpoint gets integration-tested with the full middleware stack -- authentication, rate limiting, timeouts, and structured error handling -- without the agent configuring any of it.
+
+The test suite enforces a 90% coverage floor. Drop below that threshold and CI fails. The agent's job is to write the test logic, not the test plumbing.
+
+## Unit vs Integration Architecture
+
+The template enforces a strict two-tier test structure. Unit tests verify individual components in isolation -- no database, no network, no async event loop overhead. Integration tests exercise the full ASGI stack through an in-memory HTTP client, hitting every middleware layer exactly as production traffic would.
+
+```
+tests/
+├── conftest.py              # Root fixtures: environment isolation
+├── helpers.py               # Factory functions: settings, JWT, principals
+├── unit/
+│   ├── test_settings.py     # Settings validation and defaults
+│   ├── test_builder.py      # Builder chain wiring
+│   ├── test_auth.py         # JWT parsing and verification
+│   ├── test_cache.py        # Cache store backends
+│   ├── test_middleware.py   # Individual middleware behavior
+│   ├── test_errors.py       # Error handler formatting
+│   ├── test_logging.py      # Structured log output
+│   └── ...                  # One file per component
+└── integration/
+    ├── conftest.py           # App factory fixtures, HTTP clients
+    ├── test_app.py           # Smoke tests: startup, health, info
+    ├── test_auth_flow.py     # End-to-end JWT auth through middleware
+    ├── test_cache.py         # Cache through the full request cycle
+    ├── test_middleware_stack.py  # Middleware ordering and interaction
+    └── test_migrations.py    # Alembic migration round-trips
+```
+
+Unit tests are fast. They run without an event loop where possible and mock external boundaries. Integration tests spin up a real FastAPI application through `create_app()`, wire the full lifespan (database, cache, auth), and issue HTTP requests through HTTPX's ASGI transport -- no TCP socket, no port binding, but every middleware in the chain processes the request.
+
+## Root Fixtures: Environment Isolation
+
+The root `conftest.py` applies a single autouse fixture to every test in the suite. It strips all `APP_*` environment variables and changes the working directory to a temporary path, ensuring that no local `.env` file or shell export can influence test outcomes.
+
+<CodeFromRepo
+  code={`@pytest.fixture(autouse=True)
+def _isolate_app_settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Prevent local environment/config files from influencing test outcomes."""
+    for key in tuple(os.environ):
+        if key.startswith("APP_"):
+            monkeypatch.delenv(key, raising=False)
+
+    monkeypatch.chdir(tmp_path)`}
+  lang="python"
+  filePath="tests/conftest.py"
+  startLine={20}
+  endLine={27}
+/>
+
+This fixture is `autouse=True`, which means every single test -- unit and integration alike -- runs in a clean environment automatically. No test author needs to remember to activate it.
+
+## Integration Test Fixtures
+
+The integration `conftest.py` provides a layered fixture chain: settings, app, and client. Each fixture builds on the previous one, and every test gets a fresh application instance with isolated state.
+
+<CodeFromRepo
+  code={`@pytest.fixture
+def test_settings() -> Settings:
+    """Settings tuned for fast, isolated test runs."""
+    return make_settings(
+        app_name="Test App",
+        app_version="0.0.1-test",
+        debug=True,
+        docs_enabled=True,
+        redoc_enabled=True,
+        openapi_enabled=True,
+        log_level="DEBUG",
+        metrics_enabled=False,
+        readiness_include_details=True,
+        info_endpoint_enabled=True,
+        endpoints_listing_enabled=True,
+        request_timeout=5,
+    )
+
+
+@pytest.fixture
+def app(test_settings: Settings) -> FastAPI:
+    """A fully-configured test application."""
+    return create_app(settings=test_settings)
+
+
+@pytest.fixture
+async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
+    """Async HTTP client wired to the ASGI app (no real network)."""
+    async with app.router.lifespan_context(app):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            yield ac`}
+  lang="python"
+  filePath="tests/integration/conftest.py"
+  startLine={50}
+  endLine={81}
+/>
+
+The `client` fixture activates the full lifespan context -- database engine, cache store, auth service -- before yielding an async HTTP client. Tests send real HTTP requests through the ASGI transport without opening a network socket. When the fixture tears down, every resource is cleaned up.
+
+## Hermetic Helpers
+
+The `helpers.py` module provides factory functions that keep test code concise and decoupled from implementation details. Three functions handle the most common needs: building isolated settings, minting test JWTs, and constructing auth principals.
+
+<CodeFromRepo
+  code={`def make_settings(**overrides: object) -> Settings:
+    """Build Settings isolated from local environment and .env files."""
+    return Settings(_env_file=None, **overrides)  # type: ignore[arg-type, call-arg]
+
+
+def make_jwt(
+    subject: str = "test-user",
+    *,
+    secret: str = TEST_SECRET,
+    audience: str | None = TEST_AUDIENCE,
+    issuer: str | None = TEST_ISSUER,
+    scopes: list[str] | None = None,
+    roles: list[str] | None = None,
+    expires_in_seconds: int = 300,
+) -> str:
+    """Mint an HS256 test JWT with sensible defaults."""
+    return build_test_jwt(
+        subject=subject,
+        secret=secret,
+        audience=audience,
+        issuer=issuer,
+        scopes=scopes,
+        roles=roles,
+        expires_in_seconds=expires_in_seconds,
+    )
+
+
+def make_principal(
+    subject: str = "test-user",
+    *,
+    issuer: str | None = TEST_ISSUER,
+    audience: list[str] | None = None,
+    scopes: list[str] | None = None,
+    roles: list[str] | None = None,
+) -> Principal:
+    """Build a Principal with sensible defaults."""
+    return Principal(
+        subject=subject,
+        issuer=issuer,
+        audience=audience or [TEST_AUDIENCE],
+        scopes=scopes or [],
+        roles=roles or [],
+        claims={"sub": subject},
+    )`}
+  lang="python"
+  filePath="tests/helpers.py"
+  startLine={29}
+  endLine={73}
+/>
+
+`make_settings()` passes `_env_file=None` to guarantee that no `.env` file on disk can influence the test. `make_jwt()` mints a valid HS256 JWT with sensible defaults so tests can authenticate without configuring a full JWKS endpoint. `make_principal()` builds the parsed identity object directly, useful for unit tests that skip HTTP entirely.
+
+## Coverage Configuration
+
+The pytest and coverage configuration lives in `pyproject.toml`. The template enforces a 90% coverage floor -- CI fails if the threshold drops.
+
+<CodeFromRepo
+  code={`[tool.pytest.ini_options]
+# Test discovery roots.
+testpaths = ["tests"]
+# Async handling mode for pytest-asyncio.
+asyncio_mode = "auto"
+# Custom markers used to split quick vs full-stack tests.
+markers = [
+    "unit: fast isolated tests for individual components",
+    "integration: full-stack tests through the ASGI transport",
+]
+
+# Coverage.py runtime collection settings.
+[tool.coverage.run]
+# Measure coverage for application package only.
+source = ["src/app"]
+
+# Coverage.py reporting thresholds/options.
+[tool.coverage.report]
+# Show uncovered line numbers in terminal report.
+show_missing = true
+# Enforce a high coverage floor for this template.
+fail_under = 90`}
+  lang="toml"
+  filePath="pyproject.toml"
+  startLine={147}
+  endLine={168}
+/>
+
+Key choices: `asyncio_mode = "auto"` means every `async def test_*` function is automatically treated as an async test -- no `@pytest.mark.asyncio` decorator needed. Custom `unit` and `integration` markers allow running tiers independently with `pytest -m unit` or `pytest -m integration`. Coverage is scoped to `src/app` only, so test code and config files do not inflate the percentage.
+
+## What the Agent Never Implements
+
+The test infrastructure handles all of the following. Your agent writes test functions on top of this foundation:
+
+- **Environment isolation** -- The autouse `_isolate_app_settings` fixture strips `APP_*` variables and changes to a temp directory for every test
+- **Test app factory** -- Integration fixtures provide a fully wired FastAPI application with lifespan management
+- **Async HTTP client** -- The ASGI transport client is pre-configured and yielded as a fixture
+- **JWT minting** -- `make_jwt()` produces valid tokens with sensible defaults for auth-protected route testing
+- **Principal construction** -- `make_principal()` builds identity objects for unit tests that bypass HTTP
+- **Coverage enforcement** -- The 90% floor is configured in `pyproject.toml` and enforced by CI
+- **Async test runner** -- `pytest-asyncio` in auto mode handles event loop creation and teardown
