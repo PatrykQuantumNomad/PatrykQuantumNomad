@@ -1,0 +1,57 @@
+---
+/**
+ * Guides hub page — /guides/
+ * Lists all available production guides. Currently features the FastAPI
+ * Production Guide, future-proofed for additional guides.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { guideLandingUrl } from '../../lib/guides/routes';
+
+const [guideMeta] = await getCollection('guides');
+const guidePages = await getCollection('guidePages');
+const chapterCount = guideMeta.data.chapters.length;
+---
+
+<Layout
+  title="Guides | Patryk Golabek"
+  description="Production-grade technical guides covering FastAPI, Kubernetes, and cloud-native architecture."
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold" data-reveal>
+      Guides
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl" data-reveal>
+      In-depth production guides that walk through real-world configurations and battle-tested patterns.
+    </p>
+
+    <div class="mt-12 grid grid-cols-1 gap-6">
+      <a
+        href={guideLandingUrl(guideMeta.data.slug)}
+        class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden"
+        data-reveal
+        data-tilt
+      >
+        <article>
+          <div class="bg-gradient-to-br from-[var(--color-accent)]/10 to-[var(--color-accent-secondary)]/10 px-6 py-8">
+            <span class="inline-block text-xs font-mono px-2 py-0.5 rounded bg-[var(--color-accent)]/20 text-[var(--color-accent)]">
+              {chapterCount} chapters
+            </span>
+          </div>
+          <div class="p-6">
+            <p class="meta-mono text-[var(--color-accent)]">Production Guide</p>
+            <h2 class="text-xl font-heading font-bold text-[var(--color-text-primary)] mt-2">
+              {guideMeta.data.title}
+            </h2>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+              {guideMeta.data.description}
+            </p>
+            <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">
+              Read the guide &rarr;
+            </span>
+          </div>
+        </article>
+      </a>
+    </div>
+  </div>
+</Layout>
