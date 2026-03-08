@@ -1,0 +1,13 @@
+---
+/**
+ * JwtAuthFlowDiagram -- Build-time SVG wrapper for DIAG-03.
+ * Renders the JWT authentication flow with 3 validation modes as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateJwtAuthFlow } from '../../lib/guides/svg-diagrams';
+
+const svg = generateJwtAuthFlow();
+---
+
+<PlotFigure svg={svg} caption="JWT authentication: 3 validation modes (shared secret, static key, JWKS)" maxWidth="720px" />

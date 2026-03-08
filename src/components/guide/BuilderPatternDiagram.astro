@@ -1,0 +1,13 @@
+---
+/**
+ * BuilderPatternDiagram -- Build-time SVG wrapper for DIAG-02.
+ * Renders the Builder pattern composition as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateBuilderPattern } from '../../lib/guides/svg-diagrams';
+
+const svg = generateBuilderPattern();
+---
+
+<PlotFigure svg={svg} caption="Builder pattern: setup_*() method composition and create_app() factory" maxWidth="780px" />

@@ -1,0 +1,13 @@
+---
+/**
+ * MiddlewareStackDiagram -- Build-time SVG wrapper for DIAG-01.
+ * Renders the 8-layer middleware stack as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateMiddlewareStack } from '../../lib/guides/svg-diagrams';
+
+const svg = generateMiddlewareStack();
+---
+
+<PlotFigure svg={svg} caption="Request flow through the 8-layer middleware stack" maxWidth="720px" />
