@@ -10,6 +10,46 @@
       {
         "slug": "builder-pattern",
         "title": "Builder Pattern"
+      },
+      {
+        "slug": "middleware",
+        "title": "Middleware Stack"
+      },
+      {
+        "slug": "authentication",
+        "title": "Authentication (JWT)"
+      },
+      {
+        "slug": "observability",
+        "title": "Observability"
+      },
+      {
+        "slug": "database",
+        "title": "Database"
+      },
+      {
+        "slug": "docker",
+        "title": "Docker & Containerization"
+      },
+      {
+        "slug": "testing",
+        "title": "Testing"
+      },
+      {
+        "slug": "health-checks",
+        "title": "Health Checks"
+      },
+      {
+        "slug": "security-headers",
+        "title": "Security Headers"
+      },
+      {
+        "slug": "rate-limiting",
+        "title": "Rate Limiting"
+      },
+      {
+        "slug": "caching",
+        "title": "Caching"
       }
     ]
   }
