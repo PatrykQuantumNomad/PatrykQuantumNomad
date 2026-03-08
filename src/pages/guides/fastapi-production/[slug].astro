@@ -1,28 +1,35 @@
 ---
 import { getCollection, render } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
+import GuideLayout from '../../../layouts/GuideLayout.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('guidePages');
+  const [guideMeta] = await getCollection('guides');
   return pages.map((page) => ({
     params: { slug: page.data.slug },
-    props: { page },
+    props: { page, guideMeta },
   }));
 }
 
 interface Props {
   page: Awaited<ReturnType<typeof getCollection<'guidePages'>>>[number];
+  guideMeta: Awaited<ReturnType<typeof getCollection<'guides'>>>[number];
 }
 
-const { page } = Astro.props;
+const { page, guideMeta } = Astro.props;
 const { Content } = await render(page);
 ---
 
-<Layout
+<GuideLayout
   title={`${page.data.title} | FastAPI Production Guide`}
   description={page.data.description}
+  guideTitle={guideMeta.data.title}
+  guideSlug={guideMeta.data.slug}
+  chapters={guideMeta.data.chapters}
+  currentSlug={page.data.slug}
+  chapterTitle={page.data.title}
 >
-  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <article>
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-8">{page.data.title}</h1>
     <div class="prose max-w-none
       [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
@@ -31,4 +38,4 @@ const { Content } = await render(page);
       <Content />
     </div>
   </article>
-</Layout>
+</GuideLayout>
