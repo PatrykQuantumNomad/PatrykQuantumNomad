@@ -78,9 +78,9 @@ Plans:
 **Plans:** 4/4 plans complete
 Plans:
 - [x] 88-01-PLAN.md -- Builder Pattern and Middleware pages (core architecture with diagrams)
-- [ ] 88-02-PLAN.md -- Authentication, Security Headers, and Rate Limiting pages (security cluster)
-- [ ] 88-03-PLAN.md -- Observability, Database, and Docker pages (infrastructure cluster with topology diagram)
-- [ ] 88-04-PLAN.md -- Testing, Health Checks, and Caching pages (supporting layers)
+- [x] 88-02-PLAN.md -- Authentication, Security Headers, and Rate Limiting pages (security cluster)
+- [x] 88-03-PLAN.md -- Observability, Database, and Docker pages (infrastructure cluster with topology diagram)
+- [x] 88-04-PLAN.md -- Testing, Health Checks, and Caching pages (supporting layers)
 
 ### Phase 89: SEO, OG Images, and Site Integration
 **Goal**: The guide is fully integrated into the site with discoverability, SEO metadata, and a companion blog post
