@@ -75,7 +75,12 @@ Plans:
   3. Each domain page includes syntax-highlighted code snippets from the FastAPI template with source file path annotations via CodeFromRepo
   4. Architecture diagrams are embedded in the relevant domain pages (middleware stack in Middleware page, builder pattern in Builder page, auth flow in Authentication page, deployment topology in Docker page)
   5. The guide is self-contained -- a reader who has never seen the fastapi-template repository can understand every page without referencing external docs
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 88-01-PLAN.md -- Builder Pattern and Middleware pages (core architecture with diagrams)
+- [ ] 88-02-PLAN.md -- Authentication, Security Headers, and Rate Limiting pages (security cluster)
+- [ ] 88-03-PLAN.md -- Observability, Database, and Docker pages (infrastructure cluster with topology diagram)
+- [ ] 88-04-PLAN.md -- Testing, Health Checks, and Caching pages (supporting layers)
 
 ### Phase 89: SEO, OG Images, and Site Integration
 **Goal**: The guide is fully integrated into the site with discoverability, SEO metadata, and a companion blog post
@@ -98,5 +103,5 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 | 85. Foundation and Content Schema | 1/1 | Complete   | 2026-03-08 |
 | 86. Page Infrastructure and Navigation | 2/2 | Complete | 2026-03-08 |
 | 87. Guide-Specific Components | 3/3 | Complete | 2026-03-08 |
-| 88. Content Authoring | 0/TBD | Not started | - |
+| 88. Content Authoring | 0/4 | Planned | - |
 | 89. SEO, OG Images, and Site Integration | 0/TBD | Not started | - |
