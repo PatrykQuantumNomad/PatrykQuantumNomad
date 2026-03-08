@@ -1,0 +1,287 @@
+---
+title: "Docker & Containerization"
+description: "How the FastAPI template builds production containers with multi-stage Dockerfiles, digest-pinned images, tini for signal forwarding, unprivileged users, and a deployment topology diagram."
+order: 5
+slug: "docker"
+---
+
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+import DeploymentTopology from '../../../../components/guide/DeploymentTopology';
+
+## What Your Agent Inherits
+
+The agent's code runs in a hardened container with a non-root user, PID 1 signal forwarding via tini, digest-pinned base images, and optimized layer caching. The Dockerfile is production-ready out of the box -- the agent writes Python code, and the container infrastructure handles the rest: multi-stage builds keep the runtime image small, the entrypoint runs migrations on deploy, and the health check probe keeps the orchestrator informed.
+
+---
+
+## Multi-Stage Build
+
+The Dockerfile separates dependency installation from runtime, producing a minimal final image that contains no build tools, no package manager caches, and no source control artifacts.
+
+<CodeFromRepo
+  code={`# syntax=docker/dockerfile:1.7
+
+# Keep base images pinned by digest so rebuilds stay reproducible.
+# Use ARG-based references so ops/refresh-docker-base-digests.sh can update
+# digests automatically.
+ARG UV_BASE_IMAGE=ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+ARG PYTHON_RUNTIME_IMAGE=python:3.13-slim-bookworm@sha256:1245b6c39d0b8e49e911c7d07b60cd9ed26016b0e439b6903d5e08730e417553
+
+FROM \${UV_BASE_IMAGE} AS builder
+
+ENV UV_LINK_MODE=copy
+
+WORKDIR /app
+
+# Install tini once in the builder, pinned to the current Debian package version,
+# then copy the binary into the final image without carrying apt tooling forward.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \\
+    apt-get update && \\
+    apt-get install --yes --no-install-recommends tini=0.19.0-1+b3 && \\
+    rm -rf /var/lib/apt/lists/*
+
+ARG UV_EXTRAS="--extra postgres --extra redis"
+
+COPY pyproject.toml uv.lock README.md ./
+# Resolve third-party dependencies first so source-only changes reuse this layer.
+RUN --mount=type=cache,target=/root/.cache/uv \\
+    uv sync --frozen --no-dev --no-install-project \${UV_EXTRAS}
+
+COPY src /app/src
+COPY alembic /app/alembic
+COPY main.py alembic.ini /app/
+COPY ops/docker-entrypoint.sh ops/http_probe.py /app/ops/
+
+# Install the local project into the virtualenv after the application files exist.
+RUN --mount=type=cache,target=/root/.cache/uv \\
+    uv sync --frozen --no-dev --no-editable \${UV_EXTRAS}
+
+# The runtime stage stays slim: only Python, the app virtualenv, runtime files,
+# and the init binary required for signal forwarding/reaping are copied across.
+FROM \${PYTHON_RUNTIME_IMAGE} AS runtime
+
+ARG BUILD_DATE=unknown
+ARG REPOSITORY_URL=
+ARG VCS_REF=unknown
+ARG VERSION=dev
+
+ENV PYTHONUNBUFFERED=1 \\
+    PYTHONDONTWRITEBYTECODE=1 \\
+    PATH="/app/.venv/bin:\${PATH}" \\
+    PYTHONPATH="/app/src"
+
+LABEL org.opencontainers.image.title="fastapi-template" \\
+      org.opencontainers.image.description="Production-ready FastAPI template with Builder pattern configuration" \\
+      org.opencontainers.image.licenses="Apache-2.0" \\
+      org.opencontainers.image.source="\${REPOSITORY_URL}" \\
+      org.opencontainers.image.url="\${REPOSITORY_URL}" \\
+      org.opencontainers.image.documentation="\${REPOSITORY_URL}" \\
+      org.opencontainers.image.revision="\${VCS_REF}" \\
+      org.opencontainers.image.version="\${VERSION}" \\
+      org.opencontainers.image.created="\${BUILD_DATE}"
+
+WORKDIR /app
+
+# Use stable high IDs so mounted volumes keep predictable ownership across rebuilds
+# and orchestrators can set matching runAsUser/runAsGroup values explicitly.
+RUN groupadd --system --gid 10001 app && \\
+    useradd --system --uid 10001 --gid 10001 --create-home --home-dir /home/app app && \\
+    install -d -o app -g app /app/data
+
+COPY --from=builder /usr/bin/tini /usr/bin/tini
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
+COPY --from=builder --chown=app:app /app/alembic /app/alembic
+COPY --from=builder --chown=app:app /app/src /app/src
+COPY --from=builder --chown=app:app /app/main.py /app/alembic.ini /app/
+COPY --from=builder --chown=app:app --chmod=755 /app/ops/docker-entrypoint.sh /app/ops/docker-entrypoint.sh
+COPY --from=builder --chown=app:app /app/ops/http_probe.py /app/ops/http_probe.py
+
+EXPOSE 8000
+
+# Healthcheck stays separate from readiness so container platforms can detect
+# dead processes quickly without needing external orchestration logic.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \\
+    CMD python /app/ops/http_probe.py --path-env APP_HEALTH_CHECK_PATH --default-path /healthcheck
+
+USER app
+
+# tini becomes PID 1 and forwards signals to the entrypoint/app correctly.
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/ops/docker-entrypoint.sh"]`}
+  lang="dockerfile"
+  filePath="Dockerfile"
+  title="Multi-stage Dockerfile"
+/>
+
+The two stages serve distinct purposes:
+
+1. **Builder stage** -- uses the `uv` package manager image to resolve and install dependencies. The `uv sync --frozen --no-dev --no-install-project` layer caches third-party packages, so source-only changes skip the expensive dependency resolution step. Tini is also installed here from the Debian package repository.
+
+2. **Runtime stage** -- starts from a minimal Python slim image. Only the virtualenv, application source, migration files, the entrypoint script, and the tini binary are copied from the builder. No `apt`, no `pip`, no `uv`, no build headers remain in the final image.
+
+---
+
+## Container Hardening
+
+The Dockerfile applies four security measures that are easy to miss in hand-written containers.
+
+### Digest-Pinned Base Images
+
+```dockerfile
+ARG UV_BASE_IMAGE=ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855...
+ARG PYTHON_RUNTIME_IMAGE=python:3.13-slim-bookworm@sha256:1245b6c...
+```
+
+Tags like `python:3.13-slim` are mutable -- the registry can push a new image under the same tag at any time. Digest pinning (`@sha256:...`) locks the exact image content so builds are reproducible. A helper script (`ops/refresh-docker-base-digests.sh`) updates digests when you intentionally want to pull newer base images.
+
+### Tini as PID 1
+
+```dockerfile
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/ops/docker-entrypoint.sh"]
+```
+
+Without an init process, the application runs as PID 1 inside the container. PID 1 has special signal-handling semantics in Linux: it does not receive default signal handlers, so `SIGTERM` from `docker stop` or Kubernetes pod termination may not propagate to the application. Tini solves this by:
+
+- **Forwarding signals** to the child process (uvicorn), enabling graceful shutdown.
+- **Reaping zombie processes** that accumulate when child processes exit without a parent calling `wait()`.
+
+### Unprivileged User
+
+```dockerfile
+RUN groupadd --system --gid 10001 app && \
+    useradd --system --uid 10001 --gid 10001 --create-home --home-dir /home/app app
+...
+USER app
+```
+
+The container runs as a non-root user with stable, high UID/GID values (10001). Stable IDs ensure volume mount ownership is predictable across image rebuilds and allow Kubernetes `securityContext` to match with explicit `runAsUser`/`runAsGroup` values.
+
+### HEALTHCHECK Directive
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python /app/ops/http_probe.py --path-env APP_HEALTH_CHECK_PATH --default-path /healthcheck
+```
+
+The health check runs a lightweight HTTP probe against the application's health endpoint. Docker uses this to mark unhealthy containers for restart. The `--start-period` gives the application 15 seconds to initialize before the first probe, and the custom `http_probe.py` script reads the health check path from the same environment variable the application uses.
+
+---
+
+## Container Entrypoint
+
+The entrypoint script handles pre-start tasks before launching the application server.
+
+<CodeFromRepo
+  code={`#!/usr/bin/env sh
+set -eu
+
+# Container entrypoint for the application image. It optionally runs Alembic
+# migrations, then launches either the provided command or the default uvicorn
+# server defined for this template.
+cd /app
+
+# Keep the SQLite data directory present for local and volume-backed runs.
+mkdir -p /app/data
+
+# In-memory rate limiting is per-process, so multi-worker deployments must use a
+# shared backend to enforce limits consistently.
+if [ "\${APP_RATE_LIMIT_ENABLED:-false}" = "true" ] && \\
+   [ -z "\${APP_RATE_LIMIT_STORAGE_URL:-}" ] && \\
+   [ "\${UVICORN_WORKERS:-4}" != "1" ]; then
+  echo "APP_RATE_LIMIT_STORAGE_URL is required when APP_RATE_LIMIT_ENABLED=true and UVICORN_WORKERS>1." >&2
+  exit 1
+fi
+
+# Migrations stay opt-in so production restarts do not implicitly change schema.
+if [ "\${RUN_DB_MIGRATIONS:-false}" = "true" ]; then
+  echo "Applying Alembic migrations..."
+  alembic -c alembic.ini upgrade head
+fi
+
+# If no explicit command is provided, start the API with the container defaults.
+if [ "$#" -eq 0 ]; then
+  set -- \\
+    uvicorn main:app \\
+    --host "\${APP_HOST:-0.0.0.0}" \\
+    --port "\${APP_PORT:-8000}" \\
+    --workers "\${UVICORN_WORKERS:-4}" \\
+    --no-access-log
+fi
+
+# Replace the shell so PID 1 remains tini and signals reach uvicorn directly.
+exec "$@"`}
+  lang="bash"
+  filePath="ops/docker-entrypoint.sh"
+  title="Container entrypoint"
+/>
+
+The entrypoint provides three safeguards:
+
+1. **Rate limit validation** -- if rate limiting is enabled with multiple workers but no shared Redis backend, the container exits immediately with a clear error instead of silently splitting counters across processes.
+2. **Opt-in migrations** -- `RUN_DB_MIGRATIONS=true` runs `alembic upgrade head` before the server starts. This is off by default so container restarts do not accidentally apply unapproved schema changes.
+3. **`exec` replacement** -- the final `exec "$@"` replaces the shell process with uvicorn, so tini remains PID 1 and signals propagate correctly through the process tree.
+
+---
+
+## Deployment Topology
+
+The template's production architecture connects four services. Explore the interactive topology below -- drag nodes, zoom, and pan to examine the connections.
+
+<DeploymentTopology client:visible />
+
+The topology shows:
+
+- **Caddy** (reverse proxy) -- terminates TLS, handles static assets, and forwards API traffic to the application over HTTP.
+- **FastAPI App** (uvicorn workers) -- the application container running one or more worker processes behind the entrypoint.
+- **PostgreSQL** -- the primary database, connected via `asyncpg` for async query execution.
+- **Redis** -- shared storage for rate limiting counters and the application cache layer, connected via `aioredis`.
+
+Each connection is labeled with the protocol or driver used, making the data flow explicit.
+
+---
+
+## Docker Compose
+
+For local development, the template includes a minimal Compose file that runs the application container with sensible defaults.
+
+<CodeFromRepo
+  code={`services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fastapi-template:local
+    env_file:
+      - "\${ENV_FILE:-.env}"
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8000"
+      APP_DATABASE_BACKEND: "\${APP_DATABASE_BACKEND:-sqlite}"
+      APP_DATABASE_SQLITE_PATH: "\${APP_DATABASE_SQLITE_PATH:-./data/app.db}"
+      APP_RATE_LIMIT_STORAGE_BACKEND: "\${APP_RATE_LIMIT_STORAGE_BACKEND:-memory}"
+      RUN_DB_MIGRATIONS: "\${RUN_DB_MIGRATIONS:-true}"
+      UVICORN_WORKERS: "\${UVICORN_WORKERS:-1}"
+    ports:
+      - "\${APP_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data`}
+  lang="yaml"
+  filePath="docker-compose.yml"
+  title="Docker Compose for local development"
+/>
+
+The Compose file defaults to SQLite and a single worker for fast local iteration. To switch to the full production topology with Postgres and Redis, set the environment variables or provide a `.env` file that overrides the backend selections.
+
+---
+
+## What the Agent Never Implements
+
+The template handles all containerization concerns. The agent never needs to:
+
+- **Write or maintain the Dockerfile** -- the multi-stage build, layer caching strategy, and runtime image selection are pre-configured.
+- **Configure tini or signal handling** -- the entrypoint and PID 1 setup work transparently.
+- **Create the unprivileged user or set file permissions** -- the Dockerfile creates the `app` user with stable UIDs and sets ownership on all copied files.
+- **Implement container health checks** -- the HEALTHCHECK directive and `http_probe.py` script are wired to the application's health endpoint.
+- **Handle migration execution at deploy time** -- the entrypoint runs Alembic upgrades when `RUN_DB_MIGRATIONS=true`.
+- **Pin base image digests** -- the digest references and refresh script manage reproducible builds.
+- **Validate rate limit configuration for multi-worker deploys** -- the entrypoint catches misconfiguration and exits with a clear error.
