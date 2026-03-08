@@ -3012,3 +3012,273 @@ export async function generateEdaPillarOgImage(
 
   return renderOgPng(layout);
 }
+
+/**
+ * Generates a branded OG image for FastAPI Production Guide pages.
+ * Two-column layout: left column has branding text, title, chapter pill,
+ * and description. Right column has a decorative geometric pattern.
+ * Works for both the landing page (chapterLabel = 'Production Guide')
+ * and chapter pages (chapterLabel = chapter domain name).
+ */
+export async function generateGuideOgImage(
+  pageTitle: string,
+  pageDescription: string,
+  chapterLabel: string,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const accentPrimary = '#c44b20';
+  const accentSecondary = '#e8734a';
+  const pillColor = '#3b82f6';
+
+  // Decorative geometric pattern for right column (simple rectangles/lines)
+  const geometricElements = [
+    // Large accent rectangle
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '60px',
+          right: '40px',
+          width: '180px',
+          height: '180px',
+          backgroundColor: `${accentPrimary}15`,
+          borderRadius: '16px',
+          border: `2px solid ${accentPrimary}30`,
+        },
+      },
+    },
+    // Medium secondary rectangle
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '160px',
+          right: '140px',
+          width: '120px',
+          height: '120px',
+          backgroundColor: `${accentSecondary}12`,
+          borderRadius: '12px',
+          border: `2px solid ${accentSecondary}25`,
+        },
+      },
+    },
+    // Small accent square
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '300px',
+          right: '60px',
+          width: '80px',
+          height: '80px',
+          backgroundColor: `${accentPrimary}20`,
+          borderRadius: '8px',
+        },
+      },
+    },
+    // Horizontal line
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '420px',
+          right: '40px',
+          width: '200px',
+          height: '3px',
+          backgroundColor: `${accentSecondary}30`,
+          borderRadius: '2px',
+        },
+      },
+    },
+    // Vertical line
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '80px',
+          right: '260px',
+          width: '3px',
+          height: '200px',
+          backgroundColor: `${accentPrimary}25`,
+          borderRadius: '2px',
+        },
+      },
+    },
+    // Dot cluster
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '460px',
+          right: '160px',
+          width: '12px',
+          height: '12px',
+          backgroundColor: accentPrimary,
+          borderRadius: '50%',
+          opacity: 0.3,
+        },
+      },
+    },
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '460px',
+          right: '130px',
+          width: '12px',
+          height: '12px',
+          backgroundColor: accentSecondary,
+          borderRadius: '50%',
+          opacity: 0.25,
+        },
+      },
+    },
+    {
+      type: 'div',
+      props: {
+        style: {
+          position: 'absolute' as const,
+          top: '460px',
+          right: '100px',
+          width: '12px',
+          height: '12px',
+          backgroundColor: pillColor,
+          borderRadius: '50%',
+          opacity: 0.2,
+        },
+      },
+    },
+  ];
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        accentBar(),
+        // Left column: text content
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '700px',
+              padding: '40px 0px 60px 56px',
+              gap: '18px',
+            },
+            children: [
+              // Branding text
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '18px',
+                    color: accentPrimary,
+                    letterSpacing: '1px',
+                  },
+                  children: 'FastAPI Production Guide',
+                },
+              },
+              // Page title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '40px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: truncate(pageTitle, 70),
+                },
+              },
+              // Chapter label pill
+              {
+                type: 'div',
+                props: {
+                  style: { display: 'flex', gap: '10px' },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '14px',
+                          color: '#ffffff',
+                          backgroundColor: pillColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: chapterLabel,
+                      },
+                    },
+                  ],
+                },
+              },
+              // Description
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: truncate(pageDescription, 140),
+                },
+              },
+            ],
+          },
+        },
+        // Right column: decorative geometric pattern
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'relative' as const,
+              width: '500px',
+              height: '630px',
+            },
+            children: geometricElements,
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
