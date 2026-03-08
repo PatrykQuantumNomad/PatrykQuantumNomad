@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Completed 87-01-PLAN.md
-last_updated: "2026-03-08T15:45:13.278Z"
-last_activity: 2026-03-08 -- Completed Plan 01 of Phase 87 (SVG Diagram Generators)
+milestone: v1.15
+milestone_name: FastAPI Production Guide
+status: in_progress
+stopped_at: Completed 87-02-PLAN.md
+last_updated: "2026-03-08T15:45:55.292Z"
+last_activity: 2026-03-08 -- Completed Plan 02 of Phase 87 (CodeFromRepo Component)
 progress:
   total_phases: 5
   completed_phases: 2
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 87 of 89 (Guide-Specific Components)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-03-08 -- Completed Plan 01 of Phase 87 (SVG Diagram Generators)
+Last activity: 2026-03-08 -- Completed Plan 02 of Phase 87 (CodeFromRepo Component)
 
 Progress: [#####░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 189 (across 15 milestones)
-- v1.15 plans completed: 3
+- Total plans completed: 190 (across 15 milestones)
+- v1.15 plans completed: 4
 
 **Cumulative Stats:**
 
@@ -78,6 +78,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [87-01] Mirrored plot-base.ts pattern for diagram-base.ts ensuring consistency with EDA SVG approach
 - [87-01] DiagramConfig omits margin since architecture diagrams are not data charts with axes
 - [87-01] textLabel helper includes textAnchor option for flexible text positioning
+- [87-02] Default templateRepo and versionTag hardcoded in CodeFromRepo props (matching guide.json) rather than reading guide.json at build time
+- [87-02] CSS child selector overrides ([&_.expressive-code]) to join header bar seamlessly with code block
 
 ### Pending Todos
 
@@ -99,6 +101,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 87-01-PLAN.md
+Stopped at: Completed 87-02-PLAN.md
 Resume file: None
-Next: Execute 87-02-PLAN.md (CodeFromRepo component)
+Next: Execute 87-03-PLAN.md (Astro diagram wrappers and React Flow deployment topology)

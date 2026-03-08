@@ -62,7 +62,7 @@ Plans:
 **Plans:** 2/3 plans executed
 Plans:
 - [x] 87-01-PLAN.md -- TDD SVG diagram generators (diagram-base, middleware-stack, builder-pattern, jwt-auth-flow)
-- [ ] 87-02-PLAN.md -- CodeFromRepo component with source attribution and GitHub link
+- [x] 87-02-PLAN.md -- CodeFromRepo component with source attribution and GitHub link
 - [ ] 87-03-PLAN.md -- Astro diagram wrappers and interactive React Flow deployment topology
 
 ### Phase 88: Content Authoring

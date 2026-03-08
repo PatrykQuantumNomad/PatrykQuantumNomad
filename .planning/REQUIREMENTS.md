@@ -47,9 +47,9 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 
 ### Code Snippets
 
-- [ ] **CODE-01**: Each domain page includes syntax-highlighted code snippets from the FastAPI template
-- [ ] **CODE-02**: Code snippets reference tagged template repo version with source file path annotations
-- [ ] **CODE-03**: CodeFromRepo component linking snippets to full source files on GitHub
+- [x] **CODE-01**: Each domain page includes syntax-highlighted code snippets from the FastAPI template
+- [x] **CODE-02**: Code snippets reference tagged template repo version with source file path annotations
+- [x] **CODE-03**: CodeFromRepo component linking snippets to full source files on GitHub
 
 ### Site Integration
 
@@ -115,9 +115,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AGENT-01 | Phase 88 | Pending |
 | AGENT-02 | Phase 88 | Pending |
 | AGENT-03 | Phase 86 | Complete |
-| CODE-01 | Phase 88 | Pending |
-| CODE-02 | Phase 88 | Pending |
-| CODE-03 | Phase 87 | Pending |
+| CODE-01 | Phase 88 | Complete |
+| CODE-02 | Phase 88 | Complete |
+| CODE-03 | Phase 87 | Complete |
 | SITE-01 | Phase 89 | Pending |
 | SITE-02 | Phase 89 | Pending |
 | SITE-03 | Phase 89 | Pending |
