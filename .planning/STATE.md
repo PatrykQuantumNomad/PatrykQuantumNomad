@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.15
-milestone_name: FastAPI Production Guide
-status: in_progress
-stopped_at: "Completed 86-02-PLAN.md"
-last_updated: "2026-03-08"
-last_activity: 2026-03-08 -- Completed Plan 02 of Phase 86 (Landing Page and Guide Layout Integration)
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 87-01-PLAN.md
+last_updated: "2026-03-08T15:45:13.278Z"
+last_activity: 2026-03-08 -- Completed Plan 01 of Phase 87 (SVG Diagram Generators)
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 40
+  total_plans: 6
+  completed_plans: 5
+  percent: 50
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 87 of 89 (Guide-Specific Components)
-Plan: 0 of TBD complete
+Plan: 1 of 3 complete
 Status: In progress
-Last activity: 2026-03-08 -- Completed Phase 86 (Page Infrastructure and Navigation)
+Last activity: 2026-03-08 -- Completed Plan 01 of Phase 87 (SVG Diagram Generators)
 
-Progress: [####░░░░░░] 40%
+Progress: [#####░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 188 (across 15 milestones)
-- v1.15 plans completed: 2
+- Total plans completed: 189 (across 15 milestones)
+- v1.15 plans completed: 3
 
 **Cumulative Stats:**
 
@@ -75,6 +75,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [86-02] Chapter card grid sources from guide.json chapters array (not guidePages) to show all 11 chapters
 - [86-02] Coming Soon cards rendered as div (not anchor) with opacity-60 to prevent dead links
 - [86-02] Chapter descriptions hardcoded in index.astro as marketing copy (not in data model)
+- [87-01] Mirrored plot-base.ts pattern for diagram-base.ts ensuring consistency with EDA SVG approach
+- [87-01] DiagramConfig omits margin since architecture diagrams are not data charts with axes
+- [87-01] textLabel helper includes textAnchor option for flexible text positioning
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 86-02-PLAN.md
+Stopped at: Completed 87-01-PLAN.md
 Resume file: None
-Next: Plan Phase 87 (Guide-Specific Components)
+Next: Execute 87-02-PLAN.md (CodeFromRepo component)
