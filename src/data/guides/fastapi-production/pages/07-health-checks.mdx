@@ -1,0 +1,212 @@
+---
+title: "Health Checks"
+description: "How the FastAPI template separates liveness from readiness probes, uses a dependency-aware ReadinessRegistry, and auto-registers health checks for databases and caches"
+order: 7
+slug: "health-checks"
+---
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Your AI agent's endpoints are served only when the application reports ready. Kubernetes liveness and readiness probes are pre-configured with separate endpoints, separate semantics, and separate failure modes. Every dependency -- database, cache, auth service -- automatically registers its own health check with the readiness registry during the builder chain. The agent adds business logic routes; the infrastructure ensures those routes only receive traffic when every dependency is reachable.
+
+## Liveness vs Readiness
+
+These are fundamentally different questions with fundamentally different consequences:
+
+- **Liveness** (`/healthcheck`): "Is the process alive?" If this fails, Kubernetes restarts the pod. The check is fast, has no external dependencies, and returns 200 if the Python process can handle a request at all.
+- **Readiness** (`/ready`): "Can the process serve traffic?" If this fails, Kubernetes removes the pod from the service -- no traffic routed, but no restart either. The check queries every registered dependency before answering.
+
+<CodeFromRepo
+  code={`def health_check() -> dict[str, str]:
+    """
+    Liveness probe endpoint.
+
+    Returns 200 if the process is alive and able to handle requests.
+    This endpoint should be fast and have no external dependencies.
+    """
+    return {"status": "healthy"}
+
+
+async def readiness_check(request: Request) -> JSONResponse:
+    """
+    Readiness probe endpoint.
+
+    Returns 200 if the application is ready to accept traffic.
+    Extend this with connectivity checks for databases, caches,
+    and other critical dependencies.
+    """
+    registry = request.app.state.readiness_registry
+    settings = request.app.state.settings
+    results = await registry.run(request.app)
+    checks = {
+        result.name: result.as_payload(include_detail=settings.readiness_include_details)
+        for result in results
+    }
+    all_healthy = all(result.is_healthy for result in results)
+    status = "ready" if all_healthy else "not_ready"
+    status_code = 200 if all_healthy else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={"status": status, "checks": checks},
+    )`}
+  lang="python"
+  filePath="src/app/routes/health.py"
+  startLine={45}
+  endLine={77}
+/>
+
+The liveness check is a pure function -- no I/O, no state, no dependencies. It always returns 200 unless the process itself is broken. The readiness check is async and queries the registry, returning 503 with a detailed breakdown if any dependency is unhealthy. This separation ensures that a temporary database outage removes the pod from the load balancer without triggering unnecessary restarts.
+
+## The Readiness Registry
+
+The `ReadinessRegistry` is a named registry of async health checks. Each builder step (`setup_database`, `setup_cache`, `setup_auth`) registers its own check function during application construction. At readiness time, the registry runs every check sequentially and reports aggregate health.
+
+<CodeFromRepo
+  code={`@dataclass(slots=True)
+class ReadinessCheckResult:
+    """Structured readiness result for one dependency."""
+
+    name: str
+    is_healthy: bool
+    detail: str
+    latency_ms: float | None = None
+
+    @classmethod
+    def ok(cls, name: str, detail: str = "ok", latency_ms: float | None = None) -> "Self":
+        return cls(name=name, is_healthy=True, detail=detail, latency_ms=latency_ms)
+
+    @classmethod
+    def error(
+        cls,
+        name: str,
+        detail: str,
+        latency_ms: float | None = None,
+    ) -> "Self":
+        return cls(name=name, is_healthy=False, detail=detail, latency_ms=latency_ms)
+
+
+class ReadinessRegistry:
+    """Registry of dependency checks contributing to readiness."""
+
+    def __init__(self) -> None:
+        self._checks: dict[str, ReadinessCheck] = {}
+
+    def register(self, name: str, check: ReadinessCheck) -> None:
+        """Register or replace a named readiness check."""
+        self._checks[name] = check
+
+    async def run(self, app: FastAPI) -> list[ReadinessCheckResult]:
+        """
+        Execute all registered readiness checks sequentially.
+
+        The registry accepts both synchronous and asynchronous checks so simple
+        in-process probes do not need artificial \`async\` wrappers.
+        """
+        results: list[ReadinessCheckResult] = []
+        for check in self._checks.values():
+            start = perf_counter()
+            maybe_result = check(app)
+            result = await maybe_result if isawaitable(maybe_result) else maybe_result
+            if result.latency_ms is None:
+                result.latency_ms = (perf_counter() - start) * 1000
+            results.append(result)
+        return results`}
+  lang="python"
+  filePath="src/app/readiness/registry.py"
+  startLine={14}
+  endLine={79}
+/>
+
+Each `ReadinessCheckResult` carries a name, health status, human-readable detail, and measured latency. The registry's `run()` method handles both sync and async check functions transparently -- `isawaitable()` dispatches at runtime, so simple in-process checks (like the memory cache ping) avoid unnecessary `async` overhead. Latency is measured automatically if the check does not report its own.
+
+## Dependency Health Checks
+
+Each infrastructure dependency provides its own readiness check function. The database check runs `SELECT 1` against the engine with a configurable timeout. The cache check calls `store.ping()` with its own timeout.
+
+<CodeFromRepo
+  code={`async def check_database_readiness(app: FastAPI) -> ReadinessCheckResult:
+    """Run a lightweight readiness ping against the configured database."""
+    engine = cast("AsyncEngine | None", getattr(app.state, "db_engine", None))
+    settings = app.state.settings
+
+    if engine is None:
+        return ReadinessCheckResult.error("database", "Database engine not initialized")
+
+    start = perf_counter()
+    try:
+        async with asyncio.timeout(settings.database_health_timeout_seconds):
+            async with engine.connect() as connection:
+                await connection.execute(text("SELECT 1"))
+    except TimeoutError:
+        latency_ms = (perf_counter() - start) * 1000
+        return ReadinessCheckResult.error(
+            "database",
+            "Timed out while checking database connectivity",
+            latency_ms=latency_ms,
+        )
+    except Exception as exc:
+        latency_ms = (perf_counter() - start) * 1000
+        return ReadinessCheckResult.error(
+            "database",
+            f"Database check failed: {exc!s}",
+            latency_ms=latency_ms,
+        )
+
+    latency_ms = (perf_counter() - start) * 1000
+    return ReadinessCheckResult.ok("database", latency_ms=latency_ms)`}
+  lang="python"
+  filePath="src/app/db/health.py"
+  startLine={21}
+  endLine={50}
+/>
+
+<CodeFromRepo
+  code={`async def check_cache_readiness(app: FastAPI) -> ReadinessCheckResult:
+    """Run a lightweight readiness ping against the configured cache store."""
+    store = cast("CacheStore | None", getattr(app.state, "cache_store", None))
+    settings = app.state.settings
+
+    if store is None:
+        return ReadinessCheckResult.error("cache", "Cache store not initialized")
+
+    start = perf_counter()
+    try:
+        async with asyncio.timeout(settings.cache_health_timeout_seconds):
+            await store.ping()
+    except TimeoutError:
+        latency_ms = (perf_counter() - start) * 1000
+        return ReadinessCheckResult.error(
+            "cache",
+            "Timed out while checking cache connectivity",
+            latency_ms=latency_ms,
+        )
+    except Exception as exc:
+        latency_ms = (perf_counter() - start) * 1000
+        return ReadinessCheckResult.error(
+            "cache",
+            f"Cache check failed: {exc!s}",
+            latency_ms=latency_ms,
+        )
+
+    latency_ms = (perf_counter() - start) * 1000
+    return ReadinessCheckResult.ok("cache", latency_ms=latency_ms)`}
+  lang="python"
+  filePath="src/app/cache/health.py"
+  startLine={17}
+  endLine={45}
+/>
+
+Both checks follow an identical structure: verify the dependency is initialized, wrap the probe in `asyncio.timeout()`, and return a structured result with latency. Timeout values are configurable through settings (`database_health_timeout_seconds`, `cache_health_timeout_seconds`) with 2-second defaults -- fast enough for Kubernetes probe intervals, generous enough for cold connections.
+
+## What the Agent Never Implements
+
+The health check infrastructure handles all of the following. Your agent writes business logic knowing that traffic only arrives when dependencies are healthy:
+
+- **Liveness endpoint** -- Always returns 200 with zero external dependencies; never needs modification
+- **Readiness endpoint** -- Queries the registry and returns aggregate health with per-dependency breakdown
+- **ReadinessRegistry** -- Dependency-aware registry with automatic latency measurement and sync/async dispatch
+- **Dependency health checks** -- Database and cache readiness probes with configurable timeouts
+- **Auto-registration** -- Each builder step registers its own readiness check; adding a new dependency automatically extends the readiness response
+- **Kubernetes integration** -- Health and readiness paths are configurable through settings for custom probe paths

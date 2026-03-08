@@ -1,0 +1,234 @@
+---
+title: "Caching"
+description: "How the FastAPI template provides an optional, pluggable cache layer with a CacheStore abstraction, memory and Redis backends, per-key TTL, and FastAPI dependency injection"
+order: 10
+slug: "caching"
+---
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Your AI agent can cache any value with a single dependency injection call. The cache layer is optional, pluggable (memory or Redis), and pre-wired with per-key TTL support, key prefix namespacing, and automatic health registration. When caching is enabled, the agent calls `get_cache()` in a route handler and gets a fully configured store -- no connection management, no backend selection, no TTL infrastructure to build.
+
+When caching is disabled (the default), no cache resources are allocated and no readiness check is registered. The feature is zero-cost when unused.
+
+## The CacheStore Abstraction
+
+The `CacheStore` abstract base class defines the contract that every cache backend must implement. Seven methods cover the complete lifecycle: read, write, delete, existence check, bulk clear, health ping, and resource cleanup.
+
+<CodeFromRepo
+  code={`class CacheStore(ABC):
+    """Abstract cache store used by the application."""
+
+    @abstractmethod
+    async def get(self, key: str) -> bytes | None:
+        """Return the cached value for *key*, or \`\`None\`\` if absent/expired."""
+
+    @abstractmethod
+    async def set(self, key: str, value: bytes, *, ttl_seconds: int) -> None:
+        """Store *value* under *key* with a TTL in seconds."""
+
+    @abstractmethod
+    async def delete(self, key: str) -> None:
+        """Remove *key* from the cache."""
+
+    @abstractmethod
+    async def exists(self, key: str) -> bool:
+        """Return \`\`True\`\` if *key* is present and not expired."""
+
+    @abstractmethod
+    async def clear(self) -> None:
+        """Remove all entries from this cache store."""
+
+    @abstractmethod
+    async def ping(self) -> bool:
+        """Lightweight connectivity check used by the readiness probe."""
+
+    @abstractmethod
+    async def close(self) -> None:
+        """Release resources held by the store (connections, memory)."""`}
+  lang="python"
+  filePath="src/app/cache/store.py"
+  startLine={19}
+  endLine={48}
+/>
+
+All methods are async, even for the in-memory backend. This keeps the interface uniform -- route handlers never need to know which backend is active. Values are stored as `bytes`, so callers serialize before writing and deserialize after reading, keeping the cache layer encoding-agnostic.
+
+## Memory Backend
+
+The `MemoryCacheStore` implements the interface using a plain dictionary with passive TTL expiry. Each entry stores a value and an expiry timestamp based on `time.monotonic()`. Expired entries are evicted lazily on read, and a max-entry cap triggers oldest-first eviction when the store fills up.
+
+<CodeFromRepo
+  code={`class MemoryCacheStore(CacheStore):
+    """In-process cache with passive TTL expiry and max-entry eviction."""
+
+    def __init__(self, *, max_entries: int = 10_000) -> None:
+        self.max_entries = max_entries
+        # key -> (value, expiry_timestamp)
+        self._data: dict[str, tuple[bytes, float]] = {}
+
+    async def get(self, key: str) -> bytes | None:
+        entry = self._data.get(key)
+        if entry is None:
+            return None
+        value, expiry = entry
+        if time.monotonic() >= expiry:
+            self._data.pop(key, None)
+            return None
+        return value
+
+    async def set(self, key: str, value: bytes, *, ttl_seconds: int) -> None:
+        if len(self._data) >= self.max_entries and key not in self._data:
+            self._evict_oldest()
+        self._data[key] = (value, time.monotonic() + ttl_seconds)
+
+    async def delete(self, key: str) -> None:
+        self._data.pop(key, None)
+
+    async def exists(self, key: str) -> bool:
+        return await self.get(key) is not None
+
+    async def clear(self) -> None:
+        self._data.clear()
+
+    async def ping(self) -> bool:
+        return True
+
+    async def close(self) -> None:
+        self._data.clear()
+
+    def _evict_oldest(self) -> None:
+        """Remove the entry with the earliest expiry timestamp."""
+        if not self._data:
+            return
+        oldest_key = min(self._data, key=lambda k: self._data[k][1])
+        self._data.pop(oldest_key, None)`}
+  lang="python"
+  filePath="src/app/cache/store.py"
+  startLine={51}
+  endLine={95}
+/>
+
+This backend is suitable for single-process deployments and local development. The `max_entries` cap (default 10,000) prevents unbounded memory growth. The `ping()` method always returns `True` since the in-memory store has no external dependency to verify. TTL uses `time.monotonic()` rather than wall-clock time, making it immune to clock adjustments.
+
+## Redis Backend
+
+The `RedisCacheStore` wraps the async Redis client with key prefix namespacing. Every key is prefixed (default `cache:`) to avoid collisions when multiple applications share a Redis instance. TTL is delegated to Redis natively via `SETEX`.
+
+<CodeFromRepo
+  code={`class RedisCacheStore(CacheStore):
+    """Redis-backed distributed cache store."""
+
+    def __init__(self, storage_url: str, *, key_prefix: str = "cache:") -> None:
+        try:
+            from redis import asyncio as redis_asyncio
+        except ImportError:
+            raise ImportError(
+                "The 'redis' package is required for Redis-backed caching. "
+                "Install it with: uv sync --extra redis"
+            ) from None
+        self._client = redis_asyncio.from_url(storage_url, encoding="utf-8", decode_responses=False)
+        self._key_prefix = key_prefix
+
+    def _prefixed(self, key: str) -> str:
+        return f"{self._key_prefix}{key}"
+
+    async def get(self, key: str) -> bytes | None:
+        value = await self._client.get(self._prefixed(key))
+        if value is None:
+            return None
+        return value if isinstance(value, bytes) else value.encode("utf-8")
+
+    async def set(self, key: str, value: bytes, *, ttl_seconds: int) -> None:
+        await self._client.setex(self._prefixed(key), ttl_seconds, value)
+
+    async def delete(self, key: str) -> None:
+        await self._client.delete(self._prefixed(key))
+
+    async def exists(self, key: str) -> bool:
+        return bool(await self._client.exists(self._prefixed(key)))
+
+    async def clear(self) -> None:
+        await self._client.flushdb()
+
+    async def ping(self) -> bool:
+        client: Any = self._client
+        return bool(await client.ping())
+
+    async def close(self) -> None:
+        await self._client.aclose()`}
+  lang="python"
+  filePath="src/app/cache/store.py"
+  startLine={97}
+  endLine={138}
+/>
+
+The Redis package is an optional dependency (`uv sync --extra redis`). The `ImportError` guard provides a clear installation message if the package is missing. Key prefixing is handled transparently -- callers pass bare keys like `"user:123"` and the store prepends `"cache:user:123"` before touching Redis. This enables multi-tenant isolation when multiple services share a Redis instance.
+
+## Factory Function
+
+The `create_cache_store()` factory reads the application settings to determine which backend to instantiate. The `cache_backend` setting (`"memory"` or `"redis"`) drives the selection, and backend-specific settings (max entries, Redis URL, key prefix) are passed through automatically.
+
+<CodeFromRepo
+  code={`def create_cache_store(settings: Settings) -> CacheStore:
+    """Instantiate a cache store based on the application settings."""
+    if settings.cache_backend == "redis":
+        return RedisCacheStore(
+            settings.cache_storage_url,
+            key_prefix=settings.cache_key_prefix,
+        )
+    return MemoryCacheStore(max_entries=settings.cache_max_entries)`}
+  lang="python"
+  filePath="src/app/cache/store.py"
+  startLine={140}
+  endLine={148}
+/>
+
+This factory is called once during the lifespan startup. The resulting store is attached to `app.state.cache_store` and shared across all requests. Switching backends is a single environment variable change (`APP_CACHE_BACKEND=redis`) -- no code modifications required.
+
+## Dependency Injection
+
+Route handlers access the cache through a FastAPI dependency. The `get_cache()` function extracts the store from application state and returns it typed as `CacheStore`, so handlers code against the abstract interface regardless of the active backend.
+
+<CodeFromRepo
+  code={`def get_cache(request: Request) -> CacheStore:
+    """Return the configured cache store from application state."""
+    return cast("CacheStore", request.app.state.cache_store)`}
+  lang="python"
+  filePath="src/app/cache/dependencies.py"
+  startLine={12}
+  endLine={14}
+/>
+
+A route handler uses it like this:
+
+```python
+from fastapi import Depends
+from app.cache.dependencies import get_cache
+from app.cache.store import CacheStore
+
+@router.get("/items/{item_id}")
+async def get_item(item_id: str, cache: CacheStore = Depends(get_cache)):
+    cached = await cache.get(f"item:{item_id}")
+    if cached:
+        return json.loads(cached)
+    # ... fetch from database, then cache
+    await cache.set(f"item:{item_id}", json.dumps(item).encode(), ttl_seconds=300)
+    return item
+```
+
+The dependency is synchronous (no `async`) because it only reads from `app.state` -- no I/O involved. FastAPI handles both sync and async dependencies transparently.
+
+## What the Agent Never Implements
+
+The caching infrastructure handles all of the following. Your agent writes cache-aware business logic on top of this foundation:
+
+- **CacheStore abstraction** -- The 7-method async interface ensuring backend interchangeability
+- **Memory backend** -- Dict-based store with monotonic TTL and max-entry eviction for single-process deployments
+- **Redis backend** -- Distributed store with key prefix namespacing and native TTL delegation
+- **Backend selection** -- The factory function reads settings and instantiates the correct store
+- **Dependency injection** -- `get_cache()` provides the store to any route handler via `Depends()`
+- **Health registration** -- The cache readiness check is auto-registered during the builder chain
+- **Lifespan management** -- Store initialization on startup and `close()` on shutdown are handled by the lifespan manager
+- **Settings integration** -- Backend type, TTL defaults, max entries, Redis URL, and key prefix are all configurable through environment variables
