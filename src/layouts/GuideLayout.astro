@@ -41,6 +41,15 @@ const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters
       <!-- Main content -->
       <div>
         <slot />
+        <!-- Companion blog post back-link -->
+        <aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
+          <p class="text-sm text-[var(--color-text-secondary)]">
+            For a high-level overview of all 11 production concerns, read the companion blog post:
+            <a href="/blog/fastapi-production-guide/" class="text-[var(--color-accent)] hover:underline font-medium">
+              FastAPI Production Guide: What Your AI Agent Inherits
+            </a>
+          </p>
+        </aside>
         <GuideChapterNav chapters={chapters} currentSlug={currentSlug} guideSlug={guideSlug} />
       </div>
     </div>
