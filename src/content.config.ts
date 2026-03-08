@@ -3,6 +3,7 @@ import { glob, file } from 'astro/loaders';
 import { languageSchema } from './lib/beauty-index/schema';
 import { dbModelSchema } from './lib/db-compass/schema';
 import { edaTechniqueSchema, edaDistributionSchema } from './lib/eda/schema';
+import { guidePageSchema, guideMetaSchema } from './lib/guides/schema';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
@@ -50,4 +51,14 @@ const edaPages = defineCollection({
   }),
 });
 
-export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages };
+const guidePages = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides/fastapi-production/pages' }),
+  schema: guidePageSchema,
+});
+
+const guides = defineCollection({
+  loader: file('src/data/guides/fastapi-production/guide.json'),
+  schema: guideMetaSchema,
+});
+
+export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages, guidePages, guides };

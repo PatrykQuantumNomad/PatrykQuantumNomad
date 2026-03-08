@@ -1,0 +1,16 @@
+[
+  {
+    "id": "fastapi-production",
+    "title": "FastAPI Production Guide",
+    "description": "A deep-dive into every production concern handled by the FastAPI template -- so your AI agent writes business logic, not infrastructure",
+    "slug": "fastapi-production",
+    "templateRepo": "https://github.com/Translucent-Computing/fastapi-template",
+    "versionTag": "v1.0.0",
+    "chapters": [
+      {
+        "slug": "builder-pattern",
+        "title": "Builder Pattern"
+      }
+    ]
+  }
+]
