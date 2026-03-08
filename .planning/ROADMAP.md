@@ -44,7 +44,10 @@ Plans:
   3. Sidebar shows all chapters with the current page visually highlighted, and clicking a chapter navigates to it
   4. Breadcrumb navigation on every guide page shows the path (Home > Guides > FastAPI Production > Chapter Title)
   5. Previous/next chapter links at the bottom of each domain page navigate to the correct adjacent chapters in order
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 86-01-PLAN.md -- Route helpers (TDD), guide.json data update, GuideLayout, and navigation components
+- [ ] 86-02-PLAN.md -- Landing page with AI agent hero and chapter card grid, [slug].astro GuideLayout integration
 
 ### Phase 87: Guide-Specific Components
 **Goal**: Reusable components for code snippets and architecture diagrams are ready for content authoring
@@ -89,7 +92,7 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 85. Foundation and Content Schema | 1/1 | Complete   | 2026-03-08 |
-| 86. Page Infrastructure and Navigation | 0/TBD | Not started | - |
+| 86. Page Infrastructure and Navigation | 0/2 | Not started | - |
 | 87. Guide-Specific Components | 0/TBD | Not started | - |
 | 88. Content Authoring | 0/TBD | Not started | - |
 | 89. SEO, OG Images, and Site Integration | 0/TBD | Not started | - |
