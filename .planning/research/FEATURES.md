@@ -1,209 +1,284 @@
 # Feature Research
 
-**Domain:** Publishing DevOps validator skills to skills.sh
-**Researched:** 2026-03-05
+**Domain:** Multi-page production framework guide (FastAPI) as a portfolio content section
+**Researched:** 2026-03-08
 **Confidence:** HIGH
-
-## Context
-
-Four existing DevOps validator skills (dockerfile-analyzer, compose-validator, k8s-analyzer, gha-validator) are fully built with complete SKILL.md files, evaluation workspaces, benchmark data, and hooks. The research question is narrow: what publishing-specific features are needed to make these skills discoverable, installable, and successful on skills.sh?
-
-## How skills.sh Works
-
-Skills.sh is a leaderboard and directory, not a registry. There is no submission process, approval queue, or package upload. Skills appear on skills.sh automatically through anonymous telemetry when users run `npx skills add <owner>/<repo>`. The leaderboard ranks by aggregate install count. The CLI tool (`npx skills`) scans GitHub repos for SKILL.md files in standard discovery locations (`skills/`, `.agents/skills/`, `.claude/skills/`).
-
-For a multi-skill repo like PatrykQuantumNomad, the install command is:
-```
-npx skills add PatrykQuantumNomad/PatrykQuantumNomad
-```
-
-Users can also install individual skills:
-```
-npx skills add PatrykQuantumNomad/PatrykQuantumNomad --skill dockerfile-analyzer
-```
-
-The CLI discovers skills by scanning known directory paths. The `public/skills/<name>/SKILL.md` path may not be auto-discovered. The standard paths are `skills/`, `.claude/skills/`, or `.agents/skills/`.
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = skill doesn't get installed or gets uninstalled quickly.
+Features users assume exist when visiting a multi-page technical guide. Missing these and the guide feels amateurish or incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Correct directory structure for CLI discovery** | `npx skills add` scans `skills/`, `.claude/skills/`, `.agents/skills/` for SKILL.md files. Current `public/skills/` path will NOT be auto-discovered. Skills must be in a recognized discovery location. | MEDIUM | Move or symlink the 4 skill directories from `public/skills/` to `skills/` at repo root. Each skill needs its own directory containing SKILL.md. The `dist/` copies are irrelevant to skills.sh. |
-| **SKILL.md frontmatter compliance** | Name must be lowercase letters, numbers, hyphens only (max 64 chars). Description must be non-empty, max 1024 chars, no XML tags, third-person voice. Current SKILL.md files already have name+description. | LOW | Verify existing frontmatter against spec. Current names (dockerfile-analyzer, compose-validator, k8s-analyzer, gha-validator) are compliant. Descriptions need third-person verification per Anthropic best practices. |
-| **Description quality for discovery** | Claude uses the description field to decide when to auto-load a skill. skills.sh search indexes name+description. A vague description means the skill never triggers. Current descriptions are detailed and trigger-rich. | LOW | Current descriptions are already well-crafted with trigger keywords. May need minor tuning to ensure third-person voice ("Analyzes..." not "I analyze..."). Already uses proactive trigger patterns. |
-| **One-command install works** | Users expect `npx skills add <owner>/<repo>` to work. If the repo structure doesn't match CLI expectations, install silently finds no skills. | HIGH | This is the single most critical feature. Without it, nothing else matters. Must validate with `npx skills add . --list` from local repo. |
-| **Each skill functions independently** | Users may install just one skill (e.g., only dockerfile-analyzer). Skills must not depend on each other or on shared files outside their directory. | LOW | Current skills are already self-contained. Each SKILL.md contains the complete rule set, scoring methodology, and output format. No cross-skill dependencies exist. |
-| **Security audit pass** | skills.sh runs automated security audits via Gen Agent Trust Hub, Socket, and Snyk. Audit results appear publicly on each skill's page. A "Fail" badge deters installs. | LOW | SKILL.md files are pure markdown with frontmatter -- no executable code, no dependencies to scan. The `hooks/` scripts (shell scripts like `validate-dockerfile.sh`) may trigger scrutiny but are simple validators. Should pass audits cleanly. |
+| Landing page with guide overview | Every multi-page guide starts with a table of contents and "why read this" pitch. Users need to orient before diving in. | LOW | Reuse EDA landing page card-grid pattern. Show all ~11 domain pages with brief descriptions. |
+| Per-domain deep-dive pages (~11) | The guide's core promise. Each production concern (auth, middleware, observability, etc.) gets its own page with full treatment. | MEDIUM | Builder, Auth/JWT, Middleware, Observability, Database, Docker, Testing, Health checks, Security headers, Rate limiting, Caching. One .astro page per domain. |
+| Code snippets from the actual template | Developers expect real code, not pseudocode. Snippets must come from the fastapi-template repo so readers can verify them. | LOW | astro-expressive-code already configured site-wide. Use Python/YAML/Bash fenced blocks. Copy-paste accuracy is critical. |
+| Syntax highlighting with copy button | Standard in 2026. Every technical guide site has it. Users penalize for missing it. | NONE | Already available via astro-expressive-code (existing site pattern). Zero new work. |
+| Breadcrumb navigation | Orients users within the guide hierarchy. Guides > FastAPI Production > [Current Page]. Existing pattern in EDA and tool rule pages. | LOW | Reuse EdaBreadcrumb pattern. Guides > FastAPI Production > {page title}. |
+| Previous/next page navigation | Multi-page guides need sequential reading flow. Readers expect prev/next links at the bottom of each domain page. | LOW | Ordered list of domain pages. Prev/next with page titles. Omit prev on first, next on last. Similar to beauty-index [slug] prev/next pattern. |
+| Responsive layout (mobile/tablet/desktop) | Non-negotiable for any web content. The site already has this. | NONE | Inherited from Layout.astro + Tailwind. Zero new work. |
+| Build-time OG images per page | Every content section on this site generates OG images. Users sharing guide links on social media expect preview cards. | LOW | Existing Satori + Sharp pipeline. ~12 images (landing + 11 domain pages). Follow established og-image.ts pattern. |
+| JSON-LD structured data | Site-wide pattern. TechArticle or Article schema for each guide page. BreadcrumbList for navigation. | LOW | Reuse existing JSON-LD component patterns. TechArticle schema fits best for instructional content. |
+| Sitemap inclusion | All pages must appear in sitemap-index.xml. Automatic via Astro's @astrojs/sitemap. | NONE | Zero work -- Astro handles this for any page in src/pages/. |
+| LLMs.txt integration | Existing site feature. Guide pages should appear in LLMs.txt for AI discoverability. | LOW | Add guide section entries to existing LLMs.txt generation. |
+| Header navigation link | Every content section (Beauty Index, DB Compass, EDA, Tools) has a header nav entry. Users expect to find the guide from the top nav. | LOW | Add "Guides" to navLinks in Header.astro. |
+| Homepage callout | Every content section gets a homepage callout card. Drives discovery from the landing page. | LOW | Add a callout section following the existing EDA/DB Compass/Tools pattern. |
+| Table of contents per page | Long-form technical pages need in-page navigation. Existing blog posts have auto-generated TOC. | LOW | Each domain page likely 1500-3000 words. Reuse blog post TOC pattern (remark-toc or manual H2/H3 anchors). |
+| Cross-link to template repo | Users reading a guide about a template need to find the template. Every page should link to the GitHub repo. | LOW | Persistent CTA banner or sidebar link to github.com/PatrykQuantumNomad/fastapi-template. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set these skills apart from competing DevOps skills on skills.sh.
+Features that make this guide stand out from the dozens of "FastAPI in production" blog posts and README docs.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Repo-level README with benchmark data** | Top multi-skill repos (Trail of Bits, vercel-labs) use their README to showcase the skill collection. No competing DevOps skill repo has benchmark data proving measurable improvement. The +42.4% improvement stat is a powerful differentiator. | MEDIUM | Create or update repo README to include: skill catalog table with rule counts, install commands, benchmark results table, before/after comparison narrative. The README is the landing page when someone visits the GitHub repo from skills.sh. |
-| **Benchmark-backed credibility** | The 98.8% pass rate vs 56.4% baseline across 8 evals is unique among DevOps skills. kubernetes-specialist, k8s-security-policies, and devops-engineer skills on skills.sh have zero quantitative proof of effectiveness. | LOW | The benchmark data already exists in `benchmark-all-skills.md` and `benchmark-all-skills.json`. Need to surface it prominently in the README and individual skill descriptions. This is the strongest competitive moat. |
-| **Suite coherence with consistent methodology** | All 4 skills share identical scoring methodology (0-100, A+ through F, category-weighted, diminishing returns formula). No other skills.sh DevOps suite has this consistency. Users who install one will want all four. | LOW | Already built. Highlight the consistency in the README -- "same scoring methodology across all four validators." Cross-reference between skills ("If you use dockerfile-analyzer, also try compose-validator"). |
-| **Rule count as social proof** | 211 total rules (46+52+67+46) across 4 skills. The closest competitor (k8s-security at skills.sh) has no published rule count. Concrete numbers signal thoroughness. | LOW | Already built. Display prominently: "211 rules across 4 DevOps validators." Per-skill counts in the catalog table. |
-| **Hooks for CI/CD integration** | Each skill includes a `hooks/` directory with shell scripts (e.g., `validate-dockerfile.sh`). These enable automated validation beyond interactive Claude sessions. Few skills on skills.sh include hooks. | LOW | Already built. Document the hooks in the README. Show how to wire them into pre-commit or CI pipelines. This extends the skill's value beyond Claude Code sessions. |
-| **Category badges or shields in README** | GitHub shields.io badges showing rule counts, pass rates, or grades are uncommon in skill repos but standard in popular open-source projects. They make the README scannable and professional. | LOW | Add shields.io badges for: total rules (211), benchmark pass rate (98.8%), number of skills (4), supported agents (Claude Code, Cursor, Copilot, etc.). |
-| **Cross-referencing install command per skill** | Top skills.sh pages show install commands with `--skill` targeting. Documenting each skill's individual install command alongside the full-suite command caters to both "I want everything" and "I only need K8s" users. | LOW | List both commands in README. Full suite: `npx skills add PatrykQuantumNomad/PatrykQuantumNomad`. Individual: `npx skills add PatrykQuantumNomad/PatrykQuantumNomad --skill k8s-analyzer`. |
-| **Progressive disclosure in SKILL.md structure** | Anthropic best practices recommend keeping SKILL.md under 500 lines and using separate reference files for detailed content. Current SKILL.md files are 500-600+ lines each. Splitting would follow official guidance and reduce context token cost. | MEDIUM | Consider splitting each SKILL.md into a concise core (under 500 lines) with rule details in a `RULES.md` reference file. However, the current monolithic format has been benchmarked at 98.8% -- splitting risks degrading performance. This is a tradeoff to evaluate carefully. |
+| AI agent enablement narrative | The unique angle: "Every production concern is handled so your AI agent only writes business logic." No other FastAPI guide frames NFR coverage as agent-enablement. Positions the author as forward-thinking architect. | LOW | Narrative framing, not a feature to build. Woven into landing page hero and each domain page intro/outro. Each page ends with "What the agent never has to think about: [list]." |
+| Architecture diagrams (SVG, build-time) | Visual learners need diagrams. Most competing guides are text-only blog posts. Build-time SVGs match the site's existing pattern (13+ SVG generators). Key diagrams: request flow through middleware stack, builder pattern composition, deployment topology, auth flow. | MEDIUM | 4-6 architecture diagrams as build-time SVG components. Request flow is the hero diagram on the landing page. Each domain page gets at least one diagram showing where that concern fits in the overall architecture. |
+| "Why not the obvious approach" sections | Each domain page explains what the template does AND why the obvious alternative is wrong. E.g., "Why raw ASGI middleware, not BaseHTTPMiddleware" (ADR-0003). This is what 17-year architect expertise looks like -- knowing what NOT to do. | LOW | Content-only. Each page has a "Why not X?" callout box. Content sourced from the 5 ADRs in fastapi-template/docs/adr/. |
+| Builder pattern as compositional narrative | The guide's structural metaphor: the Builder pattern is how the app composes itself, and the guide mirrors this by building up understanding one concern at a time. Each domain page is a "setup_*() method explained." | LOW | Narrative framing. The landing page shows the full builder chain, then each domain page expands one method. |
+| Companion blog post with bidirectional cross-links | Existing site pattern (every content section has one). The blog post targets different search intents ("FastAPI production best practices 2026") while the guide pages target specific concerns ("FastAPI JWT authentication production"). | LOW | 1 MDX blog post, ~2000 words, linking to all 11 domain pages. Domain pages link back. Proven SEO pattern from 6 prior content sections. |
+| Production checklist callouts | Each domain page includes a "Production checklist" -- 3-5 actionable items specific to that concern. E.g., for Auth: "Rotate JWKS keys quarterly, never HS256 in prod, validate audience claim." Practical value that blog posts lack. | LOW | Content-only. Styled as a checklist component (checkbox list with check icons). |
+| Configuration reference per domain | Each page includes the relevant APP_* environment variables for that concern, pulled from the template's configuration.md. Saves readers from hunting through a monolithic config doc. | LOW | Content-only. Table of env vars relevant to each domain page. Source: fastapi-template/docs/configuration.md. |
+| Self-contained guide (no repo dependency) | The guide stands alone. A reader who never clones the template still learns production FastAPI patterns. Rare -- most template docs assume you have the code open. | LOW | Content discipline, not a feature to build. Ensure each code snippet has enough context to understand without the repo. |
+| Domain page reading time estimate | Signals content depth. "12 min read" tells users this is a thorough treatment, not a surface skim. | LOW | Existing pattern from blog posts. Calculate from word count. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good for publishing but create problems.
+Features to explicitly NOT build for this guide section.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Splitting SKILL.md to reduce token count** | Anthropic recommends under 500 lines. Current files are 530-615 lines. Token overhead is +42% vs baseline. | The 98.8% benchmark pass rate was achieved with the current monolithic SKILL.md files. Splitting into SKILL.md + RULES.md introduces a progressive disclosure dependency where Claude must decide to read the rules file. If Claude skips the reference file, rule coverage drops. The benchmark explicitly showed that structured rule IDs and category breakdowns NEVER appear without the full skill loaded. | Keep SKILL.md monolithic. The token cost (+10K tokens, ~42%) is justified by the +42.4% improvement. The files are within reasonable bounds. Only split if benchmark shows no degradation. |
-| **Adding install count tracking or analytics** | Want to know how many people install the skills. | skills.sh already tracks install counts via anonymous telemetry. Adding custom tracking (webhook, analytics script) would fail security audits and deter users. The skills CLI handles this automatically. | Rely on skills.sh leaderboard for install metrics. Check `https://skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/<skill-name>` after first installs appear. |
-| **Creating a Claude Plugin marketplace manifest** | `.claude-plugin/marketplace.json` enables `npx skills add` with plugin-style browsing in Claude Code. Trail of Bits uses this. | Plugin marketplace format is separate from skills.sh discovery. It adds complexity (manifest file, package groupings) and is only relevant for Claude Code -- not Cursor, Copilot, or the other 37 agents. The `skills/` directory structure is universal. | Use standard `skills/` directory. Plugin marketplace is a v2 concern only if Claude Code-specific features are needed. |
-| **Custom landing page or documentation site** | A dedicated docs site for the skills would be professional. | Over-engineering for 4 skills. The README is the landing page. Each SKILL.md is self-documenting. The existing blog posts on patrykgolabek.dev already provide deep documentation. Maintaining a separate docs site fragments the content. | Link to existing blog posts from the README. Use the README as the single landing page. Link to existing browser-based tools for interactive demos. |
-| **Versioning skills with semver tags** | Users might want to pin to specific skill versions. | skills.sh does not support versioned skills. The CLI always installs from the latest commit on the default branch. Versioning would require a release workflow that skills.sh ignores entirely. | Keep skills on main branch. Use git history for version tracking. If breaking changes are needed, document them in the README. |
-| **Adding evaluation test cases to the published repo** | The eval workspaces prove the skills work. Publishing them would show rigor. | Eval workspace directories (`*-workspace/`) contain test fixtures, timing data, grading results. They add 100+ files of noise to the repo tree. Users installing skills don't need eval infrastructure. The benchmark summary (`benchmark-all-skills.md`) conveys the results without the raw data. | Keep eval workspaces in the repo (they're already there) but ensure they're in directories the skills CLI won't scan. Document results in the README via the benchmark summary. |
+| Interactive code playground / REPL | "Let users run the code in-browser" sounds appealing for a Python guide. | Python REPL requires Pyodide (14MB+ WASM). Destroys Lighthouse performance. Already rejected as anti-pattern in PROJECT.md. The guide is about configuration, not runtime execution. | Static code snippets with copy button. Link to the template repo for hands-on experimentation. |
+| Live API demo endpoint | "Show a running instance of the template." | Requires hosting a backend server. The site is static (GitHub Pages). Adds ongoing maintenance, security surface, and cost. | Architecture diagrams + code snippets convey the same information without runtime dependency. |
+| Video walkthroughs embedded per page | "Add a video explaining each section." | Video production is a separate content stream. Embedding videos adds 2-5MB per page (YouTube embeds), breaks Lighthouse performance, and creates content that cannot be searched or indexed. | Well-written prose with diagrams. Video can be a future separate effort linked externally. |
+| Client-side diagram interactivity (zoom/pan/click) | "Make diagrams interactive like the React Flow dependency graphs." | The existing React Flow pattern serves tool UIs (compose validator, k8s analyzer) where users need to explore their own data. Guide diagrams are fixed architecture visualizations -- interactivity adds complexity without value. | Static SVG diagrams with clear labeling. Build-time generation matches site pattern. |
+| Diff views showing template customization | "Show how to modify the template for custom use cases." | Scope explosion. Every customization path multiplies content. The guide teaches the template's decisions, not how to fork it. | "Why this approach" sections explain the reasoning. Users who understand the reasoning can customize themselves. |
+| Auto-generated content from template source | "Parse the Python source and generate guide content automatically." | Tight coupling between guide site and template repo. Content quality requires human curation. Automated extraction produces reference docs, not pedagogical guides. | Manually curated code snippets verified against the source. Human-authored explanations. |
+| Multi-language code examples (Go, Node.js equivalents) | "Show the same patterns in other languages." | 11x scope multiplier per language. The guide is specifically about this FastAPI template. Cross-language comparisons dilute the focused value proposition. | Single-language focus. The patterns (builder, middleware, health checks) are language-agnostic concepts explained through Python implementation. |
+| Comments / discussion per page | "Let readers ask questions on each guide page." | Requires moderation infrastructure. Attracts spam. Already rejected in PROJECT.md constraints. | "Reply via email" link or link to GitHub Discussions on the template repo. |
+| Progressive disclosure / accordion sections | "Collapse advanced content behind toggles." | Each domain page is already focused on one concern. Hiding content behind accordions hurts SEO (search engines may not index collapsed content) and breaks the reading flow of a pedagogical guide. | Use clear H2/H3 hierarchy. Readers scan headings to find what they need. |
 
 ## Feature Dependencies
 
 ```
-Correct Directory Structure (skills/ at repo root)
-    required by ──> npx skills add discovery
-    required by ──> skills.sh leaderboard appearance
-    required by ──> Individual skill install (--skill flag)
+Landing Page
+    |-- requires --> Domain Page Template (shared layout for all 11 pages)
+    |-- requires --> Guide Navigation Data (ordered list of pages for prev/next)
+    |-- requires --> GuideLayout.astro (extends Layout.astro, like EDALayout.astro)
 
-SKILL.md Frontmatter Compliance
-    required by ──> Claude auto-loading (name + description)
-    required by ──> skills.sh page rendering
-    required by ──> Security audit pass
+Domain Pages (all 11)
+    |-- requires --> GuideLayout.astro
+    |-- requires --> Guide Navigation Data
+    |-- requires --> Code Snippet Content (extracted from fastapi-template)
+    |-- requires --> Breadcrumb Component
 
-Repo README with Skill Catalog
-    enhanced by ──> Benchmark Data Display
-    enhanced by ──> shields.io Badges
-    enhanced by ──> Per-Skill Install Commands
-    NOTE: README is what users see on GitHub when visiting from skills.sh
+Architecture Diagrams
+    |-- requires --> SVG Generator Functions (TypeScript, build-time)
+    |-- enhances --> Landing Page (hero request-flow diagram)
+    |-- enhances --> Domain Pages (contextual diagrams)
 
-Benchmark Data Display
-    requires ──> Existing benchmark-all-skills.md data
-    enhances ──> Repo README credibility
+OG Images
+    |-- requires --> Landing Page + Domain Pages (need titles/descriptions)
+    |-- requires --> og-image.ts extension (existing pipeline)
 
-Hooks Documentation
-    requires ──> Existing hooks/ scripts
-    enhances ──> README completeness
-    independent of ──> skills.sh discovery
+Header Navigation
+    |-- requires --> Landing Page (needs a URL to link to)
+    |-- independent of --> Domain Pages
 
-Security Audit Pass
-    requires ──> Clean SKILL.md (no executable imports)
-    requires ──> Clean hooks/ (simple shell scripts)
-    independent of ──> Directory structure
+Homepage Callout
+    |-- requires --> Landing Page
+    |-- independent of --> Domain Pages
+
+Companion Blog Post
+    |-- requires --> All Domain Pages (cross-links to each)
+    |-- requires --> Landing Page
+
+JSON-LD Structured Data
+    |-- requires --> Guide pages to exist
+    |-- independent of --> other features
+
+LLMs.txt Integration
+    |-- requires --> All pages finalized (needs URLs and descriptions)
+
+Site Integration (sitemap, header, homepage)
+    |-- requires --> All content pages built
 ```
 
 ### Dependency Notes
 
-- **Directory structure is the single blocking dependency.** Without `skills/` at repo root, `npx skills add` finds nothing. Everything else is enhancement.
-- **README is independent of discovery** but is the first thing users see after finding the skill on skills.sh. It directly affects install conversion.
-- **Benchmark data is already generated** and just needs to be surfaced in the README. No new computation required.
-- **Hooks exist and work** but are undocumented in the context of skills.sh publishing.
-- **Security audits run automatically** when skills appear on skills.sh. No action needed unless audits fail.
+- **All Domain Pages require GuideLayout.astro:** A shared layout component (like EDALayout.astro) provides consistent styling, navigation, and structure across all guide pages without per-page boilerplate.
+- **Guide Navigation Data required early:** An ordered array of {slug, title, description} drives both the landing page card grid AND the prev/next navigation on domain pages. This data structure must be defined before any pages are built.
+- **Architecture Diagrams enhance but do not block:** Diagrams add significant value but pages can ship with placeholder spots. Diagrams can be added incrementally.
+- **Companion Blog Post is the final dependency:** It cross-links to all domain pages, so it must be written after all pages exist.
+- **OG Images require finalized titles:** The Satori pipeline needs page titles and descriptions. Generate after content is stable to avoid rebuild churn.
 
 ## MVP Definition
 
 ### Launch With (v1)
 
-Minimum needed to make all 4 skills installable via `npx skills add` and appearing on skills.sh.
+Minimum set to ship a complete, valuable guide section.
 
-- [ ] **Move skills to `skills/` directory at repo root** -- The blocking requirement. Create `skills/dockerfile-analyzer/`, `skills/compose-validator/`, `skills/k8s-analyzer/`, `skills/gha-validator/` each containing their SKILL.md and hooks/ directory.
-- [ ] **Verify frontmatter compliance** -- Confirm all name and description fields meet the spec (lowercase, hyphens, no XML tags, third-person, under 1024 chars for description).
-- [ ] **Validate local install** -- Run `npx skills add . --list` from repo root to confirm all 4 skills are discovered. Run `npx skills add .` to confirm installation works.
-- [ ] **Update repo README with skill catalog** -- Add a "DevOps Validator Skills" section listing all 4 skills with rule counts, descriptions, and install commands (both full-suite and individual).
-- [ ] **Surface benchmark data in README** -- Add the key benchmark stats: 98.8% pass rate vs 56.4% baseline, +42.4% improvement, 211 total rules.
+- [ ] GuideLayout.astro with consistent styling, breadcrumbs, prev/next navigation
+- [ ] Guide navigation data (ordered page list with slugs, titles, descriptions)
+- [ ] Landing page at /guides/fastapi-production/ with hero section, AI agent narrative, and domain page grid
+- [ ] All 11 domain deep-dive pages with full prose, code snippets, and "why not" callouts
+- [ ] 4-6 architecture diagrams (request flow, middleware stack, builder pattern, auth flow, deployment topology, database lifecycle)
+- [ ] AI agent narrative woven into landing page hero and each domain page intro/outro
+- [ ] Production checklist callout per domain page
+- [ ] Configuration reference (APP_* env vars) per domain page
+- [ ] Build-time OG images for landing page + all domain pages (~12 total)
+- [ ] Header navigation entry ("Guides")
+- [ ] Homepage callout card
+- [ ] JSON-LD structured data (TechArticle + BreadcrumbList)
+- [ ] Companion blog post with bidirectional cross-links
+- [ ] LLMs.txt integration
+- [ ] Cross-link to fastapi-template repo on every page
 
 ### Add After Validation (v1.x)
 
-Features to add once skills are live on skills.sh and first installs are tracked.
+Features to add once the guide is live and traffic patterns are visible.
 
-- [ ] **shields.io badges in README** -- Total rules, pass rate, skill count, once installs start appearing
-- [ ] **Cross-reference between skills** -- Add "Related skills" section to each SKILL.md description suggesting the other validators
-- [ ] **Blog post announcing the skills** -- "4 Free DevOps Validator Skills for Claude Code" targeting SEO for skills.sh discovery
-- [ ] **Link skills from existing profile README** -- Add skills to the Interactive Tools section of the GitHub profile README
-- [ ] **Hooks documentation** -- Document how to use the validation hooks in CI/CD pipelines
+- [ ] Additional architecture diagrams for complex flows (e.g., JWKS key rotation, rate limiter state machine) -- triggered by user engagement data showing which pages get most traffic
+- [ ] "Quick reference" summary cards -- one-page cheat sheets per domain, triggered if users bookmark/share specific pages frequently
+- [ ] Guide search / filter -- triggered if page count grows beyond ~15 pages (current 11 is manageable without search)
 
 ### Future Consideration (v2+)
 
-Features to defer until install metrics prove demand.
+Features to defer until the guide proves its value.
 
-- [ ] **Progressive disclosure refactoring** -- If SKILL.md token cost becomes a problem, split into core + reference files and re-benchmark
-- [ ] **Claude Plugin marketplace manifest** -- `.claude-plugin/marketplace.json` for enhanced Claude Code browsing
-- [ ] **Additional skills** -- Terraform validator, Helm chart analyzer, based on community request patterns
-- [ ] **Evaluation framework publication** -- Open-source the eval harness and benchmark methodology
+- [ ] Additional guide sections for other templates (e.g., /guides/nextjs-production/, /guides/go-production/) -- only after FastAPI guide validates the format
+- [ ] Printable / PDF export -- requires separate styling pass, low priority for web-first audience
+- [ ] Versioned guides (v1, v2 of the template) -- only if the template undergoes breaking changes
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Directory structure for CLI discovery | CRITICAL | MEDIUM | P0 |
-| Frontmatter compliance verification | HIGH | LOW | P1 |
-| Local install validation | HIGH | LOW | P1 |
-| README skill catalog with install commands | HIGH | MEDIUM | P1 |
-| Benchmark data in README | HIGH | LOW | P1 |
-| shields.io badges | MEDIUM | LOW | P2 |
-| Cross-skill references in descriptions | MEDIUM | LOW | P2 |
-| Announcement blog post | MEDIUM | MEDIUM | P2 |
-| Profile README skill links | MEDIUM | LOW | P2 |
-| Hooks CI/CD documentation | LOW | LOW | P2 |
-| Progressive disclosure refactoring | LOW | HIGH | P3 |
-| Plugin marketplace manifest | LOW | MEDIUM | P3 |
-| Additional skills | LOW | HIGH | P3 |
+| Landing page with AI agent narrative | HIGH | LOW | P1 |
+| 11 domain deep-dive pages | HIGH | MEDIUM | P1 |
+| Code snippets from template | HIGH | LOW | P1 |
+| Architecture diagrams (4-6 SVGs) | HIGH | MEDIUM | P1 |
+| Prev/next navigation | HIGH | LOW | P1 |
+| Breadcrumb navigation | MEDIUM | LOW | P1 |
+| GuideLayout.astro | HIGH | LOW | P1 |
+| Build-time OG images | MEDIUM | LOW | P1 |
+| Header nav link | MEDIUM | LOW | P1 |
+| Homepage callout | MEDIUM | LOW | P1 |
+| JSON-LD structured data | MEDIUM | LOW | P1 |
+| Companion blog post | HIGH | LOW | P1 |
+| LLMs.txt integration | LOW | LOW | P1 |
+| Production checklist callouts | MEDIUM | LOW | P1 |
+| Configuration reference per page | MEDIUM | LOW | P1 |
+| AI agent narrative per domain | HIGH | LOW | P1 |
+| "Why not X?" callout sections | HIGH | LOW | P1 |
+| Table of contents per page | MEDIUM | LOW | P1 |
+| Cross-link to template repo | MEDIUM | LOW | P1 |
+| Reading time estimates | LOW | LOW | P2 |
+| Additional diagrams | MEDIUM | MEDIUM | P2 |
+| Quick reference cards | MEDIUM | MEDIUM | P3 |
+| Guide search | LOW | HIGH | P3 |
 
 **Priority key:**
-- P0: Blocking -- nothing works without this
-- P1: Must have for launch (professional, discoverable, installable)
-- P2: Should have, add after skills appear on leaderboard
-- P3: Nice to have, defer until demand signal
+- P1: Must have for launch -- these define the guide's completeness and differentiation
+- P2: Should have, add when possible -- enhances but not critical
+- P3: Nice to have, future consideration -- only if guide proves popular
+
+## AI Agent Narrative Strategy
+
+The AI agent angle is the guide's unique differentiator. Research into how production-ready framework guides handle narrative framing reveals three options:
+
+### Option A: Separate "AI Agent" Section
+A dedicated page explaining the AI agent use case. Other pages are pure technical reference.
+
+**Verdict: REJECT.** Isolating the narrative to one page means 10 out of 11 pages read like every other FastAPI guide. The angle becomes an afterthought.
+
+### Option B: Woven Throughout Every Page
+Each domain page opens with an AI-agent-framed motivation and closes with "what the agent never has to worry about." The landing page hero leads with the agent narrative.
+
+**Verdict: ADOPT.** This is the recommended approach because:
+- Every page reinforces the unique value proposition
+- SEO benefit: "FastAPI production [topic] for AI agents" creates differentiated search intent
+- The framing is honest -- production NFR coverage genuinely does enable agentic code generation
+- It positions the author as an architect who thinks about the AI-assisted development future
+
+### Option C: Framing Narrative Only (Landing Page)
+The landing page pitches the AI agent angle. Domain pages are standard technical content.
+
+**Verdict: PARTIAL.** Too weak. The narrative evaporates after one click.
+
+### Recommended Implementation
+
+**Landing page hero:** "Production FastAPI -- so your AI agent writes business logic, not infrastructure."
+
+**Each domain page:**
+- **Opening paragraph:** Frame the concern in agent terms. E.g., Middleware page: "When an AI agent generates a new endpoint, it should never have to think about request timeouts, body size limits, or security headers. The middleware stack handles all of it."
+- **Closing section:** "What the agent inherits for free" -- 3-5 bullet points listing the NFRs that domain page covers.
+- **Tone:** Confident, not hypothetical. Present tense. "The agent writes a route handler. The middleware stack ensures it has a request ID, structured logging, and a 30-second timeout."
 
 ## Competitor Feature Analysis
 
-| Feature | kubernetes-specialist (jeffallan) | k8s-security (kcns008) | security-analyzer (Cornjebus) | devops-engineer (antigravity) | Our Approach |
-|---------|----------------------------------|------------------------|-------------------------------|-------------------------------|--------------|
-| Rule count | Not specified | Not specified | 80+ checkpoints | Not specified | **211 rules across 4 skills** |
-| Scoring methodology | None | None | None | None | **0-100 with A+ through F grades, category-weighted** |
-| Benchmark data | None | None | None | None | **98.8% pass rate, +42.4% vs baseline** |
-| Multi-skill suite | Part of 15-skill collection | Single skill | Single skill | Part of collection | **4 focused DevOps validators with consistent methodology** |
-| Hooks / CI integration | None | None | None | None | **Shell script hooks per skill** |
-| Before/after examples | None | Brief | Phased plans | None | **Every rule includes before/after code** |
-| Coverage domains | K8s only | K8s security only | Broad security | Broad DevOps | **Dockerfile + Compose + K8s + GitHub Actions** |
-| Install count (approx) | 2.1K weekly | Unknown | Unknown | Unknown | Target: organic growth from quality |
+| Feature | FastAPI Official Template | Typical Blog Post Guide | s3rius/FastAPI-template | This Guide |
+|---------|--------------------------|-------------------------|------------------------|------------|
+| Landing page with overview | README only | No (single long post) | README only | Dedicated landing page with visual grid |
+| Per-concern deep dives | docs/ directory (flat files) | Sections in one post | CLI generator docs | 11 dedicated pages, each 1500-3000 words |
+| Architecture diagrams | None (text only) | Rare (1-2 if any) | None | 4-6 build-time SVGs |
+| AI agent narrative | None | None | None | Woven throughout every page |
+| Code from real template | Template IS the code | Generic examples | Template IS the code | Curated snippets with explanations |
+| Production checklists | Scattered in docs | Sometimes | None | Structured per domain page |
+| "Why not" reasoning | None | Rarely | None | ADR-sourced on every page |
+| OG images | None | Blog platform default | None | Custom per page |
+| JSON-LD / SEO | None | Blog platform default | None | TechArticle + BreadcrumbList |
+| Companion blog post | None | N/A (is the blog post) | None | Dedicated blog post with cross-links |
+| Cross-linked navigation | docs/ flat list | Single scroll | None | Prev/next + breadcrumbs + landing grid |
 
-### Key Competitive Insights
+**Key insight:** No existing FastAPI guide combines all three of: (1) multi-page depth, (2) architecture diagrams, and (3) an AI agent narrative angle. Most are either monolithic blog posts or bare-bones README docs. The gap is wide.
 
-1. **No competing DevOps skill has quantitative benchmarks.** The +42.4% improvement stat is unmatched. Every other skill makes qualitative claims ("expert-level", "comprehensive") without proof.
+## Domain Page Content Map
 
-2. **No suite covers all four DevOps config domains.** Most skills are either single-domain (K8s only) or overly broad (generic "DevOps engineer" persona). Four focused validators with consistent methodology is a unique positioning.
+Each of the 11 domain pages follows a consistent structure:
 
-3. **Rule-based scoring is exclusive to this suite.** Every competing skill outputs free-form text. The structured scoring (0-100, letter grades, category breakdowns, specific rule IDs) provides actionable, comparable results that free-form analysis cannot.
+| # | Domain Page | Key Content | Template Source | Diagrams Needed |
+|---|-------------|-------------|-----------------|-----------------|
+| 1 | Builder Pattern | App factory, fluent builder, setup_*() chain, testability | app_builder.py, ADR-0001 | Builder composition flow |
+| 2 | Authentication (JWT) | 3 verification modes, JWKS rotation, stateless validation | auth/, security.md | Auth flow diagram |
+| 3 | Middleware Stack | 6 raw ASGI middlewares, registration order, why not BaseHTTPMiddleware | middleware/, ADR-0003 | Request flow through middleware stack |
+| 4 | Observability | OpenTelemetry tracing, Prometheus metrics, structured JSON logging | observability/, monitoring.md | Observability pipeline diagram |
+| 5 | Database | Async SQLAlchemy, SQLite-first, Postgres migration, Alembic | db/, configuration.md | Database lifecycle diagram |
+| 6 | Docker | Multi-stage build, tini, unprivileged user, digest-pinned images | Dockerfile, docker-compose*.yml | Deployment topology diagram |
+| 7 | Testing | Test architecture, fixtures, coverage, builder testability | tests/, testing.md | None (code-focused) |
+| 8 | Health Checks | Readiness vs liveness, ReadinessRegistry, dependency-aware | readiness/, ADR-0005 | Health check decision tree |
+| 9 | Security Headers | HSTS, CSP, Permissions-Policy, X-Content-Type-Options | security_headers.py, security.md | None (table-focused) |
+| 10 | Rate Limiting | Memory and Redis backends, sliding window, per-route config | rate_limit.py, configuration.md | None (config-focused) |
+| 11 | Caching | Optional layer, cache key strategies, invalidation | cache/, configuration.md | None (config-focused) |
 
-4. **The jeff allan/claude-skills kubernetes-specialist has 2.1K weekly installs** as a reference point. This is a single skill in a 15-skill collection with 4.7K GitHub stars. Reaching comparable install numbers would require the repo itself to gain visibility through quality README, blog posts, and community sharing.
+## Per-Domain Page Structure Template
 
-5. **Trail of Bits model is instructive.** Their 50-skill security repo uses a clean README with categorical organization, one-line descriptions per skill, and a "Trophy Case" section showing real bugs found using their skills. The benchmark data serves a similar credibility function.
+Each domain page follows this consistent structure for pedagogical coherence:
+
+1. **Agent framing intro** (1 paragraph) -- Why this concern matters in an agent-assisted world
+2. **The problem** (1-2 paragraphs) -- What goes wrong without this concern handled
+3. **How the template solves it** (core content, 500-1500 words) -- Code snippets, configuration, architecture
+4. **Why not the obvious approach** (1 callout box) -- The architectural decision and its rationale
+5. **Configuration reference** (table) -- Relevant APP_* environment variables
+6. **Production checklist** (3-5 items) -- Actionable deployment items
+7. **What the agent inherits for free** (closing section) -- NFRs covered by this domain
 
 ## Sources
 
-- [skills.sh homepage](https://skills.sh) -- Leaderboard, install counts, ecosystem overview
-- [skills.sh FAQ](https://skills.sh/docs/faq) -- Publishing, telemetry, listing mechanics
-- [vercel-labs/skills GitHub](https://github.com/vercel-labs/skills) -- CLI source, discovery paths, multi-skill repo patterns
-- [anthropics/skills GitHub](https://github.com/anthropics/skills) -- Official skill template, directory structure, spec
-- [Anthropic Skill Authoring Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) -- Frontmatter spec, naming conventions, progressive disclosure, 500-line guidance
-- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) -- Skill discovery paths, frontmatter reference, directory structure
-- [find-skills skill page on skills.sh](https://skills.sh/vercel-labs/skills/find-skills) -- Individual skill page layout, metadata display, security audit badges
-- [kubernetes-specialist on skills.sh](https://skills.sh/jeffallan/claude-skills/kubernetes-specialist) -- DevOps competitor reference, 2.1K weekly installs
-- [Trail of Bits skills repo](https://github.com/trailofbits/skills) -- Multi-skill README pattern, 50 skills, categorical organization
-- [Pulumi Blog: Top 8 Claude Skills for DevOps 2026](https://www.pulumi.com/blog/top-8-claude-skills-devops-2026/) -- DevOps skill patterns, progressive disclosure effectiveness
-- [Skills.sh Review (vibecoding.app)](https://vibecoding.app/blog/skills-sh-review) -- Install count as quality signal, search/discovery mechanics
-- Existing benchmark data at `public/skills/benchmark-all-skills.md` -- 98.8% pass rate, +42.4% improvement
+- FastAPI Official Full-Stack Template: https://github.com/fastapi/full-stack-fastapi-template
+- FastAPI Production Deployment Best Practices (Render): https://render.com/articles/fastapi-production-deployment-best-practices
+- FastAPI Best Practices for Production 2026 (FastLaunchAPI): https://fastlaunchapi.dev/blog/fastapi-best-practices-production-2026
+- Google Cloud: A Dev's Guide to Production-Ready AI Agents: https://cloud.google.com/blog/products/ai-machine-learning/a-devs-guide-to-production-ready-ai-agents
+- Canada.ca Ordered Multi-Page Navigation Pattern: https://design.canada.ca/common-design-patterns/ordered-multipage.html
+- W3C Breadcrumb Pattern (WAI-ARIA APG): https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/
+- Mermaid Architecture Diagrams (v11.1.0+): https://mermaid.ai/open-source/syntax/architecture.html
+- D2 vs Mermaid Comparison: https://aaronjbecker.com/posts/mermaid-vs-d2-comparing-text-to-diagram-tools/
+- Product Strategy -- Sequencing Table Stakes vs Differentiators: https://www.productteacher.com/articles/sequencing-table-stakes-and-differentiators
+- FastAPI template source material: /Users/patrykattc/work/git/fastapi-template (local, HIGH confidence)
+- Existing site patterns: /Users/patrykattc/work/git/PatrykQuantumNomad/src (local, HIGH confidence)
 
 ---
-*Feature research for: skills.sh publishing of DevOps validator skills*
-*Researched: 2026-03-05*
+*Feature research for: FastAPI Production Guide (v1.15 milestone)*
+*Researched: 2026-03-08*

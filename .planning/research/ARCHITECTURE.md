@@ -1,423 +1,609 @@
-# Architecture Research: skills.sh Publishing for DevOps Skills
+# Architecture Research: FastAPI Production Guide Integration
 
-**Domain:** AI Agent Skill publishing from a GitHub profile repo that also serves an Astro static site
-**Researched:** 2026-03-05
+**Domain:** Multi-page production guide section within an existing Astro 5 portfolio site
+**Researched:** 2026-03-08
 **Confidence:** HIGH
 
 ## System Overview
 
 ```
-PatrykQuantumNomad/PatrykQuantumNomad (GitHub Profile Repo)
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Source of Truth                              │
-│                                                                     │
-│  skills/                          <- skills.sh CLI discovers here   │
-│  ├── compose-validator/              (Tier 2: priority directory)   │
-│  │   ├── SKILL.md                 <- skill definition               │
-│  │   └── hooks/validate-compose.sh                                  │
-│  ├── dockerfile-analyzer/                                           │
-│  │   ├── SKILL.md                                                   │
-│  │   └── hooks/validate-dockerfile.sh                               │
-│  ├── gha-validator/                                                 │
-│  │   ├── SKILL.md                                                   │
-│  │   └── hooks/validate-gha.sh                                      │
-│  └── k8s-analyzer/                                                  │
-│      ├── SKILL.md                                                   │
-│      └── hooks/validate-k8s.sh                                      │
-│                                                                     │
-│  public/skills -> ../skills       <- symlink for Astro serving      │
-│                                                                     │
-│  src/pages/tools/*/index.astro    <- interactive tool pages         │
-│  README.md                        <- GitHub profile page            │
-└─────────────────────────────────────────────────────────────────────┘
-         │                                    │
-         ▼                                    ▼
-┌─────────────────────┐          ┌──────────────────────┐
-│     skills.sh        │          │   GitHub Pages        │
-│  (CLI discovery)     │          │  patrykgolabek.dev    │
-│                      │          │                       │
-│ npx skills add       │          │ /skills/*/SKILL.md    │
-│ PatrykQuantumNomad/  │          │ (static downloads)    │
-│ PatrykQuantumNomad   │          │                       │
-│                      │          │ /tools/*/             │
-│ Scans: skills/       │          │ (interactive tools)   │
-│ (Tier 2 priority)    │          │                       │
-└─────────────────────┘          └──────────────────────┘
+PatrykQuantumNomad Portfolio Site (Astro 5, static output)
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         Content Layer                                    │
+│                                                                          │
+│  src/data/guides/fastapi-production/                                     │
+│  ├── guide.json            <- guide metadata (title, description, etc.)  │
+│  └── pages/                <- MDX content per chapter                    │
+│      ├── project-structure.mdx                                           │
+│      ├── docker.mdx                                                      │
+│      ├── kubernetes.mdx                                                  │
+│      ├── testing.mdx                                                     │
+│      └── ...               <- ~10 chapters total                         │
+│                                                                          │
+│  src/content.config.ts     <- add guidePages + guides collections        │
+├──────────────────────────────────────────────────────────────────────────┤
+│                        Page Generation Layer                             │
+│                                                                          │
+│  src/pages/guides/fastapi-production/                                    │
+│  ├── index.astro           <- guide landing page (chapter list + hero)   │
+│  └── [slug].astro          <- chapter pages via getStaticPaths           │
+│                                                                          │
+│  src/pages/open-graph/guides/fastapi-production/                         │
+│  ├── index.png.ts          <- OG image for landing page                  │
+│  └── [slug].png.ts         <- OG images for each chapter                 │
+├──────────────────────────────────────────────────────────────────────────┤
+│                        Component Layer                                   │
+│                                                                          │
+│  src/layouts/GuideLayout.astro    <- extends EDALayout pattern           │
+│  src/components/guides/                                                  │
+│  ├── GuideBreadcrumb.astro        <- breadcrumb nav                      │
+│  ├── GuideNav.astro               <- sidebar TOC + prev/next             │
+│  ├── GuidePrevNext.astro          <- bottom prev/next links              │
+│  ├── GuideJsonLd.astro            <- structured data                     │
+│  ├── CodeFromRepo.astro           <- code snippets from template repo    │
+│  ├── ArchitectureDiagram.astro    <- build-time SVG diagrams             │
+│  └── FileTree.astro               <- file tree visualization             │
+│                                                                          │
+│  src/lib/guides/                                                         │
+│  ├── schema.ts                    <- Zod schemas                         │
+│  ├── routes.ts                    <- URL builders                        │
+│  └── svg-generators/              <- architecture diagram SVGs           │
+├──────────────────────────────────────────────────────────────────────────┤
+│                        Existing Infrastructure (unchanged)               │
+│                                                                          │
+│  src/layouts/Layout.astro         <- base layout (SEO, animations)       │
+│  src/components/Header.astro      <- add "Guides" nav link               │
+│  src/data/site.ts                 <- unchanged                           │
+│  astro.config.mjs                 <- unchanged (MDX + React already on)  │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-## The Core Question: `public/skills/` vs `skills/` at Root
+## The Core Architectural Decision: MDX Pages + JSON Metadata
 
-### Recommendation: Move skills to `skills/` at root, symlink from `public/skills/`
+### Recommendation: Hybrid approach -- MDX content collection for chapter pages, JSON data file for guide-level metadata
 
-**Verdict:** Move to root `skills/`. Both Astro static serving and skills.sh CLI discovery coexist via a single symlink.
+**Why this pattern (not alternatives):**
 
-### Why Move
+The existing site already uses this exact hybrid pattern for the EDA section: `edaPages` is a glob-loaded MDX collection for long-form content, while `edaTechniques` and `edaDistributions` are file-loaded JSON collections for structured data. The guide section should follow this proven pattern rather than inventing a new one.
 
-The skills.sh CLI (powered by [vercel-labs/skills](https://github.com/vercel-labs/skills)) uses a three-tier search strategy when scanning a GitHub repository:
+**Alternative considered and rejected -- Pure JSON with inline content:** Storing chapter content as strings in JSON would lose MDX's component imports, code highlighting, and heading extraction. The EDA pages demonstrate that MDX is the right choice for narrative content that needs embedded components.
 
-1. **Tier 1 - Direct check:** Looks for `SKILL.md` at the repo root
-2. **Tier 2 - Priority directories:** Scans the `skills/` subdirectory specifically
-3. **Tier 3 - Recursive fallback:** Recursively searches the entire repo
+**Alternative considered and rejected -- Pure MDX with all metadata in frontmatter:** Frontmatter can hold chapter metadata, but guide-level metadata (overall description, chapter ordering, template repo URL) would need to be duplicated across every MDX file or hardcoded in the page template. A separate JSON file provides a single source of truth for guide structure, exactly as `edaTechniques` provides technique metadata separate from the MDX technique pages.
 
-Skills in `public/skills/` would only be found via Tier 3 (recursive fallback). This works but is slower, less predictable, and signals unfamiliarity with the convention. Placing skills in `skills/` at root puts them in Tier 2 -- the standard, expected location that matches the convention used by [anthropics/skills](https://github.com/anthropics/skills), [vercel-labs/skills](https://github.com/vercel-labs/skills), and [microsoft/skills](https://github.com/microsoft/skills).
+**Alternative considered and rejected -- Starlight docs theme:** Starlight is Astro's documentation framework, but it is a full-site theme, not a section addon. It would conflict with the existing Layout.astro, Header, Footer, animations, and styling. The portfolio site has its own established design language; the guide section should use it.
 
-**Confidence:** HIGH -- verified via [DeepWiki analysis of vercel-labs/skills](https://deepwiki.com/vercel-labs/skills) documenting the `discoverSkills()` function's three-tier strategy, and [Vercel KB guide](https://vercel.com/kb/guide/agent-skills-creating-installing-and-sharing-reusable-agent-context) confirming `skills/` as the conventional directory.
-
-### Why Astro Still Works
-
-Astro's `public/` directory copies contents verbatim to the build output. A symlink inside `public/` pointing to the root-level `skills/` directory is resolved during the Astro build process -- the skill files end up in `dist/skills/` exactly as before. The static URLs like `patrykgolabek.dev/skills/gha-validator/SKILL.md` continue to work unchanged.
-
-**Confidence:** HIGH -- verified through [Astro project structure docs](https://docs.astro.build/en/basics/project-structure/) that `public/` copies files as-is, and symlinks are standard filesystem operations resolved by Node.js during Astro's build.
+**Confidence:** HIGH -- directly validated by examining `content.config.ts`, `edaPages` collection, and `edaTechniques` collection in the existing codebase.
 
 ## Component Responsibilities
 
-| Component | Responsibility | Current State | Change Required |
-|-----------|---------------|---------------|-----------------|
-| `skills/` (root) | Source of truth for all 4 SKILL.md files + hooks | Does not exist | **NEW** -- move from `public/skills/` |
-| `public/skills` | Astro static serving gateway | Contains skills directly | **MODIFY** -- replace directory with symlink to `../skills/` |
-| `public/benchmarks/` | Benchmark data + workspace eval results | Does not exist | **NEW** -- moved from `public/skills/` |
-| `src/pages/tools/*/` | Interactive web tool pages | Links to `/skills/*/SKILL.md` for download | No change needed |
-| `.github/workflows/deploy.yml` | Astro build + GitHub Pages deploy | Uses `withastro/action@v3` | No change needed |
-| `README.md` | GitHub profile page | No skills.sh references | **MODIFY** -- add `npx skills add` install command |
+| Component | Responsibility | New/Modified | Closest Existing Analog |
+|-----------|---------------|-------------|------------------------|
+| `src/content.config.ts` | Register `guidePages` MDX collection + `guides` JSON collection | **MODIFIED** | Already registers `edaPages` + `edaTechniques` |
+| `src/data/guides/fastapi-production/pages/*.mdx` | Chapter content (narrative, code, diagrams) | **NEW** | `src/data/eda/pages/foundations/*.mdx` |
+| `src/data/guides/fastapi-production/guide.json` | Guide metadata: title, slug, chapters array with ordering | **NEW** | `src/data/eda/techniques.json` |
+| `src/layouts/GuideLayout.astro` | Extends Layout with guide-specific head slots (syntax highlighting already handled by expressive-code) | **NEW** | `src/layouts/EDALayout.astro` |
+| `src/pages/guides/fastapi-production/index.astro` | Landing page with chapter card grid | **NEW** | `src/pages/eda/foundations/index.astro` |
+| `src/pages/guides/fastapi-production/[slug].astro` | Chapter detail page with sidebar + prev/next | **NEW** | `src/pages/eda/foundations/[...slug].astro` |
+| `src/components/guides/GuideBreadcrumb.astro` | Breadcrumb: Home > Guides > FastAPI Production > Chapter | **NEW** | `src/components/eda/EdaBreadcrumb.astro` |
+| `src/components/guides/GuideNav.astro` | Sidebar chapter list + on-page TOC | **NEW** | No direct analog (new pattern) |
+| `src/components/guides/GuidePrevNext.astro` | Bottom prev/next navigation between chapters | **NEW** | No direct analog (blog has related posts, not sequential) |
+| `src/components/guides/GuideJsonLd.astro` | Schema.org TechArticle + HowTo structured data | **NEW** | `src/components/eda/EDAJsonLd.astro` |
+| `src/components/guides/CodeFromRepo.astro` | Renders code snippets with link to source in template repo | **NEW** | Blog's inline code blocks (extended) |
+| `src/components/guides/ArchitectureDiagram.astro` | Build-time SVG architecture diagrams | **NEW** | `src/components/eda/PlotFigure.astro` + SVG generators |
+| `src/components/guides/FileTree.astro` | Project structure tree visualization | **NEW** | No direct analog |
+| `src/lib/guides/schema.ts` | Zod schemas for guide + chapter collections | **NEW** | `src/lib/eda/schema.ts` |
+| `src/lib/guides/routes.ts` | URL builder functions for guide pages | **NEW** | `src/lib/eda/routes.ts` |
+| `src/lib/guides/svg-generators/*.ts` | Build-time SVG for architecture diagrams | **NEW** | `src/lib/eda/svg-generators/*.ts` |
+| `src/pages/open-graph/guides/fastapi-production/[slug].png.ts` | Per-chapter OG images | **NEW** | `src/pages/open-graph/eda/[...slug].png.ts` |
+| `src/components/Header.astro` | Add "Guides" to navLinks array | **MODIFIED** | Already has 9 nav links |
+| `src/data/projects.ts` | Link to guide from projects listing | **MODIFIED** | Already lists other projects |
 
 ## Recommended Project Structure
 
 ```
-PatrykQuantumNomad/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml                # Astro build & deploy (unchanged)
-├── skills/                            # NEW: root-level skills directory
-│   ├── compose-validator/
-│   │   ├── SKILL.md                   # Skill definition (moved from public/)
-│   │   └── hooks/
-│   │       └── validate-compose.sh    # Shell hook (moved from public/)
-│   ├── dockerfile-analyzer/
-│   │   ├── SKILL.md
-│   │   └── hooks/
-│   │       └── validate-dockerfile.sh
-│   ├── gha-validator/
-│   │   ├── SKILL.md
-│   │   └── hooks/
-│   │       └── validate-gha.sh
-│   └── k8s-analyzer/
-│       ├── SKILL.md
-│       └── hooks/
-│           └── validate-k8s.sh
-├── public/
-│   ├── skills -> ../skills            # MODIFIED: symlink replaces directory
-│   ├── benchmarks/                    # NEW: benchmark + eval data
-│   │   ├── benchmark-all-skills.json
-│   │   ├── benchmark-all-skills.md
-│   │   ├── grading-summary.json
-│   │   ├── compose-validator-workspace/
-│   │   ├── dockerfile-analyzer-workspace/
-│   │   ├── gha-validator-workspace/
-│   │   └── k8s-analyzer-workspace/
-│   ├── images/
-│   ├── fonts/
-│   └── ...                            # other static assets (unchanged)
-├── src/
-│   ├── pages/
-│   │   ├── tools/                     # Interactive tool pages (unchanged)
-│   │   └── ...
-│   └── ...
-├── astro.config.mjs                   # Unchanged
-├── README.md                          # Add skills.sh install badge/command
-└── package.json                       # Unchanged
+src/
+├── content.config.ts                              # ADD guidePages + guides collections
+├── data/
+│   └── guides/
+│       └── fastapi-production/
+│           ├── guide.json                          # Guide metadata + chapter ordering
+│           └── pages/
+│               ├── 01-project-structure.mdx        # Chapter 1
+│               ├── 02-configuration.mdx            # Chapter 2
+│               ├── 03-dependency-injection.mdx     # Chapter 3
+│               ├── 04-database.mdx                 # Chapter 4
+│               ├── 05-authentication.mdx           # Chapter 5
+│               ├── 06-testing.mdx                  # Chapter 6
+│               ├── 07-docker.mdx                   # Chapter 7
+│               ├── 08-kubernetes.mdx               # Chapter 8
+│               ├── 09-ci-cd.mdx                    # Chapter 9
+│               └── 10-monitoring.mdx               # Chapter 10
+├── layouts/
+│   └── GuideLayout.astro                           # New layout extending Layout
+├── components/
+│   └── guides/
+│       ├── GuideBreadcrumb.astro
+│       ├── GuideNav.astro
+│       ├── GuidePrevNext.astro
+│       ├── GuideJsonLd.astro
+│       ├── CodeFromRepo.astro
+│       ├── ArchitectureDiagram.astro
+│       └── FileTree.astro
+├── lib/
+│   └── guides/
+│       ├── schema.ts
+│       ├── routes.ts
+│       └── svg-generators/
+│           ├── fastapi-architecture.ts
+│           ├── docker-layers.ts
+│           └── k8s-deployment.ts
+├── pages/
+│   ├── guides/
+│   │   └── fastapi-production/
+│   │       ├── index.astro                         # Guide landing
+│   │       └── [slug].astro                        # Chapter pages
+│   └── open-graph/
+│       └── guides/
+│           └── fastapi-production/
+│               ├── index.png.ts                    # Landing OG
+│               └── [slug].png.ts                   # Chapter OG
 ```
-
-### What NOT to Put in `skills/`
-
-The workspace and benchmark data must NOT live in the root `skills/` directory. These are Astro-served static content for the website, not part of the skill packages:
-
-| File/Directory | Current Location | New Location | Why Move |
-|---------------|-----------------|--------------|----------|
-| `benchmark-all-skills.json` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
-| `benchmark-all-skills.md` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
-| `grading-summary.json` | `public/skills/` | `public/benchmarks/` | Not a skill; confuses CLI discovery |
-| `*-workspace/` directories | `public/skills/` | `public/benchmarks/` | Contain eval results, inflate download size |
-
-The workspace directories (`compose-validator-workspace/`, etc.) contain eval results and test fixtures. Keeping them inside `skills/` would cause problems:
-1. The CLI may attempt to treat workspace directories as skills during recursive scanning
-2. They inflate the clone size for skill consumers who just want SKILL.md + hooks
-3. They are website content (benchmark data), not agent skill content
 
 ### Structure Rationale
 
-- **`skills/` at root:** Matches the skills.sh Tier 2 convention. Every major skills repo uses `skills/` at root. This is the de facto standard.
-- **Symlink `public/skills`:** Zero-cost bridge between two consumers. One source of truth, two access paths. Git tracks symlinks natively (stored as text files pointing to target).
-- **`public/benchmarks/` separated:** Keeps the skills directory pristine for CLI consumers while preserving web-accessible benchmark data at new URLs.
+- **`src/data/guides/fastapi-production/`:** Follows the EDA pattern where data lives under `src/data/eda/`. Each guide gets its own subdirectory, making it trivial to add future guides (e.g., `src/data/guides/kubernetes-operators/`).
+- **Numbered MDX files (01-, 02-, ...):** Provides natural filesystem ordering that maps to chapter sequence. The number prefix is stripped from the slug during route generation. This is more robust than relying on a separate ordering field when adding/reordering chapters.
+- **`guide.json` at guide level:** Contains guide-wide metadata (title, description, template repo URL, author, tags) and a `chapters` array that defines ordering, titles, and descriptions. The JSON is the source of truth for chapter order; the MDX file numbering is a convenience for filesystem browsing.
+- **`src/lib/guides/`:** Mirrors `src/lib/eda/` -- schemas, routes, and SVG generators are colocated by domain rather than scattered across `src/`.
+- **`src/components/guides/`:** Mirrors `src/components/eda/` -- guide-specific components are namespaced to avoid polluting the global component directory.
 
 ## Architectural Patterns
 
-### Pattern 1: Symlink Bridge (Single Source of Truth)
+### Pattern 1: Content Collection Hybrid (MDX Pages + JSON Metadata)
 
-**What:** Use a filesystem symlink to serve the same files through two channels (skills.sh CLI discovery + Astro static site) without duplication.
+**What:** Register two collections: `guidePages` (glob-loaded MDX for chapter content) and `guides` (file-loaded JSON for guide-level metadata including chapter ordering and template repo URLs).
 
-**When to use:** When the same content must be discoverable by both a package manager (skills.sh scans the git repo) and a static site generator (Astro copies from `public/`).
+**When to use:** When you need both renderable long-form content (chapters with embedded components, code blocks, headings) and structured metadata (ordering, cross-references, external URLs).
 
 **Trade-offs:**
-- Pro: No file duplication, single edit point, guaranteed consistency
-- Pro: Git tracks symlinks natively (stored as a text file containing the target path)
-- Pro: GitHub Actions on Ubuntu resolves symlinks during Astro build
-- Con: Windows developers need `git config core.symlinks true` (not an issue for this project -- CI runs Ubuntu)
-- Con: Some CI environments may not resolve symlinks, but `withastro/action@v3` on `ubuntu-latest` does
+- Pro: MDX gives full component power -- import Callout, CodeFromRepo, ArchitectureDiagram directly in content
+- Pro: JSON ordering array is the single source of truth for chapter sequence, making reordering trivial
+- Pro: Content collections give Zod validation, TypeScript types, and build-time error reporting
+- Con: Two collections for one logical entity (guide) requires joining at query time
+- Con: Adding a new chapter requires editing both the MDX file and the JSON chapters array
 
 **Implementation:**
-```bash
-# After moving skills to root
-cd /path/to/PatrykQuantumNomad
 
-# Create symlink (public/skills points to ../skills)
-ln -s ../skills public/skills
+```typescript
+// src/lib/guides/schema.ts
+import { z } from 'astro/zod';
 
-# Git commits the symlink as a text file
-git add public/skills
-git status
-# modified:   public/skills (typechange from directory to symlink)
+export const guideChapterSchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  description: z.string(),
+});
+
+export const guideSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  description: z.string(),
+  templateRepo: z.string().url(),
+  tags: z.array(z.string()).default([]),
+  chapters: z.array(guideChapterSchema),
+});
+
+export const guidePageSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  chapter: z.number().int().min(1),
+  guide: z.string(), // matches guide.id -- used to join
+  tags: z.array(z.string()).default([]),
+  templateRepoPath: z.string().optional(), // path within template repo for "View Source"
+});
 ```
 
-### Pattern 2: Frontmatter-Only Discovery (Progressive Loading)
+```typescript
+// In src/content.config.ts -- additions only
+const guides = defineCollection({
+  loader: file('src/data/guides/fastapi-production/guide.json'),
+  schema: guideSchema,
+});
 
-**What:** The skills.sh CLI uses progressive loading: only YAML frontmatter (`name` and `description`) is scanned during the browse phase. Full SKILL.md content loads on-demand when a user selects a skill. Supporting files (`hooks/`, `scripts/`) are accessed only during the use phase when the agent follows instructions referencing them.
+const guidePages = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides' }),
+  schema: guidePageSchema,
+});
 
-**When to use:** Understanding this pattern means the existing large SKILL.md files (19-31 KB each) are perfectly fine. No need to split or truncate.
+export const collections = {
+  blog, languages, dbModels, edaTechniques, edaDistributions, edaPages,
+  guides, guidePages, // NEW
+};
+```
+
+### Pattern 2: Chapter-Aware Navigation (Sidebar + Prev/Next)
+
+**What:** Compute prev/next links and sidebar state from the guide's `chapters` array at build time, passing them as props to navigation components. No client-side state needed.
+
+**When to use:** Any sequential multi-page guide where readers progress through ordered content.
 
 **Trade-offs:**
-- Pro: Large, comprehensive SKILL.md files do not slow discovery or listing
-- Pro: The `description` field in frontmatter is the critical trigger -- it must be comprehensive enough for agents to know when to activate
-- Con: The `description` field must fit the browsing context (agents read it to decide relevance)
+- Pro: Zero JavaScript for navigation -- fully static, accessible, SEO-friendly
+- Pro: Chapter ordering comes from `guide.json`, not from filesystem or frontmatter
+- Pro: Sidebar highlights current chapter without client JS (computed in `getStaticPaths`)
+- Con: Adding a chapter requires updating `guide.json` chapters array
 
-**Current frontmatter (already correct):**
-```yaml
+**Implementation:**
+
+```typescript
+// src/pages/guides/fastapi-production/[slug].astro (getStaticPaths excerpt)
+export async function getStaticPaths() {
+  const allPages = await getCollection('guidePages');
+  const guideMeta = await getCollection('guides');
+  const guide = guideMeta.find(g => g.data.slug === 'fastapi-production');
+
+  const chapterSlugs = guide.data.chapters.map(c => c.slug);
+  const pages = allPages
+    .filter(p => p.data.guide === 'fastapi-production')
+    .sort((a, b) => a.data.chapter - b.data.chapter);
+
+  return pages.map((page, i) => {
+    const slug = page.id.replace('fastapi-production/pages/', '').replace(/^\d+-/, '');
+    return {
+      params: { slug },
+      props: {
+        page,
+        guide: guide.data,
+        prev: i > 0 ? guide.data.chapters[i - 1] : null,
+        next: i < pages.length - 1 ? guide.data.chapters[i + 1] : null,
+        currentIndex: i,
+        totalChapters: pages.length,
+      },
+    };
+  });
+}
+```
+
+### Pattern 3: Build-Time SVG Architecture Diagrams
+
+**What:** Generate architecture diagrams as SVG strings at build time using the same TypeScript-to-SVG pattern already established for EDA plots. The SVGs are inlined into the HTML -- no external image loads, no client JavaScript.
+
+**When to use:** For diagrams that illustrate static architecture: project structure, Docker layer composition, Kubernetes resource relationships, CI/CD pipelines.
+
+**Trade-offs:**
+- Pro: Zero CLS (Cumulative Layout Shift) -- SVG dimensions known at build time
+- Pro: Theme-aware -- SVGs use CSS custom properties for colors
+- Pro: No image optimization pipeline needed -- inlined directly
+- Pro: Established pattern in codebase (17 existing SVG generators)
+- Con: Complex diagrams require manual TypeScript SVG construction
+- Con: Changes to diagrams require a rebuild
+
+**Implementation:**
+
+```typescript
+// src/lib/guides/svg-generators/fastapi-architecture.ts
+export function generateFastAPIArchitecture(opts: {
+  width: number;
+  height: number;
+}): string {
+  // Returns SVG string showing: Client -> Router -> Dependencies -> Service -> DB
+  // Uses var(--color-*) for theme compatibility
+  return `<svg width="${opts.width}" height="${opts.height}" ...>...</svg>`;
+}
+```
+
+```astro
+<!-- In MDX: -->
+import ArchitectureDiagram from '../../../components/guides/ArchitectureDiagram.astro';
+<ArchitectureDiagram type="fastapi-architecture" width={800} height={400} />
+```
+
+### Pattern 4: Template Repo Source Linking
+
+**What:** A `CodeFromRepo` component that renders code blocks with a "View in template repo" link, connecting guide content to the actual source code in the FastAPI template repository.
+
+**When to use:** When the guide explains code that lives in a separate GitHub repository. The guide is the narrative; the template repo is the reference implementation.
+
+**Trade-offs:**
+- Pro: Readers can jump from explanation to full implementation
+- Pro: Code in MDX is curated (relevant excerpts), not full files
+- Pro: Template repo link stored in `guide.json` -- single source of truth
+- Con: Code in MDX can drift from template repo if repo changes -- requires manual sync
+- Con: Permanent link depends on stable branch/tag (use a tagged release, not `main`)
+
+**Implementation:**
+
+```astro
+<!-- src/components/guides/CodeFromRepo.astro -->
 ---
-name: gha-validator
-description: >
-  Analyze GitHub Actions workflow files for security vulnerabilities, semantic
-  errors, best-practice violations, schema issues, and style problems...
+interface Props {
+  path: string;       // e.g., "app/core/config.py"
+  language: string;   // e.g., "python"
+  title?: string;     // optional label
+  repoUrl: string;    // from guide metadata
+  branch?: string;    // default "main"
+}
+const { path, language, title, repoUrl, branch = 'main' } = Astro.props;
+const sourceUrl = `${repoUrl}/blob/${branch}/${path}`;
 ---
+<div class="relative">
+  <div class="flex items-center justify-between text-xs text-[var(--color-text-secondary)] mb-1">
+    <span class="font-mono">{title || path}</span>
+    <a href={sourceUrl} target="_blank" rel="noopener noreferrer"
+       class="text-[var(--color-accent)] hover:underline">
+      View source
+    </a>
+  </div>
+  <slot /> <!-- Code block from expressive-code goes here -->
+</div>
 ```
 
-### Pattern 3: Convention-Over-Configuration for Skill Layout
+Usage in MDX:
 
-**What:** Each skill is a self-contained directory: `SKILL.md` at root, optional `hooks/`, `scripts/`, `templates/`, `resources/` subdirectories. The directory name must match the frontmatter `name` field (lowercase, hyphens allowed, no uppercase).
+```mdx
+import CodeFromRepo from '../../../components/guides/CodeFromRepo.astro';
 
-**When to use:** Always follow this convention for skills.sh compatibility.
+<CodeFromRepo path="app/core/config.py" language="python" repoUrl="https://github.com/PatrykQuantumNomad/fastapi-template">
 
-**Current skill structure (already correct -- no changes needed within individual skills):**
+```python
+# app/core/config.py
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    app_name: str = "FastAPI Production App"
+    debug: bool = False
+    database_url: str
+
+    class Config:
+        env_file = ".env"
 ```
-gha-validator/          # directory name matches frontmatter name
-├── SKILL.md            # name: gha-validator
-└── hooks/
-    └── validate-gha.sh # referenced by SKILL.md instructions
-```
 
-All 4 existing skills already follow this convention perfectly.
+</CodeFromRepo>
+```
 
 ## Data Flow
 
-### Skill Discovery Flow (skills.sh CLI)
+### Build-Time Page Generation
 
 ```
-User runs: npx skills add PatrykQuantumNomad/PatrykQuantumNomad
+guide.json (chapters array)
     |
-CLI clones repo to temp directory
+    ├── getStaticPaths() reads chapter ordering
     |
-discoverSkills() scans:
-  Tier 1: root SKILL.md?  -> NO
-  Tier 2: skills/ exists? -> YES, 4 subdirectories found
+    ├── guidePages collection (MDX files)
+    |   |
+    |   ├── Zod validates frontmatter against guidePageSchema
+    |   |
+    |   └── render(page) produces { Content, headings }
     |
-Each subdirectory checked for SKILL.md with valid frontmatter
+    ├── Joins: chapters[i] + pages[i] -> { page, prev, next, guide }
     |
-CLI presents skill list:
-  1. compose-validator
-  2. dockerfile-analyzer
-  3. gha-validator
-  4. k8s-analyzer
-    |
-User selects skill(s) or uses --skill flag
-    |
-CLI copies/symlinks to target:
-  ~/.agents/skills/{name}/    (canonical)
-  ~/.claude/skills/{name}/    (Claude Code symlink)
-  .codex/skills/{name}/       (Codex symlink)
-    |
-Install telemetry -> skill appears on skills.sh directory
-  URL: skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/{skill-name}
+    └── For each chapter:
+        |
+        ├── [slug].astro renders with GuideLayout
+        |   ├── GuideBreadcrumb: Home > Guides > FastAPI Production > Chapter
+        |   ├── GuideNav: sidebar with all chapters + on-page headings
+        |   ├── Content: rendered MDX with embedded components
+        |   └── GuidePrevNext: links to adjacent chapters
+        |
+        └── OG image endpoint generates per-chapter social card
 ```
 
-### Astro Static Serving Flow
+### Content Authoring Flow
 
 ```
-npm run build (astro build)
-    |
-Astro scans public/ directory
-    |
-Encounters public/skills (symlink -> ../skills/)
-    |
-Resolves symlink, copies all skill files to dist/skills/
-    |
-dist/skills/gha-validator/SKILL.md        -> served as static file
-dist/skills/gha-validator/hooks/validate-gha.sh -> served as static file
-    |
-GitHub Pages deploys dist/
-    |
-patrykgolabek.dev/skills/gha-validator/SKILL.md -> downloadable
+Author edits:
+  1. src/data/guides/fastapi-production/pages/07-docker.mdx  (chapter content)
+  2. src/data/guides/fastapi-production/guide.json            (if adding/reordering)
+     |
+     ├── Astro dev server hot-reloads
+     ├── Zod validates schema at build time
+     └── TypeScript catches type errors in page templates
 ```
 
-### Cross-Reference Flow (Tool Pages to Skills)
+### OG Image Generation Flow
 
 ```
-User visits: patrykgolabek.dev/tools/gha-validator/
+src/pages/open-graph/guides/fastapi-production/[slug].png.ts
     |
-src/pages/tools/gha-validator/index.astro renders
+    ├── getStaticPaths(): one route per chapter
     |
-Page includes download link:
-  <a href="/skills/gha-validator/SKILL.md" download="SKILL.md">
+    ├── GET handler:
+    |   ├── getOrGenerateOgImage(title, description, generateFn)
+    |   |   ├── Check cache (node_modules/.cache/og-guides/)
+    |   |   ├── Cache miss: generateGuideOgImage(title, description, chapterNum)
+    |   |   └── Cache hit: return cached PNG
+    |   |
+    |   └── Return PNG response with immutable cache headers
     |
-Link resolves to static file served from dist/skills/
-    |
-User can ALSO install via CLI:
-  npx skills add PatrykQuantumNomad/PatrykQuantumNomad -s gha-validator
+    └── Reuses existing og-cache.ts infrastructure
 ```
 
-### Key Data Flows
+### Navigation Data Flow (No Client JS)
 
-1. **Skill authoring:** Edit `skills/*/SKILL.md` -> git push -> triggers Astro rebuild (GitHub Pages) AND makes skills available for CLI install (skills.sh scans the git repo directly)
-2. **Web serving:** `skills/` -> symlink -> `public/skills/` -> Astro build -> `dist/skills/` -> GitHub Pages
-3. **CLI install:** GitHub repo clone -> `npx skills add` -> scans `skills/` -> installs to user's agent config directories
-4. **Telemetry loop:** User installs via CLI -> anonymous telemetry -> skill appears on skills.sh leaderboard -> more visibility -> more installs
+```
+guide.json chapters array (ordered)
+    |
+    ├── getStaticPaths() computes for each page:
+    |   ├── prev: chapters[i-1] or null
+    |   ├── next: chapters[i+1] or null
+    |   ├── currentIndex: i
+    |   └── allChapters: chapters[] (for sidebar)
+    |
+    ├── Passed as Astro.props to page template
+    |
+    ├── GuideNav.astro receives allChapters + currentIndex
+    |   └── Renders sidebar with aria-current on active chapter
+    |
+    └── GuidePrevNext.astro receives prev + next
+        └── Renders bottom nav links (or null at start/end)
+```
 
 ## Integration Points
 
-### External Services
+### New Content Collections
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| skills.sh directory | Automatic via install telemetry | No registration or publish step. Skills appear at `skills.sh/PatrykQuantumNomad/PatrykQuantumNomad/{skill-name}` when users install via CLI |
-| GitHub Pages | Astro static build via `withastro/action@v3` | Symlink resolved at build time. Existing workflow completely unchanged |
-| Claude Code | Users install with `npx skills add` | Skill lands in `.claude/skills/` or `~/.claude/skills/` |
-| OpenAI Codex CLI | Users install with `npx skills add` | Skill lands in `.codex/skills/` |
-| GitHub Copilot | Users install with `npx skills add` | Skill lands in `.github/skills/` |
-| Gemini CLI | Users install with `npx skills add` | Skill lands in `.agents/skills/` |
+| Collection | Loader | Source | Schema |
+|------------|--------|--------|--------|
+| `guides` | `file()` | `src/data/guides/fastapi-production/guide.json` | `guideSchema` (id, title, slug, description, templateRepo, chapters[]) |
+| `guidePages` | `glob()` | `./src/data/guides` with `**/*.mdx` pattern | `guidePageSchema` (title, description, chapter, guide, tags, templateRepoPath) |
 
-### Internal Boundaries
+### Modifications to Existing Files
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `skills/` <-> `public/skills` | Filesystem symlink | One-way: `public/skills` reads from `skills/`. Never edit in `public/skills/` directly (it is a symlink) |
-| `src/pages/tools/` <-> static skills | HTTP URL reference (`/skills/*/SKILL.md`) | Tool pages link to skills for download. URL path unchanged after migration |
-| `public/benchmarks/` <-> skills | None (fully decoupled) | Benchmark data references skill names by convention but lives in separate directory |
-| `README.md` <-> skills.sh | Text reference | README should include `npx skills add` command and link to skills.sh pages |
+| File | Change | Risk |
+|------|--------|------|
+| `src/content.config.ts` | Add 2 collection definitions + import schema | LOW -- additive, no changes to existing collections |
+| `src/components/Header.astro` | Add `{ href: '/guides/', label: 'Guides' }` to navLinks | LOW -- single array push, 10th nav item |
+| `src/data/projects.ts` | Add guide entry to projects array | LOW -- additive |
+
+### Reused Existing Infrastructure (No Modifications)
+
+| Component | How It Is Reused |
+|-----------|-----------------|
+| `Layout.astro` | GuideLayout wraps it (same as EDALayout) |
+| `SEOHead.astro` | Via Layout -- title, description, og props |
+| `BreadcrumbJsonLd.astro` | Imported directly in guide page templates |
+| `TableOfContents.astro` | Imported in [slug].astro for on-page headings |
+| `lib/og-image.ts` | Add `generateGuideOgImage()` function |
+| `lib/eda/og-cache.ts` | `getOrGenerateOgImage()` is domain-agnostic |
+| `blog/Callout.astro` | Imported in guide MDX pages for tips/warnings |
+| `blog/KeyTakeaway.astro` | Imported in guide MDX pages for summaries |
+| `Expressive Code` | Already configured in astro.config.mjs -- code blocks work in MDX |
+| `View Transitions` | Already in Layout.astro via ClientRouter |
+
+### External Integration
+
+| External | Integration | Notes |
+|----------|-------------|-------|
+| FastAPI template repo | `CodeFromRepo` links to source files | Use tagged release (e.g., `v1.0.0`) not `main` branch for stable links |
+| Google Search | Schema.org TechArticle + BreadcrumbList JSON-LD | Reuses existing structured data patterns |
+| GitHub Pages | Static output, no deployment changes | Existing `withastro/action@v3` workflow handles new pages automatically |
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Duplicating Files Instead of Symlinking
+### Anti-Pattern 1: Putting Guide Content in `src/pages/` as Astro Files
 
-**What people do:** Copy SKILL.md files to both `skills/` and `public/skills/` to serve both purposes.
-**Why it's wrong:** Two copies drift out of sync. One edit fixes the CLI version but the website serves stale content (or vice versa). Git diff noise doubles. Merge conflicts multiply.
-**Do this instead:** Single source of truth in `skills/`, symlink from `public/skills`.
+**What people do:** Write each guide chapter as a standalone `.astro` page file instead of MDX content in a collection.
+**Why it's wrong:** Loses content collection benefits: no Zod validation, no `getCollection()` queries, no `render()` with heading extraction, no separation of content from presentation. Makes prev/next navigation require hardcoded arrays in every page file.
+**Do this instead:** Use MDX content collection with `glob()` loader. Page templates in `src/pages/` query the collection via `getStaticPaths()`.
 
-### Anti-Pattern 2: Putting Workspace/Benchmark Data in `skills/`
+### Anti-Pattern 2: Storing Chapter Ordering in MDX Frontmatter Only
 
-**What people do:** Keep `*-workspace/` directories and `benchmark-*.json` alongside SKILL.md files in the skills directory.
-**Why it's wrong:** `npx skills add` discovery scans subdirectories under `skills/`. Workspace directories would be listed as potential skills (they contain no `SKILL.md` so they would be skipped, but it adds noise and confusion). The workspace dirs contain eval results (JSON, timing data, model outputs) that are irrelevant to skill consumers and inflate clone/download size.
-**Do this instead:** Move benchmark/workspace data to `public/benchmarks/`. Keep `skills/` with only the 4 skill directories.
+**What people do:** Add an `order: 3` field to each MDX file's frontmatter and sort by it at query time.
+**Why it's wrong:** Ordering is distributed across 10+ files. Reordering requires editing multiple frontmatter blocks and hoping you didn't create gaps or duplicates. No single view of the chapter sequence.
+**Do this instead:** Define chapter ordering in `guide.json` as a single array. Each MDX file has a `chapter` number that can be validated against the JSON. The JSON array is the source of truth.
 
-### Anti-Pattern 3: Using `.claude-plugin/marketplace.json` for Discovery
+### Anti-Pattern 3: Creating a Separate Layout for Every Section
 
-**What people do:** Create plugin manifest files to explicitly declare skill locations in non-standard paths.
-**Why it's wrong:** Unnecessary complexity. The standard `skills/` convention provides Tier 2 discovery automatically. A manifest is only useful for non-standard layouts and creates another file to maintain with no benefit.
-**Do this instead:** Put skills in `skills/` and let convention handle discovery.
+**What people do:** Build `GuideLayout.astro` from scratch, duplicating the head tags, fonts, analytics, animations, header, and footer from `Layout.astro`.
+**Why it's wrong:** Any change to the base layout (new font, CSP update, analytics tag) must be propagated to every layout variant. The EDA section already demonstrates the correct pattern: `EDALayout.astro` wraps `Layout.astro` and adds only section-specific concerns (KaTeX CSS).
+**Do this instead:** `GuideLayout.astro` wraps `Layout.astro` with a `<slot />`. It adds only guide-specific concerns: nothing in the current guide design requires anything beyond what `Layout.astro` already provides, so `GuideLayout` may be a near-empty wrapper. That is fine -- it provides the extension point for future needs.
 
-### Anti-Pattern 4: Leaving Skills in `public/skills/` Without Moving
+### Anti-Pattern 4: Using React Islands for Guide Navigation
 
-**What people do:** Leave skills in `public/skills/` and rely on the recursive fallback (Tier 3) to find them.
-**Why it's wrong:** Tier 3 is a fallback, not the expected path. It is slower (scans entire repo tree including `node_modules/`, `handbook/`, etc.). It signals unfamiliarity with the ecosystem convention. Future CLI versions could change recursive scanning behavior.
-**Do this instead:** Use `skills/` at root -- the standard, expected, documented location.
+**What people do:** Build the sidebar and prev/next navigation as React components with `client:visible` or `client:load`.
+**Why it's wrong:** Guide navigation is entirely deterministic at build time. There is no user interaction that changes which chapters exist or their order. Client-side JavaScript for static navigation is unnecessary weight and delays interactivity.
+**Do this instead:** Build navigation as Astro components (`.astro` files). Compute all navigation data in `getStaticPaths()` and pass as props. Reserve React islands for genuinely interactive elements (e.g., a code playground if added later).
 
-### Anti-Pattern 5: Creating a Separate Repository for Skills
+### Anti-Pattern 5: Inlining Full Source Files from the Template Repo
 
-**What people do:** Create `PatrykQuantumNomad/devops-skills` as a dedicated skills repository, separate from the profile repo.
-**Why it's wrong for this case:** With only 4 skills, a separate repo fragments discoverability. The profile repo URL (`PatrykQuantumNomad/PatrykQuantumNomad`) is memorable, directly associated with the author, and already has traffic. The skills add professional value to the profile repo. A separate repo would only make sense at 20+ skills.
-**Do this instead:** Keep skills in the profile repo. The `skills/` directory coexists cleanly with Astro, README.md, and other profile content.
-
-## Migration Checklist
-
-### New Components
-
-| Component | Type | Description |
-|-----------|------|-------------|
-| `skills/` (root directory) | **NEW** | Root-level skills directory containing 4 skill subdirectories |
-| `public/benchmarks/` | **NEW** | New home for benchmark data and workspace eval directories |
-
-### Modified Components
-
-| Component | Change | Risk |
-|-----------|--------|------|
-| `public/skills/` | Directory replaced by symlink to `../skills/` | LOW -- Astro resolves symlinks; `withastro/action@v3` runs on Ubuntu which handles symlinks natively |
-| `README.md` | Add skills.sh install instructions and badge | NONE -- additive text change |
-
-### Unmodified Components
-
-| Component | Why No Change |
-|-----------|---------------|
-| `astro.config.mjs` | Static output mode, no skills-specific config. `public/` handling is built-in |
-| `src/pages/tools/*/index.astro` | Download links use `/skills/*/SKILL.md` -- URL path unchanged |
-| `.github/workflows/deploy.yml` | `withastro/action@v3` handles symlinks in `public/` |
-| `package.json` | No new dependencies for skill publishing |
-| `.gitignore` | No new patterns needed |
-| Individual SKILL.md files | Content and frontmatter already follow skills.sh convention |
-| Individual hooks/*.sh files | Already correctly located within skill directories |
+**What people do:** Copy entire files from the template repo into MDX, creating 200-line code blocks.
+**Why it's wrong:** Readers cannot absorb 200 lines of code in a guide context. Long code blocks push other content off-screen. Full files drift out of sync with the repo faster than curated excerpts.
+**Do this instead:** Show curated excerpts (10-40 lines) that illustrate the specific concept being discussed. Use `CodeFromRepo` with a "View source" link for readers who want the full file. The guide is narrative, not a code dump.
 
 ## Build Order
 
-The migration has dependency ordering. Steps 1-3 must happen together in a single commit to avoid broken state.
+The following sequence respects dependencies between components. Items at the same level can be built in parallel.
 
-1. **Create `skills/` at root** -- `mkdir skills/`
-2. **Move the 4 skill directories** -- `mv public/skills/{compose-validator,dockerfile-analyzer,gha-validator,k8s-analyzer} skills/`
-3. **Create `public/benchmarks/`** and move non-skill files -- `mv public/skills/{benchmark-*,grading-summary.json,*-workspace} public/benchmarks/`
-4. **Replace `public/skills/` directory** with symlink -- `rm -rf public/skills && ln -s ../skills public/skills`
-5. **Update internal references** -- check if any code references `public/skills/benchmark-*` or `public/skills/grading-summary.json` and update paths to `public/benchmarks/`
-6. **Verify Astro build** -- `npm run build` should produce `dist/skills/` with all 4 skill directories
-7. **Verify skills.sh discovery** -- `npx skills add . --list` from repo root should find exactly 4 skills
-8. **Update README.md** -- add skills.sh install command block
-9. **Test download links** on local dev server -- `localhost:4321/skills/gha-validator/SKILL.md` should serve content
+### Phase 1: Foundation (no dependencies on other new components)
+
+1. **`src/lib/guides/schema.ts`** -- Zod schemas for `guideSchema` and `guidePageSchema`
+2. **`src/lib/guides/routes.ts`** -- URL builder functions: `guideUrl(guideSlug)`, `guideChapterUrl(guideSlug, chapterSlug)`
+3. **`src/data/guides/fastapi-production/guide.json`** -- Guide metadata with chapter ordering array
+
+### Phase 2: Content Infrastructure (depends on Phase 1 schemas)
+
+4. **`src/content.config.ts`** -- Add `guides` and `guidePages` collections with schema imports
+5. **`src/layouts/GuideLayout.astro`** -- Thin wrapper around `Layout.astro`
+6. **`src/data/guides/fastapi-production/pages/01-project-structure.mdx`** -- First chapter MDX (start with one to validate pipeline)
+
+### Phase 3: Navigation Components (depends on Phase 1 routes + Phase 2 collections)
+
+7. **`src/components/guides/GuideBreadcrumb.astro`** -- Breadcrumb using routes.ts helpers
+8. **`src/components/guides/GuidePrevNext.astro`** -- Bottom prev/next links
+9. **`src/components/guides/GuideNav.astro`** -- Sidebar chapter list + on-page TOC integration
+
+### Phase 4: Page Templates (depends on Phase 2 + Phase 3)
+
+10. **`src/pages/guides/fastapi-production/[slug].astro`** -- Chapter page with getStaticPaths, layout, nav components
+11. **`src/pages/guides/fastapi-production/index.astro`** -- Landing page with chapter card grid
+
+### Phase 5: Guide-Specific Components (can be built in parallel with Phase 4)
+
+12. **`src/components/guides/CodeFromRepo.astro`** -- Code block wrapper with source link
+13. **`src/components/guides/FileTree.astro`** -- Project structure tree visualization
+14. **`src/components/guides/ArchitectureDiagram.astro`** -- SVG diagram wrapper
+15. **`src/lib/guides/svg-generators/fastapi-architecture.ts`** -- First architecture diagram
+
+### Phase 6: SEO + OG Images (depends on Phase 4 pages existing)
+
+16. **`src/components/guides/GuideJsonLd.astro`** -- Schema.org structured data
+17. **`src/pages/open-graph/guides/fastapi-production/[slug].png.ts`** -- Per-chapter OG images
+18. **`src/pages/open-graph/guides/fastapi-production/index.png.ts`** -- Landing page OG image
+19. **Add `generateGuideOgImage()` to `src/lib/og-image.ts`**
+
+### Phase 7: Site Integration (final, depends on pages existing)
+
+20. **`src/components/Header.astro`** -- Add "Guides" nav link
+21. **`src/data/projects.ts`** -- Add guide to projects listing
+22. **Remaining chapter MDX files** (02 through 10) -- content authoring
+
+### Dependency Graph
+
+```
+schema.ts ─────┐
+               ├── content.config.ts ──┐
+routes.ts ─────┤                       │
+guide.json ────┘                       │
+                                       ├── [slug].astro ──── Header.astro (nav link)
+GuideLayout.astro ─────────────────────┤                     projects.ts (listing)
+                                       │
+GuideBreadcrumb.astro ─────────────────┤
+GuidePrevNext.astro ───────────────────┤
+GuideNav.astro ────────────────────────┘
+
+CodeFromRepo.astro ────── (used in MDX, independent of page template)
+FileTree.astro ────────── (used in MDX, independent of page template)
+ArchitectureDiagram.astro + svg-generators ── (used in MDX, independent)
+
+GuideJsonLd.astro ──── (embedded in page template after it works)
+OG image endpoints ─── (depend on og-image.ts + og-cache.ts)
+```
 
 ## Scaling Considerations
 
-| Concern | Current (4 skills) | At 10-20 skills | At 50+ skills |
-|---------|---------------------|------------------|---------------|
-| Repo size | Negligible (~100KB total for all skills) | Still fine, SKILL.md files are text | Consider dedicated skills repo |
-| Astro build time | No impact (public/ files are copied, not processed) | No impact | Minimal impact |
-| skills.sh listing | 4 entries under one repo | Manageable, good for brand coherence | Split into themed repos |
-| Symlink approach | Clean and simple | Still clean | May want selective symlinks |
+| Concern | At 1 guide (10 chapters) | At 5 guides (50 chapters) | At 20+ guides |
+|---------|--------------------------|---------------------------|---------------|
+| Content organization | Single directory under `src/data/guides/` | Each guide gets its own subdirectory -- clean | Consider a `/guides/` landing page listing all guides |
+| Build time | Negligible -- 10 MDX pages add ~2-3 seconds | Still fast -- Astro 5 MDX builds are ~2x faster | May want to profile; 200+ MDX pages could add 30+ seconds |
+| Navigation | Sidebar + prev/next per guide | Same pattern per guide, no cross-guide nav needed | May want a guides index page with search/filter |
+| OG images | 11 images (landing + 10 chapters) | 55 images -- caching essential | OG cache prevents regeneration; fine at this scale |
+| Content collections | 2 new collections | Same 2 collections with more entries | Same 2 collections; glob pattern handles subdirectories automatically |
+| Header nav | "Guides" link sufficient | Still fine -- dropdown could list guides | Dropdown or dedicated nav section |
 
 ### Scaling Priority
 
-The 4-skill profile repo is well within the sweet spot. The only inflection point would be at ~20+ skills, where a dedicated `PatrykQuantumNomad/devops-skills` repository might make sense for organizational clarity. For 4 skills, keeping them in the profile repo maximizes discoverability -- the profile repo URL is memorable and directly associated with the author identity.
-
-## Verification Steps
-
-After migration, confirm these three paths all work:
-
-1. **skills.sh CLI discovery:** `npx skills add . --list` from repo root shows exactly 4 skills
-2. **Astro static build:** `npm run build && ls dist/skills/*/SKILL.md` shows 4 SKILL.md files
-3. **Dev server:** `npm run dev` then visit `localhost:4321/skills/gha-validator/SKILL.md` returns content
-4. **Git status clean:** `git status` shows the symlink tracked correctly (typechange for `public/skills`)
+1. **First concern:** At 5+ guides, the `/guides/` landing page should become a listing page showing all available guides (not just FastAPI). This is a trivial index.astro page querying the `guides` collection.
+2. **Second concern:** At 20+ guides, consider whether the `guides` JSON collection should become a glob-loaded collection of individual `guide.json` files per directory, rather than a single combined JSON file.
 
 ## Sources
 
-- [vercel-labs/skills -- The open agent skills tool](https://github.com/vercel-labs/skills) -- CLI source code and three-tier discovery strategy
-- [Vercel KB -- Agent Skills: Creating, Installing, and Sharing](https://vercel.com/kb/guide/agent-skills-creating-installing-and-sharing-reusable-agent-context) -- Publishing convention (`skills/` directory, no publish step)
-- [anthropics/skills -- Public skills repository](https://github.com/anthropics/skills) -- Reference implementation of `skills/` directory layout (84.5k stars)
-- [DeepWiki -- vercel-labs/skills](https://deepwiki.com/vercel-labs/skills) -- Three-tier search strategy: direct check, priority directories, recursive fallback
-- [DeepWiki -- Skill Directory Structure](https://deepwiki.com/heilcheng/awesome-agent-skills/2.3-skill-directory-structure) -- Required SKILL.md format, optional subdirectories (scripts/, templates/, resources/)
-- [skills.sh FAQ](https://skills.sh/docs/faq) -- Skills appear via install telemetry, no publish step
-- [Astro Docs -- Project Structure](https://docs.astro.build/en/basics/project-structure/) -- `public/` directory copies files verbatim to build output
-- [skills.sh -- find-skills listing page](https://skills.sh/vercel-labs/skills/find-skills) -- Reference for how skill pages appear (install command, stats, documentation)
+- [Astro Content Collections Documentation](https://docs.astro.build/en/guides/content-collections/) -- glob() and file() loaders, schema validation, collection querying
+- [Astro MDX Integration](https://docs.astro.build/en/guides/integrations-guide/mdx/) -- MDX component imports, rendering, heading extraction
+- [Astro Pages Documentation](https://docs.astro.build/en/basics/astro-pages/) -- getStaticPaths, dynamic routes, props
+- Existing codebase patterns: `src/content.config.ts`, `src/layouts/EDALayout.astro`, `src/pages/eda/foundations/[...slug].astro`, `src/lib/eda/routes.ts`, `src/lib/eda/schema.ts`, `src/lib/eda/og-cache.ts`, `src/pages/open-graph/eda/[...slug].png.ts`
 
 ---
-*Architecture research for: skills.sh publishing from Astro profile repo*
-*Researched: 2026-03-05*
+*Architecture research for: FastAPI Production Guide integration with Astro 5 portfolio site*
+*Researched: 2026-03-08*
