@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.15 FastAPI Production Guide (Shipped: 2026-03-08)
+
+**Delivered:** Multi-page self-contained guide section at `/guides/fastapi-production/` with 11 domain deep-dive chapters, build-time architecture diagrams, code snippets from the FastAPI template repository, AI agent narrative framing, and full site integration with OG images, JSON-LD, and companion blog post
+
+**Phases completed:** 85-89 (13 plans total)
+
+**Key accomplishments:**
+- Built Zod-validated guide content infrastructure with Astro content collections, dynamic page routing, and JSON metadata
+- Created responsive two-column guide layout with sticky sidebar, breadcrumbs, and prev/next chapter navigation
+- Authored 11 comprehensive domain chapters (builder pattern, middleware, auth, security headers, rate limiting, observability, database, Docker, testing, health checks, caching) with 50+ CodeFromRepo snippets
+- Developed 3 build-time SVG architecture diagram generators (middleware stack, builder pattern, JWT auth flow) and an interactive React Flow deployment topology
+- Generated 12 branded OG images at build time with content-hash caching, implemented TechArticle JSON-LD and BreadcrumbList structured data
+- Integrated guide site-wide via header nav, /guides/ hub page, homepage callout card, LLMs.txt entries, and companion blog post with bidirectional cross-links
+
+**Stats:**
+- 85 files created/modified (+11,893 / -93 lines)
+- 5 phases, 13 plans, 49 commits
+- 1 day (2026-03-08)
+
+**Git range:** `feat(85-01)` → `feat(89-03)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.14 DevOps Skills Publishing (Shipped: 2026-03-05)
 
 **Delivered:** Packaged and published 4 DevOps validator skills (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator) to the skills.sh open agent skills ecosystem with directory restructure, CLI verification, and README documentation

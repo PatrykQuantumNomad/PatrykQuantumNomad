@@ -245,31 +245,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - README Agent Skills section with install commands, 4-skill table, and benchmark highlights (98.8% pass rate, +42.4%) -- v1.14
 - GitHub Actions Workflow Validator added to README Interactive Tools table -- v1.14
 - All `public/skills/` references updated to `skills/` across repo -- v1.14
-
-## Current Milestone: v1.15 FastAPI Production Guide
-
-**Goal:** Build a multi-page self-contained guide section at `/guides/fastapi-production/` explaining how to configure FastAPI for production, accompanying the [fastapi-template](https://github.com/PatrykQuantumNomad/fastapi-template) repository.
-
-**Target features:**
-- Landing page with philosophy, AI agent angle as headline narrative, and domain overview
-- ~11 domain deep-dive pages: Builder pattern, Authentication (JWT), Middleware stack, Observability (OTEL/Prometheus/logging), Database (async SQLAlchemy/Alembic), Docker & containerization, Testing, Health checks (readiness vs liveness), Security headers, Rate limiting, Caching
-- Architecture diagrams (request flow, middleware stack, builder pattern, deployment topologies)
-- Code snippets from the actual template with syntax highlighting
-- AI agent narrative woven throughout ("every production concern handled, so your agent writes business logic")
-- Self-contained guide (stands alone without requiring repo docs)
-- Full site integration (header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt)
-
-**Source material:** FastAPI template at `/Users/patrykattc/work/git/fastapi-template` (GitHub: PatrykQuantumNomad/fastapi-template)
+- ✓ Multi-page guide section at `/guides/fastapi-production/` with Zod-validated content collections and dynamic page routing — v1.15
+- ✓ Guide landing page with AI agent narrative hero and chapter card grid — v1.15
+- ✓ 11 domain deep-dive pages with full prose, code snippets, and AI agent framing — v1.15
+- ✓ 3 build-time SVG architecture diagrams (middleware stack, builder pattern, JWT auth flow) and interactive React Flow deployment topology — v1.15
+- ✓ CodeFromRepo component with syntax highlighting and GitHub source attribution — v1.15
+- ✓ GuideLayout with sticky sidebar, breadcrumbs, prev/next navigation, and reading progress — v1.15
+- ✓ Full site integration (header nav, /guides/ hub page, homepage callout, JSON-LD, 12 OG images, sitemap, LLMs.txt, companion blog post) — v1.15
 
 ### Active
 
-- [ ] Multi-page guide section at `/guides/fastapi-production/`
-- [ ] Landing page with AI agent angle as primary marketing narrative
-- [ ] ~11 domain deep-dive pages covering all production concerns
-- [ ] Architecture diagrams (middleware stack, request flow, builder pattern)
-- [ ] Code snippets from template with syntax highlighting
-- [ ] Self-contained content (no dependency on repo docs)
-- [ ] Full site integration (header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt)
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -298,14 +284,13 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.14 DevOps Skills Publishing on top of 13 previous milestones (v1.0 through v1.13). 4 DevOps validator skills now published to skills.sh.
-FastAPI template project at github.com/PatrykQuantumNomad/fastapi-template covers: Builder pattern app composition, 3-mode JWT auth (shared secret/static key/JWKS), raw ASGI middleware stack (6 middlewares), readiness vs liveness health separation, SQLite-first multi-backend (zero-infra dev to Postgres+Redis prod), OpenTelemetry + Prometheus + structured JSON logging, rightmost untrusted hop proxy trust, security headers (HSTS/CSP/permissions policy), rate limiting (memory/Redis), async SQLAlchemy with Alembic migrations, multi-stage Docker with tini/unprivileged user/digest-pinned images, 98%+ test coverage, 5 ADRs, and optional caching layer.
+Shipped v1.15 FastAPI Production Guide on top of 14 previous milestones (v1.0 through v1.14). FastAPI Production Guide at /guides/fastapi-production/ with 11 domain deep-dive chapters.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 requirements delivered (737 total). ~1010+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 requirements delivered (773 total). ~1074+ pages total. Lighthouse 90+ on mobile.
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 22 posts (12 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 23 posts (13 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages, and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 46 rules (34 Hadolint DL codes + 12 custom PG rules), category-weighted scoring, inline annotations, 46 rule documentation pages, PNG badge export, and shareable URL state.
@@ -314,6 +299,7 @@ Docker Compose Validator: browser-based compose file validation with 52 rules (8
 Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (10 schema + 20 security + 12 reliability + 12 best practice + 8 cross-resource + 5 RBAC), multi-resource schema validation for 19 K8s resource types, PSS/CIS compliance, interactive React Flow dependency graph, 67 rule documentation pages, and companion blog post.
 EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies at full NIST depth with quantitative test batteries and interpretation sections, 6 foundations, 4 reference pages, filterable landing page, 17 build-time SVG generators, and companion blog post.
 GitHub Actions Workflow Validator: browser-based two-pass linter with actionlint WASM via Web Worker + SchemaStore JSON Schema, 48 rules across 6 categories (10 security, 18 semantic, 8 best practice, 4 style, 8 schema), CodeMirror 6 YAML editor, category-weighted scoring, interactive React Flow workflow graph with dagre layout, 48 rule documentation pages, shareable results, and companion blog post.
+FastAPI Production Guide: 11-chapter guide at /guides/fastapi-production/ with Zod content collections, GuideLayout with sidebar/breadcrumb/prev-next navigation, 3 build-time SVG diagrams, interactive React Flow deployment topology, 50+ CodeFromRepo snippets, AI agent narrative, 12 OG images, JSON-LD, companion blog post, and /guides/ hub page.
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -407,6 +393,16 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | Condition/restart for Lisp Error Handling | handler-bind + restart-case instead of handler-case alone | ✓ Good — showcases unique CL capability |
 | Lisp after Clojure in data files | Editorial proximity for Lisp-family languages | ✓ Good — logical grouping |
 | Preserve anti-patterns during 25→26 update | RedMonk URL date, C# age, scoring weight are not language counts | ✓ Good — no false positives in count update |
+| Guide content as Zod-validated Astro collections | Consistent with existing EDA pattern, type-safe frontmatter | ✓ Good — schema validation catches errors at build time |
+| GuideLayout extends Layout directly (two-column grid) | Guide pages need sidebar + content, different from EDA simple wrapper | ✓ Good — clean separation of layout concerns |
+| CSS position:sticky for sidebar (zero JS) | Sidebar stays visible during scroll without JavaScript overhead | ✓ Good — performant, accessible |
+| diagram-base.ts mirroring plot-base.ts pattern | Consistent SVG generation approach across EDA and guide diagrams | ✓ Good — familiar pattern for maintenance |
+| CodeFromRepo with hardcoded defaults | Avoids build-time guide.json reads; props override when needed | ✓ Good — simple, explicit |
+| Static dagre layout at module level for topology | Topology data is hardcoded; no need for useMemo | ✓ Good — zero runtime cost |
+| Separate og-guide cache directory | Prevents collisions with EDA OG image cache | ✓ Good — isolated caching |
+| /guides/ hub page (not redirect) | Future-proofs for additional guides beyond FastAPI | ✓ Good — extensible URL structure |
+| Pure MDX prose for companion blog post | No component imports needed; standard markdown links suffice | ✓ Good — minimal complexity |
+| Back-link in GuideLayout (not per-MDX) | Avoids editing 11 MDX files; single component change | ✓ Good — DRY |
 | PG011 warning severity matching DL3002 | USER-related rules should share severity level | ✓ Good — consistent severity for USER directive issues |
 | PG011/DL3002 non-overlap boundary | PG011 fires only when zero USER instructions exist; DL3002 handles rest | ✓ Good — no duplicate violations |
 | PG012 info severity (not warning) | Pointer compression is optimization suggestion, not correctness issue | ✓ Good — appropriate 3-point deduction vs 8-point warning |
@@ -431,4 +427,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-08 after v1.15 milestone start*
+*Last updated: 2026-03-08 after v1.15 milestone*
