@@ -30,7 +30,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. A `guides` JSON collection loads guide-level metadata (guide.json) with chapter ordering, template repo URL, and version tag
   3. `getStaticPaths` at `/guides/fastapi-production/[slug]/` generates pages from the content collection
   4. A stub MDX chapter file builds successfully through the full pipeline (collection -> page -> rendered HTML)
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 85-01-PLAN.md -- Zod schemas, content collections, stub MDX, dynamic page route, and schema unit tests
 
 ### Phase 86: Page Infrastructure and Navigation
 **Goal**: Users can navigate the guide with sidebar, breadcrumbs, prev/next links, and reading progress -- and the landing page introduces the guide
@@ -86,7 +88,7 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 85. Foundation and Content Schema | 0/TBD | Not started | - |
+| 85. Foundation and Content Schema | 0/1 | Not started | - |
 | 86. Page Infrastructure and Navigation | 0/TBD | Not started | - |
 | 87. Guide-Specific Components | 0/TBD | Not started | - |
 | 88. Content Authoring | 0/TBD | Not started | - |
