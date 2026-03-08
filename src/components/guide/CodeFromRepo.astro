@@ -1,0 +1,85 @@
+---
+/**
+ * CodeFromRepo -- Renders a syntax-highlighted code block with a file path
+ * annotation header and a "View source" link to the tagged GitHub file.
+ *
+ * Wraps astro-expressive-code's Code component with source attribution so
+ * every snippet in the guide links back to the actual FastAPI template.
+ */
+import { Code } from 'astro-expressive-code/components';
+import { buildGitHubFileUrl } from '../../lib/guides/code-helpers';
+
+interface Props {
+  /** The raw source code to display */
+  code: string;
+  /** Language identifier for syntax highlighting (e.g. "python", "yaml") */
+  lang: string;
+  /** Path to the file within the template repository */
+  filePath: string;
+  /** Optional display title (defaults to filePath) */
+  title?: string;
+  /** GitHub repository URL (defaults to fastapi-template) */
+  templateRepo?: string;
+  /** Git tag or branch (defaults to v1.0.0) */
+  versionTag?: string;
+  /** Optional start line for highlight fragment */
+  startLine?: number;
+  /** Optional end line for highlight fragment */
+  endLine?: number;
+}
+
+const {
+  code,
+  lang,
+  filePath,
+  title,
+  templateRepo = 'https://github.com/Translucent-Computing/fastapi-template',
+  versionTag = 'v1.0.0',
+  startLine,
+  endLine,
+} = Astro.props;
+
+const githubUrl = buildGitHubFileUrl(
+  templateRepo,
+  versionTag,
+  filePath,
+  startLine ? { startLine, endLine } : undefined,
+);
+
+const displayTitle = title || filePath;
+---
+
+<div class="my-6 not-prose">
+  <!-- File path header bar -->
+  <div class="flex items-center justify-between px-3 py-2 bg-[var(--color-surface-alt)] border border-b-0 border-[var(--color-border)] rounded-t-lg text-sm">
+    <span class="font-mono text-[var(--color-text-secondary)] truncate">{displayTitle}</span>
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-[var(--color-accent)] hover:underline whitespace-nowrap ml-4 flex items-center gap-1"
+    >
+      View source
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </a>
+  </div>
+  <!-- Code block with rounded top corners removed to join header -->
+  <div class="[&_.expressive-code]:!rounded-t-none [&_.expressive-code]:!mt-0 [&_.expressive-code]:!border-t-0">
+    <Code code={code} lang={lang} title={displayTitle} />
+  </div>
+</div>
