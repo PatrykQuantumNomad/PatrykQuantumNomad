@@ -246,9 +246,30 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - GitHub Actions Workflow Validator added to README Interactive Tools table -- v1.14
 - All `public/skills/` references updated to `skills/` across repo -- v1.14
 
+## Current Milestone: v1.15 FastAPI Production Guide
+
+**Goal:** Build a multi-page self-contained guide section at `/guides/fastapi-production/` explaining how to configure FastAPI for production, accompanying the [fastapi-template](https://github.com/PatrykQuantumNomad/fastapi-template) repository.
+
+**Target features:**
+- Landing page with philosophy, AI agent angle as headline narrative, and domain overview
+- ~11 domain deep-dive pages: Builder pattern, Authentication (JWT), Middleware stack, Observability (OTEL/Prometheus/logging), Database (async SQLAlchemy/Alembic), Docker & containerization, Testing, Health checks (readiness vs liveness), Security headers, Rate limiting, Caching
+- Architecture diagrams (request flow, middleware stack, builder pattern, deployment topologies)
+- Code snippets from the actual template with syntax highlighting
+- AI agent narrative woven throughout ("every production concern handled, so your agent writes business logic")
+- Self-contained guide (stands alone without requiring repo docs)
+- Full site integration (header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt)
+
+**Source material:** FastAPI template at `/Users/patrykattc/work/git/fastapi-template` (GitHub: PatrykQuantumNomad/fastapi-template)
+
 ### Active
 
-(None -- ready for next milestone)
+- [ ] Multi-page guide section at `/guides/fastapi-production/`
+- [ ] Landing page with AI agent angle as primary marketing narrative
+- [ ] ~11 domain deep-dive pages covering all production concerns
+- [ ] Architecture diagrams (middleware stack, request flow, builder pattern)
+- [ ] Code snippets from template with syntax highlighting
+- [ ] Self-contained content (no dependency on repo docs)
+- [ ] Full site integration (header nav, homepage callout, JSON-LD, OG images, sitemap, LLMs.txt)
 
 ### Out of Scope
 
@@ -278,6 +299,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 ## Context
 
 Shipped v1.14 DevOps Skills Publishing on top of 13 previous milestones (v1.0 through v1.13). 4 DevOps validator skills now published to skills.sh.
+FastAPI template project at github.com/PatrykQuantumNomad/fastapi-template covers: Builder pattern app composition, 3-mode JWT auth (shared secret/static key/JWKS), raw ASGI middleware stack (6 middlewares), readiness vs liveness health separation, SQLite-first multi-backend (zero-infra dev to Postgres+Redis prod), OpenTelemetry + Prometheus + structured JSON logging, rightmost untrusted hop proxy trust, security headers (HSTS/CSP/permissions policy), rate limiting (memory/Redis), async SQLAlchemy with Alembic migrations, multi-stage Docker with tini/unprivileged user/digest-pinned images, 98%+ test coverage, 5 ADRs, and optional caching layer.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 requirements delivered (737 total). ~1010+ pages total. Lighthouse 90+ on mobile.
@@ -409,4 +431,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-05 after v1.14 milestone*
+*Last updated: 2026-03-08 after v1.15 milestone start*

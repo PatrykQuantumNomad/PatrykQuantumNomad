@@ -1,42 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.14
-milestone_name: DevOps Skills Publishing
-status: milestone_complete
-stopped_at: v1.14 milestone archived
-last_updated: "2026-03-06"
-last_activity: 2026-03-06 -- Quick task 012 completed (npm security fixes)
+milestone: v1.15
+milestone_name: FastAPI Production Guide
+status: defining_requirements
+stopped_at: defining requirements
+last_updated: "2026-03-08"
+last_activity: 2026-03-08 -- Milestone v1.15 started
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-05)
+See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.15 FastAPI Production Guide
 
 ## Current Position
 
-Phase: 84 of 84 total (all milestones)
-Plan: Complete
-Status: v1.14 milestone archived -- ready for next milestone
-Last activity: 2026-03-06 -- Completed quick task 012: Fix Snyk security scan issue on GHA Validator skill
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-08 — Milestone v1.15 started
 
-Progress: [##########] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 187 (across 14 milestones)
-- v1.14 plans completed: 3
+- v1.15 plans completed: 0
 
 **Cumulative Stats:**
 
@@ -83,7 +83,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Quick task 012 completed
+Last session: 2026-03-08
+Stopped at: Milestone v1.15 started — defining requirements
 Resume file: None
-Next: `/gsd:new-milestone` to start next milestone
+Next: Complete requirements definition, then `/gsd:plan-phase 85`
