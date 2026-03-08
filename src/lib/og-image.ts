@@ -3254,6 +3254,7 @@ export async function generateGuideOgImage(
           type: 'div',
           props: {
             style: {
+              display: 'flex',
               position: 'relative' as const,
               width: '500px',
               height: '630px',
