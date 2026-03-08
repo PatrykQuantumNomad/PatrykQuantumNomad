@@ -1,0 +1,181 @@
+---
+title: "Security Headers"
+description: "Automatic HSTS, Content-Security-Policy, referrer policy, and permissions policy on every response -- with CSP relaxation for API docs"
+order: 8
+slug: "security-headers"
+---
+
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Every HTTP response from the agent's endpoints automatically includes a full set of security headers: HSTS, Content-Security-Policy, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, and Cache-Control.
+The agent never sets these headers manually -- the `SecurityHeadersMiddleware` injects them before the response reaches the client.
+
+---
+
+## The Headers
+
+The middleware attaches a conservative default header set to every HTTP response.
+Each header closes a specific browser-side attack vector:
+
+| Header | Default value | Purpose |
+|--------|--------------|---------|
+| **Strict-Transport-Security** | `max-age=31536000; includeSubDomains` | Forces HTTPS for all future requests (only sent over HTTPS) |
+| **Content-Security-Policy** | `default-src 'none'; frame-ancestors 'none'` | Blocks all inline scripts, styles, and framing (XSS prevention) |
+| **X-Content-Type-Options** | `nosniff` | Prevents MIME-type sniffing attacks |
+| **X-Frame-Options** | `DENY` | Prevents clickjacking via iframe embedding |
+| **Referrer-Policy** | `no-referrer` | Strips referrer information from outgoing requests |
+| **Permissions-Policy** | `geolocation=(), camera=(), microphone=()` | Disables access to device APIs |
+| **Cache-Control** | `no-store` | Prevents caching of API responses |
+
+The middleware injects all headers in a single `send_wrapper` that intercepts the `http.response.start` ASGI event:
+
+<CodeFromRepo
+  code={`class SecurityHeadersMiddleware:
+    """Attach conservative security headers to all HTTP responses."""
+
+    def __init__(
+        self,
+        app: ASGIApp,
+        *,
+        hsts_enabled: bool,
+        hsts_max_age_seconds: int,
+        referrer_policy: str,
+        permissions_policy: str,
+        content_security_policy: str,
+        trust_proxy_proto_header: bool,
+        trusted_proxies: list[str],
+    ) -> None:
+        self.app = app
+        self.hsts_enabled = hsts_enabled
+        self.hsts_max_age_seconds = hsts_max_age_seconds
+        self.referrer_policy = referrer_policy
+        self.permissions_policy = permissions_policy
+        self.content_security_policy = content_security_policy
+        self.trust_proxy_proto_header = trust_proxy_proto_header
+        self.trusted_proxies = parse_trusted_proxies(trusted_proxies)`}
+  lang="python"
+  filePath="src/app/middleware/security_headers.py"
+  title="SecurityHeadersMiddleware"
+  startLine={11}
+  endLine={33}
+/>
+
+**HSTS and proxy awareness** -- HSTS is only sent when the request arrived over HTTPS.
+Behind a reverse proxy, the middleware checks the `X-Forwarded-Proto` header, but only after verifying the client IP is in the configured `trusted_proxies` list.
+This prevents an untrusted client from injecting a forwarded-proto header to trick the middleware into sending HSTS on a plain HTTP connection.
+
+<CodeFromRepo
+  code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_wrapper(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(raw=message.setdefault("headers", []))
+                headers["X-Content-Type-Options"] = "nosniff"
+                headers["X-Frame-Options"] = "DENY"
+                headers["Referrer-Policy"] = self.referrer_policy
+                headers["Permissions-Policy"] = self.permissions_policy
+                headers["Cache-Control"] = "no-store"
+                if self.content_security_policy:
+                    headers["Content-Security-Policy"] = self.content_security_policy
+
+                request_headers = Headers(raw=scope.get("headers", []))
+                client = scope.get("client")
+                client_host = client[0] if client else "unknown"
+                forwarded_proto = None
+                if self.trust_proxy_proto_header and is_trusted_proxy(
+                    client_host, self.trusted_proxies
+                ):
+                    forwarded_proto = normalize_forwarded_proto(
+                        request_headers.get("x-forwarded-proto")
+                    )
+                scheme = forwarded_proto or scope.get("scheme", "http")
+                if self.hsts_enabled and scheme == "https":
+                    headers["Strict-Transport-Security"] = (
+                        f"max-age={self.hsts_max_age_seconds}; includeSubDomains"
+                    )
+
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)`}
+  lang="python"
+  filePath="src/app/middleware/security_headers.py"
+  title="SecurityHeadersMiddleware.__call__"
+  startLine={35}
+  endLine={69}
+/>
+
+---
+
+## Automatic CSP Relaxation for API Docs
+
+The strict production CSP (`default-src 'none'`) blocks all external resources, which makes Swagger UI and ReDoc unusable.
+When either docs endpoint is enabled, the settings validator automatically extends the CSP with the minimum directives needed for interactive documentation -- without weakening the policy for regular API responses:
+
+<CodeFromRepo
+  code={`def _resolve_csp_for_docs(settings: Settings) -> None:
+    """Extend the default CSP when Swagger UI or ReDoc are enabled."""
+    if not (settings.docs_enabled or settings.redoc_enabled):
+        return
+
+    if settings.security_content_security_policy != _DEFAULT_CSP:
+        return
+
+    directives = [
+        "default-src 'none'",
+        "connect-src 'self' https://cdn.jsdelivr.net",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "img-src 'self' https://fastapi.tiangolo.com",
+        "frame-ancestors 'none'",
+    ]
+
+    if settings.redoc_enabled:
+        directives[3] += " https://fonts.googleapis.com"
+        directives[4] += " data: https://cdn.redoc.ly"
+        directives.insert(-1, "font-src 'self' https://fonts.gstatic.com")
+        directives.insert(-1, "worker-src 'self' blob:")
+
+    settings.security_content_security_policy = "; ".join(directives)`}
+  lang="python"
+  filePath="src/app/settings.py"
+  title="_resolve_csp_for_docs"
+  startLine={582}
+  endLine={615}
+/>
+
+If the operator has already provided a custom CSP, the resolver leaves it untouched -- explicit configuration always wins.
+
+---
+
+## Configuration
+
+All security headers are configurable through environment variables with safe defaults:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `APP_SECURITY_HEADERS_ENABLED` | `true` | Master toggle for the middleware |
+| `APP_SECURITY_HSTS_ENABLED` | `false` | Enable HSTS (set `true` once HTTPS is confirmed) |
+| `APP_SECURITY_HSTS_MAX_AGE_SECONDS` | `31536000` | HSTS max-age (1 year) |
+| `APP_SECURITY_REFERRER_POLICY` | `no-referrer` | Referrer-Policy header value |
+| `APP_SECURITY_PERMISSIONS_POLICY` | `geolocation=(), camera=(), microphone=()` | Permissions-Policy |
+| `APP_SECURITY_CONTENT_SECURITY_POLICY` | `default-src 'none'; frame-ancestors 'none'` | CSP (empty string disables) |
+| `APP_SECURITY_TRUST_PROXY_PROTO_HEADER` | `false` | Honor X-Forwarded-Proto from trusted proxies |
+| `APP_SECURITY_TRUSTED_PROXIES` | `[]` | CIDR list of trusted reverse proxies |
+
+---
+
+## What the Agent Never Implements
+
+The following concerns are handled entirely by the middleware layer.
+The agent's generated code should never contain logic for:
+
+- **Setting security headers** -- all headers are injected automatically on every response
+- **HSTS management** -- HTTPS detection and header injection are handled by the middleware
+- **CSP policy construction** -- defaults are strict; docs relaxation is automatic
+- **Proxy protocol trust** -- the middleware validates the client IP against the trusted-proxies allowlist
+- **Cache-control on API responses** -- `no-store` is applied globally
