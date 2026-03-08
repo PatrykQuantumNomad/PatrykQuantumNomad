@@ -1,0 +1,34 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('guidePages');
+  return pages.map((page) => ({
+    params: { slug: page.data.slug },
+    props: { page },
+  }));
+}
+
+interface Props {
+  page: Awaited<ReturnType<typeof getCollection<'guidePages'>>>[number];
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<Layout
+  title={`${page.data.title} | FastAPI Production Guide`}
+  description={page.data.description}
+>
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-8">{page.data.title}</h1>
+    <div class="prose max-w-none
+      [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
+      [&>p]:text-[var(--color-text-secondary)] [&>p]:leading-relaxed [&>p]:mb-4
+    ">
+      <Content />
+    </div>
+  </article>
+</Layout>
