@@ -1,0 +1,39 @@
+---
+import Layout from './Layout.astro';
+import GuideSidebar from '../components/guide/GuideSidebar.astro';
+import GuideBreadcrumb from '../components/guide/GuideBreadcrumb.astro';
+import GuideChapterNav from '../components/guide/GuideChapterNav.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  guideTitle: string;
+  guideSlug: string;
+  chapters: Array<{ slug: string; title: string }>;
+  currentSlug: string;
+  chapterTitle: string;
+}
+
+const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters, currentSlug, chapterTitle } = Astro.props;
+---
+
+<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType="article">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <GuideBreadcrumb guideTitle={guideTitle} guideSlug={guideSlug} chapterTitle={chapterTitle} />
+
+    <div class="lg:grid lg:grid-cols-[240px_1fr] lg:gap-8 mt-6">
+      <!-- Sidebar (hidden on mobile, sticky on desktop) -->
+      <aside class="hidden lg:block">
+        <GuideSidebar chapters={chapters} currentSlug={currentSlug} guideSlug={guideSlug} />
+      </aside>
+
+      <!-- Main content -->
+      <div>
+        <slot />
+        <GuideChapterNav chapters={chapters} currentSlug={currentSlug} guideSlug={guideSlug} />
+      </div>
+    </div>
+  </div>
+</Layout>

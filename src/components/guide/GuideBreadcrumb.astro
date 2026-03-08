@@ -1,0 +1,43 @@
+---
+import { guideLandingUrl } from '../../lib/guides/routes';
+
+interface Props {
+  guideTitle: string;
+  guideSlug: string;
+  chapterTitle?: string;
+}
+
+const { guideTitle, guideSlug, chapterTitle } = Astro.props;
+
+interface Crumb {
+  label: string;
+  href: string;
+}
+
+const crumbs: Crumb[] = [
+  { label: 'Home', href: '/' },
+  { label: 'Guides', href: '/guides/' },
+  { label: guideTitle, href: guideLandingUrl(guideSlug) },
+];
+
+if (chapterTitle) {
+  crumbs.push({ label: chapterTitle, href: '' });
+}
+---
+
+<nav aria-label="Breadcrumb" class="mb-6">
+  <ol class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+    {crumbs.map((crumb, i) => (
+      <li class="flex items-center gap-2">
+        {i > 0 && <span aria-hidden="true">/</span>}
+        {crumb.href ? (
+          <a href={crumb.href} class="hover:text-[var(--color-accent)] transition-colors">
+            {crumb.label}
+          </a>
+        ) : (
+          <span class="text-[var(--color-text-primary)] font-medium">{crumb.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

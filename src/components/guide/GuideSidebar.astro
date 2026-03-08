@@ -1,0 +1,41 @@
+---
+import { guidePageUrl } from '../../lib/guides/routes';
+
+interface Props {
+  chapters: Array<{ slug: string; title: string }>;
+  currentSlug: string;
+  guideSlug: string;
+}
+
+const { chapters, currentSlug, guideSlug } = Astro.props;
+---
+
+<nav
+  aria-label="Guide chapters"
+  class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"
+>
+  <h2 class="text-sm font-heading font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] mb-3">
+    Chapters
+  </h2>
+  <ul class="space-y-1">
+    {chapters.map((ch) => {
+      const isActive = ch.slug === currentSlug;
+      return (
+        <li>
+          <a
+            href={guidePageUrl(guideSlug, ch.slug)}
+            class:list={[
+              'block px-3 py-2 rounded-lg text-sm transition-colors',
+              isActive
+                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:bg-[var(--color-surface-alt)]',
+            ]}
+            {...(isActive ? { 'aria-current': 'page' as const } : {})}
+          >
+            {ch.title}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
