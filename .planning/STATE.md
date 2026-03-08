@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: FastAPI Production Guide
 status: in_progress
-stopped_at: "Completed 86-01-PLAN.md"
+stopped_at: "Completed 86-02-PLAN.md"
 last_updated: "2026-03-08"
-last_activity: 2026-03-08 -- Completed Plan 01 of Phase 86 (Route Helpers and Navigation Components)
+last_activity: 2026-03-08 -- Completed Plan 02 of Phase 86 (Landing Page and Guide Layout Integration)
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 2
   total_plans: 2
   completed_plans: 2
   percent: 40
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.15 FastAPI Production Guide -- Phase 86 (Page Infrastructure and Navigation)
+**Current focus:** v1.15 FastAPI Production Guide -- Phase 87 (Guide-Specific Components)
 
 ## Current Position
 
-Phase: 86 of 89 (Page Infrastructure and Navigation)
-Plan: 1 of 2 complete
+Phase: 87 of 89 (Guide-Specific Components)
+Plan: 0 of TBD complete
 Status: In progress
-Last activity: 2026-03-08 -- Completed Plan 01 (Route Helpers and Navigation Components)
+Last activity: 2026-03-08 -- Completed Phase 86 (Page Infrastructure and Navigation)
 
 Progress: [####░░░░░░] 40%
 
@@ -71,6 +71,10 @@ Full decision log in PROJECT.md Key Decisions table.
 - [86-01] Route helpers follow src/lib/eda/routes.ts pattern with GUIDE_ROUTES const + URL builders
 - [86-01] GuideLayout extends Layout.astro directly (two-column grid vs EDALayout simple wrapper)
 - [86-01] Sidebar uses CSS position:sticky (zero JS) with top offset for sticky header
+- [86-02] Landing page uses Layout (not GuideLayout) since it is not a chapter page
+- [86-02] Chapter card grid sources from guide.json chapters array (not guidePages) to show all 11 chapters
+- [86-02] Coming Soon cards rendered as div (not anchor) with opacity-60 to prevent dead links
+- [86-02] Chapter descriptions hardcoded in index.astro as marketing copy (not in data model)
 
 ### Pending Todos
 
@@ -92,6 +96,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 86-01-PLAN.md
+Stopped at: Completed 86-02-PLAN.md
 Resume file: None
-Next: Execute 86-02-PLAN.md (Landing page and [slug].astro GuideLayout integration)
+Next: Plan Phase 87 (Guide-Specific Components)

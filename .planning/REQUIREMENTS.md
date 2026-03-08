@@ -9,7 +9,7 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 
 ### Guide Infrastructure
 
-- [ ] **INFRA-01**: Guide landing page at `/guides/fastapi-production/` with chapter card grid and AI agent narrative hero
+- [x] **INFRA-01**: Guide landing page at `/guides/fastapi-production/` with chapter card grid and AI agent narrative hero
 - [x] **INFRA-02**: GuideLayout.astro extending Layout.astro with guide-specific navigation and reading progress
 - [x] **INFRA-03**: Sidebar chapter navigation showing all chapters with current-page highlighting
 - [x] **INFRA-04**: Breadcrumb navigation on all guide pages (Home > Guides > FastAPI Production > Chapter)
@@ -43,7 +43,7 @@ Requirements for the FastAPI Production Guide milestone. Each maps to roadmap ph
 
 - [ ] **AGENT-01**: Each domain page opens with what the AI agent inherits from this production concern
 - [ ] **AGENT-02**: Each domain page closes with a summary of what the agent never needs to implement
-- [ ] **AGENT-03**: Landing page hero frames the template as "production concerns handled, agent writes business logic"
+- [x] **AGENT-03**: Landing page hero frames the template as "production concerns handled, agent writes business logic"
 
 ### Code Snippets
 
@@ -89,7 +89,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 86 | Pending |
+| INFRA-01 | Phase 86 | Complete |
 | INFRA-02 | Phase 86 | Complete |
 | INFRA-03 | Phase 86 | Complete |
 | INFRA-04 | Phase 86 | Complete |
@@ -114,7 +114,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DIAG-04 | Phase 87 | Pending |
 | AGENT-01 | Phase 88 | Pending |
 | AGENT-02 | Phase 88 | Pending |
-| AGENT-03 | Phase 86 | Pending |
+| AGENT-03 | Phase 86 | Complete |
 | CODE-01 | Phase 88 | Pending |
 | CODE-02 | Phase 88 | Pending |
 | CODE-03 | Phase 87 | Pending |

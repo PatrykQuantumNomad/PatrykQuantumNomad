@@ -14,7 +14,7 @@
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 85: Foundation and Content Schema** - Zod schemas, content collections, guide metadata, route helpers, and page generation pipeline (completed 2026-03-08)
-- [ ] **Phase 86: Page Infrastructure and Navigation** - GuideLayout, landing page, sidebar, breadcrumb, prev/next navigation, reading progress, and first chapter validation
+- [x] **Phase 86: Page Infrastructure and Navigation** - GuideLayout, landing page, sidebar, breadcrumb, prev/next navigation, reading progress, and first chapter validation (completed 2026-03-08)
 - [ ] **Phase 87: Guide-Specific Components** - CodeFromRepo component, 4 architecture diagram SVG generators, diagram-base module, and interactive deployment topology
 - [ ] **Phase 88: Content Authoring** - All 11 domain MDX pages with prose, code snippets, diagrams, and AI agent narrative
 - [ ] **Phase 89: SEO, OG Images, and Site Integration** - JSON-LD, OG images, header nav, homepage callout, companion blog post, LLMs.txt, and sitemap
@@ -44,10 +44,10 @@ Plans:
   3. Sidebar shows all chapters with the current page visually highlighted, and clicking a chapter navigates to it
   4. Breadcrumb navigation on every guide page shows the path (Home > Guides > FastAPI Production > Chapter Title)
   5. Previous/next chapter links at the bottom of each domain page navigate to the correct adjacent chapters in order
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 86-01-PLAN.md -- Route helpers (TDD), guide.json data update, GuideLayout, and navigation components
-- [ ] 86-02-PLAN.md -- Landing page with AI agent hero and chapter card grid, [slug].astro GuideLayout integration
+- [x] 86-02-PLAN.md -- Landing page with AI agent hero and chapter card grid, [slug].astro GuideLayout integration
 
 ### Phase 87: Guide-Specific Components
 **Goal**: Reusable components for code snippets and architecture diagrams are ready for content authoring
@@ -92,7 +92,7 @@ Phases execute in numeric order: 85 -> 86 -> 87 -> 88 -> 89
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 85. Foundation and Content Schema | 1/1 | Complete   | 2026-03-08 |
-| 86. Page Infrastructure and Navigation | 1/2 | In progress | - |
+| 86. Page Infrastructure and Navigation | 2/2 | Complete | 2026-03-08 |
 | 87. Guide-Specific Components | 0/TBD | Not started | - |
 | 88. Content Authoring | 0/TBD | Not started | - |
 | 89. SEO, OG Images, and Site Integration | 0/TBD | Not started | - |
