@@ -1,0 +1,287 @@
+---
+title: "Authentication (JWT)"
+description: "Three-mode stateless JWT validation -- shared secret, static public key, or auto-rotating JWKS -- with graceful degradation and FastAPI dependency injection"
+order: 2
+slug: "authentication"
+---
+
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+import JwtAuthFlowDiagram from '../../../../components/guide/JwtAuthFlowDiagram.astro';
+
+## What Your Agent Inherits
+
+Your agent's route handlers receive an authenticated **Principal** object through FastAPI dependency injection.
+Every concern below the route signature -- token parsing, key resolution, signature verification, claim validation, clock-skew tolerance -- is already handled by the template's `JWTAuthService`.
+
+The agent never inspects the `Authorization` header directly.
+It declares a dependency, receives a typed `Principal`, and makes business decisions based on `subject`, `scopes`, and `roles`.
+
+---
+
+## Three Validation Modes
+
+The template supports three sources of key material for JWT signature verification, selected entirely through environment variables:
+
+| Mode | Algorithm family | Environment variable | Use case |
+|------|-----------------|---------------------|----------|
+| **Shared secret** | HS256 / HS384 / HS512 | `APP_AUTH_JWT_SECRET` | Local development, integration tests |
+| **Static public key** | RS256 / ES256 / PS256 | `APP_AUTH_JWT_PUBLIC_KEY` | Single-issuer staging or on-prem |
+| **JWKS endpoint** | RS256 / ES256 / PS256 | `APP_AUTH_JWKS_URL` | Production with key rotation (Auth0, Keycloak, Entra ID) |
+
+Only one mode is active at a time -- the configuration validator rejects mixed setups at startup.
+The `JWTAuthService` constructor stores the settings and prepares the JWKS cache lock for the async runtime:
+
+<CodeFromRepo
+  code={`class JWTAuthService:
+    """Validate externally-issued JWTs against local config or JWKS."""
+
+    def __init__(self, settings: Settings, http_client: httpx.AsyncClient) -> None:
+        self.settings = settings
+        self.http_client = http_client
+        self._jwks_lock = asyncio.Lock()
+        self._jwks_cache: dict[str, Any] | None = None
+        self._jwks_loaded_at = 0.0
+        self._jwks_last_fetch_used_stale_cache = False`}
+  lang="python"
+  filePath="src/app/auth/service.py"
+  title="JWTAuthService.__init__"
+  startLine={32}
+  endLine={41}
+/>
+
+---
+
+## Key Resolution
+
+When a token arrives, `_resolve_key()` walks the three modes in priority order -- JWKS first, then static key, then shared secret.
+This decision tree means a production deployment with `APP_AUTH_JWKS_URL` set will always use rotating keys, regardless of whether a fallback secret is also configured:
+
+<CodeFromRepo
+  code={`async def _resolve_key(self, token: str) -> Any:
+    if self.settings.auth_jwks_url:
+        header = jwt.get_unverified_header(token)
+        kid = header.get("kid")
+        if not kid:
+            raise AuthenticationError("JWT is missing kid header required for JWKS")
+
+        jwks = await self._fetch_jwks(force_refresh=False)
+        key = _get_jwk_key_for_kid(jwks, kid)
+        if key is not None:
+            return key
+
+        # Force one refresh on kid misses so key rotation does not require
+        # a process restart or cache TTL expiry before new tokens work.
+        refreshed_jwks = await self._fetch_jwks(force_refresh=True)
+        refreshed_key = _get_jwk_key_for_kid(refreshed_jwks, kid)
+        if refreshed_key is not None:
+            return refreshed_key
+        raise AuthenticationError("No matching signing key found")
+
+    if self.settings.auth_jwt_public_key:
+        return self.settings.auth_jwt_public_key
+
+    if self._uses_shared_secret():
+        return self.settings.auth_jwt_secret
+
+    raise AuthenticationError("JWT validation is enabled but no key material is configured")`}
+  lang="python"
+  filePath="src/app/auth/service.py"
+  title="JWTAuthService._resolve_key"
+  startLine={117}
+  endLine={143}
+/>
+
+Notice the **forced refresh on kid miss** (lines 131-134).
+When an identity provider rotates its signing key, the first token signed with the new key will miss the cache.
+Instead of rejecting the request, the service forces a single JWKS refresh.
+If the new kid appears in the refreshed key set, the token validates without operator intervention or a process restart.
+
+---
+
+## JWKS with Graceful Degradation
+
+The `_fetch_jwks()` method implements a **cache-aside** pattern with an `asyncio.Lock` to prevent a thundering-herd fetch:
+
+<CodeFromRepo
+  code={`async def _fetch_jwks(self, force_refresh: bool) -> dict[str, Any]:
+    if not force_refresh and self._jwks_cache and not self._jwks_cache_expired():
+        self._jwks_last_fetch_used_stale_cache = False
+        return self._jwks_cache
+
+    async with self._jwks_lock:
+        if not force_refresh and self._jwks_cache and not self._jwks_cache_expired():
+            self._jwks_last_fetch_used_stale_cache = False
+            return self._jwks_cache
+
+        try:
+            response = await self.http_client.get(self.settings.auth_jwks_url)
+            response.raise_for_status()
+            self._jwks_cache = _validate_jwks_payload(response.json())
+            self._jwks_loaded_at = monotonic()
+            self._jwks_last_fetch_used_stale_cache = False
+            return self._jwks_cache
+        except Exception:
+            if self._jwks_cache is not None:
+                self._jwks_last_fetch_used_stale_cache = True
+                return self._jwks_cache
+            raise`}
+  lang="python"
+  filePath="src/app/auth/service.py"
+  title="JWTAuthService._fetch_jwks"
+  startLine={145}
+  endLine={166}
+/>
+
+Key behaviors:
+
+- **Double-check locking** -- the fast path returns the cached value without acquiring the lock; the lock body re-checks staleness to avoid redundant fetches.
+- **TTL-based refresh** -- the cache expires after `auth_jwks_cache_ttl_seconds` (default 300 s), configurable via `APP_AUTH_JWKS_CACHE_TTL_SECONDS`.
+- **Stale-cache fallback** -- if the JWKS endpoint is temporarily unreachable but a stale cache exists, the service continues validating tokens with the last known key set rather than rejecting all requests. The readiness check will report the degraded state.
+
+---
+
+<JwtAuthFlowDiagram />
+
+---
+
+## The Principal Model
+
+Once the JWT passes signature and claim validation, the service maps the raw claims to a typed Pydantic model.
+This gives route handlers a stable domain object instead of an arbitrary dictionary:
+
+<CodeFromRepo
+  code={`class Principal(BaseModel):
+    """Authenticated principal extracted from a validated JWT."""
+
+    subject: str = Field(description="JWT subject claim")
+    issuer: str | None = Field(default=None, description="Token issuer")
+    audience: list[str] = Field(default_factory=list, description="Normalized audience values")
+    scopes: list[str] = Field(default_factory=list, description="Granted OAuth scopes")
+    roles: list[str] = Field(default_factory=list, description="Application roles")
+    claims: dict[str, Any] = Field(default_factory=dict, description="Full validated claim set")`}
+  lang="python"
+  filePath="src/app/auth/models.py"
+  title="Principal model"
+  startLine={10}
+  endLine={18}
+/>
+
+The `scopes` and `roles` fields are normalized from several formats -- space-delimited strings, JSON arrays, or comma-separated values -- so the agent can use simple `in` checks regardless of the identity provider's claim layout.
+
+---
+
+## Configuration Validation
+
+Misconfigured authentication is caught at startup, not at runtime.
+The `_validate_auth_settings()` function enforces consistency rules:
+
+<CodeFromRepo
+  code={`def _validate_auth_settings(settings: Settings) -> None:
+    """Validate JWT/auth-related configuration after defaults resolve."""
+    if settings.auth_jwks_url and not settings.auth_jwks_url.startswith("https://"):
+        raise ValueError("APP_AUTH_JWKS_URL must use https://")
+
+    if not settings.auth_enabled:
+        return
+
+    algorithm_families = {
+        _jwt_algorithm_family(algorithm) for algorithm in settings.auth_jwt_algorithms
+    }
+    if len(algorithm_families) != 1:
+        raise ValueError("APP_AUTH_JWT_ALGORITHMS must all belong to the same algorithm family")
+
+    uses_shared_secret = "HS" in algorithm_families
+    _validate_auth_key_material(settings, uses_shared_secret)
+    _validate_auth_claim_requirements(settings)`}
+  lang="python"
+  filePath="src/app/settings.py"
+  title="_validate_auth_settings"
+  startLine={618}
+  endLine={635}
+/>
+
+What this catches before the first request:
+
+- JWKS URL over plain HTTP (must be HTTPS)
+- Mixed algorithm families (e.g., HS256 + RS256)
+- Missing key material for the chosen algorithm
+- Shared secrets shorter than 32 characters for HS* algorithms
+- Missing issuer or audience when the respective `auth_require_*` flags are true
+
+---
+
+## Dependency Injection
+
+The final piece connects the `JWTAuthService` to FastAPI's dependency injection system.
+Route handlers declare what authorization level they require, and the framework resolves the rest:
+
+<CodeFromRepo
+  code={`async def get_optional_principal(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> Principal | None:
+    """Return the authenticated principal when a bearer token is provided."""
+    if credentials is None:
+        return None
+
+    auth_service = get_auth_service(request)
+    try:
+        return await auth_service.authenticate_token(credentials.credentials)
+    except AuthenticationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+
+
+def get_current_principal(
+    principal: Principal | None = Depends(get_optional_principal),
+) -> Principal:
+    """Require and return an authenticated principal."""
+    if principal is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return principal`}
+  lang="python"
+  filePath="src/app/auth/dependencies.py"
+  title="Authentication dependencies"
+  startLine={22}
+  endLine={51}
+/>
+
+Three dependency tiers are available to the agent's routes:
+
+| Dependency | Behavior |
+|-----------|----------|
+| `get_optional_principal` | Returns `Principal` if a token is present, `None` otherwise |
+| `get_current_principal` | Returns `Principal` or raises 401 |
+| `require_scopes("read:items")` | Returns `Principal` with specified scopes or raises 403 |
+| `require_roles("admin")` | Returns `Principal` with specified roles or raises 403 |
+
+A typical protected endpoint looks like this:
+
+```python
+@router.get("/items")
+async def list_items(principal: Principal = Depends(get_current_principal)):
+    # principal.subject, principal.scopes, principal.roles are all available
+    return await service.list_items_for(principal.subject)
+```
+
+---
+
+## What the Agent Never Implements
+
+The following concerns are handled entirely by the template infrastructure.
+The agent's generated code should never contain logic for:
+
+- **Token parsing** -- extracting the bearer token from the `Authorization` header
+- **Key management** -- loading secrets, public keys, or JWKS endpoints
+- **JWKS rotation** -- cache refresh, stale-cache fallback, kid-miss retry
+- **Signature verification** -- calling `jwt.decode` with the correct algorithm and key
+- **Claim validation** -- checking `exp`, `iss`, `aud`, and required claims
+- **Principal mapping** -- normalizing scopes, roles, and audience from varying formats
+- **HTTP 401/403 responses** -- the dependency chain raises the correct status codes automatically
