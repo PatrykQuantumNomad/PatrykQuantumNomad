@@ -1,0 +1,93 @@
+---
+/**
+ * FastAPI Production Guide landing page — /guides/fastapi-production/
+ * Hero section with AI agent narrative framing and chapter card grid
+ * showing all 11 chapters with Coming Soon treatment for unwritten ones.
+ */
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import { guidePageUrl } from '../../../lib/guides/routes';
+
+const [guideMeta] = await getCollection('guides');
+const guidePages = await getCollection('guidePages');
+const existingSlugs = new Set(guidePages.map(p => p.data.slug));
+
+const chapterDescriptions: Record<string, string> = {
+  'builder-pattern': 'How the application factory composes middleware, routes, and lifecycle events',
+  'middleware': 'The raw ASGI middleware stack -- six layers processing every request',
+  'authentication': 'Three JWT validation modes: shared secret, static key, and JWKS discovery',
+  'observability': 'OpenTelemetry traces, Prometheus metrics, and structured JSON logging',
+  'database': 'Async SQLAlchemy with Alembic migrations and multi-backend support',
+  'docker': 'Multi-stage builds with tini, unprivileged user, and digest-pinned images',
+  'testing': '98%+ coverage strategy with fixtures, factories, and async test patterns',
+  'health-checks': 'Readiness vs liveness separation for Kubernetes orchestration',
+  'security-headers': 'HSTS, CSP, permissions policy, and security header configuration',
+  'rate-limiting': 'Memory and Redis-backed rate limiting with configurable windows',
+  'caching': 'Optional caching layer with backend-agnostic cache interface',
+};
+---
+
+<Layout
+  title="FastAPI Production Guide | Patryk Golabek"
+  description={guideMeta.data.description}
+  ogType="website"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <!-- Hero Section -->
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      {guideMeta.data.title}
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl">
+      Every production concern &mdash; middleware, authentication, observability, security,
+      containerization &mdash; configured and battle-tested. This guide walks through each
+      layer of the FastAPI template so you understand what your AI agent inherits when it
+      starts writing business logic.
+    </p>
+    <p class="text-sm text-[var(--color-text-secondary)] mt-4">
+      Built for <a
+        href={guideMeta.data.templateRepo}
+        class="text-[var(--color-accent)] hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >fastapi-template</a> {guideMeta.data.versionTag}
+    </p>
+
+    <!-- Chapter Card Grid -->
+    <h2 class="text-2xl font-heading font-bold mt-16 mb-8">Chapters</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {guideMeta.data.chapters.map((ch: { slug: string; title: string }, i: number) => {
+        const hasContent = existingSlugs.has(ch.slug);
+        const chapterNum = String(i + 1).padStart(2, '0');
+        const description = chapterDescriptions[ch.slug] || '';
+
+        return hasContent ? (
+          <a
+            href={guidePageUrl(guideMeta.data.slug, ch.slug)}
+            class="group rounded-lg border border-[var(--color-border)] p-5 hover:border-[var(--color-accent)] transition-colors"
+          >
+            <span class="text-xs text-[var(--color-text-secondary)] font-mono">{chapterNum}</span>
+            <h3 class="text-base font-heading font-bold mt-1 group-hover:text-[var(--color-accent)] transition-colors">
+              {ch.title}
+            </h3>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-2">
+              {description}
+            </p>
+          </a>
+        ) : (
+          <div class="rounded-lg border border-[var(--color-border)] p-5 opacity-60">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-[var(--color-text-secondary)] font-mono">{chapterNum}</span>
+              <span class="text-xs bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] px-2 py-0.5 rounded">Coming Soon</span>
+            </div>
+            <h3 class="text-base font-heading font-bold mt-1">
+              {ch.title}
+            </h3>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-2">
+              {description}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</Layout>
