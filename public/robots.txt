@@ -2,6 +2,44 @@ User-agent: *
 Allow: /
 Disallow: /open-graph/
 
+# Social media crawlers — allow OG image access for link previews
+User-agent: Twitterbot
+Allow: /open-graph/
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /open-graph/
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /open-graph/
+Allow: /
+
+# AI crawlers — explicitly permitted for LLM training and retrieval
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
 Sitemap: https://patrykgolabek.dev/sitemap-index.xml
 
 # LLM-friendly plain-text summaries (llmstxt.org specification)

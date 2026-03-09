@@ -4,7 +4,7 @@
  * annotation header and a "View source" link to the tagged GitHub file.
  *
  * Wraps astro-expressive-code's Code component with source attribution so
- * every snippet in the guide links back to the actual FastAPI template.
+ * every snippet in the guide links back to the actual FastAPI Chassis.
  */
 import { Code } from 'astro-expressive-code/components';
 import { buildGitHubFileUrl } from '../../lib/guides/code-helpers';
@@ -18,7 +18,7 @@ interface Props {
   filePath: string;
   /** Optional display title (defaults to filePath) */
   title?: string;
-  /** GitHub repository URL (defaults to fastapi-template) */
+  /** GitHub repository URL (defaults to fastapi-chassis) */
   templateRepo?: string;
   /** Git tag or branch (defaults to v1.0.0) */
   versionTag?: string;
@@ -33,7 +33,7 @@ const {
   lang,
   filePath,
   title,
-  templateRepo = 'https://github.com/Translucent-Computing/fastapi-template',
+  templateRepo = 'https://github.com/PatrykQuantumNomad/fastapi-chassis',
   versionTag = 'v1.0.0',
   startLine,
   endLine,

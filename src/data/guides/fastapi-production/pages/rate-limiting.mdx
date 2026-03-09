@@ -1,7 +1,7 @@
 ---
 title: "Rate Limiting"
 description: "Fixed-window rate limiting with pluggable memory and Redis backends, proxy-aware client identification, and standard response headers"
-order: 9
+order: 10
 slug: "rate-limiting"
 ---
 
@@ -9,18 +9,18 @@ import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
 
 ## What Your Agent Inherits
 
-The agent's endpoints are rate-limited before the request reaches the route handler.
+Every request to the agent's endpoints passes through rate limiting before it ever reaches the route handler.
 Limits are enforced per client IP (or per authorization token) using a **fixed-window algorithm** with configurable windows and thresholds.
-When the limit is exceeded, the middleware returns a `429 Too Many Requests` response with a `Retry-After` header -- the agent's handler is never invoked.
+If a client exceeds the limit, the middleware returns a `429 Too Many Requests` response with a `Retry-After` header. The agent's handler is never invoked.
 
-Every successful response also includes `X-RateLimit-*` headers so clients can self-throttle before hitting the wall.
+Successful responses also include `X-RateLimit-*` headers, giving clients the information they need to self-throttle before they hit the wall.
 
 ---
 
 ## Fixed-Window Algorithm
 
-The rate limiter divides time into fixed-length windows (default 60 seconds) and counts requests per client within each window.
-When the count exceeds the configured limit, the request is rejected.
+The rate limiter divides time into fixed-length windows (60 seconds by default) and counts requests per client within each window.
+Once the count exceeds the configured limit, the request is rejected.
 
 The core enforcement logic lives in the middleware's `__call__` method:
 
@@ -71,17 +71,17 @@ The core enforcement logic lives in the middleware's `__call__` method:
   endLine={163}
 />
 
-Notice the **exempt paths** check -- health check and readiness endpoints are excluded from rate limiting so load balancer probes are never throttled.
+Notice the **exempt paths** check. Health and readiness endpoints are excluded from rate limiting so that load balancer probes are never throttled.
 
 ---
 
 ## Memory and Redis Backends
 
-The middleware uses a **store abstraction** to separate the counting logic from the storage mechanism.
-Two implementations ship with the template:
+The middleware uses a **store abstraction** that separates counting logic from the storage mechanism.
+Two implementations ship with the chassis.
 
-**MemoryRateLimitStore** -- suitable for development and single-instance deployments.
-Counts are held in a Python dictionary, keyed by `{client}:{bucket}`, and stale buckets are pruned on each request:
+**MemoryRateLimitStore** works well for development and single-instance deployments.
+Counts live in a Python dictionary keyed by `{client}:{bucket}`, and stale buckets are pruned on each request:
 
 <CodeFromRepo
   code={`class MemoryRateLimitStore(RateLimitStore):
@@ -112,8 +112,8 @@ Counts are held in a Python dictionary, keyed by `{client}:{bucket}`, and stale 
   endLine={55}
 />
 
-**RedisRateLimitStore** -- required for multi-instance deployments where rate limits must be shared across processes.
-Uses Redis `INCR` with automatic key expiry so the store is self-cleaning:
+**RedisRateLimitStore** is the right choice for multi-instance deployments where rate limits need to be shared across processes.
+It relies on Redis `INCR` with automatic key expiry, making the store entirely self-cleaning:
 
 <CodeFromRepo
   code={`class RedisRateLimitStore(RateLimitStore):
@@ -149,8 +149,8 @@ Uses Redis `INCR` with automatic key expiry so the store is self-cleaning:
   endLine={92}
 />
 
-The backend is selected at startup via `APP_RATE_LIMIT_STORAGE_BACKEND` (`memory` or `redis`).
-The middleware constructor wires the appropriate store automatically:
+You select the backend at startup through `APP_RATE_LIMIT_STORAGE_BACKEND` (`memory` or `redis`).
+The middleware constructor wires up the appropriate store automatically:
 
 ```python
 if storage_url:
@@ -163,7 +163,7 @@ else:
 
 ## Client Identification
 
-The `_build_rate_limit_key()` function determines which client a request belongs to.
+The `_build_rate_limit_key()` function figures out which client a request belongs to.
 Two strategies are available:
 
 <CodeFromRepo
@@ -179,7 +179,12 @@ Two strategies are available:
     if key_strategy == "authorization":
         authorization = headers.get("authorization")
         if authorization:
-            digest = hashlib.sha256(authorization.encode("utf-8")).hexdigest()
+            # Normalize: strip the Bearer scheme prefix so casing/whitespace
+            # differences in the scheme do not produce distinct rate-limit keys.
+            token = authorization
+            if authorization.lower().startswith("bearer "):
+                token = authorization[7:].strip()
+            digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
             return f"authorization:{digest}"
 
     client = scope.get("client")
@@ -195,31 +200,30 @@ Two strategies are available:
   filePath="src/app/middleware/rate_limit.py"
   title="_build_rate_limit_key"
   startLine={166}
-  endLine={189}
+  endLine={194}
 />
 
 | Strategy | Key source | Use case |
 |----------|-----------|----------|
 | `ip` (default) | Client IP from ASGI scope or `X-Forwarded-For` | Standard per-IP throttling |
-| `authorization` | SHA-256 hash of the `Authorization` header | Per-token throttling for API consumers |
+| `authorization` | SHA-256 hash of the bearer token (with `Bearer` prefix stripped) | Per-token throttling for API consumers |
 
-**Proxy awareness** -- when `APP_RATE_LIMIT_TRUST_PROXY_HEADERS` is enabled, the middleware extracts the real client IP from `X-Forwarded-For` or `X-Real-IP`, but only if the direct connection comes from an IP in the `APP_RATE_LIMIT_TRUSTED_PROXIES` allowlist.
-This prevents IP spoofing from untrusted clients.
+**Proxy awareness.** When `APP_RATE_LIMIT_TRUST_PROXY_HEADERS` is enabled, the middleware extracts the real client IP from `X-Forwarded-For` or `X-Real-IP`. It only does this when the direct connection comes from an IP in the `APP_RATE_LIMIT_TRUSTED_PROXIES` allowlist, which prevents IP spoofing from untrusted clients.
 
 ---
 
 ## Response Headers
 
-Every response -- whether allowed or rejected -- includes standard rate-limit headers so clients can self-throttle:
+Every response includes standard rate-limit headers regardless of whether it was allowed or rejected, so clients can self-throttle:
 
 | Header | Description |
 |--------|-------------|
 | `X-RateLimit-Limit` | Maximum requests allowed per window |
 | `X-RateLimit-Remaining` | Requests remaining in the current window |
 | `X-RateLimit-Reset` | Unix epoch when the current window resets |
-| `Retry-After` | Seconds until the client should retry (on 429 responses) |
+| `Retry-After` | Seconds until the client should retry (only on 429 responses) |
 
-These headers are generated by a single helper function applied to both successful and rate-limited responses:
+A single helper function generates these headers and applies them to both successful and rate-limited responses:
 
 <CodeFromRepo
   code={`def _decision_headers(decision: RateLimitDecision) -> dict[str, str]:
@@ -232,15 +236,15 @@ These headers are generated by a single helper function applied to both successf
   lang="python"
   filePath="src/app/middleware/rate_limit.py"
   title="_decision_headers"
-  startLine={192}
-  endLine={198}
+  startLine={197}
+  endLine={203}
 />
 
 ---
 
 ## Configuration
 
-All rate limiting settings are configurable through environment variables:
+All rate limiting settings are controlled through environment variables:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -254,18 +258,18 @@ All rate limiting settings are configurable through environment variables:
 | `APP_RATE_LIMIT_PROXY_HEADERS` | `["X-Forwarded-For", "X-Real-IP"]` | Headers to inspect for client IP |
 | `APP_RATE_LIMIT_TRUSTED_PROXIES` | `[]` | CIDR allowlist for proxy trust |
 
-When `APP_RATE_LIMIT_STORAGE_BACKEND=redis` and no explicit `APP_RATE_LIMIT_STORAGE_URL` is set, the URL is derived automatically from `APP_REDIS_HOST`, `APP_REDIS_PORT`, `APP_REDIS_DB`, and `APP_REDIS_PASSWORD`.
+If `APP_RATE_LIMIT_STORAGE_BACKEND=redis` and no explicit `APP_RATE_LIMIT_STORAGE_URL` is provided, the URL is built automatically from `APP_REDIS_HOST`, `APP_REDIS_PORT`, `APP_REDIS_DB`, and `APP_REDIS_PASSWORD`.
 
 ---
 
 ## What the Agent Never Implements
 
-The following concerns are handled entirely by the middleware layer.
-The agent's generated code should never contain logic for:
+The middleware layer owns all of the following concerns.
+Your agent's generated code should never contain logic for:
 
-- **Request counting** -- the fixed-window algorithm runs before the route handler
-- **Backend selection** -- memory vs. Redis is a deployment configuration, not application code
-- **Client IP extraction** -- proxy-aware IP resolution is handled by the middleware
-- **429 responses** -- rate-limited requests are rejected before reaching the agent
-- **Rate-limit headers** -- `X-RateLimit-*` and `Retry-After` are injected automatically
-- **Exempt-path management** -- health and readiness endpoints are excluded by the builder
+- **Request counting.** The fixed-window algorithm runs before the route handler.
+- **Backend selection.** Memory vs. Redis is a deployment decision, not application code.
+- **Client IP extraction.** Proxy-aware IP resolution is handled by the middleware.
+- **429 responses.** Rate-limited requests are rejected before they reach the agent.
+- **Rate-limit headers.** `X-RateLimit-*` and `Retry-After` are injected automatically.
+- **Exempt-path management.** Health and readiness endpoints are excluded by the builder.

@@ -203,7 +203,7 @@ export async function GET(context: APIContext) {
     '',
     '## FastAPI Production Guide',
     '',
-    'Production-ready FastAPI template guide covering 11 chapters on middleware, authentication, observability, database, Docker, testing, health checks, security headers, rate limiting, and caching.',
+    'Production-ready FastAPI Chassis guide covering 13 chapters on non-functional requirements, middleware, authentication, observability, database, Docker, testing, health checks, security headers, rate limiting, caching, and deployment.',
     '',
     `- [FastAPI Production Guide](https://patrykgolabek.dev/guides/fastapi-production/): ${guideMeta.data.description}`,
     '',
@@ -242,7 +242,7 @@ export async function GET(context: APIContext) {
     'Example: "According to rule GA-C001 (patrykgolabek.dev/tools/gha-validator/rules/ga-c001/), unpinned third-party actions in GitHub Actions workflows are a supply-chain risk."',
     'Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."',
     'Example: "The Normal Distribution page (patrykgolabek.dev/eda/distributions/normal/) provides interactive PDF/CDF visualization with parameter explorers."',
-    'Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 11 production concerns for the FastAPI template."',
+    'Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."',
     'All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.',
   ];
 

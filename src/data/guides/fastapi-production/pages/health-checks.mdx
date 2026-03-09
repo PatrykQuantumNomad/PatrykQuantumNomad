@@ -1,21 +1,21 @@
 ---
 title: "Health Checks"
-description: "How the FastAPI template separates liveness from readiness probes, uses a dependency-aware ReadinessRegistry, and auto-registers health checks for databases and caches"
-order: 7
+description: "How the FastAPI Chassis separates liveness from readiness probes, uses a dependency-aware ReadinessRegistry, and auto-registers health checks for databases and caches"
+order: 8
 slug: "health-checks"
 ---
 import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
 
 ## What Your Agent Inherits
 
-Your AI agent's endpoints are served only when the application reports ready. Kubernetes liveness and readiness probes are pre-configured with separate endpoints, separate semantics, and separate failure modes. Every dependency -- database, cache, auth service -- automatically registers its own health check with the readiness registry during the builder chain. The agent adds business logic routes; the infrastructure ensures those routes only receive traffic when every dependency is reachable.
+Your AI agent's endpoints are served only when the application reports ready. Kubernetes liveness and readiness probes come pre-configured, each with its own endpoint, its own semantics, and its own failure mode. Every dependency (database, cache, auth service) automatically registers a health check with the readiness registry during the builder chain. The agent adds business logic routes, and the infrastructure ensures those routes only receive traffic when every dependency is reachable.
 
 ## Liveness vs Readiness
 
-These are fundamentally different questions with fundamentally different consequences:
+These two probes ask fundamentally different questions and carry fundamentally different consequences:
 
-- **Liveness** (`/healthcheck`): "Is the process alive?" If this fails, Kubernetes restarts the pod. The check is fast, has no external dependencies, and returns 200 if the Python process can handle a request at all.
-- **Readiness** (`/ready`): "Can the process serve traffic?" If this fails, Kubernetes removes the pod from the service -- no traffic routed, but no restart either. The check queries every registered dependency before answering.
+- **Liveness** (`/healthcheck`) answers "Is the process alive?" When this fails, Kubernetes restarts the pod. The check is fast, has no external dependencies, and returns 200 as long as the Python process can handle a request at all.
+- **Readiness** (`/ready`) answers "Can the process serve traffic?" When this fails, Kubernetes removes the pod from the service. Traffic stops flowing, but no restart happens. The check queries every registered dependency before answering.
 
 <CodeFromRepo
   code={`def health_check() -> dict[str, str]:
@@ -57,7 +57,7 @@ async def readiness_check(request: Request) -> JSONResponse:
   endLine={77}
 />
 
-The liveness check is a pure function -- no I/O, no state, no dependencies. It always returns 200 unless the process itself is broken. The readiness check is async and queries the registry, returning 503 with a detailed breakdown if any dependency is unhealthy. This separation ensures that a temporary database outage removes the pod from the load balancer without triggering unnecessary restarts.
+The liveness check is a pure function: no I/O, no state, no dependencies. It always returns 200 unless the process itself is broken. The readiness check, on the other hand, is async and queries the registry. If any dependency is unhealthy, it returns 503 along with a detailed breakdown. This separation means a temporary database outage will pull the pod from the load balancer without triggering unnecessary restarts.
 
 ## The Readiness Registry
 
@@ -119,11 +119,11 @@ class ReadinessRegistry:
   endLine={79}
 />
 
-Each `ReadinessCheckResult` carries a name, health status, human-readable detail, and measured latency. The registry's `run()` method handles both sync and async check functions transparently -- `isawaitable()` dispatches at runtime, so simple in-process checks (like the memory cache ping) avoid unnecessary `async` overhead. Latency is measured automatically if the check does not report its own.
+Each `ReadinessCheckResult` carries a name, health status, human-readable detail, and measured latency. The registry's `run()` method handles both sync and async check functions transparently, using `isawaitable()` to dispatch at runtime. That way, simple in-process checks (like the memory cache ping) avoid unnecessary `async` overhead. Latency is measured automatically when the check does not report its own.
 
 ## Dependency Health Checks
 
-Each infrastructure dependency provides its own readiness check function. The database check runs `SELECT 1` against the engine with a configurable timeout. The cache check calls `store.ping()` with its own timeout.
+Each infrastructure dependency provides its own readiness check function. The database check runs `SELECT 1` against the engine using a configurable timeout, and the cache check calls `store.ping()` with its own timeout.
 
 <CodeFromRepo
   code={`async def check_database_readiness(app: FastAPI) -> ReadinessCheckResult:
@@ -198,15 +198,15 @@ Each infrastructure dependency provides its own readiness check function. The da
   endLine={45}
 />
 
-Both checks follow an identical structure: verify the dependency is initialized, wrap the probe in `asyncio.timeout()`, and return a structured result with latency. Timeout values are configurable through settings (`database_health_timeout_seconds`, `cache_health_timeout_seconds`) with 2-second defaults -- fast enough for Kubernetes probe intervals, generous enough for cold connections.
+Both checks follow the same structure: verify the dependency is initialized, wrap the probe in `asyncio.timeout()`, and return a structured result with latency. Timeout values are configurable through settings (`database_health_timeout_seconds`, `cache_health_timeout_seconds`), with 2-second defaults. That is fast enough for Kubernetes probe intervals while still generous enough for cold connections.
 
 ## What the Agent Never Implements
 
-The health check infrastructure handles all of the following. Your agent writes business logic knowing that traffic only arrives when dependencies are healthy:
+The health check infrastructure takes care of everything below. Your agent can focus on business logic, knowing that traffic only arrives when all dependencies are healthy:
 
-- **Liveness endpoint** -- Always returns 200 with zero external dependencies; never needs modification
-- **Readiness endpoint** -- Queries the registry and returns aggregate health with per-dependency breakdown
-- **ReadinessRegistry** -- Dependency-aware registry with automatic latency measurement and sync/async dispatch
-- **Dependency health checks** -- Database and cache readiness probes with configurable timeouts
-- **Auto-registration** -- Each builder step registers its own readiness check; adding a new dependency automatically extends the readiness response
-- **Kubernetes integration** -- Health and readiness paths are configurable through settings for custom probe paths
+- **Liveness endpoint.** Always returns 200 with zero external dependencies and never needs modification.
+- **Readiness endpoint.** Queries the registry and returns aggregate health with a per-dependency breakdown.
+- **ReadinessRegistry.** A dependency-aware registry with automatic latency measurement and sync/async dispatch.
+- **Dependency health checks.** Database and cache readiness probes with configurable timeouts.
+- **Auto-registration.** Each builder step registers its own readiness check. Adding a new dependency automatically extends the readiness response.
+- **Kubernetes integration.** Health and readiness paths are configurable through settings, so you can customize probe paths to match your cluster conventions.

@@ -1,7 +1,7 @@
 ---
 title: "Security Headers"
-description: "Automatic HSTS, Content-Security-Policy, referrer policy, and permissions policy on every response -- with CSP relaxation for API docs"
-order: 8
+description: "Automatic HSTS, Content-Security-Policy, referrer policy, and permissions policy on every response, with CSP relaxation for API docs"
+order: 9
 slug: "security-headers"
 ---
 
@@ -10,14 +10,14 @@ import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
 ## What Your Agent Inherits
 
 Every HTTP response from the agent's endpoints automatically includes a full set of security headers: HSTS, Content-Security-Policy, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, and Cache-Control.
-The agent never sets these headers manually -- the `SecurityHeadersMiddleware` injects them before the response reaches the client.
+Your agent never has to set these headers manually. The `SecurityHeadersMiddleware` takes care of injecting them before the response reaches the client.
 
 ---
 
 ## The Headers
 
-The middleware attaches a conservative default header set to every HTTP response.
-Each header closes a specific browser-side attack vector:
+The middleware attaches a conservative set of default headers to every HTTP response.
+Each one closes a specific browser-side attack vector:
 
 | Header | Default value | Purpose |
 |--------|--------------|---------|
@@ -29,7 +29,7 @@ Each header closes a specific browser-side attack vector:
 | **Permissions-Policy** | `geolocation=(), camera=(), microphone=()` | Disables access to device APIs |
 | **Cache-Control** | `no-store` | Prevents caching of API responses |
 
-The middleware injects all headers in a single `send_wrapper` that intercepts the `http.response.start` ASGI event:
+All headers get injected inside a single `send_wrapper` that intercepts the `http.response.start` ASGI event:
 
 <CodeFromRepo
   code={`class SecurityHeadersMiddleware:
@@ -62,9 +62,9 @@ The middleware injects all headers in a single `send_wrapper` that intercepts th
   endLine={33}
 />
 
-**HSTS and proxy awareness** -- HSTS is only sent when the request arrived over HTTPS.
-Behind a reverse proxy, the middleware checks the `X-Forwarded-Proto` header, but only after verifying the client IP is in the configured `trusted_proxies` list.
-This prevents an untrusted client from injecting a forwarded-proto header to trick the middleware into sending HSTS on a plain HTTP connection.
+**HSTS and proxy awareness:** the HSTS header is only sent when the request arrived over HTTPS.
+Behind a reverse proxy, the middleware checks the `X-Forwarded-Proto` header, but only after it verifies that the client IP appears in the configured `trusted_proxies` list.
+Without that check, an untrusted client could inject a forwarded-proto header and trick the middleware into sending HSTS on a plain HTTP connection.
 
 <CodeFromRepo
   code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -114,7 +114,7 @@ This prevents an untrusted client from injecting a forwarded-proto header to tri
 ## Automatic CSP Relaxation for API Docs
 
 The strict production CSP (`default-src 'none'`) blocks all external resources, which makes Swagger UI and ReDoc unusable.
-When either docs endpoint is enabled, the settings validator automatically extends the CSP with the minimum directives needed for interactive documentation -- without weakening the policy for regular API responses:
+When either docs endpoint is enabled, the settings validator automatically extends the CSP with just the minimum directives needed for interactive documentation. The policy for regular API responses stays fully locked down:
 
 <CodeFromRepo
   code={`def _resolve_csp_for_docs(settings: Settings) -> None:
@@ -144,17 +144,17 @@ When either docs endpoint is enabled, the settings validator automatically exten
   lang="python"
   filePath="src/app/settings.py"
   title="_resolve_csp_for_docs"
-  startLine={582}
-  endLine={615}
+  startLine={642}
+  endLine={675}
 />
 
-If the operator has already provided a custom CSP, the resolver leaves it untouched -- explicit configuration always wins.
+If the operator has already provided a custom CSP, the resolver leaves it untouched. An explicit configuration always takes precedence.
 
 ---
 
 ## Configuration
 
-All security headers are configurable through environment variables with safe defaults:
+Every security header is configurable through environment variables, and the defaults are safe out of the box:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -171,11 +171,11 @@ All security headers are configurable through environment variables with safe de
 
 ## What the Agent Never Implements
 
-The following concerns are handled entirely by the middleware layer.
-The agent's generated code should never contain logic for:
+The middleware layer handles all of the following concerns.
+Your agent's generated code should never contain logic for:
 
-- **Setting security headers** -- all headers are injected automatically on every response
-- **HSTS management** -- HTTPS detection and header injection are handled by the middleware
-- **CSP policy construction** -- defaults are strict; docs relaxation is automatic
-- **Proxy protocol trust** -- the middleware validates the client IP against the trusted-proxies allowlist
-- **Cache-control on API responses** -- `no-store` is applied globally
+- **Setting security headers.** They are injected automatically on every response.
+- **HSTS management.** HTTPS detection and header injection live in the middleware.
+- **CSP policy construction.** Defaults are strict, and docs relaxation happens automatically.
+- **Proxy protocol trust.** The middleware validates the client IP against the trusted-proxies allowlist.
+- **Cache-control on API responses.** `no-store` is applied globally by the middleware.

@@ -1,0 +1,12 @@
+---
+/**
+ * Renders the ISO 25010 Software Product Quality tree as a static SVG
+ * via PlotFigure. Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateNfrDiagram } from '../../lib/guides/svg-diagrams';
+
+const svg = generateNfrDiagram();
+---
+
+<PlotFigure svg={svg} caption="ISO/IEC 25010 &mdash; Software Product Quality model: 9 characteristics and their sub-characteristics" maxWidth="900px" />

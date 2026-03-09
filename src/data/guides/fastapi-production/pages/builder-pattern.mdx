@@ -1,0 +1,296 @@
+---
+title: "Builder Pattern"
+description: "How the FastAPI Chassis composes a production-ready application using FastAPIAppBuilder's fluent interface, the setup_*() method chain, and the create_app() factory function"
+order: 1
+slug: "builder-pattern"
+---
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+import BuilderPatternDiagram from '../../../../components/guide/BuilderPatternDiagram.astro';
+
+## What Your Agent Inherits
+
+Your AI agent inherits a fully wired FastAPI application. Every production concern, from middleware and authentication to database connections, caching, observability, and error handling, is configured and composed before the first request arrives. The agent focuses on route handlers and business logic, not bootstrap code.
+
+The builder pattern keeps the application assembly explicit, testable, and practically impossible to misconfigure by accident. Each concern lives in its own named method, and the entire chain reads like a deployment checklist.
+
+## The Traditional Approach
+
+Most FastAPI tutorials and quick-start projects wire everything in a single file. The pattern is familiar: create the app at module level, bolt on middleware, include routers, and connect to services inline.
+
+```python
+# main.py — the "everything in one file" approach
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from redis.asyncio import Redis
+from prometheus_client import make_asgi_app
+
+from .config import DATABASE_URL, REDIS_URL, ALLOWED_ORIGINS
+from .routes import api_router
+from .auth import verify_jwt
+
+# Global state — created at import time
+app = FastAPI(title="My API", version="1.0.0")
+engine = create_async_engine(DATABASE_URL)
+SessionLocal = async_sessionmaker(engine)
+redis = Redis.from_url(REDIS_URL)
+
+# Middleware — ordering is implicit and easy to get wrong
+app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*.example.com"])
+
+# Metrics — mounted inline
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+
+# Routes
+app.include_router(api_router)
+
+# Startup/shutdown — scattered event handlers
+@app.on_event("startup")
+async def startup():
+    await redis.ping()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await engine.dispose()
+    await redis.close()
+```
+
+This works for prototypes and small services, but it accumulates problems as the application grows:
+
+- **Untestable bootstrap.** Importing `main` triggers database connections and Redis clients. Tests that need different settings must monkeypatch globals before import, which is fragile and order-dependent.
+- **Hidden initialization order.** Middleware is applied in reverse registration order in Starlette. When CORS, auth, rate-limiting, and tracing are scattered across the file, getting the order right requires memorizing framework internals.
+- **No isolation between concerns.** Database setup, auth, caching, and metrics are interleaved. Disabling one concern (say, Redis caching in a test environment) means commenting out lines sprinkled throughout the file.
+- **Deprecated lifecycle hooks.** The `@app.on_event("startup")` and `@app.on_event("shutdown")` decorators are deprecated in modern FastAPI in favor of lifespan context managers. Migrating a file that uses them often means rewriting the entire bootstrap sequence.
+- **Global singletons.** `engine`, `SessionLocal`, and `redis` exist as module-level objects. A second application instance is impossible, and cleanup depends on shutdown events actually firing.
+
+The chassis solves every one of these problems with two ideas: a factory function and a builder chain.
+
+## Why a Factory Function?
+
+The chassis doesn't instantiate FastAPI at module level. Instead, it wraps the entire bootstrap sequence in a factory function called `create_app()`. This is a deliberate choice, and it pays off in three concrete ways:
+
+1. **Testability.** Tests can call `create_app()` with different settings (test database, disabled metrics, mock auth) without monkeypatching global state. Each test gets a fresh, isolated application instance.
+
+2. **Explicit lifecycle.** The creation order is visible and intentional: settings first, then logging, then everything else. No hidden side effects get triggered by importing a module.
+
+3. **Multiple instances.** Need two applications with different configurations in the same process for integration testing? A factory makes that trivial. A module-level singleton makes it impossible.
+
+<CodeFromRepo
+  code={`def create_app(settings: Settings | None = None) -> FastAPI:
+    """
+    Factory method to create and configure the FastAPI application.
+
+    Orchestrates the builder chain to produce a fully configured,
+    production-ready FastAPI instance.
+
+    Args:
+        settings: Optional settings override. Loads from environment
+                  variables and .env file if None.
+
+    Returns:
+        A fully configured FastAPI application ready to serve requests.
+    """
+    settings = settings or Settings()
+    from .app_builder import FastAPIAppBuilder
+
+    configure_root_logging(settings)
+    logger = logging.getLogger(settings.app_name)
+
+    # Keep the bootstrap path explicit so changes to app wiring stay easy to
+    # review, test, and reason about.
+    app = (
+        FastAPIAppBuilder(settings=settings, logger=logger)
+        .setup_settings()
+        .setup_logging()
+        .setup_database()
+        .setup_auth()
+        .setup_cache()
+        .setup_tracing()
+        .setup_metrics()
+        .setup_error_handlers()
+        .setup_routes()
+        .setup_middleware()
+        .build()
+    )
+
+    return app`}
+  lang="python"
+  filePath="src/app/__init__.py"
+  startLine={36}
+  endLine={73}
+/>
+
+Notice the comment: *"Keep the bootstrap path explicit so changes to app wiring stay easy to review, test, and reason about."* That line captures the guiding principle. Every `setup_*()` call is visible in one place, and adding or removing a concern is a single-line change.
+
+## The Builder Chain
+
+The `FastAPIAppBuilder` class implements the builder pattern with a fluent interface. Each `setup_*()` method configures one concern and returns `Self`, which enables the chaining syntax you saw in `create_app()`.
+
+<CodeFromRepo
+  code={`class FastAPIAppBuilder:
+    """
+    Builder class for constructing a production-ready FastAPI application.
+
+    Each \`setup_*()\` method owns one concern and can be tested in isolation,
+    while \`build()\` returns the final configured application instance.
+    """
+
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        logger: logging.Logger | None = None,
+    ) -> None:
+        """Initialize the builder with settings, logger, and base FastAPI app."""
+        self.settings = settings or Settings()
+        self.logger = logger or logging.getLogger(self.settings.app_name)
+
+        lifespan_manager = LifespanManager(self.settings, self.logger)
+        self.app = FastAPI(
+            title=self.settings.app_name,
+            description=self.settings.app_description,
+            version=self.settings.app_version,
+            debug=self.settings.debug,
+            docs_url="/docs" if self.settings.docs_enabled else None,
+            redoc_url="/redoc" if self.settings.redoc_enabled else None,
+            openapi_url="/openapi.json" if self.settings.openapi_enabled else None,
+            lifespan=lifespan_manager.lifespan,
+        )`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  startLine={47}
+  endLine={74}
+/>
+
+The constructor does just enough to get started: it accepts settings and a logger, then creates the base FastAPI instance with lifespan management. The `LifespanManager` handles async startup and shutdown, so database connections, cache clients, and auth services are initialized and torn down in the lifespan context rather than in the builder itself.
+
+<BuilderPatternDiagram />
+
+The diagram above illustrates how each `setup_*()` method feeds into the builder chain, with `build()` at the end returning the fully configured FastAPI application.
+
+## What Each Step Does
+
+The builder chain follows a deliberate order. Each method either registers a concern into `app.state` or attaches middleware and routes to the application:
+
+- **`setup_settings()`** attaches configuration to `app.state` and initializes the readiness registry. Every subsequent step reads from `app.state.settings`.
+- **`setup_logging()`** loads a JSON logging configuration and applies structured formatting: JSON for production, human-readable text for development.
+- **`setup_database()`** registers database state placeholders (`db_engine`, `db_session_factory`) along with a readiness check. Actual connections are established later in the lifespan context.
+- **`setup_auth()`** registers the auth state placeholder and a readiness check. The JWT auth service is initialized during startup via the lifespan manager.
+- **`setup_cache()`** registers cache state and, when enabled, a readiness check for Redis or memory backends.
+- **`setup_tracing()`** configures OpenTelemetry with a TracerProvider and instruments the FastAPI application for automatic span creation.
+- **`setup_metrics()`** adds Prometheus metrics collection via `starlette-exporter`, skipping health and metrics paths to avoid polluting dashboards.
+- **`setup_error_handlers()`** registers global exception handlers that return structured JSON error responses with consistent formatting.
+- **`setup_routes()`** includes the health check router and the API router containing all business logic endpoints.
+- **`setup_middleware()`** configures the full middleware stack (covered in the next chapter).
+
+Here is a representative example showing how `setup_database()` registers a placeholder and a readiness check while deferring the actual connection to the lifespan:
+
+<CodeFromRepo
+  code={`    def setup_database(self) -> Self:
+        """Register database state placeholders and readiness expectations."""
+        self.app.state.db_engine = None
+        self.app.state.db_session_factory = None
+        self.app.state.readiness_registry.register("database", check_database_readiness)
+        self.logger.info("Database integration configured successfully")
+        return self`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  startLine={137}
+  endLine={143}
+/>
+
+The `setup_auth()` method follows the same pattern. It registers a placeholder and a readiness check, then defers initialization to the lifespan:
+
+<CodeFromRepo
+  code={`    def setup_auth(self) -> Self:
+        """Register auth state placeholders and readiness hooks."""
+        self.app.state.auth_service = None
+
+        async def auth_readiness_check(app: FastAPI) -> ReadinessCheckResult:
+            auth_service = cast("JWTAuthService", app.state.auth_service)
+            return await auth_service.readiness_check(app)
+
+        self.app.state.readiness_registry.register("auth", auth_readiness_check)
+        self.logger.info("Authentication integration configured successfully")
+        return self`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  startLine={145}
+  endLine={155}
+/>
+
+Every `setup_*()` method follows this same pattern: return `Self`, log what it configured, and never start actual connections. The lifespan context handles the runtime lifecycle.
+
+## The Build Step
+
+Once every concern is registered, `build()` returns the assembled FastAPI instance. The method is intentionally minimal. It logs a confirmation and hands back the app:
+
+<CodeFromRepo
+  code={`    def build(self) -> FastAPI:
+        """Finalize the configuration and return the FastAPI instance."""
+        self.logger.info(
+            "%s v%s built successfully",
+            self.settings.app_name,
+            self.settings.app_version,
+        )
+        return self.app`}
+  lang="python"
+  filePath="src/app/app_builder.py"
+  startLine={333}
+  endLine={340}
+/>
+
+If `build()` completes without error, you know every setup step ran and the application is fully configured. Because the builder logs each step, your production startup log ends up reading like a checklist of everything that was initialized.
+
+## The ASGI Entry Point
+
+`main.py` bridges the factory function and the ASGI server. It creates the application at module level so Uvicorn (or any ASGI server) can reference it as `main:app`:
+
+<CodeFromRepo
+  code={`import uvicorn
+
+from app import create_app
+from app.settings import Settings
+
+settings = Settings()
+
+# Create the importable ASGI application instance referenced by \`main:app\`.
+app = create_app(settings=settings)
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
+        log_level=settings.log_level.lower(),
+        log_config=settings.logging_config_path,
+        access_log=False,
+    )`}
+  lang="python"
+  filePath="main.py"
+  startLine={14}
+  endLine={34}
+/>
+
+In production, the command is:
+
+```bash
+uvicorn main:app --host 127.0.0.1 --port 8000 --workers 4 --no-access-log
+```
+
+Uvicorn imports `main`, finds the `app` attribute (the result of `create_app()`), and starts serving. The `if __name__` block is there as a convenient development runner with auto-reload, but production deployments always use the module reference directly.
+
+## What the Agent Never Implements
+
+The builder pattern takes care of all of the following, so your agent can focus on writing business logic on top of this foundation:
+
+- **Application factory and wiring.** `create_app()` composes all concerns. Agents never need to modify bootstrap code.
+- **Middleware registration.** The middleware stack is configured in `setup_middleware()` with a deliberate ordering.
+- **Service initialization and teardown.** The lifespan manager handles database connections, cache clients, and auth service startup/shutdown.
+- **Readiness check registration.** Each `setup_*()` method registers its own readiness check with the registry.
+- **Error handler setup.** Global exception handlers return structured JSON responses.
+- **Metrics and tracing configuration.** OpenTelemetry and Prometheus are configured once and instrument all routes automatically.
+- **Logging infrastructure.** Structured JSON or text logging with request context propagation.

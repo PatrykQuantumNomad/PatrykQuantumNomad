@@ -1,20 +1,20 @@
 ---
 title: "Caching"
-description: "How the FastAPI template provides an optional, pluggable cache layer with a CacheStore abstraction, memory and Redis backends, per-key TTL, and FastAPI dependency injection"
-order: 10
+description: "How the FastAPI Chassis provides an optional, pluggable cache layer with a CacheStore abstraction, memory and Redis backends, per-key TTL, and FastAPI dependency injection"
+order: 11
 slug: "caching"
 ---
 import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
 
 ## What Your Agent Inherits
 
-Your AI agent can cache any value with a single dependency injection call. The cache layer is optional, pluggable (memory or Redis), and pre-wired with per-key TTL support, key prefix namespacing, and automatic health registration. When caching is enabled, the agent calls `get_cache()` in a route handler and gets a fully configured store -- no connection management, no backend selection, no TTL infrastructure to build.
+Your AI agent can cache any value with a single dependency injection call. The cache layer is optional, pluggable (memory or Redis), and pre-wired with per-key TTL support, key prefix namespacing, and automatic health registration. When caching is enabled, the agent simply calls `get_cache()` in a route handler and receives a fully configured store. There is no connection management, no backend selection, and no TTL infrastructure to build.
 
-When caching is disabled (the default), no cache resources are allocated and no readiness check is registered. The feature is zero-cost when unused.
+When caching is disabled (the default), no cache resources are allocated and no readiness check is registered. The feature costs nothing when left unused.
 
 ## The CacheStore Abstraction
 
-The `CacheStore` abstract base class defines the contract that every cache backend must implement. Seven methods cover the complete lifecycle: read, write, delete, existence check, bulk clear, health ping, and resource cleanup.
+The `CacheStore` abstract base class defines the contract that every cache backend must fulfill. Seven methods cover the complete lifecycle: read, write, delete, existence check, bulk clear, health ping, and resource cleanup.
 
 <CodeFromRepo
   code={`class CacheStore(ABC):
@@ -53,11 +53,11 @@ The `CacheStore` abstract base class defines the contract that every cache backe
   endLine={48}
 />
 
-All methods are async, even for the in-memory backend. This keeps the interface uniform -- route handlers never need to know which backend is active. Values are stored as `bytes`, so callers serialize before writing and deserialize after reading, keeping the cache layer encoding-agnostic.
+All methods are async, even for the in-memory backend. This keeps the interface uniform so that route handlers never need to know which backend is active. Values are stored as `bytes`: callers serialize before writing and deserialize after reading, which keeps the cache layer encoding-agnostic.
 
 ## Memory Backend
 
-The `MemoryCacheStore` implements the interface using a plain dictionary with passive TTL expiry. Each entry stores a value and an expiry timestamp based on `time.monotonic()`. Expired entries are evicted lazily on read, and a max-entry cap triggers oldest-first eviction when the store fills up.
+`MemoryCacheStore` implements the interface using a plain dictionary with passive TTL expiry. Each entry stores a value alongside an expiry timestamp based on `time.monotonic()`. Expired entries are evicted lazily on read, and a max-entry cap triggers oldest-first eviction once the store fills up.
 
 <CodeFromRepo
   code={`class MemoryCacheStore(CacheStore):
@@ -110,11 +110,11 @@ The `MemoryCacheStore` implements the interface using a plain dictionary with pa
   endLine={95}
 />
 
-This backend is suitable for single-process deployments and local development. The `max_entries` cap (default 10,000) prevents unbounded memory growth. The `ping()` method always returns `True` since the in-memory store has no external dependency to verify. TTL uses `time.monotonic()` rather than wall-clock time, making it immune to clock adjustments.
+This backend is a good fit for single-process deployments and local development. The `max_entries` cap (default 10,000) prevents unbounded memory growth, and `ping()` always returns `True` because there is no external dependency to verify. TTL relies on `time.monotonic()` rather than wall-clock time, making it immune to clock adjustments.
 
 ## Redis Backend
 
-The `RedisCacheStore` wraps the async Redis client with key prefix namespacing. Every key is prefixed (default `cache:`) to avoid collisions when multiple applications share a Redis instance. TTL is delegated to Redis natively via `SETEX`.
+`RedisCacheStore` wraps the async Redis client and adds key prefix namespacing. Every key gets a prefix (default `cache:`) to avoid collisions when multiple applications share a Redis instance. TTL is delegated natively to Redis via `SETEX`.
 
 <CodeFromRepo
   code={`class RedisCacheStore(CacheStore):
@@ -164,11 +164,11 @@ The `RedisCacheStore` wraps the async Redis client with key prefix namespacing. 
   endLine={138}
 />
 
-The Redis package is an optional dependency (`uv sync --extra redis`). The `ImportError` guard provides a clear installation message if the package is missing. Key prefixing is handled transparently -- callers pass bare keys like `"user:123"` and the store prepends `"cache:user:123"` before touching Redis. This enables multi-tenant isolation when multiple services share a Redis instance.
+The Redis package is an optional dependency (`uv sync --extra redis`). If the package is missing, the `ImportError` guard surfaces a clear installation message. Key prefixing is handled transparently: callers pass bare keys like `"user:123"`, and the store prepends `"cache:user:123"` before touching Redis. This makes multi-tenant isolation straightforward when several services share a single Redis instance.
 
 ## Factory Function
 
-The `create_cache_store()` factory reads the application settings to determine which backend to instantiate. The `cache_backend` setting (`"memory"` or `"redis"`) drives the selection, and backend-specific settings (max entries, Redis URL, key prefix) are passed through automatically.
+The `create_cache_store()` factory reads the application settings and decides which backend to instantiate. The `cache_backend` setting (`"memory"` or `"redis"`) drives the selection, while backend-specific settings like max entries, Redis URL, and key prefix are passed through automatically.
 
 <CodeFromRepo
   code={`def create_cache_store(settings: Settings) -> CacheStore:
@@ -185,11 +185,11 @@ The `create_cache_store()` factory reads the application settings to determine w
   endLine={148}
 />
 
-This factory is called once during the lifespan startup. The resulting store is attached to `app.state.cache_store` and shared across all requests. Switching backends is a single environment variable change (`APP_CACHE_BACKEND=redis`) -- no code modifications required.
+This factory runs once during the lifespan startup. The resulting store is attached to `app.state.cache_store` and shared across all requests. Switching backends is a one-line environment variable change (`APP_CACHE_BACKEND=redis`) with no code modifications required.
 
 ## Dependency Injection
 
-Route handlers access the cache through a FastAPI dependency. The `get_cache()` function extracts the store from application state and returns it typed as `CacheStore`, so handlers code against the abstract interface regardless of the active backend.
+Route handlers access the cache through a FastAPI dependency. The `get_cache()` function extracts the store from application state and returns it typed as `CacheStore`, so handlers always code against the abstract interface regardless of the active backend.
 
 <CodeFromRepo
   code={`def get_cache(request: Request) -> CacheStore:
@@ -218,17 +218,17 @@ async def get_item(item_id: str, cache: CacheStore = Depends(get_cache)):
     return item
 ```
 
-The dependency is synchronous (no `async`) because it only reads from `app.state` -- no I/O involved. FastAPI handles both sync and async dependencies transparently.
+The dependency is synchronous (no `async`) because it only reads from `app.state` and involves no I/O. FastAPI handles both sync and async dependencies transparently.
 
 ## What the Agent Never Implements
 
-The caching infrastructure handles all of the following. Your agent writes cache-aware business logic on top of this foundation:
+The caching infrastructure takes care of everything listed below. Your agent only needs to write cache-aware business logic on top of this foundation:
 
-- **CacheStore abstraction** -- The 7-method async interface ensuring backend interchangeability
-- **Memory backend** -- Dict-based store with monotonic TTL and max-entry eviction for single-process deployments
-- **Redis backend** -- Distributed store with key prefix namespacing and native TTL delegation
-- **Backend selection** -- The factory function reads settings and instantiates the correct store
-- **Dependency injection** -- `get_cache()` provides the store to any route handler via `Depends()`
-- **Health registration** -- The cache readiness check is auto-registered during the builder chain
-- **Lifespan management** -- Store initialization on startup and `close()` on shutdown are handled by the lifespan manager
-- **Settings integration** -- Backend type, TTL defaults, max entries, Redis URL, and key prefix are all configurable through environment variables
+- **CacheStore abstraction.** A 7-method async interface that ensures backend interchangeability.
+- **Memory backend.** A dict-based store with monotonic TTL and max-entry eviction, ideal for single-process deployments.
+- **Redis backend.** A distributed store with key prefix namespacing and native TTL delegation.
+- **Backend selection.** A factory function that reads settings and instantiates the correct store.
+- **Dependency injection.** `get_cache()` provides the store to any route handler via `Depends()`.
+- **Health registration.** The cache readiness check is auto-registered during the builder chain.
+- **Lifespan management.** Store initialization on startup and `close()` on shutdown, both handled by the lifespan manager.
+- **Settings integration.** Backend type, TTL defaults, max entries, Redis URL, and key prefix are all configurable through environment variables.

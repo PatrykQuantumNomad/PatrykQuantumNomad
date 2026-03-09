@@ -55,7 +55,7 @@ describe('guideMetaSchema', () => {
     title: 'FastAPI Production Guide',
     description: 'A deep-dive into every production concern',
     slug: 'fastapi-production',
-    templateRepo: 'https://github.com/Translucent-Computing/fastapi-template',
+    templateRepo: 'https://github.com/PatrykQuantumNomad/fastapi-chassis',
     versionTag: 'v1.0.0',
     chapters: [{ slug: 'builder-pattern', title: 'Builder Pattern' }],
   };

@@ -1,7 +1,7 @@
 ---
 title: "Middleware Stack"
-description: "How the FastAPI template configures 6 raw ASGI middlewares with deliberate ordering, and why it avoids BaseHTTPMiddleware entirely"
-order: 1
+description: "How the FastAPI Chassis configures 6 raw ASGI middlewares with deliberate ordering, and why it avoids BaseHTTPMiddleware entirely"
+order: 2
 slug: "middleware"
 ---
 import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
@@ -9,13 +9,13 @@ import MiddlewareStackDiagram from '../../../../components/guide/MiddlewareStack
 
 ## What Your Agent Inherits
 
-Your AI agent's endpoints run inside a middleware pipeline that has already handled request IDs, structured logging, rate limiting, body size limits, timeouts, security headers, CORS, and trusted host validation. Every request your agent processes has been identified, metered, and hardened before it reaches your route handler.
+Your AI agent's endpoints run inside a middleware pipeline that has already taken care of request IDs, structured logging, rate limiting, body size limits, timeouts, security headers, CORS, and trusted host validation. By the time a request reaches your route handler, it has already been identified, metered, and hardened.
 
-The agent never registers middleware, never configures CORS origins, and never writes request logging. The template handles the entire request envelope so the agent focuses on the response body.
+The agent never registers middleware, never configures CORS origins, and never writes request logging. The chassis owns the entire request envelope, leaving the agent free to focus on the response body.
 
 ## The Registration Order
 
-Starlette applies middleware in reverse registration order -- the last middleware added is the first to process incoming requests. The template exploits this to create a deliberate layering where security concerns wrap everything and correlation IDs propagate through every layer.
+Starlette applies middleware in reverse registration order: the last middleware added is the first to process incoming requests. The chassis takes advantage of this to create a deliberate layering where security concerns wrap everything and correlation IDs propagate through every layer.
 
 <CodeFromRepo
   code={`    def setup_middleware(self) -> Self:
@@ -77,7 +77,9 @@ Starlette applies middleware in reverse registration order -- the last middlewar
                     trust_proxy_proto_header=self.settings.security_trust_proxy_proto_header,
                     trusted_proxies=self.settings.security_trusted_proxies,
                 )
-            # Host validation stays on by default.
+            # Host validation stays on by default; local/test hosts are part of
+            # the default settings so development still works without widening
+            # the acceptance policy to "*".
             self.app.add_middleware(
                 TrustedHostMiddleware,
                 allowed_hosts=self.settings.trusted_hosts,
@@ -103,23 +105,23 @@ Starlette applies middleware in reverse registration order -- the last middlewar
   endLine={331}
 />
 
-Read the inline comments carefully -- they explain *why* each middleware sits where it does. The key insight is that registration order is the inverse of execution order:
+Take a close look at the inline comments; they explain *why* each middleware sits where it does. The key insight is that registration order is the inverse of execution order:
 
-- **CORS** is registered last but executes first -- preflight requests never reach auth or rate limiting.
-- **Timeout** is registered first but executes last -- it wraps only the handler, so outer middleware can still log and annotate timeout responses.
+- **CORS** is registered last but executes first, so preflight requests never reach auth or rate limiting.
+- **Timeout** is registered first but executes last. It wraps only the handler, which lets outer middleware still log and annotate timeout responses.
 - **Request ID and Logging** sit outside rate limiting so that even 429 responses get correlation headers and a structured access log.
 
 ## Why Raw ASGI, Not BaseHTTPMiddleware
 
-Every custom middleware in this template implements the raw ASGI protocol directly instead of subclassing Starlette's `BaseHTTPMiddleware`. This is a deliberate choice driven by three problems with `BaseHTTPMiddleware`:
+Every custom middleware in this chassis implements the raw ASGI protocol directly instead of subclassing Starlette's `BaseHTTPMiddleware`. This is a deliberate choice, driven by three well-known problems with `BaseHTTPMiddleware`.
 
-1. **It reads the entire request body into memory.** `BaseHTTPMiddleware` calls `await request.body()` before your code runs, breaking streaming uploads and consuming memory proportional to body size.
+1. **It reads the entire request body into memory.** `BaseHTTPMiddleware` calls `await request.body()` before your code runs, which breaks streaming uploads and consumes memory proportional to body size.
 
-2. **It wraps exceptions in a way that hides the original.** When a handler raises an exception inside `BaseHTTPMiddleware`, the original traceback is lost because the middleware catches and re-raises it.
+2. **It wraps exceptions in a way that hides the original.** When a handler raises inside `BaseHTTPMiddleware`, the original traceback is lost because the middleware catches and re-raises it.
 
-3. **It prevents streaming responses.** The `call_next()` pattern buffers the entire response before returning it, defeating any streaming response your handler produces.
+3. **It prevents streaming responses.** The `call_next()` pattern buffers the entire response before returning it, which defeats any streaming response your handler produces.
 
-The raw ASGI pattern is straightforward: accept `scope`, `receive`, and `send`; check if the request type is HTTP; do your work; call the next app. Here is the canonical example from the Request ID middleware:
+The raw ASGI pattern is straightforward: accept `scope`, `receive`, and `send`, check if the request type is HTTP, do your work, and call the next app. Here is the canonical example from the Request ID middleware:
 
 <CodeFromRepo
   code={`class RequestIDMiddleware:
@@ -156,13 +158,13 @@ The raw ASGI pattern is straightforward: accept `scope`, `receive`, and `send`; 
   endLine={53}
 />
 
-Every middleware in the template follows this same structure: `__init__` stores the next app, `__call__` checks the scope type, does its work, and delegates to `self.app(scope, receive, send)` -- optionally wrapping `send` or `receive` to intercept messages.
+Every middleware in the chassis follows this same structure. `__init__` stores the next app, `__call__` checks the scope type, does its work, and delegates to `self.app(scope, receive, send)`. It can optionally wrap `send` or `receive` to intercept messages along the way.
 
 ## The Six Middlewares
 
 ### Request ID
 
-Generates a fresh UUID for every request and propagates correlation IDs across service boundaries. If the caller sends `X-Correlation-ID`, it is reused. If only `X-Request-ID` is sent, it becomes the correlation ID. Both identifiers are injected into the ASGI scope state, the logging context, and the response headers.
+Generates a fresh UUID for every request and propagates correlation IDs across service boundaries. If the caller sends `X-Correlation-ID`, that value is reused. If only `X-Request-ID` is present, it becomes the correlation ID. Both identifiers are then injected into the ASGI scope state, the logging context, and the response headers.
 
 <CodeFromRepo
   code={`        state = scope.setdefault("state", {})
@@ -197,7 +199,7 @@ The `send_wrapper` pattern is how raw ASGI middleware intercepts response messag
 
 ### Request Logging
 
-Emits one structured access log per request with method, path, status code, latency, client address, request ID, and correlation ID. This replaces Uvicorn's default access log with a richer, JSON-structured log that includes correlation IDs for distributed tracing.
+Emits one structured access log per request containing the method, path, status code, latency, client address, request ID, and correlation ID. This replaces Uvicorn's default access log with a richer, JSON-structured format that includes correlation IDs for distributed tracing.
 
 <CodeFromRepo
   code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -224,18 +226,24 @@ Emits one structured access log per request with method, path, status code, late
                     RequestIDMiddleware.CORRELATION_HEADER_NAME.lower().encode("latin-1"),
                     b"-",
                 ).decode("utf-8")
+                content_length = headers.get(b"content-length")
+                if content_length is not None:
+                    try:
+                        response_bytes = int(content_length.decode("ascii"))
+                    except ValueError:
+                        response_bytes = None
             await send(message)`}
   lang="python"
   filePath="src/app/middleware/request_logging.py"
   startLine={34}
-  endLine={59}
+  endLine={64}
 />
 
-The middleware defaults `status_code` to 500 so that if the handler crashes before sending a response, the log still records the failure. The `perf_counter()` timer captures sub-millisecond latency.
+Notice that `status_code` defaults to 500. If the handler crashes before sending a response, the log still records the failure correctly. The `perf_counter()` timer captures sub-millisecond latency.
 
 ### Security Headers
 
-Injects conservative security headers on every response: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store`, and optionally `Content-Security-Policy`. HSTS is only added when the request arrived over HTTPS (detected via scheme or trusted proxy headers).
+Injects a conservative set of security headers on every response, including `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store`, and optionally `Content-Security-Policy`. HSTS is only added when the request arrived over HTTPS, detected via the scheme or trusted proxy headers.
 
 <CodeFromRepo
   code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -279,11 +287,11 @@ Injects conservative security headers on every response: `X-Content-Type-Options
   endLine={69}
 />
 
-The HSTS check is proxy-aware: when the application sits behind a reverse proxy (Nginx, Traefik, a cloud load balancer), it reads `X-Forwarded-Proto` but only from trusted proxy IPs. This prevents clients from spoofing the protocol header to trigger or suppress HSTS.
+The HSTS check is proxy-aware. When the application sits behind a reverse proxy like Nginx, Traefik, or a cloud load balancer, it reads `X-Forwarded-Proto` but only from trusted proxy IPs. This prevents clients from spoofing the protocol header to trigger or suppress HSTS.
 
 ### Rate Limiting
 
-Implements a fixed-window rate limiting algorithm with pluggable backends (in-memory for development, Redis for production). The middleware exempts health check and metrics paths, and it is proxy-aware for IP-based rate limiting behind reverse proxies.
+Implements a fixed-window rate limiting algorithm with pluggable backends: in-memory for development and Redis for production. The middleware exempts health check and metrics paths, and it is proxy-aware for accurate IP-based rate limiting behind reverse proxies.
 
 <CodeFromRepo
   code={`class RateLimitMiddleware:
@@ -321,11 +329,11 @@ Implements a fixed-window rate limiting algorithm with pluggable backends (in-me
   endLine={124}
 />
 
-The `key_strategy` setting supports two modes: `"ip"` (default) hashes the client IP, and `"authorization"` hashes the Authorization header so authenticated clients share a per-token budget. The store abstraction means switching from memory to Redis is a single configuration change -- no code modifications required.
+The `key_strategy` setting supports two modes. `"ip"` (the default) hashes the client IP, while `"authorization"` hashes the Authorization header so authenticated clients share a per-token budget. Thanks to the store abstraction, switching from memory to Redis is a single configuration change with no code modifications required.
 
 ### Body Size Limit
 
-Rejects oversized request bodies before the handler reads them. The middleware checks the `Content-Length` header upfront for an early rejection, then wraps `receive` to count bytes as they stream in -- catching requests that underreport their size or have no Content-Length at all.
+Rejects oversized request bodies before the handler ever reads them. The middleware checks the `Content-Length` header upfront for an early rejection, then wraps `receive` to count bytes as they stream in. This catches requests that underreport their size or omit Content-Length entirely.
 
 <CodeFromRepo
   code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -390,11 +398,11 @@ Rejects oversized request bodies before the handler reads them. The middleware c
   endLine={80}
 />
 
-This is the `receive_wrapper` pattern -- the counterpart to the `send_wrapper` pattern seen in other middleware. Instead of intercepting outgoing response messages, it intercepts incoming request body chunks. This is streaming-aware: it never buffers the entire body in memory, it counts bytes as they arrive.
+This is the `receive_wrapper` pattern, the counterpart to the `send_wrapper` pattern seen in other middleware. Instead of intercepting outgoing response messages, it intercepts incoming request body chunks. It is fully streaming-aware and never buffers the entire body in memory. It simply counts bytes as they arrive.
 
 ### Timeout
 
-Wraps request processing in `asyncio.wait_for()` to enforce a maximum duration. If the handler exceeds the timeout, the middleware returns a 504 Gateway Timeout with a structured JSON body. In Kubernetes deployments, this timeout should be set below the ingress controller's timeout so the application returns a meaningful error before the infrastructure kills the connection.
+Wraps request processing in `asyncio.wait_for()` to enforce a maximum duration. If the handler exceeds the timeout, the middleware returns a 504 Gateway Timeout with a structured JSON body. For Kubernetes deployments, set this value below the ingress controller's timeout so the application returns a meaningful error before the infrastructure kills the connection.
 
 <CodeFromRepo
   code={`    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -445,17 +453,17 @@ Wraps request processing in `asyncio.wait_for()` to enforce a maximum duration. 
   endLine={89}
 />
 
-The timeout middleware tracks whether the response has already started. If the timeout fires after response headers are sent, it cannot send a 504 -- instead, it closes the partial response cleanly and logs a warning. This prevents the ASGI server from raising a protocol error due to duplicate response starts.
+The timeout middleware tracks whether the response has already started. If the timeout fires after response headers have been sent, it cannot send a 504, so it closes the partial response cleanly and logs a warning instead. This prevents the ASGI server from raising a protocol error due to duplicate response starts.
 
 ## The Request Flow
 
 <MiddlewareStackDiagram />
 
-The diagram above shows the full 8-layer request flow. An inbound request passes through each layer from the outside in: CORS, Trusted Host, Security Headers, Request Logging, Request ID, Rate Limiting, Body Size Limit, and finally Timeout before reaching your route handler. The response travels back through the same layers in reverse, picking up security headers, rate limit headers, correlation IDs, and an access log entry along the way.
+The diagram above shows the full 8-layer request flow. An inbound request passes through each layer from the outside in, starting with CORS, then Trusted Host, Security Headers, Request Logging, Request ID, Rate Limiting, Body Size Limit, and finally Timeout before reaching your route handler. The response travels back through the same layers in reverse, picking up security headers, rate limit headers, correlation IDs, and an access log entry along the way.
 
 ## What the Agent Never Implements
 
-The middleware stack handles all of the following. Your agent writes route handlers that benefit from these protections automatically:
+The middleware stack handles all of the following, so your agent just writes route handlers and benefits from these protections automatically:
 
 - **Request ID generation** and correlation header propagation across service boundaries
 - **Structured access logging** with method, path, status, latency, and correlation IDs

@@ -1,0 +1,537 @@
+---
+title: "Deployment"
+description: "Kubernetes deployment with a production-ready Helm chart that auto-selects Deployment or StatefulSet, VM deployment via Docker, and the operational infrastructure your AI agent never has to touch"
+order: 12
+slug: "deployment"
+---
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Your AI agent writes route handlers. It never has to touch Kubernetes manifests, Helm values, Docker Compose files, or deployment scripts. The chassis ships with a production-ready Helm chart that takes care of workload selection, security hardening, secret management, database migrations, autoscaling, network policies, and observability integration. For VM deployments, Docker Compose and GitHub Actions workflows come pre-configured.
+
+The agent's code runs identically across all environments. The deployment layer adapts to whatever infrastructure you target through configuration alone, not code changes.
+
+---
+
+## Kubernetes: The Helm Chart
+
+The chassis includes a complete Helm chart in `chart/` that deploys the application to any Kubernetes cluster. One `helm install` command gives you a hardened, observable, production-ready deployment.
+
+<CodeFromRepo
+  code={`apiVersion: v2
+name: fastapi-chassis
+description: Production-ready Helm chart for deploying FastAPI Chassis applications
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - fastapi
+  - python
+  - api
+  - chassis
+home: https://github.com/PatrykQuantumNomad/fastapi-chassis
+maintainers:
+  - name: PatrykQuantumNomad`}
+  lang="yaml"
+  filePath="chart/Chart.yaml"
+  title="Helm chart metadata"
+/>
+
+### Quick Start
+
+```bash
+# Postgres backend (default)
+helm install my-app ./chart \
+  --set database.postgres.host=postgres.default.svc \
+  --set database.postgres.password=changeme
+
+# SQLite backend (single-node, persistent volume)
+helm install my-app ./chart \
+  --set database.backend=sqlite \
+  --set persistence.size=10Gi
+```
+
+---
+
+## Automatic Workload Selection
+
+The chart picks the right Kubernetes workload type based on your database backend. Postgres and custom backends get a **Deployment**, which is stateless and freely scalable. SQLite gets a **StatefulSet** with a stable network identity and persistent volume claims.
+
+<CodeFromRepo
+  code={`{{- if ne (include "fastapi-chassis.isSqlite" .) "true" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 3 }}
+  selector:
+    matchLabels:
+      {{- include "fastapi-chassis.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy.maxSurge | default 1 }}
+      maxUnavailable: {{ .Values.strategy.maxUnavailable | default 0 }}
+  template:
+    {{- include "fastapi-chassis.podSpec" (dict "root" . "isSqlite" "false") | nindent 4 }}
+{{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/deployment.yaml"
+  title="Deployment (Postgres/custom backends)"
+/>
+
+<CodeFromRepo
+  code={`{{- if eq (include "fastapi-chassis.isSqlite" .) "true" -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "fastapi-chassis.headlessServiceName" . }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 3 }}
+  selector:
+    matchLabels:
+      {{- include "fastapi-chassis.selectorLabels" . | nindent 6 }}
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: {{ .Values.sqlite.podManagementPolicy | default "OrderedReady" }}
+  template:
+    {{- include "fastapi-chassis.podSpec" (dict "root" . "isSqlite" "true") | nindent 4 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "fastapi-chassis.selectorLabels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode | default "ReadWriteOnce" }}
+        {{- include "fastapi-chassis.storage.class" (dict "persistence" .Values.persistence "global" (.Values.global | default dict)) | nindent 8 }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | default "10Gi" }}
+{{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/statefulset.yaml"
+  title="StatefulSet (SQLite backend)"
+/>
+
+A single helper drives this decision: `fastapi-chassis.isSqlite` checks `database.backend`. The agent never needs to know which workload type is running, because the chart handles that entirely.
+
+---
+
+## Configuration Management
+
+Configuration is split into a ConfigMap for non-sensitive values and a Secret for credentials. Every `APP_*` environment variable the application reads maps from Helm values into the ConfigMap, so the same settings model documented throughout this guide works identically in Kubernetes.
+
+<CodeFromRepo
+  code={`apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+data:
+  # --- Application ---
+  APP_APP_NAME: {{ .Values.app.name | quote }}
+  APP_APP_VERSION: {{ .Values.app.version | default .Chart.AppVersion | quote }}
+  APP_DEBUG: {{ .Values.app.debug | default false | quote }}
+  APP_HOST: "0.0.0.0"
+  APP_PORT: {{ include "fastapi-chassis.containerPort" . | quote }}
+  APP_LOG_LEVEL: {{ .Values.app.logLevel | default "INFO" | quote }}
+  APP_LOG_FORMAT: {{ .Values.app.logFormat | default "json" | quote }}
+  APP_REQUEST_TIMEOUT: {{ .Values.app.requestTimeout | default 30 | quote }}
+
+  # --- Health ---
+  APP_HEALTH_CHECK_PATH: {{ .Values.app.healthCheckPath | default "/healthcheck" | quote }}
+  APP_READINESS_CHECK_PATH: {{ .Values.app.readinessCheckPath | default "/ready" | quote }}
+  APP_READINESS_INCLUDE_DETAILS: {{ .Values.app.readinessIncludeDetails | default false | quote }}
+
+  # --- Database ---
+  APP_DATABASE_BACKEND: {{ .Values.database.backend | default "postgres" | quote }}
+  {{- if eq (.Values.database.backend | default "postgres") "postgres" }}
+  APP_DATABASE_POSTGRES_HOST: {{ .Values.database.postgres.host | quote }}
+  APP_DATABASE_POSTGRES_PORT: {{ .Values.database.postgres.port | default 5432 | quote }}
+  APP_DATABASE_POSTGRES_NAME: {{ .Values.database.postgres.name | quote }}
+  APP_DATABASE_POSTGRES_USER: {{ .Values.database.postgres.user | quote }}
+  {{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/configmap.yaml"
+  title="ConfigMap (excerpt: application and database settings)"
+  startLine={1}
+  endLine={31}
+/>
+
+The full ConfigMap also covers auth, rate limiting, cache, Redis, metrics, tracing, security headers, CORS, and trusted hosts. Each section maps directly to `values.yaml` keys, all following a consistent naming convention.
+
+---
+
+## Database Migrations as Helm Hooks
+
+Schema migrations run as a Kubernetes Job using `pre-install,pre-upgrade` Helm hooks. The migration finishes before any new application pods start, so the database schema is always compatible with the deployed code.
+
+<CodeFromRepo
+  code={`{{- if .Values.migrations.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}-migrate
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit | default 3 }}
+  activeDeadlineSeconds: {{ .Values.migrations.activeDeadlineSeconds | default 120 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fastapi-chassis.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- include "fastapi-chassis.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "fastapi-chassis.serviceAccountName" . }}
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: {{ include "fastapi-chassis.image" (dict "imageRoot" .Values.image "global" (.Values.global | default dict) "defaultTag" .Chart.AppVersion) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "fastapi-chassis.fullname" . }}
+            {{- if .Values.secret.create }}
+            - secretRef:
+                name: {{ include "fastapi-chassis.fullname" . }}
+            {{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/migration-job.yaml"
+  title="Migration Job (Helm hook)"
+  startLine={1}
+  endLine={42}
+/>
+
+The migration Job uses the same container image, ConfigMap, and Secret as the application pods. It runs as the same non-root user (UID 10001), with a read-only root filesystem and all capabilities dropped. To turn it on, set `migrations.enabled: true` in your values.
+
+---
+
+## Security Hardening
+
+The chart applies defense-in-depth out of the box:
+
+- **Non-root execution.** The pod security context sets `runAsNonRoot: true` with UID/GID 10001.
+- **Read-only root filesystem.** Setting `readOnlyRootFilesystem: true` prevents runtime file modification. A writable `/tmp` emptyDir is mounted for temporary files.
+- **Dropped capabilities.** All Linux capabilities are dropped (`drop: [ALL]`).
+- **Seccomp profile.** The `RuntimeDefault` seccomp profile restricts available system calls.
+- **Network isolation.** An optional NetworkPolicy limits traffic to only the connections the application actually needs.
+
+### Network Policy
+
+The NetworkPolicy template automatically builds egress rules based on which features you have enabled: DNS, database (Postgres port), Redis (when rate limiting or caching is on), JWKS endpoint (HTTPS 443 when auth is on), and the OTLP exporter (when tracing is on).
+
+<CodeFromRepo
+  code={`{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "fastapi-chassis.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controller
+    - ports:
+        - port: {{ include "fastapi-chassis.containerPort" . }}
+          protocol: TCP
+      {{- if .Values.networkPolicy.ingressFrom }}
+      from:
+        {{- toYaml .Values.networkPolicy.ingressFrom | nindent 8 }}
+      {{- end }}
+  egress:
+    # DNS resolution
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- if or (eq (.Values.database.backend | default "postgres") "postgres") (eq (.Values.database.backend | default "postgres") "custom") }}
+    # Database
+    - ports:
+        - port: {{ .Values.database.postgres.port | default 5432 }}
+          protocol: TCP
+      {{- if .Values.networkPolicy.databaseCIDR }}
+      to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.databaseCIDR }}
+      {{- end }}
+    {{- end }}
+    {{- if or .Values.rateLimit.enabled .Values.cache.enabled }}
+    # Redis
+    - ports:
+        - port: {{ .Values.redis.port | default 6379 }}
+          protocol: TCP
+    {{- end }}
+    {{- if and .Values.auth.enabled .Values.auth.jwksUrl }}
+    # JWKS endpoint (HTTPS)
+    - ports:
+        - port: 443
+          protocol: TCP
+    {{- end }}
+    {{- if .Values.tracing.enabled }}
+    # OTLP exporter
+    - ports:
+        - port: 4318
+          protocol: TCP
+        - port: 4317
+          protocol: TCP
+    {{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/networkpolicy.yaml"
+  title="NetworkPolicy"
+  startLine={1}
+  endLine={67}
+/>
+
+---
+
+## Autoscaling and Availability
+
+### Horizontal Pod Autoscaler
+
+The HPA supports CPU and memory targets with configurable stabilization windows. Scale-down is deliberately conservative (300s window, 1 pod at a time) to prevent flapping, while scale-up is aggressive (30s window, 2 pods at a time) so you can respond to traffic spikes quickly.
+
+<CodeFromRepo
+  code={`{{- if .Values.autoscaling.enabled -}}
+apiVersion: {{ include "fastapi-chassis.capabilities.hpa.apiVersion" . }}
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ include "fastapi-chassis.workloadKind" . }}
+    name: {{ include "fastapi-chassis.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.scaleDownStabilization | default 300 }}
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.scaleUpStabilization | default 30 }}
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+{{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/hpa.yaml"
+  title="HorizontalPodAutoscaler"
+  startLine={1}
+  endLine={46}
+/>
+
+### Pod Disruption Budget
+
+The PDB makes sure that voluntary disruptions like node drains and cluster upgrades cannot take down all your pods at once:
+
+<CodeFromRepo
+  code={`{{- if .Values.podDisruptionBudget.enabled -}}
+apiVersion: {{ include "fastapi-chassis.capabilities.pdb.apiVersion" . }}
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ include "fastapi-chassis.namespace" . }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "fastapi-chassis.selectorLabels" . | nindent 6 }}
+{{- end }}`}
+  lang="yaml"
+  filePath="chart/templates/pdb.yaml"
+  title="PodDisruptionBudget"
+/>
+
+---
+
+## Observability Integration
+
+The chart includes a Prometheus Operator **ServiceMonitor** that registers the application's `/metrics` endpoint for scraping automatically:
+
+<CodeFromRepo
+  code={`{{- if .Values.serviceMonitor.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "fastapi-chassis.fullname" . }}
+  namespace: {{ .Values.serviceMonitor.namespace | default (include "fastapi-chassis.namespace" .) }}
+  labels:
+    {{- include "fastapi-chassis.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "fastapi-chassis.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "fastapi-chassis.namespace" . }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval | default "30s" }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | default "10s" }}`}
+  lang="yaml"
+  filePath="chart/templates/servicemonitor.yaml"
+  title="Prometheus ServiceMonitor"
+  startLine={1}
+  endLine={23}
+/>
+
+Together with the Ingress template for external traffic routing, the chart gives you a complete Kubernetes deployment without the agent ever writing a single manifest.
+
+---
+
+## VM Deployment
+
+If you do not have Kubernetes, the chassis also supports VM deployment through Docker. You get two paths: a single container via `docker run`, or a multi-service stack via Docker Compose. Both come with GitHub Actions workflows for automated deployment.
+
+### Single Container
+
+```bash
+docker run -d \
+  --name fastapi-chassis \
+  --env-file .env \
+  -p 8000:8000 \
+  --read-only \
+  --tmpfs /tmp:size=32m \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  ghcr.io/patrykquantumnomad/fastapi-chassis:v1.0.0
+```
+
+All the container hardening from the Dockerfile chapter still applies here: non-root user, tini as PID 1, and digest-pinned base images. The `--read-only` and `--cap-drop ALL` flags mirror the Kubernetes security context.
+
+### Docker Compose
+
+When your production VM needs Postgres and Redis running alongside the application:
+
+```bash
+docker compose -f docker-compose.deploy.yml up -d
+```
+
+The deployment compose file includes health checks, restart policies, resource limits, and security options (`read_only`, `cap_drop`, `no-new-privileges`). Worker count and proxy headers are configurable through environment variables, just as they are on the Kubernetes path.
+
+### Reverse Proxy
+
+Both VM paths should sit behind a reverse proxy such as Nginx, Caddy, or Traefik that terminates TLS and forwards traffic. Set `UVICORN_FORWARDED_ALLOW_IPS` to the proxy's IP so that the application receives correct client addresses and protocol information.
+
+### Verification
+
+After deployment, verify the stack:
+
+```bash
+# Liveness
+curl -f http://localhost:8000/healthcheck
+
+# Readiness (all dependencies healthy)
+curl -f http://localhost:8000/ready
+```
+
+The health check architecture from Chapter 7 works identically in both Kubernetes and VM environments. The `/healthcheck` endpoint confirms the process is alive, while `/ready` confirms that all dependencies (database, cache, auth) are reachable.
+
+---
+
+## Production Checklist
+
+Before deploying to production on either platform:
+
+| Concern | Kubernetes | VM |
+|---------|-----------|-----|
+| **TLS termination** | Ingress with `tls` block | Reverse proxy (Nginx/Caddy) |
+| **Secrets** | Kubernetes Secret or external operator | `.env` file with restricted permissions |
+| **Database** | External Postgres (RDS, CloudSQL) | External or co-located Postgres |
+| **Migrations** | Helm hook Job (`migrations.enabled`) | `RUN_DB_MIGRATIONS=true` in entrypoint |
+| **Rate limiting** | Redis backend (multi-pod) | Memory (single worker) or Redis |
+| **Autoscaling** | HPA with CPU/memory targets | OS-level process manager |
+| **Network isolation** | NetworkPolicy | Firewall rules |
+| **Monitoring** | ServiceMonitor + Prometheus | Prometheus scraping `/metrics` |
+| **Disruption budget** | PDB (`podDisruptionBudget.enabled`) | Rolling restart scripts |
+| **Log aggregation** | JSON stdout to cluster logging | JSON stdout to log shipper |
+
+---
+
+## What the Agent Never Implements
+
+The deployment layer handles everything listed below. Your agent focuses on writing Python route handlers and business logic:
+
+- **Kubernetes manifests.** Deployment, StatefulSet, Service, Ingress, HPA, PDB, NetworkPolicy, and ServiceMonitor are all templated in the Helm chart.
+- **Workload type selection.** The chart automatically picks Deployment or StatefulSet based on the database backend.
+- **Secret management.** Credentials flow through Kubernetes Secrets or `.env` files, never through application code.
+- **Database migration orchestration.** Helm hooks run Alembic before pod rollout, and the Docker entrypoint runs migrations at container start.
+- **Container security context.** Non-root user, read-only filesystem, dropped capabilities, and seccomp profiles are all configured in the chart and compose files.
+- **Network policies.** Egress rules are built automatically from whichever features you enable (database, Redis, JWKS, OTLP).
+- **Autoscaling configuration.** HPA targets, stabilization windows, and scale policies live in Helm values.
+- **Observability wiring.** ServiceMonitor registration, probe configuration, and metrics endpoint exposure are all pre-configured.
+- **VM deployment workflows.** GitHub Actions pipelines for both Docker and Compose paths come included.

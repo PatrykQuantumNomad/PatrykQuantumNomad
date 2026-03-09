@@ -2,7 +2,7 @@
 /**
  * FastAPI Production Guide landing page — /guides/fastapi-production/
  * Hero section with AI agent narrative framing and chapter card grid
- * showing all 11 chapters with Coming Soon treatment for unwritten ones.
+ * showing all 13 chapters with Coming Soon treatment for unwritten ones.
  */
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
@@ -16,6 +16,7 @@ const existingSlugs = new Set(guidePages.map(p => p.data.slug));
 const ogImageURL = new URL('/open-graph/guides/fastapi-production.png', Astro.site).toString();
 
 const chapterDescriptions: Record<string, string> = {
+  'nfr-introduction': 'The 23 quality attributes that shape every production decision in the chassis',
   'builder-pattern': 'How the application factory composes middleware, routes, and lifecycle events',
   'middleware': 'The raw ASGI middleware stack -- six layers processing every request',
   'authentication': 'Three JWT validation modes: shared secret, static key, and JWKS discovery',
@@ -27,6 +28,7 @@ const chapterDescriptions: Record<string, string> = {
   'security-headers': 'HSTS, CSP, permissions policy, and security header configuration',
   'rate-limiting': 'Memory and Redis-backed rate limiting with configurable windows',
   'caching': 'Optional caching layer with backend-agnostic cache interface',
+  'deployment': 'Kubernetes Helm chart and VM deployment with security hardening',
 };
 ---
 
@@ -37,7 +39,7 @@ const chapterDescriptions: Record<string, string> = {
   ogImageAlt="FastAPI Production Guide"
   ogType="website"
 >
-  <GuideJsonLd title={guideMeta.data.title} description={guideMeta.data.description} url="https://patrykgolabek.dev/guides/fastapi-production/" isLanding={true} />
+  <GuideJsonLd title={guideMeta.data.title} description={guideMeta.data.description} url="https://patrykgolabek.dev/guides/fastapi-production/" isLanding={true} datePublished={guideMeta.data.publishedDate?.toISOString().split('T')[0]} dateModified={guideMeta.data.publishedDate?.toISOString().split('T')[0]} />
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
     { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
@@ -49,9 +51,9 @@ const chapterDescriptions: Record<string, string> = {
       {guideMeta.data.title}
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl">
-      Every production concern &mdash; middleware, authentication, observability, security,
-      containerization &mdash; configured and battle-tested. This guide walks through each
-      layer of the FastAPI template so you understand what your AI agent inherits when it
+      Every production concern, middleware, authentication, observability, security,
+      containerization, configured and battle tested. This guide walks through each
+      layer of the FastAPI Chassis so you understand what your AI agent inherits when it
       starts writing business logic.
     </p>
     <p class="text-sm text-[var(--color-text-secondary)] mt-4">
@@ -60,8 +62,52 @@ const chapterDescriptions: Record<string, string> = {
         class="text-[var(--color-accent)] hover:underline"
         target="_blank"
         rel="noopener noreferrer"
-      >fastapi-template</a> {guideMeta.data.versionTag}
+      >fastapi-chassis</a> {guideMeta.data.versionTag}
     </p>
+
+    <!-- What is FastAPI — preamble -->
+    <section class="mt-16">
+      <h2 class="text-2xl font-heading font-bold mb-4">What is FastAPI?</h2>
+      <p class="text-base text-[var(--color-text-secondary)] leading-relaxed max-w-2xl">
+        <a href="https://fastapi.tiangolo.com/" class="text-[var(--color-accent)] hover:underline" target="_blank" rel="noopener noreferrer">FastAPI</a>
+        is a modern, high-performance Python web framework for building APIs.
+        Built on <strong>Starlette</strong> for the async runtime and <strong>Pydantic</strong> for
+        data validation, it delivers performance on par with Node.js and Go while staying
+        fully type-hinted and standards-based (OpenAPI&nbsp;+&nbsp;JSON&nbsp;Schema).
+      </p>
+      <p class="text-base text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mt-4">
+        Getting started is simple. A few lines give you a working API with
+        auto-generated interactive docs:
+      </p>
+
+      <div class="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] overflow-hidden max-w-2xl">
+        <div class="flex items-center gap-2 px-4 py-2 border-b border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] font-mono">
+          <span>main.py</span>
+        </div>
+        <pre class="px-4 py-4 overflow-x-auto text-sm leading-relaxed"><code class="language-python">from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def read_root():
+    return {`{"Hello": "World"}`}</code></pre>
+      </div>
+
+      <p class="text-sm text-[var(--color-text-secondary)] mt-3 max-w-2xl">
+        Run with <code class="text-xs bg-[var(--color-surface-alt)] px-1.5 py-0.5 rounded font-mono">fastapi dev main.py</code>
+        and visit <code class="text-xs bg-[var(--color-surface-alt)] px-1.5 py-0.5 rounded font-mono">/docs</code> for
+        the Swagger UI.
+      </p>
+
+      <p class="text-base text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mt-6">
+        That gets you a prototype. Production needs a lot more than that: authentication,
+        observability, security headers, database migrations, health checks, rate limiting,
+        and container packaging. The <strong>FastAPI Chassis</strong> wires all of that into
+        a single, tested foundation so your team (or your AI agent) can focus on
+        business logic from day one. Start with the <a href="/guides/fastapi-production/nfr-introduction/" class="text-[var(--color-accent)] hover:underline font-medium">Non-Functional Requirements</a> chapter
+        to see the quality attributes the chassis answers, then dive into any chapter below.
+      </p>
+    </section>
 
     <!-- Chapter Card Grid -->
     <h2 class="text-2xl font-heading font-bold mt-16 mb-8">Chapters</h2>

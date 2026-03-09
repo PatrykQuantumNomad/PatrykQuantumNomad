@@ -1,7 +1,7 @@
 ---
 title: "Authentication (JWT)"
-description: "Three-mode stateless JWT validation -- shared secret, static public key, or auto-rotating JWKS -- with graceful degradation and FastAPI dependency injection"
-order: 2
+description: "Three-mode stateless JWT validation (shared secret, static public key, or auto-rotating JWKS) with graceful degradation and FastAPI dependency injection"
+order: 3
 slug: "authentication"
 ---
 
@@ -11,16 +11,16 @@ import JwtAuthFlowDiagram from '../../../../components/guide/JwtAuthFlowDiagram.
 ## What Your Agent Inherits
 
 Your agent's route handlers receive an authenticated **Principal** object through FastAPI dependency injection.
-Every concern below the route signature -- token parsing, key resolution, signature verification, claim validation, clock-skew tolerance -- is already handled by the template's `JWTAuthService`.
+Every concern below the route signature, including token parsing, key resolution, signature verification, claim validation, and clock-skew tolerance, is already handled by the chassis's `JWTAuthService`.
 
 The agent never inspects the `Authorization` header directly.
-It declares a dependency, receives a typed `Principal`, and makes business decisions based on `subject`, `scopes`, and `roles`.
+Instead, it declares a dependency, receives a typed `Principal`, and makes business decisions based on `subject`, `scopes`, and `roles`.
 
 ---
 
 ## Three Validation Modes
 
-The template supports three sources of key material for JWT signature verification, selected entirely through environment variables:
+The chassis supports three sources of key material for JWT signature verification, all selected through environment variables:
 
 | Mode | Algorithm family | Environment variable | Use case |
 |------|-----------------|---------------------|----------|
@@ -28,7 +28,7 @@ The template supports three sources of key material for JWT signature verificati
 | **Static public key** | RS256 / ES256 / PS256 | `APP_AUTH_JWT_PUBLIC_KEY` | Single-issuer staging or on-prem |
 | **JWKS endpoint** | RS256 / ES256 / PS256 | `APP_AUTH_JWKS_URL` | Production with key rotation (Auth0, Keycloak, Entra ID) |
 
-Only one mode is active at a time -- the configuration validator rejects mixed setups at startup.
+Only one mode is active at a time, and the configuration validator rejects mixed setups at startup.
 The `JWTAuthService` constructor stores the settings and prepares the JWKS cache lock for the async runtime:
 
 <CodeFromRepo
@@ -53,8 +53,8 @@ The `JWTAuthService` constructor stores the settings and prepares the JWKS cache
 
 ## Key Resolution
 
-When a token arrives, `_resolve_key()` walks the three modes in priority order -- JWKS first, then static key, then shared secret.
-This decision tree means a production deployment with `APP_AUTH_JWKS_URL` set will always use rotating keys, regardless of whether a fallback secret is also configured:
+When a token arrives, `_resolve_key()` walks the three modes in priority order: JWKS first, then static key, then shared secret.
+Because of this ordering, a production deployment with `APP_AUTH_JWKS_URL` set will always use rotating keys, even if a fallback secret happens to be configured:
 
 <CodeFromRepo
   code={`async def _resolve_key(self, token: str) -> Any:
@@ -92,15 +92,15 @@ This decision tree means a production deployment with `APP_AUTH_JWKS_URL` set wi
 />
 
 Notice the **forced refresh on kid miss** (lines 131-134).
-When an identity provider rotates its signing key, the first token signed with the new key will miss the cache.
-Instead of rejecting the request, the service forces a single JWKS refresh.
-If the new kid appears in the refreshed key set, the token validates without operator intervention or a process restart.
+When an identity provider rotates its signing key, the first token signed with the new key will naturally miss the cache.
+Rather than rejecting the request outright, the service forces a single JWKS refresh.
+If the new kid appears in the refreshed key set, the token validates without any operator intervention or a process restart.
 
 ---
 
 ## JWKS with Graceful Degradation
 
-The `_fetch_jwks()` method implements a **cache-aside** pattern with an `asyncio.Lock` to prevent a thundering-herd fetch:
+The `_fetch_jwks()` method implements a **cache-aside** pattern backed by an `asyncio.Lock` to prevent thundering herd fetches:
 
 <CodeFromRepo
   code={`async def _fetch_jwks(self, force_refresh: bool) -> dict[str, Any]:
@@ -122,21 +122,35 @@ The `_fetch_jwks()` method implements a **cache-aside** pattern with an `asyncio
             return self._jwks_cache
         except Exception:
             if self._jwks_cache is not None:
-                self._jwks_last_fetch_used_stale_cache = True
-                return self._jwks_cache
+                stale_seconds = monotonic() - self._jwks_loaded_at
+                max_stale = self.settings.auth_jwks_max_stale_seconds
+                if max_stale > 0 and stale_seconds <= max_stale:
+                    self._jwks_last_fetch_used_stale_cache = True
+                    logger.warning(
+                        "JWKS refresh failed; using stale cache (%.0fs old, max %ds)",
+                        stale_seconds,
+                        max_stale,
+                    )
+                    return self._jwks_cache
+                logger.error(
+                    "JWKS refresh failed and stale cache exceeded max age "
+                    "(%.0fs old, max %ds); rejecting",
+                    stale_seconds,
+                    max_stale,
+                )
             raise`}
   lang="python"
   filePath="src/app/auth/service.py"
   title="JWTAuthService._fetch_jwks"
   startLine={145}
-  endLine={166}
+  endLine={180}
 />
 
 Key behaviors:
 
-- **Double-check locking** -- the fast path returns the cached value without acquiring the lock; the lock body re-checks staleness to avoid redundant fetches.
-- **TTL-based refresh** -- the cache expires after `auth_jwks_cache_ttl_seconds` (default 300 s), configurable via `APP_AUTH_JWKS_CACHE_TTL_SECONDS`.
-- **Stale-cache fallback** -- if the JWKS endpoint is temporarily unreachable but a stale cache exists, the service continues validating tokens with the last known key set rather than rejecting all requests. The readiness check will report the degraded state.
+- **Double-check locking.** The fast path returns the cached value without acquiring the lock. Inside the lock body, staleness is re-checked to avoid redundant fetches.
+- **TTL-based refresh.** The cache expires after `auth_jwks_cache_ttl_seconds` (default 300 s), which you can tune via `APP_AUTH_JWKS_CACHE_TTL_SECONDS`.
+- **Stale-cache fallback with age limits.** If the JWKS endpoint is temporarily unreachable but a stale cache exists, the service keeps validating tokens with the last known key set instead of rejecting every request. This grace period lasts up to `auth_jwks_max_stale_seconds` (default 3600 s). Once the stale cache exceeds that age, the service starts rejecting requests rather than relying on dangerously old keys. The readiness check will report the degraded state.
 
 ---
 
@@ -146,8 +160,8 @@ Key behaviors:
 
 ## The Principal Model
 
-Once the JWT passes signature and claim validation, the service maps the raw claims to a typed Pydantic model.
-This gives route handlers a stable domain object instead of an arbitrary dictionary:
+Once the JWT passes signature and claim validation, the service maps its raw claims to a typed Pydantic model.
+This gives route handlers a stable, well-defined domain object rather than an arbitrary dictionary:
 
 <CodeFromRepo
   code={`class Principal(BaseModel):
@@ -166,14 +180,14 @@ This gives route handlers a stable domain object instead of an arbitrary diction
   endLine={18}
 />
 
-The `scopes` and `roles` fields are normalized from several formats -- space-delimited strings, JSON arrays, or comma-separated values -- so the agent can use simple `in` checks regardless of the identity provider's claim layout.
+The `scopes` and `roles` fields are normalized from several common formats (space-delimited strings, JSON arrays, and comma-separated values), so your agent can use simple `in` checks regardless of how the identity provider structures its claims.
 
 ---
 
 ## Configuration Validation
 
-Misconfigured authentication is caught at startup, not at runtime.
-The `_validate_auth_settings()` function enforces consistency rules:
+Authentication misconfigurations are caught at startup, not at runtime.
+The `_validate_auth_settings()` function enforces a set of consistency rules:
 
 <CodeFromRepo
   code={`def _validate_auth_settings(settings: Settings) -> None:
@@ -196,24 +210,24 @@ The `_validate_auth_settings()` function enforces consistency rules:
   lang="python"
   filePath="src/app/settings.py"
   title="_validate_auth_settings"
-  startLine={618}
-  endLine={635}
+  startLine={678}
+  endLine={695}
 />
 
-What this catches before the first request:
+Here is what gets caught before the first request ever arrives:
 
-- JWKS URL over plain HTTP (must be HTTPS)
-- Mixed algorithm families (e.g., HS256 + RS256)
-- Missing key material for the chosen algorithm
-- Shared secrets shorter than 32 characters for HS* algorithms
-- Missing issuer or audience when the respective `auth_require_*` flags are true
+- JWKS URL served over plain HTTP (must be HTTPS)
+- Mixed algorithm families (e.g., HS256 combined with RS256)
+- Missing key material for the chosen algorithm family
+- Shared secrets shorter than 32 characters when using HS* algorithms
+- Missing issuer or audience values when the corresponding `auth_require_*` flags are enabled
 
 ---
 
 ## Dependency Injection
 
-The final piece connects the `JWTAuthService` to FastAPI's dependency injection system.
-Route handlers declare what authorization level they require, and the framework resolves the rest:
+The final piece wires the `JWTAuthService` into FastAPI's dependency injection system.
+Route handlers simply declare what authorization level they need, and the framework takes care of the rest:
 
 <CodeFromRepo
   code={`async def get_optional_principal(
@@ -253,7 +267,7 @@ def get_current_principal(
   endLine={51}
 />
 
-Three dependency tiers are available to the agent's routes:
+Four dependency options are available to your agent's routes:
 
 | Dependency | Behavior |
 |-----------|----------|
@@ -275,13 +289,13 @@ async def list_items(principal: Principal = Depends(get_current_principal)):
 
 ## What the Agent Never Implements
 
-The following concerns are handled entirely by the template infrastructure.
-The agent's generated code should never contain logic for:
+The following concerns live entirely in the chassis infrastructure.
+Your agent's generated code should never contain logic for any of these:
 
-- **Token parsing** -- extracting the bearer token from the `Authorization` header
-- **Key management** -- loading secrets, public keys, or JWKS endpoints
-- **JWKS rotation** -- cache refresh, stale-cache fallback, kid-miss retry
-- **Signature verification** -- calling `jwt.decode` with the correct algorithm and key
-- **Claim validation** -- checking `exp`, `iss`, `aud`, and required claims
-- **Principal mapping** -- normalizing scopes, roles, and audience from varying formats
-- **HTTP 401/403 responses** -- the dependency chain raises the correct status codes automatically
+- **Token parsing.** The chassis extracts the bearer token from the `Authorization` header.
+- **Key management.** Secrets, public keys, and JWKS endpoints are loaded automatically.
+- **JWKS rotation.** Cache refresh, stale-cache fallback, and kid-miss retry are built in.
+- **Signature verification.** The chassis calls `jwt.decode` with the correct algorithm and key.
+- **Claim validation.** Checks for `exp`, `iss`, `aud`, and any required claims are automatic.
+- **Principal mapping.** Scopes, roles, and audience values are normalized from varying formats.
+- **HTTP 401/403 responses.** The dependency chain raises the correct status codes on its own.

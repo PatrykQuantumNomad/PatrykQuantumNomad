@@ -2,11 +2,16 @@
   {
     "id": "fastapi-production",
     "title": "FastAPI Production Guide",
-    "description": "A deep-dive into every production concern handled by the FastAPI template -- so your AI agent writes business logic, not infrastructure",
+    "description": "A deep dive into every production concern handled by the FastAPI Chassis. Additionally, help for AI agents in writing business logic, not infrastructure.",
     "slug": "fastapi-production",
-    "templateRepo": "https://github.com/Translucent-Computing/fastapi-template",
+    "templateRepo": "https://github.com/PatrykQuantumNomad/fastapi-chassis",
     "versionTag": "v1.0.0",
+    "publishedDate": "2026-03-08",
     "chapters": [
+      {
+        "slug": "nfr-introduction",
+        "title": "Non-Functional Requirements"
+      },
       {
         "slug": "builder-pattern",
         "title": "Builder Pattern"
@@ -50,6 +55,14 @@
       {
         "slug": "caching",
         "title": "Caching"
+      },
+      {
+        "slug": "deployment",
+        "title": "Deployment"
+      },
+      {
+        "slug": "conclusion",
+        "title": "Conclusion"
       }
     ]
   }

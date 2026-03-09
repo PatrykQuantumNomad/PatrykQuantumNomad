@@ -1,0 +1,228 @@
+---
+title: "Database"
+description: "How the FastAPI Chassis manages async SQLAlchemy engines, session lifecycle, multi-backend URL derivation, and Alembic migrations so your AI agent can focus on models and queries."
+order: 5
+slug: "database"
+---
+
+import CodeFromRepo from '../../../../components/guide/CodeFromRepo.astro';
+
+## What Your Agent Inherits
+
+Your agent writes SQLAlchemy models and queries against a pre-configured async engine. Session lifecycle, connection pooling, migration infrastructure, and multi-backend URL derivation are all wired up out of the box. The database layer defaults to SQLite for development and is Postgres-ready for production. Switching backends is a single environment variable change, with no application code to touch.
+
+---
+
+## Engine Creation
+
+The engine factory smooths over the differences between SQLite and Postgres at connection time, giving the rest of your application a single `AsyncEngine` interface to work with.
+
+<CodeFromRepo
+  code={`def create_database_engine(settings: Settings) -> AsyncEngine:
+    """Create the application's async engine, optimized for the default SQLite setup."""
+    _ensure_sqlite_parent_exists(settings.database_url)
+
+    connect_args: dict[str, int] = {}
+    if settings.database_url.startswith("sqlite+aiosqlite://"):
+        connect_args["timeout"] = settings.database_connect_timeout_seconds
+
+    engine_kwargs: dict[str, object] = {
+        "echo": settings.database_echo,
+        "pool_pre_ping": settings.database_pool_pre_ping,
+    }
+    if connect_args:
+        engine_kwargs["connect_args"] = connect_args
+
+    if not settings.database_url.startswith("sqlite+aiosqlite://"):
+        engine_kwargs["pool_size"] = settings.database_pool_size
+        engine_kwargs["max_overflow"] = settings.database_max_overflow
+
+    engine = create_async_engine(settings.database_url, **engine_kwargs)
+
+    if settings.database_url.startswith("sqlite+aiosqlite://"):
+        _register_sqlite_pragmas(engine, settings)
+
+    return engine`}
+  lang="python"
+  filePath="src/app/db/engine.py"
+  title="create_database_engine()"
+  startLine={68}
+  endLine={92}
+/>
+
+A few design decisions worth noting:
+
+- **SQLite path creation.** `_ensure_sqlite_parent_exists()` creates the `data/` directory on first run, so the default configuration just works without any manual setup.
+- **Conditional pool sizing.** SQLite doesn't support connection pools, so `pool_size` and `max_overflow` are only set for non-SQLite backends. SQLite receives a `timeout` connect argument instead.
+- **Pool pre-ping.** Enabled by default to catch stale connections before they cause query failures in long-running deployments.
+- **Echo toggle.** `APP_DATABASE_ECHO=true` turns on SQL logging for development debugging, no code changes needed.
+- **SQLite production pragmas.** When the SQLite backend is active, `_register_sqlite_pragmas()` applies WAL journal mode, tuned synchronous settings, busy timeout, cache size, foreign keys, and optional mmap through an engine event listener. Each pragma is configurable via `APP_DATABASE_SQLITE_*` environment variables.
+
+---
+
+## Multi-Backend URL Derivation
+
+A single `Settings` object supports three database backends through a priority chain: an explicit URL, backend-specific fields, or the SQLite default.
+
+<CodeFromRepo
+  code={`def _derive_database_url(settings: Settings) -> str:
+    """Build a runtime database URL from the selected backend configuration."""
+    if settings.database_backend == "sqlite":
+        return f"sqlite+aiosqlite:///{settings.database_sqlite_path}"
+
+    if settings.database_backend == "postgres":
+        if not settings.database_postgres_password:
+            raise ValueError(
+                "APP_DATABASE_POSTGRES_PASSWORD must be set when APP_DATABASE_BACKEND=postgres"
+            )
+        return (
+            "postgresql+asyncpg://"
+            f"{settings.database_postgres_user}:{settings.database_postgres_password}"
+            f"@{settings.database_postgres_host}:{settings.database_postgres_port}"
+            f"/{settings.database_postgres_name}"
+        )
+
+    raise ValueError("APP_DATABASE_URL must be set when APP_DATABASE_BACKEND=custom")`}
+  lang="python"
+  filePath="src/app/settings.py"
+  title="_derive_database_url()"
+  startLine={562}
+  endLine={579}
+/>
+
+Here is how the priority chain works:
+
+1. **`APP_DATABASE_URL`** (explicit). If set, it overrides everything. Use this when your deployment platform provides a full connection string.
+2. **`APP_DATABASE_BACKEND=postgres`**. Derives the URL from individual `APP_DATABASE_POSTGRES_*` fields and validates that the password is present.
+3. **`APP_DATABASE_BACKEND=sqlite`** (default). Constructs a file-backed SQLite URL from `APP_DATABASE_SQLITE_PATH`.
+4. **`APP_DATABASE_BACKEND=custom`**. Requires an explicit `APP_DATABASE_URL` and raises an error if none is provided.
+
+In practice, this means a developer can clone the repo and run it right away (SQLite kicks in by default), while production deploys simply set `APP_DATABASE_BACKEND=postgres` along with the individual connection fields.
+
+---
+
+## Async Sessions
+
+The session layer gives you a factory and a dependency injection friendly scope generator for request-scoped database access.
+
+### Session Factory
+
+<CodeFromRepo
+  code={`def create_session_factory(
+    settings: Settings,
+    engine: AsyncEngine,
+) -> async_sessionmaker[AsyncSession]:
+    """Create the async session factory bound to the configured engine."""
+    _ = settings
+    return async_sessionmaker(
+        engine,
+        expire_on_commit=False,
+        autoflush=False,
+        autocommit=False,
+    )`}
+  lang="python"
+  filePath="src/app/db/engine.py"
+  title="create_session_factory()"
+  startLine={95}
+  endLine={106}
+/>
+
+- **`expire_on_commit=False`** prevents SQLAlchemy from issuing lazy-load queries after a commit. Those queries would fail in an async context.
+- **`autoflush=False`** gives your application explicit control over when queries actually hit the database.
+- **`autocommit=False`** requires explicit `session.commit()` calls, keeping transaction boundaries visible in your application code.
+
+### Request-Scoped Session
+
+<CodeFromRepo
+  code={`async def session_scope(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[AsyncSession]:
+    """Yield a request-scoped database session."""
+    async with session_factory() as session:
+        yield session`}
+  lang="python"
+  filePath="src/app/db/engine.py"
+  title="session_scope()"
+  startLine={109}
+  endLine={114}
+/>
+
+The `session_scope()` generator pairs with FastAPI's dependency injection:
+
+<CodeFromRepo
+  code={`async def get_db_session(request: Request) -> AsyncIterator[AsyncSession]:
+    """Yield a request-scoped async database session."""
+    async for session in session_scope(get_session_factory(request)):
+        yield session`}
+  lang="python"
+  filePath="src/app/db/session.py"
+  title="get_db_session() dependency"
+  startLine={19}
+  endLine={22}
+/>
+
+Route handlers declare `session: AsyncSession = Depends(get_db_session)` and receive a session that is automatically closed when the request completes. Your agent writes queries, and the chassis takes care of the session lifecycle.
+
+### Declarative Base
+
+<CodeFromRepo
+  code={`from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """Base class for all ORM models in the application."""`}
+  lang="python"
+  filePath="src/app/db/base.py"
+  title="ORM Base class"
+/>
+
+Every model your agent creates inherits from `Base`. This centralizes metadata so Alembic's autogeneration can detect schema changes across the entire model hierarchy.
+
+---
+
+## Alembic Integration
+
+Alembic handles database migrations, but it doesn't natively support async database drivers. The chassis bridges that gap with an automatic async-to-sync URL mapper.
+
+<CodeFromRepo
+  code={`def _derive_alembic_database_url(database_url: str) -> str:
+    """Derive a sync Alembic URL from the configured async runtime URL when possible."""
+    sqlite_prefix = "sqlite+aiosqlite://"
+    if database_url.startswith(sqlite_prefix):
+        return database_url.replace(sqlite_prefix, "sqlite://", 1)
+
+    postgres_prefix = "postgresql+asyncpg://"
+    if database_url.startswith(postgres_prefix):
+        return database_url.replace(postgres_prefix, "postgresql+psycopg://", 1)
+
+    raise ValueError("APP_ALEMBIC_DATABASE_URL must be set explicitly for this database URL")`}
+  lang="python"
+  filePath="src/app/settings.py"
+  title="_derive_alembic_database_url()"
+  startLine={541}
+  endLine={551}
+/>
+
+This mapping swaps async drivers for their synchronous counterparts:
+
+| Runtime Driver | Alembic Driver |
+|---|---|
+| `sqlite+aiosqlite` | `sqlite` |
+| `postgresql+asyncpg` | `postgresql+psycopg` |
+
+If the runtime URL uses a custom driver that the mapper doesn't recognize, you'll need to set `APP_ALEMBIC_DATABASE_URL` explicitly. This keeps the common case fully automatic while still providing an escape hatch for less typical setups.
+
+The entrypoint script runs migrations at container start when `RUN_DB_MIGRATIONS=true`, so schema changes apply on every deploy without a separate migration step.
+
+---
+
+## What the Agent Never Implements
+
+The chassis owns all the database plumbing. Your agent never needs to:
+
+- **Configure the async engine or connection pool.** Backend selection and pool sizing are driven entirely by environment variables.
+- **Derive database URLs for different backends.** The settings validator takes care of SQLite, Postgres, and custom URL derivation automatically.
+- **Manage session lifecycle or transaction boundaries.** `get_db_session()` provides a request-scoped session through dependency injection.
+- **Map async URLs to sync URLs for Alembic.** The settings validator derives the Alembic URL from the runtime URL.
+- **Create the SQLite data directory.** `_ensure_sqlite_parent_exists()` handles that on engine creation.
+- **Run migrations at deploy time.** The Docker entrypoint runs Alembic upgrades when configured.

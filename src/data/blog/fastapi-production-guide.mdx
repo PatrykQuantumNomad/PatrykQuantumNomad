@@ -1,24 +1,31 @@
 ---
-title: "FastAPI Production Guide: What Your AI Agent Inherits"
-description: "A companion overview of the FastAPI Production Guide covering 11 production concerns -- middleware, authentication, observability, database, Docker, testing, health checks, security headers, rate limiting, and caching."
+title: "AI Agents Write Features, Not Production Systems"
+description: "Why prompting an AI agent to build a FastAPI app gets you functional code but not production infrastructure. How hand-crafting 13 production concerns into a chassis lets the agent focus on what it's good at: business logic."
 publishedDate: 2026-03-08
 tags: ["fastapi", "python", "production", "kubernetes", "docker", "ai-agent", "devops"]
+coverImage: "/images/fastapi-production-guide-cover.svg"
 draft: false
 ---
 
-When an AI agent generates a FastAPI endpoint, what production infrastructure is already in place? That is the question the [FastAPI Production Guide](/guides/fastapi-production/) answers across 11 chapters. Each chapter covers one production concern that the template handles so the agent -- or any developer -- writes business logic instead of boilerplate.
+Prompt an AI agent to build a FastAPI application. You will get endpoints, models, and business logic. You will not get a production system.
 
-This post introduces the guide, summarizes what each chapter covers, and provides direct links to all 11 deep-dive pages. If you want the full technical detail with code snippets, architecture diagrams, and configuration walkthroughs, follow the links to the guide itself.
+Even the most detailed prompt, one that specifies middleware ordering, JWT validation modes, structured logging, container hardening, and health check separation, will produce inconsistent results. LLMs are not deterministic. Run the same prompt twice and you get two different implementations. The functional requirements, the endpoints that make your app do what it does, will be reasonably close each time. The non-functional requirements, the production concerns that determine whether your app survives real traffic, will be different every run. Sometimes dangerously so.
 
-## Why a Production Guide?
+This is the gap that most AI-assisted development ignores. Developers care about time to market. They prompt for features and accept whatever infrastructure the model happens to generate. The result is functional code sitting on top of random production decisions: middleware in the wrong order, health checks that conflate readiness with liveness, Docker images running as root, rate limiters trusting spoofed headers.
 
-Running `uvicorn main:app --reload` gets you a development server. It does not get you production infrastructure. Between that first endpoint and a deployment you would trust with real traffic, there are at least 11 concerns to address: how requests flow through middleware, how authentication validates tokens, how observability surfaces problems before users notice, how the database connection pool handles concurrency, how the Docker image minimizes attack surface, how tests run reliably in CI, how health checks distinguish readiness from liveness, how security headers defend against common web attacks, how rate limiting protects the API from abuse, and how caching reduces unnecessary work.
+The fix is not a better prompt. The fix is to stop asking the AI agent to make production decisions at all.
 
-The [fastapi-template](https://github.com/Translucent-Computing/fastapi-template) repository handles all of these. The guide walks through each one, explaining the what, the why, and the "why not the obvious approach" tradeoffs. The AI agent angle is deliberate: when an agent generates a new route, it inherits every one of these 11 production layers without writing a single line of infrastructure code.
+## Hand-Craft the Foundation, Let the Agent Build on It
+
+The [fastapi-chassis](https://github.com/PatrykQuantumNomad/fastapi-chassis) repository takes the opposite approach to prompting. Every non-functional requirement is hand-crafted, tested, and configured before the AI agent writes its first line of code. Middleware ordering, authentication, observability, database connections, Docker packaging, test infrastructure, health checks, security headers, rate limiting, caching, and deployment are all locked in. The agent inherits all of it and focuses on the one thing it does well: writing business logic.
+
+The guide opens with a [Non-Functional Requirements](/guides/fastapi-production/nfr-introduction/) chapter that maps 23 quality attributes to the chapters that address them — the contract between the chassis and the agent.
+
+The [FastAPI Production Guide](/guides/fastapi-production/) walks through each of these production concerns across 13 chapters, explaining the what, the why, and the tradeoffs. This post introduces the guide, summarizes what each chapter covers, and provides direct links to every deep-dive page.
 
 ## Builder Pattern
 
-The guide starts with the architectural foundation. The Builder Pattern chapter explains how the FastAPI application is composed through a factory function that calls a series of `setup_*()` methods. Each method adds one production concern -- middleware, authentication, database connections, health routes -- and the factory orchestrates the order.
+The guide starts with the architectural foundation. The Builder Pattern chapter explains how the FastAPI application is composed through a factory function that calls a series of `setup_*()` methods. Each method adds one production concern (middleware, authentication, database connections, health routes) and the factory orchestrates the order.
 
 This pattern means adding a new capability is a single function call, not a scattered set of changes across the codebase. The chapter includes an architecture diagram showing how the builder composes the full application.
 
@@ -26,7 +33,7 @@ This pattern means adding a new capability is a single function call, not a scat
 
 ## Middleware Stack
 
-FastAPI sits on top of Starlette, which means middleware runs as raw ASGI wrappers. The Middleware chapter covers the 6-layer middleware stack: CORS, request ID injection, request logging, timing, compression, and security headers. Order matters -- the guide explains why request ID injection must come before logging, and why compression must come after security headers.
+FastAPI sits on top of Starlette, which means middleware runs as raw ASGI wrappers. The Middleware chapter covers the 6-layer middleware stack: CORS, request ID injection, request logging, timing, compression, and security headers. Order matters. The guide explains why request ID injection must come before logging, and why compression must come after security headers.
 
 The chapter includes a visual diagram of the middleware stack showing request and response flow through all six layers.
 
@@ -34,7 +41,7 @@ The chapter includes a visual diagram of the middleware stack showing request an
 
 ## Authentication
 
-The Authentication chapter covers the template's 3-mode JWT validation system: shared secret (HMAC), static public key (RSA/EC), and JWKS endpoint (key rotation). A single `get_current_user` dependency handles all three modes transparently. The chapter walks through each mode's configuration, explains when to use which, and includes a flow diagram showing how the validation logic selects the correct mode at runtime.
+The Authentication chapter covers the chassis's 3-mode JWT validation system: shared secret (HMAC), static public key (RSA/EC), and JWKS endpoint (key rotation). A single `get_current_user` dependency handles all three modes transparently. The chapter walks through each mode's configuration, explains when to use which, and includes a flow diagram showing how the validation logic selects the correct mode at runtime.
 
 This is the chapter that matters most for the AI agent angle. An agent generating a protected endpoint adds a single dependency parameter and inherits whichever authentication mode the deployment is configured for.
 
@@ -42,7 +49,7 @@ This is the chapter that matters most for the AI agent angle. An agent generatin
 
 ## Observability
 
-You cannot debug what you cannot see. The Observability chapter covers the template's three observability pillars: OpenTelemetry distributed tracing, Prometheus metrics, and structured JSON logging. Each pillar is configured once in the builder and available everywhere without per-route setup.
+You cannot debug what you cannot see. The Observability chapter covers the chassis's three observability pillars: OpenTelemetry distributed tracing, Prometheus metrics, and structured JSON logging. Each pillar is configured once in the builder and available everywhere without per-route setup.
 
 The chapter explains how trace context propagates across service boundaries, how custom Prometheus metrics are defined, and how structured logging captures request metadata automatically. In a Kubernetes environment, this is the difference between grepping through text logs and querying structured fields in a log aggregation system.
 
@@ -50,7 +57,7 @@ The chapter explains how trace context propagates across service boundaries, how
 
 ## Database
 
-The Database chapter covers the template's async SQLAlchemy setup with Alembic migrations. The key design decision is SQLite-first development with zero-infra local setup, transitioning to PostgreSQL and Redis in production without code changes. The chapter walks through the async session factory, connection pool configuration, and migration workflow.
+The Database chapter covers the chassis's async SQLAlchemy setup with Alembic migrations. The key design decision is SQLite-first development with zero-infra local setup, transitioning to PostgreSQL and Redis in production without code changes. The chapter walks through the async session factory, connection pool configuration, and migration workflow.
 
 For the AI agent, this means generating a new model and migration is a matter of following the existing patterns. The database connection, session lifecycle, and migration pipeline are already configured.
 
@@ -66,7 +73,7 @@ Image security is not optional in Kubernetes. The chapter explains why each Dock
 
 ## Testing
 
-The Testing chapter covers the template's test infrastructure: root `conftest.py` with shared fixtures, integration `conftest.py` with database and client fixtures, and a test organization pattern that separates unit tests from integration tests. The template achieves 98%+ test coverage, and the chapter explains how the fixture hierarchy makes that coverage maintainable.
+The Testing chapter covers the chassis's test infrastructure: root `conftest.py` with shared fixtures, integration `conftest.py` with database and client fixtures, and a test organization pattern that separates unit tests from integration tests. The chassis achieves high test coverage, and the chapter explains how the fixture hierarchy makes that coverage maintainable.
 
 The guide shows the exact fixture setup so that adding tests for new endpoints follows the established pattern rather than reinventing the test infrastructure each time.
 
@@ -74,7 +81,7 @@ The guide shows the exact fixture setup so that adding tests for new endpoints f
 
 ## Health Checks
 
-Not all health checks are the same. The Health Checks chapter explains the critical distinction between readiness probes (can this instance accept traffic?) and liveness probes (is this instance still functioning?). The template implements both with separate endpoints, and the chapter explains why conflating them causes cascading failures in Kubernetes.
+Not all health checks are the same. The Health Checks chapter explains the critical distinction between readiness probes (can this instance accept traffic?) and liveness probes (is this instance still functioning?). The chassis implements both with separate endpoints, and the chapter explains why conflating them causes cascading failures in Kubernetes.
 
 A readiness check that also verifies the database connection prevents traffic from reaching pods that cannot serve requests. A liveness check that avoids expensive dependency checks prevents Kubernetes from restarting pods that are temporarily waiting on a slow upstream service.
 
@@ -92,28 +99,80 @@ Each header is explained with its production impact and the consequences of omit
 
 The Rate Limiting chapter covers two implementations: an in-memory rate limiter for single-instance deployments and a Redis-backed rate limiter for distributed deployments. Both use the same interface, and the builder selects the correct implementation based on configuration.
 
-The chapter explains proxy-aware client identification -- why using the leftmost IP from `X-Forwarded-For` is wrong, and how the template uses the rightmost untrusted hop instead. In a Kubernetes environment behind an ingress controller, getting client identification wrong means either rate limiting all traffic as a single client or trusting spoofed headers.
+The chapter explains proxy-aware client identification: why using the leftmost IP from `X-Forwarded-For` is wrong, and how the chassis uses the rightmost untrusted hop instead. In a Kubernetes environment behind an ingress controller, getting client identification wrong means either rate limiting all traffic as a single client or trusting spoofed headers.
 
 [Read the full Rate Limiting chapter](/guides/fastapi-production/rate-limiting/)
 
 ## Caching
 
-The Caching chapter covers the template's optional caching layer using dependency injection. Cache operations are injected into route handlers as dependencies rather than called directly, which means routes remain testable and the caching implementation can be swapped without changing business logic.
+The Caching chapter covers the chassis's optional caching layer using dependency injection. Cache operations are injected into route handlers as dependencies rather than called directly, which means routes remain testable and the caching implementation can be swapped without changing business logic.
 
-The chapter covers the Redis-backed cache implementation, TTL configuration, cache key strategies, and the pattern for adding caching to new endpoints. For the AI agent, caching a new endpoint is a matter of adding a dependency parameter -- the cache infrastructure is already configured and connected.
+The chapter covers the Redis-backed cache implementation, TTL configuration, cache key strategies, and the pattern for adding caching to new endpoints. For the AI agent, caching a new endpoint is a matter of adding a dependency parameter; the cache infrastructure is already configured and connected.
 
 [Read the full Caching chapter](/guides/fastapi-production/caching/)
 
 ## How to Use This Guide
 
-There is no single correct reading order, but I recommend starting with the [Builder Pattern](/guides/fastapi-production/builder-pattern/) chapter. It explains the factory function that composes all 11 production concerns, which gives you the mental model for how every other chapter fits together. From there, read whichever chapter addresses your most immediate concern.
+There is no single correct reading order, but I recommend starting with the [Non-Functional Requirements](/guides/fastapi-production/nfr-introduction/) chapter to see the full scope of what the chassis handles, then moving to the [Builder Pattern](/guides/fastapi-production/builder-pattern/) chapter. It explains the factory function that composes all 13 production concerns, which gives you the mental model for how every other chapter fits together. From there, read whichever chapter addresses your most immediate concern.
 
 If you are deploying to Kubernetes, the [Docker](/guides/fastapi-production/docker/), [Health Checks](/guides/fastapi-production/health-checks/), and [Observability](/guides/fastapi-production/observability/) chapters are the most operationally critical. If you are securing the API, start with [Authentication](/guides/fastapi-production/authentication/), [Security Headers](/guides/fastapi-production/security-headers/), and [Rate Limiting](/guides/fastapi-production/rate-limiting/). If you are onboarding a new developer, the [Testing](/guides/fastapi-production/testing/) and [Database](/guides/fastapi-production/database/) chapters explain the day-to-day development patterns.
 
 The full guide is at the [FastAPI Production Guide](/guides/fastapi-production/) landing page.
 
-## What Your Agent Inherits
+## The Missing Primitive: Chassis
 
-The goal is simple: your AI agent inherits production-grade infrastructure. Every one of the 11 production concerns covered in this guide is handled by the template before the agent writes its first line of business logic. Authentication, middleware, observability, database connections, Docker packaging, test infrastructure, health checks, security headers, rate limiting, and caching are all configured, tested, and documented.
+Modern AI coding agents have a growing vocabulary of extensibility primitives. Claude Code has skills (reusable capabilities the agent can invoke), hooks (lifecycle events that trigger shell commands around agent actions), and MCPs (external tool integrations that give the agent access to databases, APIs, and services). Each one extends what the agent can do.
 
-The [FastAPI Production Guide](/guides/fastapi-production/) shows you exactly what that means, one production concern at a time.
+None of them address what the agent should inherit.
+
+When an agent generates a new endpoint, it needs to know: what middleware stack does this request pass through? What authentication scheme protects it? What logging format captures its output? What test infrastructure validates it? Today, the agent either guesses (non-deterministically) or you paste context into a prompt and hope it sticks.
+
+This is the gap. There is no first-class concept for "here is the production infrastructure you are building on top of — do not modify it, do not re-implement it, just extend it." Skills tell the agent what it can do. Hooks tell it what happens around its actions. MCPs tell it what tools it can reach. But nothing tells it what foundation it stands on.
+
+I am calling this missing primitive a **chassis**.
+
+A chassis is not a template. A template is a starting point you clone and modify. A chassis is a structural contract: a versioned, tested, documented production foundation that the agent treats as immutable infrastructure. The agent builds on the chassis. It does not rebuild the chassis.
+
+The difference matters. A template says "here is some code to start from." A chassis says "here are 13 production concerns that are solved — your job is business logic." A template is a suggestion. A chassis is a guarantee.
+
+What a chassis declaration might look like:
+
+```toml
+# .claude/chassis.toml
+[chassis]
+name = "fastapi-production"
+repo = "PatrykQuantumNomad/fastapi-chassis"
+version = "v1.0.0"
+guide = "https://patrykgolabek.dev/guides/fastapi-production/"
+
+# Production concerns handled by this chassis
+concerns = [
+  "middleware",
+  "authentication",
+  "observability",
+  "database",
+  "docker",
+  "testing",
+  "health-checks",
+  "security-headers",
+  "rate-limiting",
+  "caching",
+]
+
+# Boundaries the agent must respect
+[chassis.boundaries]
+immutable = ["src/core/", "src/middleware/", "docker/", "tests/conftest.py"]
+extensible = ["src/routes/", "src/models/", "src/services/", "tests/routes/"]
+```
+
+The `immutable` paths are the production infrastructure. The agent reads them for context but never modifies them. The `extensible` paths are where the agent writes business logic, following the patterns established by the chassis. The `concerns` list tells the agent what is already handled so it does not attempt to re-implement authentication, re-configure logging, or add its own middleware.
+
+This is not hypothetical. The [fastapi-chassis](https://github.com/PatrykQuantumNomad/fastapi-chassis) is a chassis. The 13 chapters of the [FastAPI Production Guide](/guides/fastapi-production/) are the documentation for that chassis. What is missing is the tooling that makes this a first-class concept in the agent's workflow rather than something you explain in a prompt.
+
+Skills, hooks, MCPs, and chassis. Four primitives. The first three extend what the agent can do. The fourth defines what it does not need to do.
+
+## Stop Prompting for Production
+
+The non-functional requirements of a production system are not something you want to leave to chance. They are not something you want to vary between prompt runs. They are the kind of decisions that need to be made once, made correctly, and inherited by every piece of code that follows.
+
+That is what the [fastapi-chassis](https://github.com/PatrykQuantumNomad/fastapi-chassis) provides. Hand-crafted production infrastructure across 13 concerns, documented in 13 chapters of the [FastAPI Production Guide](/guides/fastapi-production/). Your AI agent writes features. The chassis handles everything else.

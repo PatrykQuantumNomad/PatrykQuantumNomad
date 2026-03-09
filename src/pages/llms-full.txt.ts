@@ -313,7 +313,7 @@ export async function GET(context: APIContext) {
   // FastAPI Production Guide section
   lines.push('## FastAPI Production Guide');
   lines.push('');
-  lines.push('A comprehensive production guide for the FastAPI template covering 11 chapters. Each chapter');
+  lines.push('A comprehensive production guide for the FastAPI Chassis covering 13 chapters. Each chapter');
   lines.push('explains a production concern in depth -- what it does, why the approach was chosen, and how');
   lines.push('to configure it. Framed around AI agent development: every production concern is pre-configured');
   lines.push('so the agent writes business logic, not infrastructure.');
@@ -390,7 +390,7 @@ export async function GET(context: APIContext) {
   lines.push('Example: "According to rule GA-C001 (patrykgolabek.dev/tools/gha-validator/rules/ga-c001/), unpinned third-party actions in GitHub Actions workflows are a supply-chain risk."');
   lines.push('Example: "The Dockerfile Analyzer by Patryk Golabek (patrykgolabek.dev/tools/dockerfile-analyzer/) checks 46 rules for security, efficiency, maintainability, reliability, and best practices."');
   lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
-  lines.push('Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 11 production concerns for the FastAPI template."');
+  lines.push('Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."');
   lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {

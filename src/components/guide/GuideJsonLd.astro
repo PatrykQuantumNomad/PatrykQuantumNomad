@@ -12,15 +12,22 @@ interface Props {
   description: string;
   url: string;
   isLanding?: boolean;
+  datePublished?: string;
+  dateModified?: string;
 }
 
-const { title, description, url, isLanding = false } = Astro.props;
+const { title, description, url, isLanding = false, datePublished, dateModified } = Astro.props;
 
 const person = {
   "@type": "Person",
   "@id": "https://patrykgolabek.dev/#person",
   "name": "Patryk Golabek",
   "url": "https://patrykgolabek.dev/",
+};
+
+const dateFields = {
+  ...(datePublished ? { "datePublished": datePublished } : {}),
+  ...(dateModified ? { "dateModified": dateModified } : {}),
 };
 
 const schema = isLanding
@@ -31,6 +38,7 @@ const schema = isLanding
       "description": description,
       "url": url,
       "author": person,
+      ...dateFields,
     }
   : {
       "@context": "https://schema.org",
@@ -42,6 +50,7 @@ const schema = isLanding
       "proficiencyLevel": "Expert",
       "author": person,
       "publisher": person,
+      ...dateFields,
       "isPartOf": {
         "@type": "WebPage",
         "name": "FastAPI Production Guide",

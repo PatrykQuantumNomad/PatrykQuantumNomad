@@ -1,0 +1,141 @@
+---
+title: "Non-Functional Requirements"
+description: "The 23 quality attributes that distinguish a production FastAPI application from a prototype: why they matter, how they group, and which chapter addresses each one"
+order: 0
+slug: "nfr-introduction"
+---
+import NfrDiagram from '../../../../components/guide/NfrDiagram.astro';
+
+## What Your Agent Inherits
+
+Your AI agent inherits a production system, not a prototype. Before the agent writes its first line of business logic, the FastAPI Chassis has already addressed non-functional requirements across security, reliability, performance, maintainability, and deployment. This chapter maps each of those requirements to the chapter that covers it.
+
+Non-functional requirements are the quality attributes that determine whether software survives real traffic, real users, and real failures. They are invisible when they work and catastrophic when they don't. An AI agent generating endpoints will produce functional code, routes that accept requests and return responses. What it won't produce consistently is the infrastructure that makes those endpoints production worthy: the middleware ordering, the authentication validation, the structured logging, the container hardening, the health check separation.
+
+This guide exists because those decisions should be made once, made well, and inherited by every piece of code that follows.
+
+## What Are Non-Functional Requirements?
+
+Functional requirements describe _what_ a system does. A login endpoint authenticates users. A search endpoint returns results. An upload endpoint stores files. These are the features, the things you can point to in a demo.
+
+Non-functional requirements describe _how well_ the system does it. How fast does the login respond under load? What happens when the database connection drops mid-request? Can you trace a single request across three services? Will the container restart correctly after an OOM kill? Can a new developer add an endpoint without understanding the middleware stack?
+
+The software engineering literature calls these the "-ilities": reliability, availability, maintainability, scalability, testability, observability. The ISO 25010 standard formalizes them into a product quality model with nine characteristics and dozens of sub-characteristics. In practice, most teams discover them the hard way: in production, at 2 AM, when something that worked in development fails under real conditions.
+
+<NfrDiagram />
+
+Here is the core problem with AI-generated code: non-functional requirements are exactly where LLMs are least reliable. Ask an LLM to implement a login endpoint and you'll get a reasonable implementation every time. Ask it to configure middleware ordering, health check separation, and security headers, and you'll get a different answer on each run. Functional requirements have clear right answers that appear in training data. Non-functional requirements involve tradeoffs, context, and operational experience that LLMs can approximate but never truly internalize.
+
+The FastAPI Chassis solves this by removing non-functional requirements from the agent's scope entirely. The chassis handles most of them. The agent handles business logic.
+
+## The NFR Matrix
+
+The non-functional requirements addressed by the chassis group into six categories. Each requirement links to the chapter (or chapters) that implement it.
+
+### Security and Compliance
+
+These requirements protect the system, its data, and its users from unauthorized access, data breaches, and regulatory violations.
+
+**Security.** Defense against unauthorized access, injection, and data exposure. The chassis implements this across five layers: JWT authentication with three validation modes ([Authentication](/guides/fastapi-production/authentication/)), ASGI middleware with request filtering ([Middleware](/guides/fastapi-production/middleware/)), HTTP security headers against XSS and clickjacking ([Security Headers](/guides/fastapi-production/security-headers/)), rate limiting against abuse ([Rate Limiting](/guides/fastapi-production/rate-limiting/)), and hardened container images running as non-root ([Docker](/guides/fastapi-production/docker/)).
+
+**Compliance.** Adherence to security standards and organizational policies. The authentication system supports JWKS endpoint discovery for integration with enterprise identity providers ([Authentication](/guides/fastapi-production/authentication/)). Security headers enforce transport security (HSTS) and content policies (CSP) that compliance audits require ([Security Headers](/guides/fastapi-production/security-headers/)).
+
+**Regulations.** Meeting external legal and industry requirements. HSTS enforcement, CSP headers, and referrer policy configuration address requirements from frameworks like PCI-DSS and SOC 2 ([Security Headers](/guides/fastapi-production/security-headers/)). Structured logging with immutable request traces provides the audit trail that regulators expect ([Observability](/guides/fastapi-production/observability/)).
+
+**Auditability.** The ability to trace and verify system behavior after the fact. Every request generates a unique trace ID that propagates across service boundaries via OpenTelemetry ([Observability](/guides/fastapi-production/observability/)). Structured JSON logs capture request metadata, response codes, and timing automatically. The test suite verifies that audit relevant behaviors are covered ([Testing](/guides/fastapi-production/testing/)).
+
+### Reliability and Operations
+
+These requirements ensure the system remains functional, recoverable, and visible under failure conditions.
+
+**Fault Tolerance.** Continued operation when components fail. Health check separation ensures Kubernetes does not restart pods during transient failures ([Health Checks](/guides/fastapi-production/health-checks/)). The middleware stack processes requests through isolated layers so a failure in one concern does not cascade ([Middleware](/guides/fastapi-production/middleware/)).
+
+**Reliability.** Consistent correct behavior over time. The test suite with high coverage ensures that regressions are caught before deployment ([Testing](/guides/fastapi-production/testing/)). Health checks verify database connectivity and service health continuously ([Health Checks](/guides/fastapi-production/health-checks/)). The async database layer handles connection pool exhaustion gracefully ([Database](/guides/fastapi-production/database/)).
+
+**Availability.** System accessible when users need it. Readiness probes prevent traffic from reaching pods that cannot serve requests. Liveness probes restart pods that are genuinely stuck ([Health Checks](/guides/fastapi-production/health-checks/)). Rate limiting prevents abuse from consuming all available capacity ([Rate Limiting](/guides/fastapi-production/rate-limiting/)). Kubernetes deployment with rolling updates ensures zero-downtime releases ([Deployment](/guides/fastapi-production/deployment/)).
+
+**Recoverability.** Ability to restore normal operation after failure. Alembic database migrations provide forward and rollback paths ([Database](/guides/fastapi-production/database/)). Health checks enable Kubernetes to automatically recover failed pods ([Health Checks](/guides/fastapi-production/health-checks/)). Helm rollback capabilities restore previous deployment states ([Deployment](/guides/fastapi-production/deployment/)).
+
+**Observability.** Visibility into system behavior at runtime. The three-pillar approach covers distributed tracing (OpenTelemetry), metrics (Prometheus), and structured logging (JSON) ([Observability](/guides/fastapi-production/observability/)).
+
+**Debuggability.** Ability to diagnose issues quickly. Trace IDs correlate logs across services. Structured logging provides queryable fields rather than unstructured text. Prometheus metrics expose latency percentiles and error rates ([Observability](/guides/fastapi-production/observability/)). The test infrastructure reproduces issues in isolation ([Testing](/guides/fastapi-production/testing/)).
+
+### Development and Maintenance
+
+These requirements determine how efficiently the codebase can be understood, modified, tested, and evolved.
+
+**Maintainability.** Ease of understanding and modifying the codebase. The builder pattern makes application assembly explicit and readable, where each concern is a named method call ([Builder Pattern](/guides/fastapi-production/builder-pattern/)). The test suite serves as executable documentation ([Testing](/guides/fastapi-production/testing/)).
+
+**Testability.** Ease of verifying correct behavior. The factory function creates isolated application instances per test. Shared fixtures, factories, and async test patterns enable comprehensive coverage without boilerplate ([Testing](/guides/fastapi-production/testing/)). The builder pattern's explicit composition makes each concern independently testable ([Builder Pattern](/guides/fastapi-production/builder-pattern/)).
+
+**Extensibility.** Ease of adding new capabilities. The builder pattern means adding a new concern is a single `setup_*()` method call ([Builder Pattern](/guides/fastapi-production/builder-pattern/)). The caching layer demonstrates the dependency injection pattern for optional capabilities ([Caching](/guides/fastapi-production/caching/)).
+
+**Upgradability.** Ease of updating dependencies and platforms. Digest-pinned Docker base images make updates explicit and reproducible ([Docker](/guides/fastapi-production/docker/)). Alembic migrations version the database schema alongside code ([Database](/guides/fastapi-production/database/)). Helm chart versioning tracks deployment configuration changes ([Deployment](/guides/fastapi-production/deployment/)).
+
+**Serviceability.** Ease of diagnosing and resolving production issues. Observability tooling identifies issues before users report them ([Observability](/guides/fastapi-production/observability/)). Health checks provide automated status verification ([Health Checks](/guides/fastapi-production/health-checks/)).
+
+**Manageability.** Ease of operating and configuring the system. Helm values files parameterize deployment configuration without code changes ([Deployment](/guides/fastapi-production/deployment/)). The builder pattern centralizes application configuration in one place ([Builder Pattern](/guides/fastapi-production/builder-pattern/)).
+
+### Performance and Scale
+
+These requirements govern how the system behaves under load and how efficiently it uses resources.
+
+**Scalability.** Ability to handle increasing load. Redis-backed rate limiting and caching work across multiple instances ([Rate Limiting](/guides/fastapi-production/rate-limiting/), [Caching](/guides/fastapi-production/caching/)). The async database layer supports connection pooling for concurrent requests ([Database](/guides/fastapi-production/database/)). Kubernetes Deployment configuration enables horizontal pod autoscaling ([Deployment](/guides/fastapi-production/deployment/)).
+
+**Responsiveness.** Speed of individual request handling. The middleware stack adds minimal overhead per request ([Middleware](/guides/fastapi-production/middleware/)). Caching avoids redundant computation for repeated requests ([Caching](/guides/fastapi-production/caching/)). Rate limiting protects response times by shedding excess load ([Rate Limiting](/guides/fastapi-production/rate-limiting/)).
+
+**Timeliness.** Meeting time-based processing requirements. Request timing middleware measures and logs response latency ([Middleware](/guides/fastapi-production/middleware/)). Prometheus histograms track latency percentiles for SLA monitoring ([Observability](/guides/fastapi-production/observability/)).
+
+**Affordability.** Cost-effective resource usage. Caching reduces compute and database load for repeated operations ([Caching](/guides/fastapi-production/caching/)). Multi-stage Docker builds produce minimal images that consume less memory and storage ([Docker](/guides/fastapi-production/docker/)). Right-sized Kubernetes resource requests prevent over-provisioning ([Deployment](/guides/fastapi-production/deployment/)).
+
+### Deployment and Delivery
+
+These requirements address how the system moves from code to running in production.
+
+**Deployability.** Ease and safety of releasing new versions. Multi-stage Docker builds produce consistent, reproducible images ([Docker](/guides/fastapi-production/docker/)). Helm charts with rolling update strategies enable zero-downtime deployments. VM deployment via Docker Compose provides an alternative for non-Kubernetes environments ([Deployment](/guides/fastapi-production/deployment/)).
+
+**Usability.** Developer experience when working with the system. The builder pattern provides a readable, self-documenting application assembly ([Builder Pattern](/guides/fastapi-production/builder-pattern/)). Auto-generated OpenAPI documentation gives API consumers interactive docs without additional work. The factory function pattern means `create_app()` is the single entry point. There is one way to create the application, and it is the right way.
+
+### AI and ML
+
+This category addresses requirements specific to using AI agents as the primary development interface.
+
+**Deterministic Infrastructure for Non-Deterministic Agents.** AI agents produce different code on every run. The functional requirements (endpoints, models, business logic) will be close enough each time. The non-functional requirements (middleware ordering, security configuration, container hardening) will vary unpredictably. The chassis turns this asymmetry into a feature rather than a risk: non-functional requirements are locked in as immutable infrastructure, and the agent operates exclusively in the business logic layer where variation is acceptable. Every chapter in this guide describes infrastructure the agent inherits but never generates.
+
+## NFR Quick Reference
+
+| NFR | Category | Primary Chapters |
+|-----|----------|-----------------|
+| Security | Security & Compliance | Authentication, Middleware, Security Headers, Rate Limiting, Docker |
+| Compliance | Security & Compliance | Authentication, Security Headers |
+| Regulations | Security & Compliance | Security Headers, Observability |
+| Auditability | Security & Compliance | Observability, Testing |
+| Fault Tolerance | Reliability & Operations | Health Checks, Middleware |
+| Reliability | Reliability & Operations | Testing, Health Checks, Database |
+| Availability | Reliability & Operations | Health Checks, Rate Limiting, Deployment |
+| Recoverability | Reliability & Operations | Database, Health Checks, Deployment |
+| Observability | Reliability & Operations | Observability |
+| Debuggability | Reliability & Operations | Observability, Testing |
+| Maintainability | Development & Maintenance | Builder Pattern, Testing |
+| Testability | Development & Maintenance | Testing, Builder Pattern |
+| Extensibility | Development & Maintenance | Builder Pattern, Caching |
+| Upgradability | Development & Maintenance | Docker, Database, Deployment |
+| Serviceability | Development & Maintenance | Observability, Health Checks |
+| Manageability | Development & Maintenance | Deployment, Builder Pattern |
+| Scalability | Performance & Scale | Rate Limiting, Caching, Database, Deployment |
+| Responsiveness | Performance & Scale | Middleware, Caching, Rate Limiting |
+| Timeliness | Performance & Scale | Middleware, Observability |
+| Affordability | Performance & Scale | Caching, Docker, Deployment |
+| Deployability | Deployment & Delivery | Docker, Deployment |
+| Usability | Deployment & Delivery | Builder Pattern |
+| Deterministic Infrastructure | AI/ML | All Chapters |
+
+## What the Agent Never Implements
+
+The table above is a contract. Every row is a production requirement that your AI agent does not need to think about, configure, or generate. The chassis handles it. The guide documents it. The agent writes business logic.
+
+This is the fundamental shift from template-based to chassis-based development. A template gives you starting code to modify. A chassis gives you 23 answered questions and a clear boundary: everything above the line is infrastructure, everything below is your feature.
+
+Start with any chapter that addresses your most immediate concern. If you want to understand how the application is assembled, begin with [Builder Pattern](/guides/fastapi-production/builder-pattern/). If you want to understand how the application is observed in production, start with [Observability](/guides/fastapi-production/observability/). If you want to deploy immediately, jump to [Docker](/guides/fastapi-production/docker/) and [Deployment](/guides/fastapi-production/deployment/).
+
+The order does not matter. The coverage does.

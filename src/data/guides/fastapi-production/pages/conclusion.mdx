@@ -1,0 +1,54 @@
+---
+title: "Conclusion"
+description: "A summary of the 13 production concerns handled by the FastAPI Chassis, the boundary between infrastructure and business logic, and where to go from here"
+order: 14
+slug: "conclusion"
+---
+
+## The Boundary
+
+This guide documented production concerns across several technical chapters. Every chapter followed the same structure: what your AI agent inherits, how the chassis implements it, and what the agent never has to touch.
+
+That structure is the point. The FastAPI Chassis draws a line between infrastructure and business logic, and everything in this guide lives on the infrastructure side of that line.
+
+Here is what sits below the agent:
+
+| Layer | Chapters | What It Handles |
+|-------|----------|----------------|
+| **Application assembly** | Builder Pattern | Factory function, builder chain, lifespan management |
+| **Request pipeline** | Middleware, Security Headers, Rate Limiting | CORS, trusted hosts, timing, security headers, abuse protection |
+| **Authentication** | Authentication | JWT validation, JWKS discovery, three auth modes |
+| **Data** | Database, Caching | Async SQLAlchemy, Alembic migrations, Redis/memory cache |
+| **Observability** | Observability, Health Checks | OpenTelemetry tracing, Prometheus metrics, structured logging, readiness probes |
+| **Testing** | Testing | Fixtures, factories, async patterns, coverage infrastructure |
+| **Deployment** | Docker, Deployment | Multi-stage builds, Helm chart, VM compose, CI/CD workflows |
+
+The agent writes route handlers, models, and business logic. Everything else is already done.
+
+## What This Means for AI-Generated Code
+
+AI agents produce different code on every run. For business logic, that variation more bearable: there are many reasonable ways to implement a search endpoint or a CRUD operation. For infrastructure, that variation is dangerous: there is one correct middleware ordering, one correct way to separate liveness from readiness, one correct way to propagate trace context.
+
+The chassis eliminates the dangerous variation. The agent operates in the safe zone where creativity is an asset, not a liability.
+
+This is not a theoretical distinction. Every chapter in this guide exists because the alternative, letting an LLM generate infrastructure code on each run, produces inconsistent, untestable, and often insecure results. The chassis makes that entire category of problems disappear.
+
+## Getting Started
+
+If you have read the guide front to back, you already know more about the chassis than you need to start building. If you skipped here from the introduction, these three paths will get you productive:
+
+**Path 1: Understand the architecture.** Read [Builder Pattern](/guides/fastapi-production/builder-pattern/) and [Middleware](/guides/fastapi-production/middleware/). These two chapters explain how the application is assembled and how requests flow through it. Everything else builds on top.
+
+**Path 2: Deploy first, explore later.** Read [Docker](/guides/fastapi-production/docker/) and [Deployment](/guides/fastapi-production/deployment/). Get the chassis running in your environment, then read individual chapters as questions come up.
+
+**Path 3: Write your first endpoint.** Clone the [FastAPI Chassis repository](https://github.com/PatrykQuantumNomad/fastapi-chassis), run the test suite to verify everything works, and add a route. The chassis handles the rest.
+
+## Contributing
+
+The FastAPI Chassis is open source. If you find a gap in the production concerns, an edge case in the configuration, or a better way to handle something, contributions are welcome at [github.com/PatrykQuantumNomad/fastapi-chassis](https://github.com/PatrykQuantumNomad/fastapi-chassis).
+
+The guide itself lives in this site's repository. Corrections, clarifications, and improvements to the documentation are equally valued.
+
+---
+
+The chassis handles the infrastructure. The guide documents the decisions. You write the features.
