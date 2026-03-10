@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: executing
-stopped_at: Completed 90-01-PLAN.md
-last_updated: "2026-03-10T19:18:25.434Z"
-last_activity: 2026-03-10 — Completed 90-02 (CodeBlock + multi-guide parameterization)
+stopped_at: Completed 90-03-PLAN.md
+last_updated: "2026-03-10T19:25:07Z"
+last_activity: 2026-03-10 — Completed 90-03 (Claude Code landing page, chapter routing, hub page, LLMs.txt)
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 8
+  completed_plans: 3
+  percent: 12
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 90 (1 of 6) — Infrastructure Refactoring
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: Executing
-Last activity: 2026-03-10 — Completed 90-02 (CodeBlock + multi-guide parameterization)
+Last activity: 2026-03-10 — Completed 90-03 (Claude Code landing page, chapter routing, hub page, LLMs.txt)
 
-Progress: [█░░░░░░░░░] 8%
+Progress: [█░░░░░░░░░] 12%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [█░░░░░░░░░] 8%
 | v1.15 FastAPI Production Guide | 85-89 | 13 | 36 | 2026-03-08 |
 | **Total** | **89** | **200** | **773** | |
 | Phase 90 P01 | 4 | 2 tasks | 8 files |
+| Phase 90 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 90]: Removed GUIDE_ROUTES.landing constant -- guideLandingUrl() is the single source of truth for all guide landing URLs
 - [Phase 90]: Per-guide collection registration pattern (claudeCodePages, claudeCodeGuide) rather than merged collections
 - [Phase 90]: Dynamic sitemap builder uses readdirSync to iterate src/data/guides/* directories
+- (90-03) Landing page uses render() to extract reading time from remarkPluginFrontmatter at build time
+- (90-03) Claude Code hub card uses guide title prominently instead of logo image
+- (90-03) templateRepo/versionTag access wrapped in conditionals in llms-full.txt.ts
 
 ### Pending Todos
 
@@ -94,7 +98,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T19:18:25.431Z
-Stopped at: Completed 90-01-PLAN.md
+Last session: 2026-03-10T19:25:07Z
+Stopped at: Completed 90-03-PLAN.md
 Resume file: None
-Next: Execute 90-03-PLAN.md (Claude Code landing page, chapter routing)
+Next: Execute 90-04-PLAN.md (OG images + full regression verification)

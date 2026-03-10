@@ -12,8 +12,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 - [x] **INFRA-01**: Multi-guide content collection system supporting multiple guides without hardcoded single-guide assumptions
 - [x] **INFRA-02**: Guide page schema extended with `lastVerified` date field for content freshness tracking
 - [x] **INFRA-03**: Claude Code guide.json metadata with 11 chapters, requirements, and guide-level configuration
-- [ ] **INFRA-04**: Guide landing page at /guides/claude-code/ with chapter card grid and AI agent narrative hero
-- [ ] **INFRA-05**: Dynamic chapter routing at /guides/claude-code/[slug] for all 11 chapters
+- [x] **INFRA-04**: Guide landing page at /guides/claude-code/ with chapter card grid and AI agent narrative hero
+- [x] **INFRA-05**: Dynamic chapter routing at /guides/claude-code/[slug] for all 11 chapters
 - [x] **INFRA-06**: Existing FastAPI guide renders identically after all infrastructure changes (regression gate)
 - [x] **INFRA-07**: CodeBlock component for inline code snippets without GitHub source attribution
 
@@ -92,8 +92,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-01 | Phase 90 | Complete |
 | INFRA-02 | Phase 90 | Complete |
 | INFRA-03 | Phase 90 | Complete |
-| INFRA-04 | Phase 90 | Pending |
-| INFRA-05 | Phase 90 | Pending |
+| INFRA-04 | Phase 90 | Complete |
+| INFRA-05 | Phase 90 | Complete |
 | INFRA-06 | Phase 90 | Complete |
 | INFRA-07 | Phase 90 | Complete |
 | DIAG-01 | Phase 91 | Pending |
