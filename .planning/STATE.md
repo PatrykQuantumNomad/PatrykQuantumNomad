@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 93 Foundation Content Chapters
+**Current focus:** v1.16 Claude Code Guide — Phase 93 Foundation Content Chapters COMPLETE
 
 ## Current Position
 
-Phase: 93 (4 of 6) — Foundation Content Chapters
-Plan: 2 of 3
-Status: In Progress
-Last activity: 2026-03-10 — Completed 93-02 (Chapter 3 Models/Costs/Permissions + Chapter 4 Environment/Sandboxing)
+Phase: 93 (4 of 6) — Foundation Content Chapters — COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 93 Complete
+Last activity: 2026-03-10 — Completed 93-03 (Chapter 5 Remote/Headless + Chapter 6 MCP)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [████████░░] 80%
 | Phase 92 P01 | 4min | 2 tasks | 7 files |
 | Phase 92 P02 | 5min | 2 tasks | 7 files |
 | Phase 93 P02 | 9min | 2 tasks | 2 files |
+| Phase 93 P03 | 9min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (93-02) Rule specificity example shows broad allow + narrow deny pattern for git commands
 - (93-02) Settings precedence includes CLI arguments as separate tier between managed and local
 - (93-02) Status line script uses jq for JSON parsing to keep examples portable
+- (93-03) Chapter 5 frames programmatic usage as '-p flag' not 'headless mode' per official docs rebranding
+- (93-03) SSE transport marked as deprecated in 5 locations across Chapter 6 for maximum visibility
+- (93-03) Cron 3-day expiry limitation prominently featured with durable alternatives (Desktop tasks, GitHub Actions)
 
 ### Pending Todos
 
@@ -128,7 +132,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T22:13:00Z
-Stopped at: Completed 93-02-PLAN.md
+Last session: 2026-03-10T22:14:02Z
+Stopped at: Completed Phase 93 (all 3 plans done)
 Resume file: None
-Next: 93-03-PLAN.md (Chapter 5 Remote Control & Headless + Chapter 6 MCP)
+Next: Phase 94 (Advanced Content Chapters)

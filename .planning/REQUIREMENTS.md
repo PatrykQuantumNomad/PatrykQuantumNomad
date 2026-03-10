@@ -23,8 +23,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 - [ ] **CHAP-02**: Chapter 2 — Project Context & Memory Management (CLAUDE.md hierarchy, auto-memory, context rot, .claudeignore)
 - [x] **CHAP-03**: Chapter 3 — Models, Cost Economics & Permissions (model selection, effort levels, pricing tiers, permission system)
 - [x] **CHAP-04**: Chapter 4 — Environment Sandboxing & Workspace Customization (config scopes, sandboxed execution, status lines)
-- [ ] **CHAP-05**: Chapter 5 — Remote Control, Headless Automation & Crons (remote control, headless mode, cron scheduling, HTTP proxies)
-- [ ] **CHAP-06**: Chapter 6 — Model Context Protocol (connecting external tools, transports, tool search, troubleshooting)
+- [x] **CHAP-05**: Chapter 5 — Remote Control, Headless Automation & Crons (remote control, headless mode, cron scheduling, HTTP proxies)
+- [x] **CHAP-06**: Chapter 6 — Model Context Protocol (connecting external tools, transports, tool search, troubleshooting)
 - [ ] **CHAP-07**: Chapter 7 — Custom Skills (SKILL.md anatomy, slash commands vs auto-invocation, skill creator)
 - [ ] **CHAP-08**: Chapter 8 — Hooks & Lifecycle Automation (13 lifecycle events, exit codes, prompt/agent hooks)
 - [ ] **CHAP-09**: Chapter 9 — Git Worktrees & Subagent Delegation (parallel development, custom agent personas)
@@ -107,8 +107,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAP-02 | Phase 93 | Pending |
 | CHAP-03 | Phase 93 | Complete |
 | CHAP-04 | Phase 93 | Complete |
-| CHAP-05 | Phase 93 | Pending |
-| CHAP-06 | Phase 93 | Pending |
+| CHAP-05 | Phase 93 | Complete |
+| CHAP-06 | Phase 93 | Complete |
 | CHAP-07 | Phase 94 | Pending |
 | CHAP-08 | Phase 94 | Pending |
 | CHAP-09 | Phase 94 | Pending |
