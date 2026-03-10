@@ -34,7 +34,7 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
 - [x] **Phase 91: SVG Diagram Generators** - 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams) (completed 2026-03-10)
 - [x] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands (completed 2026-03-10)
 - [x] **Phase 93: Foundation Content Chapters** - Chapters 1-6 covering setup, context management, models/costs, sandboxing, remote/headless, and MCP (completed 2026-03-10)
-- [ ] **Phase 94: Advanced Content Chapters** - Chapters 7-11 covering skills, hooks, worktrees, agent teams, and security/enterprise
+- [x] **Phase 94: Advanced Content Chapters** - Chapters 7-11 covering skills, hooks, worktrees, agent teams, and security/enterprise (completed 2026-03-10)
 - [ ] **Phase 95: Site Integration & Blog Post** - Header nav, homepage callout, hub page, sitemap, LLMs.txt, JSON-LD, OG images, companion blog post
 
 ## Phase Details
