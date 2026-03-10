@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: executing
-stopped_at: Completed 90-03-PLAN.md
-last_updated: "2026-03-10T19:25:07Z"
-last_activity: 2026-03-10 — Completed 90-03 (Claude Code landing page, chapter routing, hub page, LLMs.txt)
+status: phase-complete
+stopped_at: Completed 90-04-PLAN.md
+last_updated: "2026-03-10T19:40:00Z"
+last_activity: 2026-03-10 — Completed 90-04 (OG images + full regression verification — Phase 90 complete)
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 12
+  completed_plans: 4
+  percent: 17
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 
 ## Current Position
 
-Phase: 90 (1 of 6) — Infrastructure Refactoring
-Plan: 3 of 4 complete
-Status: Executing
-Last activity: 2026-03-10 — Completed 90-03 (Claude Code landing page, chapter routing, hub page, LLMs.txt)
+Phase: 90 (1 of 6) — Infrastructure Refactoring — COMPLETE
+Plan: 4 of 4 complete
+Status: Phase complete — ready for Phase 91
+Last activity: 2026-03-10 — Completed 90-04 (OG images + full regression verification — Phase 90 complete)
 
-Progress: [█░░░░░░░░░] 12%
+Progress: [██░░░░░░░░] 17%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [█░░░░░░░░░] 12%
 | **Total** | **89** | **200** | **773** | |
 | Phase 90 P01 | 4 | 2 tasks | 8 files |
 | Phase 90 P03 | 4min | 2 tasks | 5 files |
+| Phase 90 P04 | ~15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - (90-03) Landing page uses render() to extract reading time from remarkPluginFrontmatter at build time
 - (90-03) Claude Code hub card uses guide title prominently instead of logo image
 - (90-03) templateRepo/versionTag access wrapped in conditionals in llms-full.txt.ts
+- (90-04) 'Zero-to-Hero Guide' subtitle used in Claude Code landing OG image to differentiate from FastAPI's 'Production Guide'
+- (90-04) OG image directory structure mirrors routing: open-graph/guides/{slug}/ per guide
 
 ### Pending Todos
 
@@ -84,7 +87,6 @@ None.
 
 ### Blockers/Concerns
 
-- 7 hardcoded single-guide assumptions must be fixed in Phase 90 before any content work begins (PITFALL-2 from research)
 - NotebookLM 51-source corpus has ~13% hallucination rate -- every factual claim in chapters must be verified against official docs (PITFALL-4)
 - Agent Teams (Chapter 10) is "research preview" status -- scope content conservatively with explicit warnings
 
@@ -98,7 +100,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T19:25:07Z
-Stopped at: Completed 90-03-PLAN.md
+Last session: 2026-03-10T19:40:00Z
+Stopped at: Completed 90-04-PLAN.md
 Resume file: None
-Next: Execute 90-04-PLAN.md (OG images + full regression verification)
+Next: Execute Phase 91 (SVG Diagram Generators)

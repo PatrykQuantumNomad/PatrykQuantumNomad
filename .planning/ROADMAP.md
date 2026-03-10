@@ -30,7 +30,7 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
 - Integer phases (90, 91, ...): Planned milestone work
 - Decimal phases (90.1, 90.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 90: Infrastructure Refactoring** - Multi-guide content collections, schema extension, guide metadata, page routing, CodeBlock component, and FastAPI regression gate
+- [x] **Phase 90: Infrastructure Refactoring** - Multi-guide content collections, schema extension, guide metadata, page routing, CodeBlock component, and FastAPI regression gate
 - [ ] **Phase 91: SVG Diagram Generators** - 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams)
 - [ ] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands
 - [ ] **Phase 93: Foundation Content Chapters** - Chapters 1-6 covering setup, context management, models/costs, sandboxing, remote/headless, and MCP
@@ -49,12 +49,12 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
   3. Navigating to /guides/claude-code/introduction shows a rendered chapter page with sidebar navigation, breadcrumbs, and prev/next links
   4. A CodeBlock component renders inline code snippets with syntax highlighting and file-path header but no GitHub source link
   5. Production build succeeds with zero errors and both guides appear in the build output
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed — COMPLETE (2026-03-10)
 Plans:
-- [ ] 90-01-PLAN.md — Schema extension, content collections, guide.json, sitemap builder refactor
-- [ ] 90-02-PLAN.md — CodeBlock component, GuideLayout + GuideJsonLd parameterization
-- [ ] 90-03-PLAN.md — Claude Code landing page, chapter routing, hub page, LLMs.txt multi-guide
-- [ ] 90-04-PLAN.md — OG images + full regression verification
+- [x] 90-01-PLAN.md — Schema extension, content collections, guide.json, sitemap builder refactor
+- [x] 90-02-PLAN.md — CodeBlock component, GuideLayout + GuideJsonLd parameterization
+- [x] 90-03-PLAN.md — Claude Code landing page, chapter routing, hub page, LLMs.txt multi-guide
+- [x] 90-04-PLAN.md — OG images + full regression verification
 
 ### Phase 91: SVG Diagram Generators
 **Goal**: Five build-time SVG architecture diagrams are available as Astro components for embedding in guide chapters
@@ -121,7 +121,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 90. Infrastructure Refactoring | 3/4 | In Progress|  |
+| 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
 | 91. SVG Diagram Generators | 0/TBD | Not started | - |
 | 92. Interactive React Components | 0/TBD | Not started | - |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
