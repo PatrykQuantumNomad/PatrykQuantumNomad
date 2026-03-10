@@ -61,4 +61,14 @@ const guides = defineCollection({
   schema: guideMetaSchema,
 });
 
-export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages, guidePages, guides };
+const claudeCodePages = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides/claude-code/pages' }),
+  schema: guidePageSchema,
+});
+
+const claudeCodeGuide = defineCollection({
+  loader: file('src/data/guides/claude-code/guide.json'),
+  schema: guideMetaSchema,
+});
+
+export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages, guidePages, guides, claudeCodePages, claudeCodeGuide };

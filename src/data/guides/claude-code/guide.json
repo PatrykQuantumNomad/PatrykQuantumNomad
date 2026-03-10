@@ -1,0 +1,27 @@
+[
+  {
+    "id": "claude-code",
+    "title": "Claude Code Guide",
+    "description": "The definitive zero-to-hero guide for Claude Code -- from first agentic interaction through multi-agent orchestration, by a cloud-native architect with 17+ years of experience.",
+    "slug": "claude-code",
+    "accentColor": "#D97706",
+    "publishedDate": "2026-03-15",
+    "requirements": {
+      "claude-code": "latest",
+      "node": "18+"
+    },
+    "chapters": [
+      { "slug": "introduction", "title": "Introduction & Getting Started", "description": "The agentic loop, installation across all interfaces, core tools, and your first checkpoint" },
+      { "slug": "context-management", "title": "Project Context & Memory", "description": "CLAUDE.md hierarchy, auto-memory, context rot prevention, and .claudeignore" },
+      { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Model selection, effort levels, pricing tiers, and the permission system" },
+      { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configuration scopes, sandboxed execution, and status line customization" },
+      { "slug": "remote-and-headless", "title": "Remote Control & Headless Automation", "description": "Remote control, headless mode, cron scheduling, and HTTP proxy configuration" },
+      { "slug": "mcp", "title": "Model Context Protocol", "description": "Connecting external tools, transport modes, tool search, and troubleshooting" },
+      { "slug": "custom-skills", "title": "Custom Skills", "description": "SKILL.md anatomy, slash commands vs auto-invocation, and the skill creator" },
+      { "slug": "hooks", "title": "Hooks & Lifecycle Automation", "description": "Lifecycle events, exit codes, and prompt/agent hooks" },
+      { "slug": "worktrees", "title": "Git Worktrees & Subagent Delegation", "description": "Parallel development branches and custom agent personas" },
+      { "slug": "agent-teams", "title": "Agent Teams & Advanced Orchestration", "description": "Team architecture, shared tasks, and dependency tracking (research preview)" },
+      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Vulnerability scanning, managed settings, and plugin governance" }
+    ]
+  }
+]

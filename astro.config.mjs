@@ -42,19 +42,24 @@ function buildContentDateMap() {
     }
   } catch { /* non-fatal — pages will omit lastmod */ }
 
-  // Guide pages: use guide-level publishedDate from guide.json
+  // Guide pages: iterate all guide directories dynamically
   try {
-    const meta = JSON.parse(
-      readFileSync('./src/data/guides/fastapi-production/guide.json', 'utf-8'),
-    );
-    const guideDate = meta[0]?.publishedDate;
-    if (guideDate) {
-      const iso = new Date(guideDate).toISOString();
-      map.set(`${SITE}/guides/fastapi-production/`, iso);
-      map.set(`${SITE}/guides/fastapi-production/faq/`, iso);
-      for (const ch of meta[0].chapters ?? []) {
-        map.set(`${SITE}/guides/fastapi-production/${ch.slug}/`, iso);
-      }
+    const guidesDir = './src/data/guides';
+    for (const entry of readdirSync(guidesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const jsonPath = `${guidesDir}/${entry.name}/guide.json`;
+      try {
+        const meta = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+        const guideDate = meta[0]?.publishedDate;
+        const guideSlug = meta[0]?.slug;
+        if (guideDate && guideSlug) {
+          const iso = new Date(guideDate).toISOString();
+          map.set(`${SITE}/guides/${guideSlug}/`, iso);
+          for (const ch of meta[0].chapters ?? []) {
+            map.set(`${SITE}/guides/${guideSlug}/${ch.slug}/`, iso);
+          }
+        }
+      } catch { /* non-fatal -- guide.json may not parse */ }
     }
   } catch { /* non-fatal */ }
 
