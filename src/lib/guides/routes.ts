@@ -8,7 +8,6 @@
 
 /** All valid guide route prefixes */
 export const GUIDE_ROUTES = {
-  landing: '/guides/fastapi-production/',
   guides: '/guides/',
 } as const;
 
