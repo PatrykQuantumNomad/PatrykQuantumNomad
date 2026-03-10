@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: phase-complete
-stopped_at: Completed 90-04-PLAN.md
-last_updated: "2026-03-10T19:40:00Z"
-last_activity: 2026-03-10 — Completed 90-04 (OG images + full regression verification — Phase 90 complete)
+status: in-progress
+stopped_at: Completed 91-01-PLAN.md
+last_updated: "2026-03-10T20:14:44Z"
+last_activity: 2026-03-10 — Completed 91-01 (diagram-base extensions + agentic loop + hook lifecycle diagrams)
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 17
+  total_plans: 3
+  completed_plans: 1
+  percent: 22
 ---
 
 # Project State
@@ -21,22 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 90 Infrastructure Refactoring
+**Current focus:** v1.16 Claude Code Guide — Phase 91 SVG Diagram Generators
 
 ## Current Position
 
-Phase: 90 (1 of 6) — Infrastructure Refactoring — COMPLETE
-Plan: 4 of 4 complete
-Status: Phase complete — ready for Phase 91
-Last activity: 2026-03-10 — Completed 90-04 (OG images + full regression verification — Phase 90 complete)
+Phase: 91 (2 of 6) — SVG Diagram Generators — IN PROGRESS
+Plan: 1 of 3 complete
+Status: Executing Phase 91
+Last activity: 2026-03-10 — Completed 91-01 (diagram-base extensions + agentic loop + hook lifecycle diagrams)
 
-Progress: [██░░░░░░░░] 17%
+Progress: [██▒░░░░░░░] 22%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 200 (across 15 milestones)
+- Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
+- v1.16 plans completed: 5
 
 **Cumulative Stats:**
 
@@ -62,6 +63,7 @@ Progress: [██░░░░░░░░] 17%
 | Phase 90 P01 | 4 | 2 tasks | 8 files |
 | Phase 90 P03 | 4min | 2 tasks | 5 files |
 | Phase 90 P04 | ~15min | 2 tasks | 2 files |
+| Phase 91 P01 | 4min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -80,6 +82,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (90-03) templateRepo/versionTag access wrapped in conditionals in llms-full.txt.ts
 - (90-04) 'Zero-to-Hero Guide' subtitle used in Claude Code landing OG image to differentiate from FastAPI's 'Production Guide'
 - (90-04) OG image directory structure mirrors routing: open-graph/guides/{slug}/ per guide
+- (91-01) Triangular layout for agentic loop with curved Bezier arrows connecting 3 phase boxes in a cycle
+- (91-01) Hook lifecycle uses 18 events (not 13 from REQUIREMENTS.md) based on verified official docs
+- (91-01) PreToolUse highlighted with accent border and CAN BLOCK label to indicate blocking capability
 
 ### Pending Todos
 
@@ -100,7 +105,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T19:40:00Z
-Stopped at: Completed 90-04-PLAN.md
+Last session: 2026-03-10T20:14:44Z
+Stopped at: Completed 91-01-PLAN.md
 Resume file: None
-Next: Execute Phase 91 (SVG Diagram Generators)
+Next: Execute 91-02-PLAN.md (Permission Model + MCP Architecture diagrams)
