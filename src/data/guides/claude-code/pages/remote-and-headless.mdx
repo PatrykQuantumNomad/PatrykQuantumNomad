@@ -1,0 +1,348 @@
+---
+title: "Remote Control & Headless Automation"
+description: "Remote control, headless mode, cron scheduling, and HTTP proxy configuration"
+order: 4
+slug: "remote-and-headless"
+lastVerified: 2026-03-10
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+
+## What You Will Learn
+
+This chapter covers using Claude Code beyond interactive terminal sessions. You will learn how to access your local Claude Code session from a phone or browser via remote control, run Claude Code programmatically with the `-p` flag for scripts and CI/CD pipelines, and schedule recurring tasks with cron expressions for automated workflows.
+
+## Remote Control
+
+Remote control lets you access your local Claude Code session from any device -- a phone, tablet, or another computer -- using only a web browser. Your machine connects outbound to Anthropic's relay service over HTTPS. No inbound ports are opened, no firewall rules need changing, and no VPN is required.
+
+Start a remote control session from your terminal.
+
+<CodeBlock
+  code={`claude remote-control`}
+  lang="bash"
+  title="Starting remote control"
+/>
+
+Claude Code displays a QR code and a URL. Scan the QR code from your phone or open the URL in any browser. You are now connected to the same Claude Code session running on your machine.
+
+If you already have an active Claude Code session, you can start remote control from within it using the slash command.
+
+<CodeBlock
+  code={`/remote-control`}
+  lang="text"
+  title="Starting remote control from an existing session"
+  caption="Generates a QR code and URL without starting a new session."
+/>
+
+Once connected, everything you type in the remote browser is sent to your local Claude Code instance. Responses appear in real time. Claude Code still runs on your machine, reads your local files, and executes commands in your local environment. The remote connection is just a display and input relay.
+
+## Remote vs Web Sessions
+
+Remote control and web sessions are fundamentally different.
+
+**Remote control** means Claude runs locally on your machine. It has access to your files, your terminal, your Git history, and your entire development environment. The phone or browser is a window into that local session. When Claude Code edits a file through remote control, the file changes on your disk immediately.
+
+**Web sessions** at console.anthropic.com run on Anthropic's cloud infrastructure. Claude operates in a sandboxed cloud environment without access to your local filesystem. Web sessions are useful for quick questions, exploring ideas, or working when you are away from your development machine.
+
+Use remote control when you need Claude Code to work with your local project -- reviewing code from your phone during a commute, pairing with a colleague by sharing the URL, or continuing a task from a different room. Use web sessions when you do not need local file access.
+
+## Programmatic Usage with -p
+
+The `-p` flag runs Claude Code with a single prompt and exits when done. This is how you integrate Claude Code into scripts, CI/CD pipelines, and automated workflows.
+
+<CodeBlock
+  code={`claude -p "Explain the main function in src/index.ts"`}
+  lang="bash"
+  title="Running a single prompt"
+  caption="Claude Code processes the prompt, writes output to stdout, and exits."
+/>
+
+By default, output is plain text. Use `--output-format` to control the format.
+
+<CodeBlock
+  code={`# Plain text (default)
+claude -p "List all exported functions in src/utils.ts" --output-format text
+
+# Structured JSON with metadata
+claude -p "List all exported functions in src/utils.ts" --output-format json
+
+# Streaming JSON (one event per line)
+claude -p "List all exported functions in src/utils.ts" --output-format stream-json`}
+  lang="bash"
+  title="Output format options"
+/>
+
+The JSON output format returns a structured response that includes the result text, token usage, cost, and session metadata. This makes it straightforward to parse Claude Code output in scripts.
+
+<CodeBlock
+  code={`{
+  "result": "The file exports three functions: parseConfig, validateInput, formatOutput...",
+  "cost": 0.003,
+  "duration_ms": 2400,
+  "session_id": "abc123",
+  "num_turns": 1
+}`}
+  lang="json"
+  title="Example JSON output"
+  caption="Exact fields may vary. Use this format for programmatic consumption."
+/>
+
+The `stream-json` format emits one JSON object per line as Claude Code processes the prompt. Each line represents an event: an assistant message, a tool call, a tool result. This is useful for real-time monitoring in pipelines where you want to see progress as it happens rather than waiting for the final result.
+
+## Structured Output with --json-schema
+
+When you need Claude Code to return data in a specific shape, provide a JSON schema with the `--json-schema` flag. Claude Code will structure its response to match the schema.
+
+<CodeBlock
+  code={`claude -p "Analyze src/auth.ts and extract all function signatures" \
+  --output-format json \
+  --json-schema '{
+    "type": "object",
+    "properties": {
+      "functions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "params": { "type": "array", "items": { "type": "string" } },
+            "returnType": { "type": "string" }
+          },
+          "required": ["name", "params", "returnType"]
+        }
+      }
+    },
+    "required": ["functions"]
+  }'`}
+  lang="bash"
+  title="Extracting structured data with a JSON schema"
+/>
+
+The response will conform to your schema.
+
+<CodeBlock
+  code={`{
+  "functions": [
+    {
+      "name": "validateToken",
+      "params": ["token: string", "options?: AuthOptions"],
+      "returnType": "Promise<TokenPayload>"
+    },
+    {
+      "name": "refreshSession",
+      "params": ["sessionId: string"],
+      "returnType": "Promise<Session>"
+    }
+  ]
+}`}
+  lang="json"
+  title="Structured response matching the provided schema"
+/>
+
+This is powerful for building tooling on top of Claude Code. You can extract code metrics, generate documentation, audit dependencies, or build custom analysis pipelines -- all with predictable output shapes.
+
+## System Prompt Customization
+
+Two flags control the system prompt that Claude Code uses when running with `-p`.
+
+**`--system-prompt`** replaces the default system prompt entirely. Use this when you want Claude Code to behave completely differently from its default behavior.
+
+<CodeBlock
+  code={`claude -p "Review this PR" \
+  --system-prompt "You are a strict code reviewer. Focus only on security issues and performance problems. Ignore style."`}
+  lang="bash"
+  title="Replacing the system prompt"
+/>
+
+**`--append-system-prompt`** adds to the default system prompt. Use this when you want Claude Code to retain its default capabilities but follow additional project-specific rules.
+
+<CodeBlock
+  code={`claude -p "Add a new API endpoint for user preferences" \
+  --append-system-prompt "Always use the repository's existing error handling patterns. Never add new dependencies without justification."`}
+  lang="bash"
+  title="Appending to the system prompt"
+/>
+
+Prefer `--append-system-prompt` in most cases. The default system prompt contains important instructions about tool usage, safety, and output formatting. Replacing it entirely with `--system-prompt` removes those instructions, which can lead to unexpected behavior.
+
+## Auto-Approving Tools in Scripts
+
+When running Claude Code with the `-p` flag, every tool invocation that would normally require your approval will block the process. In a script or CI/CD pipeline, there is no one to click "approve." You must explicitly declare which tools Claude Code is allowed to use without asking.
+
+The `--allowedTools` flag specifies which tools are permitted. It uses the same permission rule syntax described in [Models, Cost Economics & Permissions](/guides/claude-code/models-and-costs/).
+
+<CodeBlock
+  code={`claude -p "Fix the failing tests" \
+  --allowedTools "Bash(npm test)" "Bash(npm run lint)" "Edit" "Write"`}
+  lang="bash"
+  title="Allowing specific tools for headless execution"
+  caption="Without --allowedTools, Claude Code will fail on any action requiring permission."
+/>
+
+You can be as specific or as broad as the task requires.
+
+<CodeBlock
+  code={`# Allow all bash commands (broad)
+claude -p "Set up the project" --allowedTools "Bash(*)"
+
+# Allow only specific operations (narrow)
+claude -p "Run the test suite and fix failures" \
+  --allowedTools "Bash(npm test)" "Bash(npx vitest run)" "Edit"
+
+# Allow file operations only (no command execution)
+claude -p "Refactor the utils module" --allowedTools "Edit" "Write"`}
+  lang="bash"
+  title="Permission granularity examples"
+/>
+
+If you run Claude Code with `-p` and do not provide `--allowedTools`, any action that requires approval will cause the process to exit with an error. Always specify the tools your script needs.
+
+## Session Management
+
+By default, each invocation of `claude -p` starts a fresh session with no prior context. For multi-step workflows where you want to build on prior context, use session continuation flags.
+
+**`--continue`** resumes the most recent session.
+
+<CodeBlock
+  code={`# Step 1: Analyze the codebase
+claude -p "Analyze the authentication module and identify security issues" \
+  --output-format json > analysis.json
+
+# Step 2: Continue the same session to fix the issues found
+claude -p "Fix the security issues you identified" \
+  --continue \
+  --allowedTools "Edit" "Bash(npm test)"`}
+  lang="bash"
+  title="Continuing the most recent session"
+/>
+
+**`--resume`** resumes a specific session by ID. This is useful when running multiple pipelines in parallel and you need to continue a particular session.
+
+<CodeBlock
+  code={`# Get the session ID from JSON output
+SESSION_ID=$(cat analysis.json | jq -r '.session_id')
+
+# Resume that specific session
+claude -p "Now write tests for the fixes" \
+  --resume "$SESSION_ID" \
+  --allowedTools "Write" "Bash(npm test)"`}
+  lang="bash"
+  title="Resuming a specific session by ID"
+/>
+
+Session continuation preserves the full conversation history, including which files Claude Code read, what changes it made, and any context it accumulated. This makes multi-step workflows coherent without repeating instructions.
+
+## Scheduled Tasks
+
+Claude Code can run tasks on a recurring schedule. The `/loop` skill creates scheduled tasks conversationally -- you describe what you want to happen and when, and Claude Code sets up the automation.
+
+<CodeBlock
+  code={`Every morning at 9 AM, check for outdated npm dependencies
+and create a summary report in reports/deps-check.md`}
+  lang="text"
+  title="Example: creating a scheduled task with /loop"
+  caption="Claude Code parses the schedule and creates the cron job for you."
+/>
+
+Behind the scenes, Claude Code uses three tools to manage scheduled tasks.
+
+**CronCreate** registers a new recurring task with a cron expression, a prompt to execute, and optional tool permissions.
+
+**CronList** shows all currently registered scheduled tasks with their schedules, last run time, and next scheduled run.
+
+**CronDelete** removes a scheduled task by its ID.
+
+You can interact with these tools directly, but the `/loop` skill provides a more natural interface. Describe your automation need in plain language, and Claude Code translates it into the correct cron configuration.
+
+## Cron Expressions
+
+Scheduled tasks use standard 5-field cron expressions: minute, hour, day-of-month, month, day-of-week.
+
+<CodeBlock
+  code={`# ┌─── minute (0-59)
+# │ ┌─── hour (0-23)
+# │ │ ┌─── day of month (1-31)
+# │ │ │ ┌─── month (1-12)
+# │ │ │ │ ┌─── day of week (0-6, Sunday=0)
+# │ │ │ │ │
+# * * * * *
+
+# Every weekday at 9 AM
+0 9 * * 1-5
+
+# Every 30 minutes
+*/30 * * * *
+
+# Every Sunday at midnight
+0 0 * * 0
+
+# First day of every month at 8 AM
+0 8 1 * *`}
+  lang="text"
+  title="Cron expression format and common examples"
+/>
+
+Scheduled tasks run in your **local timezone**, not UTC. This is important for scheduling tasks around your work hours.
+
+**Critical limitation: tasks expire after 3 days.** If Claude Code Desktop is not running for 3 days, scheduled tasks created through the CLI will expire and will not resume automatically. This is by design -- CLI-created cron tasks are intended for short-lived automation, not permanent infrastructure. For durable scheduling, see the alternatives below.
+
+## Durable Scheduling Alternatives
+
+When you need scheduled tasks that survive restarts, machine reboots, or extended offline periods, use one of these alternatives instead of CLI cron tasks.
+
+**Claude Code Desktop scheduled tasks** are persistent. Tasks created through the Desktop application survive app restarts and do not have the 3-day expiry limitation. If your automation needs to run reliably for weeks or months, create the schedule through the Desktop app.
+
+**GitHub Actions with schedule trigger** moves the automation entirely to CI. The task runs on GitHub's infrastructure regardless of whether your local machine is running.
+
+<CodeBlock
+  code={`name: Weekly Dependency Review
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Claude Code
+        run: curl -fsSL https://claude.ai/install.sh | bash
+      - name: Run dependency review
+        run: |
+          claude -p "Review package.json for outdated or vulnerable dependencies. Create a report." \
+            --output-format text \
+            --allowedTools "Bash(npm audit)" "Bash(npm outdated)" "Read" \
+          > dependency-report.md
+        env:
+          ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}`}
+  lang="yaml"
+  title=".github/workflows/scheduled-review.yml"
+  caption="Runs in CI -- no local machine dependency. Note the cron uses UTC."
+/>
+
+Choose CLI cron for quick, temporary automation (check something for the next few days). Choose Desktop scheduled tasks for persistent local automation. Choose GitHub Actions for durable, team-visible automation that runs regardless of any individual machine's state.
+
+## Best Practices
+
+- **Use `-p` for CI/CD integration.** The `-p` flag is the entry point for every automated Claude Code workflow. Combine it with `--output-format json` for machine-readable output and `--allowedTools` for unattended execution.
+
+- **Prefer `--append-system-prompt` over `--system-prompt`.** The default system prompt contains safety and formatting instructions you usually want to keep. Append project-specific rules rather than replacing everything.
+
+- **Always specify `--allowedTools` in scripts.** Without explicit tool permissions, Claude Code will exit with an error on any action that requires approval. Specify the minimum set of tools your script needs.
+
+- **Use JSON output format for programmatic consumption.** The structured JSON response includes token usage, cost, and session ID alongside the result, making it straightforward to build dashboards, cost tracking, and audit logs.
+
+- **Test cron schedules with short intervals first.** Before setting a daily cron, test with `*/5 * * * *` (every 5 minutes) to verify the task works as expected, then update to the production schedule.
+
+- **Prefer Desktop scheduled tasks or GitHub Actions over CLI cron for anything durable.** CLI cron tasks expire after 3 days. If the automation matters, use a scheduling mechanism that persists.
+
+- **Use `--continue` for multi-step pipelines.** Break complex automated workflows into sequential steps that build on each other's context, rather than cramming everything into a single massive prompt.
+
+## Further Reading
+
+- <a href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener noreferrer">Remote Control</a> -- official documentation on remote access setup and security
+- <a href="https://code.claude.com/docs/en/headless" target="_blank" rel="noopener noreferrer">Running Claude Code Programmatically</a> -- the `-p` flag, output formats, and system prompt customization
+- <a href="https://code.claude.com/docs/en/scheduled-tasks" target="_blank" rel="noopener noreferrer">Scheduled Tasks</a> -- cron expressions, task management, and limitations
+
+Next, learn how to extend Claude Code with external tools and data sources in [Model Context Protocol](/guides/claude-code/mcp/).
