@@ -19,8 +19,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 
 ### Content Chapters
 
-- [ ] **CHAP-01**: Chapter 1 — Introduction & Getting Started (agentic loop, installation, interfaces, core tools, checkpointing)
-- [ ] **CHAP-02**: Chapter 2 — Project Context & Memory Management (CLAUDE.md hierarchy, auto-memory, context rot, .claudeignore)
+- [x] **CHAP-01**: Chapter 1 — Introduction & Getting Started (agentic loop, installation, interfaces, core tools, checkpointing)
+- [x] **CHAP-02**: Chapter 2 — Project Context & Memory Management (CLAUDE.md hierarchy, auto-memory, context rot, .claudeignore)
 - [x] **CHAP-03**: Chapter 3 — Models, Cost Economics & Permissions (model selection, effort levels, pricing tiers, permission system)
 - [x] **CHAP-04**: Chapter 4 — Environment Sandboxing & Workspace Customization (config scopes, sandboxed execution, status lines)
 - [x] **CHAP-05**: Chapter 5 — Remote Control, Headless Automation & Crons (remote control, headless mode, cron scheduling, HTTP proxies)
@@ -103,8 +103,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DIAG-05 | Phase 91 | Complete |
 | INTV-01 | Phase 92 | Complete |
 | INTV-02 | Phase 92 | Complete |
-| CHAP-01 | Phase 93 | Pending |
-| CHAP-02 | Phase 93 | Pending |
+| CHAP-01 | Phase 93 | Complete |
+| CHAP-02 | Phase 93 | Complete |
 | CHAP-03 | Phase 93 | Complete |
 | CHAP-04 | Phase 93 | Complete |
 | CHAP-05 | Phase 93 | Complete |

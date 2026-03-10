@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: in-progress
-stopped_at: Completed 93-03-PLAN.md
-last_updated: "2026-03-10T22:14:02Z"
-last_activity: 2026-03-10 — Completed 93-03 (Chapter 5 Remote/Headless + Chapter 6 MCP)
+status: executing
+stopped_at: Completed 93-01-PLAN.md
+last_updated: "2026-03-10T22:19:31.212Z"
+last_activity: 2026-03-10 — Completed 93-01 (Chapter 1 Introduction + Chapter 2 Context Management)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 12
-  percent: 83
+  completed_plans: 10
+  percent: 79
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 93 Foundation Content Chapters COMPLETE
+**Current focus:** v1.16 Claude Code Guide — Phase 93 Foundation Content Chapters
 
 ## Current Position
 
-Phase: 93 (4 of 6) — Foundation Content Chapters — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 93 Complete
-Last activity: 2026-03-10 — Completed 93-03 (Chapter 5 Remote/Headless + Chapter 6 MCP)
+Phase: 93 (4 of 6) — Foundation Content Chapters
+Plan: 1 of 3 complete
+Status: In Progress
+Last activity: 2026-03-10 — Completed 93-01 (Chapter 1 Introduction + Chapter 2 Context Management)
 
-Progress: [████████░░] 83%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
@@ -68,8 +68,7 @@ Progress: [████████░░] 83%
 | Phase 91 P03 | 3min | 2 tasks | 4 files |
 | Phase 92 P01 | 4min | 2 tasks | 7 files |
 | Phase 92 P02 | 5min | 2 tasks | 7 files |
-| Phase 93 P02 | 9min | 2 tasks | 2 files |
-| Phase 93 P03 | 9min | 2 tasks | 2 files |
+| Phase 93 P01 | 13min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,14 +103,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (92-02) Category colors: session=blue, loop=violet, standalone=amber for instant visual grouping
 - (92-02) CAN BLOCK badge uses accent color with transparent background matching Phase 91 convention
 - (92-02) Category nodes use dashed border and are non-interactive to distinguish from event nodes
-- (93-02) Model decision table with task-model mapping for practical model selection guidance
-- (93-02) Permission evaluation explained as numbered steps (deny->ask->allow->default) for clarity
-- (93-02) Rule specificity example shows broad allow + narrow deny pattern for git commands
-- (93-02) Settings precedence includes CLI arguments as separate tier between managed and local
-- (93-02) Status line script uses jq for JSON parsing to keep examples portable
-- (93-03) Chapter 5 frames programmatic usage as '-p flag' not 'headless mode' per official docs rebranding
-- (93-03) SSE transport marked as deprecated in 5 locations across Chapter 6 for maximum visibility
-- (93-03) Cron 3-day expiry limitation prominently featured with durable alternatives (Desktop tasks, GitHub Actions)
+- (93-01) Native install script (curl) as primary installation method; npm explicitly deprecated
+- (93-01) File exclusion documented via respectGitignore + claudeMdExcludes, not standalone .claudeignore
+- (93-01) Slash commands quick reference added to Chapter 1 for reader convenience
 
 ### Pending Todos
 
@@ -132,7 +126,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T22:14:02Z
-Stopped at: Completed Phase 93 (all 3 plans done)
+Last session: 2026-03-10T22:19:31.210Z
+Stopped at: Completed 93-01-PLAN.md
 Resume file: None
-Next: Phase 94 (Advanced Content Chapters)
+Next: 93-02-PLAN.md (Chapter 3 Models/Costs + Chapter 4 Environment)

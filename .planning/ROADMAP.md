@@ -95,11 +95,11 @@ Plans:
   3. A reader can make informed model and effort-level choices based on cost/quality tradeoffs after reading Chapter 3
   4. A reader understands sandboxing, workspace configuration scopes, and environment customization after reading Chapter 4
   5. Chapters 5-6 enable a reader to set up headless automation, cron scheduling, and connect MCP servers for external tool integration
-**Plans:** 3/3 plans complete
+**Plans:** 1/3 plans complete
 Plans:
 - [x] 93-01-PLAN.md — Chapter 1 (Introduction & Getting Started) + Chapter 2 (Project Context & Memory)
-- [x] 93-02-PLAN.md — Chapter 3 (Models, Costs & Permissions) + Chapter 4 (Environment & Sandboxing)
-- [x] 93-03-PLAN.md — Chapter 5 (Remote Control & Headless) + Chapter 6 (Model Context Protocol)
+- [ ] 93-02-PLAN.md — Chapter 3 (Models, Costs & Permissions) + Chapter 4 (Environment & Sandboxing)
+- [ ] 93-03-PLAN.md — Chapter 5 (Remote Control & Headless) + Chapter 6 (Model Context Protocol)
 
 ### Phase 94: Advanced Content Chapters
 **Goal**: Readers who have mastered the foundations can extend Claude Code with custom skills, hooks, parallel worktrees, multi-agent orchestration, and enterprise security controls
@@ -135,6 +135,6 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
 | 91. SVG Diagram Generators | 3/3 | Complete   | 2026-03-10 |
 | 92. Interactive React Components | 2/2 | Complete   | 2026-03-10 |
-| 93. Foundation Content Chapters | 3/3 | Complete | 2026-03-10 |
+| 93. Foundation Content Chapters | 1/3 | In Progress | - |
 | 94. Advanced Content Chapters | 0/TBD | Not started | - |
 | 95. Site Integration & Blog Post | 0/TBD | Not started | - |
