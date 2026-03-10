@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: active
-stopped_at: null
-last_updated: "2026-03-10T19:16:17.000Z"
-last_activity: 2026-03-10 -- Completed 90-02 (CodeBlock + multi-guide parameterization)
+status: executing
+stopped_at: Completed 90-01-PLAN.md
+last_updated: "2026-03-10T19:18:25.434Z"
+last_activity: 2026-03-10 — Completed 90-02 (CodeBlock + multi-guide parameterization)
 progress:
   total_phases: 6
   completed_phases: 0
@@ -59,6 +59,7 @@ Progress: [█░░░░░░░░░] 8%
 | v1.14 DevOps Skills Publishing | 82-84 | 3 | 16 | 2026-03-05 |
 | v1.15 FastAPI Production Guide | 85-89 | 13 | 36 | 2026-03-08 |
 | **Total** | **89** | **200** | **773** | |
+| Phase 90 P01 | 4 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (90-02) CodeBlock uses same expressive-code wrapper pattern as CodeFromRepo but without source attribution
 - (90-02) GuideJsonLd defaults parentTitle/parentUrl to FastAPI values for zero-change backward compatibility
 - (90-02) Companion link rendered conditionally -- Claude Code guide pages will simply omit the prop
+- [Phase 90]: Removed GUIDE_ROUTES.landing constant -- guideLandingUrl() is the single source of truth for all guide landing URLs
+- [Phase 90]: Per-guide collection registration pattern (claudeCodePages, claudeCodeGuide) rather than merged collections
+- [Phase 90]: Dynamic sitemap builder uses readdirSync to iterate src/data/guides/* directories
 
 ### Pending Todos
 
@@ -90,7 +94,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10
-Stopped at: Completed 90-02-PLAN.md
+Last session: 2026-03-10T19:18:25.431Z
+Stopped at: Completed 90-01-PLAN.md
 Resume file: None
 Next: Execute 90-03-PLAN.md (Claude Code landing page, chapter routing)
