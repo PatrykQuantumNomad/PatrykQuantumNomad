@@ -49,7 +49,12 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
   3. Navigating to /guides/claude-code/introduction shows a rendered chapter page with sidebar navigation, breadcrumbs, and prev/next links
   4. A CodeBlock component renders inline code snippets with syntax highlighting and file-path header but no GitHub source link
   5. Production build succeeds with zero errors and both guides appear in the build output
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 90-01-PLAN.md — Schema extension, content collections, guide.json, sitemap builder refactor
+- [ ] 90-02-PLAN.md — CodeBlock component, GuideLayout + GuideJsonLd parameterization
+- [ ] 90-03-PLAN.md — Claude Code landing page, chapter routing, hub page, LLMs.txt multi-guide
+- [ ] 90-04-PLAN.md — OG images + full regression verification
 
 ### Phase 91: SVG Diagram Generators
 **Goal**: Five build-time SVG architecture diagrams are available as Astro components for embedding in guide chapters
@@ -116,7 +121,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 90. Infrastructure Refactoring | 0/TBD | Not started | - |
+| 90. Infrastructure Refactoring | 0/4 | Planned | - |
 | 91. SVG Diagram Generators | 0/TBD | Not started | - |
 | 92. Interactive React Components | 0/TBD | Not started | - |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
