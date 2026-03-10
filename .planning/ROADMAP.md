@@ -82,8 +82,8 @@ Plans:
   3. Both components load via client:visible (lazy) and do not impact page load performance for readers who do not scroll to them
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 92-01-PLAN.md — Permission flow explorer data + React Flow component (INTV-01)
-- [ ] 92-02-PLAN.md — Hook event visualizer data + React Flow component (INTV-02)
+- [x] 92-01-PLAN.md — Permission flow explorer data + React Flow component (INTV-01)
+- [x] 92-02-PLAN.md — Hook event visualizer data + React Flow component (INTV-02)
 
 ### Phase 93: Foundation Content Chapters
 **Goal**: Readers can follow a progressive learning path from zero Claude Code knowledge through core daily-use features (setup, context, models, environment, remote control, MCP)
