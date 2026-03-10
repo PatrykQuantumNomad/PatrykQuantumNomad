@@ -21,8 +21,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 
 - [ ] **CHAP-01**: Chapter 1 — Introduction & Getting Started (agentic loop, installation, interfaces, core tools, checkpointing)
 - [ ] **CHAP-02**: Chapter 2 — Project Context & Memory Management (CLAUDE.md hierarchy, auto-memory, context rot, .claudeignore)
-- [ ] **CHAP-03**: Chapter 3 — Models, Cost Economics & Permissions (model selection, effort levels, pricing tiers, permission system)
-- [ ] **CHAP-04**: Chapter 4 — Environment Sandboxing & Workspace Customization (config scopes, sandboxed execution, status lines)
+- [x] **CHAP-03**: Chapter 3 — Models, Cost Economics & Permissions (model selection, effort levels, pricing tiers, permission system)
+- [x] **CHAP-04**: Chapter 4 — Environment Sandboxing & Workspace Customization (config scopes, sandboxed execution, status lines)
 - [ ] **CHAP-05**: Chapter 5 — Remote Control, Headless Automation & Crons (remote control, headless mode, cron scheduling, HTTP proxies)
 - [ ] **CHAP-06**: Chapter 6 — Model Context Protocol (connecting external tools, transports, tool search, troubleshooting)
 - [ ] **CHAP-07**: Chapter 7 — Custom Skills (SKILL.md anatomy, slash commands vs auto-invocation, skill creator)
@@ -105,8 +105,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTV-02 | Phase 92 | Complete |
 | CHAP-01 | Phase 93 | Pending |
 | CHAP-02 | Phase 93 | Pending |
-| CHAP-03 | Phase 93 | Pending |
-| CHAP-04 | Phase 93 | Pending |
+| CHAP-03 | Phase 93 | Complete |
+| CHAP-04 | Phase 93 | Complete |
 | CHAP-05 | Phase 93 | Pending |
 | CHAP-06 | Phase 93 | Pending |
 | CHAP-07 | Phase 94 | Pending |

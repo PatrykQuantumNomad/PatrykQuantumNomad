@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: in-progress
-stopped_at: Completed 92-02-PLAN.md
-last_updated: "2026-03-10T21:23:47Z"
-last_activity: 2026-03-10 — Completed 92-02 (hook event visualizer component + data module)
+stopped_at: Completed 93-03-PLAN.md
+last_updated: "2026-03-10T22:14:02Z"
+last_activity: 2026-03-10 — Completed 93-03 (Chapter 5 Remote/Headless + Chapter 6 MCP)
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
-  percent: 72
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 12
+  percent: 83
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 92 Interactive React Components
+**Current focus:** v1.16 Claude Code Guide — Phase 93 Foundation Content Chapters
 
 ## Current Position
 
-Phase: 92 (3 of 6) — Interactive React Components — COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 92 Complete
-Last activity: 2026-03-10 — Completed 92-02 (hook event visualizer component + data module)
+Phase: 93 (4 of 6) — Foundation Content Chapters
+Plan: 2 of 3
+Status: In Progress
+Last activity: 2026-03-10 — Completed 93-02 (Chapter 3 Models/Costs/Permissions + Chapter 4 Environment/Sandboxing)
 
-Progress: [███████░░░] 72%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [███████░░░] 72%
 | Phase 91 P03 | 3min | 2 tasks | 4 files |
 | Phase 92 P01 | 4min | 2 tasks | 7 files |
 | Phase 92 P02 | 5min | 2 tasks | 7 files |
+| Phase 93 P02 | 9min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,11 @@ Full decision log in PROJECT.md Key Decisions table.
 - (92-02) Category colors: session=blue, loop=violet, standalone=amber for instant visual grouping
 - (92-02) CAN BLOCK badge uses accent color with transparent background matching Phase 91 convention
 - (92-02) Category nodes use dashed border and are non-interactive to distinguish from event nodes
+- (93-02) Model decision table with task-model mapping for practical model selection guidance
+- (93-02) Permission evaluation explained as numbered steps (deny->ask->allow->default) for clarity
+- (93-02) Rule specificity example shows broad allow + narrow deny pattern for git commands
+- (93-02) Settings precedence includes CLI arguments as separate tier between managed and local
+- (93-02) Status line script uses jq for JSON parsing to keep examples portable
 
 ### Pending Todos
 
@@ -122,7 +128,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T21:23:47Z
-Stopped at: Completed Phase 92 (all 2 plans done)
+Last session: 2026-03-10T22:13:00Z
+Stopped at: Completed 93-02-PLAN.md
 Resume file: None
-Next: Phase 93 (Foundation Content Chapters)
+Next: 93-03-PLAN.md (Chapter 5 Remote Control & Headless + Chapter 6 MCP)
