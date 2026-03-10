@@ -3,6 +3,248 @@ title: "Introduction & Getting Started"
 description: "The agentic loop, installation across all interfaces, core tools, and your first checkpoint"
 order: 0
 slug: "introduction"
+lastVerified: 2026-03-10
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+import AgenticLoopDiagram from '../../../../components/guide/AgenticLoopDiagram.astro';
+
+## What You Will Learn
+
+This chapter introduces Claude Code from the ground up. You will understand the agentic loop that drives every interaction, install Claude Code on your platform, explore the interfaces where it runs, learn the core tools it uses to read and modify your codebase, and walk through your first session from start to finish.
+
+By the end of this chapter, you will know how to install Claude Code, start a session, ask questions about a codebase, request changes, and safely undo anything that goes wrong.
+This foundation prepares you for Chapter 2, where you will learn how to configure Claude Code with project-specific instructions.
+
+## What Is Claude Code?
+
+Claude Code is an agentic coding tool that runs in your terminal, reads your entire codebase, edits files, and executes commands -- all directly on your local filesystem. Unlike hosted IDE extensions or cloud-based editors, Claude Code operates on the same files you see in your file manager and commits to the same Git history you push to your remote.
+
+You describe what you want in natural language. Claude Code figures out which files to read, what changes to make, and how to verify the result. It works iteratively: reading, editing, running commands, checking output, and repeating until the task is complete or it needs your input.
+
+There is an important distinction between Claude Code and chat-based AI assistants. Chat assistants answer questions about code you paste into them. Claude Code operates on your actual project: it reads your files, understands your directory structure, runs your test suite, and modifies your source code in place. The context is not a snippet you copy -- it is your entire repository.
+
+Claude Code is available across multiple interfaces. The terminal CLI is the primary experience where all features are available. IDE extensions for VS Code and JetBrains provide inline integration. A desktop app runs on macOS and Windows. A web interface is accessible at console.anthropic.com. Slack integration brings Claude Code into team conversations. This guide focuses on the terminal CLI since it is the most complete interface and the one every other interface builds upon.
+
+## The Agentic Loop
+
+Every Claude Code interaction follows a three-phase cycle that repeats until the task is complete.
+
+**Phase 1: Gather context.** Claude Code reads files, searches your codebase for patterns, examines project structure, checks documentation, and builds an understanding of the relevant code. It decides what to read based on your request and what it discovers along the way. For example, if you ask it to fix a bug in the authentication module, it will search for auth-related files, read them, follow imports to understand dependencies, and check test files to understand expected behavior.
+
+**Phase 2: Take action.** Based on what it learned, Claude Code edits files, creates new files, runs shell commands, installs dependencies, or performs any other operation needed to accomplish the task. Each action is deliberate and targeted. Claude Code does not rewrite entire files -- it makes surgical edits to the specific sections that need to change.
+
+**Phase 3: Verify results.** After making changes, Claude Code checks its work. It runs tests, reads compiler output, validates that files were created correctly, and confirms the changes achieve what you asked for. If verification reveals a problem, it loops back to gather more context and try again. This self-correction is what allows Claude Code to handle complex, multi-step tasks without constant supervision.
+
+<AgenticLoopDiagram />
+
+The diagram above shows these three phases connected in a continuous cycle. Claude Code enters the loop when you submit a prompt and exits when the task is complete, when it needs clarification from you, or when you stop it. A single prompt might trigger one pass through the loop for a simple question, or dozens of passes for a complex refactoring task.
+
+This autonomous looping is what makes Claude Code "agentic" rather than a simple question-and-answer tool. You describe the goal; Claude Code figures out the steps.
+
+The number of loop iterations depends on task complexity. A simple question ("What does this function do?") might require one gather-context phase and no action or verification. A multi-file refactoring might loop dozens of times as Claude Code reads files, makes changes, runs tests, discovers a failing test, reads more context, fixes the issue, and verifies again.
+
+Understanding this loop is foundational. Every feature covered in this guide -- from project context configuration to hooks and automation -- builds on top of this cycle.
+
+## Installation
+
+The recommended way to install Claude Code is the native install script. This handles all dependencies and platform-specific configuration automatically.
+
+<CodeBlock
+  code={`curl -fsSL https://claude.ai/install.sh | bash`}
+  lang="bash"
+  title="macOS / Linux / WSL"
+/>
+
+On macOS, you can also install via Homebrew.
+
+<CodeBlock
+  code={`brew install claude-code`}
+  lang="bash"
+  title="Homebrew (macOS)"
+/>
+
+On Windows, use the Windows Package Manager.
+
+<CodeBlock
+  code={`winget install Anthropic.ClaudeCode`}
+  lang="bash"
+  title="Windows (WinGet)"
+/>
+
+An npm package (`@anthropic-ai/claude-code`) also exists but is deprecated. Use the native installer instead -- it provides better platform integration, automatic updates, and correct system-level dependencies.
+
+After installation, verify it worked by checking the version.
+
+<CodeBlock
+  code={`claude --version`}
+  lang="bash"
+  title="Verify installation"
+/>
+
+Then start Claude Code by running the `claude` command from within any project directory.
+
+<CodeBlock
+  code={`cd your-project
+claude`}
+  lang="bash"
+  title="Starting Claude Code"
+/>
+
+The first time you run Claude Code, it will prompt you to authenticate with your Anthropic account. Follow the on-screen instructions to complete setup. You will need either an Anthropic API key or a Claude Max/Team/Enterprise subscription.
+
+Claude Code supports two billing models: direct API usage (pay-per-token via an Anthropic API key) and subscription plans (Claude Max, Team, or Enterprise) that include Claude Code access with usage limits. See the [Models & Costs chapter](/guides/claude-code/models-and-costs/) for detailed pricing, model selection, and cost optimization strategies.
+
+## Available Interfaces
+
+Claude Code runs across several interfaces, each suited to different workflows.
+
+**Terminal CLI** is the primary interface and the focus of this guide. Every feature is available in the terminal. You type natural language prompts and Claude Code responds with actions, explanations, and code changes.
+
+**VS Code extension** integrates Claude Code into the editor with inline suggestions, a chat panel, and access to the same agentic loop from within your IDE.
+
+**JetBrains plugin** provides similar integration for IntelliJ IDEA, WebStorm, PyCharm, and other JetBrains IDEs.
+
+**Desktop app** runs on macOS and Windows as a standalone application, providing a dedicated window for Claude Code sessions without needing a terminal.
+
+**Web interface** at console.anthropic.com gives browser-based access for quick tasks or when you are away from your development machine.
+
+**Slack integration** brings Claude Code into team channels, allowing collaborative prompting and shared context across your organization.
+
+All interfaces share the same underlying capabilities. A task started in VS Code uses the same agentic loop, the same tools, and the same context management as a task run from the terminal. The difference is the surrounding experience -- inline editor integration versus a dedicated prompt.
+
+The terminal CLI is where you will spend most of your time. All examples in this guide use the terminal CLI unless otherwise noted. Later chapters cover [remote access and headless automation](/guides/claude-code/remote-and-headless/) for CI/CD pipelines, but the core interaction model is always the same agentic loop described above.
+
+## Core Tools
+
+Claude Code uses five categories of tools autonomously during the agentic loop. You do not invoke these tools directly -- Claude Code selects the right tool for each step.
+
+**File operations** include reading file contents, writing new files, and making targeted edits to existing files. When Claude Code needs to understand your code, it reads files. When it needs to make changes, it writes or edits them. Edits are surgical -- Claude Code replaces specific sections rather than rewriting entire files.
+
+**Search** covers two complementary tools. Glob finds files by name patterns (like finding all TypeScript files in a directory). Grep searches file contents for text patterns (like finding every function that calls a specific API). Together, they let Claude Code navigate codebases of any size efficiently.
+
+**Execution** means running shell commands via Bash. Claude Code uses this to install packages, run tests, start development servers, check Git status, and perform any other command-line operation your workflow requires.
+
+**Web access** through WebFetch lets Claude Code read documentation, API references, and other URLs when it needs information from the web. This is useful when working with third-party libraries or when you paste a URL in your prompt for Claude Code to reference.
+
+**Code intelligence** is the ability to understand project structure, follow imports, navigate symbol definitions, and grasp how different parts of your codebase relate to each other. This is not a single tool but a capability that emerges from combining file reading, search, and Claude's understanding of programming languages.
+
+These tools work together seamlessly. When you ask Claude Code to refactor a function, it might Glob to find all files importing that function, Grep to find every call site, Read each file to understand the usage context, Edit the function and all its callers, then Bash to run the test suite and verify nothing broke. You never need to tell it which tools to use -- it selects them based on the task.
+
+Claude Code also asks for your permission before performing potentially destructive operations like writing files or running shell commands. You can configure these permission rules to match your workflow -- covered in detail in the [Models, Costs & Permissions chapter](/guides/claude-code/models-and-costs/).
+
+## Checkpoints and Undo
+
+Claude Code creates checkpoints before making changes to your files. If something goes wrong -- an edit breaks your build, a refactoring goes in the wrong direction, or you simply change your mind -- you can rewind to the previous state.
+
+Press **Esc** twice (Esc-Esc) to stop Claude Code and undo the most recent changes. Two presses are intentional -- the first Esc cancels the current operation, and the second triggers the rewind. File snapshots are created before edits, so reverting is safe and instantaneous. You do not lose uncommitted work that existed before Claude Code started editing.
+
+You can also use the `/undo` command to revert the last set of changes after Claude Code has finished a task. This is useful when you want to review the output first and then decide whether to keep it.
+
+Here is a summary of the undo mechanisms:
+
+- **Esc-Esc** (during execution) -- stops the current operation and rewinds file changes
+- **/undo** (after completion) -- reverts the last set of changes Claude Code made
+- **Git** (always available) -- your normal Git workflow provides an additional safety net since Claude Code works on your actual files
+
+This checkpoint system makes it safe to let Claude Code work autonomously. You can give it complex tasks, watch it iterate through the agentic loop, and rewind if the result is not what you wanted. Start with small tasks to build confidence, then gradually increase scope as you learn what Claude Code handles well.
+
+## Your First Session
+
+The best way to understand Claude Code is to use it. This section walks through a complete first interaction -- from starting a session to requesting a code change.
+
+Open your terminal, navigate to a project, and start Claude Code.
+
+<CodeBlock
+  code={`cd ~/projects/my-app
+claude`}
+  lang="bash"
+  title="Starting a session"
+/>
+
+Claude Code will show a prompt where you can type natural language instructions. The initial startup reads your project structure and any CLAUDE.md configuration file (covered in the [next chapter](/guides/claude-code/context-management/)).
+
+Try asking a question about your codebase first. This triggers the "gather context" phase without making any changes, so it is a safe way to start.
+
+<CodeBlock
+  code={`What does the authentication middleware do in this project?`}
+  lang="text"
+  title="Example: asking a question"
+  caption="Claude Code will read relevant files, search for auth-related code, and explain what it finds."
+/>
+
+Claude Code reads files, searches for patterns, and returns an explanation grounded in your actual code -- not generic advice.
+
+Now try asking Claude Code to make a change. This triggers the full agentic loop: gather context, take action, and verify results.
+
+<CodeBlock
+  code={`Add input validation to the user registration endpoint.
+Validate that email is a valid format and password is at least 8 characters.`}
+  lang="text"
+  title="Example: requesting a change"
+  caption="Claude Code will find the endpoint, make the edit, and run tests to verify."
+/>
+
+Here is what happens behind the scenes:
+
+1. Claude Code searches your codebase for the registration endpoint.
+2. It reads the relevant file and understands the current implementation.
+3. It edits the file to add validation logic.
+4. It asks for your permission before applying the changes.
+5. After you approve, it runs any existing tests to verify the changes work.
+
+You will see each step in your terminal. Claude Code shows you what it is reading, what changes it proposes, and what commands it runs. You stay in control throughout the process.
+
+As you gain confidence, try more complex prompts that require multiple steps.
+
+<CodeBlock
+  code={`Refactor the database connection module to use connection pooling.
+Update all files that import the old connection helper.
+Run the existing tests to make sure nothing breaks.`}
+  lang="text"
+  title="Example: multi-step task"
+  caption="Claude Code will find the module, plan the refactor, update all callers, and run the test suite."
+/>
+
+This kind of multi-step task is where the agentic loop shines. Claude Code will iterate through the gather-action-verify cycle multiple times, handling each step and verifying along the way.
+
+When you are done with a session, type `/quit` or press **Ctrl+C** to exit. Your conversation history is saved automatically and can be resumed later with `claude --continue` to pick up where you left off.
+
+## Best Practices
+
+These practices will help you get the most out of Claude Code from day one.
+
+- **Start with small, well-defined tasks** to learn how Claude Code operates. Ask it to add a function, fix a bug, or write a test before giving it large refactoring jobs.
+
+- **Review diffs before approving changes.** Claude Code shows you exactly what it plans to modify. Read the diff carefully, especially for changes to critical code paths.
+
+- **Use /undo if something goes wrong.** Reverting is fast and safe. It is better to undo and re-prompt with more specific instructions than to manually fix a bad edit.
+
+- **Keep commits small and focused.** After Claude Code completes a task, commit the changes before starting the next task. This gives you clear rollback points and a readable Git history.
+
+- **Be specific in your prompts.** "Fix the bug" is vague. "Fix the null pointer exception in the user service when email is missing" gives Claude Code the context it needs to find and fix the right issue.
+
+- **Use Git as your safety net.** Commit before starting a new Claude Code task so you always have a clean baseline to return to. Claude Code works on your real files, so Git discipline is more important than ever.
+
+## Slash Commands Quick Reference
+
+Claude Code provides several slash commands you can type at the prompt. Here are the essential ones to know from the start:
+
+- **/help** -- show available commands and usage information
+- **/undo** -- revert the last set of file changes
+- **/clear** -- reset the conversation and start fresh (useful between unrelated tasks)
+- **/compact** -- compress the conversation to free up context window space
+- **/cost** -- show token usage and cost for the current session
+
+You will encounter more commands throughout this guide. The [Context Management chapter](/guides/claude-code/context-management/) covers `/compact` and `/clear` in depth, and the [Models & Costs chapter](/guides/claude-code/models-and-costs/) explains `/cost` and model selection.
+
+## Further Reading
+
+For more detail on the topics covered in this chapter, consult the official Claude Code documentation:
+
+- <a href="https://code.claude.com/docs/en/overview" target="_blank" rel="noopener noreferrer">Claude Code Overview</a> -- official documentation covering all features and interfaces
+- <a href="https://code.claude.com/docs/en/quickstart" target="_blank" rel="noopener noreferrer">Quickstart Guide</a> -- Anthropic's official getting-started walkthrough
+- <a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener noreferrer">How Claude Code Works</a> -- deep dive into the agentic loop, tools, and context management
+
 ---
 
-Content coming in Phase 93.
+Next, learn how to give Claude Code project-specific instructions and manage the context window in [Project Context & Memory](/guides/claude-code/context-management/).
