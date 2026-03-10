@@ -1,0 +1,360 @@
+---
+title: "Environment Sandboxing & Customization"
+description: "Configuration scopes, sandboxed execution, and status line customization"
+order: 3
+slug: "environment"
+lastVerified: 2026-03-10
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+
+## What You Will Learn
+
+This chapter covers the security and customization layer of Claude Code. You will learn how the four-tier configuration system controls settings across enterprise, personal, and project scopes. You will understand how sandbox modes isolate Claude Code's access to your filesystem and network. And you will learn how to customize the terminal experience with environment variables and a status line. By the end, you will be able to configure Claude Code to fit your team's security requirements and your personal workflow preferences.
+
+---
+
+## Configuration Scopes
+
+Claude Code settings are organized into four tiers, each with a specific purpose and priority level. When the same setting is defined at multiple tiers, higher-priority tiers override lower ones.
+
+### Managed Settings
+
+Managed settings have the highest priority and cannot be overridden by any other tier. Enterprise administrators use this file to enforce organization-wide policies -- for example, blocking certain commands across all developers or requiring sandbox mode.
+
+<CodeBlock
+  code={`~/.claude/managed-settings.json`}
+  lang="text"
+  caption="Managed settings location -- controlled by enterprise admins"
+/>
+
+Most individual developers will never create this file. It exists for organizations that need centralized control over Claude Code's behavior across their engineering teams. If a managed setting denies a command, no project or personal setting can allow it.
+
+### User Settings
+
+User settings are your personal defaults that apply across all projects. This is where you set preferences like your default model, effort level, and personal permission rules.
+
+<CodeBlock
+  code={`~/.claude/settings.json`}
+  lang="text"
+  caption="User settings location -- personal defaults for all projects"
+/>
+
+### Project Settings
+
+Project settings are shared with your team via version control. This is the right place for permission rules that the whole team should follow, model preferences for the project, and any project-specific configuration.
+
+<CodeBlock
+  code={`.claude/settings.json`}
+  lang="text"
+  caption="Project settings location -- committed to git, shared with team"
+/>
+
+### Local Settings
+
+Local settings are personal overrides for a specific project. They are not committed to git and exist only on your machine. Use this for personal preferences that differ from the team defaults -- for example, using a different model or enabling auto-allow sandbox mode for a project you trust.
+
+<CodeBlock
+  code={`.claude/settings.local.json`}
+  lang="text"
+  caption="Local settings location -- personal project overrides, not committed to git"
+/>
+
+### Precedence Order
+
+When the same setting exists at multiple tiers, the precedence order is: **managed > local > project > user**. Note that local overrides project -- this allows individual developers to customize their experience without affecting team settings.
+
+This means:
+- A managed deny rule cannot be overridden by any other tier
+- A local setting overrides the project setting for the same key
+- A project setting overrides your user-level default
+- User settings serve as the fallback when nothing else is specified
+
+## Settings File Format
+
+All four tiers use the same JSON format. Here is a comprehensive example showing the most commonly used fields.
+
+<CodeBlock
+  code={`{
+  "model": "sonnet",
+  "permissions": {
+    "mode": "default",
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Read(*)"
+    ],
+    "deny": [
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(rm -rf /)*"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": false,
+    "filesystem": {
+      "allowWrite": [
+        "./src/**",
+        "./tests/**",
+        "./docs/**"
+      ]
+    }
+  },
+  "preferences": {
+    "effort": "medium"
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Comprehensive project settings showing permissions, sandbox, and preferences"
+/>
+
+The `permissions` section controls which actions Claude can take without asking (covered in detail in [Models, Cost Economics & Permissions](/guides/claude-code/models-and-costs/)). The `sandbox` section controls filesystem and network isolation (covered below). The `preferences` section sets behavioral defaults like effort level.
+
+## Environment Variables
+
+Several environment variables control Claude Code's behavior. Set them in your shell profile for persistence across sessions.
+
+<CodeBlock
+  code={`# Model selection
+export ANTHROPIC_MODEL=sonnet
+
+# Effort level (low, medium, high)
+export CLAUDE_CODE_EFFORT=medium
+
+# API key (for direct API usage, not needed for Claude Pro/Max subscriptions)
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Custom output directory for generated files
+export CLAUDE_CODE_OUTPUT_DIR=./output
+
+# Disable automatic updates
+export DISABLE_AUTOUPDATER=1
+
+# Default haiku model (replaces deprecated ANTHROPIC_SMALL_FAST_MODEL)
+export ANTHROPIC_DEFAULT_HAIKU_MODEL=haiku`}
+  lang="bash"
+  title="~/.zshrc"
+  caption="Key environment variables for Claude Code configuration"
+/>
+
+Environment variables take effect for the current shell session and any Claude Code sessions started from it. For permanent changes, add them to your shell profile (`~/.zshrc`, `~/.bashrc`, or equivalent).
+
+Note that the `ANTHROPIC_SMALL_FAST_MODEL` environment variable is deprecated. Use `ANTHROPIC_DEFAULT_HAIKU_MODEL` instead for configuring the lightweight model used for background tasks.
+
+---
+
+## Why Sandboxing Matters
+
+Claude Code runs real commands on your machine. It reads files, executes shell commands, and writes code. This power is what makes it effective -- but it also means that unexpected behavior could have real consequences.
+
+Sandboxing constrains what Claude Code can access, even if something goes wrong. There are two primary risk scenarios that sandboxing addresses:
+
+**Accidental damage.** Claude might misinterpret a request and run a destructive command like `rm -rf` on a directory outside your project. Without sandboxing, this would succeed and data would be lost. With sandboxing, filesystem access is restricted to authorized paths.
+
+**Prompt injection.** When working with untrusted codebases, malicious content in files or commit messages could attempt to trick Claude into running harmful commands. Sandboxing limits the blast radius -- even if Claude is manipulated into running a command, it cannot access files or network resources outside the sandbox boundary.
+
+Sandboxing works at the operating system level, not the application level. This means Claude Code cannot bypass it even with a `bypassPermissions` mode -- the OS kernel enforces the restrictions.
+
+## Sandbox Modes
+
+Claude Code supports two sandbox modes that offer different tradeoffs between security and convenience.
+
+### Regular Sandbox
+
+In regular sandbox mode, Claude asks for permission for any operation that might reach outside the sandbox boundary. This is the default behavior when sandboxing is enabled.
+
+<CodeBlock
+  code={`{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": false
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Regular sandbox -- Claude asks for permission on boundary-crossing operations"
+/>
+
+Regular sandbox mode is the safest option. You maintain full visibility into every command Claude runs while still benefiting from OS-level isolation that prevents catastrophic errors.
+
+### Auto-Allow with Sandbox
+
+Auto-allow sandbox mode automatically approves all operations that stay within the sandbox boundary. Claude only asks for permission when an operation would cross the boundary.
+
+<CodeBlock
+  code={`{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Auto-allow sandbox -- operations within the boundary proceed without prompting"
+/>
+
+The `autoAllowBashIfSandboxed` flag is the key setting. When set to `true`, Claude can run any bash command that stays within the sandbox's filesystem and network constraints without asking. This provides a fast, uninterrupted workflow while maintaining hard security boundaries.
+
+This mode is a good fit when you trust the codebase you are working on and want minimal interruptions, but still want OS-level guardrails preventing access outside the project.
+
+## Filesystem Isolation
+
+Sandboxing enforces filesystem access restrictions at the operating system level using platform-specific mechanisms.
+
+**macOS** uses **Seatbelt** (`sandbox-exec`) to restrict filesystem access at the kernel level. Seatbelt profiles define which paths are readable and writable. This is the same sandboxing technology that macOS uses for App Store applications.
+
+**Linux** uses **bubblewrap** (`bwrap`) to provide namespace-based isolation. Bubblewrap creates a restricted filesystem view where only explicitly allowed paths are visible. It uses Linux kernel namespaces, the same technology underlying container runtimes like Docker.
+
+Neither platform relies on Claude Code to self-enforce filesystem restrictions. The OS kernel prevents unauthorized access regardless of what commands Claude attempts to run.
+
+### Configuring Writable Paths
+
+The `sandbox.filesystem.allowWrite` setting specifies which paths Claude Code can write to. Paths use a prefix notation:
+
+| Prefix | Meaning | Example |
+|--------|---------|---------|
+| `//` | Absolute path from root | `//tmp/claude-output` |
+| `~` | Home directory | `~/Documents/exports` |
+| `./` | Relative to project root | `./src/**` |
+
+<CodeBlock
+  code={`{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": [
+        "./src/**",
+        "./tests/**",
+        "./docs/**",
+        "//tmp/claude-*",
+        "~/.claude/projects/**"
+      ]
+    }
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Filesystem sandbox with prefix notation for writable paths"
+/>
+
+Glob patterns work in writable path specifications. `./src/**` allows writing to any file under the `src` directory tree. `//tmp/claude-*` allows writing to temporary files with a `claude-` prefix. Paths not listed in `allowWrite` are read-only by default when sandboxing is enabled.
+
+## Network Isolation
+
+Claude Code's sandbox also controls network access through a proxy-based architecture. All outbound network traffic is routed through a local proxy that enforces domain restrictions.
+
+The `allowedDomains` setting controls which external domains Claude Code can reach. This prevents data exfiltration and limits the scope of any network-related prompt injection attacks.
+
+<CodeBlock
+  code={`{
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "pypi.org",
+        "api.github.com",
+        "raw.githubusercontent.com"
+      ]
+    }
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Network sandbox allowing only package registries and GitHub API"
+/>
+
+By default, the sandbox allows access to common package registries (npm, PyPI, crates.io) and other standard development domains. You can restrict this further for high-security environments or expand it for projects that need specific API access.
+
+Keep the allowed domains list as minimal as practical. Every domain you add is a potential channel for data to leave your machine. If Claude needs to access an API that is not in the allowed list, you will be prompted to approve it.
+
+---
+
+## Status Line Customization
+
+Claude Code displays a status line at the bottom of the terminal during active sessions. You can customize this status line with a shell script that receives session information and outputs custom text.
+
+### Configuring the Status Line
+
+Point the `statusLine` setting to a shell script that will generate your custom status text.
+
+<CodeBlock
+  code={`{
+  "statusLine": "~/.claude/status.sh"
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Point to a custom status line script"
+/>
+
+### Writing a Status Line Script
+
+The status line script receives session JSON on stdin and should output a single line of text to stdout. The JSON contains information about the current session including the model, cost, and token usage.
+
+<CodeBlock
+  code={`#!/bin/bash
+# Read session JSON from stdin
+SESSION=$(cat)
+
+# Extract fields using jq
+MODEL=$(echo "$SESSION" | jq -r '.model // "unknown"')
+COST=$(echo "$SESSION" | jq -r '.cost // "0.00"')
+TOKENS=$(echo "$SESSION" | jq -r '.tokensUsed // 0')
+
+# Format output
+echo "Model: $MODEL | Cost: \$$COST | Tokens: $TOKENS"`}
+  lang="bash"
+  title="~/.claude/status.sh"
+  caption="Example status line script showing model, cost, and token count"
+/>
+
+Make sure to mark the script as executable:
+
+<CodeBlock
+  code={`chmod +x ~/.claude/status.sh`}
+  lang="bash"
+  caption="Make the status line script executable"
+/>
+
+The status line updates periodically during the session. Keep your script fast -- it should execute in milliseconds, not seconds. Avoid network calls or expensive computations in the status line script.
+
+### Practical Status Line Examples
+
+A cost-focused status line for budget-conscious teams:
+
+<CodeBlock
+  code={`#!/bin/bash
+SESSION=$(cat)
+COST=$(echo "$SESSION" | jq -r '.cost // "0.00"')
+MODEL=$(echo "$SESSION" | jq -r '.model // "unknown"')
+echo "[$MODEL] \$$COST spent"`}
+  lang="bash"
+  title="~/.claude/cost-status.sh"
+  caption="Minimal status line showing model and running cost"
+/>
+
+## Best Practices
+
+- **Use project settings for team conventions.** Put `.claude/settings.json` in version control so all team members share the same permission rules, model defaults, and sandbox configuration. This ensures consistent behavior across the team.
+
+- **Use local settings for personal overrides.** Keep `.claude/settings.local.json` out of version control (add it to `.gitignore`). Use it for personal preferences like a different default model or auto-allow sandbox mode for projects you trust.
+
+- **Enable sandbox for untrusted codebases.** When working with code you did not write -- open source contributions, inherited projects, or third-party code reviews -- enable sandboxing to limit the blast radius of any malicious content hidden in the codebase.
+
+- **Start with regular sandbox before auto-allow.** Use regular sandbox mode first to understand what commands Claude runs during your typical workflow. Once you are confident in the patterns, enable `autoAllowBashIfSandboxed` for a faster experience.
+
+- **Keep `allowedDomains` minimal.** Only add domains that your project genuinely needs. Every additional domain is a potential data exfiltration channel. Start with package registries and add domains as needed.
+
+- **Use the status line to track costs.** A custom status line showing the current session cost keeps spending visible without requiring you to run `/cost` manually. This is especially valuable for teams with cost targets.
+
+- **Document your settings choices.** Add comments to your project's CLAUDE.md explaining why specific permission rules exist. Future team members (and future you) will benefit from understanding the reasoning behind deny rules.
+
+## Further Reading
+
+- <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">Settings</a> -- Official docs on configuration scopes, file locations, and available settings
+- <a href="https://code.claude.com/docs/en/sandboxing" target="_blank" rel="noopener noreferrer">Sandboxing</a> -- Official docs on sandbox modes, filesystem isolation, and network restrictions
+- <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener noreferrer">Status Line</a> -- Official docs on custom status line scripts and session JSON format
+- [Remote Control & Headless Automation](/guides/claude-code/remote-and-headless/) -- Running Claude Code remotely and automating with scheduled tasks (next chapter)
