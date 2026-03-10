@@ -66,7 +66,11 @@ Plans:
   3. The Hook Lifecycle diagram visualizes all lifecycle events with branching execution paths
   4. The Permission Model diagram shows the evaluation flowchart with allow/ask/deny decision paths
   5. The MCP Architecture diagram shows server topology with stdio and HTTP transport connections
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 91-01-PLAN.md — Extend diagram-base.ts + Agentic Loop (DIAG-01) + Hook Lifecycle (DIAG-02)
+- [ ] 91-02-PLAN.md — Permission Model (DIAG-03) + MCP Architecture (DIAG-04)
+- [ ] 91-03-PLAN.md — Agent Teams (DIAG-05) + full regression verification
 
 ### Phase 92: Interactive React Components
 **Goal**: Two interactive React Flow visualizers let readers explore Claude Code permission evaluation and hook event sequences hands-on
@@ -122,7 +126,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
-| 91. SVG Diagram Generators | 0/TBD | Not started | - |
+| 91. SVG Diagram Generators | 0/3 | Not started | - |
 | 92. Interactive React Components | 0/TBD | Not started | - |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
 | 94. Advanced Content Chapters | 0/TBD | Not started | - |
