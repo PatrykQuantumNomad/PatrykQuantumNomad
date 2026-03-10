@@ -1,0 +1,14 @@
+---
+/**
+ * McpArchitectureDiagram -- Build-time SVG wrapper for DIAG-04.
+ * Renders the MCP server topology with stdio (local) and HTTP (remote)
+ * transports as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateMcpArchitecture } from '../../lib/guides/svg-diagrams';
+
+const svg = generateMcpArchitecture();
+---
+
+<PlotFigure svg={svg} caption="MCP architecture: server topology with stdio (local) and HTTP (remote) transports" maxWidth="720px" />

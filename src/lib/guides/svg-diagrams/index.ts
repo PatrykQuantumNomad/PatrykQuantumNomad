@@ -11,6 +11,7 @@ export { generateNfrDiagram } from './nfr-diagram';
 export { generateAgenticLoop } from './agentic-loop';
 export { generateHookLifecycle } from './hook-lifecycle';
 export { generatePermissionModel } from './permission-model';
+export { generateMcpArchitecture } from './mcp-architecture';
 export { generateAgentTeams } from './agent-teams';
 
 // Shared types and utilities
