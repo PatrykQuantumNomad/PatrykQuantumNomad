@@ -1,8 +1,8 @@
 ---
 /**
  * Guides hub page — /guides/
- * Lists all available production guides. Currently features the FastAPI
- * Production Guide, future-proofed for additional guides.
+ * Lists all available production guides. Features FastAPI Production Guide
+ * and Claude Code Guide as distinct cards with per-guide accent colors.
  */
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
@@ -10,14 +10,17 @@ import Layout from '../../layouts/Layout.astro';
 import { guideLandingUrl } from '../../lib/guides/routes';
 import fastapiLogo from '../../assets/images/fastapi-logo-teal.png';
 
-const [guideMeta] = await getCollection('guides');
-const guidePages = await getCollection('guidePages');
-const chapterCount = guideMeta.data.chapters.length;
+const [fastapiMeta] = await getCollection('guides');
+const [claudeCodeMeta] = await getCollection('claudeCodeGuide');
+
+const fastapiChapterCount = fastapiMeta.data.chapters.length;
+const claudeCodeChapterCount = claudeCodeMeta.data.chapters.length;
+const claudeAccent = claudeCodeMeta.data.accentColor ?? '#D97706';
 ---
 
 <Layout
   title="Guides | Patryk Golabek"
-  description="Production-grade technical guides covering FastAPI, Kubernetes, and cloud-native architecture."
+  description="Production-grade technical guides covering FastAPI, Claude Code, and cloud-native architecture."
 >
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
     <h1 class="text-4xl sm:text-5xl font-heading font-bold" data-reveal>
@@ -28,8 +31,9 @@ const chapterCount = guideMeta.data.chapters.length;
     </p>
 
     <div class="mt-12 grid grid-cols-1 gap-6">
+      <!-- FastAPI Production Guide -->
       <a
-        href={guideLandingUrl(guideMeta.data.slug)}
+        href={guideLandingUrl(fastapiMeta.data.slug)}
         class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden"
         data-reveal
         data-tilt
@@ -46,17 +50,57 @@ const chapterCount = guideMeta.data.chapters.length;
             <div class="relative z-10 flex items-center gap-3">
               <span class="font-mono text-[10px] tracking-[0.35em] text-[#009485]/60 uppercase select-none">Production Chassis</span>
               <span class="inline-block text-xs font-mono px-2 py-0.5 rounded bg-[#009485]/15 text-[#009485]">
-                {chapterCount} chapters
+                {fastapiChapterCount} chapters
               </span>
             </div>
           </div>
           <div class="p-6">
             <p class="meta-mono text-[var(--color-accent)]">Production Guide</p>
             <h2 class="text-xl font-heading font-bold text-[var(--color-text-primary)] mt-2">
-              {guideMeta.data.title}
+              {fastapiMeta.data.title}
             </h2>
             <p class="text-sm text-[var(--color-text-secondary)] mt-2">
-              {guideMeta.data.description}
+              {fastapiMeta.data.description}
+            </p>
+            <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">
+              Read the guide &rarr;
+            </span>
+          </div>
+        </article>
+      </a>
+
+      <!-- Claude Code Guide -->
+      <a
+        href={guideLandingUrl(claudeCodeMeta.data.slug)}
+        class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden"
+        data-reveal
+        data-tilt
+      >
+        <article>
+          <div class={`bg-gradient-to-br from-[${claudeAccent}]/8 to-[${claudeAccent}]/3 px-6 py-8 flex flex-col items-center justify-center gap-3 relative overflow-hidden`}>
+            <div class={`absolute inset-4 border border-dashed border-[${claudeAccent}]/20 rounded-lg`} aria-hidden="true">
+              <div class={`absolute -top-1 -left-1 w-2 h-2 rounded-full bg-[${claudeAccent}]/40`}></div>
+              <div class={`absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[${claudeAccent}]/40`}></div>
+              <div class={`absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-[${claudeAccent}]/40`}></div>
+              <div class={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-[${claudeAccent}]/40`}></div>
+            </div>
+            <h3 class={`relative z-10 text-2xl font-heading font-bold text-[${claudeAccent}]`}>
+              {claudeCodeMeta.data.title}
+            </h3>
+            <div class="relative z-10 flex items-center gap-3">
+              <span class={`font-mono text-[10px] tracking-[0.35em] text-[${claudeAccent}]/60 uppercase select-none`}>Zero to Hero</span>
+              <span class={`inline-block text-xs font-mono px-2 py-0.5 rounded bg-[${claudeAccent}]/15 text-[${claudeAccent}]`}>
+                {claudeCodeChapterCount} chapters
+              </span>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="meta-mono text-[var(--color-accent)]">Mastery Guide</p>
+            <h2 class="text-xl font-heading font-bold text-[var(--color-text-primary)] mt-2">
+              {claudeCodeMeta.data.title}
+            </h2>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+              {claudeCodeMeta.data.description}
             </p>
             <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">
               Read the guide &rarr;

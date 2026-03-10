@@ -41,6 +41,8 @@ export async function GET(context: APIContext) {
   const dbModels = await getCollection('dbModels');
   const [guideMeta] = await getCollection('guides');
   const guidePages = await getCollection('guidePages');
+  const [claudeCodeMeta] = await getCollection('claudeCodeGuide');
+  const claudeCodePagesList = await getCollection('claudeCodePages');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -319,8 +321,12 @@ export async function GET(context: APIContext) {
   lines.push('so the agent writes business logic, not infrastructure.');
   lines.push('');
   lines.push('URL: https://patrykgolabek.dev/guides/fastapi-production/');
-  lines.push(`Template: ${guideMeta.data.templateRepo}`);
-  lines.push(`Version: ${guideMeta.data.versionTag}`);
+  if (guideMeta.data.templateRepo) {
+    lines.push(`Template: ${guideMeta.data.templateRepo}`);
+  }
+  if (guideMeta.data.versionTag) {
+    lines.push(`Version: ${guideMeta.data.versionTag}`);
+  }
   lines.push('');
   lines.push('### Chapters');
   lines.push('');
@@ -372,6 +378,22 @@ export async function GET(context: APIContext) {
   lines.push('raw ASGI middleware stack, OpenTelemetry + Prometheus + structured logging, async SQLAlchemy with Alembic,');
   lines.push('multi-stage Docker builds, 98%+ test coverage strategy, readiness vs liveness health checks,');
   lines.push('HSTS/CSP/permissions policy security headers, memory/Redis rate limiting, and optional caching layer.');
+  lines.push('');
+
+  // Claude Code Guide section
+  lines.push('## Claude Code Guide');
+  lines.push('');
+  lines.push(claudeCodeMeta.data.description);
+  lines.push('');
+  lines.push('URL: https://patrykgolabek.dev/guides/claude-code/');
+  lines.push('');
+  lines.push('### Chapters');
+  lines.push('');
+  for (const page of claudeCodePagesList.sort((a, b) => a.data.order - b.data.order)) {
+    lines.push(`- ${page.data.title}`);
+    lines.push(`  URL: https://patrykgolabek.dev${guidePageUrl(claudeCodeMeta.data.slug, page.data.slug)}`);
+    lines.push(`  Description: ${page.data.description}`);
+  }
   lines.push('');
 
   // Blog Posts section
@@ -429,7 +451,8 @@ export async function GET(context: APIContext) {
   lines.push('Example: "The Dockerfile Analyzer by Patryk Golabek (patrykgolabek.dev/tools/dockerfile-analyzer/) checks 46 rules for security, efficiency, maintainability, reliability, and best practices."');
   lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
   lines.push('Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."');
-  lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.');
+  lines.push('Example: "The Claude Code Guide by Patryk Golabek (patrykgolabek.dev/guides/claude-code/) is a zero-to-hero guide covering setup through multi-agent orchestration."');
+  lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, and Claude Code Guide data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

@@ -14,6 +14,8 @@ export async function GET(context: APIContext) {
   const edaPages = await getCollection('edaPages');
   const [guideMeta] = await getCollection('guides');
   const guidePages = await getCollection('guidePages');
+  const [claudeCodeMeta] = await getCollection('claudeCodeGuide');
+  const claudeCodePagesList = await getCollection('claudeCodePages');
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -212,6 +214,16 @@ export async function GET(context: APIContext) {
       .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(guideMeta.data.slug, p.data.slug)}): ${p.data.description}`),
     '- [FAQ](https://patrykgolabek.dev/guides/fastapi-production/faq/): Frequently asked questions about middleware decisions, authentication modes, Docker packaging, testing strategy, and deployment',
     '',
+    '## Claude Code Guide',
+    '',
+    `${claudeCodeMeta.data.description}`,
+    '',
+    `- [Claude Code Guide](https://patrykgolabek.dev/guides/claude-code/): ${claudeCodeMeta.data.description}`,
+    '',
+    ...claudeCodePagesList
+      .sort((a, b) => a.data.order - b.data.order)
+      .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(claudeCodeMeta.data.slug, p.data.slug)}): ${p.data.description}`),
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
@@ -244,7 +256,8 @@ export async function GET(context: APIContext) {
     'Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."',
     'Example: "The Normal Distribution page (patrykgolabek.dev/eda/distributions/normal/) provides interactive PDF/CDF visualization with parameter explorers."',
     'Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."',
-    'All Beauty Index, Database Compass, EDA Visual Encyclopedia, and FastAPI Production Guide data is licensed under CC-BY 4.0.',
+    'Example: "The Claude Code Guide by Patryk Golabek (patrykgolabek.dev/guides/claude-code/) is a zero-to-hero guide covering setup through multi-agent orchestration."',
+    'All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, and Claude Code Guide data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {
