@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: in-progress
-stopped_at: Completed 91-03-PLAN.md
-last_updated: "2026-03-10T20:23:24Z"
-last_activity: 2026-03-10 — Completed 91-03 (agent teams diagram + regression verification)
+stopped_at: Completed 92-01-PLAN.md
+last_updated: "2026-03-10T21:22:10Z"
+last_activity: 2026-03-10 — Completed 92-01 (permission flow explorer component + data module)
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
-  percent: 55
+  total_plans: 9
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 91 SVG Diagram Generators
+**Current focus:** v1.16 Claude Code Guide — Phase 92 Interactive React Components
 
 ## Current Position
 
-Phase: 91 (2 of 6) — SVG Diagram Generators — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 91 Complete
-Last activity: 2026-03-10 — Completed 91-03 (agent teams diagram + regression verification)
+Phase: 92 (3 of 6) — Interactive React Components
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-03-10 — Completed 92-01 (permission flow explorer component + data module)
 
-Progress: [█████▒░░░░] 55%
+Progress: [██████▒░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
-- v1.16 plans completed: 7
+- v1.16 plans completed: 8
 
 **Cumulative Stats:**
 
@@ -66,6 +66,7 @@ Progress: [█████▒░░░░] 55%
 | Phase 91 P01 | 4min | 2 tasks | 8 files |
 | Phase 91 P02 | 4min | 2 tasks | 7 files |
 | Phase 91 P03 | 3min | 2 tasks | 4 files |
+| Phase 92 P01 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,10 @@ Full decision log in PROJECT.md Key Decisions table.
 - (91-02) SSE transport labeled as deprecated, HTTP highlighted as recommended with accent color
 - (91-03) Dashed groupBox wrapping entire diagram conveys Research Preview status prominently
 - (91-03) Task state indicators use accent color for in-progress and textSecondary for pending/completed
+- (92-01) Diamond nodes use decorative SVG background (not clip-path) to avoid clipping React Flow handles
+- (92-01) 9 edges include 2 prompt-user outcome edges for complete decision tree
+- (92-01) Data module separated from component in src/lib/guides/interactive-data/ for independent unit testing
+- (92-01) Detail panel rendered as sibling below ReactFlow canvas, not inside the flow
 
 ### Pending Todos
 
@@ -112,7 +117,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T20:23:45Z
-Stopped at: Completed Phase 91 (all 3 plans done)
+Last session: 2026-03-10T21:22:10Z
+Stopped at: Completed 92-01-PLAN.md
 Resume file: None
-Next: Phase 92 (next phase in v1.16 Claude Code Guide milestone)
+Next: 92-02-PLAN.md (hook event visualizer)
