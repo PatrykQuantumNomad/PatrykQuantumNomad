@@ -111,7 +111,7 @@ Plans:
   3. A reader understands git worktree-based parallel development and subagent delegation patterns after reading Chapter 9
   4. A reader can set up agent team architecture with shared task lists, dependency tracking, and mailbox communication after reading Chapter 10
   5. A reader understands vulnerability scanning, managed enterprise settings, and plugin governance after reading Chapter 11
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 94-01-PLAN.md — Chapter 7 (Custom Skills) + Chapter 8 (Hooks & Lifecycle Automation)
 - [ ] 94-02-PLAN.md — Chapter 9 (Git Worktrees & Subagent Delegation) + Chapter 10 (Agent Teams & Advanced Orchestration)
@@ -140,5 +140,5 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | 91. SVG Diagram Generators | 3/3 | Complete   | 2026-03-10 |
 | 92. Interactive React Components | 2/2 | Complete   | 2026-03-10 |
 | 93. Foundation Content Chapters | 3/3 | Complete | 2026-03-10 |
-| 94. Advanced Content Chapters | 0/3 | Not started | - |
+| 94. Advanced Content Chapters | 1/3 | In Progress|  |
 | 95. Site Integration & Blog Post | 0/TBD | Not started | - |

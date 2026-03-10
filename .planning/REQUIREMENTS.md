@@ -29,7 +29,7 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 - [ ] **CHAP-08**: Chapter 8 — Hooks & Lifecycle Automation (13 lifecycle events, exit codes, prompt/agent hooks)
 - [ ] **CHAP-09**: Chapter 9 — Git Worktrees & Subagent Delegation (parallel development, custom agent personas)
 - [ ] **CHAP-10**: Chapter 10 — Agent Teams & Advanced Orchestration (team architecture, shared tasks, dependency tracking)
-- [ ] **CHAP-11**: Chapter 11 — Security & Enterprise Administration (vulnerability scanning, managed settings, plugin governance)
+- [x] **CHAP-11**: Chapter 11 — Security & Enterprise Administration (vulnerability scanning, managed settings, plugin governance)
 
 ### SVG Diagrams
 
@@ -113,7 +113,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAP-08 | Phase 94 | Pending |
 | CHAP-09 | Phase 94 | Pending |
 | CHAP-10 | Phase 94 | Pending |
-| CHAP-11 | Phase 94 | Pending |
+| CHAP-11 | Phase 94 | Complete |
 | SITE-01 | Phase 95 | Pending |
 | SITE-02 | Phase 95 | Pending |
 | SITE-03 | Phase 95 | Pending |

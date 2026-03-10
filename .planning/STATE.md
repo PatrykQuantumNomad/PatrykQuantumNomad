@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: in-progress
-stopped_at: Completed Phase 93 (all 3 plans)
-last_updated: "2026-03-10T22:35:00Z"
-last_activity: 2026-03-10 — Completed Phase 93 (6 foundation content chapters)
+stopped_at: Completed 94-03-PLAN.md (Chapter 11 Security & Enterprise Administration)
+last_updated: "2026-03-10T23:10:00Z"
+last_activity: 2026-03-10 — Completed 94-03 (Chapter 11 Security & Enterprise Administration)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
-  percent: 83
+  total_plans: 15
+  completed_plans: 14
+  percent: 93
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 93 Complete, ready for Phase 94
+**Current focus:** v1.16 Claude Code Guide — Phase 94 in progress (Plan 03 complete)
 
 ## Current Position
 
-Phase: 93 (4 of 6) — Foundation Content Chapters — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 93 Complete
-Last activity: 2026-03-10 — Completed Phase 93 (all 6 foundation chapters verified)
+Phase: 94 (5 of 6) — Advanced Content Chapters — IN PROGRESS
+Plan: 1 of 3 complete (94-03 done; 94-01, 94-02 in parallel)
+Status: Phase 94 in progress
+Last activity: 2026-03-10 — Completed 94-03 (Chapter 11 Security & Enterprise Administration)
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
-- v1.16 plans completed: 12
+- v1.16 plans completed: 13
 
 **Cumulative Stats:**
 
@@ -71,6 +71,7 @@ Progress: [████████░░] 83%
 | Phase 93 P01 | 13min | 2 tasks | 2 files |
 | Phase 93 P02 | 9min | 2 tasks | 2 files |
 | Phase 93 P03 | 9min | 2 tasks | 2 files |
+| Phase 94 P03 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - (93-01) Native install script (curl) as primary installation method; npm explicitly deprecated
 - (93-01) File exclusion documented via respectGitignore + claudeMdExcludes, not standalone .claudeignore
 - (93-01) Slash commands quick reference added to Chapter 1 for reader convenience
+- (94-03) Vulnerability scanning framed as capability pattern (subagents + skills + hooks), not standalone named feature
+- (94-03) 520 lines covers all 16 sections including 5 managed settings mechanisms, 3 governance flags, plugin/sandbox/auth controls
 
 ### Pending Todos
 
@@ -128,7 +131,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T22:35:00Z
-Stopped at: Completed Phase 93 (all 3 plans done)
+Last session: 2026-03-10T23:10:00Z
+Stopped at: Completed 94-03-PLAN.md (Chapter 11 Security & Enterprise Administration)
 Resume file: None
-Next: Phase 94 (Advanced Content Chapters)
+Next: Complete 94-01 and 94-02 (parallel), then Phase 95
