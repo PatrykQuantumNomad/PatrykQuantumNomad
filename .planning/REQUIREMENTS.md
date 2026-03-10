@@ -25,8 +25,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 - [x] **CHAP-04**: Chapter 4 — Environment Sandboxing & Workspace Customization (config scopes, sandboxed execution, status lines)
 - [x] **CHAP-05**: Chapter 5 — Remote Control, Headless Automation & Crons (remote control, headless mode, cron scheduling, HTTP proxies)
 - [x] **CHAP-06**: Chapter 6 — Model Context Protocol (connecting external tools, transports, tool search, troubleshooting)
-- [ ] **CHAP-07**: Chapter 7 — Custom Skills (SKILL.md anatomy, slash commands vs auto-invocation, skill creator)
-- [ ] **CHAP-08**: Chapter 8 — Hooks & Lifecycle Automation (13 lifecycle events, exit codes, prompt/agent hooks)
+- [x] **CHAP-07**: Chapter 7 — Custom Skills (SKILL.md anatomy, slash commands vs auto-invocation, skill creator)
+- [x] **CHAP-08**: Chapter 8 — Hooks & Lifecycle Automation (18 lifecycle events, exit codes, prompt/agent hooks)
 - [ ] **CHAP-09**: Chapter 9 — Git Worktrees & Subagent Delegation (parallel development, custom agent personas)
 - [ ] **CHAP-10**: Chapter 10 — Agent Teams & Advanced Orchestration (team architecture, shared tasks, dependency tracking)
 - [x] **CHAP-11**: Chapter 11 — Security & Enterprise Administration (vulnerability scanning, managed settings, plugin governance)
@@ -109,8 +109,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAP-04 | Phase 93 | Complete |
 | CHAP-05 | Phase 93 | Complete |
 | CHAP-06 | Phase 93 | Complete |
-| CHAP-07 | Phase 94 | Pending |
-| CHAP-08 | Phase 94 | Pending |
+| CHAP-07 | Phase 94 | Complete |
+| CHAP-08 | Phase 94 | Complete |
 | CHAP-09 | Phase 94 | Pending |
 | CHAP-10 | Phase 94 | Pending |
 | CHAP-11 | Phase 94 | Complete |
