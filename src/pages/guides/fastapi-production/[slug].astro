@@ -32,6 +32,11 @@ const ogImageURL = new URL('/open-graph/guides/fastapi-production/' + page.data.
   currentSlug={page.data.slug}
   chapterTitle={page.data.title}
   publishedDate={guideMeta.data.publishedDate}
+  companionLink={{
+    href: "/blog/fastapi-production-guide/",
+    text: "FastAPI Production Guide: What Your AI Agent Inherits",
+    label: "For a high-level overview of all 13 production concerns, read the companion blog post: "
+  }}
 >
   <article>
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-8">{page.data.title}</h1>

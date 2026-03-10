@@ -17,16 +17,19 @@ interface Props {
   currentSlug: string;
   chapterTitle: string;
   publishedDate?: Date;
+  companionLink?: { href: string; text: string; label: string };
+  parentTitle?: string;
+  parentUrl?: string;
 }
 
-const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters, currentSlug, chapterTitle, publishedDate } = Astro.props;
+const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters, currentSlug, chapterTitle, publishedDate, companionLink, parentTitle, parentUrl } = Astro.props;
 const isoPublished = publishedDate?.toISOString().split('T')[0];
 ---
 
 <Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType="article" publishedDate={publishedDate}>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
     <GuideBreadcrumb guideTitle={guideTitle} guideSlug={guideSlug} chapterTitle={chapterTitle} />
-    <GuideJsonLd title={title} description={description ?? ''} url={`https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/`} datePublished={isoPublished} dateModified={isoPublished} />
+    <GuideJsonLd title={title} description={description ?? ''} url={`https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/`} datePublished={isoPublished} dateModified={isoPublished} parentTitle={parentTitle} parentUrl={parentUrl} />
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
@@ -43,15 +46,16 @@ const isoPublished = publishedDate?.toISOString().split('T')[0];
       <!-- Main content -->
       <div>
         <slot />
-        <!-- Companion blog post back-link -->
-        <aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
-          <p class="text-sm text-[var(--color-text-secondary)]">
-            For a high-level overview of all 13 production concerns, read the companion blog post:
-            <a href="/blog/fastapi-production-guide/" class="text-[var(--color-accent)] hover:underline font-medium">
-              FastAPI Production Guide: What Your AI Agent Inherits
-            </a>
-          </p>
-        </aside>
+        {companionLink && (
+          <aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
+            <p class="text-sm text-[var(--color-text-secondary)]">
+              {companionLink.label}
+              <a href={companionLink.href} class="text-[var(--color-accent)] hover:underline font-medium">
+                {companionLink.text}
+              </a>
+            </p>
+          </aside>
+        )}
         <GuideChapterNav chapters={chapters} currentSlug={currentSlug} guideSlug={guideSlug} />
       </div>
     </div>

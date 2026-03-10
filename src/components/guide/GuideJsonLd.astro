@@ -1,10 +1,13 @@
 ---
 /**
  * GuideJsonLd.astro — TechArticle or CollectionPage JSON-LD
- * structured data for FastAPI Production Guide pages.
+ * structured data for guide pages.
  *
  * Mode 1 (chapter page): @type "TechArticle" with isPartOf linking to guide landing
  * Mode 2 (landing page): @type "CollectionPage" (when isLanding is true)
+ *
+ * parentTitle and parentUrl control the isPartOf values. Defaults match
+ * the FastAPI Production Guide so existing pages need no changes.
  */
 
 interface Props {
@@ -14,9 +17,11 @@ interface Props {
   isLanding?: boolean;
   datePublished?: string;
   dateModified?: string;
+  parentTitle?: string;
+  parentUrl?: string;
 }
 
-const { title, description, url, isLanding = false, datePublished, dateModified } = Astro.props;
+const { title, description, url, isLanding = false, datePublished, dateModified, parentTitle = 'FastAPI Production Guide', parentUrl = 'https://patrykgolabek.dev/guides/fastapi-production/' } = Astro.props;
 
 const person = {
   "@type": "Person",
@@ -53,8 +58,8 @@ const schema = isLanding
       ...dateFields,
       "isPartOf": {
         "@type": "WebPage",
-        "name": "FastAPI Production Guide",
-        "url": "https://patrykgolabek.dev/guides/fastapi-production/",
+        "name": parentTitle,
+        "url": parentUrl,
       },
     };
 ---
