@@ -10,6 +10,7 @@ export { generateJwtAuthFlow } from './jwt-auth-flow';
 export { generateNfrDiagram } from './nfr-diagram';
 export { generateAgenticLoop } from './agentic-loop';
 export { generateHookLifecycle } from './hook-lifecycle';
+export { generatePermissionModel } from './permission-model';
 
 // Shared types and utilities
 export { DIAGRAM_PALETTE, DEFAULT_DIAGRAM_CONFIG, type DiagramConfig } from './diagram-base';

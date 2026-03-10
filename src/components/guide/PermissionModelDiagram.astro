@@ -1,0 +1,14 @@
+---
+/**
+ * PermissionModelDiagram -- Build-time SVG wrapper for DIAG-03.
+ * Renders the deny->ask->allow evaluation flowchart with tool tiers
+ * and permission modes as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generatePermissionModel } from '../../lib/guides/svg-diagrams';
+
+const svg = generatePermissionModel();
+---
+
+<PlotFigure svg={svg} caption="Permission evaluation: deny rules checked first, then ask, then allow (first match wins)" maxWidth="720px" />
