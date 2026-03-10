@@ -1,0 +1,56 @@
+---
+/**
+ * Claude Code guide chapter page template — /guides/claude-code/[slug]/
+ * Uses GuideLayout for sidebar, breadcrumbs, and prev/next navigation.
+ * No companionLink (will be added in Phase 95 when blog post exists).
+ */
+import { getCollection, render } from 'astro:content';
+import GuideLayout from '../../../layouts/GuideLayout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('claudeCodePages');
+  const [guideMeta] = await getCollection('claudeCodeGuide');
+  return pages.map((page) => ({
+    params: { slug: page.data.slug },
+    props: { page, guideMeta },
+  }));
+}
+
+interface Props {
+  page: Awaited<ReturnType<typeof getCollection<'claudeCodePages'>>>[number];
+  guideMeta: Awaited<ReturnType<typeof getCollection<'claudeCodeGuide'>>>[number];
+}
+
+const { page, guideMeta } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(page);
+const readingTime = remarkPluginFrontmatter?.minutesRead;
+const ogImageURL = new URL('/open-graph/guides/claude-code/' + page.data.slug + '.png', Astro.site).toString();
+---
+
+<GuideLayout
+  title={`${page.data.title} | Claude Code Guide`}
+  description={page.data.description}
+  ogImage={ogImageURL}
+  ogImageAlt={page.data.title + ' - Claude Code Guide'}
+  guideTitle={guideMeta.data.title}
+  guideSlug={guideMeta.data.slug}
+  chapters={guideMeta.data.chapters}
+  currentSlug={page.data.slug}
+  chapterTitle={page.data.title}
+  publishedDate={guideMeta.data.publishedDate}
+  parentTitle="Claude Code Guide"
+  parentUrl="https://patrykgolabek.dev/guides/claude-code/"
+>
+  <article>
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">{page.data.title}</h1>
+    {readingTime && (
+      <p class="text-xs font-mono text-[var(--color-text-secondary)] mb-8">{readingTime}</p>
+    )}
+    <div class="prose max-w-none
+      [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
+      [&>p]:text-[var(--color-text-secondary)] [&>p]:leading-relaxed [&>p]:mb-4
+    ">
+      <Content />
+    </div>
+  </article>
+</GuideLayout>

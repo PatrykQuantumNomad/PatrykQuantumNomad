@@ -1,0 +1,137 @@
+---
+/**
+ * Claude Code Guide landing page — /guides/claude-code/
+ * Hero section with guide description, prerequisites box, and numbered
+ * chapter card grid showing all 11 chapters with Coming Soon treatment
+ * for unwritten ones and estimated reading time for existing chapters.
+ */
+import { getCollection, render } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import GuideJsonLd from '../../../components/guide/GuideJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import { guidePageUrl } from '../../../lib/guides/routes';
+
+const [guideMeta] = await getCollection('claudeCodeGuide');
+const guidePages = await getCollection('claudeCodePages');
+const existingSlugs = new Set(guidePages.map(p => p.data.slug));
+
+// Build reading time map by rendering all pages (only a handful, build cost negligible)
+// Per user locked decision: reading time displayed on landing page cards
+const readingTimeMap = new Map<string, string>();
+for (const page of guidePages) {
+  const { remarkPluginFrontmatter } = await render(page);
+  if (remarkPluginFrontmatter?.minutesRead) {
+    readingTimeMap.set(page.data.slug, remarkPluginFrontmatter.minutesRead);
+  }
+}
+
+const ogImageURL = new URL('/open-graph/guides/claude-code.png', Astro.site).toString();
+const accent = guideMeta.data.accentColor ?? '#D97706';
+---
+
+<Layout
+  title="Claude Code Guide | Patryk Golabek"
+  description={guideMeta.data.description}
+  ogImage={ogImageURL}
+  ogImageAlt="Claude Code Guide"
+  ogType="website"
+>
+  <GuideJsonLd
+    title={guideMeta.data.title}
+    description={guideMeta.data.description}
+    url="https://patrykgolabek.dev/guides/claude-code/"
+    isLanding={true}
+    datePublished={guideMeta.data.publishedDate?.toISOString().split('T')[0]}
+    dateModified={guideMeta.data.publishedDate?.toISOString().split('T')[0]}
+    parentTitle="Claude Code Guide"
+    parentUrl="https://patrykgolabek.dev/guides/claude-code/"
+  />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
+    { name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' },
+  ]} />
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <!-- Hero Section -->
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      {guideMeta.data.title}
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl">
+      {guideMeta.data.description}
+    </p>
+
+    <!-- Prerequisites Box -->
+    <div class="mt-8 p-5 rounded-lg border border-[var(--color-border)] max-w-2xl" style={`border-left: 4px solid ${accent}`}>
+      <h2 class="font-heading font-bold text-base mb-2">Prerequisites & Audience</h2>
+      <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+        For developers familiar with CLI tools and AI-assisted development. Requires Node.js 18+ and a Claude API subscription.
+      </p>
+      {guideMeta.data.requirements && (
+        <div class="flex flex-wrap gap-2 mt-3">
+          {Object.entries(guideMeta.data.requirements).map(([pkg, ver]) => (
+            <span class="text-xs font-mono bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] px-2 py-1 rounded border border-[var(--color-border)]">
+              {pkg} {ver}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <!-- Chapter Card Grid -->
+    <h2 class="text-2xl font-heading font-bold mt-16 mb-8">Chapters</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {guideMeta.data.chapters.map((ch: { slug: string; title: string; description?: string }, i: number) => {
+        const exists = existingSlugs.has(ch.slug);
+        const chapterNum = String(i + 1).padStart(2, '0');
+        const readTime = readingTimeMap.get(ch.slug);
+
+        return exists ? (
+          <a
+            href={guidePageUrl(guideMeta.data.slug, ch.slug)}
+            class="group rounded-lg border border-[var(--color-border)] p-5 transition-colors flex flex-col"
+            style={`--guide-accent: ${accent}`}
+            data-hover-border
+          >
+            <span class="text-lg font-mono" style={`color: ${accent}`}>{chapterNum}</span>
+            <h3 class="text-base font-heading font-bold mt-1 group-hover:text-[var(--guide-accent)] transition-colors">
+              {ch.title}
+            </h3>
+            {ch.description && (
+              <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-2">
+                {ch.description}
+              </p>
+            )}
+            <div class="mt-auto pt-3 flex items-center gap-2">
+              {readTime && (
+                <span class="text-xs font-mono text-[var(--color-text-secondary)]">{readTime}</span>
+              )}
+            </div>
+          </a>
+        ) : (
+          <div class="rounded-lg border border-[var(--color-border)] p-5 opacity-60 flex flex-col">
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-mono" style={`color: ${accent}`}>{chapterNum}</span>
+              <span class="text-xs bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] px-2 py-0.5 rounded">Coming Soon</span>
+            </div>
+            <h3 class="text-base font-heading font-bold mt-1">
+              {ch.title}
+            </h3>
+            {ch.description && (
+              <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-2">
+                {ch.description}
+              </p>
+            )}
+            <div class="mt-auto pt-3" />
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  [data-hover-border]:hover {
+    border-color: var(--guide-accent);
+  }
+</style>
