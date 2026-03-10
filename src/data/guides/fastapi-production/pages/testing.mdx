@@ -198,6 +198,25 @@ fail_under = 90`}
 
 A few key choices worth noting. Setting `asyncio_mode = "auto"` means every `async def test_*` function is automatically treated as an async test, so no `@pytest.mark.asyncio` decorator is needed. The custom `unit` and `integration` markers let you run tiers independently with `pytest -m unit` or `pytest -m integration`. Coverage is scoped to `src/app` only, so test code and config files do not inflate the percentage.
 
+---
+
+## Best Practices
+
+- **Always isolate tests from local environment state.** Strip `APP_*` environment variables and switch to a temporary working directory in an autouse fixture so no `.env` file or shell export can influence test outcomes.
+- **Never use module-level app instances in tests.** Always call `create_app()` with test-specific settings to get a fresh, isolated application instance per test.
+- **Prefer ASGI transport over real network sockets for integration tests.** HTTPX's `ASGITransport` exercises the full middleware stack without opening a TCP port, keeping tests fast and avoiding port conflicts.
+- **Always enforce a coverage floor in CI.** A 90%+ threshold catches regressions before deployment and incentivizes writing tests alongside new features.
+- **Prefer `make_jwt()` and `make_principal()` helpers over inline token construction.** Factory functions keep test code concise, decouple tests from implementation details, and provide sensible defaults.
+
+## Further Reading
+
+- <a href="https://fastapi.tiangolo.com/tutorial/testing/" target="_blank" rel="noopener noreferrer">FastAPI Testing Documentation</a>
+- <a href="https://pytest-asyncio.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer">pytest-asyncio Documentation</a>
+- <a href="https://www.python-httpx.org/async/#calling-into-python-web-apps" target="_blank" rel="noopener noreferrer">HTTPX — Async Testing with ASGI</a>
+- <a href="https://coverage.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer">Coverage.py Documentation</a>
+
+---
+
 ## What the Agent Never Implements
 
 The test infrastructure handles everything listed below. Your agent simply writes test functions on top of this foundation:

@@ -17,6 +17,7 @@ export const guideMetaSchema = z.object({
   templateRepo: z.string().url(),
   versionTag: z.string(),
   publishedDate: z.coerce.date().optional(),
+  requirements: z.record(z.string(), z.string()).optional(),
   chapters: z.array(
     z.object({
       slug: z.string(),

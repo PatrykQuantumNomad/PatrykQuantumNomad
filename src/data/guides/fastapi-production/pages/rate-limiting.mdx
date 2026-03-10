@@ -262,6 +262,23 @@ If `APP_RATE_LIMIT_STORAGE_BACKEND=redis` and no explicit `APP_RATE_LIMIT_STORAG
 
 ---
 
+## Best Practices
+
+- **Always use Redis-backed rate limiting for multi-instance deployments.** In-memory rate limiting splits counters across processes, effectively multiplying the allowed rate by the number of workers or pods.
+- **Never apply rate limiting to health check and readiness endpoints.** Throttling probe traffic causes false-positive failures in load balancers and orchestrators.
+- **Prefer IP-based rate limiting as the default strategy** and switch to authorization-based limiting only for authenticated API consumers who need per-token budgets.
+- **Always include `X-RateLimit-*` and `Retry-After` headers in both successful and rate-limited responses.** These headers enable well-behaved clients to self-throttle before hitting the limit.
+- **Always validate proxy trust before extracting client IPs from `X-Forwarded-For`.** Without trust validation, clients behind untrusted proxies can spoof their IP to bypass rate limits.
+
+## Further Reading
+
+- <a href="https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/" target="_blank" rel="noopener noreferrer">IETF Draft — RateLimit Header Fields for HTTP</a>
+- <a href="https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP — Denial of Service Cheat Sheet (Rate Limiting)</a>
+- <a href="https://redis.io/commands/incr/" target="_blank" rel="noopener noreferrer">Redis INCR Command Documentation</a>
+- <a href="https://developers.cloudflare.com/waf/rate-limiting-rules/best-practices/" target="_blank" rel="noopener noreferrer">Cloudflare — Rate Limiting Best Practices</a>
+
+---
+
 ## What the Agent Never Implements
 
 The middleware layer owns all of the following concerns.

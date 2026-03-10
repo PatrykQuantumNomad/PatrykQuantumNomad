@@ -287,6 +287,25 @@ async def list_items(principal: Principal = Depends(get_current_principal)):
 
 ---
 
+## Best Practices
+
+- **Always use JWKS for production JWT validation** to support automatic key rotation without process restarts or redeployments.
+- **Never store private keys or shared secrets in environment variables for production.** Use JWKS endpoints backed by your identity provider (Auth0, Keycloak, Entra ID) for automatic key management.
+- **Always validate `iss` and `aud` claims in production.** Without issuer and audience validation, tokens from unrelated services can authenticate against your API.
+- **Prefer typed `Principal` models over raw claim dictionaries.** Typed models provide IDE autocompletion, runtime validation, and protect against typos in claim field names.
+- **Always implement clock-skew tolerance** (the default `leeway` in PyJWT) for JWT `exp` validation. Clock drift between the identity provider and your application is inevitable in distributed systems.
+- **Never mix algorithm families in a single deployment.** HS256 (symmetric) and RS256 (asymmetric) have fundamentally different security properties and key management requirements.
+
+## Further Reading
+
+- <a href="https://datatracker.ietf.org/doc/html/rfc7519" target="_blank" rel="noopener noreferrer">RFC 7519 — JSON Web Token (JWT)</a>
+- <a href="https://datatracker.ietf.org/doc/html/rfc7517" target="_blank" rel="noopener noreferrer">RFC 7517 — JSON Web Key (JWK)</a>
+- <a href="https://fastapi.tiangolo.com/tutorial/security/" target="_blank" rel="noopener noreferrer">FastAPI Security Documentation</a>
+- <a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP JWT Security Cheat Sheet</a>
+- <a href="https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-key-sets" target="_blank" rel="noopener noreferrer">Auth0 — JWKS Best Practices</a>
+
+---
+
 ## What the Agent Never Implements
 
 The following concerns live entirely in the chassis infrastructure.

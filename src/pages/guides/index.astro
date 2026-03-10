@@ -5,8 +5,10 @@
  * Production Guide, future-proofed for additional guides.
  */
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import { guideLandingUrl } from '../../lib/guides/routes';
+import fastapiLogo from '../../assets/images/fastapi-logo-teal.png';
 
 const [guideMeta] = await getCollection('guides');
 const guidePages = await getCollection('guidePages');
@@ -33,10 +35,20 @@ const chapterCount = guideMeta.data.chapters.length;
         data-tilt
       >
         <article>
-          <div class="bg-gradient-to-br from-[var(--color-accent)]/10 to-[var(--color-accent-secondary)]/10 px-6 py-8">
-            <span class="inline-block text-xs font-mono px-2 py-0.5 rounded bg-[var(--color-accent)]/20 text-[var(--color-accent)]">
-              {chapterCount} chapters
-            </span>
+          <div class="bg-gradient-to-br from-[#009485]/8 to-[#009485]/3 px-6 py-8 flex flex-col items-center justify-center gap-3 relative overflow-hidden">
+            <div class="absolute inset-4 border border-dashed border-[#009485]/20 rounded-lg" aria-hidden="true">
+              <div class="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+            </div>
+            <Image src={fastapiLogo} alt="FastAPI Chassis" width={220} height={63} class="relative z-10" loading="lazy" />
+            <div class="relative z-10 flex items-center gap-3">
+              <span class="font-mono text-[10px] tracking-[0.35em] text-[#009485]/60 uppercase select-none">Production Chassis</span>
+              <span class="inline-block text-xs font-mono px-2 py-0.5 rounded bg-[#009485]/15 text-[#009485]">
+                {chapterCount} chapters
+              </span>
+            </div>
           </div>
           <div class="p-6">
             <p class="meta-mono text-[var(--color-accent)]">Production Guide</p>

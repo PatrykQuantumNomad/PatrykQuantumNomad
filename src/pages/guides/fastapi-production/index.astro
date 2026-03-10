@@ -64,6 +64,15 @@ const chapterDescriptions: Record<string, string> = {
         rel="noopener noreferrer"
       >fastapi-chassis</a> {guideMeta.data.versionTag}
     </p>
+    {guideMeta.data.requirements && (
+      <div class="flex flex-wrap gap-2 mt-3">
+        {Object.entries(guideMeta.data.requirements).map(([pkg, ver]) => (
+          <span class="text-xs font-mono bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] px-2 py-1 rounded border border-[var(--color-border)]">
+            {pkg} {ver}
+          </span>
+        ))}
+      </div>
+    )}
 
     <!-- What is FastAPI — preamble -->
     <section class="mt-16">
@@ -108,6 +117,24 @@ async def read_root():
         to see the quality attributes the chassis answers, then dive into any chapter below.
       </p>
     </section>
+
+    <!-- FAQ link -->
+    <div class="mt-10 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] max-w-2xl">
+      <h3 class="font-heading font-bold text-base mb-2">Have questions?</h3>
+      <p class="text-sm text-[var(--color-text-secondary)] mb-3">
+        Common questions about middleware decisions, authentication modes, Docker packaging,
+        testing strategy, and deployment — answered from the guide content.
+      </p>
+      <a
+        href="/guides/fastapi-production/faq/"
+        class="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-accent)] hover:underline"
+      >
+        Read the FAQ
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
 
     <!-- Chapter Card Grid -->
     <h2 class="text-2xl font-heading font-bold mt-16 mb-8">Chapters</h2>

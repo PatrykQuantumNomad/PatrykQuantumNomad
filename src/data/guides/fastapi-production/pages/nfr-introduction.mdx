@@ -130,6 +130,22 @@ This category addresses requirements specific to using AI agents as the primary 
 | Usability | Deployment & Delivery | Builder Pattern |
 | Deterministic Infrastructure | AI/ML | All Chapters |
 
+## Best Practices
+
+- **Always define NFRs before writing the first line of business logic.** Retrofitting security, observability, and reliability into an existing codebase is exponentially harder than inheriting them from a chassis.
+- **Never let AI agents generate infrastructure code on each run.** Non-functional requirements involve tradeoffs and operational experience that LLMs cannot reliably reproduce. Lock them into a chassis and let the agent focus on business logic.
+- **Prefer the ISO 25010 quality model as your NFR checklist.** Its nine characteristics and sub-characteristics provide comprehensive coverage that ad-hoc lists miss.
+- **Always map each NFR to a specific implementation.** An NFR without a chapter reference, code module, or configuration knob is an aspiration, not a requirement.
+
+## Further Reading
+
+- <a href="https://www.iso.org/standard/35733.html" target="_blank" rel="noopener noreferrer">ISO/IEC 25010:2023 — Systems and software quality models</a>
+- <a href="https://owasp.org/www-project-application-security-verification-standard/" target="_blank" rel="noopener noreferrer">OWASP Application Security Verification Standard (ASVS)</a>
+- <a href="https://sre.google/sre-book/service-level-objectives/" target="_blank" rel="noopener noreferrer">Google SRE Book — Service Level Objectives</a>
+- <a href="https://fastapi.tiangolo.com/" target="_blank" rel="noopener noreferrer">FastAPI Documentation</a>
+
+---
+
 ## What the Agent Never Implements
 
 The table above is a contract. Every row is a production requirement that your AI agent does not need to think about, configure, or generate. The chassis handles it. The guide documents it. The agent writes business logic.

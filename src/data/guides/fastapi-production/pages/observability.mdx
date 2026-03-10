@@ -331,6 +331,23 @@ When a latency spike shows up in your Prometheus dashboard, you search for the c
 
 ---
 
+## Best Practices
+
+- **Always use the three-pillar approach: traces, metrics, and logs together.** Each pillar answers different questions — traces show request flow, metrics show aggregate trends, logs show application-level events. The `request_id` ties them all together.
+- **Never include health checks, readiness probes, or metrics endpoints in telemetry collection.** Infrastructure noise drowns out real application signals and inflates storage costs.
+- **Always use `BatchSpanProcessor` instead of `SimpleSpanProcessor` in production.** Batch processing keeps per-request overhead negligible while simple processing blocks on every span export.
+- **Prefer structured JSON logging over unstructured text in production.** JSON logs are machine-parseable, compatible with every log aggregator, and queryable by field name.
+- **Always propagate `request_id` and `correlation_id` through Python `ContextVar`.** Context variables are async-safe and propagate naturally through `await` chains without thread-local hacks.
+
+## Further Reading
+
+- <a href="https://opentelemetry.io/docs/languages/python/" target="_blank" rel="noopener noreferrer">OpenTelemetry Python Documentation</a>
+- <a href="https://prometheus.io/docs/practices/instrumentation/" target="_blank" rel="noopener noreferrer">Prometheus Best Practices — Instrumentation</a>
+- <a href="https://sre.google/sre-book/monitoring-distributed-systems/" target="_blank" rel="noopener noreferrer">Google SRE Book — Monitoring Distributed Systems</a>
+- <a href="https://docs.python.org/3/library/contextvars.html" target="_blank" rel="noopener noreferrer">Python `contextvars` Documentation</a>
+
+---
+
 ## What the Agent Never Implements
 
 The chassis handles all observability plumbing, so the agent never needs to:

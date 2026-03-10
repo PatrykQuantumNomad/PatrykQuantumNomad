@@ -461,6 +461,23 @@ The timeout middleware tracks whether the response has already started. If the t
 
 The diagram above shows the full 8-layer request flow. An inbound request passes through each layer from the outside in, starting with CORS, then Trusted Host, Security Headers, Request Logging, Request ID, Rate Limiting, Body Size Limit, and finally Timeout before reaching your route handler. The response travels back through the same layers in reverse, picking up security headers, rate limit headers, correlation IDs, and an access log entry along the way.
 
+## Best Practices
+
+- **Always use raw ASGI middleware instead of `BaseHTTPMiddleware` for production code.** `BaseHTTPMiddleware` buffers request bodies, hides exception tracebacks, and prevents streaming responses.
+- **Never change middleware registration order without understanding the execution model.** Starlette applies middleware in reverse registration order — the last middleware added is the first to process requests.
+- **Always place CORS as the outermost middleware** so preflight requests are handled before authentication, rate limiting, or route logic execute.
+- **Prefer the `send_wrapper` and `receive_wrapper` patterns for intercepting ASGI messages.** These patterns enable streaming-compatible request/response modification without buffering.
+- **Always keep request ID and logging middleware outside the rate limiter** so that even rejected 429 responses get correlation headers and a structured access log entry.
+
+## Further Reading
+
+- <a href="https://www.starlette.io/middleware/" target="_blank" rel="noopener noreferrer">Starlette Middleware Documentation</a>
+- <a href="https://asgi.readthedocs.io/en/latest/specs/main.html" target="_blank" rel="noopener noreferrer">ASGI Specification</a>
+- <a href="https://github.com/encode/starlette/issues/919" target="_blank" rel="noopener noreferrer">Starlette Discussion: BaseHTTPMiddleware Issues</a>
+- <a href="https://owasp.org/www-project-secure-headers/" target="_blank" rel="noopener noreferrer">OWASP Secure Headers Project</a>
+
+---
+
 ## What the Agent Never Implements
 
 The middleware stack handles all of the following, so your agent just writes route handlers and benefits from these protections automatically:

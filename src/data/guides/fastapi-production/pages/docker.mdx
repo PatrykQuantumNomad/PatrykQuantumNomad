@@ -281,6 +281,25 @@ Out of the box the Compose file defaults to SQLite and a single worker, which is
 
 ---
 
+## Best Practices
+
+- **Always pin base images by digest, not just by tag.** Tags are mutable — the registry can push a different image under the same tag at any time. Digest pinning (`@sha256:...`) locks the exact image content for reproducible builds.
+- **Always use tini (or `--init`) as PID 1 in production containers.** Without an init process, your application becomes PID 1 and won't receive default signal handlers, preventing graceful shutdown on `SIGTERM`.
+- **Never run containers as root in production.** Use a non-root user with stable, high UID/GID values (e.g., 10001) so volume mount ownership stays predictable across rebuilds.
+- **Always separate dependency installation from source code copying in multi-stage builds.** This leverages Docker layer caching — source-only changes skip the expensive dependency resolution step.
+- **Prefer `exec` in entrypoint scripts** to replace the shell process with the application. This ensures signal forwarding works correctly through the process tree.
+- **Always validate multi-worker rate limiting at container start.** In-memory rate limiting with multiple Uvicorn workers silently splits counters across processes — fail fast if Redis is not configured.
+
+## Further Reading
+
+- <a href="https://docs.docker.com/build/building/multi-stage/" target="_blank" rel="noopener noreferrer">Docker Multi-Stage Build Best Practices</a>
+- <a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener noreferrer">Dockerfile Best Practices — Docker Documentation</a>
+- <a href="https://github.com/krallin/tini" target="_blank" rel="noopener noreferrer">Tini — A Tiny but Valid Init for Containers</a>
+- <a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests" target="_blank" rel="noopener noreferrer">OCI Image Specification — Image Digests</a>
+- <a href="https://github.com/hadolint/hadolint" target="_blank" rel="noopener noreferrer">Hadolint — Dockerfile Linter</a>
+
+---
+
 ## What the Agent Never Implements
 
 The chassis handles every containerization concern. Your agent never needs to:

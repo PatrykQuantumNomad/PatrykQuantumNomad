@@ -220,6 +220,24 @@ async def get_item(item_id: str, cache: CacheStore = Depends(get_cache)):
 
 The dependency is synchronous (no `async`) because it only reads from `app.state` and involves no I/O. FastAPI handles both sync and async dependencies transparently.
 
+---
+
+## Best Practices
+
+- **Always use an abstract `CacheStore` interface so backends are interchangeable.** Coding against the abstraction means switching from memory to Redis is a single environment variable change with no application code modifications.
+- **Prefer per-key TTL over global TTL.** Different data has different freshness requirements — user profiles may tolerate 5-minute staleness while pricing data needs 10-second TTL.
+- **Always use `time.monotonic()` for TTL expiry in in-memory caches.** Monotonic clocks are immune to wall-clock adjustments (NTP sync, daylight saving) that can prematurely expire or extend cached entries.
+- **Never cache without a max-entry cap on in-memory stores.** Unbounded caches cause memory growth that eventually triggers OOM kills in containerized deployments.
+- **Always use key prefix namespacing when sharing a Redis instance.** Without prefixes, multiple applications using the same Redis instance risk key collisions and accidental data overwrites.
+
+## Further Reading
+
+- <a href="https://redis.io/commands/setex/" target="_blank" rel="noopener noreferrer">Redis SETEX Command Documentation</a>
+- <a href="https://fastapi.tiangolo.com/tutorial/dependencies/" target="_blank" rel="noopener noreferrer">FastAPI — Dependencies and Dependency Injection</a>
+- <a href="https://aws.amazon.com/caching/best-practices/" target="_blank" rel="noopener noreferrer">Caching Best Practices — AWS Architecture Blog</a>
+
+---
+
 ## What the Agent Never Implements
 
 The caching infrastructure takes care of everything listed below. Your agent only needs to write cache-aware business logic on top of this foundation:

@@ -216,6 +216,23 @@ The entrypoint script runs migrations at container start when `RUN_DB_MIGRATIONS
 
 ---
 
+## Best Practices
+
+- **Always set `expire_on_commit=False` for async SQLAlchemy sessions.** Without this, SQLAlchemy issues lazy-load queries after commit that fail in an async context.
+- **Never hardcode database URLs in application code.** Use environment variables with a priority chain (explicit URL → backend-specific fields → SQLite default) so the same codebase works from development through production.
+- **Always enable `pool_pre_ping` for long-running deployments.** Pre-ping catches stale connections before they cause query failures, at the cost of one lightweight round-trip per checkout.
+- **Prefer Alembic autogeneration for schema migrations** but always review the generated migration before applying. Autogeneration catches column additions and type changes but may miss index or constraint subtleties.
+- **Always derive the Alembic URL automatically from the async runtime URL.** Maintaining separate sync and async connection strings is error-prone and leads to drift.
+
+## Further Reading
+
+- <a href="https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html" target="_blank" rel="noopener noreferrer">SQLAlchemy Async Session Documentation</a>
+- <a href="https://alembic.sqlalchemy.org/en/latest/autogenerate.html" target="_blank" rel="noopener noreferrer">Alembic Tutorial — Auto Generating Migrations</a>
+- <a href="https://fastapi.tiangolo.com/tutorial/sql-databases/" target="_blank" rel="noopener noreferrer">FastAPI — SQL (Relational) Databases</a>
+- <a href="https://www.postgresql.org/docs/current/runtime-config-connection.html" target="_blank" rel="noopener noreferrer">PostgreSQL Connection Pooling Best Practices</a>
+
+---
+
 ## What the Agent Never Implements
 
 The chassis owns all the database plumbing. Your agent never needs to:

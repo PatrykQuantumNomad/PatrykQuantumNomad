@@ -200,6 +200,24 @@ Each infrastructure dependency provides its own readiness check function. The da
 
 Both checks follow the same structure: verify the dependency is initialized, wrap the probe in `asyncio.timeout()`, and return a structured result with latency. Timeout values are configurable through settings (`database_health_timeout_seconds`, `cache_health_timeout_seconds`), with 2-second defaults. That is fast enough for Kubernetes probe intervals while still generous enough for cold connections.
 
+---
+
+## Best Practices
+
+- **Always separate liveness from readiness probes.** Liveness answers "is the process alive?" (restart on failure). Readiness answers "can it serve traffic?" (remove from load balancer on failure). Conflating them causes unnecessary restarts during transient dependency outages.
+- **Never add external dependency checks to the liveness probe.** A database outage should remove the pod from the load balancer (readiness), not trigger a restart cycle (liveness) that makes recovery harder.
+- **Always set health check timeouts below the Kubernetes probe timeout.** If your readiness check takes 3 seconds and the probe timeout is 2 seconds, Kubernetes marks the pod as unhealthy before the check completes.
+- **Prefer a registry pattern for dependency health checks** so that adding a new dependency (cache, message queue, external API) automatically extends the readiness response without modifying the health check endpoint.
+- **Always measure and report health check latency.** Slow health checks indicate resource contention or connectivity issues before they affect user traffic.
+
+## Further Reading
+
+- <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/" target="_blank" rel="noopener noreferrer">Kubernetes — Configure Liveness, Readiness, and Startup Probes</a>
+- <a href="https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-setting-up-health-checks-with-readiness-and-liveness-probes" target="_blank" rel="noopener noreferrer">Kubernetes Health Check Best Practices — Google Cloud</a>
+- <a href="https://fastapi.tiangolo.com/tutorial/metadata/" target="_blank" rel="noopener noreferrer">FastAPI — Health Check Patterns</a>
+
+---
+
 ## What the Agent Never Implements
 
 The health check infrastructure takes care of everything below. Your agent can focus on business logic, knowing that traffic only arrives when all dependencies are healthy:

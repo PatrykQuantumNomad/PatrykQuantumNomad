@@ -7,6 +7,13 @@
     "templateRepo": "https://github.com/PatrykQuantumNomad/fastapi-chassis",
     "versionTag": "v1.0.0",
     "publishedDate": "2026-03-08",
+    "requirements": {
+      "fastapi": "0.135+",
+      "python": "3.13+",
+      "starlette": "0.52+",
+      "pydantic": "2.12+",
+      "uvicorn": "0.41+"
+    },
     "chapters": [
       {
         "slug": "nfr-introduction",

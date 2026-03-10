@@ -1,0 +1,152 @@
+---
+/**
+ * FastAPI Production Guide FAQ — /guides/fastapi-production/faq/
+ * 18 common questions answered from the guide content, with FAQPage JSON-LD.
+ */
+import Layout from '../../../layouts/Layout.astro';
+import FAQPageJsonLd from '../../../components/FAQPageJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+
+const faqItems = [
+  {
+    question: "Why does the chassis avoid BaseHTTPMiddleware?",
+    answer: "BaseHTTPMiddleware has three critical problems: it reads the entire request body into memory (breaking streaming uploads), hides original exception tracebacks, and prevents streaming responses. The chassis uses raw ASGI middleware instead, which maintains streaming compatibility, preserves exception context, and enables response streaming. Every custom middleware implements the raw ASGI protocol directly with scope, receive, and send.",
+  },
+  {
+    question: "What's the difference between liveness and readiness probes?",
+    answer: "Liveness (/healthcheck) answers 'Is the process alive?' with no external dependencies — it always returns 200 if Python is running. Readiness (/ready) answers 'Can the process serve traffic?' by querying the entire dependency registry (database, cache, auth). Failed liveness triggers a pod restart; failed readiness removes the pod from the load balancer without restarting it. Conflating the two causes unnecessary restarts when a downstream dependency is temporarily unreachable.",
+  },
+  {
+    question: "Why use JWKS instead of shared secrets for JWT validation?",
+    answer: "JWKS enables automatic key rotation without process restarts. The auth service implements cache-aside JWKS fetching with graceful degradation: if the JWKS endpoint fails temporarily, tokens are validated against the stale cache for up to 1 hour. New signing keys are detected on first kid miss and force a cache refresh. This is production-safe for enterprise identity providers like Auth0, Keycloak, and Entra ID.",
+  },
+  {
+    question: "How do I switch from SQLite to Postgres?",
+    answer: "Set two environment variables: APP_DATABASE_BACKEND=postgres and APP_DATABASE_POSTGRES_PASSWORD=<password>. The other Postgres fields default to sensible values. The engine factory automatically selects the right pool settings, connect arguments, and pragmas for each backend. The Alembic URL is derived automatically from the runtime URL (aiosqlite to sqlite, asyncpg to psycopg).",
+  },
+  {
+    question: "Why does the builder pattern use a factory function instead of module-level instantiation?",
+    answer: "Factory functions enable test isolation, explicit lifecycle control, and multiple app instances. Module-level singletons trigger side effects on import, making tests fragile (monkeypatching required, order-dependent). The factory pattern defers connection establishment to the lifespan context, keeping app creation fast and side-effect-free.",
+  },
+  {
+    question: "What is the middleware registration order and why does it matter?",
+    answer: "Starlette applies middleware in reverse registration order (last registered = first executed). The chassis registers: Timeout, Body Limit, Rate Limit, Request ID, Request Logging, Security Headers, Trusted Host, CORS (outermost). This ensures CORS preflight skips auth and rate limiting, request ID propagates through everything including 429 responses, and timeout wraps only the handler.",
+  },
+  {
+    question: "Why does the container use tini as PID 1?",
+    answer: "Without an init process, the application becomes PID 1 inside the container and loses default signal handlers. SIGTERM from docker stop or Kubernetes termination never reaches the application. Tini (a tiny init process) forwards signals to child processes and reaps zombies, enabling graceful shutdown. The entrypoint runs exec uvicorn so tini stays as PID 1.",
+  },
+  {
+    question: "How are Docker base images kept reproducible?",
+    answer: "Images are pinned by digest (@sha256:...), not by mutable tags. Tags like python:3.13-slim can change at any time. Digest pinning locks exact image content. A helper script (ops/refresh-docker-base-digests.sh) updates digests when you deliberately pull newer base images, keeping builds fully reproducible.",
+  },
+  {
+    question: "Why is in-memory rate limiting dangerous in multi-worker setups?",
+    answer: "In-memory rate limiting with multiple Uvicorn workers (or multiple pods) silently multiplies the effective limit by the number of processes. 100 req/min per process becomes 200 req/min with 2 workers. The Docker entrypoint detects this misconfiguration at startup: if APP_RATE_LIMIT_ENABLED=true but no Redis is configured and UVICORN_WORKERS>1, the container fails with a clear error message.",
+  },
+  {
+    question: "How does the JWKS cache handle key rotation without restarts?",
+    answer: "When a token arrives with a kid not in the cache, the service forces a JWKS refresh and retries with the refreshed key set. New keys become available immediately. The cache expires after 300 seconds (configurable), and stale cache is used for up to 1 hour if the JWKS endpoint is unreachable, providing graceful degradation during identity provider outages.",
+  },
+  {
+    question: "Why are request IDs propagated through contextvars instead of thread-local storage?",
+    answer: "Python contextvars are async-safe and propagate naturally through await chains, background tasks, and database callbacks without thread-local hacks. The RequestIDMiddleware sets request context at request start and resets it after response completion. Structured logging automatically injects request_id and correlation_id into every log record via the RequestContextFilter.",
+  },
+  {
+    question: "What makes the test infrastructure hermetic?",
+    answer: "The root conftest.py autouse fixture strips all APP_* environment variables and changes to a temp directory for every test. This guarantees no local .env file, shell export, or working directory state influences test outcomes. Integration tests use ASGI transport (no real TCP sockets) and activate the full lifespan context, hitting every middleware and dependency exactly as production traffic would.",
+  },
+  {
+    question: "How does HSTS work safely behind a reverse proxy?",
+    answer: "HSTS is only sent over HTTPS. Behind a reverse proxy, the middleware reads X-Forwarded-Proto but only when the client IP is in the trusted_proxies allowlist. Without trust validation, an untrusted client could spoof the header to manipulate HSTS behavior. CSP is automatically relaxed for Swagger/ReDoc docs when enabled, adding just the minimum directives needed for interactive documentation.",
+  },
+  {
+    question: "How does the readiness registry auto-register health checks?",
+    answer: "Each builder step (setup_database, setup_cache, setup_auth) registers its own readiness check function with the registry during construction. At readiness time, the registry runs every check sequentially and reports aggregate health. The registry accepts both sync and async checks transparently, using isawaitable() to dispatch at runtime. Latency is measured automatically for each check.",
+  },
+  {
+    question: "How does the cache abstraction support switching backends without code changes?",
+    answer: "The CacheStore abstract base class defines seven async methods: get, set, delete, exists, clear, ping, and close. All values are bytes, so callers handle serialization. The factory reads APP_CACHE_BACKEND and instantiates the right store. Route handlers inject get_cache() and code against the abstract interface. Switching from memory to Redis is a single environment variable change (APP_CACHE_BACKEND=redis).",
+  },
+  {
+    question: "Why does the Helm chart auto-select Deployment vs StatefulSet?",
+    answer: "SQLite requires persistent storage with a stable network identity, so it uses StatefulSet with volumeClaimTemplates. Postgres and custom backends are stateless and freely scalable, so they use Deployment. The chart helper fastapi-chassis.isSqlite checks the backend and conditionally renders either template. The same Helm values work for both — the infrastructure adapts to the database choice.",
+  },
+  {
+    question: "What are the 23 non-functional requirements covered by the chassis?",
+    answer: "The chassis addresses 23 quality attributes across four categories: reliability (health checks, graceful shutdown, circuit breaking), security (JWT auth, security headers, rate limiting, CORS), observability (structured logging, distributed tracing, Prometheus metrics), and operability (Docker packaging, Helm charts, database migrations, environment-driven config). These are the concerns LLMs are least reliable at generating correctly, so the chassis locks them in.",
+  },
+  {
+    question: "Why does the test suite enforce a 90%+ coverage floor?",
+    answer: "High coverage thresholds catch regressions before deployment and incentivize writing tests alongside new features. The pyproject.toml sets fail_under = 90 with coverage scoped to src/app only, excluding test files and config. CI fails if coverage drops. Custom markers (@pytest.mark.unit, @pytest.mark.integration) let developers run tiers independently. The chassis achieves 98%+ coverage across all production code.",
+  },
+];
+---
+
+<Layout
+  title="FAQ — FastAPI Production Guide | Patryk Golabek"
+  description="Frequently asked questions about the FastAPI Production Guide — covering middleware, authentication, Docker, testing, deployment, and more."
+  ogType="website"
+>
+  <FAQPageJsonLd items={faqItems} />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
+    { name: 'FastAPI Production Guide', url: 'https://patrykgolabek.dev/guides/fastapi-production/' },
+    { name: 'FAQ', url: 'https://patrykgolabek.dev/guides/fastapi-production/faq/' },
+  ]} />
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <nav class="text-sm text-[var(--color-text-secondary)] mb-8 font-mono">
+      <a href="/" class="hover:text-[var(--color-accent)]">Home</a>
+      <span class="mx-1">/</span>
+      <a href="/guides/" class="hover:text-[var(--color-accent)]">Guides</a>
+      <span class="mx-1">/</span>
+      <a href="/guides/fastapi-production/" class="hover:text-[var(--color-accent)]">FastAPI Production Guide</a>
+      <span class="mx-1">/</span>
+      <span class="text-[var(--color-text-primary)]">FAQ</span>
+    </nav>
+
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      Frequently Asked Questions
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl">
+      Common questions about the FastAPI Chassis production architecture —
+      middleware decisions, authentication modes, Docker packaging, testing strategy, and deployment.
+    </p>
+
+    <div class="mt-12 space-y-8">
+      {faqItems.map((item, i) => (
+        <details class="group border border-[var(--color-border)] rounded-lg" id={`faq-${i + 1}`}>
+          <summary class="flex items-start gap-3 cursor-pointer px-5 py-4 text-left font-heading font-bold text-base hover:text-[var(--color-accent)] transition-colors select-none">
+            <span class="text-[var(--color-accent)] font-mono text-sm mt-0.5 shrink-0">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span>{item.question}</span>
+            <svg
+              class="w-5 h-5 shrink-0 ml-auto mt-0.5 text-[var(--color-text-secondary)] transition-transform group-open:rotate-180"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="px-5 pb-5 pt-0 text-[var(--color-text-secondary)] leading-relaxed text-sm border-t border-[var(--color-border)] mt-0 pt-4">
+            {item.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
+      <p class="text-sm text-[var(--color-text-secondary)]">
+        Still have questions? Start with the
+        <a href="/guides/fastapi-production/nfr-introduction/" class="text-[var(--color-accent)] hover:underline font-medium">Non-Functional Requirements</a>
+        chapter or browse all
+        <a href="/guides/fastapi-production/" class="text-[var(--color-accent)] hover:underline font-medium">13 chapters</a>
+        of the FastAPI Production Guide.
+      </p>
+    </div>
+  </div>
+</Layout>

@@ -169,6 +169,23 @@ Every security header is configurable through environment variables, and the def
 
 ---
 
+## Best Practices
+
+- **Always start with a strict CSP (`default-src 'none'`) and relax only as needed.** A permissive default CSP provides no protection. Strict defaults with explicit allowlists are the only effective approach.
+- **Never enable HSTS until you are certain HTTPS is working correctly.** HSTS with a one-year max-age is effectively irreversible — browsers will refuse plain HTTP connections for the entire duration.
+- **Always validate proxy trust before honoring `X-Forwarded-Proto`.** Without IP-based validation, an untrusted client can inject a forwarded-proto header and manipulate HSTS behavior.
+- **Prefer `no-store` over `no-cache` for API response Cache-Control.** `no-store` prevents any caching of sensitive API responses, while `no-cache` still allows storage with revalidation.
+- **Always set `X-Frame-Options: DENY` for API endpoints.** APIs should never be rendered in iframes. This prevents clickjacking attacks with zero functional impact.
+
+## Further Reading
+
+- <a href="https://owasp.org/www-project-secure-headers/" target="_blank" rel="noopener noreferrer">OWASP Secure Headers Project</a>
+- <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy" target="_blank" rel="noopener noreferrer">MDN — Content-Security-Policy</a>
+- <a href="https://datatracker.ietf.org/doc/html/rfc6797" target="_blank" rel="noopener noreferrer">RFC 6797 — HTTP Strict Transport Security (HSTS)</a>
+- <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy" target="_blank" rel="noopener noreferrer">MDN — Permissions-Policy</a>
+
+---
+
 ## What the Agent Never Implements
 
 The middleware layer handles all of the following concerns.

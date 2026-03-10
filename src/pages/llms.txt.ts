@@ -210,6 +210,7 @@ export async function GET(context: APIContext) {
     ...guidePages
       .sort((a, b) => a.data.order - b.data.order)
       .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(guideMeta.data.slug, p.data.slug)}): ${p.data.description}`),
+    '- [FAQ](https://patrykgolabek.dev/guides/fastapi-production/faq/): Frequently asked questions about middleware decisions, authentication modes, Docker packaging, testing strategy, and deployment',
     '',
     '## Blog Posts',
     '',

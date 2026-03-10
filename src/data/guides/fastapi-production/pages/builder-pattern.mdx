@@ -283,6 +283,23 @@ uvicorn main:app --host 127.0.0.1 --port 8000 --workers 4 --no-access-log
 
 Uvicorn imports `main`, finds the `app` attribute (the result of `create_app()`), and starts serving. The `if __name__` block is there as a convenient development runner with auto-reload, but production deployments always use the module reference directly.
 
+## Best Practices
+
+- **Always use a factory function (`create_app()`) instead of module-level app instantiation.** Factory functions enable isolated test instances, explicit lifecycle control, and multiple configurations in the same process.
+- **Never start real connections in the builder chain.** Register state placeholders and readiness checks during build, then establish connections in the lifespan context. This keeps the build step fast and side-effect-free.
+- **Prefer a fluent builder interface over scattered configuration.** A single `create_app()` call that reads like a checklist is easier to review, test, and modify than configuration spread across multiple files.
+- **Always make each `setup_*()` method return `Self`.** This maintains the fluent chain and makes adding or removing concerns a single-line change.
+- **Never import the app object at module level in test files.** Always call `create_app()` with test-specific settings to avoid shared mutable state between tests.
+
+## Further Reading
+
+- <a href="https://fastapi.tiangolo.com/advanced/settings/" target="_blank" rel="noopener noreferrer">FastAPI — Settings and Environment Variables</a>
+- <a href="https://www.starlette.io/lifespan/" target="_blank" rel="noopener noreferrer">Starlette Lifespan Events</a>
+- <a href="https://refactoring.guru/design-patterns/builder/python/example" target="_blank" rel="noopener noreferrer">Python Builder Pattern — Refactoring Guru</a>
+- <a href="https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html" target="_blank" rel="noopener noreferrer">SQLAlchemy Async Session Best Practices</a>
+
+---
+
 ## What the Agent Never Implements
 
 The builder pattern takes care of all of the following, so your agent can focus on writing business logic on top of this foundation:

@@ -15,7 +15,7 @@ const { svg, caption, maxWidth = '720px' } = Astro.props;
 
 <figure class="my-8 not-prose">
   <div class="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-white dark:bg-[#1a1a2e] p-3">
-    <div class="mx-auto" style={`max-width: ${maxWidth}`} set:html={svg} />
+    <div class="mx-auto" style={`max-width: ${maxWidth}`} role="img" aria-label={caption || 'Diagram'} set:html={svg} />
   </div>
   {caption && (
     <figcaption class="mt-2 text-center text-sm text-[var(--color-text-secondary)] italic">

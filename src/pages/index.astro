@@ -8,6 +8,7 @@ import FAQPageJsonLd from '../components/FAQPageJsonLd.astro';
 import { siteConfig } from '../data/site';
 import heroImg from '../assets/images/meandbatman.jpg';
 import { generateEdaHeroSvg } from '../lib/eda/svg-generators/eda-hero';
+import fastapiLogo from '../assets/images/fastapi-logo-teal.png';
 
 const edaCardSvg = generateEdaHeroSvg({ width: 280, height: 160 });
 
@@ -225,8 +226,15 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
       </a>
       <a href="/guides/fastapi-production/" class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden" data-reveal data-tilt>
         <article>
-          <div class="bg-gradient-to-br from-[var(--color-accent)]/10 to-[var(--color-accent-secondary)]/10 px-6 pt-6 pb-4 flex items-center justify-center min-h-[148px]">
-            <span class="text-4xl font-heading font-bold text-[var(--color-accent)]/30 select-none" aria-hidden="true">FastAPI</span>
+          <div class="bg-gradient-to-br from-[#009485]/8 to-[#009485]/3 px-6 pt-6 pb-4 flex flex-col items-center justify-center min-h-[148px] gap-2 relative overflow-hidden">
+            <div class="absolute inset-4 border border-dashed border-[#009485]/20 rounded-lg" aria-hidden="true">
+              <div class="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+              <div class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-[#009485]/40"></div>
+            </div>
+            <Image src={fastapiLogo} alt="FastAPI Chassis" width={180} height={52} class="relative z-10" loading="lazy" />
+            <span class="relative z-10 font-mono text-[10px] tracking-[0.35em] text-[#009485]/60 uppercase select-none">Production Chassis</span>
           </div>
           <div class="p-6 pt-4">
             <p class="meta-mono text-[var(--color-accent)]">Production Guide</p>

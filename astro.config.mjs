@@ -51,6 +51,7 @@ function buildContentDateMap() {
     if (guideDate) {
       const iso = new Date(guideDate).toISOString();
       map.set(`${SITE}/guides/fastapi-production/`, iso);
+      map.set(`${SITE}/guides/fastapi-production/faq/`, iso);
       for (const ch of meta[0].chapters ?? []) {
         map.set(`${SITE}/guides/fastapi-production/${ch.slug}/`, iso);
       }

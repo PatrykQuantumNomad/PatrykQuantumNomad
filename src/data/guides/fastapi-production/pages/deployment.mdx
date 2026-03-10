@@ -522,6 +522,25 @@ Before deploying to production on either platform:
 
 ---
 
+## Best Practices
+
+- **Always run containers with a read-only root filesystem and drop all Linux capabilities.** These two settings eliminate entire classes of container escape and privilege escalation attacks.
+- **Prefer Kubernetes Deployment over StatefulSet unless you need stable storage.** Deployments are freely scalable and support rolling updates. StatefulSets add complexity that is only justified for persistent volume requirements (e.g., SQLite).
+- **Always run database migrations as a Helm pre-upgrade hook, not as part of application startup.** Hook-based migrations complete before new pods start, ensuring schema compatibility. Entrypoint-based migrations race with traffic.
+- **Never scale Kubernetes pods and Uvicorn workers simultaneously.** Pick one scaling axis. Kubernetes pod replicas are the preferred approach because the orchestrator handles health checks, load balancing, and rolling updates.
+- **Always configure Pod Disruption Budgets for production deployments.** Without a PDB, node drains and cluster upgrades can take down all pods simultaneously.
+- **Always use conservative scale-down windows (300s+) and aggressive scale-up windows (30s) in HPA configuration.** Fast scale-down causes flapping under variable load, while slow scale-up leaves users waiting.
+
+## Further Reading
+
+- <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank" rel="noopener noreferrer">Kubernetes — Deployments</a>
+- <a href="https://helm.sh/docs/chart_best_practices/" target="_blank" rel="noopener noreferrer">Helm — Chart Best Practices</a>
+- <a href="https://kubernetes.io/docs/concepts/security/pod-security-standards/" target="_blank" rel="noopener noreferrer">Kubernetes — Pod Security Standards</a>
+- <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/" target="_blank" rel="noopener noreferrer">Kubernetes — Pod Disruption Budgets</a>
+- <a href="https://www.uvicorn.org/deployment/" target="_blank" rel="noopener noreferrer">Uvicorn — Deployment Guide</a>
+
+---
+
 ## What the Agent Never Implements
 
 The deployment layer handles everything listed below. Your agent focuses on writing Python route handlers and business logic:

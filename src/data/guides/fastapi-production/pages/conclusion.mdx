@@ -51,4 +51,23 @@ The guide itself lives in this site's repository. Corrections, clarifications, a
 
 ---
 
+## Best Practices — Guide-Wide Summary
+
+- **Always inherit infrastructure from a chassis rather than generating it per-project.** Template-based development lets AI agents modify infrastructure code on each run. Chassis-based development locks infrastructure decisions and limits the agent to the business logic layer.
+- **Never let AI agents generate middleware ordering, security headers, or health check configuration.** These concerns have one correct answer that depends on operational experience, not pattern matching from training data.
+- **Always separate liveness from readiness, request ID from rate limiting, and factory functions from module-level singletons.** These separations are the architectural boundaries that make production systems debuggable, testable, and recoverable.
+- **Prefer environment-variable-driven configuration over code changes for deployment differences.** The same codebase should run in development (SQLite, memory cache, shared secret auth) and production (Postgres, Redis, JWKS auth) with only environment variable changes.
+- **Always verify the full stack before merging business logic.** Run `pytest -m integration` to exercise the middleware stack, authentication flow, health checks, and database lifecycle end-to-end.
+
+## Further Reading
+
+- <a href="https://fastapi.tiangolo.com/" target="_blank" rel="noopener noreferrer">FastAPI Documentation</a>
+- <a href="https://www.starlette.io/" target="_blank" rel="noopener noreferrer">Starlette Documentation</a>
+- <a href="https://docs.pydantic.dev/latest/" target="_blank" rel="noopener noreferrer">Pydantic v2 Documentation</a>
+- <a href="https://12factor.net/" target="_blank" rel="noopener noreferrer">The Twelve-Factor App</a>
+- <a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener noreferrer">OWASP Top Ten — Web Application Security</a>
+- <a href="https://github.com/PatrykQuantumNomad/fastapi-chassis" target="_blank" rel="noopener noreferrer">FastAPI Chassis Repository</a>
+
+---
+
 The chassis handles the infrastructure. The guide documents the decisions. You write the features.
