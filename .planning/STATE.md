@@ -4,10 +4,10 @@ milestone: v1.16
 milestone_name: Claude Code Guide
 status: active
 stopped_at: null
-last_updated: "2026-03-10T12:00:00.000Z"
-last_activity: 2026-03-10 -- Milestone v1.16 started
+last_updated: "2026-03-10T13:00:00.000Z"
+last_activity: 2026-03-10 -- Roadmap created (6 phases, 33 requirements)
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide
+**Current focus:** v1.16 Claude Code Guide — Phase 90 Infrastructure Refactoring
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 90 (1 of 6) — Infrastructure Refactoring
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-10 — Milestone v1.16 started
+Status: Ready to plan
+Last activity: 2026-03-10 — Roadmap created (6 phases, 33 requirements mapped)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -72,7 +72,9 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- 7 hardcoded single-guide assumptions must be fixed in Phase 90 before any content work begins (PITFALL-2 from research)
+- NotebookLM 51-source corpus has ~13% hallucination rate -- every factual claim in chapters must be verified against official docs (PITFALL-4)
+- Agent Teams (Chapter 10) is "research preview" status -- scope content conservatively with explicit warnings
 
 ### Quick Tasks Completed
 
@@ -85,6 +87,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Defining requirements for v1.16
+Stopped at: Roadmap created for v1.16
 Resume file: None
-Next: Define requirements and create roadmap
+Next: Plan Phase 90 (Infrastructure Refactoring)

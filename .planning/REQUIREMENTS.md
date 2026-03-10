@@ -89,45 +89,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| INFRA-06 | — | Pending |
-| INFRA-07 | — | Pending |
-| CHAP-01 | — | Pending |
-| CHAP-02 | — | Pending |
-| CHAP-03 | — | Pending |
-| CHAP-04 | — | Pending |
-| CHAP-05 | — | Pending |
-| CHAP-06 | — | Pending |
-| CHAP-07 | — | Pending |
-| CHAP-08 | — | Pending |
-| CHAP-09 | — | Pending |
-| CHAP-10 | — | Pending |
-| CHAP-11 | — | Pending |
-| DIAG-01 | — | Pending |
-| DIAG-02 | — | Pending |
-| DIAG-03 | — | Pending |
-| DIAG-04 | — | Pending |
-| DIAG-05 | — | Pending |
-| INTV-01 | — | Pending |
-| INTV-02 | — | Pending |
-| SITE-01 | — | Pending |
-| SITE-02 | — | Pending |
-| SITE-03 | — | Pending |
-| SITE-04 | — | Pending |
-| SITE-05 | — | Pending |
-| SITE-06 | — | Pending |
-| SITE-07 | — | Pending |
-| SITE-08 | — | Pending |
+| INFRA-01 | Phase 90 | Pending |
+| INFRA-02 | Phase 90 | Pending |
+| INFRA-03 | Phase 90 | Pending |
+| INFRA-04 | Phase 90 | Pending |
+| INFRA-05 | Phase 90 | Pending |
+| INFRA-06 | Phase 90 | Pending |
+| INFRA-07 | Phase 90 | Pending |
+| DIAG-01 | Phase 91 | Pending |
+| DIAG-02 | Phase 91 | Pending |
+| DIAG-03 | Phase 91 | Pending |
+| DIAG-04 | Phase 91 | Pending |
+| DIAG-05 | Phase 91 | Pending |
+| INTV-01 | Phase 92 | Pending |
+| INTV-02 | Phase 92 | Pending |
+| CHAP-01 | Phase 93 | Pending |
+| CHAP-02 | Phase 93 | Pending |
+| CHAP-03 | Phase 93 | Pending |
+| CHAP-04 | Phase 93 | Pending |
+| CHAP-05 | Phase 93 | Pending |
+| CHAP-06 | Phase 93 | Pending |
+| CHAP-07 | Phase 94 | Pending |
+| CHAP-08 | Phase 94 | Pending |
+| CHAP-09 | Phase 94 | Pending |
+| CHAP-10 | Phase 94 | Pending |
+| CHAP-11 | Phase 94 | Pending |
+| SITE-01 | Phase 95 | Pending |
+| SITE-02 | Phase 95 | Pending |
+| SITE-03 | Phase 95 | Pending |
+| SITE-04 | Phase 95 | Pending |
+| SITE-05 | Phase 95 | Pending |
+| SITE-06 | Phase 95 | Pending |
+| SITE-07 | Phase 95 | Pending |
+| SITE-08 | Phase 95 | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total
-- Mapped to phases: 0
-- Unmapped: 33 ⚠️
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after initial definition*
+*Last updated: 2026-03-10 after roadmap creation*
