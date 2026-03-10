@@ -80,7 +80,10 @@ Plans:
   1. The permission flow explorer renders as an interactive decision tree where clicking a node reveals the allow/ask/deny evaluation path
   2. The hook event visualizer displays an event sequence where clicking an event reveals its payload structure
   3. Both components load via client:visible (lazy) and do not impact page load performance for readers who do not scroll to them
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 92-01-PLAN.md — Permission flow explorer data + React Flow component (INTV-01)
+- [ ] 92-02-PLAN.md — Hook event visualizer data + React Flow component (INTV-02)
 
 ### Phase 93: Foundation Content Chapters
 **Goal**: Readers can follow a progressive learning path from zero Claude Code knowledge through core daily-use features (setup, context, models, environment, remote control, MCP)
@@ -127,7 +130,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 |-------|----------------|--------|-----------|
 | 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
 | 91. SVG Diagram Generators | 3/3 | Complete   | 2026-03-10 |
-| 92. Interactive React Components | 0/TBD | Not started | - |
+| 92. Interactive React Components | 0/2 | Not started | - |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
 | 94. Advanced Content Chapters | 0/TBD | Not started | - |
 | 95. Site Integration & Blog Post | 0/TBD | Not started | - |
