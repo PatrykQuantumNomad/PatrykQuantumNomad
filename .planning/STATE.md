@@ -64,6 +64,7 @@ Progress: [█████▒░░░░] 55%
 | Phase 90 P03 | 4min | 2 tasks | 5 files |
 | Phase 90 P04 | ~15min | 2 tasks | 2 files |
 | Phase 91 P01 | 4min | 2 tasks | 8 files |
+| Phase 91 P02 | 4min | 2 tasks | 7 files |
 | Phase 91 P03 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
@@ -86,6 +87,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (91-01) Triangular layout for agentic loop with curved Bezier arrows connecting 3 phase boxes in a cycle
 - (91-01) Hook lifecycle uses 18 events (not 13 from REQUIREMENTS.md) based on verified official docs
 - (91-01) PreToolUse highlighted with accent border and CAN BLOCK label to indicate blocking capability
+- (91-02) Permission model uses 3 diamondNode decision nodes for deny->ask->allow evaluation chain
+- (91-02) MCP architecture uses groupBox containers for Local Servers and Remote Servers with transport badges
+- (91-02) SSE transport labeled as deprecated, HTTP highlighted as recommended with accent color
 - (91-03) Dashed groupBox wrapping entire diagram conveys Research Preview status prominently
 - (91-03) Task state indicators use accent color for in-progress and textSecondary for pending/completed
 
@@ -108,7 +112,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T20:23:24Z
-Stopped at: Completed 91-03-PLAN.md
+Last session: 2026-03-10T20:23:45Z
+Stopped at: Completed Phase 91 (all 3 plans done)
 Resume file: None
 Next: Phase 92 (next phase in v1.16 Claude Code Guide milestone)

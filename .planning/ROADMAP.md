@@ -68,9 +68,9 @@ Plans:
   5. The MCP Architecture diagram shows server topology with stdio and HTTP transport connections
 **Plans:** 3/3 plans complete
 Plans:
-- [ ] 91-01-PLAN.md — Extend diagram-base.ts + Agentic Loop (DIAG-01) + Hook Lifecycle (DIAG-02)
-- [ ] 91-02-PLAN.md — Permission Model (DIAG-03) + MCP Architecture (DIAG-04)
-- [ ] 91-03-PLAN.md — Agent Teams (DIAG-05) + full regression verification
+- [x] 91-01-PLAN.md — Extend diagram-base.ts + Agentic Loop (DIAG-01) + Hook Lifecycle (DIAG-02)
+- [x] 91-02-PLAN.md — Permission Model (DIAG-03) + MCP Architecture (DIAG-04)
+- [x] 91-03-PLAN.md — Agent Teams (DIAG-05) + full regression verification
 
 ### Phase 92: Interactive React Components
 **Goal**: Two interactive React Flow visualizers let readers explore Claude Code permission evaluation and hook event sequences hands-on

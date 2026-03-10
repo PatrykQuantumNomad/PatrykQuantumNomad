@@ -35,8 +35,8 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 
 - [x] **DIAG-01**: Build-time SVG diagram — Agentic Loop (gather context → take action → verify results cycle)
 - [x] **DIAG-02**: Build-time SVG diagram — Hook Lifecycle (13+ lifecycle events with branching execution paths)
-- [ ] **DIAG-03**: Build-time SVG diagram — Permission Model (evaluation flowchart: allow/ask/deny rules)
-- [ ] **DIAG-04**: Build-time SVG diagram — MCP Architecture (server topology with stdio/HTTP transports)
+- [x] **DIAG-03**: Build-time SVG diagram — Permission Model (evaluation flowchart: allow/ask/deny rules)
+- [x] **DIAG-04**: Build-time SVG diagram — MCP Architecture (server topology with stdio/HTTP transports)
 - [x] **DIAG-05**: Build-time SVG diagram — Agent Teams (lead agent, subagents, shared task list, mailboxes)
 
 ### Interactive Components
@@ -98,8 +98,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-07 | Phase 90 | Complete |
 | DIAG-01 | Phase 91 | Complete |
 | DIAG-02 | Phase 91 | Complete |
-| DIAG-03 | Phase 91 | Pending |
-| DIAG-04 | Phase 91 | Pending |
+| DIAG-03 | Phase 91 | Complete |
+| DIAG-04 | Phase 91 | Complete |
 | DIAG-05 | Phase 91 | Complete |
 | INTV-01 | Phase 92 | Pending |
 | INTV-02 | Phase 92 | Pending |
