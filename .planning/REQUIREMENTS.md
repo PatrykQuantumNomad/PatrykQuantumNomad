@@ -42,7 +42,7 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 ### Interactive Components
 
 - [x] **INTV-01**: Interactive permission flow explorer (React Flow clickable decision tree with allow/ask/deny paths)
-- [ ] **INTV-02**: Interactive hook event visualizer (React Flow event sequence with payload reveal on click)
+- [x] **INTV-02**: Interactive hook event visualizer (React Flow event sequence with payload reveal on click)
 
 ### Site Integration
 
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DIAG-04 | Phase 91 | Complete |
 | DIAG-05 | Phase 91 | Complete |
 | INTV-01 | Phase 92 | Complete |
-| INTV-02 | Phase 92 | Pending |
+| INTV-02 | Phase 92 | Complete |
 | CHAP-01 | Phase 93 | Pending |
 | CHAP-02 | Phase 93 | Pending |
 | CHAP-03 | Phase 93 | Pending |

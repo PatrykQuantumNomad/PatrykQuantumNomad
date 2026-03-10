@@ -32,7 +32,7 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
 
 - [x] **Phase 90: Infrastructure Refactoring** - Multi-guide content collections, schema extension, guide metadata, page routing, CodeBlock component, and FastAPI regression gate
 - [x] **Phase 91: SVG Diagram Generators** - 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams) (completed 2026-03-10)
-- [ ] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands
+- [x] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands (completed 2026-03-10)
 - [ ] **Phase 93: Foundation Content Chapters** - Chapters 1-6 covering setup, context management, models/costs, sandboxing, remote/headless, and MCP
 - [ ] **Phase 94: Advanced Content Chapters** - Chapters 7-11 covering skills, hooks, worktrees, agent teams, and security/enterprise
 - [ ] **Phase 95: Site Integration & Blog Post** - Header nav, homepage callout, hub page, sitemap, LLMs.txt, JSON-LD, OG images, companion blog post
@@ -80,7 +80,7 @@ Plans:
   1. The permission flow explorer renders as an interactive decision tree where clicking a node reveals the allow/ask/deny evaluation path
   2. The hook event visualizer displays an event sequence where clicking an event reveals its payload structure
   3. Both components load via client:visible (lazy) and do not impact page load performance for readers who do not scroll to them
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 92-01-PLAN.md — Permission flow explorer data + React Flow component (INTV-01)
 - [ ] 92-02-PLAN.md — Hook event visualizer data + React Flow component (INTV-02)
@@ -130,7 +130,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 |-------|----------------|--------|-----------|
 | 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
 | 91. SVG Diagram Generators | 3/3 | Complete   | 2026-03-10 |
-| 92. Interactive React Components | 1/2 | In Progress|  |
+| 92. Interactive React Components | 2/2 | Complete   | 2026-03-10 |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
 | 94. Advanced Content Chapters | 0/TBD | Not started | - |
 | 95. Site Integration & Blog Post | 0/TBD | Not started | - |
