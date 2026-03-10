@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: in-progress
-stopped_at: Completed 94-01-PLAN.md (Chapters 7-8 Custom Skills & Hooks)
-last_updated: "2026-03-10T23:12:25Z"
-last_activity: 2026-03-10 — Completed 94-01 (Chapters 7-8 Custom Skills & Hooks)
+stopped_at: Completed Phase 94 (all 3 plans)
+last_updated: "2026-03-10T23:14:09Z"
+last_activity: 2026-03-10 — Completed Phase 94 (all 11 content chapters done)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
   completed_plans: 15
   percent: 97
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 94 in progress (Plans 01, 03 complete)
+**Current focus:** v1.16 Claude Code Guide — Phase 94 Complete, ready for Phase 95
 
 ## Current Position
 
-Phase: 94 (5 of 6) — Advanced Content Chapters — IN PROGRESS
-Plan: 2 of 3 complete (94-01, 94-03 done; 94-02 in parallel)
-Status: Phase 94 in progress
-Last activity: 2026-03-10 — Completed 94-01 (Chapters 7-8 Custom Skills & Hooks)
+Phase: 94 (5 of 6) — Advanced Content Chapters — COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 94 Complete
+Last activity: 2026-03-10 — Completed 94-02 (Chapters 9-10 Worktrees & Agent Teams)
 
-Progress: [█████████░] 93%
+Progress: [█████████░] 97%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
-- v1.16 plans completed: 14
+- v1.16 plans completed: 15
 
 **Cumulative Stats:**
 
@@ -72,6 +72,7 @@ Progress: [█████████░] 93%
 | Phase 93 P02 | 9min | 2 tasks | 2 files |
 | Phase 93 P03 | 9min | 2 tasks | 2 files |
 | Phase 94 P01 | 8min | 2 tasks | 2 files |
+| Phase 94 P02 | 8min | 2 tasks | 2 files |
 | Phase 94 P03 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
@@ -113,6 +114,9 @@ Full decision log in PROJECT.md Key Decisions table.
 - (94-01) HTML entity escaping for ${} variable references in MDX prose to prevent JSX interpolation
 - (94-01) 10 SKILL.md frontmatter fields documented; PreToolUse is ONLY loop event that can block execution
 - (94-01) hookSpecificOutput used exclusively for PreToolUse decision control (deprecated top-level format not recommended)
+- (94-02) Chapter 9 uses descriptive format for 13 AGENT.md frontmatter fields rather than table format for readability
+- (94-02) Research Preview blockquote placed immediately after What You Will Learn in Chapter 10 for maximum visibility
+- (94-02) Comparison table in Chapter 10 uses 8 dimensions for thorough subagents vs agent teams differentiation
 - (94-03) Vulnerability scanning framed as capability pattern (subagents + skills + hooks), not standalone named feature
 - (94-03) 520 lines covers all 16 sections including 5 managed settings mechanisms, 3 governance flags, plugin/sandbox/auth controls
 
@@ -135,7 +139,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T23:12:25Z
-Stopped at: Completed 94-01-PLAN.md (Chapters 7-8 Custom Skills & Hooks)
+Last session: 2026-03-10T23:14:09Z
+Stopped at: Completed 94-02-PLAN.md (Chapters 9-10 Worktrees & Agent Teams)
 Resume file: None
-Next: Complete 94-02 (Chapters 9-10), then Phase 95
+Next: Phase 95 (Site Integration & Blog Post)
