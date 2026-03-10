@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { GUIDE_ROUTES, guidePageUrl, guideLandingUrl } from '../routes';
 
 describe('GUIDE_ROUTES', () => {
-  it('has a landing route for fastapi-production', () => {
-    expect(GUIDE_ROUTES.landing).toBe('/guides/fastapi-production/');
-  });
-
   it('has a guides base route', () => {
     expect(GUIDE_ROUTES.guides).toBe('/guides/');
+  });
+
+  it('does not have a landing property', () => {
+    expect('landing' in GUIDE_ROUTES).toBe(false);
   });
 });
 

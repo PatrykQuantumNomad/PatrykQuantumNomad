@@ -47,6 +47,27 @@ describe('guidePageSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts a page with lastVerified date string', () => {
+    const result = guidePageSchema.safeParse({
+      title: 'Builder Pattern',
+      description: 'How the app composes itself',
+      order: 0,
+      slug: 'builder-pattern',
+      lastVerified: '2026-03-01',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a page without lastVerified (backward compat)', () => {
+    const result = guidePageSchema.safeParse({
+      title: 'Builder Pattern',
+      description: 'How the app composes itself',
+      order: 0,
+      slug: 'builder-pattern',
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('guideMetaSchema', () => {
@@ -60,7 +81,7 @@ describe('guideMetaSchema', () => {
     chapters: [{ slug: 'builder-pattern', title: 'Builder Pattern' }],
   };
 
-  it('validates a correct guide meta object', () => {
+  it('validates a correct guide meta object (FastAPI style with templateRepo + versionTag)', () => {
     const result = guideMetaSchema.safeParse(validMeta);
     expect(result.success).toBe(true);
   });
@@ -76,7 +97,7 @@ describe('guideMetaSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects an invalid templateRepo URL', () => {
+  it('rejects an invalid templateRepo URL when present', () => {
     const result = guideMetaSchema.safeParse({
       ...validMeta,
       templateRepo: 'not-a-url',
@@ -108,5 +129,35 @@ describe('guideMetaSchema', () => {
       chapters: [{ title: 'Builder Pattern' }],
     });
     expect(result.success).toBe(false);
+  });
+
+  it('accepts meta without templateRepo (optional)', () => {
+    const { templateRepo, ...noTemplateRepo } = validMeta;
+    const result = guideMetaSchema.safeParse(noTemplateRepo);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts meta without versionTag (optional)', () => {
+    const { versionTag, ...noVersionTag } = validMeta;
+    const result = guideMetaSchema.safeParse(noVersionTag);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts meta with accentColor', () => {
+    const result = guideMetaSchema.safeParse({
+      ...validMeta,
+      accentColor: '#D97706',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts chapters with optional description', () => {
+    const result = guideMetaSchema.safeParse({
+      ...validMeta,
+      chapters: [
+        { slug: 'builder-pattern', title: 'Builder Pattern', description: 'How the app composes itself' },
+      ],
+    });
+    expect(result.success).toBe(true);
   });
 });
