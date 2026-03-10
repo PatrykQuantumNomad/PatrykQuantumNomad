@@ -107,3 +107,69 @@ export function textLabel(
   const textAnchor = opts.textAnchor ?? 'middle';
   return `<text x="${x}" y="${y}" text-anchor="${textAnchor}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${fill}" font-family="${fontFamily}">${text}</text>`;
 }
+
+/**
+ * Generate a curved path (quadratic Bezier) between two points.
+ * Useful for cycle/loop arrows that need to arc around other elements.
+ */
+export function curvedPath(
+  x1: number,
+  y1: number,
+  cx: number,
+  cy: number,
+  x2: number,
+  y2: number,
+  markerId?: string,
+): string {
+  const markerAttr = markerId ? ` marker-end="url(#${markerId})"` : '';
+  return `<path d="M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}" fill="none" stroke="${DIAGRAM_PALETTE.textSecondary}" stroke-width="1.5"${markerAttr} />`;
+}
+
+/** Options for diamondNode */
+interface DiamondNodeOptions {
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+}
+
+/**
+ * Generate a diamond-shaped decision node centered at (cx, cy).
+ * Extracted from jwt-auth-flow.ts for reuse across flowchart diagrams.
+ */
+export function diamondNode(
+  cx: number,
+  cy: number,
+  size: number,
+  opts: DiamondNodeOptions = {},
+): string {
+  const fill = opts.fill ?? DIAGRAM_PALETTE.surfaceAlt;
+  const stroke = opts.stroke ?? DIAGRAM_PALETTE.border;
+  const strokeWidth = opts.strokeWidth ?? 1.5;
+  return `<polygon points="${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+}
+
+/** Options for groupBox */
+interface GroupBoxOptions {
+  dashed?: boolean;
+  titleFontSize?: number;
+}
+
+/**
+ * Generate a group container box with a title label.
+ * Useful for visually grouping related diagram elements (e.g., categories, scopes).
+ */
+export function groupBox(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  title: string,
+  opts: GroupBoxOptions = {},
+): string {
+  const dashAttr = opts.dashed ? ' stroke-dasharray="6,4"' : '';
+  const titleFontSize = opts.titleFontSize ?? 11;
+  return [
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="none" stroke="${DIAGRAM_PALETTE.border}" stroke-width="1.5"${dashAttr} />`,
+    `<text x="${x + 10}" y="${y + titleFontSize + 6}" font-size="${titleFontSize}" font-weight="bold" fill="${DIAGRAM_PALETTE.textSecondary}" font-family="${DEFAULT_DIAGRAM_CONFIG.fontFamily}">${title}</text>`,
+  ].join('\n');
+}

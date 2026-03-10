@@ -1,0 +1,13 @@
+---
+/**
+ * AgenticLoopDiagram -- Build-time SVG wrapper for DIAG-01.
+ * Renders the agentic loop cycle (gather context, take action, verify results)
+ * as a static SVG via PlotFigure. Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateAgenticLoop } from '../../lib/guides/svg-diagrams';
+
+const svg = generateAgenticLoop();
+---
+
+<PlotFigure svg={svg} caption="The agentic loop: gather context, take action, verify results" maxWidth="720px" />
