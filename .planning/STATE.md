@@ -4,14 +4,14 @@ milestone: v1.16
 milestone_name: Claude Code Guide
 status: active
 stopped_at: null
-last_updated: "2026-03-10T13:00:00.000Z"
-last_activity: 2026-03-10 -- Roadmap created (6 phases, 33 requirements)
+last_updated: "2026-03-10T19:16:17.000Z"
+last_activity: 2026-03-10 -- Completed 90-02 (CodeBlock + multi-guide parameterization)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 4
+  completed_plans: 2
+  percent: 8
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 90 (1 of 6) — Infrastructure Refactoring
-Plan: —
-Status: Ready to plan
-Last activity: 2026-03-10 — Roadmap created (6 phases, 33 requirements mapped)
+Plan: 2 of 4 complete
+Status: Executing
+Last activity: 2026-03-10 — Completed 90-02 (CodeBlock + multi-guide parameterization)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 8%
 
 ## Performance Metrics
 
@@ -66,6 +66,10 @@ Progress: [░░░░░░░░░░] 0%
 
 Full decision log in PROJECT.md Key Decisions table.
 
+- (90-02) CodeBlock uses same expressive-code wrapper pattern as CodeFromRepo but without source attribution
+- (90-02) GuideJsonLd defaults parentTitle/parentUrl to FastAPI values for zero-change backward compatibility
+- (90-02) Companion link rendered conditionally -- Claude Code guide pages will simply omit the prop
+
 ### Pending Todos
 
 None.
@@ -87,6 +91,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Roadmap created for v1.16
+Stopped at: Completed 90-02-PLAN.md
 Resume file: None
-Next: Plan Phase 90 (Infrastructure Refactoring)
+Next: Execute 90-03-PLAN.md (Claude Code landing page, chapter routing)
