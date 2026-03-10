@@ -1,0 +1,437 @@
+---
+title: "Hooks & Lifecycle Automation"
+description: "Lifecycle events, exit codes, and prompt/agent hooks"
+order: 7
+slug: "hooks"
+lastVerified: 2026-03-10
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+import HookLifecycleDiagram from '../../../../components/guide/HookLifecycleDiagram.astro';
+import HookEventVisualizer from '../../../../components/guide/HookEventVisualizer';
+
+## What You Will Learn
+
+This chapter covers the hook system for automating actions at specific points in Claude Code's lifecycle. You will learn the 18 lifecycle events across three categories, the four handler types for responding to events, the configuration format and matcher patterns, exit code semantics for controlling execution flow, the hookSpecificOutput schema for PreToolUse decision control, and how to manage hooks interactively.
+
+By the end of this chapter, you will be able to configure hooks that lint code before commits, block dangerous commands, send notifications on task completion, and enforce project-specific workflows.
+
+## What Are Hooks?
+
+Hooks are automations that run at specific points in Claude Code's lifecycle. They execute in response to events -- a session starting, a tool about to run, a prompt being submitted -- and can perform any action: run a shell script, call an HTTP endpoint, evaluate an LLM prompt, or delegate to a subagent.
+
+Think of hooks as CI-style automation embedded directly in your Claude Code workflow. Instead of waiting for a push to trigger a pipeline, hooks trigger immediately when the event occurs. You can lint code before Claude commits it, block destructive shell commands before they execute, log every tool invocation to an audit system, or notify your team when Claude completes a task.
+
+Hooks are configured in settings files (user, project, or managed) and apply to all sessions within their scope. You can also embed hooks in skill and subagent frontmatter for skill-scoped automation -- see [Custom Skills](/guides/claude-code/custom-skills/) for that pattern.
+
+## Hook Lifecycle Overview
+
+Claude Code fires 18 lifecycle events across three categories: session events that bookend the overall session, loop events that fire during the agentic loop, and standalone async events that fire independently of the main loop.
+
+<HookLifecycleDiagram />
+
+The diagram above shows the full lifecycle flow. Session events (SessionStart and SessionEnd) wrap the entire interaction. Between them, the agentic loop fires events as Claude gathers context, takes actions, and verifies results. Standalone async events fire independently when configuration changes, instructions load, or worktrees are created.
+
+Understanding which events fire and in what order is the foundation for writing effective hooks. The next three sections break down each category.
+
+## Session Events
+
+Session events fire once at the beginning and end of each Claude Code session.
+
+**SessionStart** fires when Claude Code initializes a new session, before any user prompt is processed. Use it for environment setup: checking prerequisites, loading environment variables, starting background services, or recording the session start time for metrics.
+
+<CodeBlock
+  code={`{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Session started at $(date)\" >> ~/.claude/session.log"
+          }
+        ]
+      }
+    ]
+  }
+}`}
+  lang="json"
+  title="settings.json"
+  caption="A SessionStart hook that logs when each session begins."
+/>
+
+**SessionEnd** fires when the session is closing, after the final response. Use it for cleanup: stopping background services, uploading session logs, or sending a summary notification.
+
+## Loop Events
+
+Loop events fire during the agentic loop as Claude processes prompts and uses tools. There are 12 loop events. Five are critical for most hook workflows; the remaining seven serve specialized needs.
+
+### Key Loop Events
+
+**UserPromptSubmit** fires when the user submits a prompt, before Claude begins processing it. Use it for prompt preprocessing, input validation, or logging user activity. This event fires for every prompt in a session, including follow-up messages.
+
+**PreToolUse** fires before Claude executes a tool. **This is the only loop event that can block execution.** When a PreToolUse hook returns exit code 2 (or a deny decision via hookSpecificOutput), the tool call is blocked and Claude receives feedback about why. This makes PreToolUse the primary event for safety gates -- blocking destructive commands, enforcing file access rules, or requiring approval for sensitive operations.
+
+<CodeBlock
+  code={`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-command.sh"
+          }
+        ]
+      }
+    ]
+  }
+}`}
+  lang="json"
+  title="settings.json"
+  caption="A PreToolUse hook that validates Bash commands before execution. Only PreToolUse can block."
+/>
+
+**PostToolUse** fires after a tool completes execution. Use it for post-processing: logging tool results, validating outputs, or triggering follow-up actions. PostToolUse cannot block -- it runs after the fact.
+
+**Stop** fires when Claude decides it has completed the task and is about to stop the agentic loop. Use it for quality checks: running a final lint pass, verifying test coverage, or confirming the output meets requirements.
+
+**PreCompact** fires before Claude auto-compacts the conversation to free context window space. Use it to inject important context that should survive compaction, or to save a snapshot of the conversation state before information is compressed.
+
+### Additional Loop Events
+
+The remaining seven loop events serve specialized use cases. Most hook configurations do not need them.
+
+| Event | When It Fires | Can Block |
+|-------|---------------|-----------|
+| PermissionRequest | Claude asks the user for tool permission | No |
+| PostToolUseFailure | A tool execution fails with an error | No |
+| Notification | Claude sends a notification (e.g., task progress) | No |
+| SubagentStart | A subagent is spawned | No |
+| SubagentStop | A subagent completes its work | No |
+| TeammateIdle | A teammate in an agent team becomes idle | No |
+| TaskCompleted | A task in an agent team is marked complete | No |
+
+Note that PreToolUse is the only loop event in the "Can Block" column. All other loop events are observational -- they let you react to what happened but cannot prevent it.
+
+## Standalone Async Events
+
+Four events fire independently of the main agentic loop. They respond to changes in Claude Code's configuration and workspace rather than to user prompts or tool calls.
+
+**InstructionsLoaded** fires when Claude Code loads instruction files (CLAUDE.md, settings.json, etc.) at session startup or when files change during a session. Use it to validate instructions or log which configuration files are active.
+
+**ConfigChange** fires when a settings file is modified during a session. Use it to reload custom configuration, notify the user about setting changes, or validate that new settings are compatible.
+
+**WorktreeCreate** fires when a new git worktree is created (via the --worktree flag or subagent isolation). Use it to set up the new worktree environment: installing dependencies, copying configuration files, or initializing databases.
+
+**WorktreeRemove** fires when a git worktree is removed. Use it for cleanup: removing temporary files, closing database connections, or archiving worktree logs.
+
+## Explore Events Interactively
+
+Click any event below to see its payload fields, handler types, and configuration examples.
+
+<HookEventVisualizer client:visible />
+
+## Configuration Format
+
+Hook configuration uses a three-level nesting structure: the event name maps to an array of matcher groups, and each matcher group contains an array of hook handlers.
+
+<CodeBlock
+  code={`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-bash.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-write.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/setup-env.sh"
+          }
+        ]
+      }
+    ]
+  }
+}`}
+  lang="json"
+  title="settings.json"
+  caption="Two PreToolUse matcher groups (Bash and Write) and one SessionStart hook without a matcher."
+/>
+
+The three levels are:
+
+1. **Event name** (e.g., `PreToolUse`, `SessionStart`) -- which lifecycle event triggers the hooks.
+2. **Matcher group** (the objects in the event's array) -- filters which specific instances of the event should trigger this group's hooks. If no `matcher` field is present, the hooks run on every instance of the event.
+3. **Hook handlers** (the objects in the `hooks` array) -- the actual automations to run when the event fires and the matcher matches.
+
+Hooks can be configured at three scopes:
+
+- **User settings** (`~/.claude/settings.json`) -- hooks apply to all your sessions on this machine.
+- **Project settings** (`.claude/settings.json`) -- hooks apply to all sessions in this project. Commit to Git for team-wide hooks.
+- **Managed settings** -- hooks enforced by organization administrators. Cannot be overridden by users.
+
+## Matcher Patterns
+
+Matchers filter which instances of an event trigger the associated hooks. Different event types support different matcher fields.
+
+**PreToolUse** and **PostToolUse** match on the tool name. The matcher value is a string that can be an exact tool name or a regular expression. When Claude is about to use the `Bash` tool, a matcher of `"Bash"` will fire. A matcher of `"Bash|Write"` will fire for both Bash and Write tool calls.
+
+<CodeBlock
+  code={`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/audit-changes.sh"
+          }
+        ]
+      }
+    ]
+  }
+}`}
+  lang="json"
+  title="Matching multiple tools with regex"
+  caption="This hook fires before both Bash and Write tool calls."
+/>
+
+When no matcher is specified, the hooks fire for every instance of the event. For session events (SessionStart, SessionEnd), matchers are typically omitted since these events fire once per session.
+
+## Handler Types
+
+Each hook handler specifies a type that determines how the automation runs. Claude Code supports four handler types.
+
+### command
+
+The **command** handler runs a shell script or command. It is the most common handler type. The command receives event data as JSON on stdin and can output JSON to stdout to influence Claude Code's behavior.
+
+<CodeBlock
+  code={`#!/bin/bash
+# .claude/hooks/validate-bash.sh
+# Reads the tool input from stdin, checks for dangerous patterns
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if echo "$COMMAND" | grep -qE 'rm\s+-rf\s+/'; then
+  # Output JSON to deny the command
+  echo '{
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "deny",
+      "permissionDecisionReason": "Blocked: rm -rf / is not allowed"
+    }
+  }'
+  exit 2  # Blocking error
+fi
+
+# Command is safe, allow it
+exit 0`}
+  lang="bash"
+  title=".claude/hooks/validate-bash.sh"
+  caption="A command handler that blocks rm -rf / via exit code 2 and hookSpecificOutput."
+/>
+
+### HTTP
+
+The **HTTP** handler sends a POST request to a URL with the event data as the JSON body. Use it for integrating with external systems: logging to a webhook, notifying a Slack channel, or calling an internal API.
+
+<CodeBlock
+  code={`{
+  "type": "http",
+  "url": "https://hooks.example.com/claude-events"
+}`}
+  lang="json"
+  title="HTTP handler configuration"
+  caption="Sends event data as a POST request to the specified URL."
+/>
+
+Enterprise administrators can restrict which URLs are allowed for HTTP hooks using the `allowedHttpHookUrls` setting in managed configuration. This prevents hooks from sending data to unauthorized endpoints.
+
+### prompt
+
+The **prompt** handler runs an LLM prompt with the event context. Claude evaluates the prompt and can return a decision or analysis. Use it for nuanced checks that require reasoning beyond pattern matching -- for example, evaluating whether a code change follows project conventions.
+
+<CodeBlock
+  code={`{
+  "type": "prompt",
+  "prompt": "Review the following tool call. If the command could delete important data or modify system files, respond with a JSON object containing hookSpecificOutput with permissionDecision set to 'ask'. Otherwise respond with an empty JSON object {}."
+}`}
+  lang="json"
+  title="Prompt handler configuration"
+  caption="An LLM evaluates the event and returns a decision."
+/>
+
+### agent
+
+The **agent** handler delegates the event to a subagent for complex analysis. The subagent runs in its own context and can use tools to investigate before returning a response. Use it for hooks that require multi-step reasoning or file analysis.
+
+## Exit Code Semantics
+
+For command handlers, the exit code determines how Claude Code interprets the result. Three categories of exit codes carry specific meaning.
+
+**Exit code 0** means success. The hook ran without issues. Claude Code continues normally. Use exit 0 when your hook's checks pass or when no action is needed.
+
+**Exit code 2** means blocking error. Claude Code stops the current operation. **This is only meaningful for PreToolUse hooks** -- the only event that can block. When a PreToolUse hook exits with code 2, the tool call is prevented and Claude receives the hook's output as feedback explaining why. For non-blocking events, exit code 2 is treated the same as other non-zero codes.
+
+**Any other exit code** (1, 3, 4, etc.) means non-blocking error. Claude Code logs a warning but continues execution. The hook's failure does not stop the operation. Use non-zero exit codes for hooks that encounter errors but should not block Claude's work -- for example, a logging hook that fails to reach its endpoint.
+
+<CodeBlock
+  code={`#!/bin/bash
+# .claude/hooks/block-rm.sh
+# Block rm -rf commands via PreToolUse
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if echo "$COMMAND" | grep -qE 'rm\s+-rf'; then
+  echo '{
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "deny",
+      "permissionDecisionReason": "Destructive rm -rf command blocked by safety hook"
+    }
+  }'
+  exit 2  # BLOCKS the tool call
+fi
+
+exit 0  # Allows the tool call`}
+  lang="bash"
+  title=".claude/hooks/block-rm.sh"
+  caption="Exit 2 blocks the Bash tool call. Exit 0 allows it. Any other code warns but allows."
+/>
+
+## JSON Output and Decision Control
+
+Command handlers can output JSON to stdout to communicate decisions and metadata back to Claude Code. The JSON output schema supports five top-level fields.
+
+**continue** -- a boolean that controls whether Claude should keep processing. Set to `false` to stop the agentic loop after this event.
+
+**stopReason** -- a string explaining why processing should stop. Only meaningful when `continue` is `false`.
+
+**suppressOutput** -- a boolean that prevents the hook's output from appearing in Claude's context. Useful for hooks that log externally and do not need Claude to see the result.
+
+**systemMessage** -- a string injected as a system message into Claude's context. Use it to provide feedback, warnings, or instructions that Claude should consider in its next step.
+
+**hookSpecificOutput** -- an object with event-specific fields. For PreToolUse, this is the primary mechanism for decision control.
+
+For PreToolUse events, hookSpecificOutput supports three decision values:
+
+- **permissionDecision: "allow"** -- automatically approve the tool call without asking the user.
+- **permissionDecision: "deny"** -- block the tool call. Claude receives the reason and adjusts its approach.
+- **permissionDecision: "ask"** -- present the tool call to the user for manual approval.
+
+The **permissionDecisionReason** field provides an explanation that Claude (or the user, for "ask" decisions) sees alongside the decision.
+
+<CodeBlock
+  code={`#!/bin/bash
+# .claude/hooks/enforce-write-rules.sh
+# Enforce file write restrictions via PreToolUse
+
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+# Block writes to production config
+if echo "$FILE_PATH" | grep -qE '^config/production'; then
+  echo '{
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "deny",
+      "permissionDecisionReason": "Production config files are read-only. Use staging config instead."
+    }
+  }'
+  exit 2
+fi
+
+# Auto-approve writes to test files
+if echo "$FILE_PATH" | grep -qE '\.test\.(ts|js)$'; then
+  echo '{
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "allow",
+      "permissionDecisionReason": "Test files are auto-approved"
+    }
+  }'
+  exit 0
+fi
+
+# Everything else goes through normal permission flow
+exit 0`}
+  lang="bash"
+  title=".claude/hooks/enforce-write-rules.sh"
+  caption="Deny writes to production config, auto-approve test files, default flow for everything else."
+/>
+
+Note: The older top-level `decision` and `reason` fields are deprecated. Always use `hookSpecificOutput` with `permissionDecision` and `permissionDecisionReason` for PreToolUse decision control.
+
+## Hook Locations and Scopes
+
+Hooks can be defined in six locations. Unlike most settings where later scopes override earlier ones, **hooks from all locations merge and all run**. A PreToolUse hook in user settings and a PreToolUse hook in project settings both execute -- neither overrides the other.
+
+**User settings** (`~/.claude/settings.json`) -- your personal hooks across all projects.
+
+**Project settings** (`.claude/settings.json`) -- team hooks shared via Git.
+
+**Local settings** (`.claude/settings.local.json`) -- your personal hooks for this project only. Not committed to Git.
+
+**Managed settings** -- organization-enforced hooks distributed by administrators. Cannot be removed by users.
+
+**Plugin hooks** -- hooks provided by installed plugins.
+
+**Skill and agent frontmatter** -- hooks embedded in SKILL.md or AGENT.md `hooks` field. These run only when that specific skill or agent is active. See [Custom Skills](/guides/claude-code/custom-skills/) for the frontmatter format.
+
+This merging behavior means you can layer hooks: organization-wide safety rules in managed settings, team-specific workflow hooks in project settings, and personal productivity hooks in user settings. All three layers run for every event, providing defense in depth.
+
+## Managing Hooks with /hooks
+
+The `/hooks` slash command provides an interactive menu for managing hooks without manually editing JSON files. It displays all configured hooks across scopes, lets you add new hooks with guided prompts, and supports deleting hooks you no longer need.
+
+<CodeBlock
+  code={`/hooks`}
+  lang="text"
+  title="Interactive hook management"
+  caption="View, add, and delete hooks from all scopes in an interactive menu."
+/>
+
+The `/hooks` menu is the fastest way to experiment with hooks. Create a hook interactively, test it, and then move the configuration to a settings file once you are satisfied. It is especially useful for debugging -- you can see exactly which hooks are active and from which scope they originate.
+
+## Best Practices
+
+- **Use PreToolUse for safety gates.** It is the only event that can block execution. Put your most important guardrails here -- blocking destructive commands, enforcing file access rules, and requiring approval for sensitive operations.
+
+- **Keep hook scripts fast.** Hooks run synchronously and block Claude Code while they execute. A slow hook that takes 5 seconds to complete adds 5 seconds of latency to every matching event. Optimize for speed: avoid network calls in command handlers when possible, and use HTTP handlers for async integrations.
+
+- **Use exit codes correctly.** Exit 0 for success, exit 2 for blocking errors (PreToolUse only), and any other code for non-blocking warnings. Getting this wrong can either block operations you intended to allow or silently pass operations you intended to block.
+
+- **Test hooks in isolation before deploying.** Pipe sample JSON into your hook script and verify the output before adding it to settings. A broken hook can disrupt every session.
+
+- **Use matchers to narrow scope.** A PreToolUse hook without a matcher fires for every tool call -- Read, Grep, Glob, Bash, Write, and more. Use matchers to target only the tools that need validation.
+
+- **Prefer hookSpecificOutput over deprecated formats.** The top-level `decision` and `reason` fields still work but are deprecated. Use `hookSpecificOutput` with `permissionDecision` and `permissionDecisionReason` for PreToolUse decision control.
+
+- **Layer hooks across scopes for defense in depth.** Organization safety rules in managed settings, team workflow hooks in project settings, and personal productivity hooks in user settings all merge and run together.
+
+## Further Reading
+
+- <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener noreferrer">Hooks</a> -- official documentation on lifecycle events, configuration format, handler types, and decision control
+- Next chapter: [Git Worktrees & Subagent Delegation](/guides/claude-code/worktrees/) covers parallel development branches and custom agent personas
