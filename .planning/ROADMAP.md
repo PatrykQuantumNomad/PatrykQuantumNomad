@@ -31,7 +31,7 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
 - Decimal phases (90.1, 90.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 90: Infrastructure Refactoring** - Multi-guide content collections, schema extension, guide metadata, page routing, CodeBlock component, and FastAPI regression gate
-- [ ] **Phase 91: SVG Diagram Generators** - 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams)
+- [x] **Phase 91: SVG Diagram Generators** - 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams) (completed 2026-03-10)
 - [ ] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands
 - [ ] **Phase 93: Foundation Content Chapters** - Chapters 1-6 covering setup, context management, models/costs, sandboxing, remote/headless, and MCP
 - [ ] **Phase 94: Advanced Content Chapters** - Chapters 7-11 covering skills, hooks, worktrees, agent teams, and security/enterprise
@@ -66,7 +66,7 @@ Plans:
   3. The Hook Lifecycle diagram visualizes all lifecycle events with branching execution paths
   4. The Permission Model diagram shows the evaluation flowchart with allow/ask/deny decision paths
   5. The MCP Architecture diagram shows server topology with stdio and HTTP transport connections
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 91-01-PLAN.md — Extend diagram-base.ts + Agentic Loop (DIAG-01) + Hook Lifecycle (DIAG-02)
 - [ ] 91-02-PLAN.md — Permission Model (DIAG-03) + MCP Architecture (DIAG-04)
@@ -126,7 +126,7 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 90. Infrastructure Refactoring | 4/4 | Complete | 2026-03-10 |
-| 91. SVG Diagram Generators | 1/3 | In Progress|  |
+| 91. SVG Diagram Generators | 3/3 | Complete   | 2026-03-10 |
 | 92. Interactive React Components | 0/TBD | Not started | - |
 | 93. Foundation Content Chapters | 0/TBD | Not started | - |
 | 94. Advanced Content Chapters | 0/TBD | Not started | - |
