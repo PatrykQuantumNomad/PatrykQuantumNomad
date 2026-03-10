@@ -255,7 +255,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — planning next milestone)
+## Current Milestone: v1.16 Claude Code Guide
+
+**Goal:** Build a comprehensive multi-chapter Claude Code guide — the definitive zero-to-hero resource for developers at all levels, covering setup through production mastery and advanced agent workflows.
+
+**Target features:**
+- Multi-chapter guide section at `/guides/claude-code/` with 10-12 deep domain chapters
+- Progressive complexity: foundation (setup, CLAUDE.md, context window, permissions) → extensibility (skills, hooks, MCP, plugins) → advanced (agent teams, subagents, parallel workflows, cron)
+- Expert practitioner voice — authoritative, direct, sharing hard-won knowledge
+- Build-time SVG architecture diagrams (agentic loop, hook lifecycle, MCP architecture)
+- Interactive elements (permission flow explorer, hook event visualizer)
+- Mix of real-world examples (GSD system, hooks, skills) and generic patterns
+- Full site integration (header nav, homepage callout, OG images, JSON-LD, sitemap, LLMs.txt, companion blog post)
+- Research sourced from 51-source NotebookLM notebook covering official docs, community guides, video transcripts, and expert analyses
 
 ### Out of Scope
 
@@ -284,7 +296,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.15 FastAPI Production Guide on top of 14 previous milestones (v1.0 through v1.14). FastAPI Production Guide at /guides/fastapi-production/ with 11 domain deep-dive chapters.
+Shipped v1.15 FastAPI Production Guide on top of 14 previous milestones (v1.0 through v1.14). FastAPI Production Guide at /guides/fastapi-production/ with 11 domain deep-dive chapters. Now building v1.16 Claude Code Guide — comprehensive zero-to-hero guide covering setup through advanced agent workflows, sourced from 51-source NotebookLM research notebook.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 requirements delivered (773 total). ~1074+ pages total. Lighthouse 90+ on mobile.
@@ -427,4 +439,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-08 after v1.15 milestone*
+*Last updated: 2026-03-10 after v1.16 milestone start*
