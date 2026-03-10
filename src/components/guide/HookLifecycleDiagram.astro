@@ -1,0 +1,13 @@
+---
+/**
+ * HookLifecycleDiagram -- Build-time SVG wrapper for DIAG-02.
+ * Renders the hook lifecycle event flow (18 events across session, loop,
+ * and async categories) as a static SVG via PlotFigure. Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateHookLifecycle } from '../../lib/guides/svg-diagrams';
+
+const svg = generateHookLifecycle();
+---
+
+<PlotFigure svg={svg} caption="Hook lifecycle: 18 event types across session, loop, and async categories" maxWidth="720px" />
