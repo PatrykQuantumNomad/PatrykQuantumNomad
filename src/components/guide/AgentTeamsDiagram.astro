@@ -1,0 +1,14 @@
+---
+/**
+ * AgentTeamsDiagram -- Build-time SVG wrapper for DIAG-05.
+ * Renders the agent teams architecture with team lead, teammates,
+ * shared task list, and mailbox messaging as a static SVG via PlotFigure.
+ * Zero client-side JavaScript.
+ */
+import PlotFigure from '../eda/PlotFigure.astro';
+import { generateAgentTeams } from '../../lib/guides/svg-diagrams';
+
+const svg = generateAgentTeams();
+---
+
+<PlotFigure svg={svg} caption="Agent teams (research preview): lead agent orchestrates teammates via shared task list and mailbox messaging" maxWidth="720px" />

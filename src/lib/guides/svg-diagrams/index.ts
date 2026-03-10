@@ -1,6 +1,6 @@
 /**
  * SVG Diagram Generator Library -- barrel export.
- * Re-exports all 3 architecture diagram generators and shared types.
+ * Re-exports all architecture diagram generators and shared types.
  */
 
 // Diagram generators
@@ -11,6 +11,7 @@ export { generateNfrDiagram } from './nfr-diagram';
 export { generateAgenticLoop } from './agentic-loop';
 export { generateHookLifecycle } from './hook-lifecycle';
 export { generatePermissionModel } from './permission-model';
+export { generateAgentTeams } from './agent-teams';
 
 // Shared types and utilities
 export { DIAGRAM_PALETTE, DEFAULT_DIAGRAM_CONFIG, type DiagramConfig } from './diagram-base';
