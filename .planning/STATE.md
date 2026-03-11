@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: executing
-stopped_at: Completed 95-02-PLAN.md (Companion Blog Post & Cross-Links)
-last_updated: "2026-03-11T00:10:18.740Z"
-last_activity: 2026-03-11 — Completed 95-01 (nav link + homepage card + SITE verification)
+status: complete
+stopped_at: Phase 95 complete — all 6 phases done, milestone ready
+last_updated: "2026-03-11T00:15:00Z"
+last_activity: 2026-03-11 — Completed Phase 95 (site integration + companion blog post)
 progress:
   total_phases: 6
   completed_phases: 6
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 95 in progress
+**Current focus:** v1.16 Claude Code Guide — All 6 phases COMPLETE
 
 ## Current Position
 
-Phase: 95 (6 of 6) — Site Integration & Blog Post
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-03-11 — Completed 95-01 (nav link + homepage card + SITE verification)
+Phase: 95 (6 of 6) — Site Integration & Blog Post — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 95 Complete — Milestone ready
+Last activity: 2026-03-11 — Completed Phase 95 (site integration + companion blog post)
 
 Progress: [██████████] 100%
 
@@ -37,7 +37,7 @@ Progress: [██████████] 100%
 **Velocity:**
 - Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
-- v1.16 plans completed: 16
+- v1.16 plans completed: 17
 
 **Cumulative Stats:**
 
@@ -145,6 +145,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-11T00:10:18.738Z
-Stopped at: Completed 95-02-PLAN.md (Companion Blog Post & Cross-Links)
+Stopped at: Phase 95 complete — all phases done
 Resume file: None
-Next: 95-02-PLAN.md (Blog Post Announcement)
+Next: /gsd:complete-milestone (v1.16 Claude Code Guide)

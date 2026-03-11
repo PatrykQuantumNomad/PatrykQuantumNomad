@@ -129,8 +129,8 @@ Plans:
   5. A companion blog post exists with bidirectional cross-links to all guide chapters, targeting long-tail workflow keywords
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 95-01-PLAN.md — Header nav link, homepage callout card, verify SITE-03 through SITE-07
-- [ ] 95-02-PLAN.md — Companion blog post, cover image, companionLink wiring
+- [x] 95-01-PLAN.md — Header nav link, homepage callout card, verify SITE-03 through SITE-07
+- [x] 95-02-PLAN.md — Companion blog post, cover image, companionLink wiring
 
 ## Progress
 
