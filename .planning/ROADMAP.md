@@ -127,7 +127,7 @@ Plans:
   3. All 12 guide pages (landing + 11 chapters) appear in sitemap-index.xml, LLMs.txt, and LLMs-full.txt
   4. Every guide page has TechArticle JSON-LD structured data, BreadcrumbList markup, and a unique build-time OG image
   5. A companion blog post exists with bidirectional cross-links to all guide chapters, targeting long-tail workflow keywords
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 95-01-PLAN.md — Header nav link, homepage callout card, verify SITE-03 through SITE-07
 - [ ] 95-02-PLAN.md — Companion blog post, cover image, companionLink wiring
@@ -144,4 +144,4 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | 92. Interactive React Components | 2/2 | Complete   | 2026-03-10 |
 | 93. Foundation Content Chapters | 3/3 | Complete | 2026-03-10 |
 | 94. Advanced Content Chapters | 3/3 | Complete | 2026-03-10 |
-| 95. Site Integration & Blog Post | 0/2 | Not started | - |
+| 95. Site Integration & Blog Post | 1/2 | In Progress|  |

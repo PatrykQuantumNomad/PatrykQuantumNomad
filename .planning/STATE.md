@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
 status: in-progress
-stopped_at: Completed Phase 94 (all 3 plans)
-last_updated: "2026-03-10T23:14:09Z"
-last_activity: 2026-03-10 — Completed Phase 94 (all 11 content chapters done)
+stopped_at: Completed 95-01-PLAN.md (Site Integration)
+last_updated: "2026-03-11T00:03:47Z"
+last_activity: 2026-03-11 — Completed 95-01 (nav link + homepage card + SITE verification)
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 16
   percent: 97
 ---
 
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — Phase 94 Complete, ready for Phase 95
+**Current focus:** v1.16 Claude Code Guide — Phase 95 in progress
 
 ## Current Position
 
-Phase: 94 (5 of 6) — Advanced Content Chapters — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 94 Complete
-Last activity: 2026-03-10 — Completed 94-02 (Chapters 9-10 Worktrees & Agent Teams)
+Phase: 95 (6 of 6) — Site Integration & Blog Post
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-03-11 — Completed 95-01 (nav link + homepage card + SITE verification)
 
-Progress: [█████████░] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 201 (across 15 milestones)
 - v1.15 plans completed: 13
-- v1.16 plans completed: 15
+- v1.16 plans completed: 16
 
 **Cumulative Stats:**
 
@@ -74,6 +74,7 @@ Progress: [█████████░] 97%
 | Phase 94 P01 | 8min | 2 tasks | 2 files |
 | Phase 94 P02 | 8min | 2 tasks | 2 files |
 | Phase 94 P03 | 3min | 2 tasks | 1 files |
+| Phase 95 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - (94-02) Comparison table in Chapter 10 uses 8 dimensions for thorough subagents vs agent teams differentiation
 - (94-03) Vulnerability scanning framed as capability pattern (subagents + skills + hooks), not standalone named feature
 - (94-03) 520 lines covers all 16 sections including 5 managed settings mechanisms, 3 governance flags, plugin/sandbox/auth controls
+- (95-01) Claude Code card uses text h3 heading instead of logo image (no logo asset)
+- (95-01) Amber #D97706 accent differentiates Claude Code from FastAPI teal #009485
 
 ### Pending Todos
 
@@ -139,7 +142,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T23:14:09Z
-Stopped at: Completed 94-02-PLAN.md (Chapters 9-10 Worktrees & Agent Teams)
+Last session: 2026-03-11T00:03:47Z
+Stopped at: Completed 95-01-PLAN.md (Site Integration)
 Resume file: None
-Next: Phase 95 (Site Integration & Blog Post)
+Next: 95-02-PLAN.md (Blog Post Announcement)

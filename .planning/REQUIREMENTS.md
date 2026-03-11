@@ -46,13 +46,13 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 
 ### Site Integration
 
-- [ ] **SITE-01**: Header navigation link for Claude Code guide
-- [ ] **SITE-02**: Homepage callout card linking to the Claude Code guide
-- [ ] **SITE-03**: /guides/ hub page updated to show both FastAPI and Claude Code guides
-- [ ] **SITE-04**: All Claude Code guide pages included in sitemap
-- [ ] **SITE-05**: LLMs.txt and LLMs-full.txt updated with Claude Code guide entries
-- [ ] **SITE-06**: JSON-LD structured data (TechArticle + BreadcrumbList) on all guide pages
-- [ ] **SITE-07**: Build-time OG images for landing page and all 11 chapter pages (12 total)
+- [x] **SITE-01**: Header navigation link for Claude Code guide
+- [x] **SITE-02**: Homepage callout card linking to the Claude Code guide
+- [x] **SITE-03**: /guides/ hub page updated to show both FastAPI and Claude Code guides
+- [x] **SITE-04**: All Claude Code guide pages included in sitemap
+- [x] **SITE-05**: LLMs.txt and LLMs-full.txt updated with Claude Code guide entries
+- [x] **SITE-06**: JSON-LD structured data (TechArticle + BreadcrumbList) on all guide pages
+- [x] **SITE-07**: Build-time OG images for landing page and all 11 chapter pages (12 total)
 - [ ] **SITE-08**: Companion blog post with bidirectional cross-links to guide chapters
 
 ## v2 Requirements
@@ -114,13 +114,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAP-09 | Phase 94 | Complete |
 | CHAP-10 | Phase 94 | Complete |
 | CHAP-11 | Phase 94 | Complete |
-| SITE-01 | Phase 95 | Pending |
-| SITE-02 | Phase 95 | Pending |
-| SITE-03 | Phase 95 | Pending |
-| SITE-04 | Phase 95 | Pending |
-| SITE-05 | Phase 95 | Pending |
-| SITE-06 | Phase 95 | Pending |
-| SITE-07 | Phase 95 | Pending |
+| SITE-01 | Phase 95 | Complete |
+| SITE-02 | Phase 95 | Complete |
+| SITE-03 | Phase 95 | Complete |
+| SITE-04 | Phase 95 | Complete |
+| SITE-05 | Phase 95 | Complete |
+| SITE-06 | Phase 95 | Complete |
+| SITE-07 | Phase 95 | Complete |
 | SITE-08 | Phase 95 | Pending |
 
 **Coverage:**
