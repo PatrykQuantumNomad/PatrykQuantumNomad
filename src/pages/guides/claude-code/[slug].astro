@@ -2,7 +2,7 @@
 /**
  * Claude Code guide chapter page template — /guides/claude-code/[slug]/
  * Uses GuideLayout for sidebar, breadcrumbs, and prev/next navigation.
- * No companionLink (will be added in Phase 95 when blog post exists).
+ * Includes companionLink to companion blog post.
  */
 import { getCollection, render } from 'astro:content';
 import GuideLayout from '../../../layouts/GuideLayout.astro';
@@ -40,6 +40,11 @@ const ogImageURL = new URL('/open-graph/guides/claude-code/' + page.data.slug + 
   publishedDate={guideMeta.data.publishedDate}
   parentTitle="Claude Code Guide"
   parentUrl="https://patrykgolabek.dev/guides/claude-code/"
+  companionLink={{
+    href: "/blog/claude-code-guide/",
+    text: "The Context Window Is the Product",
+    label: "For a high-level overview of all 11 chapters, read the companion blog post: "
+  }}
 >
   <article>
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">{page.data.title}</h1>
