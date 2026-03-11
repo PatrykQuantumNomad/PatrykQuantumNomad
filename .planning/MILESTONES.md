@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.16 Claude Code Guide (Shipped: 2026-03-11)
+
+**Delivered:** Comprehensive 11-chapter Claude Code guide at `/guides/claude-code/` covering zero-to-hero learning path from installation through enterprise administration, with 5 build-time SVG architecture diagrams, 2 interactive React Flow visualizers, multi-guide infrastructure refactoring, and full site integration with companion blog post
+
+**Phases completed:** 90-95 (17 plans total)
+
+**Key accomplishments:**
+- Built multi-guide content infrastructure with Zod-validated collections, dynamic routing, CodeBlock component, and build-time OG image generation — enabling unlimited future guides with zero hardcoded assumptions
+- Created 5 build-time SVG architecture diagrams (agentic loop, hook lifecycle, permission model, MCP topology, agent teams) with CSS custom property theming
+- Built 2 interactive React Flow visualizers (permission flow explorer with decision tree, hook event sequence with 18 events across 3 categories)
+- Authored 11 comprehensive MDX chapters (4,032 lines) covering setup, context management, models/costs, sandboxing, remote/headless, MCP, custom skills, hooks, worktrees, agent teams, and security/enterprise
+- Integrated guide site-wide via header nav, homepage callout, /guides/ hub page, sitemap, LLMs.txt, JSON-LD structured data, 12 OG images, and companion blog post "The Context Window Is the Product" with bidirectional cross-links
+
+**Stats:**
+- 116 files created/modified (+19,515 / -155 lines)
+- 4,032 lines of guide content (MDX + JSON)
+- 6 phases, 17 plans, 74 commits
+- 2 days from start to ship (2026-03-10 → 2026-03-11)
+
+**Git range:** `docs(90)` → `docs(phase-95)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.15 FastAPI Production Guide (Shipped: 2026-03-08)
 
 **Delivered:** Multi-page self-contained guide section at `/guides/fastapi-production/` with 11 domain deep-dive chapters, build-time architecture diagrams, code snippets from the FastAPI template repository, AI agent narrative framing, and full site integration with OG images, JSON-LD, and companion blog post

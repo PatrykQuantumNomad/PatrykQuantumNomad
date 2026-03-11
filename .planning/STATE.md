@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: complete
-stopped_at: Phase 95 complete — all 6 phases done, milestone ready
-last_updated: "2026-03-11T00:15:00Z"
-last_activity: 2026-03-11 — Completed Phase 95 (site integration + companion blog post)
+status: milestone_complete
+stopped_at: v1.16 milestone archived
+last_updated: "2026-03-11T01:30:00Z"
+last_activity: 2026-03-11 — v1.16 milestone complete
 progress:
   total_phases: 6
   completed_phases: 6
@@ -18,25 +18,24 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-10)
+See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.16 Claude Code Guide — All 6 phases COMPLETE
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 95 (6 of 6) — Site Integration & Blog Post — COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 95 Complete — Milestone ready
-Last activity: 2026-03-11 — Completed Phase 95 (site integration + companion blog post)
+Phase: Milestone complete
+Plan: Not started
+Status: Ready to plan next milestone
+Last activity: 2026-03-11 — v1.16 milestone complete
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (v1.16 shipped)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 201 (across 15 milestones)
-- v1.15 plans completed: 13
+- Total plans completed: 217 (across 16 milestones)
 - v1.16 plans completed: 17
 
 **Cumulative Stats:**
@@ -59,23 +58,8 @@ Progress: [██████████] 100%
 | v1.13 GHA Workflow Validator | 75-81 | 19 | 80 | 2026-03-04 |
 | v1.14 DevOps Skills Publishing | 82-84 | 3 | 16 | 2026-03-05 |
 | v1.15 FastAPI Production Guide | 85-89 | 13 | 36 | 2026-03-08 |
-| **Total** | **89** | **200** | **773** | |
-| Phase 90 P01 | 4 | 2 tasks | 8 files |
-| Phase 90 P03 | 4min | 2 tasks | 5 files |
-| Phase 90 P04 | ~15min | 2 tasks | 2 files |
-| Phase 91 P01 | 4min | 2 tasks | 8 files |
-| Phase 91 P02 | 4min | 2 tasks | 7 files |
-| Phase 91 P03 | 3min | 2 tasks | 4 files |
-| Phase 92 P01 | 4min | 2 tasks | 7 files |
-| Phase 92 P02 | 5min | 2 tasks | 7 files |
-| Phase 93 P01 | 13min | 2 tasks | 2 files |
-| Phase 93 P02 | 9min | 2 tasks | 2 files |
-| Phase 93 P03 | 9min | 2 tasks | 2 files |
-| Phase 94 P01 | 8min | 2 tasks | 2 files |
-| Phase 94 P02 | 8min | 2 tasks | 2 files |
-| Phase 94 P03 | 3min | 2 tasks | 1 files |
-| Phase 95 P01 | 2min | 2 tasks | 2 files |
-| Phase 95 P02 | 6min | 2 tasks | 3 files |
+| v1.16 Claude Code Guide | 90-95 | 17 | 33 | 2026-03-11 |
+| **Total** | **95** | **217** | **806** | |
 
 ## Accumulated Context
 
@@ -83,56 +67,14 @@ Progress: [██████████] 100%
 
 Full decision log in PROJECT.md Key Decisions table.
 
-- (90-02) CodeBlock uses same expressive-code wrapper pattern as CodeFromRepo but without source attribution
-- (90-02) GuideJsonLd defaults parentTitle/parentUrl to FastAPI values for zero-change backward compatibility
-- (90-02) Companion link rendered conditionally -- Claude Code guide pages will simply omit the prop
-- [Phase 90]: Removed GUIDE_ROUTES.landing constant -- guideLandingUrl() is the single source of truth for all guide landing URLs
-- [Phase 90]: Per-guide collection registration pattern (claudeCodePages, claudeCodeGuide) rather than merged collections
-- [Phase 90]: Dynamic sitemap builder uses readdirSync to iterate src/data/guides/* directories
-- (90-03) Landing page uses render() to extract reading time from remarkPluginFrontmatter at build time
-- (90-03) Claude Code hub card uses guide title prominently instead of logo image
-- (90-03) templateRepo/versionTag access wrapped in conditionals in llms-full.txt.ts
-- (90-04) 'Zero-to-Hero Guide' subtitle used in Claude Code landing OG image to differentiate from FastAPI's 'Production Guide'
-- (90-04) OG image directory structure mirrors routing: open-graph/guides/{slug}/ per guide
-- (91-01) Triangular layout for agentic loop with curved Bezier arrows connecting 3 phase boxes in a cycle
-- (91-01) Hook lifecycle uses 18 events (not 13 from REQUIREMENTS.md) based on verified official docs
-- (91-01) PreToolUse highlighted with accent border and CAN BLOCK label to indicate blocking capability
-- (91-02) Permission model uses 3 diamondNode decision nodes for deny->ask->allow evaluation chain
-- (91-02) MCP architecture uses groupBox containers for Local Servers and Remote Servers with transport badges
-- (91-02) SSE transport labeled as deprecated, HTTP highlighted as recommended with accent color
-- (91-03) Dashed groupBox wrapping entire diagram conveys Research Preview status prominently
-- (91-03) Task state indicators use accent color for in-progress and textSecondary for pending/completed
-- (92-01) Diamond nodes use decorative SVG background (not clip-path) to avoid clipping React Flow handles
-- (92-01) 9 edges include 2 prompt-user outcome edges for complete decision tree
-- (92-01) Data module separated from component in src/lib/guides/interactive-data/ for independent unit testing
-- (92-01) Detail panel rendered as sibling below ReactFlow canvas, not inside the flow
-- (92-02) Independent hook event data module separate from Phase 91 SVG generators to avoid coupling
-- (92-02) Category colors: session=blue, loop=violet, standalone=amber for instant visual grouping
-- (92-02) CAN BLOCK badge uses accent color with transparent background matching Phase 91 convention
-- (92-02) Category nodes use dashed border and are non-interactive to distinguish from event nodes
-- (93-01) Native install script (curl) as primary installation method; npm explicitly deprecated
-- (93-01) File exclusion documented via respectGitignore + claudeMdExcludes, not standalone .claudeignore
-- (93-01) Slash commands quick reference added to Chapter 1 for reader convenience
-- (94-01) HTML entity escaping for ${} variable references in MDX prose to prevent JSX interpolation
-- (94-01) 10 SKILL.md frontmatter fields documented; PreToolUse is ONLY loop event that can block execution
-- (94-01) hookSpecificOutput used exclusively for PreToolUse decision control (deprecated top-level format not recommended)
-- (94-02) Chapter 9 uses descriptive format for 13 AGENT.md frontmatter fields rather than table format for readability
-- (94-02) Research Preview blockquote placed immediately after What You Will Learn in Chapter 10 for maximum visibility
-- (94-02) Comparison table in Chapter 10 uses 8 dimensions for thorough subagents vs agent teams differentiation
-- (94-03) Vulnerability scanning framed as capability pattern (subagents + skills + hooks), not standalone named feature
-- (94-03) 520 lines covers all 16 sections including 5 managed settings mechanisms, 3 governance flags, plugin/sandbox/auth controls
-- (95-01) Claude Code card uses text h3 heading instead of logo image (no logo asset)
-- (95-01) Amber #D97706 accent differentiates Claude Code from FastAPI teal #009485
-- [Phase 95]: Blog post 'The Context Window Is the Product' frames context management as core practitioner skill for Claude Code
-
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- NotebookLM 51-source corpus has ~13% hallucination rate -- every factual claim in chapters must be verified against official docs (PITFALL-4)
-- Agent Teams (Chapter 10) is "research preview" status -- scope content conservatively with explicit warnings
+- Hub page (/guides/) uses Tailwind dynamic class interpolation for accentColor — should migrate to inline style attributes (tech debt from v1.16)
+- Beauty Index OG image "Cannot find module renderers.mjs" error (pre-existing)
 
 ### Quick Tasks Completed
 
@@ -144,7 +86,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-11T00:10:18.738Z
-Stopped at: Phase 95 complete — all phases done
+Last session: 2026-03-11
+Stopped at: v1.16 milestone archived
 Resume file: None
-Next: /gsd:complete-milestone (v1.16 Claude Code Guide)
+Next: /gsd:new-milestone (start next milestone)
