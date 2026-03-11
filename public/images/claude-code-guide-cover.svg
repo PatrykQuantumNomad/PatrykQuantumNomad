@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" width="1200" height="690">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f23"/>
+    </radialGradient>
+    <linearGradient id="amber-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="context-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D97706" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#D97706" stop-opacity="0.08"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="soft-shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="amber-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="690" fill="url(#bg-glow)"/>
+
+  <!-- Title -->
+  <text x="600" y="42" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="white" fill-opacity="0.9" text-anchor="middle" letter-spacing="6" font-weight="bold">THE CONTEXT WINDOW IS THE PRODUCT</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="68" font-family="Georgia,'Times New Roman',serif" font-size="12" fill="#D97706" fill-opacity="0.8" text-anchor="middle" font-style="italic">A practitioner's guide to mastering Claude Code</text>
+
+  <!-- =======================================
+       CENTRAL CONTEXT WINDOW
+       ======================================= -->
+
+  <!-- Context window container -->
+  <rect x="400" y="130" width="400" height="340" rx="8" fill="url(#context-grad)" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.5" filter="url(#soft-shadow)"/>
+
+  <!-- Context window header bar -->
+  <rect x="400" y="130" width="400" height="32" rx="8" fill="#D97706" fill-opacity="0.2"/>
+  <rect x="400" y="154" width="400" height="8" rx="0" fill="#D97706" fill-opacity="0.2"/>
+  <text x="600" y="150" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="#F59E0B" fill-opacity="1" text-anchor="middle" letter-spacing="3" font-weight="bold">CONTEXT WINDOW</text>
+
+  <!-- Content lines inside context window (representing structured context) -->
+  <g opacity="0.6">
+    <rect x="430" y="180" width="140" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="192" width="200" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="204" width="170" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="216" width="220" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+    <rect x="430" y="234" width="120" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="246" width="190" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="258" width="240" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="270" width="160" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+    <rect x="430" y="288" width="100" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="300" width="210" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="312" width="180" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+    <rect x="430" y="330" width="130" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="342" width="250" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="354" width="200" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+    <rect x="430" y="372" width="110" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="384" width="230" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="396" width="175" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+    <rect x="430" y="414" width="95" height="3" rx="1.5" fill="#D97706" fill-opacity="0.5"/>
+    <rect x="430" y="426" width="195" height="3" rx="1.5" fill="white" fill-opacity="0.15"/>
+    <rect x="430" y="438" width="155" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+  </g>
+
+  <!-- =======================================
+       LEFT SIDE INPUT BLOCKS (flowing in)
+       ======================================= -->
+
+  <!-- CLAUDE.md block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="60" y="150" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="140" y="176" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">CLAUDE.md</text>
+  </g>
+  <!-- Arrow from CLAUDE.md to context window -->
+  <line x1="220" y1="171" x2="395" y2="200" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="395,200 387,194 389,202" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- Skills block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="60" y="225" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="140" y="251" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">Skills</text>
+  </g>
+  <!-- Arrow from Skills to context window -->
+  <line x1="220" y1="246" x2="395" y2="260" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="395,260 387,254 389,262" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- Hooks block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="60" y="300" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="140" y="326" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">Hooks</text>
+  </g>
+  <!-- Arrow from Hooks to context window -->
+  <line x1="220" y1="321" x2="395" y2="320" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="395,320 387,314 389,322" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- =======================================
+       RIGHT SIDE INPUT BLOCKS (flowing in)
+       ======================================= -->
+
+  <!-- MCP block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="980" y="150" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="1060" y="176" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">MCP Servers</text>
+  </g>
+  <!-- Arrow from MCP to context window -->
+  <line x1="980" y1="171" x2="805" y2="200" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="805,200 811,194 813,202" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- Worktrees block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="980" y="225" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="1060" y="251" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">Worktrees</text>
+  </g>
+  <!-- Arrow from Worktrees to context window -->
+  <line x1="980" y1="246" x2="805" y2="260" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="805,260 811,254 813,262" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- Agent Teams block -->
+  <g filter="url(#soft-shadow)">
+    <rect x="980" y="300" width="160" height="42" rx="6" fill="#D97706" fill-opacity="0.15" stroke="#D97706" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="1060" y="326" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-weight="bold">Agent Teams</text>
+  </g>
+  <!-- Arrow from Agent Teams to context window -->
+  <line x1="980" y1="321" x2="805" y2="320" stroke="#D97706" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="4,3"/>
+  <polygon points="805,320 811,314 813,322" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- =======================================
+       LABELS
+       ======================================= -->
+
+  <!-- Left label -->
+  <text x="140" y="130" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="white" fill-opacity="0.5" text-anchor="middle" letter-spacing="2">WHAT YOU DESIGN</text>
+  <line x1="60" y1="138" x2="220" y2="138" stroke="white" stroke-opacity="0.15" stroke-width="1"/>
+
+  <!-- Right label -->
+  <text x="1060" y="130" font-family="Helvetica,Arial,sans-serif" font-size="10" fill="white" fill-opacity="0.5" text-anchor="middle" letter-spacing="2">WHAT YOU CONNECT</text>
+  <line x1="980" y1="138" x2="1140" y2="138" stroke="white" stroke-opacity="0.15" stroke-width="1"/>
+
+  <!-- =======================================
+       BOTTOM: DEVELOPER annotation
+       ======================================= -->
+
+  <!-- Developer control annotation -->
+  <text x="140" y="400" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">Project knowledge</text>
+  <text x="140" y="416" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">Reusable capabilities</text>
+  <text x="140" y="432" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">Automated guardrails</text>
+
+  <text x="1060" y="400" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">External tools</text>
+  <text x="1060" y="416" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">Parallel branches</text>
+  <text x="1060" y="432" font-family="Georgia,'Times New Roman',serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" font-style="italic">Multi-agent coordination</text>
+
+  <!-- Central insight -->
+  <text x="600" y="520" font-family="Georgia,'Times New Roman',serif" font-size="15" fill="#D97706" fill-opacity="0.9" text-anchor="middle" font-style="italic">"Design the context. Shape the output."</text>
+
+  <!-- Chapter count -->
+  <text x="600" y="555" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="white" fill-opacity="0.5" text-anchor="middle" letter-spacing="2">11 CHAPTERS  |  ZERO TO HERO</text>
+
+  <!-- =======================================
+       BOTTOM: Tagline + URL
+       ======================================= -->
+
+  <!-- Amber accent line -->
+  <line x1="400" y1="590" x2="800" y2="590" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+
+  <!-- Attribution -->
+  <text x="600" y="620" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.85" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/guides/claude-code</text>
+
+  <!-- Decorative corner accents -->
+  <line x1="30" y1="30" x2="80" y2="30" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="30" x2="30" y2="80" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="30" x2="1120" y2="30" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="30" x2="1170" y2="80" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="660" x2="80" y2="660" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="660" x2="30" y2="610" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="660" x2="1120" y2="660" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="660" x2="1170" y2="610" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+</svg>
