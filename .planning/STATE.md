@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Claude Code Guide
-status: in-progress
-stopped_at: Completed 95-01-PLAN.md (Site Integration)
-last_updated: "2026-03-11T00:03:47Z"
+status: executing
+stopped_at: Completed 95-02-PLAN.md (Companion Blog Post & Cross-Links)
+last_updated: "2026-03-11T00:10:18.740Z"
 last_activity: 2026-03-11 — Completed 95-01 (nav link + homepage card + SITE verification)
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 17
-  completed_plans: 16
-  percent: 97
+  completed_plans: 17
+  percent: 100
 ---
 
 # Project State
@@ -75,6 +75,7 @@ Progress: [██████████] 100%
 | Phase 94 P02 | 8min | 2 tasks | 2 files |
 | Phase 94 P03 | 3min | 2 tasks | 1 files |
 | Phase 95 P01 | 2min | 2 tasks | 2 files |
+| Phase 95 P02 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - (94-03) 520 lines covers all 16 sections including 5 managed settings mechanisms, 3 governance flags, plugin/sandbox/auth controls
 - (95-01) Claude Code card uses text h3 heading instead of logo image (no logo asset)
 - (95-01) Amber #D97706 accent differentiates Claude Code from FastAPI teal #009485
+- [Phase 95]: Blog post 'The Context Window Is the Product' frames context management as core practitioner skill for Claude Code
 
 ### Pending Todos
 
@@ -142,7 +144,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-11T00:03:47Z
-Stopped at: Completed 95-01-PLAN.md (Site Integration)
+Last session: 2026-03-11T00:10:18.738Z
+Stopped at: Completed 95-02-PLAN.md (Companion Blog Post & Cross-Links)
 Resume file: None
 Next: 95-02-PLAN.md (Blog Post Announcement)

@@ -35,7 +35,7 @@ Build a comprehensive multi-chapter Claude Code guide at `/guides/claude-code/` 
 - [x] **Phase 92: Interactive React Components** - Permission flow explorer and hook event visualizer as React Flow islands (completed 2026-03-10)
 - [x] **Phase 93: Foundation Content Chapters** - Chapters 1-6 covering setup, context management, models/costs, sandboxing, remote/headless, and MCP (completed 2026-03-10)
 - [x] **Phase 94: Advanced Content Chapters** - Chapters 7-11 covering skills, hooks, worktrees, agent teams, and security/enterprise (completed 2026-03-10)
-- [ ] **Phase 95: Site Integration & Blog Post** - Header nav, homepage callout, hub page, sitemap, LLMs.txt, JSON-LD, OG images, companion blog post
+- [x] **Phase 95: Site Integration & Blog Post** - Header nav, homepage callout, hub page, sitemap, LLMs.txt, JSON-LD, OG images, companion blog post (completed 2026-03-11)
 
 ## Phase Details
 
@@ -127,7 +127,7 @@ Plans:
   3. All 12 guide pages (landing + 11 chapters) appear in sitemap-index.xml, LLMs.txt, and LLMs-full.txt
   4. Every guide page has TechArticle JSON-LD structured data, BreadcrumbList markup, and a unique build-time OG image
   5. A companion blog post exists with bidirectional cross-links to all guide chapters, targeting long-tail workflow keywords
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 95-01-PLAN.md — Header nav link, homepage callout card, verify SITE-03 through SITE-07
 - [ ] 95-02-PLAN.md — Companion blog post, cover image, companionLink wiring
@@ -144,4 +144,4 @@ Phases execute in numeric order: 90 → 91 → 92 → 93 → 94 → 95
 | 92. Interactive React Components | 2/2 | Complete   | 2026-03-10 |
 | 93. Foundation Content Chapters | 3/3 | Complete | 2026-03-10 |
 | 94. Advanced Content Chapters | 3/3 | Complete | 2026-03-10 |
-| 95. Site Integration & Blog Post | 1/2 | In Progress|  |
+| 95. Site Integration & Blog Post | 2/2 | Complete   | 2026-03-11 |

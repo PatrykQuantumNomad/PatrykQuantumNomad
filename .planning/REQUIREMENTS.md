@@ -53,7 +53,7 @@ Requirements for v1.16 milestone. Each maps to roadmap phases.
 - [x] **SITE-05**: LLMs.txt and LLMs-full.txt updated with Claude Code guide entries
 - [x] **SITE-06**: JSON-LD structured data (TechArticle + BreadcrumbList) on all guide pages
 - [x] **SITE-07**: Build-time OG images for landing page and all 11 chapter pages (12 total)
-- [ ] **SITE-08**: Companion blog post with bidirectional cross-links to guide chapters
+- [x] **SITE-08**: Companion blog post with bidirectional cross-links to guide chapters
 
 ## v2 Requirements
 
@@ -121,7 +121,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SITE-05 | Phase 95 | Complete |
 | SITE-06 | Phase 95 | Complete |
 | SITE-07 | Phase 95 | Complete |
-| SITE-08 | Phase 95 | Pending |
+| SITE-08 | Phase 95 | Complete |
 
 **Coverage:**
 - v1 requirements: 33 total
