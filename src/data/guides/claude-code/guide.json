@@ -12,7 +12,7 @@
     },
     "chapters": [
       { "slug": "introduction", "title": "Introduction & Getting Started", "description": "The agentic loop, installation across all interfaces, core tools, and your first checkpoint" },
-      { "slug": "context-management", "title": "Project Context & Memory", "description": "CLAUDE.md hierarchy, auto-memory, context rot prevention, and .claudeignore" },
+      { "slug": "context-management", "title": "Project Context & Memory", "description": "CLAUDE.md hierarchy, auto-memory, context rot prevention, and file exclusion" },
       { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Model selection, effort levels, pricing tiers, and the permission system" },
       { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configuration scopes, sandboxed execution, and status line customization" },
       { "slug": "remote-and-headless", "title": "Remote Control & Headless Automation", "description": "Remote control, headless mode, cron scheduling, and HTTP proxy configuration" },
