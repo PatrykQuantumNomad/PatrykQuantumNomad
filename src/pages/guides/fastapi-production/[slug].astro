@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import GuideLayout from '../../../layouts/GuideLayout.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('guidePages');
@@ -17,7 +18,7 @@ interface Props {
 }
 
 const { page, guideMeta } = Astro.props;
-const { Content } = await render(page);
+const { Content, headings } = await render(page);
 const ogImageURL = new URL('/open-graph/guides/fastapi-production/' + page.data.slug + '.png', Astro.site).toString();
 ---
 
@@ -40,6 +41,9 @@ const ogImageURL = new URL('/open-graph/guides/fastapi-production/' + page.data.
 >
   <article>
     <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-8">{page.data.title}</h1>
+    <div class="mb-8">
+      <TableOfContents headings={headings} />
+    </div>
     <div class="prose max-w-none
       [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
       [&>p]:text-[var(--color-text-secondary)] [&>p]:leading-relaxed [&>p]:mb-4

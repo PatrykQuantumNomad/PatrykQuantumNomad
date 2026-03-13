@@ -3,7 +3,7 @@
     "id": "claude-code",
     "title": "Claude Code Guide: From First Session to Multi-Agent Orchestration",
     "shortTitle": "Claude Code Guide",
-    "description": "The definitive zero-to-hero guide for Claude Code — Anthropic's agentic coding tool. Master CLAUDE.md, MCP integrations, custom skills, hooks, worktrees, and agent teams across 11 practitioner-driven chapters.",
+    "description": "The definitive zero-to-hero guide for Claude Code, Anthropic's agentic coding tool. Master CLAUDE.md, MCP integrations, custom skills, hooks, worktrees, and agent teams across 11 practitioner-driven chapters.",
     "slug": "claude-code",
     "accentColor": "#D97706",
     "publishedDate": "2026-03-15",
