@@ -76,6 +76,9 @@ html.dark {
 
 /* ─── Base Typography ───────────────────────────────────────────────────── */
 @layer base {
+  html {
+    overflow-x: hidden;
+  }
   body {
     @apply font-sans text-[var(--color-text-primary)] bg-[var(--color-surface)] antialiased;
   }

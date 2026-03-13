@@ -100,7 +100,7 @@ export default function TerminalPlayer({
         ref={containerRef}
         className="terminal-player-container"
         style={{
-          minHeight: `${(rows + 2) * 1.2}em`,
+          minHeight: '120px',
         }}
       />
       {transcript && (
