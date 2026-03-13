@@ -9,21 +9,21 @@ import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
 ## What You Will Learn
 
-This chapter covers the SKILL.md system for creating reusable, shareable instruction sets that extend Claude Code's capabilities. You will learn the anatomy of a SKILL.md file, all ten frontmatter configuration fields, the three invocation modes (slash command, auto-invocation, and both), the four storage locations where skills can live, string substitutions for dynamic content, the dynamic injection syntax for shell command preprocessing, and the bundled skills that ship with Claude Code.
+This chapter walks you through the SKILL.md system: how to create reusable, shareable instruction sets that extend what Claude Code can do. We'll cover the anatomy of a SKILL.md file, all ten frontmatter configuration fields, the three invocation modes (slash command, auto-invocation, and both), the four storage locations where skills can live, string substitutions for dynamic content, dynamic injection syntax for shell command preprocessing, and the bundled skills that ship with Claude Code.
 
-By the end of this chapter, you will be able to create custom skills tailored to your workflow and share them with your team.
+By the end, you'll be able to create custom skills tailored to your workflow and share them across your team.
 
 ## What Are Skills?
 
-Skills are reusable instruction sets that extend what Claude Code can do. Each skill is a SKILL.md file that contains YAML frontmatter for configuration and a markdown body with instructions that Claude reads and follows when the skill is invoked. Skills follow the Agent Skills open standard.
+Skills are reusable instruction sets that extend what Claude Code can do. Each skill lives in a SKILL.md file containing YAML frontmatter for configuration and a markdown body with instructions Claude reads and follows when the skill runs. They follow the Agent Skills open standard.
 
-You can invoke a skill in three ways: as a slash command you type in chat, automatically when Claude determines it is relevant to your request, or both. Skills can restrict which tools Claude uses, override the model, run in isolated subagents, and even embed their own hook configurations.
+There are three ways to invoke a skill: as a slash command you type in chat, automatically when Claude decides it's relevant to your request, or both. Skills can also restrict which tools Claude uses, override the model, run in isolated subagents, and even embed their own hook configurations.
 
-Skills replace the older `.claude/commands/` directory. Command files still work for backward compatibility, but skills are the recommended approach -- they support richer configuration through frontmatter, automatic discovery in nested directories, and supporting files alongside the skill definition.
+If you've used the older `.claude/commands/` directory, skills are the replacement. Command files still work for backward compatibility, but skills are the recommended approach because they support richer configuration through frontmatter, automatic discovery in nested directories, and supporting files alongside the skill definition.
 
 ## SKILL.MD Anatomy
 
-Every skill is a single SKILL.md file with two parts: YAML frontmatter between `---` delimiters and a markdown body below.
+Every skill is a single SKILL.md file with two parts: YAML frontmatter between `---` delimiters, and a markdown body below.
 
 <CodeBlock
   code={`---
@@ -47,15 +47,15 @@ You are a senior developer fixing a GitHub issue.
   caption="A complete skill with frontmatter configuration and markdown instructions."
 />
 
-The **frontmatter** (everything between the `---` markers) configures how the skill behaves: its name, description, which tools it can use, and how it can be invoked. All frontmatter fields are optional -- a SKILL.md with only a markdown body is valid.
+The **frontmatter** (everything between the `---` markers) configures how the skill behaves: its name, description, which tools it can use, and how it gets invoked. All frontmatter fields are optional; a SKILL.md with just a markdown body is perfectly valid.
 
-The **markdown body** (everything after the closing `---`) is the instruction set that Claude reads and follows when the skill runs. Write it as clear, step-by-step instructions. Claude treats the body as a system-level prompt scoped to the skill's execution.
+The **markdown body** (everything after the closing `---`) contains the instructions Claude reads and follows when the skill runs. Write it as clear, step by step directions. Claude treats the body as a system level prompt scoped to that skill's execution.
 
 ## Frontmatter Reference
 
-SKILL.md supports ten optional frontmatter fields. None are required -- defaults apply when fields are omitted.
+SKILL.md supports ten optional frontmatter fields. None are required, and sensible defaults kick in when you omit them.
 
-**name** -- Human-readable name for the skill. If omitted, the filename or directory name is used. This name appears in `/help` output and the slash command menu.
+**name:** A human readable name for the skill. If you leave it out, the filename or directory name is used instead. This name shows up in `/help` output and the slash command menu.
 
 <CodeBlock
   code={`---
@@ -65,25 +65,25 @@ name: deploy-staging
   title="Setting a skill name"
 />
 
-**description** -- A brief explanation of what the skill does. Shown in `/help` and the slash command completion menu. Write a clear description so users (and Claude) understand when to use the skill.
+**description:** A brief explanation of what the skill does. It's shown in `/help` and the slash command completion menu. Write something clear so both users and Claude know when to reach for this skill.
 
-**argument-hint** -- Placeholder text that appears after the slash command name in the completion menu. Tells the user what arguments the skill expects. For example, `[issue-number]` or `[file-path] [output-format]`.
+**argument-hint:** Placeholder text that appears after the slash command name in the completion menu. It tells the user what arguments the skill expects, for example `[issue-number]` or `[file-path] [output-format]`.
 
-**disable-model-invocation** -- When set to `true`, only the user can invoke this skill via its slash command. Claude cannot auto-invoke it. Use this for skills that should only run when explicitly requested, such as deployment scripts or destructive operations. Default is `false`.
+**disable-model-invocation:** Set this to `true` if you want only the user to invoke the skill via its slash command. Claude won't be able to auto-invoke it. This is handy for skills that should only run when explicitly requested, like deployment scripts or destructive operations. Defaults to `false`.
 
-**user-invocable** -- When set to `false`, the skill is not available as a slash command. Only Claude can invoke it based on context. Use this for internal utility skills that Claude should use automatically but users should not call directly. Default is `true`.
+**user-invocable:** Set to `false` to hide the skill from the slash command menu. Only Claude can invoke it based on context. This is useful for internal utility skills that Claude should use automatically but users shouldn't call directly. Defaults to `true`.
 
-**allowed-tools** -- A comma-separated list of tools the skill is permitted to use. This restricts the skill's capabilities to only the tools you specify. For example, `Read, Grep, Glob` creates a read-only skill that cannot write files or run commands.
+**allowed-tools:** A comma separated list of tools the skill is allowed to use. This restricts the skill's capabilities to just the tools you specify. For instance, `Read, Grep, Glob` creates a read only skill that can't write files or run commands.
 
-**model** -- Override the model used when this skill runs. Accepts model shortnames like `sonnet`, `haiku`, or `opus`. Useful for running cheaper models on simple tasks or ensuring the most capable model for complex operations.
+**model:** Overrides the model used when this skill runs. Accepts shortnames like `sonnet`, `haiku`, or `opus`. Handy for running cheaper models on simple tasks or making sure the most capable model handles complex operations.
 
-**context** -- Set to `fork` to run the skill in an isolated subagent. The subagent gets its own context window, preventing the skill from consuming the parent session's context. See the Running Skills in Subagents section below.
+**context:** Set to `fork` to run the skill in an isolated subagent. The subagent gets its own context window, so the skill doesn't eat into the parent session's context. See the Running Skills in Subagents section below.
 
-**agent** -- Which subagent to use when `context` is set to `fork`. For example, `Explore` runs the skill with the built-in read-only Explore subagent. Only meaningful when `context: fork` is also set.
+**agent:** Specifies which subagent to use when `context` is set to `fork`. For example, `Explore` runs the skill with the built in read only Explore subagent. Only meaningful when `context: fork` is also set.
 
-**hooks** -- Skill-scoped hook configuration using the same format as `settings.json` hooks. Hooks defined here only apply when this skill is running. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for the full hook configuration format.
+**hooks:** Skill scoped hook configuration, using the same format as `settings.json` hooks. Hooks defined here only apply while this skill is running. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for the full hook configuration format.
 
-Here is a skill that combines several frontmatter fields.
+Here's a skill that brings several frontmatter fields together.
 
 <CodeBlock
   code={`---
@@ -113,20 +113,20 @@ For each finding, report:
 3. A recommended fix with code example`}
   lang="yaml"
   title=".claude/skills/security-review/SKILL.md"
-  caption="A security review skill: user-only invocation, read-only tools, runs in an isolated Explore subagent."
+  caption="A security review skill: user only invocation, read only tools, runs in an isolated Explore subagent."
 />
 
 ## Where Skills Live
 
-Skills can be stored in four locations, each with a different scope and audience.
+Skills can live in four locations, each with a different scope and audience.
 
-**Enterprise managed** skills are deployed through managed settings by organization administrators. Individual developers cannot modify or remove them. Use this for organization-wide standards like coding conventions, compliance checks, or approved deployment procedures.
+**Enterprise managed** skills get deployed through managed settings by organization administrators. Individual developers can't modify or remove them. This is the place for organization-wide standards like coding conventions, compliance checks, or approved deployment procedures.
 
-**Personal** skills live in `~/.claude/skills/` and are available in every project you work on. Use this location for skills that match your personal workflow -- your preferred code review checklist, your debugging methodology, or your documentation template.
+**Personal** skills live in `~/.claude/skills/` and are available in every project you work on. Put skills here that match your personal workflow: your preferred code review checklist, your debugging methodology, or your documentation template.
 
-**Project** skills live in `.claude/skills/` at the root of your repository. They are committed to Git and shared with your entire team. This is the recommended location for team-specific skills -- everyone who clones the repository gets the same skill set.
+**Project** skills live in `.claude/skills/` at the root of your repository. They're committed to Git and shared with your entire team. This is the recommended spot for team specific skills, since everyone who clones the repo gets the same skill set.
 
-**Plugin** skills are installed from plugin marketplaces. They extend Claude Code through community-contributed or organization-published skill packages.
+**Plugin** skills come from plugin marketplaces. They extend Claude Code through community contributed or organization published skill packages.
 
 <CodeBlock
   code={`my-project/
@@ -151,13 +151,13 @@ Skills can be stored in four locations, each with a different scope and audience
   caption="Skills in nested .claude/skills/ directories are discovered automatically (monorepo support)."
 />
 
-Claude Code discovers skills automatically by scanning for `SKILL.md` files in `.claude/skills/` directories at any depth in your project. In a monorepo with multiple packages, each package can define its own skills and they will all be available when Claude Code runs from the project root.
+Claude Code discovers skills automatically by scanning for `SKILL.md` files in `.claude/skills/` directories at any depth in your project. If you're working in a monorepo with multiple packages, each package can define its own skills and they'll all be available when Claude Code runs from the project root.
 
 ## Invocation Modes
 
 Skills support three invocation modes that control who can trigger them.
 
-**Slash command invocation** is the default for user-facing skills. The user types `/skill-name` followed by optional arguments in the chat prompt. To make a skill user-only (preventing Claude from auto-invoking it), set `disable-model-invocation: true` in the frontmatter.
+**Slash command invocation** is the default for user facing skills. You type `/skill-name` followed by optional arguments in the chat prompt. To make a skill user only and prevent Claude from auto-invoking it, set `disable-model-invocation: true` in the frontmatter.
 
 <CodeBlock
   code={`---
@@ -172,7 +172,7 @@ Deploy steps here...`}
   caption="Setting disable-model-invocation: true prevents Claude from auto-invoking this skill."
 />
 
-**Auto-invocation** lets Claude decide to use the skill based on context. When Claude determines that a skill is relevant to the current task, it invokes it automatically without the user typing a slash command. To make a skill Claude-only (hiding it from the slash command menu), set `user-invocable: false`.
+**Auto-invocation** lets Claude decide to use the skill based on context. When Claude determines a skill is relevant to the current task, it invokes it automatically without any slash command needed. To make a skill Claude only and hide it from the slash command menu, set `user-invocable: false`.
 
 <CodeBlock
   code={`---
@@ -187,7 +187,7 @@ Test running steps here...`}
   caption="Setting user-invocable: false removes this skill from the slash command menu."
 />
 
-**Both** (the default) allows both the user and Claude to invoke the skill. When neither `disable-model-invocation` nor `user-invocable: false` is set, the skill appears in the slash command menu and Claude can also invoke it automatically when relevant.
+**Both** (the default) lets either you or Claude invoke the skill. When neither `disable-model-invocation` nor `user-invocable: false` is set, the skill appears in the slash command menu and Claude can also invoke it automatically when it's relevant.
 
 <CodeBlock
   code={`---
@@ -205,13 +205,13 @@ Refactoring steps here...`}
 
 The markdown body of a skill supports five string substitutions that inject dynamic values at invocation time.
 
-**$ARGUMENTS** is replaced with the full argument string the user passes after the slash command. If the user types `/fix-issue 42 --priority high`, then `$ARGUMENTS` becomes `42 --priority high`.
+`$ARGUMENTS` gets replaced with the full argument string you pass after the slash command. If you type `/fix-issue 42 --priority high`, then `$ARGUMENTS` becomes `42 --priority high`.
 
-**$ARGUMENTS[N]** or **$N** is replaced with the Nth argument (0-indexed). For `/fix-issue 42 --priority high`, `$0` is `42`, `$1` is `--priority`, and `$2` is `high`.
+`$ARGUMENTS[N]` or `$N` gets replaced with the Nth argument (0-indexed). For `/fix-issue 42 --priority high`, `$0` is `42`, `$1` is `--priority`, and `$2` is `high`.
 
-**$&#123;CLAUDE_SESSION_ID&#125;** is replaced with the current session identifier. Useful for creating session-specific log files or temporary directories.
+`${CLAUDE_SESSION_ID}` gets replaced with the current session identifier. It's useful for creating session specific log files or temporary directories.
 
-**$&#123;CLAUDE_SKILL_DIR&#125;** is replaced with the absolute path to the directory containing the SKILL.md file. Use this for referencing supporting files that live alongside the skill (templates, configuration files, examples).
+`${CLAUDE_SKILL_DIR}` gets replaced with the absolute path to the directory containing the SKILL.md file. Use it to reference supporting files that live alongside the skill, like templates, configuration files, or examples.
 
 <CodeBlock
   code={`---
@@ -233,7 +233,7 @@ Also create a test file using \${CLAUDE_SKILL_DIR}/templates/component.test.tsx.
 
 ## Supporting Files and Dynamic Injection
 
-Skills can include supporting files in the same directory as the SKILL.md. These files -- templates, configuration snippets, example outputs, reference documentation -- provide additional context that Claude can read when executing the skill.
+Skills can include supporting files in the same directory as the SKILL.md. These files (templates, configuration snippets, example outputs, reference docs) give Claude additional context to work with when executing the skill.
 
 <CodeBlock
   code={`.claude/skills/deploy/
@@ -250,7 +250,7 @@ Skills can include supporting files in the same directory as the SKILL.md. These
   caption="Supporting files live alongside SKILL.md and are referenced via CLAUDE_SKILL_DIR."
 />
 
-For dynamic context that changes between invocations, SKILL.md supports the **!&#96;command&#96;** syntax. When Claude loads the skill, it runs the shell command and injects the output into the skill prompt. This lets your skill adapt to the current state of the repository, environment, or system.
+For dynamic context that changes between invocations, SKILL.md supports the **!&#96;command&#96;** syntax. When Claude loads the skill, it runs the shell command and injects the output directly into the skill prompt. This lets your skill adapt to the current state of the repo, environment, or system.
 
 <CodeBlock
   code={`---
@@ -274,13 +274,13 @@ If there are uncommitted changes, warn the user before proceeding.`}
   caption="The !&#96;command&#96; syntax injects live shell output into the skill prompt at invocation time."
 />
 
-When this skill runs, the three `!`command`` blocks are replaced with the actual output of `git branch --show-current`, `git log --oneline -1`, and `git status --short`. Claude sees the current branch name, latest commit, and working tree status as part of its instructions.
+When this skill runs, the three `!`command`` blocks get replaced with the actual output of `git branch --show-current`, `git log --oneline -1`, and `git status --short`. So Claude sees the current branch name, latest commit, and working tree status right in its instructions.
 
 ## Running Skills in Subagents
 
-When a skill sets `context: fork` in its frontmatter, it runs in an isolated subagent with its own context window. This is valuable for two reasons: the skill does not consume context from your main session, and it can run without interfering with your ongoing conversation.
+When a skill sets `context: fork` in its frontmatter, it runs in an isolated subagent with its own context window. This is valuable for two reasons: the skill doesn't consume context from your main session, and it can run without interfering with your ongoing conversation.
 
-Combine `context: fork` with the `agent` field to specify which subagent runs the skill. The built-in `Explore` subagent uses the Haiku model and has read-only tools, making it ideal for analysis tasks that should not modify files.
+You can combine `context: fork` with the `agent` field to pick which subagent runs the skill. The built in `Explore` subagent uses the Haiku model and has read only tools, making it ideal for analysis tasks that shouldn't modify files.
 
 <CodeBlock
   code={`---
@@ -302,61 +302,61 @@ Read dependency lock files for accurate version information.
 Do not modify any files.`}
   lang="yaml"
   title="Skill running in a forked Explore subagent"
-  caption="context: fork isolates the skill; agent: Explore restricts it to read-only analysis."
+  caption="context: fork isolates the skill; agent: Explore restricts it to read only analysis."
 />
 
-The subagent runs to completion and returns its results to the parent session. Your main conversation continues uninterrupted, and the skill's work does not reduce your available context window. This pattern is especially useful for expensive analysis tasks that read many files.
+The subagent runs to completion and returns its results to the parent session. Your main conversation continues uninterrupted, and the skill's work doesn't eat into your available context window. This pattern is especially useful for expensive analysis tasks that need to read many files.
 
 ## Bundled Skills
 
-Claude Code ships with several built-in skills that are available in every session without any configuration.
+Claude Code ships with several built in skills that are available in every session without any setup.
 
-**/simplify** reduces code complexity. Point it at a function, class, or file and it will refactor for clarity -- extracting helper functions, simplifying conditionals, reducing nesting depth, and improving naming.
+**/simplify** reduces code complexity. Point it at a function, class, or file and it'll refactor for clarity by extracting helper functions, simplifying conditionals, reducing nesting depth, and improving naming.
 
-**/batch** runs an operation across multiple files. Describe a change once and it applies the transformation consistently to every matching file, handling the repetitive work of multi-file edits.
+**/batch** runs an operation across multiple files. Describe a change once and it applies the transformation consistently to every matching file, taking the tedium out of multi-file edits.
 
-**/debug** provides systematic debugging. Describe the symptom and it follows a structured approach: reproduce the issue, isolate the cause, propose a fix, verify the fix, and check for regressions.
+**/debug** gives you systematic debugging. Describe the symptom and it follows a structured approach: reproduce the issue, isolate the cause, propose a fix, verify the fix, and check for regressions.
 
-**/loop** enables iterative refinement. It makes a change, evaluates the result against criteria you define, and repeats until the output meets your standards. Useful for polish passes on documentation, UI styling, or performance optimization.
+**/loop** runs a prompt or slash command on a recurring interval. Describe what you want to happen and how often, and it sets up the automation for you. Great for polling deploy status, running periodic checks, or any task that needs to repeat on a schedule. See [Remote Control & Headless Automation](/guides/claude-code/remote-and-headless/) for more on scheduled tasks.
 
-**/claude-api** integrates with the Anthropic API. It helps you write code that calls Claude's API, handling authentication, message formatting, streaming responses, and error handling correctly.
+**/claude-api** helps you integrate with the Anthropic API. It assists with writing code that calls Claude's API, handling authentication, message formatting, streaming responses, and error handling correctly.
 
 ## Restricting Skill Access
 
-Permission rules can control which skills are allowed to run. The `Skill(name)` permission type lets you allow or deny specific skills.
+Permission rules let you control which skills are allowed to run. The `Skill(name)` permission type lets you allow or deny specific skills.
 
 <CodeBlock
   code={`{
-  "permissions": {
-    "deny": [
-      "Skill(deploy)"
-    ]
-  }
+    "permissions": {
+      "deny": [
+        "Skill(deploy)"
+      ]
+    }
 }`}
   lang="json"
   title="settings.json"
   caption="Denying the deploy skill prevents both user slash command and Claude auto-invocation."
 />
 
-Enterprise administrators can use managed settings to enforce skill restrictions across the organization. This ensures that only approved skills run in production-sensitive environments.
+Enterprise administrators can use managed settings to enforce skill restrictions across the organization, ensuring only approved skills run in production sensitive environments.
 
 ## Best Practices
 
-- **Keep skills focused on one task.** A skill that does one thing well is more reusable and easier to debug than a skill that tries to handle multiple scenarios.
+- **Keep skills focused on one task.** A skill that does one thing well is more reusable and easier to debug than one that tries to handle multiple scenarios.
 
-- **Write clear descriptions for discoverability.** The description field is what users see in the slash command menu and what Claude uses to decide when to auto-invoke. Make it specific and action-oriented.
+- **Write clear descriptions for discoverability.** The description field is what users see in the slash command menu and what Claude uses to decide when to auto-invoke. Make it specific and action oriented.
 
-- **Use allowed-tools to limit scope.** A code review skill should not need write access. A documentation generator should not need to run shell commands. Restricting tools prevents unintended side effects.
+- **Use allowed-tools to limit scope.** A code review skill shouldn't need write access. A documentation generator shouldn't need to run shell commands. Restricting tools prevents unintended side effects.
 
-- **Test skills with simple inputs first.** Before deploying a complex skill to your team, test it with straightforward cases to verify the instructions produce the expected behavior.
+- **Test skills with simple inputs first.** Before rolling out a complex skill to your team, test it with straightforward cases to make sure the instructions produce the expected behavior.
 
-- **Use context:fork for expensive operations.** Skills that read many files or perform lengthy analysis should run in subagents to preserve your main session's context window.
+- **Use context:fork for expensive operations.** Skills that read many files or perform lengthy analysis should run in subagents so they don't chew through your main session's context window.
 
-- **Prefer project skills for team sharing.** Store skills in `.claude/skills/` and commit them to Git. This ensures every team member has the same skill set and updates propagate through normal version control.
+- **Prefer project skills for team sharing.** Store skills in `.claude/skills/` and commit them to Git. That way every team member gets the same skill set, and updates propagate through normal version control.
 
-- **Use dynamic injection sparingly.** The `!`command`` syntax is powerful but runs shell commands on every invocation. Keep injected commands fast and side-effect free.
+- **Use dynamic injection sparingly.** The `!`command`` syntax is powerful but runs shell commands on every invocation. Keep injected commands fast and side effect free.
 
 ## Further Reading
 
-- <a href="https://code.claude.com/docs/en/skills" target="_blank" rel="noopener noreferrer">Custom Skills</a> -- official documentation on SKILL.md anatomy, frontmatter fields, invocation modes, and supporting files
-- Next chapter: [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) covers the hook system that can be embedded in skill frontmatter for lifecycle-aware automation
+- <a href="https://code.claude.com/docs/en/skills" target="_blank" rel="noopener noreferrer">Custom Skills</a>, the official documentation on SKILL.md anatomy, frontmatter fields, invocation modes, and supporting files
+- Next up: [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) covers the hook system that can be embedded in skill frontmatter for lifecycle aware automation

@@ -30,5 +30,16 @@
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "excludedCommands": ["node"],
+    "permissions": {
+      "network": {
+        "allow": ["registry.npmjs.org"]
+      }
+    }
   }
 }

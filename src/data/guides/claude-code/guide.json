@@ -2,13 +2,13 @@
   {
     "id": "claude-code",
     "title": "Claude Code Guide",
-    "description": "The definitive zero-to-hero guide for Claude Code -- from first agentic interaction through multi-agent orchestration, by a cloud-native architect with 17+ years of experience.",
+    "description": "The definitive zero-to-hero guide for Claude Code, from first agentic interaction through multi-agent orchestration.",
     "slug": "claude-code",
     "accentColor": "#D97706",
     "publishedDate": "2026-03-15",
     "requirements": {
-      "claude-code": "latest",
-      "node": "18+"
+      "Claude Code": "",
+      "Anthropic account": ""
     },
     "chapters": [
       { "slug": "introduction", "title": "Introduction & Getting Started", "description": "The agentic loop, installation across all interfaces, core tools, and your first checkpoint" },

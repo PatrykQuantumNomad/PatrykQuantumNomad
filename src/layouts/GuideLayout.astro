@@ -43,8 +43,8 @@ const isoPublished = publishedDate?.toISOString().split('T')[0];
         <GuideSidebar chapters={chapters} currentSlug={currentSlug} guideSlug={guideSlug} />
       </aside>
 
-      <!-- Main content -->
-      <div>
+      <!-- Main content — min-w-0 prevents long code blocks from blowing out the 1fr grid column -->
+      <div class="min-w-0">
         <slot />
         {companionLink && (
           <aside class="mt-10 pt-6 border-t border-[var(--color-border)]">

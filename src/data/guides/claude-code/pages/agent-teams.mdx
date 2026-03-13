@@ -8,41 +8,41 @@ lastVerified: 2026-03-10
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import AgentTeamsDiagram from '../../../../components/guide/AgentTeamsDiagram.astro';
 
-## What You Will Learn
+## What You'll Learn
 
-This chapter covers agent teams -- an experimental feature that enables multiple Claude Code instances to work together on a shared task list with direct communication between teammates. You will learn the team architecture (lead, teammates, shared task list, mailbox), how to enable the feature, display modes for monitoring team activity, task management with dependency tracking, teammate communication patterns, how agent teams differ from subagents, and the known limitations to be aware of.
+This chapter walks you through agent teams, an experimental feature that lets multiple Claude Code instances work together on a shared task list, communicating directly with each other. We'll cover the team architecture (lead, teammates, shared task list, mailbox), how to enable the feature, display modes for monitoring team activity, task management with dependency tracking, teammate communication patterns, how agent teams differ from subagents, and the known limitations worth keeping in mind.
 
-By the end of this chapter, you will understand when and how to coordinate multiple Claude Code instances for parallel work on large tasks.
+By the end, you'll know when and how to coordinate multiple Claude Code instances for parallel work on large tasks.
 
-> **Research Preview:** Agent teams are experimental and disabled by default. The feature requires setting `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your environment or settings.json. API surface, behavior, and limitations may change. This chapter documents the feature as of March 2026.
+> **Research Preview:** Agent teams are experimental and disabled by default. You'll need to set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your environment or settings.json to use them. The API surface, behavior, and limitations may change. This chapter documents the feature as of March 2026.
 
 ## What Are Agent Teams?
 
-Agent teams enable multiple independent Claude Code instances to work together on a shared task list with direct communication. Each teammate is a full Claude Code session running in parallel, capable of reading files, editing code, running commands, and reporting results -- just like a standalone Claude Code session.
+Agent teams let multiple independent Claude Code instances collaborate on a shared task list with direct communication. Each teammate is a full Claude Code session running in parallel. It can read files, edit code, run commands, and report results, just like any standalone Claude Code session.
 
-The critical distinction from subagents ([Chapter 9](/guides/claude-code/worktrees/)) is scope. **Subagents are single-session delegation** -- a parent session spawns a subagent, the subagent does its work, and reports back to the parent. Subagents cannot communicate with each other. **Agent teams are multi-session coordination** -- independent Claude Code instances share a task list, claim work, communicate directly with each other, and coordinate through a lead agent.
+The key difference from subagents ([Chapter 9](/guides/claude-code/worktrees/)) comes down to scope. **Subagents are single session delegation:** a parent session spawns a subagent, the subagent does its work, and reports back. Subagents can't talk to each other. **Agent teams are multi session coordination:** independent Claude Code instances share a task list, claim work, message each other directly, and coordinate through a lead agent.
 
-Think of subagents as delegating a task to an assistant. Think of agent teams as assembling a team of peers who divide the work and coordinate among themselves.
+Think of subagents as handing a task to an assistant. Agent teams are more like assembling a group of peers who divide the work and coordinate among themselves.
 
-Agent teams use significantly more tokens than single-session work or subagent delegation. Token consumption scales with team size because each teammate maintains its own full context window. Keep this in mind when planning team-based work.
+One important heads up: agent teams use significantly more tokens than single session work or subagent delegation. Token consumption scales with team size because each teammate maintains its own full context window, so keep that in mind when planning team based work.
 
 ## When to Use Agent Teams
 
-Agent teams are most effective for tasks that naturally decompose into multiple parallel workstreams. Here are the scenarios where teams provide clear value over working with a single session or subagents.
+Agent teams shine when your task naturally breaks down into multiple parallel workstreams. Here are the scenarios where teams give you a clear advantage over a single session or subagents.
 
-**Parallel exploration.** You need to investigate multiple areas of a codebase simultaneously -- understanding the API layer, database schema, and frontend routing at the same time. Teammates can explore different areas and share findings.
+**Parallel exploration.** You need to investigate multiple areas of a codebase at the same time, say, the API layer, database schema, and frontend routing all at once. Teammates can explore different areas and share what they find.
 
-**Multi-component implementation.** A feature touches several independent systems (database, API, frontend, tests). Teammates work on each component in parallel, with dependency tracking ensuring the right ordering.
+**Multi component implementation.** A feature touches several independent systems (database, API, frontend, tests). Teammates work on each component in parallel, with dependency tracking to ensure the right ordering.
 
-**Research and review.** Multiple teammates can review different aspects of a pull request or research different implementation approaches, then share their findings for a consolidated decision.
+**Research and review.** Multiple teammates can review different aspects of a pull request or research different implementation approaches, then share their findings so you can make a consolidated decision.
 
-**Cross-layer debugging.** A bug that could originate in the frontend, API, or database. Teammates investigate each layer simultaneously rather than sequentially.
+**Cross layer debugging.** Got a bug that could originate in the frontend, API, or database? Teammates can investigate each layer simultaneously instead of going through them one by one.
 
-If your task does not naturally decompose into multiple independent subtasks, a single session or subagent is simpler, cheaper, and more appropriate. Teams add coordination overhead that only pays off when genuine parallelism is needed.
+If your task doesn't naturally break into multiple independent subtasks, a single session or subagent is simpler, cheaper, and the better choice. Teams add coordination overhead that only pays off when you genuinely need parallelism.
 
 ## Enabling Agent Teams
 
-Agent teams are disabled by default. You need to explicitly enable them before Claude Code will offer or accept team-based work.
+Agent teams are disabled by default. You'll need to explicitly enable them before Claude Code will offer or accept team based work.
 
 <CodeBlock
   code={`# Enable via environment variable
@@ -54,38 +54,38 @@ claude`}
   title="Enabling agent teams via environment variable"
 />
 
-You can also enable the feature persistently through settings.json.
+You can also enable it persistently through settings.json.
 
 <CodeBlock
   code={`{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
+    "env": {
+      "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    }
 }`}
   lang="json"
   title="settings.json"
   caption="Add to user, project, or local settings for persistent enablement."
 />
 
-After enabling, Claude Code will be able to propose and create teams when you give it tasks that benefit from parallel work.
+Once enabled, Claude Code can propose and create teams whenever you give it tasks that benefit from parallel work.
 
 ## Team Architecture
 
-An agent team consists of four components that work together.
+An agent team has four components that work together.
 
 <AgentTeamsDiagram />
 
-**Lead** -- The original Claude Code session that creates and manages the team. The lead is always the session you started. It decomposes work into tasks, spawns teammates, monitors progress, and produces the final result. The lead cannot be changed mid-session -- whichever Claude Code instance creates the team remains the lead for the entire session.
+**Lead.** This is the original Claude Code session that creates and manages the team. It's always the session you started. The lead breaks work into tasks, spawns teammates, monitors progress, and produces the final result. You can't change the lead mid session; whichever Claude Code instance creates the team stays in charge for the entire session.
 
-**Teammates** -- Independent Claude Code instances spawned by the lead. Each teammate has its own context window, its own set of tools, and its own permissions. Teammates are full Claude Code sessions capable of doing anything a normal session can do. They claim tasks from the shared task list and work on them independently.
+**Teammates.** Independent Claude Code instances spawned by the lead. Each teammate has its own context window, its own set of tools, and its own permissions. They're full Claude Code sessions that can do anything a normal session can. Teammates claim tasks from the shared task list and work on them independently.
 
-**Shared task list** -- A central list of tasks that the lead creates and teammates claim. Each task has a state (pending, in-progress, completed) and can have dependencies on other tasks. Tasks are claimed via a file-lock mechanism to prevent two teammates from working on the same task simultaneously.
+**Shared task list.** A central list of tasks that the lead creates and teammates claim. Each task has a state (pending, in progress, completed) and can depend on other tasks. A file lock mechanism prevents two teammates from grabbing the same task at once.
 
-**Mailbox** -- The communication channel between teammates and the lead. Teammates can send messages to specific teammates, broadcast messages to the entire team, and receive messages from others. Communication is asynchronous -- teammates process incoming messages when they reach a natural pause point.
+**Mailbox.** The communication channel between teammates and the lead. Teammates can send messages to specific teammates, broadcast to the entire team, or receive messages from others. Communication is asynchronous; teammates process incoming messages when they hit a natural pause point.
 
 ## Starting a Team
 
-Teams start from a natural language request. You describe a large task, and either Claude Code proposes splitting it across a team, or you explicitly ask for team-based work.
+Teams start from a natural language request. Just describe a large task, and Claude Code will either propose splitting it across a team or you can explicitly ask for team based work.
 
 <CodeBlock
   code={`Build a complete user authentication system with:
@@ -97,13 +97,13 @@ Teams start from a natural language request. You describe a large task, and eith
 
 Use a team to work on these in parallel.`}
   lang="text"
-  title="Example: requesting team-based work"
+  title="Example: requesting team based work"
   caption="The lead decomposes this into tasks and spawns teammates to work in parallel."
 />
 
-The lead analyzes your request, breaks it into tasks with dependencies (for example, the API endpoints depend on the database schema), adds them to the shared task list, and spawns teammates to claim and work on them. Tasks without dependencies start immediately. Tasks with dependencies wait until their prerequisites are completed.
+The lead analyzes your request, breaks it into tasks with dependencies (for example, the API endpoints depend on the database schema), adds them to the shared task list, and spawns teammates to claim and work on them. Tasks without dependencies start right away, while tasks with dependencies wait until their prerequisites finish.
 
-You can also be more explicit about the team structure.
+You can also be more explicit about how you want the team structured.
 
 <CodeBlock
   code={`Create a team of 3 to work on the payment integration:
@@ -118,60 +118,60 @@ The UI depends on both being complete.`}
   caption="Providing structure helps the lead create better task dependencies."
 />
 
-Whether you provide structure or let the lead decompose the work, the result is the same: a set of tasks with dependencies on the shared task list, with teammates claiming and working on them in parallel.
+Either way, whether you provide structure or let the lead figure it out, the result is the same: a set of tasks with dependencies on the shared task list, with teammates claiming and working on them in parallel.
 
 ## Display Modes
 
-Agent teams support two display modes for monitoring teammate activity.
+Agent teams support two display modes for keeping tabs on teammate activity.
 
-**In-process** is the default mode. All teammates share your terminal. You see the lead's output by default, and you can press **Shift+Down** to cycle through teammate views, seeing what each teammate is currently working on. Press **Shift+Down** again to move to the next teammate, and eventually cycle back to the lead.
+**In process** is the default. All teammates share your terminal, and you see the lead's output by default. Press **Shift+Down** to cycle through teammate views and see what each one is working on. Hit **Shift+Down** again to move to the next teammate, and eventually you'll cycle back to the lead.
 
-In-process mode is best for quick team sessions where you want to monitor progress without leaving your terminal. The drawback is that you can only see one teammate at a time.
+In process mode works well for quick team sessions where you just want to check progress without leaving your terminal. The tradeoff is that you can only see one teammate at a time.
 
-**Split-pane** mode gives each teammate its own terminal pane. This requires tmux or iTerm2 to be available on your system. Each teammate's output appears in a separate pane, so you can see all teammates working simultaneously.
+**Split pane** mode gives each teammate its own terminal pane. You'll need tmux or iTerm2 installed on your system. Each teammate's output shows up in a separate pane, so you can watch all of them working simultaneously.
 
 <CodeBlock
-  code={`# In-process mode (default)
+  code={`# In process mode (default)
 # Use Shift+Down to cycle between teammate views
 
-# Split-pane mode requires tmux or iTerm2
+# Split pane mode requires tmux or iTerm2
 # Configure in settings.json:
 {
-  "agentTeams": {
-    "displayMode": "split-pane"
-  }
+    "agentTeams": {
+      "displayMode": "split-pane"
+    }
 }`}
   lang="json"
   title="Configuring display mode"
   caption="Split-pane provides simultaneous visibility into all teammates."
 />
 
-Split-pane mode is best for longer team sessions or when you need to watch multiple teammates work in real time. It gives you a complete picture of team activity at the cost of screen real estate.
+Split pane mode is ideal for longer team sessions or when you need to watch multiple teammates work in real time. You get a complete picture of team activity, though it does eat into your screen real estate.
 
 <CodeBlock
-  code={`# In-process keyboard shortcuts
+  code={`# In process keyboard shortcuts
 Shift+Down    → Switch to next teammate's view
 Shift+Up      → Switch to previous teammate's view
 
-# Split-pane requirements
+# Split pane requirements
 # macOS: tmux or iTerm2 must be installed
 # Linux: tmux must be installed
 brew install tmux    # macOS
 apt install tmux     # Ubuntu/Debian`}
   lang="bash"
   title="Display mode navigation"
-  caption="In-process mode works everywhere. Split-pane requires tmux or iTerm2."
+  caption="In process mode works everywhere. Split pane requires tmux or iTerm2."
 />
 
 ## Task Management
 
-The shared task list is the coordination backbone of agent teams. Each task has a state and can have dependencies on other tasks.
+The shared task list is the coordination backbone of agent teams. Every task has a state and can depend on other tasks.
 
-**Pending** -- The task is waiting to be claimed. If it has dependencies, it stays pending until all prerequisites are completed.
+**Pending.** The task is waiting to be claimed. If it has dependencies, it stays pending until all prerequisites are done.
 
-**In-progress** -- A teammate has claimed the task and is actively working on it. Tasks are claimed via file-lock to prevent duplicate work. Once a teammate claims a task, no other teammate can claim the same one.
+**In progress.** A teammate has claimed the task and is actively working on it. File locking prevents duplicate work, so once a teammate grabs a task, nobody else can claim it.
 
-**Completed** -- The teammate has finished the task. Downstream tasks that depended on this one become available for claiming.
+**Completed.** The teammate finished the task. Any downstream tasks that depended on this one now become available for claiming.
 
 <CodeBlock
   code={`Task List:
@@ -189,19 +189,19 @@ The shared task list is the coordination backbone of agent teams. Each task has 
   caption="Tasks 4 and 5 wait until their prerequisites are completed."
 />
 
-Dependency tracking is what makes agent teams effective for complex work. The lead defines dependencies when creating tasks, and the task management system enforces them automatically. Teammates never start work on a task whose prerequisites are not yet finished.
+Dependency tracking is what makes agent teams effective for complex work. The lead defines dependencies when creating tasks, and the system enforces them automatically. Teammates won't start a task until all its prerequisites are finished.
 
 ## Teammate Communication
 
 Teammates communicate through three patterns.
 
-**Message one** sends a targeted message to a specific teammate. Use this when one teammate needs information from another -- for example, "teammate-2, what database column name did you use for the auth token?"
+**Direct message** sends a targeted message to a specific teammate. This is useful when one teammate needs information from another. For example, "teammate-2, what database column name did you use for the auth token?"
 
-**Broadcast all** sends a message to every teammate. Use this for announcements that affect the whole team -- for example, "I changed the API base URL to /api/v2, update your references."
+**Broadcast** sends a message to every teammate. Use this for announcements that affect the whole team. For example, "I changed the API base URL to /api/v2, update your references."
 
-**Automatic idle notifications** are triggered by TeammateIdle events. When a teammate finishes its current task and has nothing left to do, it broadcasts an idle notification. The lead or other teammates can then assign additional work or coordinate the next steps.
+**Automatic idle notifications** get triggered by TeammateIdle events. When a teammate finishes its current task and has nothing left to do, it broadcasts an idle notification. The lead or other teammates can then assign additional work or figure out next steps.
 
-Communication is asynchronous. When a teammate receives a message, it does not interrupt its current work immediately. Instead, it processes the message at a natural pause point -- typically between agentic loop iterations. This prevents communication from disrupting complex operations mid-execution.
+All communication is asynchronous. When a teammate receives a message, it doesn't drop what it's doing right away. Instead, it processes the message at a natural pause point, typically between agentic loop iterations. This keeps communication from disrupting complex operations mid execution.
 
 <CodeBlock
   code={`# Communication happens naturally as part of team coordination
@@ -223,7 +223,7 @@ teammate-1 → Lead: "Database migration complete. Created 3 tables:
 
 ## Agent Teams vs Subagents
 
-Both features enable parallelism, but they solve different problems. Here is a comparison to help you choose the right tool.
+Both features enable parallelism, but they solve different problems. Here's a comparison to help you pick the right tool.
 
 | Aspect | Subagents (Chapter 9) | Agent Teams (Chapter 10) |
 |--------|----------------------|--------------------------|
@@ -236,79 +236,79 @@ Both features enable parallelism, but they solve different problems. Here is a c
 | **Session count** | One session (parent + child within it) | Multiple independent sessions |
 | **Stability** | Stable feature | Research preview (experimental) |
 
-**Use subagents when:** You have a focused task to delegate, need cheap exploration (Explore subagent), want a specialized agent for a specific job (code review, security scan), or need worktree isolation for parallel file editing within a single session.
+**Use subagents when:** you have a focused task to delegate, need cheap exploration (Explore subagent), want a specialized agent for a specific job (code review, security scan), or need worktree isolation for parallel file editing within a single session.
 
-**Use agent teams when:** You have a large task that naturally decomposes into multiple independent subtasks, need teammates to communicate with each other, want dependency tracking between tasks, or need true multi-session parallelism for a complex project.
+**Use agent teams when:** you have a large task that naturally breaks into multiple independent subtasks, need teammates to talk to each other, want dependency tracking between tasks, or need true multi session parallelism for a complex project.
 
 ## Token Cost Considerations
 
-Agent teams consume significantly more tokens than single-session work. Each teammate maintains its own independent context window, which means the total token usage scales roughly linearly with team size. A team of 4 teammates working on a task uses approximately 4 times the tokens of a single session doing the same work sequentially.
+Agent teams consume significantly more tokens than single session work. Each teammate maintains its own independent context window, so total token usage scales roughly linearly with team size. A team of 4 working on a task uses approximately 4x the tokens of a single session doing the same work sequentially.
 
-This cost scaling makes team sizing an important decision. Here are guidelines for managing token costs:
+That cost scaling makes team sizing an important decision. Here are some guidelines for keeping token costs in check:
 
-- **Right-size your team.** Use the smallest team that can effectively parallelize the work. Three focused teammates are usually better than six with overlapping responsibilities.
+- **Right size your team.** Use the smallest team that can effectively parallelize the work. Three focused teammates usually beat six with overlapping responsibilities.
 
-- **Keep sessions short.** Long team sessions accumulate context in every teammate's window. Break large projects into multiple shorter team sessions rather than one marathon session.
+- **Keep sessions short.** Long team sessions accumulate context in every teammate's window. It's better to break large projects into multiple shorter team sessions than to run one marathon session.
 
-- **Use subagents for simple delegation.** If a task only needs one delegate to do focused work and report back, a subagent (Chapter 9) is far cheaper than spawning a full team.
+- **Use subagents for simple delegation.** If a task only needs one delegate to do focused work and report back, a subagent (Chapter 9) is far cheaper than spinning up a full team.
 
-- **Monitor with /cost.** Check token usage during team sessions to understand your consumption patterns. Each teammate contributes to the total, so the cost grows faster than you might expect.
+- **Monitor with /cost.** Check token usage during team sessions to understand your consumption patterns. Each teammate contributes to the total, so costs grow faster than you might expect.
 
-- **Prefer dependency tracking over large teams.** A team of 3 with clear dependencies often outperforms a team of 6 where everyone starts simultaneously and then needs to coordinate mid-flight.
+- **Prefer dependency tracking over large teams.** A team of 3 with clear dependencies often outperforms a team of 6 where everyone starts at once and then needs to coordinate mid flight.
 
 ## Best Practices
 
-- **Keep teams small.** 3-5 teammates is the sweet spot. Larger teams increase token costs proportionally and add coordination overhead. A team of 3 focused teammates outperforms a team of 8 with vague responsibilities.
+- **Keep teams small.** 3-5 teammates is the sweet spot. Larger teams drive up token costs proportionally and add coordination overhead. A focused team of 3 will outperform a team of 8 with vague responsibilities.
 
-- **Decompose work into clear, independent tasks.** Each task should be self-contained enough that a teammate can work on it without constantly needing input from others. Fuzzy task boundaries lead to conflicts and wasted work.
+- **Break work into clear, independent tasks.** Each task should be self contained enough that a teammate can work on it without constantly needing input from others. Fuzzy task boundaries lead to conflicts and wasted effort.
 
-- **Use dependency tracking for sequential work.** If task B requires the output of task A, set it as a dependency rather than hoping they finish in the right order. The task management system enforces ordering automatically.
+- **Use dependency tracking for sequential work.** If task B requires the output of task A, set it as a dependency rather than hoping they finish in the right order. The system enforces ordering automatically.
 
-- **Monitor token usage.** Teams consume tokens rapidly because each teammate maintains its own full context window. For a team of 4 working for 30 minutes, expect roughly 4x the token cost of a single session. Use shorter team sessions for cost-sensitive work.
+- **Monitor token usage.** Teams burn through tokens fast because each teammate maintains its own full context window. For a team of 4 working for 30 minutes, expect roughly 4x the token cost of a single session. Keep team sessions shorter for cost-sensitive work.
 
-- **Use in-process mode for quick coordination.** If you are running a short team session and just want to check progress occasionally, in-process mode is sufficient. Save split-pane mode for longer sessions where simultaneous visibility matters.
+- **Use in process mode for quick coordination.** If you're running a short team session and just want to check progress occasionally, in process mode does the job. Save split pane mode for longer sessions where simultaneous visibility matters.
 
-- **End team sessions cleanly.** Let all teammates complete their current tasks rather than force-quitting. Abrupt termination can leave partial changes that are difficult to reconcile.
+- **End team sessions cleanly.** Let all teammates complete their current tasks rather than force quitting. Abrupt termination can leave partial changes that are hard to reconcile.
 
-- **Start with subagents first.** If your task can be handled by one or two subagents (Chapter 9), use subagents. They are simpler, cheaper, and a stable feature. Escalate to agent teams only when you genuinely need multi-session coordination with shared state.
+- **Start with subagents first.** If your task can be handled by one or two subagents (Chapter 9), go with subagents. They're simpler, cheaper, and a stable feature. Escalate to agent teams only when you genuinely need multi session coordination with shared state.
 
 ## A Practical Workflow
 
-Here is how a typical agent team session flows from start to finish, showing how the architecture components interact in practice.
+Here's how a typical agent team session flows from start to finish, showing how the architecture components interact in practice.
 
 **Step 1: Request.** You describe a large task to Claude Code with agent teams enabled. Something like: "Refactor the notification system to support email, SMS, and push notifications with a provider abstraction layer."
 
-**Step 2: Decomposition.** The lead analyzes the request and creates tasks: (1) define the provider interface and base classes, (2) implement the email provider, (3) implement the SMS provider, (4) implement the push notification provider, (5) update existing code to use the new abstraction, (6) write tests for all providers. Tasks 2-4 depend on task 1. Task 5 depends on tasks 2-4. Task 6 depends on task 5.
+**Step 2: Decomposition.** The lead analyzes your request and creates tasks: (1) define the provider interface and base classes, (2) implement the email provider, (3) implement the SMS provider, (4) implement the push notification provider, (5) update existing code to use the new abstraction, (6) write tests for all providers. Tasks 2-4 depend on task 1. Task 5 depends on tasks 2-4. Task 6 depends on task 5.
 
-**Step 3: Spawning.** The lead spawns 3 teammates and adds all tasks to the shared task list. Teammate-1 immediately claims task 1 (no dependencies). Teammates 2 and 3 wait.
+**Step 3: Spawning.** The lead spawns 3 teammates and adds all tasks to the shared task list. Teammate-1 immediately claims task 1 (no dependencies). Teammates 2 and 3 wait for it to finish.
 
-**Step 4: Parallel work.** Once teammate-1 completes the provider interface, tasks 2-4 become available. Each teammate claims one and works in parallel. They can message each other if they discover shared patterns or need to coordinate on interface details.
+**Step 4: Parallel work.** Once teammate-1 finishes the provider interface, tasks 2-4 become available. Each teammate claims one and works in parallel. They can message each other if they discover shared patterns or need to coordinate on interface details.
 
-**Step 5: Convergence.** As provider implementations complete, task 5 (updating existing code) becomes available. One teammate claims it. When that finishes, task 6 (tests) becomes available.
+**Step 5: Convergence.** As provider implementations wrap up, task 5 (updating existing code) becomes available. One teammate claims it. When that's done, task 6 (tests) opens up.
 
-**Step 6: Completion.** All tasks are completed. The lead produces a summary of what was built, any issues encountered, and the final state of the codebase.
+**Step 6: Completion.** All tasks are done. The lead produces a summary of what was built, any issues encountered, and the final state of the codebase.
 
-This sequential-then-parallel-then-convergent pattern is the most common team workflow. The dependency system handles the ordering automatically -- you describe the work, and the team coordinates itself.
+This sequential-then-parallel-then-convergent pattern is the most common team workflow. The dependency system handles the ordering automatically. You describe the work, and the team coordinates itself.
 
 ## Known Limitations
 
-Agent teams are a research preview feature with several known limitations. Be aware of these before relying on teams for critical work.
+Agent teams are a research preview feature with several known limitations. It's worth knowing about these before relying on teams for critical work.
 
-**No session resumption.** If an in-process teammate crashes or is interrupted, it cannot be resumed. The work it completed is preserved (committed files, completed tasks), but the teammate's active task may need to be reassigned or restarted.
+**No session resumption.** If an in process teammate crashes or gets interrupted, it can't be resumed. Any work it already completed is preserved (committed files, completed tasks), but the teammate's active task may need to be reassigned or restarted.
 
-**Task status can lag.** Status updates between teammates are not instantaneous. There may be a brief delay between when a teammate completes a task and when other teammates or the lead see the updated status. This is usually seconds, not minutes, but can cause brief coordination hiccups.
+**Task status can lag.** Status updates between teammates aren't instantaneous. There may be a brief delay between when a teammate completes a task and when others see the updated status. It's usually seconds, not minutes, but it can cause brief coordination hiccups.
 
-**Shutdown can be slow.** When a team session ends, teammates may take time to wind down their current operations. Do not force-kill the process unless necessary -- give teammates time to finish and clean up.
+**Shutdown can be slow.** When a team session ends, teammates may take a moment to wind down their current operations. Don't force kill the process unless you have to. Give teammates time to finish and clean up.
 
-**One team per session.** You cannot create multiple teams within a single Claude Code session, and you cannot nest teams (a teammate cannot create its own sub-team). One session, one team.
+**One team per session.** You can't create multiple teams within a single Claude Code session, and you can't nest teams (a teammate can't create its own sub team). One session, one team.
 
-**Lead is fixed.** The lead is always the original Claude Code instance that created the team. You cannot transfer leadership to a teammate or change which instance coordinates the team mid-session.
+**Lead is fixed.** The lead is always the original Claude Code instance that created the team. You can't transfer leadership to a teammate or switch which instance coordinates the team mid session.
 
-**Permissions set at spawn.** Teammate permissions are fixed when the lead creates them. You cannot change a teammate's permission mode, tool access, or model after it has been spawned. If you need different permissions, end the team and start a new one.
+**Permissions set at spawn.** Teammate permissions are locked in when the lead creates them. You can't change a teammate's permission mode, tool access, or model after it's been spawned. If you need different permissions, you'll have to end the team and start a new one.
 
 ## Further Reading
 
-- <a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener noreferrer">Agent Teams</a> -- official documentation on team architecture, configuration, and known issues
+- <a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener noreferrer">Agent Teams</a>, official documentation on team architecture, configuration, and known issues
 
 ---
 

@@ -582,12 +582,7 @@ body::before {
   margin: 2rem 0;
 }
 .prose blockquote p:first-of-type::before {
-  content: '\201C';
-  font-size: 2rem;
-  color: var(--color-accent);
-  line-height: 0;
-  vertical-align: -0.5rem;
-  margin-right: 0.25rem;
+  content: none;
 }
 .prose ul > li::marker {
   color: var(--color-accent);

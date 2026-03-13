@@ -19,9 +19,12 @@ import {
 
 const MARKER_ID = 'perm-arrow';
 
+// Shorthand for central baseline used throughout this diagram
+const central = 'central' as const;
+
 /** Generate the Permission Model flowchart SVG diagram */
 export function generatePermissionModel(): string {
-  const config: DiagramConfig = { width: 720, height: 600, fontFamily: "'DM Sans', sans-serif" };
+  const config: DiagramConfig = { width: 720, height: 700, fontFamily: "'DM Sans', sans-serif" };
   const parts: string[] = [];
 
   // -- SVG open --
@@ -39,7 +42,7 @@ export function generatePermissionModel(): string {
   // Layout constants
   // =========================================================
   const flowX = 220; // center-x of the main flow column
-  const diamondSize = 28;
+  const diamondSize = 55;
 
   // -- Entry: Tool Call Request --
   const entryW = 190;
@@ -56,10 +59,11 @@ export function generatePermissionModel(): string {
     }),
   );
   parts.push(
-    textLabel(flowX, entryY + entryH / 2 + 5, 'Tool Call Request', {
+    textLabel(flowX, entryY + entryH / 2, 'Tool Call Request', {
       fontSize: 14,
       fontWeight: 'bold',
       fill: DIAGRAM_PALETTE.accent,
+      dominantBaseline: central,
     }),
   );
 
@@ -87,11 +91,11 @@ export function generatePermissionModel(): string {
     },
   ];
 
-  const diamondStartY = 110;
-  const diamondSpacing = 130;
-  const resultBoxW = 140;
+  const diamondStartY = 130;
+  const diamondSpacing = 160;
+  const resultBoxW = 150;
   const resultBoxH = 48;
-  const resultOffsetX = 175; // horizontal offset for Yes-branch result boxes
+  const resultOffsetX = 180; // horizontal offset for Yes-branch result boxes
 
   let prevBottomY = entryY + entryH;
 
@@ -105,7 +109,11 @@ export function generatePermissionModel(): string {
     // Diamond
     parts.push(diamondNode(flowX, cy, diamondSize));
     parts.push(
-      textLabel(flowX, cy + 4, d.label, { fontSize: 11, fontWeight: 'bold' }),
+      textLabel(flowX, cy, d.label, {
+        fontSize: 10,
+        fontWeight: 'bold',
+        dominantBaseline: central,
+      }),
     );
 
     // "No" label on the downward path
@@ -114,6 +122,7 @@ export function generatePermissionModel(): string {
         textLabel(flowX + 14, cy + diamondSize + 14, 'No', {
           fontSize: 10,
           fill: DIAGRAM_PALETTE.textSecondary,
+          dominantBaseline: central,
         }),
       );
     }
@@ -127,6 +136,7 @@ export function generatePermissionModel(): string {
       textLabel(flowX + diamondSize + 12, cy - 6, 'Yes', {
         fontSize: 10,
         fill: DIAGRAM_PALETTE.textSecondary,
+        dominantBaseline: central,
       }),
     );
 
@@ -140,16 +150,18 @@ export function generatePermissionModel(): string {
       }),
     );
     parts.push(
-      textLabel(resultCenterX, cy + 1, d.yesLabel, {
+      textLabel(resultCenterX, cy - 8, d.yesLabel, {
         fontSize: 13,
         fontWeight: 'bold',
         fill: d.yesAccent ? DIAGRAM_PALETTE.accentSecondary : DIAGRAM_PALETTE.text,
+        dominantBaseline: central,
       }),
     );
     parts.push(
-      textLabel(resultCenterX, cy + 16, d.yesSub, {
+      textLabel(resultCenterX, cy + 10, d.yesSub, {
         fontSize: 9,
         fill: DIAGRAM_PALETTE.textSecondary,
+        dominantBaseline: central,
       }),
     );
 
@@ -160,12 +172,13 @@ export function generatePermissionModel(): string {
   const lastDiamondY = diamondStartY + 2 * diamondSpacing;
   const defaultBoxW = 140;
   const defaultBoxH = 36;
-  const defaultY = lastDiamondY + diamondSize + 16;
+  const defaultY = lastDiamondY + diamondSize + 40;
 
   parts.push(
     textLabel(flowX + 14, lastDiamondY + diamondSize + 14, 'No', {
       fontSize: 10,
       fill: DIAGRAM_PALETTE.textSecondary,
+      dominantBaseline: central,
     }),
   );
   parts.push(arrowLine(flowX, lastDiamondY + diamondSize, flowX, defaultY - 2, MARKER_ID));
@@ -177,9 +190,10 @@ export function generatePermissionModel(): string {
     }),
   );
   parts.push(
-    textLabel(flowX, defaultY + defaultBoxH / 2 + 5, 'Default: Ask', {
+    textLabel(flowX, defaultY + defaultBoxH / 2, 'Default: Ask', {
       fontSize: 13,
       fontWeight: 'bold',
+      dominantBaseline: central,
     }),
   );
 
@@ -188,14 +202,15 @@ export function generatePermissionModel(): string {
   // =========================================================
   const tierX = 530;
   const tierW = 170;
-  const tierBoxH = 38;
+  const tierBoxH = 44;
   const tierStartY = 90;
-  const tierGap = 52;
+  const tierGap = 58;
 
   parts.push(
     textLabel(tierX + tierW / 2, tierStartY - 10, 'Tool Tiers', {
       fontSize: 13,
       fontWeight: 'bold',
+      dominantBaseline: central,
     }),
   );
 
@@ -215,15 +230,17 @@ export function generatePermissionModel(): string {
       }),
     );
     parts.push(
-      textLabel(tierX + tierW / 2, ty + 16, tiers[i].name, {
+      textLabel(tierX + tierW / 2, ty + tierBoxH / 2 - 8, tiers[i].name, {
         fontSize: 12,
         fontWeight: 'bold',
+        dominantBaseline: central,
       }),
     );
     parts.push(
-      textLabel(tierX + tierW / 2, ty + 30, tiers[i].sub, {
+      textLabel(tierX + tierW / 2, ty + tierBoxH / 2 + 8, tiers[i].sub, {
         fontSize: 9,
         fill: DIAGRAM_PALETTE.textSecondary,
+        dominantBaseline: central,
       }),
     );
   }
@@ -231,15 +248,16 @@ export function generatePermissionModel(): string {
   // =========================================================
   // Settings precedence bar (bottom)
   // =========================================================
-  const precY = 480;
+  const precY = 610;
   const precW = 560;
-  const precH = 32;
+  const precH = 34;
   const precX = (config.width - precW) / 2;
 
   parts.push(
-    textLabel(config.width / 2, precY - 8, 'Settings Precedence', {
+    textLabel(config.width / 2, precY - 10, 'Settings Precedence', {
       fontSize: 12,
       fontWeight: 'bold',
+      dominantBaseline: central,
     }),
   );
   parts.push(
@@ -250,33 +268,38 @@ export function generatePermissionModel(): string {
     }),
   );
   parts.push(
-    textLabel(config.width / 2, precY + precH / 2 + 5, 'Managed  >  CLI  >  Local  >  Shared  >  User', {
+    textLabel(config.width / 2, precY + precH / 2, 'Managed  >  CLI  >  Local  >  Shared  >  User', {
       fontSize: 12,
       fill: DIAGRAM_PALETTE.textSecondary,
+      dominantBaseline: central,
     }),
   );
 
   // =========================================================
   // Permission modes (bottom labels)
   // =========================================================
-  const modeY = 540;
+  const modeY = 670;
   const modes = ['default', 'acceptEdits', 'plan', 'dontAsk', 'bypassPermissions'];
-  const modeStartX = 90;
-  const modeSpacingX = 115;
+  const modeBoxWidths = [80, 100, 60, 80, 130];
+  const modeGap = 12;
 
   parts.push(
-    textLabel(config.width / 2, modeY - 8, 'Permission Modes', {
+    textLabel(config.width / 2, modeY - 10, 'Permission Modes', {
       fontSize: 12,
       fontWeight: 'bold',
+      dominantBaseline: central,
     }),
   );
 
+  // Calculate total width and starting x for centering
+  const totalModeW = modeBoxWidths.reduce((a, b) => a + b, 0) + modeGap * (modes.length - 1);
+  let modeX = (config.width - totalModeW) / 2;
+
   for (let i = 0; i < modes.length; i++) {
-    const mx = modeStartX + i * modeSpacingX;
-    const mw = 100;
-    const mh = 22;
+    const mw = modeBoxWidths[i];
+    const mh = 26;
     parts.push(
-      roundedRect(mx, modeY, mw, mh, {
+      roundedRect(modeX, modeY, mw, mh, {
         fill: DIAGRAM_PALETTE.surface,
         stroke: DIAGRAM_PALETTE.border,
         rx: 3,
@@ -284,11 +307,13 @@ export function generatePermissionModel(): string {
       }),
     );
     parts.push(
-      textLabel(mx + mw / 2, modeY + mh / 2 + 4, modes[i], {
+      textLabel(modeX + mw / 2, modeY + mh / 2, modes[i], {
         fontSize: 9,
         fill: DIAGRAM_PALETTE.textSecondary,
+        dominantBaseline: central,
       }),
     );
+    modeX += mw + modeGap;
   }
 
   // =========================================================

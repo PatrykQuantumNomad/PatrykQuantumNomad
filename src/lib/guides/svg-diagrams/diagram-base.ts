@@ -91,6 +91,7 @@ interface TextLabelOptions {
   fontWeight?: string;
   fontFamily?: string;
   textAnchor?: string;
+  dominantBaseline?: string;
 }
 
 /** Generate a centered text label SVG element */
@@ -105,7 +106,8 @@ export function textLabel(
   const fontWeight = opts.fontWeight ?? 'normal';
   const fontFamily = opts.fontFamily ?? DEFAULT_DIAGRAM_CONFIG.fontFamily;
   const textAnchor = opts.textAnchor ?? 'middle';
-  return `<text x="${x}" y="${y}" text-anchor="${textAnchor}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${fill}" font-family="${fontFamily}">${text}</text>`;
+  const baselineAttr = opts.dominantBaseline ? ` dominant-baseline="${opts.dominantBaseline}"` : '';
+  return `<text x="${x}" y="${y}" text-anchor="${textAnchor}"${baselineAttr} font-size="${fontSize}" font-weight="${fontWeight}" fill="${fill}" font-family="${fontFamily}">${text}</text>`;
 }
 
 /**

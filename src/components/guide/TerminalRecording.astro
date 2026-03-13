@@ -1,0 +1,200 @@
+---
+/**
+ * TerminalRecording — MDX-facing wrapper for asciinema terminal recordings.
+ *
+ * Renders a figure with the same visual language as PlotFigure (border,
+ * rounded corners, theme-aware background) containing a lazy-loaded
+ * asciinema-player React island with full accessibility support.
+ *
+ * Usage in MDX:
+ *   <TerminalRecording
+ *     src="/recordings/claude-code/start-session.cast"
+ *     caption="Starting a Claude Code session"
+ *     transcript="$ cd projects/my-app\n$ claude\n..."
+ *     rows={20}
+ *   />
+ */
+import TerminalPlayer from './TerminalPlayer';
+
+interface Props {
+  src: string;
+  caption?: string;
+  cols?: number;
+  rows?: number;
+  speed?: number;
+  idleTimeLimit?: number;
+  poster?: string;
+  loop?: boolean;
+  fit?: 'width' | 'height' | 'both' | 'none';
+  transcript?: string;
+  maxWidth?: string;
+}
+
+const {
+  src,
+  caption,
+  cols = 80,
+  rows = 20,
+  speed = 1,
+  idleTimeLimit = 2,
+  poster,
+  loop = false,
+  fit = 'width',
+  transcript,
+  maxWidth = '820px',
+} = Astro.props;
+---
+
+<figure class="my-8 not-prose terminal-recording" aria-label={caption ? `Terminal recording: ${caption}` : 'Terminal recording'}>
+  <div class="overflow-hidden rounded-lg border border-[var(--color-border)] terminal-recording-frame">
+    <!-- Terminal title bar -->
+    <div class="flex items-center gap-2 px-4 py-2 terminal-recording-titlebar border-b border-[var(--color-border)]">
+      <div class="flex gap-1.5" aria-hidden="true">
+        <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+        <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+        <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+      </div>
+      {caption && (
+        <span class="text-xs text-[#999] ml-2 font-mono truncate">{caption}</span>
+      )}
+    </div>
+    <!-- Player area -->
+    <div class="mx-auto" style={`max-width: ${maxWidth}`}>
+      <TerminalPlayer
+        client:visible
+        src={src}
+        cols={cols}
+        rows={rows}
+        speed={speed}
+        idleTimeLimit={idleTimeLimit}
+        poster={poster}
+        loop={loop}
+        fit={fit}
+        transcript={transcript}
+        ariaLabel={caption || 'Terminal recording'}
+      />
+    </div>
+  </div>
+  {caption && (
+    <figcaption class="mt-2 text-center text-sm text-[var(--color-text-secondary)] italic">
+      {caption}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  /* Frame and title bar use fixed dark colors for terminal realism */
+  .terminal-recording-frame {
+    background: #171726;
+  }
+
+  .terminal-recording-titlebar {
+    background: #12121f;
+  }
+
+  .terminal-recording :global(.terminal-player-wrapper) {
+    width: 100%;
+  }
+
+  .terminal-recording :global(.terminal-player-container) {
+    width: 100%;
+  }
+
+  /* Override asciinema-player defaults to match site theme */
+  .terminal-recording :global(.ap-wrapper) {
+    background: transparent !important;
+  }
+
+  .terminal-recording :global(.ap-player) {
+    background: #171726 !important;
+    border-radius: 0 !important;
+  }
+
+  .terminal-recording :global(.ap-terminal) {
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Control bar */
+  .terminal-recording :global(.ap-control-bar) {
+    background: #12121f !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .terminal-recording :global(.ap-control-bar svg) {
+    fill: #999 !important;
+  }
+
+  .terminal-recording :global(.ap-control-bar svg:hover) {
+    fill: #ccc !important;
+  }
+
+  /* Progress bar */
+  .terminal-recording :global(.ap-progressbar .ap-gutter-bar) {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .terminal-recording :global(.ap-progressbar .ap-progress-bar) {
+    background: var(--color-accent) !important;
+  }
+
+  /* Play button overlay */
+  .terminal-recording :global(.ap-overlay .ap-play-button) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 2px solid rgba(255, 255, 255, 0.25) !important;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .terminal-recording :global(.ap-overlay .ap-play-button:hover) {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .terminal-recording :global(.ap-overlay .ap-play-button svg) {
+    fill: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* Reduced-motion notice */
+  .terminal-recording :global(.terminal-player-reduced-motion-notice) {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    color: #999;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Transcript — sits outside the dark terminal frame */
+  .terminal-recording :global(.terminal-player-transcript) {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .terminal-recording :global(.terminal-player-transcript summary) {
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: 0.25rem 0;
+  }
+
+  .terminal-recording :global(.terminal-player-transcript summary:hover) {
+    color: var(--color-text-primary);
+  }
+
+  .terminal-recording :global(.terminal-player-transcript pre) {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: #171726;
+    color: #d0d0d0;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    border: 1px solid var(--color-border);
+  }
+
+  /* Reduced motion: ensure static poster frame */
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-recording :global(.ap-overlay) {
+      opacity: 1 !important;
+    }
+  }
+</style>

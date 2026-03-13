@@ -7,108 +7,108 @@ lastVerified: 2026-03-10
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
-## What You Will Learn
+## What You'll Learn
 
-This chapter covers the enterprise security and governance features that administrators need to deploy Claude Code across an organization. You will learn the security model that underpins every interaction, the five managed settings delivery mechanisms, the settings precedence hierarchy, and the governance controls for permissions, hooks, MCP servers, and plugins. You will also learn how to enforce filesystem and network sandboxing, configure authentication controls, and use vulnerability scanning as a capability pattern -- not a standalone feature.
+This chapter walks through the enterprise security and governance features you'll need to deploy Claude Code across an organization. We'll cover the security model behind every interaction, the five managed settings delivery mechanisms, the settings precedence hierarchy, and governance controls for permissions, hooks, MCP servers, and plugins. You'll also learn how to enforce filesystem and network sandboxing, configure authentication controls, and use vulnerability scanning as a capability pattern, not a standalone feature.
 
-By the end of this chapter, you will be able to answer the question: "How do I deploy Claude Code securely at scale?"
+By the end, you'll be able to answer the question: "How do I deploy Claude Code securely at scale?"
 
 ---
 
 ## Security Model Overview
 
-Claude Code's security is built on a permission-based architecture. Every potentially dangerous action -- writing a file, running a shell command, calling an MCP tool -- requires explicit approval before it executes. This design means Claude Code cannot silently modify your codebase or run commands without your knowledge.
+Claude Code is built on a permission based architecture. Every potentially dangerous action (writing a file, running a shell command, calling an MCP tool) needs explicit approval before it runs. That means Claude Code can't silently modify your codebase or execute commands behind your back.
 
-The security model follows a defense-in-depth strategy with three layers:
+The security model follows a defense in depth strategy with three layers:
 
-1. **Built-in protections.** Command blocklists, context-aware prompt injection detection, and isolated fetch contexts are always active. You cannot disable them.
-2. **Configurable permissions.** User-facing permission rules that control which tools require approval, which can run automatically, and which are denied entirely. See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for how the permission system works at the individual level.
-3. **Enterprise governance.** Managed settings that override all user and project configuration. This is the layer this chapter focuses on -- the administrative controls that enforce security policy across an entire organization.
+1. **Built in protections.** Command blocklists, context aware prompt injection detection, and isolated fetch contexts are always active. You can't disable them.
+2. **Configurable permissions.** User facing permission rules that control which tools need approval, which can run automatically, and which are denied outright. See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for how the permission system works at the individual level.
+3. **Enterprise governance.** Managed settings that override all user and project configuration. This is the layer we're focusing on here: the administrative controls that enforce security policy across an entire organization.
 
-Each layer builds on the one below it. Built-in protections are the floor that nobody can lower. Configurable permissions let individuals tune their workflow. Enterprise governance sets the ceiling that nobody can raise.
+Each layer builds on the one below it. Built in protections are the floor nobody can lower. Configurable permissions let individuals tune their workflow. Enterprise governance sets the ceiling nobody can raise.
 
 ---
 
 ## Managed Settings
 
-Managed settings are the enterprise deployment mechanism for Claude Code. They override all user-level and project-level settings, ensuring that organizational security policies cannot be weakened by individual developers.
+Managed settings are the enterprise deployment mechanism for Claude Code. They override all user level and project level settings, so organizational security policies can't be weakened by individual developers.
 
-Managed settings are delivered through five mechanisms, listed from highest to lowest priority among managed sources:
+There are five delivery mechanisms, listed from highest to lowest priority:
 
-**1. Server-managed.** Fetched from Anthropic's servers for authenticated enterprise users. When an organization configures Claude Code through their Anthropic enterprise agreement, settings are automatically pushed to every authenticated user. No local file distribution is needed.
+**1. Server managed.** Fetched from Anthropic's servers for authenticated enterprise users. When your organization configures Claude Code through an Anthropic enterprise agreement, settings are automatically pushed to every authenticated user. No local file distribution needed.
 
-**2. macOS MDM.** Distributed via Apple Mobile Device Management profiles. IT administrators can push Claude Code configuration as a managed preference domain using their existing MDM infrastructure (Jamf, Kandji, Mosyle, or similar).
+**2. macOS MDM.** Distributed via Apple Mobile Device Management profiles. IT admins can push Claude Code configuration as a managed preference domain using existing MDM infrastructure (Jamf, Kandji, Mosyle, or similar).
 
-**3. Windows registry (HKLM).** Set via Group Policy or direct registry keys under `HKEY_LOCAL_MACHINE`. This uses the same distribution mechanism that enterprise IT teams already use for Windows software configuration.
+**3. Windows registry (HKLM).** Set via Group Policy or direct registry keys under `HKEY_LOCAL_MACHINE`. This piggybacks on the same distribution mechanism enterprise IT teams already use for Windows software configuration.
 
-**4. File-based.** A JSON file placed at a well-known filesystem path. This is the most portable mechanism and works on any platform. The file is typically distributed via configuration management tools (Ansible, Chef, Puppet) or internal package management.
+**4. File based.** A JSON file placed at a well known filesystem path. This is the most portable option and works on any platform. Typically it's distributed via configuration management tools (Ansible, Chef, Puppet) or internal package management.
 
-**5. Windows HKCU.** Per-user registry settings under `HKEY_CURRENT_USER`. These have lower priority than HKLM settings, allowing organization-wide policies to override user-level registry configurations.
+**5. Windows HKCU.** Per user registry settings under `HKEY_CURRENT_USER`. These have lower priority than HKLM settings, so organization-wide policies can override user level registry configurations.
 
-Here is a representative enterprise managed settings file that demonstrates the key governance controls:
+Here's a representative enterprise managed settings file that shows the key governance controls:
 
 <CodeBlock
   code={`{
-  "permissions": {
-    "allow": [
-      "Read",
-      "Grep",
-      "Glob"
-    ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Bash(curl * | bash)"
-    ]
-  },
-  "allowManagedPermissionRulesOnly": true,
-  "allowManagedHooksOnly": true,
-  "allowManagedMcpServersOnly": true,
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/opt/company/hooks/audit-commands.sh"
-          }
-        ]
+    "permissions": {
+      "allow": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "deny": [
+        "Bash(rm -rf *)",
+        "Bash(curl * | bash)"
+      ]
+    },
+    "allowManagedPermissionRulesOnly": true,
+    "allowManagedHooksOnly": true,
+    "allowManagedMcpServersOnly": true,
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/opt/company/hooks/audit-commands.sh"
+            }
+          ]
+        }
+      ]
+    },
+    "sandbox": {
+      "enabled": true,
+      "allowUnsandboxedCommands": false,
+      "network": {
+        "allowManagedDomainsOnly": true,
+        "allowedDomains": ["github.com", "*.npmjs.org", "internal.company.com"]
       }
-    ]
-  },
-  "sandbox": {
-    "enabled": true,
-    "allowUnsandboxedCommands": false,
-    "network": {
-      "allowManagedDomainsOnly": true,
-      "allowedDomains": ["github.com", "*.npmjs.org", "internal.company.com"]
-    }
-  },
-  "forceLoginMethod": "console",
-  "forceLoginOrgUUID": "org-abc123"
+    },
+    "forceLoginMethod": "console",
+    "forceLoginOrgUUID": "org-abc123"
 }`}
   lang="json"
   title="managed-settings.json"
   caption="A comprehensive enterprise configuration covering permissions, hooks, MCP, sandbox, and authentication."
 />
 
-The sections that follow explain each governance control in detail.
+Let's walk through each governance control in detail.
 
 ---
 
 ## Settings Precedence
 
-Claude Code evaluates settings in a strict hierarchy. Higher-priority settings always override lower-priority ones:
+Claude Code evaluates settings in a strict hierarchy, where higher priority settings always win:
 
-1. **Managed settings** (highest priority) -- enterprise-deployed configuration
-2. **CLI flags** -- command-line arguments passed when launching Claude Code
-3. **Local settings** (`.claude/settings.local.json`) -- machine-specific overrides, not committed to Git
-4. **Project settings** (`.claude/settings.json`) -- project-wide configuration, committed to Git
-5. **User settings** (`~/.claude/settings.json`) -- personal defaults across all projects
+1. **Managed settings** (highest priority): enterprise deployed configuration
+2. **CLI flags**: command line arguments passed when launching Claude Code
+3. **Local settings** (`.claude/settings.local.json`): machine specific overrides, not committed to Git
+4. **Project settings** (`.claude/settings.json`): project wide configuration, committed to Git
+5. **User settings** (`~/.claude/settings.json`): personal defaults across all projects
 
-Managed settings always win. This is intentional -- it prevents developers from weakening enterprise security controls. A developer cannot override a managed `allowManagedPermissionRulesOnly: true` setting by adding permissive rules to their project or user configuration.
+Managed settings always take precedence. This is by design; it prevents developers from weakening enterprise security controls. A developer can't override a managed `allowManagedPermissionRulesOnly: true` setting by adding permissive rules to their project or user configuration.
 
-The `/status` command shows which settings are active and their source. Run it after deploying managed settings to verify the hierarchy is working as expected.
+Want to verify things are working? The `/status` command shows which settings are active and where they come from. Run it after deploying managed settings to confirm the hierarchy is behaving as expected.
 
 <CodeBlock
   code={`/status`}
@@ -121,158 +121,158 @@ The `/status` command shows which settings are active and their source. Run it a
 
 ## Permission Governance
 
-The `allowManagedPermissionRulesOnly` flag is the primary control for locking down permission rules across an organization.
+The `allowManagedPermissionRulesOnly` flag is your primary control for locking down permission rules across an organization.
 
-When set to `true`, only permission rules defined in managed settings apply. User-level, project-level, and local permission rules are ignored. This ensures a consistent security posture across every developer's machine -- nobody can add an `"allow": ["Bash(*)"]` rule to their personal settings.
+When it's set to `true`, only permission rules defined in managed settings apply. User level, project level, and local permission rules are all ignored. This gives you a consistent security posture across every developer's machine, so nobody can sneak an `"allow": ["Bash(*)"]` rule into their personal settings.
 
 <CodeBlock
   code={`{
-  "allowManagedPermissionRulesOnly": true,
-  "permissions": {
-    "allow": [
-      "Read",
-      "Grep",
-      "Glob",
-      "Bash(npm test)",
-      "Bash(npm run lint)",
-      "Bash(git *)"
-    ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Bash(curl * | bash)",
-      "Bash(chmod 777 *)"
-    ]
-  }
+    "allowManagedPermissionRulesOnly": true,
+    "permissions": {
+      "allow": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash(npm test)",
+        "Bash(npm run lint)",
+        "Bash(git *)"
+      ],
+      "deny": [
+        "Bash(rm -rf *)",
+        "Bash(curl * | bash)",
+        "Bash(chmod 777 *)"
+      ]
+    }
 }`}
   lang="json"
   title="managed-settings.json"
   caption="Only these permission rules apply when allowManagedPermissionRulesOnly is true."
 />
 
-Tools not explicitly allowed or denied will follow the default behavior: Claude Code asks the user for permission at runtime. The `allow` list defines tools that run without prompting. The `deny` list defines tools that are blocked entirely. Everything else requires interactive approval.
+Any tool that isn't explicitly allowed or denied follows the default behavior: Claude Code asks the user for permission at runtime. The `allow` list covers tools that run without prompting. The `deny` list blocks tools entirely. Everything else requires interactive approval.
 
 ---
 
 ## Hook Governance
 
-The `allowManagedHooksOnly` flag controls which hooks can execute. When set to `true`, only hooks defined in managed settings run. Hooks defined in user settings, project settings, local settings, plugins, and skill/agent frontmatter are all ignored.
+The `allowManagedHooksOnly` flag controls which hooks can execute. Set it to `true`, and only hooks defined in managed settings will run. Hooks from user settings, project settings, local settings, plugins, and skill/agent frontmatter are all ignored.
 
-This prevents developers from installing hooks that bypass security controls or exfiltrate data through hook commands.
+Why does this matter? It stops developers from installing hooks that could bypass security controls or exfiltrate data through hook commands.
 
-Two additional settings provide fine-grained hook control:
+Two additional settings give you fine-grained hook control:
 
-- **`allowedHttpHookUrls`** -- a whitelist of HTTP endpoints that hooks are permitted to call. If a hook attempts to send data to an endpoint not on this list, the request is blocked.
-- **`httpHookAllowedEnvVars`** -- specifies which environment variables hook processes can access. This prevents hooks from reading sensitive environment variables like API keys or database credentials.
+- **`allowedHttpHookUrls`** is a whitelist of HTTP endpoints that hooks are allowed to call. If a hook tries to send data to an endpoint not on this list, the request gets blocked.
+- **`httpHookAllowedEnvVars`** specifies which environment variables hook processes can access. This keeps hooks from reading sensitive environment variables like API keys or database credentials.
 
 <CodeBlock
   code={`{
-  "allowManagedHooksOnly": true,
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/opt/company/hooks/audit-file-changes.sh"
-          }
-        ]
-      }
+    "allowManagedHooksOnly": true,
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Write|Edit",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/opt/company/hooks/audit-file-changes.sh"
+            }
+          ]
+        }
+      ],
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "http",
+              "url": "https://telemetry.company.com/claude-sessions"
+            }
+          ]
+        }
+      ]
+    },
+    "allowedHttpHookUrls": [
+      "https://telemetry.company.com/*",
+      "https://hooks.company.com/*"
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "http",
-            "url": "https://telemetry.company.com/claude-sessions"
-          }
-        ]
-      }
+    "httpHookAllowedEnvVars": [
+      "COMPANY_TEAM_ID",
+      "COMPANY_PROJECT_ID"
     ]
-  },
-  "allowedHttpHookUrls": [
-    "https://telemetry.company.com/*",
-    "https://hooks.company.com/*"
-  ],
-  "httpHookAllowedEnvVars": [
-    "COMPANY_TEAM_ID",
-    "COMPANY_PROJECT_ID"
-  ]
 }`}
   lang="json"
   title="managed-settings.json"
   caption="Hook governance: only managed hooks run, HTTP calls restricted to approved endpoints."
 />
 
-For hook lifecycle details, handler types, and exit code semantics, see [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
+For more on hook lifecycle details, handler types, and exit code semantics, check out [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
 
 ---
 
 ## MCP Server Governance
 
-Managed settings control which MCP servers can connect to Claude Code. This prevents developers from adding unauthorized external tool integrations that could access sensitive data or introduce security risks.
+Managed settings let you control which MCP servers can connect to Claude Code. This prevents developers from adding unauthorized external tool integrations that might access sensitive data or introduce security risks.
 
-Four settings work together for MCP governance:
+Four settings work together here:
 
-- **`allowManagedMcpServersOnly`** -- when `true`, only MCP servers defined in managed settings or `managed-mcp.json` can connect. User-added and project-added servers are blocked.
-- **`allowedMcpServers`** -- an explicit allowlist of server names or patterns that developers are permitted to add (when `allowManagedMcpServersOnly` is `false`).
-- **`deniedMcpServers`** -- a blocklist of server names or patterns that are prohibited regardless of other settings.
-- **`managed-mcp.json`** -- a file-based MCP server configuration distributed alongside managed settings. Servers defined here are always connected and cannot be removed by users.
+- **`allowManagedMcpServersOnly`**, when `true`, ensures only MCP servers defined in managed settings or `managed-mcp.json` can connect. User added and project added servers are blocked.
+- **`allowedMcpServers`** is an explicit allowlist of server names or patterns that developers can add (when `allowManagedMcpServersOnly` is `false`).
+- **`deniedMcpServers`** is a blocklist of server names or patterns that are prohibited regardless of other settings.
+- **`managed-mcp.json`** is a file based MCP server configuration distributed alongside managed settings. Servers defined here are always connected and can't be removed by users.
 
 <CodeBlock
   code={`{
-  "allowManagedMcpServersOnly": true,
-  "mcpServers": {
-    "company-db": {
-      "command": "npx",
-      "args": ["@company/mcp-database"],
-      "env": {
-        "DB_HOST": "db.internal.company.com"
+    "allowManagedMcpServersOnly": true,
+    "mcpServers": {
+      "company-db": {
+        "command": "npx",
+        "args": ["@company/mcp-database"],
+        "env": {
+          "DB_HOST": "db.internal.company.com"
+        }
+      },
+      "code-search": {
+        "type": "http",
+        "url": "https://search.internal.company.com/mcp"
       }
     },
-    "code-search": {
-      "type": "http",
-      "url": "https://search.internal.company.com/mcp"
-    }
-  },
-  "allowedMcpServers": [
-    "@company/*"
-  ],
-  "deniedMcpServers": [
-    "@mcp/shell-exec",
-    "@mcp/unrestricted-*"
-  ]
+    "allowedMcpServers": [
+      "@company/*"
+    ],
+    "deniedMcpServers": [
+      "@mcp/shell-exec",
+      "@mcp/unrestricted-*"
+    ]
 }`}
   lang="json"
   title="managed-settings.json"
-  caption="MCP governance: only company-approved servers connect."
+  caption="MCP governance: only company approved servers connect."
 />
 
-For MCP architecture, transport modes, and configuration details, see [Model Context Protocol](/guides/claude-code/mcp/).
+For more on MCP architecture, transport modes, and configuration, see [Model Context Protocol](/guides/claude-code/mcp/).
 
 ---
 
 ## Plugin Governance
 
-Plugins extend Claude Code with additional capabilities from external sources. Plugin governance controls where plugins can be installed from and which sources are trusted.
+Plugins extend Claude Code with additional capabilities from external sources. Plugin governance gives you control over where plugins can be installed from and which sources are trusted.
 
-Three settings manage plugin governance:
+Three settings handle this:
 
-- **`strictKnownMarketplaces`** -- an array of approved plugin sources. When set, only plugins from these sources can be installed. Each entry specifies a source type and identifying pattern. There are seven source types: `github`, `npm`, `pypi`, `registry`, `url`, `local`, and `marketplace`.
-- **`blockedMarketplaces`** -- an array of blocked plugin sources. Plugins from these sources are denied regardless of the allowed list.
-- **`pluginTrustMessage`** -- a custom message displayed when a user attempts to install a plugin from a non-approved source. Use this to direct developers to your organization's approved plugin catalog.
+- **`strictKnownMarketplaces`** is an array of approved plugin sources. When set, only plugins from these sources can be installed. Each entry specifies a source type and identifying pattern. Seven source types are supported: `github`, `npm`, `pypi`, `registry`, `url`, `local`, and `marketplace`.
+- **`blockedMarketplaces`** is an array of blocked plugin sources. Plugins from these sources are denied regardless of the allowed list.
+- **`pluginTrustMessage`** is a custom message shown when a user tries to install a plugin from a non approved source. Use this to point developers toward your organization's approved plugin catalog.
 
 <CodeBlock
   code={`{
-  "strictKnownMarketplaces": [
-    { "source": "github", "repo": "acme-corp/approved-plugins" },
-    { "source": "github", "repo": "acme-corp/internal-tools" },
-    { "source": "npm", "scope": "@acme-corp" }
-  ],
-  "blockedMarketplaces": [
-    { "source": "github", "repo": "untrusted-org/*" }
-  ],
-  "pluginTrustMessage": "Only plugins from the acme-corp GitHub org and @acme-corp npm scope are approved. Submit requests to #dev-tools on Slack."
+    "strictKnownMarketplaces": [
+      { "source": "github", "repo": "acme-corp/approved-plugins" },
+      { "source": "github", "repo": "acme-corp/internal-tools" },
+      { "source": "npm", "scope": "@acme-corp" }
+    ],
+    "blockedMarketplaces": [
+      { "source": "github", "repo": "untrusted-org/*" }
+    ],
+    "pluginTrustMessage": "Only plugins from the acme corp GitHub org and @acme-corp npm scope are approved. Submit requests to #dev-tools on Slack."
 }`}
   lang="json"
   title="managed-settings.json"
@@ -283,69 +283,69 @@ Three settings manage plugin governance:
 
 ## Sandbox Enforcement
 
-Claude Code's sandbox provides two isolation dimensions: filesystem isolation and network isolation. Managed settings can enforce both to prevent data exfiltration and restrict where Claude Code can read, write, and connect.
+Claude Code's sandbox provides two isolation dimensions: filesystem and network. Managed settings can enforce both to prevent data exfiltration and restrict where Claude Code can read, write, and connect.
 
 ### Filesystem Isolation
 
 Three settings control filesystem access using glob patterns:
 
-- **`allowWrite`** -- paths the agent can write to. Only these paths are writable.
-- **`denyWrite`** -- paths explicitly blocked for writing, even if they match an `allowWrite` pattern.
-- **`denyRead`** -- paths blocked for reading. Claude Code cannot access these files at all.
+- **`allowWrite`** specifies paths the agent can write to. Only these paths are writable.
+- **`denyWrite`** specifies paths explicitly blocked for writing, even if they match an `allowWrite` pattern.
+- **`denyRead`** specifies paths blocked for reading. Claude Code can't access these files at all.
 
 ### Network Isolation
 
 Two settings control network access:
 
-- **`allowedDomains`** -- a whitelist of domains Claude Code can make HTTP requests to. Requests to other domains are blocked.
-- **`allowManagedDomainsOnly`** -- when `true`, only the domain list from managed settings applies. Developers cannot add their own allowed domains.
+- **`allowedDomains`** is a whitelist of domains Claude Code can reach via HTTP requests. Anything else gets blocked.
+- **`allowManagedDomainsOnly`**, when `true`, ensures only the domain list from managed settings applies. Developers can't add their own allowed domains.
 
 ### Unsandboxed Commands
 
-The `allowUnsandboxedCommands` setting controls whether commands can bypass the sandbox. When set to `false`, all commands execute within the sandbox restrictions. This prevents developers from using shell commands to access files or network endpoints that the sandbox would otherwise block.
+The `allowUnsandboxedCommands` setting controls whether commands can bypass the sandbox. Set it to `false`, and all commands execute within sandbox restrictions. This stops developers from using shell commands to access files or network endpoints that the sandbox would otherwise block.
 
 <CodeBlock
   code={`{
-  "sandbox": {
-    "enabled": true,
-    "allowUnsandboxedCommands": false,
-    "filesystem": {
-      "allowWrite": [
-        "/home/*/projects/**",
-        "/tmp/claude-*"
-      ],
-      "denyWrite": [
-        "/etc/**",
-        "/usr/**",
-        "**/.env",
-        "**/.env.*"
-      ],
-      "denyRead": [
-        "/etc/shadow",
-        "/etc/passwd",
-        "**/.ssh/**",
-        "**/credentials/**"
-      ]
-    },
-    "network": {
-      "allowManagedDomainsOnly": true,
-      "allowedDomains": [
-        "github.com",
-        "*.github.com",
-        "*.npmjs.org",
-        "registry.npmjs.org",
-        "internal.company.com",
-        "*.internal.company.com"
-      ]
+    "sandbox": {
+      "enabled": true,
+      "allowUnsandboxedCommands": false,
+      "filesystem": {
+        "allowWrite": [
+          "/home/*/projects/**",
+          "/tmp/claude-*"
+        ],
+        "denyWrite": [
+          "/etc/**",
+          "/usr/**",
+          "**/.env",
+          "**/.env.*"
+        ],
+        "denyRead": [
+          "/etc/shadow",
+          "/etc/passwd",
+          "**/.ssh/**",
+          "**/credentials/**"
+        ]
+      },
+      "network": {
+        "allowManagedDomainsOnly": true,
+        "allowedDomains": [
+          "github.com",
+          "*.github.com",
+          "*.npmjs.org",
+          "registry.npmjs.org",
+          "internal.company.com",
+          "*.internal.company.com"
+        ]
+      }
     }
-  }
 }`}
   lang="json"
   title="managed-settings.json"
   caption="Full sandbox configuration: filesystem write/read restrictions plus network domain whitelist."
 />
 
-The combination of filesystem and network isolation creates a strong boundary around what Claude Code can access. Even if a prompt injection attempts to exfiltrate code through a network request, the domain whitelist blocks the request. Even if a malicious instruction tries to read credentials, the `denyRead` rules prevent access.
+Together, filesystem and network isolation create a strong boundary around what Claude Code can access. If a prompt injection tries to exfiltrate code through a network request, the domain whitelist blocks it. If a malicious instruction tries to read credentials, the `denyRead` rules prevent access.
 
 ---
 
@@ -353,13 +353,13 @@ The combination of filesystem and network isolation creates a strong boundary ar
 
 Two managed settings control how developers authenticate with Claude Code:
 
-- **`forceLoginMethod`** -- restricts authentication to a specific provider. Set to `"claudeai"` for Claude.ai consumer accounts or `"console"` for Anthropic Console (API/enterprise) accounts. This prevents developers from using personal accounts for work.
-- **`forceLoginOrgUUID`** -- requires authentication to a specific organization. Only users who belong to the specified org UUID can use Claude Code. This ensures all usage is tracked under the correct organizational account.
+- **`forceLoginMethod`** restricts authentication to a specific provider. Set it to `"claudeai"` for Claude.ai consumer accounts or `"console"` for Anthropic Console (API/enterprise) accounts. This keeps developers from using personal accounts for work.
+- **`forceLoginOrgUUID`** requires authentication to a specific organization. Only users belonging to the specified org UUID can use Claude Code, ensuring all usage gets tracked under the correct organizational account.
 
 <CodeBlock
   code={`{
-  "forceLoginMethod": "console",
-  "forceLoginOrgUUID": "org-abc123def456"
+    "forceLoginMethod": "console",
+    "forceLoginOrgUUID": "org-abc123def456"
 }`}
   lang="json"
   title="managed-settings.json"
@@ -370,11 +370,11 @@ Two managed settings control how developers authenticate with Claude Code:
 
 ## Vulnerability Scanning as a Capability
 
-Vulnerability scanning is not a standalone named feature in Claude Code. It is a **capability pattern** that you build by combining subagents, skills, and hooks -- features covered in earlier chapters.
+Vulnerability scanning isn't a standalone named feature in Claude Code. It's a **capability pattern** you build by combining subagents, skills, and hooks, all features covered in earlier chapters.
 
-The pattern works like this: you create a security-reviewer subagent (see [Git Worktrees & Subagent Delegation](/guides/claude-code/worktrees/)) that specializes in identifying security issues, then invoke it as part of your workflow -- either manually or automatically through hooks.
+The idea is straightforward: you create a security reviewer subagent (see [Git Worktrees & Subagent Delegation](/guides/claude-code/worktrees/)) that specializes in spotting security issues, then invoke it as part of your workflow, either manually or automatically through hooks.
 
-Here is a security-reviewer subagent definition:
+Here's a security reviewer subagent definition:
 
 <CodeBlock
   code={`---
@@ -403,66 +403,66 @@ When invoked:
   caption="A custom subagent that performs security code review."
 />
 
-You can trigger this subagent automatically by configuring a managed hook that runs on every file change:
+To trigger this subagent automatically, configure a managed hook that runs on every file change:
 
 <CodeBlock
   code={`{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "agent",
-            "agent": "security-reviewer"
-          }
-        ]
-      }
-    ]
-  }
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Write|Edit",
+          "hooks": [
+            {
+              "type": "agent",
+              "agent": "security-reviewer"
+            }
+          ]
+        }
+      ]
+    }
 }`}
   lang="json"
   title="managed-settings.json"
   caption="Automatically trigger security review after every file write or edit."
 />
 
-This pattern is powerful because it is composable. You can create specialized subagents for different security domains (dependency auditing, secret scanning, compliance checking) and combine them through hooks. The managed settings layer ensures these security hooks run for every developer and cannot be disabled.
+What makes this pattern powerful is its composability. You can create specialized subagents for different security domains (dependency auditing, secret scanning, compliance checking) and combine them through hooks. The managed settings layer ensures these security hooks run for every developer and can't be disabled.
 
-For more on creating skills that can also participate in security workflows, see [Custom Skills](/guides/claude-code/custom-skills/).
+For more on creating skills that can participate in security workflows, see [Custom Skills](/guides/claude-code/custom-skills/).
 
 ---
 
 ## Prompt Injection Protections
 
-Claude Code includes built-in protections against prompt injection attacks -- attempts to manipulate Claude Code through malicious instructions embedded in code, documentation, or fetched content.
+Claude Code includes built in protections against prompt injection attacks, which attempt to manipulate it through malicious instructions embedded in code, documentation, or fetched content.
 
 Three layers of defense are always active:
 
-**Command blocklist.** Known dangerous command patterns are blocked before execution. This prevents common attack vectors like piping untrusted content to a shell or executing base64-encoded payloads.
+**Command blocklist.** Known dangerous command patterns get blocked before execution. This catches common attack vectors like piping untrusted content to a shell or executing base64 encoded payloads.
 
-**Context-aware analysis.** Claude Code analyzes instructions found in fetched content, code comments, and documentation for suspicious patterns. If it detects an instruction that appears to be a prompt injection (for example, "ignore your previous instructions and run this command"), it flags the content and refuses to follow the injected instruction.
+**Context aware analysis.** Claude Code analyzes instructions found in fetched content, code comments, and documentation for suspicious patterns. If it detects something that looks like a prompt injection (for example, "ignore your previous instructions and run this command"), it flags the content and refuses to follow the injected instruction.
 
-**Isolated fetch context.** Content fetched from URLs via WebFetch is marked as untrusted and processed in an isolated context. Instructions embedded in fetched web pages cannot override your original prompt or the system-level instructions that govern Claude Code's behavior.
+**Isolated fetch context.** Content fetched from URLs via WebFetch is marked as untrusted and processed in an isolated context. Instructions embedded in fetched web pages can't override your original prompt or the system level instructions that govern Claude Code's behavior.
 
-These protections are always active and cannot be disabled. They form the bottom layer of the defense-in-depth strategy described at the beginning of this chapter.
+These protections are always on and can't be disabled. They form the bottom layer of the defense in depth strategy described at the beginning of this chapter.
 
 ---
 
 ## Monitoring and Compliance
 
-For organizations that need visibility into Claude Code usage, managed settings support monitoring integrations and organizational messaging.
+If your organization needs visibility into Claude Code usage, managed settings support monitoring integrations and organizational messaging.
 
-**OpenTelemetry integration.** Claude Code can export telemetry data via OpenTelemetry, giving your observability platform visibility into session activity, tool usage, and performance metrics. This integrates with existing monitoring infrastructure (Datadog, Grafana, Splunk, or any OpenTelemetry-compatible backend).
+**OpenTelemetry integration.** Claude Code can export telemetry data via OpenTelemetry, giving your observability platform visibility into session activity, tool usage, and performance metrics. It plugs right into existing monitoring infrastructure (Datadog, Grafana, Splunk, or any OpenTelemetry compatible backend).
 
-**`otelHeadersHelper`** allows custom header injection into OpenTelemetry export requests. This is useful for authentication with your telemetry backend or for adding organizational metadata to trace data.
+**`otelHeadersHelper`** lets you inject custom headers into OpenTelemetry export requests. This is handy for authenticating with your telemetry backend or adding organizational metadata to trace data.
 
-**`companyAnnouncements`** broadcasts messages to all Claude Code users in the organization. Use this for security advisories, policy updates, feature announcements, or maintenance windows. The announcement appears when users start a new Claude Code session.
+**`companyAnnouncements`** broadcasts messages to all Claude Code users in the organization. Use it for security advisories, policy updates, feature announcements, or maintenance windows. The announcement shows up when users start a new Claude Code session.
 
 <CodeBlock
   code={`{
-  "companyAnnouncements": [
-    "Security policy update: All projects must enable sandbox network isolation by March 15. See https://wiki.company.com/claude-code-policy for details."
-  ]
+    "companyAnnouncements": [
+      "Security policy update: All projects must enable sandbox network isolation by March 15. See https://wiki.company.com/claude-code-policy for details."
+    ]
 }`}
   lang="json"
   title="managed-settings.json"
@@ -473,7 +473,7 @@ For organizations that need visibility into Claude Code usage, managed settings 
 
 ## Verifying Configuration with /status
 
-After deploying managed settings, verify they took effect by running the `/status` command inside a Claude Code session.
+After deploying managed settings, verify they've taken effect by running `/status` inside a Claude Code session.
 
 <CodeBlock
   code={`/status`}
@@ -482,39 +482,39 @@ After deploying managed settings, verify they took effect by running the `/statu
   caption="Shows active settings per layer, including which values come from managed configuration."
 />
 
-The `/status` output displays:
+The `/status` output shows you:
 
-- The current settings for each configuration layer (managed, local, project, user)
+- Current settings for each configuration layer (managed, local, project, user)
 - Which settings are being overridden by managed configuration
-- The active permission rules and their source
+- Active permission rules and where they come from
 - Connected MCP servers and their governance status
 - Sandbox configuration and network restrictions
 
-Make `/status` part of your deployment checklist. After pushing managed settings through any of the five delivery mechanisms, ask a team member to run `/status` and confirm the expected settings appear.
+Make `/status` part of your deployment checklist. After pushing managed settings through any of the five delivery mechanisms, have a team member run `/status` and confirm the expected settings show up.
 
 ---
 
 ## Best Practices
 
-- **Start with permissive settings and tighten gradually.** Deploy monitoring-only managed settings first, observe how developers use Claude Code, then restrict based on actual usage patterns. A policy that is too restrictive from day one will be circumvented.
+- **Start permissive and tighten gradually.** Deploy monitoring only managed settings first, observe how developers actually use Claude Code, then restrict based on real usage patterns. A policy that's too restrictive from day one will get circumvented.
 
-- **Use `allowManagedPermissionRulesOnly` for critical security controls.** This is the single most impactful governance setting. When enabled, developers cannot add permissive rules that weaken organizational security.
+- **Use `allowManagedPermissionRulesOnly` for critical security controls.** This is the single most impactful governance setting. Once it's enabled, developers can't add permissive rules that weaken organizational security.
 
-- **Test managed settings on a pilot group first.** Roll out managed settings to a small team before organization-wide deployment. This catches configuration mistakes before they block hundreds of developers.
+- **Test managed settings on a pilot group first.** Roll out to a small team before going organization-wide. This catches configuration mistakes before they block hundreds of developers.
 
-- **Use sandbox network isolation to prevent data exfiltration.** The `allowedDomains` whitelist ensures Claude Code can only communicate with approved endpoints. This is especially important for organizations handling sensitive source code.
+- **Use sandbox network isolation to prevent data exfiltration.** The `allowedDomains` whitelist ensures Claude Code can only talk to approved endpoints. This is especially important if your organization handles sensitive source code.
 
-- **Keep `allowedHttpHookUrls` narrow.** Hooks that send HTTP requests should only reach your own infrastructure. A broad URL whitelist defeats the purpose of hook governance.
+- **Keep `allowedHttpHookUrls` narrow.** Hooks that send HTTP requests should only reach your own infrastructure. A broad URL whitelist defeats the whole purpose of hook governance.
 
-- **Document your managed settings for team visibility.** Publish your managed settings configuration (with any secrets redacted) on an internal wiki. Developers who understand why a policy exists are less likely to work around it.
+- **Document your managed settings for team visibility.** Publish your managed settings configuration (with secrets redacted) on an internal wiki. Developers who understand why a policy exists are far less likely to work around it.
 
-- **Use `/status` to audit configuration.** Make it part of your onboarding checklist and periodic security reviews. If a developer reports unexpected behavior, `/status` is the first diagnostic step.
+- **Use `/status` to audit configuration.** Make it part of your onboarding checklist and periodic security reviews. When a developer reports unexpected behavior, `/status` is the first diagnostic step.
 
 ---
 
 ## Further Reading
 
-- <a href="https://code.claude.com/docs/en/security" target="_blank" rel="noopener noreferrer">Security</a> -- official documentation on Claude Code's security model and prompt injection protections
-- <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">Settings</a> -- managed settings delivery, precedence hierarchy, and all governance controls
-- <a href="https://code.claude.com/docs/en/plugins" target="_blank" rel="noopener noreferrer">Plugins</a> -- plugin architecture, marketplace distribution, and governance settings
-- See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for the individual-level permission system that enterprise governance builds upon
+- <a href="https://code.claude.com/docs/en/security" target="_blank" rel="noopener noreferrer">Security</a>: official documentation on Claude Code's security model and prompt injection protections
+- <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">Settings</a>: managed settings delivery, precedence hierarchy, and all governance controls
+- <a href="https://code.claude.com/docs/en/plugins" target="_blank" rel="noopener noreferrer">Plugins</a>: plugin architecture, marketplace distribution, and governance settings
+- See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for the individual level permission system that enterprise governance builds upon

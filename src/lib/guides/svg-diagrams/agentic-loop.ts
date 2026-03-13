@@ -20,7 +20,7 @@ const MARKER_ID = 'agentic-arrow';
 
 /** Generate the Agentic Loop cycle SVG diagram */
 export function generateAgenticLoop(): string {
-  const config: DiagramConfig = { width: 720, height: 450, fontFamily: "'DM Sans', sans-serif" };
+  const config: DiagramConfig = { width: 720, height: 480, fontFamily: "'DM Sans', sans-serif" };
 
   const parts: string[] = [];
 
@@ -31,18 +31,18 @@ export function generateAgenticLoop(): string {
   parts.push(arrowMarkerDef(MARKER_ID));
 
   // === Phase box dimensions ===
-  const boxW = 180;
-  const boxH = 70;
+  const boxW = 240;
+  const boxH = 75;
 
   // Triangular layout: top-center, bottom-left, bottom-right
   const gatherX = config.width / 2 - boxW / 2;
   const gatherY = 40;
 
-  const actionX = config.width / 2 + 100;
-  const actionY = 250;
+  const actionX = config.width / 2 + 70;
+  const actionY = 260;
 
-  const verifyX = config.width / 2 - 100 - boxW;
-  const verifyY = 250;
+  const verifyX = config.width / 2 - 70 - boxW;
+  const verifyY = 260;
 
   // === Phase 1: Gather Context (top center) ===
   parts.push(roundedRect(gatherX, gatherY, boxW, boxH, {
@@ -57,7 +57,7 @@ export function generateAgenticLoop(): string {
     fill: DIAGRAM_PALETTE.accent,
   }));
   parts.push(textLabel(gatherX + boxW / 2, gatherY + 50, 'Read files, search code, explore codebase', {
-    fontSize: 10,
+    fontSize: 11,
     fill: DIAGRAM_PALETTE.textSecondary,
   }));
 
@@ -74,7 +74,7 @@ export function generateAgenticLoop(): string {
     fill: DIAGRAM_PALETTE.accent,
   }));
   parts.push(textLabel(actionX + boxW / 2, actionY + 50, 'Edit files, run commands, create files', {
-    fontSize: 10,
+    fontSize: 11,
     fill: DIAGRAM_PALETTE.textSecondary,
   }));
 
@@ -91,7 +91,7 @@ export function generateAgenticLoop(): string {
     fill: DIAGRAM_PALETTE.accent,
   }));
   parts.push(textLabel(verifyX + boxW / 2, verifyY + 50, 'Run tests, check output, validate changes', {
-    fontSize: 10,
+    fontSize: 11,
     fill: DIAGRAM_PALETTE.textSecondary,
   }));
 

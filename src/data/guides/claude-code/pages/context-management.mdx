@@ -6,16 +6,17 @@ slug: "context-management"
 lastVerified: 2026-03-10
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
 
-## What You Will Learn
+## What You'll Learn
 
-This chapter covers how to give Claude Code project-specific knowledge so it produces better results from the first prompt. You will learn the CLAUDE.md file hierarchy, path-specific rules, the auto-memory system, context window management commands, and how to exclude files from loading. By the end, you will know how to configure Claude Code for any project.
+This chapter is all about giving Claude Code the right project-specific knowledge so it produces better results from the very first prompt. We'll walk through the CLAUDE.md file hierarchy, path-specific rules, the auto-memory system, context window management commands, and how to exclude files from loading. By the end, you'll know how to configure Claude Code for any project.
 
 ## The CLAUDE.md File
 
-CLAUDE.md is the primary way to give Claude Code project-specific instructions. When you start a session, Claude Code automatically reads CLAUDE.md from your project root before doing anything else. Think of it as a briefing document -- it tells Claude Code what this project is, how it is structured, and what conventions to follow.
+CLAUDE.md is the primary way to give Claude Code project-specific instructions. When you start a session, Claude Code automatically reads CLAUDE.md from your project root before doing anything else. Think of it as a briefing document that tells Claude Code what this project is, how it's structured, and what conventions to follow.
 
-Here is a minimal example:
+Here's a minimal example:
 
 <CodeBlock
   code={`# Project Overview
@@ -40,7 +41,7 @@ This is a Node.js REST API built with Express and TypeScript.
 
 ## What to Avoid
 
-- Do not use any/unknown types -- always define proper interfaces
+- Do not use any/unknown types. Always define proper interfaces
 - Do not add dependencies without checking if an existing one covers the need
 - Do not modify migration files that have already been applied`}
   lang="markdown"
@@ -48,29 +49,29 @@ This is a Node.js REST API built with Express and TypeScript.
   caption="A well-structured CLAUDE.md gives Claude Code the context it needs to produce code that matches your project conventions from the first interaction."
 />
 
-Without a CLAUDE.md, Claude Code still works -- it reads your code and infers patterns. But explicit instructions produce more consistent results, especially for conventions that cannot be inferred from code alone (like naming preferences or architectural decisions).
+Without a CLAUDE.md, Claude Code still works. It reads your code and infers patterns. But explicit instructions produce far more consistent results, especially for conventions that can't be inferred from code alone (like naming preferences or architectural decisions).
 
 ## CLAUDE.md Hierarchy
 
-CLAUDE.md files can exist at three scopes, each with a different purpose and priority level.
+CLAUDE.md files can live at three different scopes, each serving a different purpose and carrying a different priority level.
 
-**Managed policy** is the highest-priority scope, set by organization admins in enterprise deployments. These instructions cannot be overridden by project or user files. Managed policies enforce organizational standards like security requirements, approved libraries, and compliance rules.
+**Managed policy** sits at the top of the priority chain. Organization admins set these in enterprise deployments, and they can't be overridden by project or user files. Managed policies enforce organizational standards like security requirements, approved libraries, and compliance rules.
 
-**Project scope** is where most teams put their instructions. A project CLAUDE.md lives at the root of your repository (`./CLAUDE.md`) or inside the `.claude` directory (`./.claude/CLAUDE.md`). Both locations are equivalent -- the `.claude` directory option keeps your project root clean. Project-scoped instructions apply to everyone working on the repository.
+**Project scope** is where most teams put their instructions. A project CLAUDE.md lives at the root of your repository (`./CLAUDE.md`) or inside the `.claude` directory (`./.claude/CLAUDE.md`). Both locations are equivalent; the `.claude` directory option just keeps your project root clean. Project scoped instructions apply to everyone working on the repository.
 
 <CodeBlock
   code={`# Project Architecture
 
 This is a monorepo using Turborepo with three packages:
-- packages/api -- Express REST API
-- packages/web -- Next.js frontend
-- packages/shared -- Shared types and utilities
+- packages/api: Express REST API
+- packages/web: Next.js frontend
+- packages/shared: Shared types and utilities
 
 ## Build Commands
 
-- \`turbo run build\` -- build all packages
-- \`turbo run test\` -- run all test suites
-- \`turbo run lint\` -- lint all packages
+- \`turbo run build\`: build all packages
+- \`turbo run test\`: run all test suites
+- \`turbo run lint\`: lint all packages
 
 ## PR Standards
 
@@ -82,7 +83,7 @@ This is a monorepo using Turborepo with three packages:
   caption="Project CLAUDE.md is committed to the repository and shared with the entire team."
 />
 
-**User scope** applies your personal preferences across all projects. It lives at `~/.claude/CLAUDE.md` in your home directory. Use this for settings like your preferred coding style, editor integration preferences, or personal workflow rules.
+**User scope** is where your personal preferences go, and they apply across all your projects. This file lives at `~/.claude/CLAUDE.md` in your home directory. It's a great place for things like your preferred coding style, editor integration preferences, or personal workflow rules.
 
 <CodeBlock
   code={`# Personal Preferences
@@ -96,13 +97,13 @@ This is a monorepo using Turborepo with three packages:
   caption="User CLAUDE.md applies to all your projects but is never shared with teammates."
 />
 
-When multiple scopes exist, the precedence order is: **managed > project > user**. If a managed policy says "never use eval()" and a project CLAUDE.md says "eval() is allowed for template rendering," the managed policy wins. Project instructions override user preferences in the same way.
+When multiple scopes overlap, precedence goes: **managed > project > user**. So if a managed policy says "never use eval()" but a project CLAUDE.md says "eval() is allowed for template rendering," the managed policy wins. Project instructions override user preferences the same way.
 
 ## Writing Effective Instructions
 
-The best CLAUDE.md files are concise, specific, and actionable. Target under 200 lines. Every instruction should tell Claude Code something it could not easily infer from reading the code.
+The best CLAUDE.md files are concise, specific, and actionable. Aim for under 200 lines. Every instruction should tell Claude Code something it couldn't easily infer from reading the code.
 
-Here is the difference between vague and effective instructions:
+Here's the difference between vague and effective instructions:
 
 <CodeBlock
   code={`## Error Handling
@@ -116,7 +117,7 @@ Handle errors properly in the codebase.`}
   code={`## Error Handling
 
 - Wrap all route handlers in the asyncHandler() utility from src/middleware/async.ts
-- Throw AppError (from src/errors.ts) with an HTTP status code -- never throw raw Error objects
+- Throw AppError (from src/errors.ts) with an HTTP status code. Never throw raw Error objects
 - Log errors with the request trace ID: logger.error({ traceId: req.traceId, err })
 - Return error responses in the envelope format: { data: null, error: { code, message }, meta: {} }
 - Never expose stack traces or internal error messages in API responses`}
@@ -124,19 +125,46 @@ Handle errors properly in the codebase.`}
   title="Specific (much more useful)"
 />
 
-The specific version tells Claude Code exactly which utilities to use, what format to follow, and what to avoid. It produces correct code on the first attempt instead of requiring corrections.
+The specific version tells Claude Code exactly which utilities to use, what format to follow, and what to avoid. You'll get correct code on the first attempt instead of going back and forth with corrections.
 
-**Guidelines for effective CLAUDE.md files:**
+Here's what it looks like in practice. Claude Code reads CLAUDE.md at startup and follows its conventions when generating code:
 
-- Use markdown headings and bullet points for scannable structure
+<TerminalRecording
+  src="/recordings/claude-code/context-claude-md.cast"
+  caption="CLAUDE.md being read at startup and influencing code generation"
+  rows={24}
+  cols={90}
+  speed={1.2}
+  idleTimeLimit={3}
+  transcript={`$ cat CLAUDE.md
+  # Project Conventions
+  - Use JSDoc comments on all exported functions
+  - Use camelCase for variables and functions
+  - Every new endpoint must include tests
+
+  $ claude
+
+  > Add a GET /api/users endpoint that returns a list of users.
+  > Follow the project conventions in CLAUDE.md.
+
+  Read CLAUDE.md
+  Read src/routes/auth.ts
+
+  Claude reads CLAUDE.md, notices the conventions (JSDoc, camelCase,
+  test requirement), and follows them when creating the endpoint.`}
+/>
+
+**Guidelines for writing effective CLAUDE.md files:**
+
+- Use markdown headings and bullet points so everything is easy to scan
 - Reference specific file paths, function names, and patterns from your codebase
-- Include "what to avoid" sections -- telling Claude Code what not to do is as important as telling it what to do
-- State the "why" when it is not obvious so Claude Code can apply the principle to novel situations
-- Keep it under 200 lines -- if you need more, use path-specific rules or the @import syntax
+- Include "what to avoid" sections, because telling Claude Code what *not* to do is just as important as telling it what to do
+- State the "why" when it isn't obvious, so Claude Code can apply the principle to novel situations
+- Keep it under 200 lines. If you need more, reach for path-specific rules or the @import syntax
 
 ## Path-Specific Rules with .claude/rules/
 
-For rules that apply only to certain parts of your codebase, use the `.claude/rules/` directory. Each file in this directory contains YAML frontmatter with a glob pattern specifying which files the rules apply to, followed by the rules themselves in markdown.
+When you have rules that only apply to certain parts of your codebase, the `.claude/rules/` directory is exactly what you need. Each file in this directory contains YAML frontmatter with a glob pattern that specifies which files the rules apply to, followed by the rules themselves in markdown.
 
 <CodeBlock
   code={`---
@@ -166,22 +194,22 @@ globs: "src/components/**/*.tsx"
 - Colocate styles in .module.css files next to the component
 - Export a Storybook story for every visual component
 - Use the useTranslation() hook for all user-facing text
-- Avoid inline styles -- use the design token CSS variables`}
+- Avoid inline styles. Use the design token CSS variables`}
   lang="markdown"
   title=".claude/rules/components.md"
-  caption="Component-specific rules load only when editing React component files."
+  caption="Component specific rules load only when editing React component files."
 />
 
 **When to use .claude/rules/ vs CLAUDE.md:**
 
-- **CLAUDE.md** for project-wide conventions that apply to all files (architecture, build commands, general patterns)
+- **CLAUDE.md** for project wide conventions that apply to all files (architecture, build commands, general patterns)
 - **.claude/rules/** for path-specific conventions that only apply to certain file types or directories (API route patterns, component standards, test conventions)
 
-Rules files keep your main CLAUDE.md focused and prevent Claude Code from loading irrelevant instructions. When editing a frontend component, Claude Code does not need to know about API rate limiting rules.
+Rules files keep your main CLAUDE.md focused and prevent Claude Code from loading irrelevant instructions. When you're editing a frontend component, Claude Code doesn't need to know about API rate limiting rules.
 
 ## The @import Syntax
 
-CLAUDE.md supports `@path/to/file` references that pull in content from other files. This keeps your CLAUDE.md concise while giving Claude Code access to detailed documentation when needed.
+CLAUDE.md supports `@path/to/file` references that pull in content from other files. This lets you keep your CLAUDE.md concise while still giving Claude Code access to detailed documentation when it needs it.
 
 <CodeBlock
   code={`# Project Overview
@@ -202,27 +230,27 @@ Our core API conventions are documented in detail:
   caption="The @import syntax pulls content from referenced files into the context."
 />
 
-When Claude Code reads this CLAUDE.md, it follows the `@` references and loads the content of those files into context. This is useful for projects with detailed documentation that would make CLAUDE.md too long if included inline.
+When Claude Code reads this CLAUDE.md, it follows the `@` references and loads the content of those files into context. This works really well for projects with detailed documentation that would make CLAUDE.md way too long if you included everything inline.
 
-**Important limits:**
+**A few important limits to keep in mind:**
 
-- Imports can be recursive -- a referenced file can contain its own `@` references
-- The maximum recursion depth is **5 hops** to prevent circular references from consuming the context window
+- Imports can be recursive, meaning a referenced file can contain its own `@` references
+- The maximum recursion depth is **5 hops**, which prevents circular references from eating up the context window
 - Referenced files must exist at the specified path relative to the project root
 - Only text files can be imported (not binaries or images)
 
 ## Auto-Memory System
 
-Claude Code remembers things across sessions through an automatic memory system. When you tell Claude Code something it should remember ("always use tabs for indentation in this project"), it writes that to a memory file that persists between sessions.
+Claude Code can remember things across sessions through its automatic memory system. When you tell Claude Code something it should remember ("always use tabs for indentation in this project"), it writes that to a memory file that persists between sessions.
 
-Memory is stored in the `~/.claude/projects/` directory, organized by project. Each project directory contains:
+Memory gets stored in the `~/.claude/projects/` directory, organized by project. Each project directory contains:
 
-- **MEMORY.md** -- the primary memory file, loaded at session start. This file has a **200-line limit** to prevent it from consuming too much context window.
-- **Topic-specific memory files** -- additional files for specific topics that are loaded on-demand when Claude Code determines they are relevant to the current task.
+- **MEMORY.md**, the primary memory file, loaded at session start. It has a **200-line limit** so it doesn't consume too much of the context window.
+- **Topic-specific memory files** for particular topics that get loaded on demand when Claude Code determines they're relevant to the current task.
 
-Claude Code creates and updates these files automatically based on your conversations. You do not need to manage them directly, though you can review and edit them if needed.
+Claude Code creates and updates these files automatically based on your conversations. You don't need to manage them directly, though you can always review and edit them if you want to.
 
-The `/memory` command lets you browse loaded memory files and toggle auto-memory on or off. It also opens the memory file in your default editor if you want to review or prune old entries.
+The `/memory` command lets you browse loaded memory files and toggle auto memory on or off. It also opens the memory file in your default editor so you can review or prune old entries.
 
 <CodeBlock
   code={`/memory`}
@@ -231,13 +259,43 @@ The `/memory` command lets you browse loaded memory files and toggle auto-memory
   caption="Use /memory to see what Claude Code remembers about your project and manage stored context."
 />
 
-Memory is project-specific. Claude Code will not carry memories from one project into another unless they are in your user-scope `~/.claude/CLAUDE.md` file. This prevents context pollution between unrelated projects.
+Here's the full flow: teaching Claude Code a preference, verifying it was stored, and confirming it persists across sessions:
+
+<TerminalRecording
+  src="/recordings/claude-code/context-memory.cast"
+  caption="Auto-memory persisting a preference across sessions"
+  rows={24}
+  cols={90}
+  speed={1.2}
+  idleTimeLimit={3}
+  transcript={`$ claude
+
+  > Remember: in this project always use pnpm instead of npm.
+
+  Claude acknowledges and saves the preference to auto-memory.
+
+  > /memory
+
+  Shows memory layers: parent CLAUDE.md, user memory,
+  project memory, and auto-memory folder.
+
+  > /quit
+
+  $ claude   (new session)
+
+  > Install express-validator as a dependency
+
+  Claude runs 'pnpm add express-validator', not npm install.
+  The pnpm preference survived across sessions.`}
+/>
+
+Memory is project-specific. Claude Code won't carry memories from one project into another unless they're in your user scope `~/.claude/CLAUDE.md` file. This keeps unrelated projects from polluting each other's context.
 
 ## Context Window Management
 
-Claude Code operates within a context window -- the total amount of text it can "see" at once. As you work through a long session, the context window fills up with conversation history, file contents, and command output. Managing this window is important for maintaining Claude Code's effectiveness.
+Claude Code operates within a context window, which is the total amount of text it can "see" at once. As you work through a long session, the context window fills up with conversation history, file contents, and command output. Keeping an eye on this window matters for maintaining Claude Code's effectiveness.
 
-**Checking context usage.** The `/context` command shows how much of the context window is currently used. This is useful when Claude Code starts feeling slow or when responses seem to miss information you shared earlier in the session.
+**Checking context usage.** The `/context` command shows how much of the context window you're currently using. This comes in handy when Claude Code starts feeling slow or when responses seem to miss information you shared earlier in the session.
 
 <CodeBlock
   code={`/context`}
@@ -246,9 +304,9 @@ Claude Code operates within a context window -- the total amount of text it can 
   caption="Shows current context window utilization and available capacity."
 />
 
-**Auto-compaction.** When the context window fills up, Claude Code automatically compresses the conversation by summarizing earlier exchanges. This happens transparently -- you do not need to do anything. The summary preserves key decisions and context while freeing space for new work.
+**Auto-compaction.** When the context window fills up, Claude Code automatically compresses the conversation by summarizing earlier exchanges. This happens transparently, so you don't need to do anything. The summary preserves key decisions and context while freeing up space for new work.
 
-**Manual compaction.** The `/compact` command triggers compaction manually. You can optionally provide a focus instruction to tell Claude Code what to prioritize during compression.
+**Manual compaction.** You can also trigger compaction yourself with the `/compact` command. Optionally, add a focus instruction to tell Claude Code what to prioritize during compression.
 
 <CodeBlock
   code={`/compact focus on the authentication module changes`}
@@ -257,9 +315,9 @@ Claude Code operates within a context window -- the total amount of text it can 
   caption="Compresses the conversation while retaining context relevant to the authentication module."
 />
 
-This is especially useful during long sessions where you have shifted focus. Compacting with a focus instruction ensures the most relevant context is preserved.
+This is especially useful during long sessions where you've shifted focus. Compacting with a focus instruction makes sure the most relevant context sticks around.
 
-**Starting fresh.** The `/clear` command resets the conversation entirely. Use this between unrelated tasks in the same session -- it clears the context window and lets Claude Code start with a clean slate.
+**Starting fresh.** The `/clear` command resets the conversation entirely. Use it between unrelated tasks in the same session. It wipes the context window and lets Claude Code start with a clean slate.
 
 <CodeBlock
   code={`/clear`}
@@ -268,15 +326,65 @@ This is especially useful during long sessions where you have shifted focus. Com
   caption="Resets the context window. CLAUDE.md and memory files are reloaded automatically."
 />
 
-After `/clear`, Claude Code reloads your CLAUDE.md and memory files, so project-specific instructions remain available even with a fresh context.
+After `/clear`, Claude Code reloads your CLAUDE.md and memory files automatically, so your project-specific instructions are still available even with a fresh context.
+
+**Side questions with /btw.** Sometimes you need a quick answer mid-session but don't want the question and response eating up your context window. The `/btw` command is built for exactly this. Type `/btw` followed by your question, and Claude Code answers in a dismissible overlay that never enters the conversation history.
+
+<CodeBlock
+  code={`/btw what was the name of that config file again?`}
+  lang="text"
+  title="Asking a side question"
+  caption="The answer appears in an overlay. Press Space, Enter, or Escape to dismiss it and return to the prompt."
+/>
+
+`/btw` has full visibility into the current conversation, so you can ask about code Claude Code has already read, decisions it made earlier, or anything else from the session. A few things to know:
+
+- **Works while Claude is processing** — you can run `/btw` even while Claude Code is mid-response. The side question runs independently and doesn't interrupt the main turn.
+- **No tool access** — side questions answer only from what's already in context. Claude Code won't read files, run commands, or search when answering.
+- **Single response** — there are no follow-up turns. If you need a back-and-forth, use a normal prompt instead.
+- **Low cost** — the side question reuses the parent conversation's prompt cache, so the additional cost is minimal.
+
+Think of `/btw` as the inverse of a subagent: `/btw` sees your full conversation but has no tools, while a subagent has full tools but starts with an empty context. Use `/btw` to ask about what Claude Code already knows; use a subagent to go find out something new.
+
+Here are the commands in action, checking context usage, compacting with a focus, asking a side question, and clearing the slate:
+
+<TerminalRecording
+  src="/recordings/claude-code/context-window.cast"
+  caption="Using /context, /compact, and /clear to manage the context window"
+  rows={24}
+  cols={90}
+  speed={1}
+  idleTimeLimit={3}
+  transcript={`> Explain the entire project architecture, every file and its purpose.
+
+  Claude reads all files and gives a thorough response.
+
+  > /context
+
+  Shows the colored token usage grid with current utilization.
+
+  > /compact focus on the auth middleware
+
+  Compacting conversation...
+  Done. Compressed with focus on authentication middleware.
+
+  > /btw what was the middleware wrapper function called?
+
+  A dismissible overlay appears with the answer.
+  Press Space/Enter/Escape to dismiss. Nothing added to context.
+
+  > /clear
+
+  Conversation cleared. CLAUDE.md and memory reloaded.`}
+/>
 
 ## File Exclusion
 
-By default, Claude Code can read any file in your project directory. For large codebases, you may want to exclude certain files or directories to prevent them from consuming context window space unnecessarily.
+By default, Claude Code can read any file in your project directory. For large codebases, you'll probably want to exclude certain files or directories so they don't eat up context window space unnecessarily.
 
-Claude Code provides two mechanisms for file exclusion. There is no standalone `.claudeignore` file -- exclusion is handled through settings.
+Claude Code gives you two mechanisms for file exclusion. There's no standalone `.claudeignore` file; exclusion is handled through settings.
 
-**respectGitignore** (default: true) tells Claude Code to honor your existing `.gitignore` patterns. If a file is ignored by Git, Claude Code will not read or load it into context. This is enabled by default, so files like `node_modules/`, `dist/`, and `.env` are already excluded if they are in your `.gitignore`.
+**respectGitignore** (default: true) tells Claude Code to honor your existing `.gitignore` patterns. If a file is ignored by Git, Claude Code won't read or load it into context. Since this is enabled by default, files like `node_modules/`, `dist/`, and `.env` are already excluded if they're in your `.gitignore`.
 
 <CodeBlock
   code={`# .gitignore (already respected by Claude Code by default)
@@ -291,7 +399,7 @@ coverage/
   caption="Files matching .gitignore patterns are excluded from Claude Code's context when respectGitignore is enabled (the default)."
 />
 
-**claudeMdExcludes** lets you specify additional exclusion patterns directly in your CLAUDE.md. Use this for files that are tracked by Git but should not be loaded into Claude Code's context -- such as large data files, generated code, or vendor bundles.
+**claudeMdExcludes** lets you specify additional exclusion patterns directly in your CLAUDE.md. Use this for files that are tracked by Git but shouldn't be loaded into Claude Code's context, such as large data files, generated code, or vendor bundles.
 
 <CodeBlock
   code={`# File Exclusions
@@ -308,28 +416,28 @@ claudeMdExcludes:
   caption="claudeMdExcludes prevents specified files from being loaded into context, even if they are tracked by Git."
 />
 
-Together, `respectGitignore` and `claudeMdExcludes` give you fine-grained control over what Claude Code sees. Git-ignored files are excluded automatically. Git-tracked files that should not be in context are excluded via CLAUDE.md patterns.
+Together, `respectGitignore` and `claudeMdExcludes` give you fine-grained control over what Claude Code sees. Git-ignored files get excluded automatically, and Git-tracked files that shouldn't be in context are excluded via CLAUDE.md patterns.
 
 ## Best Practices
 
-- **Keep CLAUDE.md under 200 lines.** Long instruction files consume context window space that is better used for actual code. Move detailed documentation to imported files or path-specific rules.
+- **Keep CLAUDE.md under 200 lines.** Long instruction files eat up context window space that's better used for actual code. Move detailed documentation into imported files or path-specific rules.
 
-- **Use .claude/rules/ for team or area conventions.** API rules for the API team, component rules for the frontend team, infrastructure rules for DevOps. Each specialty gets relevant instructions without cluttering the global CLAUDE.md.
+- **Use .claude/rules/ for team or area conventions.** API rules for the API team, component rules for the frontend team, infrastructure rules for DevOps. Each specialty gets the instructions it needs without cluttering the global CLAUDE.md.
 
-- **Clear context between unrelated tasks.** After finishing a refactoring task, run `/clear` before starting a bug fix in a different part of the codebase. A clean context produces better results than a stale one.
+- **Clear context between unrelated tasks.** Done with a refactoring task? Run `/clear` before starting a bug fix in a different part of the codebase. A clean context produces better results than a stale one.
 
 - **Review auto-memory periodically.** Check `~/.claude/projects/` to see what Claude Code has remembered. Prune outdated entries to keep memory relevant and within the 200-line limit.
 
-- **Use @imports for detailed documentation.** Keep CLAUDE.md as a high-level overview and import detailed guides, architecture docs, and convention documents.
+- **Use @imports for detailed documentation.** Keep CLAUDE.md as a high-level overview and import your detailed guides, architecture docs, and convention documents.
 
-- **Be explicit about what to avoid.** "Never use moment.js -- use date-fns instead" is more useful than "use modern date libraries." Negative instructions prevent common mistakes.
+- **Be explicit about what to avoid.** "Never use moment.js; use date-fns instead" is way more useful than "use modern date libraries." Negative instructions go a long way in preventing common mistakes.
 
-- **Update CLAUDE.md when conventions change.** Stale instructions are worse than no instructions -- they cause Claude Code to produce code that follows outdated patterns. Review CLAUDE.md as part of your regular project maintenance.
+- **Update CLAUDE.md when conventions change.** Stale instructions are worse than no instructions because they cause Claude Code to produce code that follows outdated patterns. Make reviewing CLAUDE.md part of your regular project maintenance.
 
 ## Further Reading
 
-- <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener noreferrer">Memory & Project Context</a> -- official documentation on CLAUDE.md, auto-memory, and context management
-- <a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener noreferrer">How Claude Code Works</a> -- context window mechanics and auto-compaction behavior
+- <a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener noreferrer">Memory & Project Context</a>: official documentation on CLAUDE.md, auto-memory, and context management
+- <a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener noreferrer">How Claude Code Works</a>: context window mechanics and auto-compaction behavior
 
 ---
 

@@ -63,15 +63,15 @@ const accent = guideMeta.data.accentColor ?? '#D97706';
 
     <!-- Prerequisites Box -->
     <div class="mt-8 p-5 rounded-lg border border-[var(--color-border)] max-w-2xl" style={`border-left: 4px solid ${accent}`}>
-      <h2 class="font-heading font-bold text-base mb-2">Prerequisites & Audience</h2>
+      <h2 class="font-heading font-bold text-base mb-2">Who This Guide Is For</h2>
       <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-        For developers familiar with CLI tools and AI-assisted development. Requires Node.js 18+ and a Claude API subscription.
+        Whether you're a seasoned developer, a vibe coder building with AI, or someone who's never touched a terminal before, this guide meets you where you are. No programming experience required.
       </p>
       {guideMeta.data.requirements && (
         <div class="flex flex-wrap gap-2 mt-3">
           {Object.entries(guideMeta.data.requirements).map(([pkg, ver]) => (
             <span class="text-xs font-mono bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] px-2 py-1 rounded border border-[var(--color-border)]">
-              {pkg} {ver}
+              {pkg}{ver ? ` ${ver}` : ''}
             </span>
           ))}
         </div>
