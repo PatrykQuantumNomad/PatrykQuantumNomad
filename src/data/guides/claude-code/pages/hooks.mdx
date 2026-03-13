@@ -1,9 +1,11 @@
 ---
 title: "Hooks & Lifecycle Automation"
-description: "Lifecycle events, exit codes, and prompt/agent hooks"
+description: "Automate quality enforcement with 18 lifecycle events — lint before commits, block dangerous commands, and log every tool invocation to an audit system."
 order: 7
 slug: "hooks"
 lastVerified: 2026-03-10
+updatedDate: 2026-03-13
+keywords: ["claude code hooks", "lifecycle events", "PreToolUse", "automation", "audit logging", "quality enforcement", "ci cd integration"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
@@ -17,6 +19,8 @@ This chapter walks you through Claude Code's hook system, which lets you automat
 By the end, you'll be able to configure hooks that lint code before commits, block dangerous commands, send notifications on task completion, and enforce project-specific workflows.
 
 ## What Are Hooks?
+
+**Hooks** are shell commands that fire automatically at specific points in the Claude Code lifecycle, enabling CI-style automation directly within the agentic workflow.
 
 Hooks are automations that run at specific points in Claude Code's lifecycle. They fire in response to events such as a session starting, a tool about to run, or a prompt being submitted, and can do just about anything: run a shell script, call an HTTP endpoint, evaluate an LLM prompt, or hand things off to a subagent.
 

@@ -1,8 +1,9 @@
 [
   {
     "id": "claude-code",
-    "title": "Claude Code Guide",
-    "description": "The definitive zero-to-hero guide for Claude Code, from first agentic interaction through multi-agent orchestration.",
+    "title": "Claude Code Guide: From First Session to Multi-Agent Orchestration",
+    "shortTitle": "Claude Code Guide",
+    "description": "The definitive zero-to-hero guide for Claude Code — Anthropic's agentic coding tool. Master CLAUDE.md, MCP integrations, custom skills, hooks, worktrees, and agent teams across 11 practitioner-driven chapters.",
     "slug": "claude-code",
     "accentColor": "#D97706",
     "publishedDate": "2026-03-15",
@@ -11,17 +12,17 @@
       "Anthropic account": ""
     },
     "chapters": [
-      { "slug": "introduction", "title": "Introduction & Getting Started", "description": "The agentic loop, installation across all interfaces, core tools, and your first checkpoint" },
-      { "slug": "context-management", "title": "Project Context & Memory", "description": "CLAUDE.md hierarchy, auto-memory, context rot prevention, and file exclusion" },
-      { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Model selection, effort levels, pricing tiers, and the permission system" },
-      { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configuration scopes, sandboxed execution, and status line customization" },
-      { "slug": "remote-and-headless", "title": "Remote Control & Headless Automation", "description": "Remote control, headless mode, cron scheduling, and HTTP proxy configuration" },
-      { "slug": "mcp", "title": "Model Context Protocol", "description": "Connecting external tools, transport modes, tool search, and troubleshooting" },
-      { "slug": "custom-skills", "title": "Custom Skills", "description": "SKILL.md anatomy, slash commands vs auto-invocation, and the skill creator" },
-      { "slug": "hooks", "title": "Hooks & Lifecycle Automation", "description": "Lifecycle events, exit codes, and prompt/agent hooks" },
-      { "slug": "worktrees", "title": "Git Worktrees & Subagent Delegation", "description": "Parallel development branches and custom agent personas" },
-      { "slug": "agent-teams", "title": "Agent Teams & Advanced Orchestration", "description": "Team architecture, shared tasks, and dependency tracking (research preview)" },
-      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Vulnerability scanning, managed settings, and plugin governance" }
+      { "slug": "introduction", "title": "Introduction & Getting Started", "description": "Learn how Claude Code's agentic loop works, install on macOS/Linux/Windows, explore the core tool set, and complete your first AI-assisted coding session." },
+      { "slug": "context-management", "title": "Project Context & Memory", "description": "Master the CLAUDE.md hierarchy, auto-memory system, path-specific rules, and context window management to get dramatically better results from Claude Code." },
+      { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Choose between Sonnet, Opus, and Haiku for cost-effective AI coding. Configure effort levels, track spending, and set up the deny/ask/allow permission system." },
+      { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configure Claude Code's four-tier settings hierarchy, enable macOS Seatbelt or Linux sandbox isolation, and customize the terminal status line." },
+      { "slug": "remote-and-headless", "title": "Remote Control & Headless Automation", "description": "Run Claude Code from any device via remote control, automate with headless mode in CI/CD pipelines, and schedule recurring tasks with cron." },
+      { "slug": "mcp", "title": "Model Context Protocol", "description": "Connect Claude Code to external tools — databases, APIs, ticketing systems — using the Model Context Protocol with stdio, HTTP, and OAuth authentication." },
+      { "slug": "custom-skills", "title": "Custom Skills", "description": "Build reusable SKILL.md files that encode team conventions as slash commands or auto-invoked capabilities, with tool restrictions and subagent isolation." },
+      { "slug": "hooks", "title": "Hooks & Lifecycle Automation", "description": "Automate quality enforcement with 18 lifecycle events — lint before commits, block dangerous commands, and log every tool invocation to an audit system." },
+      { "slug": "worktrees", "title": "Git Worktrees & Subagent Delegation", "description": "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions." },
+      { "slug": "agent-teams", "title": "Agent Teams & Advanced Orchestration", "description": "Coordinate multiple Claude Code instances on shared task lists with dependency tracking and peer-to-peer communication (research preview)." },
+      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Deploy Claude Code at organizational scale with managed settings, permission governance, sandbox enforcement, and OpenTelemetry audit compliance." }
     ]
   }
 ]

@@ -19,9 +19,10 @@ interface Props {
   dateModified?: string;
   parentTitle?: string;
   parentUrl?: string;
+  keywords?: string[];
 }
 
-const { title, description, url, isLanding = false, datePublished, dateModified, parentTitle = 'FastAPI Production Guide', parentUrl = 'https://patrykgolabek.dev/guides/fastapi-production/' } = Astro.props;
+const { title, description, url, isLanding = false, datePublished, dateModified, parentTitle = 'FastAPI Production Guide', parentUrl = 'https://patrykgolabek.dev/guides/fastapi-production/', keywords } = Astro.props;
 
 const person = {
   "@type": "Person",
@@ -56,6 +57,11 @@ const schema = isLanding
       "author": person,
       "publisher": person,
       ...dateFields,
+      ...(keywords?.length ? { "keywords": keywords.join(", ") } : {}),
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": ["h1", "h2", "[data-tldr]"],
+      },
       "isPartOf": {
         "@type": "WebPage",
         "name": parentTitle,

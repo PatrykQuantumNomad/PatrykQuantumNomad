@@ -1,9 +1,11 @@
 ---
 title: "Git Worktrees & Subagent Delegation"
-description: "Parallel development branches and custom agent personas"
+description: "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions."
 order: 8
 slug: "worktrees"
 lastVerified: 2026-03-10
+updatedDate: 2026-03-13
+keywords: ["claude code subagents", "git worktrees", "AGENT.md", "parallel development", "delegation", "custom agents", "worktree isolation"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
@@ -15,6 +17,8 @@ This chapter is all about subagents, specialized AI assistants you can delegate 
 By the end, you'll be able to create purpose built agents for code review, security scanning, documentation, and other specialized tasks, and run them in parallel using git worktrees.
 
 ## What Are Subagents?
+
+**Subagents** are specialized AI assistants that run within a Claude Code session, each with its own context, tools, permissions, and optionally its own isolated git worktree to prevent file conflicts.
 
 Think of subagents as specialized AI assistants that run inside your Claude Code session. Each one gets its own context, tools, permissions, and optionally its own git worktree. When you hand off a task to a subagent, it works independently and reports results back to the parent session.
 

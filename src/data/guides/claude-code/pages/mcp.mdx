@@ -1,9 +1,11 @@
 ---
 title: "Model Context Protocol"
-description: "Connecting external tools, transport modes, tool search, and troubleshooting"
+description: "Connect Claude Code to external tools — databases, APIs, ticketing systems — using the Model Context Protocol with stdio, HTTP, and OAuth authentication."
 order: 5
 slug: "mcp"
 lastVerified: 2026-03-10
+updatedDate: 2026-03-13
+keywords: ["model context protocol", "mcp server", "claude code integrations", "mcp.json", "external tools", "oauth mcp", "tool search"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import McpArchitectureDiagram from '../../../../components/guide/McpArchitectureDiagram.astro';
@@ -13,6 +15,8 @@ import McpArchitectureDiagram from '../../../../components/guide/McpArchitecture
 This chapter is all about the Model Context Protocol (MCP), the standard for connecting Claude Code to external tools, databases, and APIs. By the end, you'll know how MCP servers work, which of the three transport modes to pick for your situation, how to add and configure servers at different scopes, how to share server configs with your team through `.mcp.json`, and how to troubleshoot connection issues when things go sideways.
 
 ## What MCP Enables
+
+**Model Context Protocol (MCP)** is the open standard that connects Claude Code to external tools, databases, APIs, ticketing systems, and documentation, beyond the local filesystem.
 
 MCP lets Claude Code reach beyond your local filesystem. On its own, Claude Code can read files, run shell commands, and search your codebase. Add MCP into the mix, and it can also query a database, create tickets in your project management tool, search a knowledge base, interact with cloud services, or call pretty much any API you connect.
 

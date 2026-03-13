@@ -42,11 +42,13 @@ const isK8sPost = post.id === 'kubernetes-manifest-best-practices';
 const isComposePost = post.id === 'docker-compose-best-practices';
 const isDockerfilePost = post.id === 'dockerfile-best-practices';
 const isGhaPost = post.id === 'github-actions-best-practices';
+const isClaudeCodeGuidePost = post.id === 'claude-code-guide';
 const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isK8sPost ? 'Kubernetes Security'
   : isComposePost ? 'Docker Best Practices'
   : isDockerfilePost ? 'Docker Security'
   : isGhaPost ? 'GitHub Actions Security'
+  : isClaudeCodeGuidePost ? 'AI Developer Tools'
   : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
@@ -58,6 +60,8 @@ const aboutDataset = isBeautyIndexPost
     ? { type: 'SoftwareApplication', name: 'Dockerfile Analyzer', url: 'https://patrykgolabek.dev/tools/dockerfile-analyzer/' }
   : isGhaPost
     ? { type: 'SoftwareApplication', name: 'GitHub Actions Workflow Validator', url: 'https://patrykgolabek.dev/tools/gha-validator/' }
+  : isClaudeCodeGuidePost
+    ? { type: 'WebPage', name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' }
     : undefined;
 
 const beautyIndexFAQ = isBeautyIndexPost ? [
@@ -147,6 +151,33 @@ const ghaFAQ = isGhaPost ? [
   },
 ] : [];
 
+const claudeCodeGuideFAQ = isClaudeCodeGuidePost ? [
+  {
+    question: 'What is Claude Code?',
+    answer: 'Claude Code is Anthropic\'s agentic coding tool that lives in your terminal. Unlike chat-based AI assistants, it reads your entire codebase, edits files, and executes commands directly on your local filesystem through a three-phase agentic loop: gather context, take action, verify results. It is available as a terminal CLI, VS Code extension, JetBrains plugin, desktop app, and web interface.',
+  },
+  {
+    question: 'How much does Claude Code cost?',
+    answer: 'Claude Code offers two billing models. Direct API usage charges per token — a typical developer spends roughly $6 per day or $100-200 per month using Sonnet for daily coding. Subscription plans (Claude Max at $100/month, Team at $30/seat/month, Enterprise with custom pricing) include Claude Code access with usage limits. Sonnet handles most tasks cost-effectively, while Opus is reserved for complex architectural decisions.',
+  },
+  {
+    question: 'What is a CLAUDE.md file?',
+    answer: 'CLAUDE.md is the primary way to give Claude Code project-specific instructions. It is a markdown file at your project root that Claude Code reads before processing your first prompt. It specifies your tech stack, coding conventions, build commands, and constraints. CLAUDE.md files follow a three-tier hierarchy — managed policy, project scope, and user scope — with higher tiers overriding lower ones.',
+  },
+  {
+    question: 'What is the Model Context Protocol (MCP) in Claude Code?',
+    answer: 'The Model Context Protocol (MCP) is the open standard for connecting Claude Code to external tools beyond the local filesystem. With MCP, Claude Code can query databases, create tickets in Jira, search documentation, deploy to staging environments, or call any API you connect. MCP supports three transport modes: stdio for local servers, HTTP for remote servers, and the deprecated SSE.',
+  },
+  {
+    question: 'Can Claude Code run in CI/CD pipelines?',
+    answer: 'Yes. Claude Code\'s headless mode runs programmatically with the -p flag, producing structured output in text, JSON, or streaming JSON formats. It supports JSON schema validation for typed responses, system prompt customization, and tool auto-approval for unattended execution. Claude Code integrates with GitHub Actions, cron scheduling, and any CI/CD platform that supports shell commands.',
+  },
+  {
+    question: 'What are Claude Code agent teams?',
+    answer: 'Agent teams are a research preview feature where multiple independent Claude Code instances coordinate on a shared task list. A lead agent decomposes work into tasks with dependencies, teammates claim and execute tasks in parallel across isolated git worktrees, and a mailbox system enables peer-to-peer communication. Agent teams require the CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 environment flag and consume roughly 4x more tokens than single-session work.',
+  },
+] : [];
+
 // Shorten title tag for SEO (Google truncates ~60 chars)
 const suffix = ' — Patryk Golabek';
 const titleTag = (title.length + suffix.length > 65)
@@ -226,6 +257,7 @@ const titleTag = (title.length + suffix.length > 65)
     {composeFAQ.length > 0 && <FAQPageJsonLd items={composeFAQ} />}
     {dockerfileFAQ.length > 0 && <FAQPageJsonLd items={dockerfileFAQ} />}
     {ghaFAQ.length > 0 && <FAQPageJsonLd items={ghaFAQ} />}
+    {claudeCodeGuideFAQ.length > 0 && <FAQPageJsonLd items={claudeCodeGuideFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },

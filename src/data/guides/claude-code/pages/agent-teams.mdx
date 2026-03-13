@@ -1,9 +1,11 @@
 ---
 title: "Agent Teams & Advanced Orchestration"
-description: "Team architecture, shared tasks, and dependency tracking (research preview)"
+description: "Coordinate multiple Claude Code instances on shared task lists with dependency tracking and peer-to-peer communication (research preview)."
 order: 9
 slug: "agent-teams"
 lastVerified: 2026-03-10
+updatedDate: 2026-03-13
+keywords: ["claude code agent teams", "multi-agent orchestration", "task coordination", "parallel agents", "team architecture", "dependency tracking"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import AgentTeamsDiagram from '../../../../components/guide/AgentTeamsDiagram.astro';
@@ -17,6 +19,8 @@ By the end, you'll know when and how to coordinate multiple Claude Code instance
 > **Research Preview:** Agent teams are experimental and disabled by default. You'll need to set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your environment or settings.json to use them. The API surface, behavior, and limitations may change. This chapter documents the feature as of March 2026.
 
 ## What Are Agent Teams?
+
+**Agent teams** are a multi-session coordination feature where independent Claude Code instances work together on a shared task list with direct peer-to-peer communication, enabling parallel execution of large tasks across isolated branches.
 
 Agent teams let multiple independent Claude Code instances collaborate on a shared task list with direct communication. Each teammate is a full Claude Code session running in parallel. It can read files, edit code, run commands, and report results, just like any standalone Claude Code session.
 

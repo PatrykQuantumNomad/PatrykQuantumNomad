@@ -1,9 +1,11 @@
 ---
 title: "Custom Skills"
-description: "SKILL.md anatomy, slash commands vs auto-invocation, and the skill creator"
+description: "Build reusable SKILL.md files that encode team conventions as slash commands or auto-invoked capabilities, with tool restrictions and subagent isolation."
 order: 6
 slug: "custom-skills"
 lastVerified: 2026-03-10
+updatedDate: 2026-03-13
+keywords: ["claude code skills", "SKILL.md", "slash commands", "custom automation", "skill creator", "team workflow", "agent skills"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
@@ -14,6 +16,8 @@ This chapter walks you through the SKILL.md system: how to create reusable, shar
 By the end, you'll be able to create custom skills tailored to your workflow and share them across your team.
 
 ## What Are Skills?
+
+**Skills** are reusable instruction sets packaged as SKILL.md files that encode team conventions, specialized workflows, and automated capabilities into shareable artifacts.
 
 Skills are reusable instruction sets that extend what Claude Code can do. Each skill lives in a SKILL.md file containing YAML frontmatter for configuration and a markdown body with instructions Claude reads and follows when the skill runs. They follow the Agent Skills open standard.
 

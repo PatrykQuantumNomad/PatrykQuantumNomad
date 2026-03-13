@@ -7,12 +7,15 @@ export const guidePageSchema = z.object({
   order: z.number().int().min(0),
   slug: z.string(),
   lastVerified: z.coerce.date().optional(),
+  updatedDate: z.coerce.date().optional(),
+  keywords: z.array(z.string()).optional(),
 });
 
 /** Zod schema for guide-level metadata (guide.json) */
 export const guideMetaSchema = z.object({
   id: z.string(),
   title: z.string(),
+  shortTitle: z.string().optional(),
   description: z.string(),
   slug: z.string(),
   templateRepo: z.string().url().optional(),

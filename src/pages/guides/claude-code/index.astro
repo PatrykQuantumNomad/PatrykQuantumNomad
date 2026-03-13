@@ -30,7 +30,7 @@ const accent = guideMeta.data.accentColor ?? '#D97706';
 ---
 
 <Layout
-  title="Claude Code Guide | Patryk Golabek"
+  title="Claude Code Guide: Setup, Skills, MCP & Agent Teams | Patryk Golabek"
   description={guideMeta.data.description}
   ogImage={ogImageURL}
   ogImageAlt="Claude Code Guide"
@@ -55,10 +55,10 @@ const accent = guideMeta.data.accentColor ?? '#D97706';
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
     <!-- Hero Section -->
     <h1 class="text-4xl sm:text-5xl font-heading font-bold">
-      {guideMeta.data.title}
+      {guideMeta.data.shortTitle ?? guideMeta.data.title}
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-2xl">
-      {guideMeta.data.description}
+      The definitive zero-to-hero guide for Claude Code.
     </p>
 
     <!-- Prerequisites Box -->

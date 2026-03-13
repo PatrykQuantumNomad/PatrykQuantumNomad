@@ -17,19 +17,22 @@ interface Props {
   currentSlug: string;
   chapterTitle: string;
   publishedDate?: Date;
+  updatedDate?: Date;
   companionLink?: { href: string; text: string; label: string };
   parentTitle?: string;
   parentUrl?: string;
+  keywords?: string[];
 }
 
-const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters, currentSlug, chapterTitle, publishedDate, companionLink, parentTitle, parentUrl } = Astro.props;
+const { title, description, ogImage, ogImageAlt, guideTitle, guideSlug, chapters, currentSlug, chapterTitle, publishedDate, updatedDate, companionLink, parentTitle, parentUrl, keywords } = Astro.props;
 const isoPublished = publishedDate?.toISOString().split('T')[0];
+const isoModified = updatedDate?.toISOString().split('T')[0] ?? isoPublished;
 ---
 
-<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType="article" publishedDate={publishedDate}>
+<Layout title={title} description={description} ogImage={ogImage} ogImageAlt={ogImageAlt} ogType="article" publishedDate={publishedDate} updatedDate={updatedDate}>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
     <GuideBreadcrumb guideTitle={guideTitle} guideSlug={guideSlug} chapterTitle={chapterTitle} />
-    <GuideJsonLd title={title} description={description ?? ''} url={`https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/`} datePublished={isoPublished} dateModified={isoPublished} parentTitle={parentTitle} parentUrl={parentUrl} />
+    <GuideJsonLd title={title} description={description ?? ''} url={`https://patrykgolabek.dev/guides/${guideSlug}/${currentSlug}/`} datePublished={isoPublished} dateModified={isoModified} parentTitle={parentTitle} parentUrl={parentUrl} keywords={keywords} />
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
