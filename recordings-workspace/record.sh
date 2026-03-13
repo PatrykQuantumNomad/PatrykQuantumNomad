@@ -414,6 +414,18 @@ info() {
 
 reset_project() {
   echo -e "${GREEN}Resetting sample project...${NC}"
+
+  # If sample-project doesn't exist, restore from zip
+  if [ ! -d "$PROJECT_DIR" ]; then
+    echo -e "${GREEN}Restoring sample-project from zip...${NC}"
+    cd "$SCRIPT_DIR"
+    unzip -q sample-project.zip
+    cd "$PROJECT_DIR"
+    npm install
+    echo -e "${GREEN}Done. Project restored and clean.${NC}"
+    return
+  fi
+
   cd "$PROJECT_DIR"
   # Clean up worktrees FIRST (remove dirs before git prune)
   rm -rf "$PROJECT_DIR/.claude/worktrees" 2>/dev/null
