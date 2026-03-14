@@ -47,7 +47,7 @@ Plans:
 **Plans:** 2/2 plans complete
 Plans:
 - [x] 97-01-PLAN.md — Template skeleton with setup, data loading, and visualization sections (TDD)
-- [ ] 97-02-PLAN.md — Hypothesis tests, test summary, interpretation, and conclusions (TDD)
+- [x] 97-02-PLAN.md — Hypothesis tests, test summary, interpretation, and conclusions (TDD)
 
 ### Phase 98: Packaging Pipeline
 **Goal**: Notebooks are packaged as downloadable ZIP files and served from the built site
