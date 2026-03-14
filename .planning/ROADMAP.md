@@ -60,8 +60,8 @@ Plans:
   4. Build time regression from notebook generation is under 5 seconds
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 98-01-PLAN.md — Core ZIP packaging functions with archiver: createZipFile and buildNotebookZipEntries (TDD)
-- [ ] 98-02-PLAN.md — Astro notebookPackager integration hook and config registration
+- [x] 98-01-PLAN.md — Core ZIP packaging functions with archiver: createZipFile and buildNotebookZipEntries (TDD)
+- [x] 98-02-PLAN.md — Astro notebookPackager integration hook and config registration
 
 ### Phase 99: Download UI and Colab Integration
 **Goal**: Users can download notebooks and open them in Colab directly from case study pages
