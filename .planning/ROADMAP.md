@@ -29,7 +29,7 @@
   2. `markdownCell()` and `codeCell()` factories produce cells with deterministic IDs and newline-terminated source lines
   3. Notebook registry maps all 10 case study slugs to their NIST .DAT filenames and analysis parameters
   4. A shared requirements.txt template specifies numpy, scipy, pandas, matplotlib, seaborn with floor version pins
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 96-01-PLAN.md — nbformat v4.5 types, cell factories, and notebook assembler with tests
 - [ ] 96-02-PLAN.md — Case study registry (10 configs), requirements.txt template, and dark theme module with tests
@@ -97,7 +97,7 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 96. Notebook Foundation | 0/2 | Planning complete | - |
+| 96. Notebook Foundation | 1/2 | In Progress|  |
 | 97. Standard Case Study Notebooks | 0/TBD | Not started | - |
 | 98. Packaging Pipeline | 0/TBD | Not started | - |
 | 99. Download UI and Colab Integration | 0/TBD | Not started | - |

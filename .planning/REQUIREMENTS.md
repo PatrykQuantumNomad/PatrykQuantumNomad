@@ -9,8 +9,8 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 ### Notebook Generation
 
-- [ ] **NBGEN-01**: Build-time TypeScript notebook builder generates valid nbformat v4.5 JSON with deterministic cell IDs
-- [ ] **NBGEN-02**: Cell factory creates markdown, code, and output cells following nbformat schema
+- [x] **NBGEN-01**: Build-time TypeScript notebook builder generates valid nbformat v4.5 JSON with deterministic cell IDs
+- [x] **NBGEN-02**: Cell factory creates markdown, code, and output cells following nbformat schema
 - [ ] **NBGEN-03**: Notebook registry maps all 10 case studies to their dataset files and analysis parameters
 - [ ] **NBGEN-04**: Each notebook bundles a requirements.txt specifying numpy, scipy, pandas, matplotlib, seaborn
 
@@ -74,8 +74,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NBGEN-01 | Phase 96 | Pending |
-| NBGEN-02 | Phase 96 | Pending |
+| NBGEN-01 | Phase 96 | Complete |
+| NBGEN-02 | Phase 96 | Complete |
 | NBGEN-03 | Phase 96 | Pending |
 | NBGEN-04 | Phase 96 | Pending |
 | NBSTD-01 | Phase 97 | Pending |
