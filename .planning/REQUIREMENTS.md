@@ -32,7 +32,7 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 ### Packaging
 
-- [ ] **PACK-01**: Each notebook zipped with its NIST .DAT dataset file(s) as self-contained download
+- [x] **PACK-01**: Each notebook zipped with its NIST .DAT dataset file(s) as self-contained download
 - [ ] **PACK-02**: Zip files generated at build time via Astro integration hook or prebuild script
 - [ ] **PACK-03**: Generated zip files served as static assets from GitHub Pages
 
@@ -88,7 +88,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NBADV-01 | Phase 100 | Pending |
 | NBADV-02 | Phase 100 | Pending |
 | NBADV-03 | Phase 100 | Pending |
-| PACK-01 | Phase 98 | Pending |
+| PACK-01 | Phase 98 | Complete |
 | PACK-02 | Phase 98 | Pending |
 | PACK-03 | Phase 98 | Pending |
 | UI-01 | Phase 99 | Pending |
