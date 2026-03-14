@@ -1,0 +1,111 @@
+/**
+ * ZIP packager for EDA Jupyter notebooks.
+ *
+ * Creates self-contained ZIP downloads containing:
+ * - {slug}.ipynb — the generated notebook (nbformat v4.5)
+ * - {dataFile}.DAT — the NIST dataset with LF-only line endings
+ * - requirements.txt — Python dependencies
+ *
+ * Uses archiver (locked decision over JSZip due to encoding issues
+ * with mixed binary/UTF-8 content).
+ */
+
+import archiver from 'archiver';
+import { createWriteStream, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { buildStandardNotebook } from './templates/standard';
+import { getCaseStudyConfig } from './registry/index';
+import { REQUIREMENTS_TXT } from './requirements';
+
+/**
+ * A single entry to be added to a ZIP archive.
+ * Provide either `content` (inline string) or `sourcePath` (file on disk).
+ */
+export interface ZipEntry {
+  /** Filename inside the ZIP archive */
+  name: string;
+  /** Inline string content */
+  content?: string;
+  /** Absolute path to a file on disk */
+  sourcePath?: string;
+}
+
+/**
+ * Create a ZIP archive at `outputPath` containing the given entries.
+ *
+ * Uses archiver with maximum zlib compression (level 9).
+ * Resolves on the output stream's `close` event (NOT on finalize())
+ * to ensure all data has been flushed to disk.
+ */
+export async function createZipFile(
+  outputPath: string,
+  entries: ZipEntry[],
+): Promise<void> {
+  // Ensure parent directories exist
+  mkdirSync(dirname(outputPath), { recursive: true });
+
+  const output = createWriteStream(outputPath);
+  const archive = archiver('zip', { zlib: { level: 9 } });
+
+  return new Promise<void>((resolve, reject) => {
+    // Resolve when ALL data has been written to disk
+    output.on('close', () => resolve());
+
+    // Reject on archive errors
+    archive.on('error', (err) => reject(err));
+
+    // Reject on warnings (except ENOENT which is non-fatal)
+    archive.on('warning', (err) => {
+      if (err.code === 'ENOENT') {
+        // Non-fatal, skip
+      } else {
+        reject(err);
+      }
+    });
+
+    archive.pipe(output);
+
+    // Add each entry to the archive
+    for (const entry of entries) {
+      if (entry.content !== undefined) {
+        archive.append(entry.content, { name: entry.name });
+      } else if (entry.sourcePath) {
+        archive.file(entry.sourcePath, { name: entry.name });
+      }
+    }
+
+    // Signal that no more entries will be added
+    archive.finalize();
+  });
+}
+
+/**
+ * Build the 3 ZIP entries for a case study notebook download.
+ *
+ * Returns:
+ * 1. {slug}.ipynb — notebook JSON (1-space indent, trailing newline)
+ * 2. {dataFile} — NIST .DAT content with LF-only line endings
+ * 3. requirements.txt — Python package pins
+ *
+ * @throws Error if slug is not found in the registry
+ */
+export function buildNotebookZipEntries(slug: string, projectRoot: string): ZipEntry[] {
+  const config = getCaseStudyConfig(slug);
+  if (!config) {
+    throw new Error(`Unknown case study slug: ${slug}`);
+  }
+
+  // Build notebook and serialize with 1-space indent + trailing newline
+  const notebook = buildStandardNotebook(slug);
+  const notebookJson = JSON.stringify(notebook, null, 1) + '\n';
+
+  // Read .DAT file and normalize to LF-only line endings
+  const datPath = join(projectRoot, 'handbook', 'datasets', config.dataFile);
+  const datContent = readFileSync(datPath, 'utf-8').replace(/\r\n/g, '\n');
+
+  return [
+    { name: `${slug}.ipynb`, content: notebookJson },
+    { name: config.dataFile, content: datContent },
+    { name: 'requirements.txt', content: REQUIREMENTS_TXT },
+  ];
+}
