@@ -1,5 +1,9 @@
 /**
  * Intro section: title + background + goals markdown cells.
+ *
+ * Produces 2 markdown cells:
+ * 1. Title with case study name and NIST section reference
+ * 2. Background description and analysis goals
  */
 
 import type { Cell } from '../../types';
@@ -18,9 +22,36 @@ export function buildIntro(
   slug: string,
   startIndex: number,
 ): { cells: Cell[]; nextIndex: number } {
-  // Stub: returns a minimal placeholder
-  const cells: Cell[] = [
-    markdownCell(slug, startIndex, [`# ${config.title}`]),
-  ];
-  return { cells, nextIndex: startIndex + cells.length };
+  let idx = startIndex;
+  const cells: Cell[] = [];
+
+  // Title cell
+  cells.push(markdownCell(slug, idx++, [
+    `# ${config.title}`,
+    '',
+    `**NIST/SEMATECH e-Handbook of Statistical Methods, Section ${config.nistSection}**`,
+    '',
+    `Source: [${config.nistUrl}](${config.nistUrl})`,
+  ]));
+
+  // Background and goals cell
+  const descLine = config.description
+    ? `${config.description}.`
+    : `EDA case study for ${config.title}.`;
+
+  cells.push(markdownCell(slug, idx++, [
+    '## Background',
+    '',
+    descLine,
+    '',
+    '### Analysis Goals',
+    '',
+    '1. **Location:** What is a typical value?',
+    '2. **Variation:** How spread out are the data?',
+    '3. **Distribution:** What is the shape of the distribution?',
+    '4. **Randomness:** Are the data random (no autocorrelation or trend)?',
+    '5. **Outliers:** Are there any outliers in the data?',
+  ]));
+
+  return { cells, nextIndex: idx };
 }

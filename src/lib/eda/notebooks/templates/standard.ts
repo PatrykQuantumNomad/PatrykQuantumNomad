@@ -2,7 +2,10 @@
  * Standard notebook template entry point.
  *
  * Assembles a complete EDA notebook for any of the 7 standard
- * case studies by composing section builders.
+ * case studies by composing section builders in order:
+ *   intro -> setup -> data-loading -> summary-stats ->
+ *   four-plot -> individual-plots -> hypothesis-tests ->
+ *   test-summary -> interpretation -> conclusions
  */
 
 import type { NotebookV4, Cell } from '../types';
@@ -42,8 +45,28 @@ export function buildStandardNotebook(slug: string): NotebookV4 {
     throw new Error(`Unknown case study slug: ${slug}`);
   }
 
-  // TODO: assemble cells from section builders
-  const cells: Cell[] = [];
+  const allCells: Cell[] = [];
+  let idx = 0;
 
-  return createNotebook(cells);
+  // Section builders are called in order, each returning cells and next index
+  const sections = [
+    buildIntro,
+    buildSetup,
+    buildDataLoading,
+    buildSummaryStats,
+    buildFourPlot,
+    buildIndividualPlots,
+    buildHypothesisTests,
+    buildTestSummary,
+    buildInterpretation,
+    buildConclusions,
+  ];
+
+  for (const buildSection of sections) {
+    const result = buildSection(config, slug, idx);
+    allCells.push(...result.cells);
+    idx = result.nextIndex;
+  }
+
+  return createNotebook(allCells);
 }
