@@ -74,37 +74,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NBGEN-01 | Phase TBD | Pending |
-| NBGEN-02 | Phase TBD | Pending |
-| NBGEN-03 | Phase TBD | Pending |
-| NBGEN-04 | Phase TBD | Pending |
-| NBSTD-01 | Phase TBD | Pending |
-| NBSTD-02 | Phase TBD | Pending |
-| NBSTD-03 | Phase TBD | Pending |
-| NBSTD-04 | Phase TBD | Pending |
-| NBSTD-05 | Phase TBD | Pending |
-| NBSTD-06 | Phase TBD | Pending |
-| NBSTD-07 | Phase TBD | Pending |
-| NBADV-01 | Phase TBD | Pending |
-| NBADV-02 | Phase TBD | Pending |
-| NBADV-03 | Phase TBD | Pending |
-| PACK-01 | Phase TBD | Pending |
-| PACK-02 | Phase TBD | Pending |
-| PACK-03 | Phase TBD | Pending |
-| UI-01 | Phase TBD | Pending |
-| UI-02 | Phase TBD | Pending |
-| UI-03 | Phase TBD | Pending |
-| SITE-01 | Phase TBD | Pending |
-| SITE-02 | Phase TBD | Pending |
-| SITE-03 | Phase TBD | Pending |
-| SITE-04 | Phase TBD | Pending |
-| SITE-05 | Phase TBD | Pending |
+| NBGEN-01 | Phase 96 | Pending |
+| NBGEN-02 | Phase 96 | Pending |
+| NBGEN-03 | Phase 96 | Pending |
+| NBGEN-04 | Phase 96 | Pending |
+| NBSTD-01 | Phase 97 | Pending |
+| NBSTD-02 | Phase 97 | Pending |
+| NBSTD-03 | Phase 97 | Pending |
+| NBSTD-04 | Phase 97 | Pending |
+| NBSTD-05 | Phase 97 | Pending |
+| NBSTD-06 | Phase 97 | Pending |
+| NBSTD-07 | Phase 97 | Pending |
+| NBADV-01 | Phase 100 | Pending |
+| NBADV-02 | Phase 100 | Pending |
+| NBADV-03 | Phase 100 | Pending |
+| PACK-01 | Phase 98 | Pending |
+| PACK-02 | Phase 98 | Pending |
+| PACK-03 | Phase 98 | Pending |
+| UI-01 | Phase 99 | Pending |
+| UI-02 | Phase 99 | Pending |
+| UI-03 | Phase 99 | Pending |
+| SITE-01 | Phase 101 | Pending |
+| SITE-02 | Phase 101 | Pending |
+| SITE-03 | Phase 101 | Pending |
+| SITE-04 | Phase 101 | Pending |
+| SITE-05 | Phase 101 | Pending |
 
 **Coverage:**
 - v1.17 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation (phases 96-101)*
