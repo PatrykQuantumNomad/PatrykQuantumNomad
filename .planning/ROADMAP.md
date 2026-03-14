@@ -44,9 +44,9 @@ Plans:
   3. Each notebook opens without errors in JupyterLab, VS Code, and Google Colab
   4. Data loading cells include row-count assertions matching NIST dataset sizes
   5. All 7 notebooks use a single parameterized standard template with case-study-specific configuration (dataset name, skiprows, column names, expected statistics)
-**Plans:** 2 plans
+**Plans:** 1/2 plans complete
 Plans:
-- [ ] 97-01-PLAN.md — Template skeleton with setup, data loading, and visualization sections (TDD)
+- [x] 97-01-PLAN.md — Template skeleton with setup, data loading, and visualization sections (TDD)
 - [ ] 97-02-PLAN.md — Hypothesis tests, test summary, interpretation, and conclusions (TDD)
 
 ### Phase 98: Packaging Pipeline
@@ -101,7 +101,7 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
-| 97. Standard Case Study Notebooks | 0/2 | Planned | - |
+| 97. Standard Case Study Notebooks | 1/2 | In progress | - |
 | 98. Packaging Pipeline | 0/TBD | Not started | - |
 | 99. Download UI and Colab Integration | 0/TBD | Not started | - |
 | 100. Advanced Case Study Notebooks | 0/TBD | Not started | - |
