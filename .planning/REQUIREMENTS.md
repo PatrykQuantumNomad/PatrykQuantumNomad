@@ -16,13 +16,13 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 ### Standard Notebooks
 
-- [ ] **NBSTD-01**: Normal Random Numbers notebook with full 4-plot analysis, hypothesis tests, and interpretation
-- [ ] **NBSTD-02**: Uniform Random Numbers notebook with distribution detection and non-normality analysis
-- [ ] **NBSTD-03**: Heat Flow Meter notebook with mild non-randomness analysis
-- [ ] **NBSTD-04**: Filter Transmittance notebook with extreme autocorrelation detection
-- [ ] **NBSTD-05**: Cryothermometry notebook with discrete data analysis
-- [ ] **NBSTD-06**: Fatigue Life notebook with distribution comparison and model selection
-- [ ] **NBSTD-07**: Standard Resistor notebook with multi-assumption failure analysis
+- [x] **NBSTD-01**: Normal Random Numbers notebook with full 4-plot analysis, hypothesis tests, and interpretation
+- [x] **NBSTD-02**: Uniform Random Numbers notebook with distribution detection and non-normality analysis
+- [x] **NBSTD-03**: Heat Flow Meter notebook with mild non-randomness analysis
+- [x] **NBSTD-04**: Filter Transmittance notebook with extreme autocorrelation detection
+- [x] **NBSTD-05**: Cryothermometry notebook with discrete data analysis
+- [x] **NBSTD-06**: Fatigue Life notebook with distribution comparison and model selection
+- [x] **NBSTD-07**: Standard Resistor notebook with multi-assumption failure analysis
 
 ### Advanced Notebooks
 
@@ -78,13 +78,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NBGEN-02 | Phase 96 | Complete |
 | NBGEN-03 | Phase 96 | Complete |
 | NBGEN-04 | Phase 96 | Complete |
-| NBSTD-01 | Phase 97 | Pending |
-| NBSTD-02 | Phase 97 | Pending |
-| NBSTD-03 | Phase 97 | Pending |
-| NBSTD-04 | Phase 97 | Pending |
-| NBSTD-05 | Phase 97 | Pending |
-| NBSTD-06 | Phase 97 | Pending |
-| NBSTD-07 | Phase 97 | Pending |
+| NBSTD-01 | Phase 97 | Complete |
+| NBSTD-02 | Phase 97 | Complete |
+| NBSTD-03 | Phase 97 | Complete |
+| NBSTD-04 | Phase 97 | Complete |
+| NBSTD-05 | Phase 97 | Complete |
+| NBSTD-06 | Phase 97 | Complete |
+| NBSTD-07 | Phase 97 | Complete |
 | NBADV-01 | Phase 100 | Pending |
 | NBADV-02 | Phase 100 | Pending |
 | NBADV-03 | Phase 100 | Pending |
