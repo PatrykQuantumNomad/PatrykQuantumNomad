@@ -1,207 +1,316 @@
-# Project Research Summary
+# Research Summary: v1.17 EDA Jupyter Notebooks
 
-**Project:** Claude Code Guide — comprehensive developer guide integrated into patrykgolabek.dev
-**Domain:** Multi-chapter technical guide (10-12 chapters) for Claude Code CLI, built on an existing Astro 5 portfolio site with established guide infrastructure
-**Researched:** 2026-03-10
+**Project:** patrykgolabek.dev — v1.17 Downloadable Jupyter Notebooks for EDA Case Studies
+**Domain:** Build-time notebook generation for Astro 5 static site (GitHub Pages)
+**Researched:** 2026-03-14
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This project adds a comprehensive Claude Code guide to an existing Astro 5 portfolio site that already has a mature, proven guide architecture from the FastAPI Production Guide. The good news: no new npm dependencies are required. Every needed technology is already installed and every structural pattern is already proven. The work decomposes cleanly into infrastructure (making the existing single-guide system multi-guide), diagram creation (5 build-time SVG generators + 2 interactive React components following exact existing patterns), and content authoring (10-12 MDX chapters). The recommended approach is to treat this as an extension of the existing system, not a new system.
+This milestone adds downloadable Jupyter notebooks for all 10 NIST EDA case studies to patrykgolabek.dev. The research is unambiguously clear on approach: generate `.ipynb` files at build time in TypeScript (the format is plain JSON — no Python tooling needed), bundle each notebook with its `.DAT` dataset file into a `.zip` archive using `archiver`, and serve them as static files from the Astro build output. This fits cleanly inside the existing build pipeline on GitHub Pages without new CI infrastructure, no Python runtime in CI, and only two new npm dependencies (`archiver` + its types).
 
-The key risk is not technical — it is content quality under rapid product evolution. Claude Code ships updates weekly (176 releases in 2025 alone), and the content research foundation is a 51-source NotebookLM corpus that carries a ~13% hallucination rate. Every factual claim must be independently verified against official documentation before any chapter is marked complete. A `lastVerified` frontmatter field must be added to the schema from day one to enable targeted freshness maintenance. The guide's competitive advantage is not comprehensive coverage (official docs do that) — it is practitioner perspective: how a 17+ year cloud-native architect integrates Claude Code into real production workflows, filtered through the same opinionated lens that made the FastAPI guide successful.
+The core implementation work is writing Python analysis code inside cell templates, not infrastructure. The TypeScript notebook builder and zip packager together are under 300 lines. The bulk of the effort is the 10 per-case-study cell template modules — 7 share a standard parameterized template, 2 are model-development variations (beam deflections with sinusoidal regression, random walk with AR(1)), and 1 is the complex DOE variant (ceramic strength). Building the standard template first delivers 70% of the milestone's content and validates the full pipeline before tackling the harder notebooks.
 
-The second major risk is SEO positioning. Official Anthropic documentation ranks near-perfectly for all head keywords related to Claude Code features. The guide must target long-tail, workflow-oriented keywords that official docs do not cover ("Claude Code workflow for Kubernetes development", "Claude Code CI/CD patterns with GitHub Actions") and angle every chapter as practitioner opinion rather than feature documentation. Infrastructure work must precede all content work — 7 hardcoded single-guide assumptions in the existing codebase will silently break or exclude the new guide if not addressed first.
+The primary risk is correctness, not complexity. Notebooks that open but fail to run — due to invalid nbformat JSON, broken `.DAT` file parsing, missing Python dependencies, or statistical values that disagree with the NIST-verified website — will undermine user trust. Every notebook must pass a build-time format check and a manual end-to-end run in a clean Python environment before the milestone is considered done.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack verdict is unusually clean: zero new dependencies. The site already has Astro 5.17.1, @xyflow/react 12.10.1, dagre 2.0.4, astro-expressive-code 0.41.6, satori + sharp for OG images, and a proven build-time SVG diagram infrastructure. All languages needed for Claude Code config examples (JSON, JSONC, TOML, YAML, Bash, TypeScript, JavaScript, Markdown, Python) are already supported by installed Shiki grammars. The only structural change is generalizing content collections from single-guide to multi-guide.
+Only two new npm dependencies are needed. The `.ipynb` format is nbformat v4.5 JSON — constructable directly from a TypeScript type definition without any npm notebook library.
 
-**Core technologies (all already installed):**
-- Astro 5.17.1: Static site generator, MDX rendering, content collections — no changes needed
-- @xyflow/react 12.10.1 + @dagrejs/dagre 2.0.4: Interactive React Flow diagrams — proven by DeploymentTopology.tsx
-- astro-expressive-code 0.41.6: Syntax highlighting with copy buttons — supports all needed languages
-- satori 0.19.2 + sharp 0.34.5: Build-time OG image generation — extend existing og-cache.ts pattern
-- diagram-base.ts (existing): SVG primitive helpers with CSS-variable theme support — reuse for all 5 new diagrams
+**New npm dependencies:**
+- `archiver ^7.0.1` — stream-based ZIP creation (14.6M weekly downloads, mature, ESM-compatible). Preferred over JSZip for build-time server-side generation because of its streaming API and correct handling of binary files alongside UTF-8 strings. JSZip has documented encoding issues with mixed binary/text content (issue #368).
+- `@types/archiver ^7.0.0` — TypeScript types for the above.
 
-**What is genuinely new (no new packages):**
-- 5 build-time SVG diagram generators following the exact existing pattern (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams)
-- 2 interactive React Flow components (PermissionFlowExplorer, HookEventVisualizer)
-- 1 new CodeBlock.astro for inline code snippets without GitHub source links
-- Multi-guide content collection wiring in content.config.ts
+**Python stack declared inside notebooks (not in package.json):**
 
-See `/Users/patrykattc/work/git/PatrykQuantumNomad/.planning/research/STACK.md` for full analysis.
+| Library | Pin | Purpose |
+|---------|-----|---------|
+| numpy | >=1.26,<3 | Numerical arrays, statistics |
+| scipy | >=1.11 | Statistical tests, distributions |
+| pandas | >=2.0,<4 | DataFrame operations, DAT loading |
+| matplotlib | >=3.7 | Plotting |
+| seaborn | >=0.12 | Plot styling |
 
-### Expected Features
+Pin philosophy: floor versions (`>=`) not exact pins. Notebooks are educational — exact pins block installation for users with recent Python. Floor versions ensure API compatibility.
 
-The feature set splits cleanly between infrastructure already built, content to author, and differentiators to build. The must-have core is 10-12 MDX chapters with proper navigation, diagrams, and SEO metadata. The competitive differentiators are the programmatic SVG diagrams (no competing guide has them), the interactive visualizers, and the practitioner voice with real examples from the author's own repositories.
+**What NOT to add:** nbformat Python library, nbconvert, any JS notebook execution library, Python runtime in CI, ADM-Zip, yauzl, or any pre-built `.ipynb`/`.zip` files committed to the repo.
 
-**Must have (table stakes):**
-- Progressive 10-12 chapter structure with zero-to-hero progression — every competing guide uses this
-- Sticky sidebar navigation with active state — already built in GuideSidebar.astro
-- Prev/next chapter navigation — already built in GuideChapterNav.astro
-- Syntax-highlighted code blocks with copy button — provided by astro-expressive-code
-- File-path-annotated code blocks — new CodeBlock.astro (trivial to build)
-- Per-chapter OG images — extend existing satori + sharp pipeline
-- JSON-LD structured data (Article + BreadcrumbList) — already built in GuideJsonLd.astro
-- In-page table of contents per chapter — existing TableOfContents.astro
-- Guide landing page with chapter card grid — follow fastapi-production/index.astro pattern
-- Callout/admonition blocks for warnings and tips — existing Callout.astro from blog components
-- Cross-chapter linking — authoring discipline, no new component needed
-- Chapter difficulty badges — small frontmatter field addition
+See: `.planning/research/STACK-jupyter-notebooks.md`
 
-**Should have (competitive differentiators):**
-- 5-6 build-time SVG architecture diagrams (CLAUDE.md hierarchy, context window lifecycle, permission evaluation flowchart, hook event lifecycle, MCP server topology) — no competing guide has these
-- Interactive context window visualizer (React island) — most misunderstood Claude Code topic, no visual exists anywhere
-- CLAUDE.md starter templates with tabbed copy UI — more polished than FlorianBruniaux's raw GitHub files
-- Real CLAUDE.md examples from author's own public repos — authentic practitioner credibility
-- Companion blog post for bidirectional SEO traffic — proven pattern from FastAPI guide
+### Features: Table Stakes vs Differentiators
 
-**Defer to v1.x (post-launch validation):**
-- FAQ page with FAQPage JSON-LD — write after observing actual reader questions
-- Interactive MCP topology (React Flow upgrade from static SVG)
-- Downloadable starter .claude/ config bundle — after template patterns stabilize
+**Must-have (table stakes — missing = product feels broken):**
+- Valid nbformat v4.5 JSON with correct `kernelspec` — opens in Jupyter, VS Code, and Colab without errors
+- Inline data embedding as Python list literals — no external file dependencies for running cells (the standard for educational notebooks)
+- Import cell with `%matplotlib inline` and `sns.set_theme()` — standard setup preamble
+- Markdown narrative interleaved with every code cell — what distinguishes a notebook from a script
+- Summary statistics, 4-plot reproduction, hypothesis test cells with interpretation — the analytical core that mirrors each web page
+- All 10 case studies covered — partial coverage looks like a bug
+- Download button on every case study page alongside the existing CSV button
 
-**Defer to v2+:**
-- Agent team coordination interactive diagram — feature is still "research preview"
-- GitHub Actions / CI dedicated chapter — deserves its own guide
-- Translated versions — only if analytics show non-English demand
+**Should-have (differentiators — not expected, but valued):**
+- "Open in Google Colab" button on case study pages and as a badge in each notebook's title cell — zero-setup execution
+- NIST source attribution + site backlinks in every notebook — each notebook becomes an SEO outpost when shared
+- Seaborn-styled plots (`sns.set_theme()`) — one line, dramatic improvement over raw matplotlib defaults
+- Requirements header cell with commented `!pip install` and a dependency-check code cell — reduces first-run failures
+- Notebooks landing page at `/eda/notebooks/` — new EDA section following existing section patterns
+- Collection ZIP (all 10 + shared requirements.txt + README) from the landing page
+- Case-study-specific advanced analysis for the 3 complex notebooks (sinusoidal curve fit, AR(1), DOE ANOVA)
 
-See `/Users/patrykattc/work/git/PatrykQuantumNomad/.planning/research/FEATURES.md` for full analysis including competitor comparison.
+**Anti-features (explicitly do not build):**
+- In-browser notebook execution (JupyterLite/Pyodide) — massive complexity for worse UX than existing SVG plots
+- Pre-executed notebooks with saved cell outputs — bloats files 5-50x, creates stale outputs, violates educational standard
+- Separate `.DAT` files bundled independently from data embedded in cells (causes path resolution failures)
+- Binder integration — Colab is faster, more reliable, and more widely used
+- Notebook preview component on case study pages — the case study page itself is the preview
+
+See: `.planning/research/FEATURES-jupyter-notebooks.md`
 
 ### Architecture Approach
 
-The architecture follows a strict "parallel extension" pattern: add a `claude-code/` directory tree that mirrors the existing `fastapi-production/` tree at every layer (data, pages, components, OG images), modify 6 existing files to remove hardcoded single-guide assumptions, and add new SVG generators and React components following exact existing patterns. No new architectural patterns are introduced — the existing pattern set is comprehensive and proven.
+**Recommended pattern: Astro integration hook (`astro:build:done`) + archiver + static file serving**
 
-**Major components:**
-1. Content collections (content.config.ts + guide.json + MDX pages) — add `claudeCodeGuidePages` and `claudeCodeGuides` collections; reuse existing Zod schemas with one addition: `lastVerified` date field to guidePageSchema
-2. Page generation layer (src/pages/guides/claude-code/) — parallel to fastapi-production; follows identical [slug].astro and index.astro patterns; OG images at parallel path
-3. Build-time SVG diagram generators (src/lib/guides/svg-diagrams/) — 5 new TypeScript generators using existing diagram-base.ts primitives; wrapped by 5 new thin Astro components
-4. Interactive React components (src/components/guide/claude-code/) — 2 React Flow components following DeploymentTopology.tsx pattern; loaded with client:visible
-5. Modified shared infrastructure — GuideLayout.astro (parameterize companion link), GuideJsonLd.astro (parameterize isPartOf), routes.ts (remove hardcoded path), guides hub page (iterate all guides), astro.config.mjs sitemap builder (scan all guide.json files), llms.txt endpoints (iterate all guides)
+The research produced two competing architecture proposals:
 
-**Key architectural constraint:** Use separate content collection per guide, not a unified multi-guide glob pattern. This matches the codebase convention (EDA has its own collections) and avoids runtime collection switching that conflicts with Astro's typed getCollection() API.
+- **ARCHITECTURE.md** (from one researcher) recommends Astro API route endpoints (`[slug].zip.ts` / `[slug].ipynb.ts` with `getStaticPaths()`) using JSZip for in-memory zip creation, following the OG image endpoint pattern.
+- **ARCHITECTURE-jupyter-notebooks.md** and **STACK.md** (from a second researcher) recommend an Astro integration hook (`astro:build:done`) with archiver for streaming zip creation, writing to `dist/downloads/notebooks/`. This follows the existing `indexnow.ts` integration pattern.
 
-See `/Users/patrykattc/work/git/PatrykQuantumNomad/.planning/research/ARCHITECTURE.md` for full dependency-aware build order and component specifications.
+**Go with the Astro integration hook + archiver approach.** The PITFALLS research provides the deciding factor: JSZip has documented encoding problems when mixing binary (`.DAT` files) and UTF-8 (notebook JSON) content in the same archive. archiver's streaming API handles this correctly. The integration hook also receives the `dir` parameter directly — no need to hardcode `dist/`. The existing `indexnow.ts` is a direct template in this codebase.
+
+The API route approach is not wrong, but archiver is the better zip tool for this use case.
+
+**Component structure (new files):**
+
+| Component | Responsibility |
+|-----------|---------------|
+| `src/lib/notebook/types.ts` | TypeScript interfaces for nbformat v4.5 |
+| `src/lib/notebook/config.ts` | `NOTEBOOK_REGISTRY` array (slug to dataset metadata) |
+| `src/lib/notebook/cells.ts` | `markdownCell()` / `codeCell()` factories with deterministic IDs |
+| `src/lib/notebook/builder.ts` | Constructs `NotebookV4` JSON from slug + template |
+| `src/lib/notebook/templates/` | Per-case-study cell definitions (10 template modules) |
+| `src/lib/notebook/packager.ts` | Creates `.zip` using archiver (notebook + `.DAT` + requirements.txt) |
+| `src/integrations/notebook-generator.ts` | Astro `astro:build:done` hook, orchestration loop |
+| `src/pages/eda/notebooks/index.astro` | Landing page at `/eda/notebooks/` |
+| `src/components/eda/NotebookDownload.astro` | Download buttons for case study pages |
+
+**Modified existing files (minimal changes):**
+- `src/lib/eda/routes.ts` — add `notebooks` route constant + `notebookZipUrl()` helper
+- `src/pages/eda/index.astro` — add Notebooks to `SECTIONS` and `NAV_ITEMS` arrays
+- `src/pages/eda/case-studies/[...slug].astro` — import and render `NotebookDownload` (2 lines)
+- `astro.config.mjs` — register `notebookGenerator()` in integrations array
+
+**Unchanged:** `datasets.ts`, `handbook/datasets/*.DAT`, `.github/workflows/deploy.yml`, `astro.config.mjs` sitemap config, `src/content.config.ts`
+
+**Download URL pattern:** `/downloads/notebooks/{slug}.zip` and `/downloads/notebooks/{slug}.ipynb`
+
+**ZIP structure per archive:**
+```
+{slug}/
+  {slug}.ipynb          (notebook JSON, clean — no executed outputs)
+  {DATASET_NAME}.DAT    (line endings normalized to LF)
+  requirements.txt      (Python version floors)
+```
+
+**Google Colab strategy:** Commit 10 raw `.ipynb` files to `notebooks/eda/` in the repo. Colab links require GitHub repository paths (`colab.research.google.com/github/PatrykQuantumNomad/...`), not GitHub Pages static URLs. Total size: ~150-250KB, negligible.
+
+See: `.planning/research/ARCHITECTURE.md`, `.planning/research/ARCHITECTURE-jupyter-notebooks.md`
 
 ### Critical Pitfalls
 
-1. **Content staleness from rapid Claude Code evolution** — Add `lastVerified` frontmatter field to schema from day one; verify every factual claim against official docs before marking any chapter complete; quarantine volatile content (specific flags, exact syntax) into dated callout boxes; structure chapters around durable concepts not specific commands
-2. **Hardcoded single-guide assumptions breaking multi-guide architecture** — Must be fixed FIRST before any content work; 7 specific hardcoded locations catalogued by file and line number: content.config.ts (2), astro.config.mjs, guides hub page, llms.txt, llms-full.txt, GuideLayout companion link — all must be refactored and tested before adding any Claude Code content
-3. **SEO cannibalization with official Anthropic documentation** — Angle every chapter as practitioner workflow not feature documentation; run keyword gap analysis before writing each chapter; no chapter title should match an official docs section header
-4. **NotebookLM hallucination and interpretive overconfidence** — Treat NotebookLM output as outline draft only; build a feature verification checklist per chapter; every Claude Code behavior mentioned must have a corresponding current official docs entry or recent CHANGELOG confirmation
-5. **Breaking the /guides/ hub page and supporting pages** — Hub page uses `[guideMeta]` destructure (takes only first guide); llms.txt and llms-full.txt have the same bug; sitemap builder hardcodes FastAPI path; all three must be fixed in the infrastructure phase
+Five pitfalls have the highest probability of causing user-facing failures:
 
-See `/Users/patrykattc/work/git/PatrykQuantumNomad/.planning/research/PITFALLS.md` for full analysis including recovery strategies and "looks done but isn't" verification checklist.
+1. **Invalid nbformat v4.5 JSON** — Missing `id` fields on cells (required in v4.5 per JEP 62), wrong `execution_count` type (must be `null`, not `undefined` or omitted), or `source` array format errors cause cells to not render or notebook validators to reject the file. JupyterLab may silently show blank cells. Google Colab masks some issues during testing. Prevention: define strict TypeScript interfaces, always set `execution_count: null` and `outputs: []` on code cells, use deterministic cell IDs (slug prefix + zero-padded counter), run `nbformat.validate()` in a build-time check.
+
+2. **`.DAT` file parsing fails on first run** — NIST `.DAT` files are not standard CSV. They use fixed-width format, have varying header line counts to skip, inconsistent delimiters, mixed CRLF/LF line endings, and different column structures. A generic `pd.read_csv()` call fails on most of them. Prevention: per-dataset loading code with explicit `skiprows`, `names`, and `sep` parameters; normalize `.DAT` files to LF line endings when copying into ZIP; add a row-count assertion after loading (`assert len(df) == 200`).
+
+3. **ZIP encoding corruption** — JSZip has known issues encoding binary files alongside UTF-8 strings. archiver handles this correctly but requires explicit types: `archive.append(buffer, ...)` for binary `.DAT` files and `archive.append(jsonString, ...)` for notebook JSON. Additionally, always await `output.on('close')` not `archive.finalize()` to avoid stream truncation races.
+
+4. **Users cannot run notebooks due to missing dependencies** — The most common failure mode for distributed notebooks. Users in different virtual environments get `ModuleNotFoundError` immediately. Google Colab testing masks this because packages are pre-installed there. Prevention: dependency-check cell as the first code cell (prints install command for missing packages); include `requirements.txt` in every ZIP; prominently feature "Open in Colab" as the zero-install path.
+
+5. **Notebook values disagree with website** — The website's TypeScript analysis is NIST-verified (completed in v1.9). Python's SciPy may compute slightly different p-values or apply different default parameters than the TypeScript implementations. Users who notice discrepancies lose trust in both the website and the notebook. Prevention: cross-reference all statistical values against verified NIST values from `src/data/eda/datasets.ts` and case study pages; document any systematic differences in interpretation cells.
+
+**Additional pitfall requiring a decision:** Google Colab users cannot access the bundled `.DAT` file automatically. Either add a Colab-specific upload cell (simple) or fetch the `.DAT` from a GitHub raw URL conditionally (more friction). This must be decided before templates are written.
+
+See: `.planning/research/PITFALLS.md`, `.planning/research/PITFALLS-jupyter-notebooks.md`
 
 ## Implications for Roadmap
 
-Based on combined research, the build order is strictly constrained by dependency analysis. Infrastructure must precede content. Diagrams can be built in parallel with early content chapters. Interactive components come after static diagrams are proven.
+### Suggested Phase Structure
 
-### Phase 1: Infrastructure Refactoring
-**Rationale:** 7 hardcoded single-guide assumptions in the existing codebase will silently break or exclude Claude Code guide content if not fixed first. Changes touch existing shipping code and carry real regression risk. Test gate: FastAPI guide renders identically after all changes; build succeeds without errors.
-**Delivers:** Multi-guide-capable codebase; content collection system ready for Claude Code MDX; hub page, sitemap, and llms.txt iterate all guides; GuideLayout and GuideJsonLd are parameterized
-**Addresses:** Pitfalls 2 and 6 (hardcoded single-guide assumptions, hub page breakage)
-**Modifies existing files:** content.config.ts, astro.config.mjs, GuideLayout.astro, GuideJsonLd.astro, routes.ts, guides/index.astro, llms.txt.ts, llms-full.txt.ts, fastapi-production/[slug].astro
+The build order is strictly constrained by dependencies: types and config first (no dependencies), then cell factories and builder (depend on types), then packager (depends on builder), then Astro integration (depends on all library code), then UI components (depend on routes), then landing page and EDA index integration.
 
-### Phase 2: Content Schema and Guide Metadata
-**Rationale:** Schema changes and guide.json creation are prerequisites for all content and page work. Adding `lastVerified` to guidePageSchema must happen before any MDX files are authored so the field is present from the start, not backfilled.
-**Delivers:** Extended guidePageSchema with `lastVerified` date field; claude-code/guide.json with full chapter list; stub introduction.mdx for pipeline validation; content collections registered and type-checking
-**Addresses:** Pitfall 1 (content staleness — `lastVerified` field established at schema level)
-**Uses:** Existing guideMetaSchema and guidePageSchema from schema.ts (additive only)
+---
 
-### Phase 3: Page Routes and OG Images
-**Rationale:** Route scaffolding enables testing the full page generation pipeline before investing in heavy content and diagram work. Once routes exist, chapter MDX files can be added incrementally without structural risk.
-**Delivers:** /guides/claude-code/ landing page; /guides/claude-code/[slug] chapter routing; OG image endpoints for landing and all chapters; hub page showing both guides
-**Addresses:** Pitfall 2 completion (OG image endpoints)
-**Uses:** Existing satori + sharp + og-cache.ts pipeline
+**Phase 1: Foundation — Types, Config, and Cell Factory**
 
-### Phase 4: CodeBlock Component
-**Rationale:** All Claude Code guide code examples are inline (no template repo), so CodeBlock.astro must exist before content authoring begins. Small, focused, low-risk — build it early so it is available for all chapters.
-**Delivers:** CodeBlock.astro wrapping astro-expressive-code with file-path header but no GitHub source link
-**Implements:** Pattern 3 (Inline Code Blocks) from ARCHITECTURE.md
+Rationale: Zero external dependencies. Establishes the TypeScript contracts that all subsequent phases build on. Getting the nbformat schema right here prevents schema bugs from propagating into all 10 templates.
 
-### Phase 5: SVG Diagram Generators
-**Rationale:** Diagrams are independent of chapter prose and can be built in parallel with early chapter drafts. Building them early establishes a visual vocabulary that informs how chapters are written. All 5 follow the same diagram-base.ts pattern — batch work is efficient.
-**Delivers:** 5 SVG generator functions (agentic-loop.ts, hook-lifecycle.ts, permission-model.ts, mcp-architecture.ts, agent-teams.ts); 5 Astro wrapper components; barrel export updates in svg-diagrams/index.ts
-**Implements:** Pattern 2 (Build-Time SVG Diagram Generators) from ARCHITECTURE.md
-**Performance constraint:** Each diagram under 50KB and 250 lines (established bounds from existing diagrams: 94-252 lines)
+Delivers:
+- `src/lib/notebook/types.ts` — nbformat v4.5 TypeScript interfaces (NotebookV4, MarkdownCell, CodeCell)
+- `src/lib/notebook/config.ts` — NOTEBOOK_REGISTRY array (10 entries, slug to DAT filename + NIST metadata)
+- `src/lib/notebook/cells.ts` — `markdownCell()` / `codeCell()` with deterministic IDs and correct `\n`-terminated source line format
 
-### Phase 6: Interactive React Components
-**Rationale:** React islands add client-side JavaScript weight and must be capped at 2 total to control bundle size. Build these after diagrams are proven so the decision to add interactivity is informed by whether the static version is already sufficient.
-**Delivers:** PermissionFlowExplorer.tsx (permission decision tree with clickable nodes); HookEventVisualizer.tsx (hook event sequence with payload reveal)
-**Uses:** @xyflow/react + @dagrejs/dagre following DeploymentTopology.tsx pattern exactly
-**Performance constraint:** client:visible loading; each component under 30KB gzipped; max 2 React islands per chapter page
+Test gate: TypeScript compiles. `markdownCell('test')` returns correct nbformat shape. Registry entries match DATASET_SOURCES DAT filenames. Cell IDs are unique per notebook.
 
-### Phase 7: MDX Chapter Content
-**Rationale:** Content is the primary deliverable. By this phase, all infrastructure, diagrams, and components are ready. Each chapter can be authored and verified independently.
-**Delivers:** 10-12 MDX chapter files with prose, diagrams, code blocks, callouts, cross-links, difficulty badges, `lastVerified` dates, and in-page table of contents
-**Critical process requirement:** Feature verification checklist per chapter — every Claude Code behavior mentioned must be confirmed in current official docs or recent CHANGELOG before chapter is marked complete. This directly addresses Pitfalls 1 and 5.
-**Content strategy:** Angle chapters as practitioner workflows, not feature reference; target long-tail keywords after running keyword gap analysis per chapter before writing; keep chapters to 2000-3000 words maximum. Addresses Pitfalls 3 and 4.
+Avoids: Pitfall 1 (invalid nbformat), source line newline convention bug (PITFALLS-jupyter-notebooks Pitfall 5).
 
-### Phase 8: SEO, Polish, and Post-Launch Enhancements
-**Rationale:** FAQ, companion blog post, and enhanced interactive features are high-value but depend on chapter content being finalized. These are the v1.x post-launch additions that SEO value compounds over time.
-**Delivers:** FAQ page with FAQPage JSON-LD; companion blog post targeting broad queries with cross-links to all chapters; CLAUDE.md starter templates with tabbed UI; before/after comparison blocks; Lighthouse audit and Google Rich Results structured data validation
-**Addresses:** Pitfall 4 completion (SEO cannibalization — companion blog post creates two-pronged traffic strategy)
+---
+
+**Phase 2: Notebook Builder + Standard Template (7 case studies)**
+
+Rationale: The 7 standard-template case studies share a single parameterized cell sequence. Building and validating this template first delivers 70% of the milestone content and proves the full generation pipeline before tackling the complex notebooks.
+
+Delivers:
+- `src/lib/notebook/builder.ts` — `buildNotebook(slug)` function
+- `src/lib/notebook/templates/standard.ts` — standard cell sequence (title, requirements, imports, data loading, summary stats, 4-plot, individual plots, hypothesis tests, test summary table, interpretation, conclusions)
+- Per-case-study configs for: normal-random-numbers, uniform-random-numbers, cryothermometry, filter-transmittance, heat-flow-meter, fatigue-life, standard-resistor
+
+Test gate: `buildNotebook('normal-random-numbers')` returns valid JSON. Validate against nbformat schema. Open in JupyterLab and VS Code without errors. Data loading cell asserts correct row count.
+
+Avoids: Pitfall 1 (format version), Pitfall 2 (per-dataset loading parameters verified for all 7 files).
+
+Research flag: Standard patterns, no deeper research needed. Cell sequence is fully documented in FEATURES.md. Per-dataset `skiprows` and `names` parameters must be empirically verified in Python — this is implementation work.
+
+---
+
+**Phase 3: ZIP Packager + Astro Integration**
+
+Rationale: Depends on builder output. Establishes the delivery mechanism. Without this, notebooks exist as JSON in memory but never reach the user's browser.
+
+Delivers:
+- `npm install archiver @types/archiver`
+- `src/lib/notebook/packager.ts` — `createNotebookZip()` using archiver (notebook + DAT + requirements.txt, LF-normalized line endings)
+- `src/integrations/notebook-generator.ts` — Astro `astro:build:done` hook with `mkdirSync` guard, generation loop, Astro logger output
+- Register `notebookGenerator()` in `astro.config.mjs`
+- Update `src/lib/eda/routes.ts` with `notebooks` route and `notebookZipUrl()` helper
+- Add generated output paths to `.gitignore`
+
+Test gate: `astro build` succeeds. `dist/downloads/notebooks/normal-random-numbers.zip` exists, extracts correctly on macOS and Linux, contains correct files with LF line endings. Build time regression under 5 seconds.
+
+Avoids: Pitfall 3 (ZIP encoding), stream finalization race (PITFALLS-jupyter-notebooks Pitfall 4), output directory not existing (PITFALLS-jupyter-notebooks Pitfall 6).
+
+---
+
+**Phase 4: Download UI + Case Study Integration**
+
+Rationale: Depends on routes being defined. Wires the generated files to the user interface with minimal changes to existing files.
+
+Delivers:
+- `src/components/eda/NotebookDownload.astro` — download buttons (`.zip` primary, `.ipynb` secondary) with "Open in Colab" badge
+- Modify `src/pages/eda/case-studies/[...slug].astro` — import and render `NotebookDownload` (2 lines)
+- Commit 10 `.ipynb` files to `notebooks/eda/` in the repo for Colab GitHub URL scheme
+
+Test gate: Every case study page shows notebook download section. Colab links open the correct notebooks. Download button triggers file save dialog (not browser navigation). Content-Type header is `application/zip`.
+
+Avoids: MIME type pitfall (static file served with download attribute, not data: URI), Colab URL scheme pitfall.
+
+---
+
+**Phase 5: Advanced Templates — Beam Deflections, Random Walk, Ceramic Strength**
+
+Rationale: These 3 notebooks are in a higher complexity tier and depend on the standard pipeline being proven. Beam deflections needs `scipy.optimize.curve_fit` for sinusoidal regression. Random walk needs AR(1) coefficient estimation. Ceramic strength needs multi-column data loading (480 rows × 8 columns), two-sample t-test, F-test, one-way ANOVA, and DOE factor analysis.
+
+Delivers:
+- `src/lib/notebook/templates/beam-deflections.ts` — sinusoidal model development variant
+- `src/lib/notebook/templates/random-walk.ts` — AR(1) model development variant
+- `src/lib/notebook/templates/ceramic-strength.ts` — DOE variant (~65KB notebook, most complex)
+
+Test gate: All 3 notebooks open and run end-to-end in a clean Python environment. Statistical values match NIST-verified website values from v1.9. Ceramic strength loads correctly from JAHANMI2.DAT (480 rows × 8 columns, multi-column fixed-width format).
+
+Avoids: Pitfall 5 (drift from website), Pitfall 2 (JAHANMI2.DAT is the most complex DAT format).
+
+Research flag: Statistical values for sinusoidal parameters (beam deflections), AR(1) coefficients (random walk), and ANOVA F-statistics (ceramic strength) must be cross-referenced against NIST-verified website values from v1.9 during implementation. This is the highest-risk phase for value drift.
+
+---
+
+**Phase 6: Notebooks Landing Page + EDA Index Integration**
+
+Rationale: The landing page and EDA index update are independent of the notebook content itself. They surface the feature to users who arrive at the EDA section without going to a specific case study.
+
+Delivers:
+- `src/pages/eda/notebooks/index.astro` — landing page with card grid (all 10 notebooks, download links, NIST section references)
+- Modify `src/pages/eda/index.astro` — add Notebooks to SECTIONS + NAV_ITEMS
+- Collection ZIP (all 10 + shared requirements.txt + collection README) from the landing page
+
+Test gate: `/eda/notebooks/` renders with correct breadcrumbs and JSON-LD. EDA index shows Notebooks section. Collection ZIP downloads and contains all 10 notebooks plus README.
+
+---
 
 ### Phase Ordering Rationale
 
-- Infrastructure first is non-negotiable: 7 hardcoded assumptions cause silent failures if not fixed before content is added
-- Schema before content: prevents needing to backfill `lastVerified` fields across all 10-12 chapters after the fact
-- Diagrams (Phase 5) before content (Phase 7): authors can reference diagram component names in MDX from the start
-- Interactive components (Phase 6) after static diagrams (Phase 5): upgrades a static diagram to interactive only where the static version proves insufficient
-- FAQ and blog post (Phase 8) last: FAQ emerges from actual chapter content; blog post must link to finalized chapter URLs
+- Phases 1 through 3 follow strict dependency order (types → builder → packager → integration). Nothing can be built out of sequence.
+- Phase 4 (UI) is intentionally decoupled from Phase 5 (advanced templates). Download buttons for the 7 standard-template notebooks can go live while the 3 complex notebooks are still in development.
+- Phase 6 (landing page) is structurally independent and can be done in parallel with Phase 5 once Phase 3 is complete.
+- Standard template first (Phase 2) validates the full pipeline before the complexity of advanced templates.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 7 (Chapter Content):** Each chapter needs a keyword gap analysis before writing to avoid SEO cannibalization with official docs. Also requires a feature verification checklist built from current official docs — these docs must be re-read at content authoring time, not treated as current from this research snapshot.
-- **Phase 5 (SVG Diagrams — hook lifecycle specifically):** The hook lifecycle diagram (DIAG-CC-02) is the most complex of the five, covering 17+ hook events with branching execution paths. The complete list of hook events and their payload schemas should be pulled fresh from official docs immediately before implementation.
+**Phases needing attention during implementation:**
+- **Phase 2:** Per-dataset `.DAT` parsing parameters (`skiprows`, `names`, `sep`) must be manually verified in Python for all 7 standard-template files. Do not assume generic parsing works — each file has a different structure.
+- **Phase 5:** Statistical values for beam deflections (sinusoidal model parameters), random walk (AR(1) coefficients), and ceramic strength (ANOVA F-statistics, batch effects) must be cross-referenced against the NIST-verified website values from v1.9. These are the highest-risk notebooks for value drift.
+- **Phase 3:** Test ZIP extraction on both macOS and Linux. Verify `Content-Type: application/zip` after first deployment.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (Infrastructure):** The 7 hardcoded locations are fully catalogued by file and line number. The fixes are mechanical refactors following established patterns.
-- **Phase 3 (Page Routes / OG):** Follows the exact fastapi-production page and OG pattern. No unknown territory.
-- **Phase 4 (CodeBlock component):** Trivially small component wrapping existing astro-expressive-code. Pattern fully specified in ARCHITECTURE.md.
-- **Phase 6 (Interactive React):** Follows DeploymentTopology.tsx pattern exactly. Node/edge specifications documented in ARCHITECTURE.md.
+**Phases with standard patterns (no deeper research needed):**
+- **Phase 1:** Pure TypeScript type definitions matching a stable JSON schema. No ambiguity.
+- **Phase 4:** Follows exact patterns from existing `CaseStudyDataset.astro` CSV download buttons.
+- **Phase 6:** Follows exact pattern from `src/pages/eda/case-studies/index.astro` card grid.
+
+## Open Questions and Decisions Needed
+
+1. **Colab data file delivery** — Colab users cannot access the bundled `.DAT` file automatically. Options: (a) add a Colab-specific upload cell at the top of each notebook, or (b) fetch the `.DAT` file from a GitHub raw URL conditionally. Option (a) is simpler and avoids network dependencies. Must be decided before Phase 2 templates are written since it affects the title and data-loading cells.
+
+2. **`source` field format in notebook cells** — Both a single multi-line string and a string array (with `\n` appended to all lines except the last) are valid per the nbformat spec. ARCHITECTURE.md recommends single string for simplicity; ARCHITECTURE-jupyter-notebooks.md recommends string array for spec fidelity. Recommendation: use single multi-line string. JupyterLab, VS Code, and Colab all handle both correctly. Simplify the cell factory.
+
+3. **Collection ZIP scope** — FEATURES.md lists this as a Phase 2 differentiator for the `/eda/notebooks/` landing page. Confirm whether this is in scope for v1.17 or deferred. It requires all 10 notebooks to be complete first.
+
+4. **Numerical precision threshold** — Python SciPy may compute slightly different p-values than the TypeScript implementations. Decide the acceptable precision threshold before writing interpretation cells. Recommendation: match to 3-4 significant digits, document any systematic differences in a comment.
+
+5. **`astro:build:done` vs API route endpoints** — Resolved in favor of integration hook + archiver (see Architecture section). Only reopen this decision if the integration hook approach hits unexpected issues during Phase 3.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All technologies verified against installed versions. Zero new dependencies confirmed. Pattern compatibility confirmed by existing DeploymentTopology.tsx, diagram-base.ts, og-cache.ts usage. |
-| Features | HIGH | Feature set verified against official Anthropic docs (overview, permissions, hooks, skills, MCP, memory, agent teams). Competitor analysis conducted on 5 competing guides. Feature prioritization grounded in existing site capabilities. |
-| Architecture | HIGH | Based on direct codebase analysis of all integration points. 7 hardcoded single-guide assumptions identified by file and line number. Dependency-aware build order derived from actual file dependencies, not assumptions. |
-| Pitfalls | HIGH | Pitfalls grounded in direct codebase inspection (7 hardcoded paths verified by line number), Claude Code CHANGELOG.md (release cadence confirmed: 176 updates in 2025), NotebookLM hallucination research (arxiv study: 13% rate), and OG image build-time benchmarks (documented case studies: 100-300ms per image). |
+| Stack | HIGH | nbformat v4.5 spec verified against official schema and JEP 62. archiver downloads and API verified on npm. Python package versions verified on PyPI. JSZip encoding issues confirmed in library issue tracker. |
+| Features | HIGH | Cell order and quality checklist derived from fast.ai, Jake VanderPlas PDSH, STScI JDAT notebooks, and Jupyter4Edu pedagogical patterns — gold standard sources. Anti-features grounded in documented tradeoffs. |
+| Architecture | HIGH | Existing `indexnow.ts` integration and OG image endpoint patterns are proven in this codebase. archiver vs JSZip decision is based on documented encoding issues. Component boundaries follow single-responsibility principle from existing codebase. |
+| Pitfalls | HIGH | `.DAT` file format variability verified by direct `file` command inspection of files in `handbook/datasets/`. JSZip encoding issue documented in the library's own issue tracker (#368). nbformat cell ID requirement in official spec (JEP 62). NIST value cross-reference requirement grounded in v1.9 verification work. |
 
-**Overall confidence:** HIGH
+**Overall confidence: HIGH**
 
 ### Gaps to Address
 
-- **Chapter keyword strategy:** Keyword gap analysis per chapter must be conducted during Phase 7 planning at writing time, not during this research phase. The research establishes the approach (target long-tail workflow keywords), but specific keywords for each of 10-12 chapters require checking actual SERPs given how rapidly the Claude Code ecosystem evolves.
-- **`lastVerified` schema impact on OG image caching:** The og-cache.ts system uses title + description to compute the cache hash. Adding `lastVerified` to guidePageSchema is confirmed necessary, but the impact on OG image cache invalidation (should `lastVerified` date changes trigger new OG images?) needs to be decided at implementation time.
-- **guide.json `templateRepo` field for Claude Code:** The guideMetaSchema requires a `.url()` validated `templateRepo` field. Claude Code has no template repo. Confirmed approach is to use official Anthropic docs URL, but this should be validated against the Zod schema at implementation time.
-- **Agent Teams chapter scope:** Agent Teams shipped March 7, 2026 as "research preview." The feature may change significantly before GA. The chapter should exist at launch (it is a genuine differentiator), but content must be scoped conservatively with explicit "research preview" warnings and the tightest `lastVerified` maintenance cadence of any chapter.
+- **Exact `.DAT` parsing parameters for all 10 files** — Known formats documented in PITFALLS.md, but `skiprows` counts and column names need empirical verification in Python. This is implementation work, not a research gap.
+- **Numerical agreement with website** — Will not be known until Python code is written and compared cell-by-cell with the website values. The v1.9 website values are the ground truth. Requires careful implementation discipline, not additional research.
+- **Colab `.DAT` file delivery** — No decision made yet (Open Question #1). Must be resolved before Phase 2 templates begin.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct codebase analysis: content.config.ts, astro.config.mjs, GuideLayout.astro, GuideJsonLd.astro, routes.ts, guides/index.astro, llms.txt.ts, llms-full.txt.ts, diagram-base.ts, DeploymentTopology.tsx, og-cache.ts, schema.ts — all integration points verified by file and line number
-- [Claude Code Official Docs](https://code.claude.com/docs/en/overview) — feature surface, permissions, hooks, skills, MCP, memory, agent teams verified at research date
-- [Claude Code CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) — 176 updates in 2025; /simplify, /batch, HTTP hooks (March 3 2026); Agent Teams, Automatic Memories (March 7 2026)
+- [nbformat v4.5 JSON Schema](https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.5.schema.json)
+- [nbformat v4.5 format description](https://nbformat.readthedocs.io/en/latest/format_description.html)
+- [Cell ID JEP 62](https://jupyter.org/enhancement-proposals/62-cell-id/cell-id.html)
+- [Astro Integration API](https://docs.astro.build/en/reference/integrations-reference/)
+- [Astro Endpoints documentation](https://docs.astro.build/en/guides/endpoints/)
+- [archiver npm package](https://www.npmjs.com/package/archiver)
+- [npm trends: archiver vs jszip vs alternatives](https://npmtrends.com/archiver-vs-jszip-vs-node-stream-zip-vs-yauzl-vs-yazl-vs-zip-js)
+- Existing codebase patterns (direct code inspection): `src/integrations/indexnow.ts`, `src/pages/open-graph/eda/[...slug].png.ts`, `src/components/eda/CaseStudyDataset.astro`, `src/data/eda/datasets.ts`, `src/lib/eda/routes.ts`, `src/pages/eda/case-studies/index.astro`
+- [Teaching and Learning with Jupyter — Pedagogical Patterns](https://jupyter4edu.github.io/jupyter-edu-book/catalogue.html)
+- [Jake VanderPlas Python Data Science Handbook notebooks](https://github.com/jakevdp/PythonDataScienceHandbook)
+- [STScI JDAT Notebooks requirements specification](https://spacetelescope.github.io/jdat_notebooks/docs/requirements.html)
+- [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
+- NumPy, SciPy, pandas, matplotlib, seaborn — PyPI releases verified
 
-### Secondary (MEDIUM confidence)
-- [FlorianBruniaux/claude-code-ultimate-guide](https://github.com/FlorianBruniaux/claude-code-ultimate-guide) — most comprehensive community guide (22K+ lines, 41 Mermaid diagrams); primary competitor analysis source
-- [alexop.dev - Understanding Claude Code's Full Stack](https://alexop.dev/posts/understanding-claude-code-full-stack/) — conceptual layer dependency analysis
-- [adityabawankule.io - Claude Code Complete Guide](https://www.adityabawankule.io/guides/claude-code-complete-guide) — web-hosted guide with sidebar nav
-- [NotebookLM Hallucination Research - arxiv](https://arxiv.org/html/2509.25498v1) — 13% hallucination rate, interpretive overconfidence as primary error mode
-- [Astro OG Image Caching - ainoya.dev](https://ainoya.dev/posts/astro-ogp-build-cache/) — build time benchmarks: 100-300ms per satori+sharp image
-
-### Tertiary (LOW confidence — validate at authoring time)
-- [Claude Code Cron Scheduling - winbuzzer.com](https://winbuzzer.com/2026/03/09/anthropic-claude-code-cron-scheduling-background-worker-loop-xcxwbn/) — March 2026 feature announcement; validate against official docs before including in chapter
-- [claudefa.st Agent Teams guide](https://claudefa.st/blog/guide/agents/agent-teams) — practical agent teams patterns; all claims must be verified against official docs at chapter authoring time
+### Secondary (MEDIUM-HIGH confidence)
+- [JSZip encoding issue #368](https://github.com/Stuk/jszip/issues/368) — UTF-8 encoding not preserved after zip generation
+- [Archiver string stream issue #375](https://github.com/archiverjs/node-archiver/issues/375) — invalid ZIP from string-based streams
+- [Google Colab GitHub integration](https://github.com/googlecolab/open_in_colab) — URL pattern requirement
+- [Writing Good Jupyter Notebooks — Practical Data Science](https://www.practicaldatascience.org/notebooks/PDS_not_yet_in_coursera/20_programming_concepts/writing_good_jupyter_notebooks.html)
+- [nbformat MissingIDFieldWarning #335](https://github.com/jupyter/nbformat/issues/335)
+- `handbook/datasets/*.DAT` — direct file inspection confirming mixed CRLF/LF line endings
 
 ---
-*Research completed: 2026-03-10*
+*Research completed: 2026-03-14*
 *Ready for roadmap: yes*

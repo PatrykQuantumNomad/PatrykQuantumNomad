@@ -1,350 +1,485 @@
-# Pitfalls Research
+# Domain Pitfalls: Adding Jupyter Notebook Downloads to Existing Astro Static Site
 
-**Domain:** Adding a comprehensive Claude Code guide to an existing Astro 5 portfolio site (1082 pages, established guide infrastructure from FastAPI guide)
-**Researched:** 2026-03-10
-**Confidence:** HIGH (grounded in direct codebase analysis of 7 hardcoded integration points, verified against Claude Code changelog and official docs, confirmed NotebookLM hallucination research)
+**Domain:** Downloadable Jupyter Notebooks for 10 EDA case studies on existing Astro 5 / GitHub Pages site
+**Researched:** 2026-03-14
+**Confidence:** HIGH (verified against official nbformat docs, GitHub Pages docs, project source code, and community issue trackers)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Content Staleness from Rapid Claude Code Evolution
+Mistakes that cause broken downloads, user-facing failures, or build regressions.
 
-**What goes wrong:**
-Claude Code shipped 176 updates in 2025 alone and continues at a pace of roughly weekly releases in 2026. Feature names, CLI flags, configuration syntax, and even core concepts (CLAUDE.md, Skills, hooks, Agent SDK) change or appear between guide drafts and publication. A guide written against the February 2026 feature set was already partially stale by March 3, 2026 when `/simplify`, `/batch`, HTTP hooks, and worktree-shared project configs all shipped in a single release. By March 7, Automatic Memories and Agent Teams arrived. Readers encounter instructions that reference deprecated flags, missing features, or outdated workflows. The guide loses credibility and SEO authority when users bounce because instructions do not match their version.
+### Pitfall 1: Notebook Format Version Mismatch Causes Validation Errors
 
-Unlike the FastAPI guide (which pins to a semver-tagged template repo), Claude Code has no stable versioning scheme for features -- the tool auto-updates in the background, so all users are always on the latest version. There is no way to tell a reader "install Claude Code v2.3" because version pinning is not a user-facing concept.
+**What goes wrong:** Generating .ipynb files with `nbformat: 4, nbformat_minor: 5` (format 4.5) but omitting cell `id` fields, or generating with `nbformat_minor: 0` and including `id` fields that older clients do not expect. The notebook opens in one environment but fails validation in another.
 
-**Why it happens:**
-NotebookLM sources (51 documents) capture a snapshot in time. These sources include blog posts, changelogs, and community guides from varying dates. Claude Code's feature surface shifts weekly. Writers assume the content they researched is still current by the time they publish. The FastAPI guide avoided this because it referenced a tagged, immutable codebase.
+**Why it happens:** The notebook format is JSON with a schema that evolved significantly. Format 4.5 (introduced via JEP 62) **requires** a unique `id` field on every cell -- a string of 1-64 characters matching `^[a-zA-Z0-9-_]+$`. Earlier format versions (4.0-4.4) do not have this field. When generating programmatically in TypeScript/Node.js (not using Python's `nbformat` library), it is easy to get the version/schema contract wrong. There is no maintained TypeScript library for generating Jupyter notebooks -- the canonical `nbformat` library is Python-only.
 
-**How to avoid:**
-1. Anchor every chapter to behaviors verified against the official docs at code.claude.com/docs/en/overview and the CHANGELOG at github.com/anthropics/claude-code/blob/main/CHANGELOG.md -- not just NotebookLM sources.
-2. Add a `lastVerified` date field to the guide page schema (extend `guidePageSchema` in `src/lib/guides/schema.ts`). Render this date prominently on each chapter page via GuideLayout.
-3. Structure chapters around durable concepts (memory system, tool access, project configuration, CI/CD integration, multi-agent patterns) rather than specific flags or slash commands that change monthly.
-4. Quarantine volatile content (specific flag names, exact command syntax, pricing details, model names) into clearly marked callout boxes labeled "Current as of [date]" that are easy to update without rewriting entire chapters.
-5. Build a lightweight update checklist: before each site deploy, diff the official CHANGELOG.md against the guide's `lastVerified` dates. If breaking changes exist, update the affected callout boxes.
+**Consequences:**
+- JupyterLab 3.x+ and nbformat 5.x validators reject notebooks with missing IDs when declared as 4.5
+- VS Code Jupyter extension shows MissingIDFieldWarning or refuses to render cells
+- Google Colab silently ignores the issue (masking the bug during testing)
+- Users who validate notebooks with `nbformat.validate()` get `ValidationError`
 
-**Warning signs:**
-- NotebookLM sources are more than 4 weeks old at time of content authoring
-- Chapter text references specific CLI flags (e.g., `--from-pr`, `/simplify`) without marking them as version-specific
-- No `lastVerified` date visible on chapter pages
-- Official Claude Code docs structure has diverged from guide chapter structure
-- Guide mentions a feature that has been renamed or removed in a recent changelog
+**Prevention:**
+- Target format version 4, minor version 5 (`"nbformat": 4, "nbformat_minor": 5`) -- this is the current standard all environments support
+- Generate a unique `id` for every cell using 8-character hex strings (e.g., deterministic hash from cell index + notebook slug)
+- Use **deterministic** IDs (not random) so that builds are reproducible and git diffs are clean
+- Validate the complete notebook JSON structure against the nbformat 4.5 schema before writing to disk
 
-**Phase to address:**
-Content schema phase (add `lastVerified` frontmatter field) and every content authoring phase (verify against official docs before marking chapter complete). This is the single highest priority pitfall -- it is unique to guides about rapidly-evolving tools and has no equivalent in the FastAPI guide.
+**Detection:** Open every generated notebook in JupyterLab, VS Code, AND run `python -c "import nbformat; nbformat.validate(nbformat.read('notebook.ipynb', as_version=4))"` from CLI. If any one fails, the format is wrong.
 
----
-
-### Pitfall 2: Hardcoded Single-Guide Assumptions Breaking Multi-Guide Architecture
-
-**What goes wrong:**
-The existing guide infrastructure has at least 7 locations with hardcoded `fastapi-production` references that will silently break or exclude a second guide:
-
-1. **`src/content.config.ts` lines 54-57:** The `guidePages` collection loader hardcodes `base: './src/data/guides/fastapi-production/pages'`. A Claude Code guide's MDX files in `./src/data/guides/claude-code/pages` will not be loaded into any collection.
-2. **`src/content.config.ts` lines 59-62:** The `guides` collection loader hardcodes `file('src/data/guides/fastapi-production/guide.json')`. A Claude Code `guide.json` will not be loaded.
-3. **`astro.config.mjs` lines 47-59:** The `buildContentDateMap()` function reads `./src/data/guides/fastapi-production/guide.json` directly via `readFileSync`. Claude Code guide pages will have no `lastmod` in the sitemap.
-4. **`src/pages/guides/index.astro` line 13:** Destructures `const [guideMeta] = await getCollection('guides')` -- takes only the first guide, silently ignoring any second guide.
-5. **`src/pages/llms.txt.ts` line 15 and `src/pages/llms-full.txt.ts` line 42:** Same `[guideMeta]` destructure pattern.
-6. **`src/pages/open-graph/guides/fastapi-production/[slug].png.ts`:** OG image endpoint is nested under the `fastapi-production` path. No equivalent exists for `claude-code`.
-7. **`src/pages/guides/fastapi-production/[slug].astro` and `index.astro`:** Page templates are guide-specific directories.
-
-Adding a Claude Code guide without refactoring these hardcoded paths will cause the new guide's pages to either not build at all, be missing from the sitemap and llms.txt, or have no OG images.
-
-**Why it happens:**
-The FastAPI guide was the first and only guide (v1.15 milestone). The architecture was designed to be "future-proofed" with a `/guides/` hub page and generic route helpers (`guidePageUrl`, `guideLandingUrl`), but the content collections, sitemap builder, LLM endpoints, and OG image generators all hardcode the single guide's path. This is completely reasonable for a first guide -- it avoided over-engineering. But adding a second guide requires making these paths generic.
-
-**How to avoid:**
-1. Create separate content collections for the Claude Code guide: `claudeCodePages` (glob loader on `./src/data/guides/claude-code/pages`) and add Claude Code's `guide.json` to the existing `guides` collection by switching the `file()` loader to a `glob()` or `file()` that loads from a pattern matching all guide.json files.
-2. Create guide-specific page directories: `src/pages/guides/claude-code/[slug].astro`, `src/pages/guides/claude-code/index.astro`, `src/pages/guides/claude-code/faq.astro`.
-3. Create guide-specific OG endpoints: `src/pages/open-graph/guides/claude-code/[slug].png.ts` and `src/pages/open-graph/guides/claude-code.png.ts`.
-4. Refactor `astro.config.mjs` to iterate over all `src/data/guides/*/guide.json` files for sitemap dates.
-5. Refactor `src/pages/guides/index.astro` to iterate over all guides from the collection, not destructure the first one.
-6. Refactor `llms.txt` and `llms-full.txt` to iterate over all guides.
-7. Test that the FastAPI guide continues to build correctly after all infrastructure changes.
-
-**Warning signs:**
-- `getCollection('guides')` with array destructuring `[guideMeta]` instead of iteration
-- Claude Code guide pages missing from sitemap (`grep claude-code dist/sitemap-0.xml` returns nothing)
-- No OG images generated for Claude Code chapters
-- `/guides/` hub page only showing FastAPI guide
-- Build succeeds but Claude Code guide pages are silently not generated
-
-**Phase to address:**
-FIRST phase of the milestone. Infrastructure refactoring must happen before any content authoring. Attempting content first will create a tangled mess of duplicated templates or, worse, content that cannot be rendered.
+**Sources:**
+- [Cell ID JEP 62](https://jupyter.org/enhancement-proposals/62-cell-id/cell-id.html)
+- [nbformat 4.5 format description](https://nbformat.readthedocs.io/en/latest/format_description.html)
+- [MissingIDFieldWarning issue #335](https://github.com/jupyter/nbformat/issues/335)
 
 ---
 
-### Pitfall 3: Content Type Confusion -- Mixing Tutorial, Reference, and Conceptual Content
+### Pitfall 2: Generating .ipynb JSON in TypeScript Without a Schema Reference
 
-**What goes wrong:**
-Claude Code's feature surface is amorphous. "Memory" encompasses CLAUDE.md, auto-memory, project settings, and session context. "Tool access" includes MCP, built-in tools, shell commands, file system access, and agent SDK tools. Without careful scoping, chapters balloon into sprawling pages that blend conceptual explanation ("what is CLAUDE.md?"), tutorial steps ("create a file called CLAUDE.md..."), and reference tables ("supported directives: ..."). This produces chapters that serve nobody well: beginners get lost in reference details, experienced users cannot find the specific syntax they need, and search engines cannot determine the page's primary intent for ranking.
+**What goes wrong:** Hand-writing the notebook JSON structure from memory produces notebooks that are subtly invalid -- missing required fields like `execution_count` on code cells, wrong types for `outputs` (object instead of array), or incorrect `source` format (string instead of list of strings).
 
-The FastAPI guide successfully avoided this because each chapter maps to a concrete architectural component (middleware, auth, docker) with clear boundaries. Claude Code's features are more interconnected and harder to isolate into clean chapters.
+**Why it happens:** There is no maintained TypeScript library for generating Jupyter notebooks. When building notebooks in a Node.js/Astro build pipeline, developers must construct the JSON manually. The format has subtle requirements:
+- Code cells require `execution_count` (set to `null` for unexecuted cells, NOT omitted)
+- Code cells require `outputs` as an array (empty `[]` for unexecuted cells)
+- `source` can be a string or a list of strings -- JupyterLab handles both, but behavior varies
+- `metadata` must be an object (even if empty `{}`), never `null` or omitted
+- `cell_type` must be exactly `"code"`, `"markdown"`, or `"raw"` (case-sensitive)
+- `kernelspec` inside top-level `metadata` should specify `"name": "python3"` and `"display_name": "Python 3"` for the kernel chooser to work
 
-**Why it happens:**
-The 51 NotebookLM sources contain a mix of tutorials, reference docs, blog posts, and changelogs. When synthesizing from diverse source types, the natural result is chapters that are "about" a topic rather than chapters that accomplish a specific reader goal. Additionally, Anthropic's official documentation already provides both tutorials (quickstart) and reference (CLI reference, settings) -- a third-party guide that tries to do both is redundant AND inferior.
+**Consequences:**
+- Notebook opens but cells are empty or show raw JSON
+- Kernel selection dialog appears repeatedly because `kernelspec` is missing or malformed
+- nbformat validation rejects the file entirely
+- Subtle rendering differences between JupyterLab, VS Code, and Colab
 
-**How to avoid:**
-1. Define each chapter's primary content type before writing: is it explanation (understanding-oriented, discursive) or how-to guide (task-oriented, assumes knowledge)? For this guide, lean toward explanation + how-to hybrid, matching the FastAPI guide's pattern. NOT tutorial (official docs already do that) and NOT reference (official docs already do that).
-2. Keep chapters to 2000-3000 words maximum. If a chapter exceeds this, it is trying to cover too much -- split it.
-3. Extract reference-style content (command lists, flag tables, configuration options) into a dedicated "Quick Reference" chapter or omit it entirely (link to official docs instead).
-4. Apply the "one chapter, one decision" rule from the FastAPI guide: each chapter should answer one primary question. "How does Claude Code's memory system shape your project?" is good. "Everything about CLAUDE.md, auto-memory, session context, and project settings" is too broad.
-5. Create chapter outline with word count targets and primary content type labels before any writing begins. Review outline against the FastAPI guide's chapter structure for consistency.
+**Prevention:**
+- Define a TypeScript type/interface that exactly mirrors the nbformat 4.5 schema:
+  ```typescript
+  interface NotebookCell {
+    cell_type: 'code' | 'markdown' | 'raw';
+    id: string;
+    metadata: Record<string, unknown>;
+    source: string;
+    execution_count?: null;  // code cells only
+    outputs?: unknown[];     // code cells only
+  }
+  interface Notebook {
+    nbformat: 4;
+    nbformat_minor: 5;
+    metadata: {
+      kernelspec: { name: string; display_name: string; language: string };
+      language_info: { name: string; version: string; mimetype: string; file_extension: string };
+    };
+    cells: NotebookCell[];
+  }
+  ```
+- Set `execution_count: null` (not `undefined`, not omitted) on all code cells
+- Set `outputs: []` on all code cells
+- Always use a single multi-line string for `source` (simplest, most compatible)
+- Include complete `kernelspec` and `language_info` in notebook metadata
+- Write a build-time validation step that parses each generated .ipynb and checks all required fields
 
-**Warning signs:**
-- Chapters exceeding 3000 words
-- Chapters containing both "step 1, step 2" tutorial sequences AND tables of all available options
-- Chapter titles like "Claude Code Memory System" (too broad) rather than "How CLAUDE.md Shapes Every Session" (opinionated, specific)
-- Reader cannot determine what they will learn from the chapter title alone
-- Content duplicates what the official Claude Code quickstart already covers
+**Detection:** Automated build-time JSON schema validation. Verify by opening in JupyterLab, VS Code, and Colab.
 
-**Phase to address:**
-Content planning/outline phase -- before any writing begins. This pitfall is expensive to fix after chapters are written because restructuring requires splitting, merging, and rewriting significant portions of text.
-
----
-
-### Pitfall 4: SEO Cannibalization with Official Claude Code Documentation
-
-**What goes wrong:**
-Anthropic maintains comprehensive official documentation at code.claude.com/docs (overview, quickstart, memory, MCP, hooks, skills, settings, CLI reference, best practices, common workflows, and more). Writing guide chapters that target the same head keywords ("Claude Code CLAUDE.md", "Claude Code MCP setup", "Claude Code best practices") puts patrykgolabek.dev in direct competition with Anthropic's domain authority. Google will overwhelmingly prefer the official source for informational queries about a product's own features. The guide pages rank nowhere, generate no organic traffic, and the authoring effort is wasted. Worse, if search engines view the content as low-value derivative of official docs, it can subtly damage the overall domain's SEO authority through quality signals.
-
-Additionally, multiple community guides already exist (ClaudeLog, zebbern/claude-code-guide on GitHub, claudefast, developertoolkit.ai) targeting the same general keywords. The Claude Code guide market is already crowded.
-
-**Why it happens:**
-The natural instinct is to cover what Claude Code does comprehensively. But Anthropic already does that with continuously-updated documentation. Third-party guides that merely rephrase official documentation offer zero differentiation to search engines or readers.
-
-**How to avoid:**
-1. Target long-tail, workflow-oriented keywords that official docs do NOT cover: "Claude Code workflow for Kubernetes development", "Claude Code CLAUDE.md for monorepo architecture", "Claude Code CI/CD automation with GitHub Actions patterns", "Claude Code vs Cursor for DevOps engineers", "how a staff engineer uses Claude Code daily". The FastAPI guide succeeded because it covers production architecture decisions, not what FastAPI is.
-2. Angle every chapter as "practitioner's opinion + real-world patterns" rather than "what this feature does." Official docs explain features; this guide should explain how a 17+ year architect uses those features in production workflows.
-3. Include canonical cross-references to official documentation for factual claims. Link to code.claude.com/docs generously. This signals to search engines that the guide is additive, not duplicative.
-4. Run a keyword gap analysis before writing: search for each planned chapter title on Google and check if official docs or high-authority community guides already own the first page. If they do, reangle the chapter.
-5. Use TechArticle JSON-LD schema (already established pattern from FastAPI guide) to differentiate from generic blog-style content.
-6. The unique value proposition is Patryk's experience as a cloud-native architect. Every chapter should filter Claude Code through that lens, not through a generic "getting started" lens.
-
-**Warning signs:**
-- Chapter titles that match official documentation section headers (e.g., "CLAUDE.md" matches code.claude.com/docs/en/memory)
-- Content that could be found in official docs with minor rewording
-- Guide chapters targeting head terms ("Claude Code") instead of long-tail ("Claude Code workflow for Python microservices")
-- Post-publish: Search Console shows guide pages with impressions but zero clicks (losing to official docs in every SERP)
-- Community guides (ClaudeLog, etc.) already rank for the same terms
-
-**Phase to address:**
-Content planning phase (keyword research and chapter angle definition, before any writing). SEO integration phase (JSON-LD, canonical URLs, keyword verification post-build). This must be validated before investing weeks of writing effort.
+**Sources:**
+- [nbformat file format specification](https://nbformat.readthedocs.io/en/latest/format_description.html)
+- [nbformat TypeScript type definitions discussion](https://discourse.jupyter.org/t/nbformat-typescript-type-definitions/1935)
 
 ---
 
-### Pitfall 5: NotebookLM Source Hallucination and Interpretive Overconfidence
+### Pitfall 3: ZIP File Corruption from Encoding Mismatches
 
-**What goes wrong:**
-The 51 NotebookLM sources are the content foundation. Published research shows NotebookLM produces hallucinations in approximately 13% of responses, with the most common error being "interpretive overconfidence" -- adding unsupported characterizations, transforming attributed opinions into general statements, and presenting hedged claims as definitive. When building a guide about a tool that changes weekly, NotebookLM may synthesize outdated information from older sources as if it is still current, or confidently describe a feature that has been renamed, deprecated, or fundamentally changed.
+**What goes wrong:** The generated .zip files are corrupt -- they extract to garbled content, fail to unzip, or the .ipynb inside has mangled characters. The download link works but the content is broken.
 
-Specific risk: if the 51 sources include blog posts from mid-2025 (when Claude Code was in early beta) alongside January 2026 changelogs, NotebookLM will synthesize them without temporal awareness. A feature described enthusiastically in source #23 (a blog post from August 2025) may have been deprecated in source #47 (a changelog from January 2026), but NotebookLM will present both as current facts.
+**Why it happens:** In Node.js, ZIP libraries (JSZip, archiver) distinguish between text and binary content. If you add a JSON string (the .ipynb content) using the binary option, or add binary data (the .DAT file) as UTF-8 text, the file is corrupted. JSZip specifically warns: "If you use a library that returns a binary string, you should use the binary option, otherwise JSZip will try to encode the string with UTF-8." Additionally, the `archiver` library has a known issue where string-based streams compute file sizes by character count instead of byte count, producing invalid ZIPs.
 
-**Why it happens:**
-NotebookLM only answers from uploaded sources and cannot search the internet. It has no concept of time -- it cannot tell you that source #23 predates source #47. If the 51 sources span 6+ months of a rapidly-evolving tool, the synthesized output will contain temporal contradictions that appear as confident, coherent text.
+**Consequences:**
+- Users download a .zip that cannot be extracted
+- The .ipynb inside extracts but fails to parse as JSON (encoding corruption)
+- The .DAT file inside extracts but has wrong line endings or garbled characters
+- Failures may be platform-specific (works on macOS, breaks on Windows, or vice versa)
 
-**How to avoid:**
-1. Treat NotebookLM output as a first draft outline, never as a source of truth. Every factual claim about Claude Code features must be independently verified against the official documentation at code.claude.com/docs or a recent CHANGELOG.md entry.
-2. Before content authoring begins, audit the 51 sources for recency. Remove or flag any source older than 3 months. Weight newer sources explicitly.
-3. For each chapter, create a feature verification checklist: every Claude Code feature, command, or behavior mentioned must have a corresponding entry in current official docs or a CHANGELOG entry from the past 60 days confirming it still exists and works as described.
-4. Do not use NotebookLM's exact phrasing for technical claims. Rephrase after independent verification to avoid propagating confident-sounding inaccuracies.
-5. Watch specifically for "interpretive overconfidence" patterns: claims like "Claude Code always...", "the best practice is...", "Claude Code cannot..." are red flags unless verified.
+**Prevention:**
+- Use `archiver` (stream-based, more robust for file I/O at build time) over JSZip for server-side/build-time ZIP generation
+- Add .ipynb files as UTF-8 strings explicitly: `archive.append(jsonString, { name: 'notebook.ipynb' })`
+- Add .DAT files by reading them as Buffers: `archive.file(filePath, { name: 'data.dat' })` -- do NOT read as string first
+- After generation, validate every .zip by extracting it in a test and verifying contents match source
+- Test on all three target platforms (macOS, Linux, Windows) since ZIP format has known cross-platform issues
 
-**Warning signs:**
-- Chapter content describes a Claude Code feature that cannot be found in current official docs
-- NotebookLM output uses confident language ("Claude Code always...", "the recommended approach is...") for claims that are actually opinions from blog post sources
-- Multiple sources in the NotebookLM corpus describe the same feature differently (temporal inconsistency)
-- Guide text describes behavior that contradicts a reader's actual Claude Code experience
+**Detection:** Build-time validation that extracts each generated .zip and compares contents byte-for-byte with source files.
 
-**Phase to address:**
-Every content authoring phase. Build verification into the authoring workflow as a mandatory step, not a post-hoc review. Each chapter should not be marked complete until the feature verification checklist is satisfied.
-
----
-
-### Pitfall 6: Breaking the /guides/ Hub Page and Supporting Pages
-
-**What goes wrong:**
-Multiple pages beyond the hub have single-guide assumptions:
-
-1. **Hub page (`/guides/index.astro`):** Uses `const [guideMeta] = await getCollection('guides')` and renders a single card with a hardcoded FastAPI teal gradient (`from-[#009485]/8 to-[#009485]/3`) and a hardcoded `fastapiLogo` import. Adding a Claude Code guide to the collection means `getCollection('guides')` returns two items, but the page only renders the first. The second guide silently disappears.
-
-2. **FAQ page (`/guides/fastapi-production/faq.astro`):** Entirely hardcoded for FastAPI. The Claude Code guide will need its own FAQ page, but the pattern is not reusable -- the FAQ questions are defined as a const array inside the Astro frontmatter.
-
-3. **GuideLayout navigation:** The sidebar, breadcrumbs, and prev/next links reference `guideMeta.data.chapters`. If a GuideLayout is shared between guides, it must correctly scope chapters to the current guide. If the Claude Code guide has 10 chapters and FastAPI has 14, the sidebar must show only the current guide's chapters.
-
-**Why it happens:**
-Single-guide implementation. The hub page was built with a grid layout (future-proofing) but single-guide data fetching and rendering. The FAQ page is a standalone page with no abstraction. The GuideLayout receives guide metadata as props but was only ever tested with one guide.
-
-**How to avoid:**
-1. Refactor `/guides/index.astro` to iterate over all guides: `const allGuides = await getCollection('guides')` then map to render guide cards.
-2. Move per-guide branding (logo, gradient colors, accent color) into guide.json metadata or a separate branding config. Do not hardcode colors in page templates.
-3. Create Claude Code FAQ as a separate page (`/guides/claude-code/faq.astro`). Consider extracting FAQ item data into a JSON file (matching the `guide.json` pattern) rather than embedding in frontmatter.
-4. Verify GuideLayout renders correctly with Claude Code metadata: different chapter count, different slugs, different guide title in breadcrumbs.
-5. Test cross-guide isolation: navigating within the Claude Code guide should never show FastAPI chapters in the sidebar or link to FastAPI pages.
-
-**Warning signs:**
-- Hub page shows only one guide after Claude Code is added
-- Array destructuring `[guideMeta]` in hub page or LLM endpoint code
-- Hub page gradient/logo is FastAPI-specific with no conditional logic
-- Sidebar shows wrong guide's chapters when navigating between guides
-- Breadcrumbs show "FastAPI Production Guide" on Claude Code pages
-
-**Phase to address:**
-Infrastructure refactoring phase (first phase). Test with both guides present before proceeding to content.
+**Sources:**
+- [JSZip encoding issues #368](https://github.com/Stuk/jszip/issues/368)
+- [Archiver corrupt ZIPs from string streams #375](https://github.com/archiverjs/node-archiver/issues/375)
+- [JSZip binary handling docs](https://stuk.github.io/jszip/documentation/api_jszip/file_data.html)
 
 ---
 
-### Pitfall 7: Build Time Regression from OG Image Generation
+### Pitfall 4: NIST .DAT Files Have Inconsistent Formats and Encodings
 
-**What goes wrong:**
-The site currently generates 810 OG images at build time using satori + sharp. Each image takes 100-300ms. Adding 10-12 Claude Code guide chapters means 12-14 new OG images (chapters + landing + FAQ). With the existing content-hash caching in `og-cache.ts`, incremental builds are fine -- unchanged images are served from cache.
+**What goes wrong:** The notebook code for loading the bundled .DAT file fails with parsing errors because each NIST .DAT file has a different format: variable number of header lines to skip, inconsistent column delimiters, mixed line endings, and different column layouts.
 
-The real risk is cold-start scenarios: when CI/CD runs `npm ci` (which wipes `node_modules/`), when the `CACHE_VERSION` constant is bumped, when switching to a new CI runner, or when a developer clones fresh. In these cases, ALL 820+ OG images regenerate. At 100-300ms each, that is 82-246 seconds of pure OG generation. One developer documented their Astro site's build dropping from 30 seconds to over 10 minutes when OG caching broke.
+**Why it happens:** The 10 case study datasets come from different NIST experiments spanning decades. Direct analysis of the actual files in `handbook/datasets/` reveals:
+- **Line endings are inconsistent**: `CERAMIC.DAT` and `LEW.DAT` use CRLF (`\r\n`), while `FLICKER.DAT` and `ANSCOMBE.DAT` use LF (`\n`) -- confirmed via `file` command on actual repository files
+- **Header lengths vary**: `LEW.DAT` has 25 lines of metadata before data begins (the file literally says "SKIP 25"), while other files have different skip counts
+- **Delimiters vary**: Some use fixed-width columns, others use whitespace-delimited fields
+- **Column structures differ**: Single-column datasets (normal random, random walk) vs multi-column datasets (ceramic strength with 7 variables plus run order)
+- **Data row formats differ**: `CERAMIC.DAT` has a header row with column names plus a separator line (`----`), others jump to data after metadata
 
-Adding 12 more images is marginal on top of 810, but each new guide multiplies the cold-start penalty.
+**Consequences:**
+- A generic `pd.read_csv(filename, sep='\s+')` call fails on files with headers
+- Users get `ParserError` or load header text as data values
+- Wrong `skiprows` value loads partial data or includes metadata as numbers
+- Multi-column datasets need explicit column name assignment
+- CRLF vs LF inconsistency can cause subtle parsing bugs on different platforms
 
-**Why it happens:**
-The `og-cache.ts` stores cached images in `node_modules/.cache/og-guide/`. The `CACHE_VERSION` constant (`'1'`) causes bulk invalidation when bumped. CI pipelines that do not persist `node_modules/.cache/` between runs always cold-start. The site's total OG image count (810+) is already at a scale where cold-start is a material concern.
+**Prevention:**
+- Each notebook must have a **dataset-specific** loading cell with the correct `skiprows`, `names`, and `sep` parameters hardcoded for that dataset
+- Normalize all bundled .DAT files to consistent LF line endings when copying into the ZIP (do not modify the originals in `handbook/datasets/`)
+- Include a data validation cell after loading that prints shape, dtypes, and first 5 rows so the user can verify correct loading
+- Do NOT rely on pandas auto-detection -- be explicit about every parameter:
+  ```python
+  # LEW.DAT (single column, 25 header lines)
+  df = pd.read_csv('LEW.DAT', sep=r'\s+', skiprows=25, header=None, names=['deflection'])
 
-**How to avoid:**
-1. Ensure CI/CD pipeline caches `node_modules/.cache/` between builds. This is the single most impactful mitigation.
-2. Keep Claude Code guide OG images in the same caching system as FastAPI guide images -- the existing `og-cache.ts` handles this correctly (cache directory is shared, hash includes title+description for uniqueness).
-3. Measure build time before and after adding the Claude Code guide. Set a regression budget: the guide addition should not increase clean-build time by more than 5 seconds on warm cache.
-4. If cold-start becomes a problem at scale, consider pre-generating OG images as a separate build step that commits PNGs or stores them as CI artifacts.
+  # CERAMIC.DAT (multi-column, skip metadata + column header + separator)
+  df = pd.read_csv('CERAMIC.DAT', sep=r'\s+', skiprows=22,
+                    names=['X1','X2','X3','X4','X5','Y','ORDER'])
+  ```
+- Cross-reference expected row counts against what `src/data/eda/datasets.ts` already has (e.g., normalRandom has 500 values, LEW has 200 values, ceramicStrength has 32 observations)
 
-**Warning signs:**
-- Build time increases by more than 10 seconds after adding guide on warm cache
-- CI builds are significantly slower than local builds (cache miss)
-- `CACHE_VERSION` bump causes full OG regeneration taking multiple minutes
-- New developer reports "build takes forever" after fresh clone
-
-**Phase to address:**
-OG image and SEO integration phase. Measure before and after. Verify CI caching is configured. This is lower risk than the other critical pitfalls because the caching infrastructure already exists.
+**Detection:** Each notebook's data loading cell should assert the expected row count: `assert len(df) == 200, f"Expected 200 rows, got {len(df)}"`
 
 ---
 
-## Technical Debt Patterns
+### Pitfall 5: Users Cannot Run Notebooks Due to Missing Python Dependencies
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Duplicate `[slug].astro` template per guide instead of shared dynamic route | Faster, avoids refactoring existing FastAPI pages, zero risk to shipped guide | Every new guide requires copying and maintaining a separate template. Bug fixes in GuideLayout integration must be applied N times. | Acceptable for guide #2 (Claude Code). Two template copies is manageable. Plan shared template refactor for guide #3. |
-| Separate `claudeCodePages` content collection instead of unified multi-guide collection | Zero risk to existing FastAPI guide, simpler content queries, follows established per-section pattern (EDA has its own collections too) | Each new guide requires a new collection definition, new loader, new entry in content.config.ts | Recommended approach. Per-guide collections match the codebase convention. This is not debt -- it is the right pattern. |
-| Hardcoding chapter descriptions in landing page template | Fast to author, no schema change needed | Descriptions not queryable, not in structured data, not available to llms.txt. Must be updated in two places if chapter descriptions change. FastAPI guide already has this duplication. | Never. Put descriptions in MDX frontmatter (already in `guidePageSchema.description`). Fix this pattern for Claude Code guide; do not repeat the FastAPI guide's mistake. |
-| Skipping `lastVerified` date field in schema | Fewer schema changes, faster initial build | No mechanism to track content freshness. Readers and maintainers cannot tell if content is current. Critical for a rapidly-evolving tool. | Never. Essential from day one for a Claude Code guide. Non-negotiable. |
-| Using NotebookLM output directly without verification | Faster content authoring, 51 sources already synthesized | 13% hallucination rate means roughly 1 in 8 factual claims may be wrong. Damaged credibility when readers find errors. | Never for technical claims. Acceptable for narrative framing and structure suggestions only. |
-| Skipping keyword gap analysis before writing | Saves 2-3 hours of SEO research | Weeks of writing effort produces content that cannot rank against official docs and established community guides. | Never. The 2-3 hour investment prevents weeks of wasted effort. |
+**What goes wrong:** Users download the notebook, open it in JupyterLab or VS Code, run the first cell, and immediately get `ModuleNotFoundError: No module named 'scipy'` or `No module named 'seaborn'`. They abandon the notebook.
 
-## Integration Gotchas
+**Why it happens:** This is the single most common failure mode for distributed Jupyter notebooks. The root cause is that Jupyter's kernel may not match the user's pip environment. Even users who have numpy installed system-wide may have Jupyter running in a different virtual environment. The problem is well-documented in the Jupyter community and affects beginners disproportionately. Google Colab users do NOT hit this (packages are pre-installed) -- creating a false sense during testing that notebooks "work fine."
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| `content.config.ts` content collections | Trying to add Claude Code pages to existing `guidePages` collection (hardcoded to FastAPI directory) | Create a new `claudeCodePages` collection with its own glob loader pointing to `./src/data/guides/claude-code/pages` |
-| `guides` meta collection | `file()` loader hardcoded to `fastapi-production/guide.json` | Switch to a loader that reads from both guide.json files, or create a second `claudeCodeGuide` collection |
-| `astro.config.mjs` sitemap builder | `buildContentDateMap()` hardcodes `fastapi-production/guide.json` path via `readFileSync` | Refactor to dynamically find and read all `src/data/guides/*/guide.json` files |
-| `llms.txt` and `llms-full.txt` | `[guideMeta]` destructure only gets first guide | Iterate over all guides in collection and render a section for each |
-| `/guides/index.astro` hub page | `[guideMeta]` destructure and hardcoded FastAPI branding (teal gradient, logo import) | Iterate over all guides; move branding config into guide.json or a branding module |
-| `GuideLayout.astro` | Assuming layout works for any guide without testing | Verify sidebar, breadcrumbs, and prev/next render correctly with Claude Code metadata (different chapter count) |
-| JSON-LD structured data | `GuideJsonLd.astro` may use hardcoded URLs | Verify component accepts dynamic guide slugs and generates correct URLs for Claude Code pages |
-| Header navigation | "Guides" link already exists from v1.15 | Verify it still leads to hub page that now shows both guides (no code change needed if hub page refactor is done) |
-| RSS feed | Companion blog post (if created) must appear in feed | Follow existing pattern from FastAPI companion blog post |
-| OG image cache namespace | Concern that two guides sharing one cache directory causes collisions | No collision risk: hash includes title+description, which is unique per page. Shared cache is correct behavior. |
+**Consequences:**
+- Users with less Python experience give up immediately
+- Even experienced users waste time debugging environment issues
+- Support burden falls on the site owner through confused issue reports
 
-## Performance Traps
+**Prevention:**
+- Include a `requirements.txt` in each ZIP alongside the notebook and .DAT file
+- Add a "Setup" markdown cell at the very top of every notebook explaining prerequisites
+- Add a dependency check cell as the first code cell:
+  ```python
+  import sys
+  required = ['numpy', 'scipy', 'pandas', 'matplotlib', 'seaborn']
+  missing = []
+  for pkg in required:
+      try:
+          __import__(pkg)
+      except ImportError:
+          missing.append(pkg)
+  if missing:
+      print(f"Missing packages: {', '.join(missing)}")
+      print(f"Install with: {sys.executable} -m pip install {' '.join(missing)}")
+  else:
+      print("All dependencies available.")
+  ```
+- Use `{sys.executable} -m pip install` (not `!pip install`) to ensure the correct environment
+- Pin version ranges (not exact versions) to avoid resolution failures: `numpy>=1.24`, `scipy>=1.10`, `pandas>=2.0`, `matplotlib>=3.7`, `seaborn>=0.12`
+- Include an "Open in Google Colab" badge/link on the download page as the zero-setup alternative
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| OG image cold-start in CI | CI build time doubles or triples | Cache `node_modules/.cache/og-guide/` as CI artifact between builds. 810+ images at 100-300ms = 80-240s cold start. | When CI pipeline clears cache (npm ci, new runner, cache eviction) |
-| SVG diagram complexity exceeding FastAPI guide levels | Lighthouse performance drops below 90 on pages with diagrams | Keep each SVG diagram under 50KB and 250 lines (FastAPI diagrams range 94-252 lines). Use the established `diagram-base.ts` pattern. | When a single diagram exceeds ~100 SVG elements or 100KB |
-| Interactive React components in Claude Code guide MDX | JS bundle size per chapter page increases, hydration delays on mobile | Use `client:visible` (not `client:load`) for any React islands. Budget: each React island under 30KB gzipped. The FastAPI guide's React Flow topology is ~50KB and represents the upper bound. | When more than 2 React islands exist on a single chapter page |
-| Large MDX files with many code blocks | Build time per page increases; expressive-code processes every block | Keep code blocks to essential snippets (10-30 lines). Max 8 code blocks per chapter. Use prose to explain, not more code. | When a single MDX file has 15+ syntax-highlighted code blocks |
-| Adding new npm dependencies for Claude Code guide features | Vite dependency pre-bundling overhead increases for ALL pages, not just guide pages | No new npm dependencies for diagram or guide features. Use existing satori, sharp, expressive-code, and Astro built-in capabilities. | Immediately on build -- Vite re-optimizes deps for entire site |
+**Detection:** Test notebooks in a clean Python 3.11+ virtual environment with only `jupyter` installed -- no scientific packages pre-installed.
 
-## Security Mistakes
+**Sources:**
+- [Installing Python packages from Jupyter](https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/)
+- [Kernel/pip mismatch discussion](https://discourse.jupyter.org/t/python-in-terminal-finds-module-jupyter-notebook-does-not/2262)
+- [Jupyter notebook reproducibility best practices](https://blog.reviewnb.com/jupyter-notebook-reproducibility-managing-dependencies-data-secrets/)
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Including real Anthropic API keys or billing details in guide examples | Readers copy-paste credentials; keys leak into public content indexed by search engines | Use obviously fake values: `sk-ant-EXAMPLE-not-a-real-key`. Add visible warnings in code blocks. |
-| Recommending `--dangerouslySkipPermissions` or `dangerouslyDisableSandbox` without warnings | Readers disable Claude Code safety features, leading to accidental file deletion or command execution | Never recommend permission bypasses in guide content. If discussing the feature, clearly warn about risks and when it is appropriate (CI environments only). |
-| Showing CLAUDE.md content that grants overly broad file system or command access | Readers copy permissive CLAUDE.md configs into production repos | Show minimal-permission CLAUDE.md examples. Explain the principle of least privilege for AI tool configuration. |
-| Linking to unofficial Claude Code packages or extensions without vetting | Readers install compromised or malicious packages | Only link to official Anthropic sources (code.claude.com, docs.anthropic.com, github.com/anthropics/). Vet any community resources. |
+---
 
-## UX Pitfalls
+## Moderate Pitfalls
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Chapters assume reader uses Claude Code in terminal only | VS Code, Desktop, Web, and JetBrains users cannot follow along | Note which environment each workflow applies to. Use environment-agnostic language where possible. Claude Code runs in 5+ environments now. |
-| Chapters organized by Claude Code feature ("CLAUDE.md", "MCP", "Hooks") | Reader must read entire guide to accomplish a single task; mirrors official docs structure and loses differentiation | Organize by what the reader wants to DO: "Set up a project for Claude Code", "Build effective prompt workflows", "Automate CI/CD with Claude Code", "Coordinate multi-agent tasks" |
-| No difficulty indicators per chapter | Beginners start with advanced chapters (multi-agent patterns) and get frustrated; experts wade through basics | Add difficulty indicator (beginner/intermediate/advanced) to frontmatter. Render in sidebar and chapter cards. |
-| Monolithic "Getting Started" chapter covering install + config + first task | First chapter is overwhelming; readers bounce before reaching the valuable content | Keep first chapter under 800 words: install + one "wow" moment. Separate project configuration into its own chapter. |
-| No visual differentiation between Claude Code guide and FastAPI guide | Readers navigating between guides cannot tell which guide they are in | Use distinct accent color and branding for Claude Code guide (Anthropic orange/coral vs FastAPI teal). Different gradient on landing page. |
-| Guide content duplicates official quickstart | Readers feel they already know this; no added value | Start beyond the quickstart. Assume the reader has Claude Code installed and has run it once. The guide's value starts where the official docs' quickstart ends. |
+### Pitfall 6: Build Time Regression from ZIP Generation
+
+**What goes wrong:** Adding ZIP file generation to the Astro build increases build time. If done naively (regenerating all 10 ZIPs on every build), it compounds with the existing 1090+ page build and OG image generation.
+
+**Why it happens:** The project already generates 1090+ pages with OG images (using content-hash caching to avoid regeneration). ZIP generation adds file I/O -- reading .DAT files from `handbook/datasets/`, generating .ipynb JSON, compressing everything. While individual ZIPs are small (the largest dataset DZIUBA1.DAT is only 21KB), pipeline overhead adds up if not managed.
+
+**Prevention:**
+- Use the existing content-hash caching pattern (already proven for OG images) to skip ZIP regeneration when source data has not changed
+- Alternative (recommended): pre-generate ZIPs in a prebuild script -- the `prebuild` pattern already exists in `package.json` (`"prebuild": "node scripts/download-actionlint-wasm.mjs"`)
+- Total ZIP payload is tiny: all 10 datasets total ~58KB, plus ~10 notebooks at ~15-25KB each. Compressed ZIPs likely under 100KB total
+- Generate to `public/downloads/eda/` so Astro copies them to `dist/` automatically
+
+**Detection:** Compare `astro build` time before and after. Acceptable threshold: < 5 seconds added.
+
+---
+
+### Pitfall 7: Generated Notebooks Drift from Website Case Study Content
+
+**What goes wrong:** The notebook analysis produces different numbers, uses different plot styles, or follows a different analysis sequence than what the case study page shows. Users see one thing on the website and get something different in the notebook.
+
+**Why it happens:** The website case studies use TypeScript SVG generators with hardcoded NIST parameters (from `src/data/eda/datasets.ts`) and custom hypothesis test implementations (runs test, Bartlett, Levene, Anderson-Darling, Grubbs, PPCC, location test -- all validated against NIST in v1.9). The notebooks will use Python (NumPy, SciPy, matplotlib) which may compute slightly different values due to floating-point differences, different default parameters in statistical functions, or different binning algorithms.
+
+**Consequences:**
+- Users lose trust in either the website or the notebook
+- Statistical test results may disagree at the margins (e.g., p-values that round differently)
+- Hardcoded NIST regression parameters on the website vs SciPy's optimizer may give different decimal places
+
+**Prevention:**
+- For each case study, verify that notebook output matches the website's verified NIST values (already validated in v1.9)
+- Use the same rounding conventions as the website (typically 4-6 significant digits)
+- For hardcoded parameters (e.g., Beam Deflections sinusoidal model), include a comment explaining the NIST reference values
+- Do NOT try to match SVG plot aesthetics -- use a clean matplotlib/seaborn style. The notebook is the "Python implementation" of the same analysis.
+- Add interpretation markdown cells that match the website's conclusions
+
+**Detection:** Review notebook output cell-by-cell against the corresponding website case study page. All statistical values should agree to published precision.
+
+---
+
+### Pitfall 8: Relative File Paths Break When Users Move Notebooks
+
+**What goes wrong:** The notebook loads data with `pd.read_csv('RANDN.DAT')` which works when the notebook and data file are in the same directory. But users commonly move the .ipynb to a different folder while leaving the .DAT file in the download folder.
+
+**Why it happens:** ZIP files extract to a flat structure or a named directory depending on creation. Users may move just the notebook, or extract to a different location, or their Jupyter working directory may differ from the extraction path. Google Colab users must upload the data file separately (different workflow entirely).
+
+**Consequences:**
+- `FileNotFoundError: [Errno 2] No such file or directory: 'RANDN.DAT'`
+- Users who extract to their home directory and open Jupyter from a different path get path errors
+- Colab requires separate data upload step
+
+**Prevention:**
+- Bundle notebook and data inside a subdirectory within the ZIP: `normal-random-numbers/notebook.ipynb` + `normal-random-numbers/RANDN.DAT` -- this forces extraction into a single folder, keeping files together
+- Add a helpful error message in the data loading cell:
+  ```python
+  import os
+  data_file = 'RANDN.DAT'
+  if not os.path.exists(data_file):
+      print(f"ERROR: '{data_file}' not found in current directory: {os.getcwd()}")
+      print(f"Please ensure '{data_file}' is in the same folder as this notebook.")
+  ```
+- For Colab compatibility, add a conditional upload cell:
+  ```python
+  try:
+      from google.colab import files
+      uploaded = files.upload()  # User selects the .DAT file
+  except ImportError:
+      pass  # Not running in Colab
+  ```
+
+**Detection:** Test the notebook from a different working directory than the extraction path.
+
+---
+
+### Pitfall 9: Astro Build Integration Approach -- Hook vs Script vs Public Directory
+
+**What goes wrong:** Choosing the wrong integration point for notebook/ZIP generation leads to files not appearing in the build output, race conditions with other integrations, or unnecessary complexity.
+
+**Why it happens:** There are three viable approaches:
+1. **`public/` directory** -- pre-generate ZIPs and commit them to `public/downloads/eda/`. Simplest. Copied as-is to `dist/`. But binary files bloat git history.
+2. **`prebuild` script** -- add to `package.json` prebuild. Already a pattern in this project (`download-actionlint-wasm.mjs`). Generates to `public/downloads/eda/` before Astro sees it.
+3. **Astro integration hook** -- generate ZIPs in `astro:build:done` or `astro:build:generated`. Most "Astro-native" but adds complexity. The existing `indexnow.ts` integration already uses `astro:build:done`.
+
+**Consequences of wrong choice:**
+- Option 1: ZIPs must be regenerated manually and committed to git when notebooks change
+- Option 3: Files generated in `astro:build:done` may miss the deploy artifact packaging depending on when Astro finalizes the output directory
+- Option 2: Cleanest separation but requires ensuring the script runs before dev server too
+
+**Prevention:**
+- Use **Option 2 (prebuild script)** -- it matches the existing `download-actionlint-wasm.mjs` pattern, runs before Astro build, and outputs to `public/downloads/eda/` where Astro copies it to `dist/` automatically
+- This avoids committing binary ZIPs to git (generated fresh each build from source data and notebook templates)
+- Add to prebuild chain: `"prebuild": "node scripts/download-actionlint-wasm.mjs && node scripts/generate-notebooks.mjs"`
+- Add `public/downloads/` to `.gitignore` since these are generated artifacts
+
+**Detection:** Verify `dist/downloads/eda/*.zip` exists after `astro build`. Verify ZIPs are accessible in `astro dev`.
+
+---
+
+### Pitfall 10: MIME Type / Content-Type Issues for ZIP Downloads from GitHub Pages
+
+**What goes wrong:** Users click the download button but the browser tries to display the .zip file as text instead of downloading it, or the file arrives with wrong headers.
+
+**Why it happens:** The existing CSV downloads in `CaseStudyDataset.astro` use `data:` URIs (`data:text/csv;charset=utf-8,...`). This works for small text files but is completely wrong for ZIP files -- binary data encoded as base64 data URIs would be enormous and unreliable. GitHub Pages (served via Fastly CDN) should serve `.zip` files with correct `application/zip` MIME type, but this must be verified rather than assumed.
+
+**Prevention:**
+- Serve ZIP files as static assets from `public/downloads/eda/` (NOT as `data:` URIs)
+- Use `<a href="/downloads/eda/normal-random-numbers.zip" download="normal-random-numbers.zip">` with the `download` attribute
+- Verify Content-Type header after deployment: `curl -I https://patrykgolabek.dev/downloads/eda/normal-random-numbers.zip`
+- Keep the existing CSV `data:` URI pattern for inline CSV downloads (those are small text)
+
+**Detection:** After deployment, verify `content-type: application/zip` header. Test actual download in Chrome, Firefox, and Safari.
+
+---
+
+## Minor Pitfalls
+
+### Pitfall 11: Google Colab "Open in Colab" Links Require GitHub Raw URLs
+
+**What goes wrong:** Adding an "Open in Colab" button that links to the GitHub Pages URL (`https://patrykgolabek.dev/downloads/eda/notebook.ipynb`) does not work because Colab's URL rewriting only works for GitHub **repository** paths (`colab.research.google.com/github/USER/REPO/blob/BRANCH/path/to/notebook.ipynb`), not GitHub Pages static file URLs.
+
+**Prevention:**
+- Option A: Commit the raw .ipynb files (not ZIPs) to a `notebooks/eda/` directory in the repo. Colab links point to repo. Download ZIPs point to built site. This is the cleanest approach.
+- Option B: Skip Colab integration entirely -- focus on download-and-run workflow
+- Option C: Use Colab's file upload flow -- user downloads ZIP, extracts, uploads to Colab manually
+- Recommendation: Option A. Commit 10 .ipynb files to repo (they are tiny -- ~15-25KB each). Colab "Open in Colab" links use `colab.research.google.com/github/PatrykQuantumNomad/PatrykQuantumNomad/blob/main/notebooks/eda/normal-random-numbers.ipynb`. The Colab user still needs to upload the .DAT file separately (add an upload cell).
+
+**Detection:** Click every "Open in Colab" link and verify the notebook loads.
+
+**Sources:**
+- [Google Colab GitHub integration](https://github.com/googlecolab/open_in_colab)
+
+---
+
+### Pitfall 12: Notebook Markdown Cells Render Differently Across Environments
+
+**What goes wrong:** Markdown cells that look good in JupyterLab may render differently in VS Code (which uses its own Markdown renderer) or Colab (which has limited Markdown support). LaTeX math in markdown cells is particularly fragile.
+
+**Prevention:**
+- Use standard Markdown only (no HTML, no custom CSS)
+- LaTeX math works in all three environments: use `$inline$` and `$$block$$` syntax
+- Avoid complex table formatting in markdown cells -- keep tables simple
+- Do NOT use raw HTML in markdown cells -- Colab strips it
+- Test representative markdown cells in all three target environments
+
+**Detection:** Visual review of every markdown cell in JupyterLab, VS Code, and Colab.
+
+---
+
+### Pitfall 13: Matplotlib Backend Issues in Headless Environments
+
+**What goes wrong:** Notebooks that use `plt.show()` may fail or produce no output if the matplotlib backend is not set correctly. Some environments require `%matplotlib inline` magic, others handle it automatically.
+
+**Prevention:**
+- Always include `%matplotlib inline` in the first code cell (before any plotting)
+- This is harmless in environments that do not need it and essential in those that do
+- Use `plt.figure()` and `plt.show()` consistently
+- Set a consistent style at the top: `plt.style.use('seaborn-v0_8-whitegrid')` or similar
+
+**Detection:** Run notebooks in JupyterLab (not just Colab) and verify all plots render inline.
+
+---
+
+### Pitfall 14: Version Pinning in requirements.txt Creates Future Incompatibilities
+
+**What goes wrong:** Pinning exact versions (e.g., `numpy==1.26.4`) causes `pip install` failures when users have a newer Python that drops support for that numpy version, or when the pinned version has no wheel for their platform (especially Apple Silicon).
+
+**Prevention:**
+- Use minimum version pins with `>=` instead of `==`: `numpy>=1.24`, `scipy>=1.10`, `pandas>=2.0`, `matplotlib>=3.7`, `seaborn>=0.12`
+- Do NOT pin jupyter, ipykernel, or notebook -- those are the user's environment
+- Test with both the minimum pinned versions AND the latest versions
+- Add a Python version note: "Requires Python 3.9 or later"
+
+**Detection:** Test `pip install -r requirements.txt` in both Python 3.9 and 3.12+ environments.
+
+---
+
+### Pitfall 15: GitHub Pages Site Size Trajectory
+
+**What goes wrong:** Not an immediate blocker (adding ~200KB of ZIPs to a 170MB dist/), but the repository is already 1.1GB (primarily due to the full NIST handbook copy in `handbook/`). GitHub Pages has a hard published site limit of 1GB and a recommended repository limit of 1GB. Git LFS cannot be used with GitHub Pages.
+
+**Prevention:**
+- The ZIPs for this milestone are tiny: ~58KB total datasets + ~150KB notebooks = well under 500KB total
+- Monitor `dist/` size as part of build output
+- The `handbook/` directory (the NIST source data) is NOT deployed -- only `public/` and generated content go to `dist/`
+- If committing .ipynb files to repo for Colab links (Pitfall 11), that adds ~150-250KB -- negligible
+- Add `du -sh dist/` to build output for monitoring
+
+**Detection:** Alert if `dist/` approaches 500MB.
+
+**Sources:**
+- [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
+
+---
+
+### Pitfall 16: Dataset Attribution and Source Credibility
+
+**What goes wrong:** Bundling NIST .DAT files in downloadable ZIPs without proper attribution undermines the educational credibility of the notebooks and may confuse users about data provenance.
+
+**Prevention:**
+- NIST data is public domain (produced by US government employees) -- no copyright issue
+- Include a markdown cell in each notebook crediting the NIST/SEMATECH e-Handbook as the source
+- Include the NIST URL for each dataset
+- Reference the specific handbook section (e.g., "Section 1.4.2.1")
+- Mirror the attribution pattern already used in the `CaseStudyDataset.astro` component and `DATASET_SOURCES` in `datasets.ts`
+
+**Detection:** Review each notebook for proper NIST attribution and source URLs.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Notebook template/generator | Pitfall 1 (format version), Pitfall 2 (invalid JSON) | Define TypeScript interfaces for nbformat 4.5; validate output against schema; generate deterministic cell IDs |
+| Dataset bundling | Pitfall 4 (inconsistent .DAT formats) | Per-dataset loading code with explicit skiprows/names/sep; normalize line endings to LF; assert row counts |
+| ZIP generation pipeline | Pitfall 3 (encoding corruption), Pitfall 9 (integration approach) | Use archiver with explicit encoding; prebuild script pattern matching existing `download-actionlint-wasm.mjs` |
+| Download UI on case study pages | Pitfall 10 (MIME type) | Static file serving from `public/downloads/eda/`, not data: URIs; use download attribute on links |
+| User experience (running notebooks) | Pitfall 5 (missing dependencies), Pitfall 8 (file paths) | Requirements cell at top; helpful error messages for missing files; requirements.txt in ZIP |
+| Content parity | Pitfall 7 (drift from website) | Cross-reference all statistical values with NIST-verified website values from v1.9 |
+| Build integration | Pitfall 6 (build time), Pitfall 9 (hook vs script) | Prebuild script to `public/downloads/eda/`; add to `.gitignore` |
+| Google Colab integration | Pitfall 11 (Colab URL scheme) | Commit .ipynb files to `notebooks/eda/` in repo for `colab.research.google.com/github/` links |
+| Notebooks landing page | Pitfall 15 (site size) | Monitor dist/ size; ZIPs are tiny so no concern for this milestone |
+| Testing/validation | Pitfall 1 (format version), Pitfall 13 (matplotlib backend) | Test in JupyterLab, VS Code, Colab; run nbformat.validate(); include %matplotlib inline |
+
+## Integration Gotchas Specific to This Project
+
+| Integration Point | Common Mistake | Correct Approach |
+|-------------------|----------------|------------------|
+| `CaseStudyDataset.astro` | Adding download button in the existing CSV download section using data: URI for ZIP | Add a separate "Download Notebook" button that links to static file at `/downloads/eda/[slug].zip` |
+| `src/data/eda/datasets.ts` | Trying to reuse the TypeScript dataset arrays in notebook generation | Read original .DAT files from `handbook/datasets/` for the ZIP; the TypeScript arrays are for SVG rendering only |
+| `public/downloads/eda/` | Committing generated ZIPs to git | Add to `.gitignore`; generate via prebuild script |
+| `package.json` prebuild | Only running notebook generation in `prebuild`, not accessible during dev | Add a standalone script too: `"generate-notebooks": "node scripts/generate-notebooks.mjs"` |
+| Case study MDX pages | Adding notebook download link in MDX content (fragile, scattered) | Add download button via the existing `CaseStudyDataset.astro` component (centralized, already on every case study page) |
+| CASE_STUDY_MAP in CaseStudyDataset.astro | Assuming all case studies have the same data shape | 9 are single-column, 1 (ceramic-strength) is multi-column. Notebook generation must handle both shapes. |
+| Line endings in .DAT files | Copying .DAT files directly to ZIP without normalization | Normalize to LF when writing to ZIP. 4 files use CRLF, others use LF. |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Guide hub page:** Both FastAPI and Claude Code guides appear at `/guides/` -- verify with actual build output, not just code review
-- [ ] **Sitemap:** All Claude Code guide pages appear in `sitemap-0.xml` with correct `lastmod` dates -- `grep claude-code dist/sitemap-0.xml`
-- [ ] **llms.txt:** Claude Code guide section appears with all chapter URLs -- fetch `/llms.txt` from build output and verify
-- [ ] **llms-full.txt:** Same verification for the full-content LLM endpoint
-- [ ] **OG images:** Every Claude Code chapter has a unique OG image that renders correctly -- check `dist/open-graph/guides/claude-code/*.png` exists and is valid
-- [ ] **JSON-LD:** TechArticle and BreadcrumbList structured data validates for every Claude Code chapter page -- use Google Rich Results Test
-- [ ] **Breadcrumbs:** Trail reads Home > Guides > Claude Code Guide > [Chapter] -- NOT Home > Guides > FastAPI Production Guide > [Chapter]
-- [ ] **Sidebar navigation:** Sidebar shows only Claude Code chapters when viewing Claude Code guide, not FastAPI chapters
-- [ ] **Prev/next links:** Work correctly within Claude Code guide and never link to FastAPI guide chapters
-- [ ] **Header nav:** "Guides" link leads to hub page showing both guides
-- [ ] **Cross-guide isolation:** Complete click-through of entire Claude Code guide never navigates to a FastAPI guide page
-- [ ] **Mobile layout:** Sidebar collapses correctly on mobile for Claude Code guide (may have different chapter count than FastAPI)
-- [ ] **Content freshness:** Every chapter has a `lastVerified` date within 30 days of publish date
-- [ ] **Feature verification:** Every Claude Code feature mentioned in the guide exists in current official docs or recent changelog
-- [ ] **Lighthouse scores:** All Claude Code guide pages score 90+ on Performance, Accessibility, Best Practices, and SEO
-- [ ] **Dark mode:** All diagrams, code blocks, and callout boxes render correctly in both light and dark themes
-- [ ] **FastAPI guide regression:** FastAPI guide still builds and renders correctly after Claude Code guide is added -- click through all 14 FastAPI pages
-
-## Recovery Strategies
-
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Content staleness (outdated Claude Code features) | LOW | Update affected callout boxes with current syntax. If chapter structure is sound, updating specific claims takes 1-2 hours per chapter. The `lastVerified` field enables targeted updates. |
-| Hardcoded single-guide breaking multi-guide | HIGH | Requires refactoring content.config.ts, page templates, sitemap builder, llms.txt, hub page, and OG endpoints. If done after content is written, risk of breaking both guides simultaneously. Prevention (infrastructure first) is 10x cheaper than recovery. |
-| Content type confusion (mixed tutorial/reference) | MEDIUM | Restructure chapters: move reference tables to a dedicated appendix, remove tutorial sequences that duplicate official docs. May require splitting or merging 3-4 chapters. 1-2 days of rewriting. |
-| SEO cannibalization with official docs | MEDIUM | Rewrite chapter titles and meta descriptions for long-tail keywords. Add canonical URLs to official docs. May require significant content rewriting if chapters are too close to official doc topics. 2-3 days. |
-| NotebookLM hallucinations in published content | HIGH | Every factual claim must be re-verified against official docs. If guide is published with errors, credibility damage is immediate and hard to recover. Prevention (verify during writing) is far cheaper than correction (post-publish errata + reputation damage). |
-| Hub page showing only one guide | LOW | Fix `[guideMeta]` destructure to iterate. Small code change (~30 minutes) but must verify no downstream effects in hub page rendering. |
-| Build time regression from OG images | LOW | Enable CI cache for `node_modules/.cache/`. If already slow, pre-generate and commit OG images as static assets. 1-2 hours. |
-
-## Pitfall-to-Phase Mapping
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| P1: Content staleness | Schema phase (add `lastVerified` field) + every content phase (verify against official docs) | `lastVerified` field in frontmatter; each chapter date is within 30 days of publish |
-| P2: Hardcoded single-guide assumptions | Phase 1: Infrastructure refactoring (MUST be first) | FastAPI guide still builds correctly; both guides appear on hub page; Claude Code pages in sitemap and llms.txt |
-| P3: Content type confusion | Content planning phase (outline review with content type labels) | Each chapter has labeled primary content type; word count under 3000; no tutorial sequences |
-| P4: SEO cannibalization | Content planning phase (keyword gap analysis) | No chapter title matches an official docs section header; long-tail keywords documented |
-| P5: NotebookLM hallucinations | Every content authoring phase (feature verification checklist) | Every feature mentioned confirmed in official docs or recent changelog |
-| P6: Hub page and supporting page breakage | Phase 1: Infrastructure refactoring | Hub page renders both guides; FAQ page renders correctly; sidebar scoped to current guide |
-| P7: Build time regression | OG image/SEO integration phase | Build time delta under 5 seconds on warm cache; CI caching configured |
+- [ ] All 10 ZIP files exist in `dist/downloads/eda/` after build
+- [ ] Every ZIP extracts correctly on macOS, Linux, and Windows
+- [ ] Every .ipynb inside passes `nbformat.validate()` from Python CLI
+- [ ] Every notebook opens without errors in JupyterLab
+- [ ] Every notebook opens without errors in VS Code with Jupyter extension
+- [ ] Every notebook opens without warnings in Google Colab
+- [ ] Every notebook runs top-to-bottom in a clean Python environment (only jupyter pre-installed)
+- [ ] Every data loading cell successfully loads the bundled .DAT file
+- [ ] Every data loading cell asserts correct row count
+- [ ] All statistical values in notebooks match website case study values
+- [ ] All plots render inline (not just in Colab which auto-handles this)
+- [ ] Download buttons appear on all 10 case study pages
+- [ ] Download links work on the deployed site (not just localhost)
+- [ ] Content-Type header for .zip files is `application/zip`
+- [ ] requirements.txt is included in every ZIP
+- [ ] Notebooks landing page at `/eda/notebooks/` exists and links work
+- [ ] NIST attribution appears in every notebook
+- [ ] `%matplotlib inline` appears in every notebook before plotting cells
+- [ ] Build time regression is under 5 seconds compared to baseline
+- [ ] `public/downloads/` is in `.gitignore`
 
 ## Sources
 
-### Primary (HIGH confidence -- direct codebase analysis)
-- `src/content.config.ts` lines 54-62 -- hardcoded `fastapi-production/pages` and `fastapi-production/guide.json` paths in content collection loaders
-- `astro.config.mjs` lines 47-59 -- hardcoded `readFileSync('./src/data/guides/fastapi-production/guide.json')` in sitemap date builder
-- `src/pages/guides/index.astro` line 13 -- `[guideMeta]` array destructure taking only first guide
-- `src/pages/llms.txt.ts` line 15, `src/pages/llms-full.txt.ts` line 42 -- same single-guide destructure pattern
-- `src/lib/guides/og-cache.ts` -- OG caching system with `CACHE_VERSION` invalidation and `node_modules/.cache/og-guide` directory
-- `src/lib/guides/schema.ts` -- current guidePageSchema lacks `lastVerified` field
-- `src/lib/guides/svg-diagrams/*.ts` -- 94-252 lines per diagram, establishing safe complexity bounds
+### Primary (HIGH confidence -- direct project analysis + official docs)
+- `handbook/datasets/*.DAT` -- direct `file` command inspection confirming mixed CRLF/LF line endings across dataset files
+- `src/data/eda/datasets.ts` -- TypeScript dataset arrays with row counts for all 10 case studies (62,000+ tokens of inline data)
+- `src/components/eda/CaseStudyDataset.astro` -- existing CSV download pattern using data: URIs, CASE_STUDY_MAP structure
+- `package.json` -- existing prebuild pattern (`download-actionlint-wasm.mjs`), no archiver/jszip dependency yet
+- `astro.config.mjs` -- static output mode, GitHub Pages deployment configuration
+- `.github/workflows/deploy.yml` -- withastro/action@v3 build, no custom caching for generated assets
+- [nbformat 4.5 format specification](https://nbformat.readthedocs.io/en/latest/format_description.html) -- required fields, cell ID format, metadata structure
+- [Cell ID JEP 62](https://jupyter.org/enhancement-proposals/62-cell-id/cell-id.html) -- cell ID required for format 4.5+, pattern `^[a-zA-Z0-9-_]+$`, 1-64 chars
+- [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits) -- 1GB published site limit, 100GB bandwidth, 10-minute deploy timeout
 
-### Secondary (MEDIUM confidence -- verified web research)
-- [Claude Code Official Docs](https://code.claude.com/docs/en/overview) -- current feature surface covering terminal, VS Code, desktop, web, JetBrains environments
-- [Claude Code CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) -- 176 updates in 2025; /simplify, /batch, HTTP hooks shipped March 3 2026; Agent Teams, Automatic Memories shipped March 7 2026
-- [Claude Code Changelog - ClaudeLog](https://claudelog.com/claude-code-changelog/) -- community-maintained version tracking confirming rapid release cadence
-- [Astro OG Image Caching - ainoya.dev](https://ainoya.dev/posts/astro-ogp-build-cache/) -- build time dropping from 10+ minutes to 30 seconds with image caching
-- [OG Images Build-Time vs Runtime - Jilles Soeters](https://jilles.me/og-images-astro-build-vs-runtime/) -- 100-300ms per satori+sharp image generation benchmark
-- [NotebookLM Hallucination Research - arxiv](https://arxiv.org/html/2509.25498v1) -- 13% hallucination rate with interpretive overconfidence as primary error mode
-- [SEO Cannibalization Guide - Search Engine Land](https://searchengineland.com/guide/keyword-cannibalization) -- keyword cannibalization detection and prevention strategies
-- [Documentation Structure Best Practices - GitBook](https://gitbook.com/docs/guides/docs-best-practices/documentation-structure-tips) -- mixing content types as anti-pattern
-- [Astro Content Collections Docs](https://docs.astro.build/en/guides/content-collections/) -- multi-directory collection patterns using loaders
+### Secondary (MEDIUM-HIGH confidence -- verified library documentation)
+- [JSZip documentation and limitations](https://stuk.github.io/jszip/documentation/limitations.html) -- UTF-8 only, binary handling requirements
+- [JSZip encoding issue #368](https://github.com/Stuk/jszip/issues/368) -- UTF-8 encoding not preserved after zip generation
+- [Archiver string stream issue #375](https://github.com/archiverjs/node-archiver/issues/375) -- invalid ZIP from string-based streams
+- [Astro Integration API](https://docs.astro.build/en/reference/integrations-reference/) -- astro:build:done hook, static asset handling
+- [Google Colab GitHub integration](https://github.com/googlecolab/open_in_colab) -- URL pattern for opening notebooks from GitHub repos
+
+### Tertiary (MEDIUM confidence -- community best practices)
+- [Installing Python packages from Jupyter](https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/) -- kernel/pip mismatch explanation
+- [Jupyter notebook reproducibility](https://blog.reviewnb.com/jupyter-notebook-reproducibility-managing-dependencies-data-secrets/) -- dependency management best practices
+- [nbformat MissingIDFieldWarning #335](https://github.com/jupyter/nbformat/issues/335) -- warning behavior for missing cell IDs
 
 ---
-*Pitfalls research for: Adding a comprehensive Claude Code guide to patrykgolabek.dev (1082-page Astro 5 site with established guide infrastructure)*
-*Researched: 2026-03-10*
+*Pitfalls research for: Adding downloadable Jupyter Notebooks for 10 EDA case studies to patrykgolabek.dev (1090+ page Astro 5 site on GitHub Pages)*
+*Researched: 2026-03-14*

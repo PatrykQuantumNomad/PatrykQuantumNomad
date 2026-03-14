@@ -1,705 +1,777 @@
-# Architecture Research: Claude Code Guide Integration
+# Architecture Patterns: Jupyter Notebook Downloads for EDA Case Studies
 
-**Domain:** Multi-chapter Claude Code guide within existing Astro 5 portfolio guide architecture
-**Researched:** 2026-03-10
-**Confidence:** HIGH
+**Domain:** Downloadable Jupyter notebooks for Astro 5 static site
+**Researched:** 2026-03-14
+**Overall confidence:** HIGH
 
-The existing FastAPI Production Guide established a clean, well-factored guide architecture. The Claude Code guide should follow the same patterns with surgical extensions where new capabilities are needed. This document maps every integration point, identifies what is new vs modified, and provides a dependency-aware build order.
+## Recommended Architecture
 
-## System Overview
+### Overview
 
-```
-PatrykQuantumNomad Portfolio Site (Astro 5, static output)
-+--------------------------------------------------------------------------+
-|                          Content Layer                                    |
-|                                                                          |
-|  src/data/guides/                                                        |
-|  +-- fastapi-production/              (EXISTING - unchanged)             |
-|  |   +-- guide.json                                                      |
-|  |   +-- pages/*.mdx                                                     |
-|  +-- claude-code/                     (NEW)                              |
-|      +-- guide.json                   <- guide metadata + chapters       |
-|      +-- pages/*.mdx                  <- 10-12 chapter MDX files         |
-|                                                                          |
-|  src/content.config.ts                (MODIFIED - add 2 collections)     |
-+--------------------------------------------------------------------------+
-|                       Page Generation Layer                               |
-|                                                                          |
-|  src/pages/guides/                                                       |
-|  +-- index.astro                      (MODIFIED - multi-guide hub)       |
-|  +-- fastapi-production/              (EXISTING - unchanged)             |
-|  |   +-- index.astro                                                     |
-|  |   +-- [slug].astro                                                    |
-|  |   +-- faq.astro                                                       |
-|  +-- claude-code/                     (NEW)                              |
-|      +-- index.astro                  <- landing page with chapter grid  |
-|      +-- [slug].astro                 <- chapter rendering via MDX       |
-|      +-- faq.astro                    <- optional FAQ page               |
-+--------------------------------------------------------------------------+
-|                       Component Layer                                     |
-|                                                                          |
-|  src/components/guide/                (EXTENDED)                         |
-|  +-- GuideSidebar.astro               (EXISTING - reused as-is)         |
-|  +-- GuideBreadcrumb.astro            (EXISTING - reused as-is)         |
-|  +-- GuideChapterNav.astro            (EXISTING - reused as-is)         |
-|  +-- GuideJsonLd.astro                (MODIFIED - parameterize guide)   |
-|  +-- CodeFromRepo.astro               (EXISTING - reused as-is)         |
-|  +-- CodeBlock.astro                  (NEW - inline code snippets)      |
-|  +-- AgenticLoopDiagram.astro         (NEW - SVG wrapper)               |
-|  +-- HookLifecycleDiagram.astro       (NEW - SVG wrapper)               |
-|  +-- PermissionModelDiagram.astro     (NEW - SVG wrapper)               |
-|  +-- McpArchitectureDiagram.astro     (NEW - SVG wrapper)               |
-|  +-- AgentTeamsDiagram.astro          (NEW - SVG wrapper)               |
-|  +-- PermissionFlowExplorer.tsx       (NEW - React interactive)         |
-|  +-- HookEventVisualizer.tsx          (NEW - React interactive)         |
-+--------------------------------------------------------------------------+
-|                       Library Layer                                       |
-|                                                                          |
-|  src/lib/guides/                                                         |
-|  +-- schema.ts                        (EXISTING - reused as-is)         |
-|  +-- routes.ts                        (MODIFIED - remove hardcoded)     |
-|  +-- code-helpers.ts                  (EXISTING - reused as-is)         |
-|  +-- og-cache.ts                      (EXISTING - reused as-is)         |
-|  +-- svg-diagrams/                                                       |
-|      +-- diagram-base.ts             (EXISTING - reused as-is)          |
-|      +-- index.ts                    (MODIFIED - add new exports)        |
-|      +-- agentic-loop.ts            (NEW)                               |
-|      +-- hook-lifecycle.ts           (NEW)                               |
-|      +-- permission-model.ts         (NEW)                               |
-|      +-- mcp-architecture.ts         (NEW)                               |
-|      +-- agent-teams.ts             (NEW)                                |
-+--------------------------------------------------------------------------+
-|                        OG Image Layer                                     |
-|                                                                          |
-|  src/pages/open-graph/guides/                                            |
-|  +-- fastapi-production.png.ts        (EXISTING - unchanged)            |
-|  +-- fastapi-production/[slug].png.ts (EXISTING - unchanged)            |
-|  +-- claude-code.png.ts              (NEW - landing OG)                  |
-|  +-- claude-code/[slug].png.ts       (NEW - chapter OG)                  |
-+--------------------------------------------------------------------------+
-|                        Layout Layer                                       |
-|                                                                          |
-|  src/layouts/                                                            |
-|  +-- GuideLayout.astro                (MODIFIED - remove companion link) |
-+--------------------------------------------------------------------------+
-```
-
-## Component Responsibilities
-
-| Component | Responsibility | Status | Notes |
-|-----------|---------------|--------|-------|
-| `guide.json` (per guide) | Guide metadata, chapter list, requirements | NEW data file | Follows exact same schema as FastAPI guide |
-| `content.config.ts` | Registers Astro content collections for MDX pages and guide metadata | MODIFIED | Add `claudeCodeGuidePages` and `claudeCodeGuides` collections |
-| `GuideLayout.astro` | Two-column layout: sticky sidebar + content area | MODIFIED | Remove hardcoded FastAPI companion blog link, make it configurable |
-| `GuideSidebar.astro` | Sticky chapter navigation sidebar | REUSED | Already guide-agnostic (takes `guideSlug` + `chapters` props) |
-| `GuideBreadcrumb.astro` | Breadcrumb navigation | REUSED | Already guide-agnostic |
-| `GuideChapterNav.astro` | Previous/Next chapter footer navigation | REUSED | Already guide-agnostic |
-| `GuideJsonLd.astro` | Schema.org structured data | MODIFIED | Hardcodes "FastAPI Production Guide" in `isPartOf` URL |
-| `CodeFromRepo.astro` | Code with GitHub source link | REUSED | Will NOT be used for Claude Code guide (no template repo) |
-| `CodeBlock.astro` | Inline code block without GitHub source link | NEW | For JSON/YAML/bash/TOML snippets that exist only in the guide |
-| `routes.ts` | URL builder functions | MODIFIED | `GUIDE_ROUTES.landing` hardcodes fastapi path |
-| `og-cache.ts` | Build-time OG image caching | REUSED | Fully generic (hash-based) |
-| `diagram-base.ts` | SVG primitive helpers | REUSED | Palette, shapes, arrows, text |
-| SVG diagram generators | Build-time diagram creation | NEW (5 files) | Follow existing pattern from nfr-diagram.ts |
-| SVG diagram wrappers | Astro components calling generators | NEW (5 files) | Follow existing pattern from NfrDiagram.astro |
-| React interactive components | Client-side explorable visualizations | NEW (2 files) | Follow existing pattern from DeploymentTopology.tsx |
-| OG image routes | Per-chapter OG PNG generation | NEW (2 files) | Follow existing pattern from fastapi-production OG routes |
-| Guide hub page | Lists all available guides | MODIFIED | Currently renders only FastAPI guide card |
-| Guide landing page | Hero + chapter card grid | NEW | Follow fastapi-production/index.astro pattern |
-| Chapter slug page | Renders MDX content in GuideLayout | NEW | Follow fastapi-production/[slug].astro pattern |
-
-## Recommended Project Structure (New/Modified Files Only)
+Generate `.ipynb` notebooks and `.zip` download bundles at **Astro build time** using the same pattern the codebase already uses for OG images: TypeScript API route endpoints with `getStaticPaths()` that return binary `Response` objects. No new build scripts, no pre-built files committed to the repo -- everything flows through Astro's existing static output pipeline.
 
 ```
-src/
-+-- content.config.ts                              # MODIFY: add 2 collections
-+-- data/
-|   +-- guides/
-|       +-- claude-code/                           # NEW directory
-|           +-- guide.json                         # Guide metadata
-|           +-- pages/                             # NEW directory
-|               +-- introduction.mdx               # Ch 1: What is Claude Code
-|               +-- agentic-loop.mdx               # Ch 2: The Agentic Loop
-|               +-- tools.mdx                      # Ch 3: Tool Use & Permissions
-|               +-- hooks.mdx                      # Ch 4: Hook System
-|               +-- mcp-servers.mdx                # Ch 5: MCP Servers
-|               +-- claude-md.mdx                  # Ch 6: CLAUDE.md & Memory
-|               +-- agent-teams.mdx                # Ch 7: Multi-Agent Orchestration
-|               +-- workflows.mdx                  # Ch 8: Custom Slash Commands
-|               +-- git-integration.mdx            # Ch 9: Git & GitHub Integration
-|               +-- configuration.mdx              # Ch 10: Settings & Configuration
-|               +-- advanced-patterns.mdx          # Ch 11: Advanced Patterns
-|               +-- conclusion.mdx                 # Ch 12: Reference & Resources
-+-- pages/
-|   +-- guides/
-|   |   +-- index.astro                            # MODIFY: multi-guide listing
-|   |   +-- claude-code/                           # NEW directory
-|   |       +-- index.astro                        # Landing page
-|   |       +-- [slug].astro                       # Chapter pages
-|   +-- open-graph/
-|       +-- guides/
-|           +-- claude-code.png.ts                 # NEW: landing OG image
-|           +-- claude-code/
-|               +-- [slug].png.ts                  # NEW: chapter OG images
-+-- components/
-|   +-- guide/
-|       +-- CodeBlock.astro                        # NEW: inline code snippets
-|       +-- AgenticLoopDiagram.astro               # NEW: SVG wrapper
-|       +-- HookLifecycleDiagram.astro             # NEW: SVG wrapper
-|       +-- PermissionModelDiagram.astro           # NEW: SVG wrapper
-|       +-- McpArchitectureDiagram.astro           # NEW: SVG wrapper
-|       +-- AgentTeamsDiagram.astro                # NEW: SVG wrapper
-|       +-- PermissionFlowExplorer.tsx             # NEW: interactive React
-|       +-- HookEventVisualizer.tsx                # NEW: interactive React
-+-- layouts/
-|   +-- GuideLayout.astro                          # MODIFY: configurable companion link
-+-- lib/
-    +-- guides/
-        +-- routes.ts                              # MODIFY: remove hardcoded path
-        +-- svg-diagrams/
-            +-- index.ts                           # MODIFY: add new exports
-            +-- agentic-loop.ts                    # NEW: DIAG-CC-01
-            +-- hook-lifecycle.ts                  # NEW: DIAG-CC-02
-            +-- permission-model.ts                # NEW: DIAG-CC-03
-            +-- mcp-architecture.ts                # NEW: DIAG-CC-04
-            +-- agent-teams.ts                     # NEW: DIAG-CC-05
+handbook/datasets/*.DAT        (source data, already in repo)
+         |
+src/lib/eda/notebooks/         (NEW: notebook builder + templates)
+         |
+         v
+src/pages/eda/notebooks/
+  |- index.astro                (NEW: landing page at /eda/notebooks/)
+  |- [slug].zip.ts              (NEW: build-time endpoint -> /eda/notebooks/{slug}.zip)
+  |- [slug].ipynb.ts            (NEW: build-time endpoint -> /eda/notebooks/{slug}.ipynb)
+         |
+         v
+dist/eda/notebooks/
+  |- index.html
+  |- ceramic-strength.zip       (notebook + .DAT file)
+  |- ceramic-strength.ipynb     (standalone notebook)
+  |- ...10 case studies
 ```
 
-### Structure Rationale
+### Component Boundaries
 
-- **Parallel guide directories under `src/data/guides/`:** Each guide gets its own folder with `guide.json` + `pages/` subdirectory. This mirrors how the FastAPI guide is organized and keeps content collections isolated per guide.
-- **Parallel page directories under `src/pages/guides/`:** Each guide gets its own route folder. The `[slug].astro` dynamic route pattern is duplicated per guide rather than using a nested `[guide]/[slug]` pattern because Astro content collections are already hardwired per-guide in `content.config.ts`.
-- **SVG diagrams co-located in `svg-diagrams/`:** All diagram generators share the same `diagram-base.ts` foundation. Keeping them in one folder with a barrel export makes imports clean.
-- **React interactive components in `components/guide/`:** Follows the DeploymentTopology.tsx precedent. These load via `client:visible` to avoid blocking initial page load.
+| Component | Responsibility | Communicates With | Status |
+|-----------|---------------|-------------------|--------|
+| `src/lib/eda/notebooks/builder.ts` | Constructs nbformat v4.5 JSON for a given case study | datasets.ts, DATASET_SOURCES, handbook/datasets/ | **NEW** |
+| `src/lib/eda/notebooks/templates.ts` | Per-case-study cell definitions (markdown narrative + Python code cells) | builder.ts | **NEW** |
+| `src/lib/eda/notebooks/zip.ts` | Assembles .zip buffer (notebook + .DAT data file) | builder.ts, Node.js fs for .DAT files | **NEW** |
+| `src/lib/eda/notebooks/registry.ts` | Maps case study slugs to notebook metadata (title, .DAT filename, description) | DATASET_SOURCES from datasets.ts | **NEW** |
+| `src/lib/eda/notebooks/types.ts` | TypeScript interfaces for nbformat v4.5 structures | None | **NEW** |
+| `src/pages/eda/notebooks/[slug].zip.ts` | Astro API route endpoint: getStaticPaths + GET -> binary zip Response | zip.ts, registry.ts | **NEW** |
+| `src/pages/eda/notebooks/[slug].ipynb.ts` | Astro API route endpoint: getStaticPaths + GET -> .ipynb JSON Response | builder.ts, registry.ts | **NEW** |
+| `src/pages/eda/notebooks/index.astro` | Landing page listing all 10 notebooks with download links | registry.ts, EDALayout | **NEW** |
+| `src/components/eda/NotebookDownload.astro` | Download button/card for embedding in existing case study pages | registry.ts | **NEW** |
+| `src/lib/eda/routes.ts` | Add `notebookUrl()`, `notebookZipUrl()`, and `notebooks` route | Existing, **MODIFY** |
+| `src/pages/eda/index.astro` | Add "Notebooks" to the SECTIONS array and NAV_ITEMS | Existing, **MODIFY** |
+| `src/pages/eda/case-studies/[...slug].astro` | Import and render NotebookDownload component | Existing, **MODIFY** |
+| `src/data/eda/datasets.ts` | Reference only -- no changes needed (DATASET_SOURCES already maps slug to .DAT name) | Existing, **NO CHANGE** |
+| `handbook/datasets/*.DAT` | Source .DAT files read at build time by zip.ts | Existing, **NO CHANGE** |
 
-## Architectural Patterns
+### Data Flow
 
-### Pattern 1: Content Collection Per Guide
+**Build-time flow (no runtime computation):**
 
-**What:** Each guide gets its own pair of Astro content collections: one `file()` collection for the guide.json metadata, one `glob()` collection for the MDX chapter pages. Both use the same Zod schemas (`guideMetaSchema`, `guidePageSchema`) already defined in `src/lib/guides/schema.ts`.
+1. Astro calls `getStaticPaths()` in `[slug].zip.ts` / `[slug].ipynb.ts`
+2. Registry provides 10 case study entries (slug, title, .DAT filename, description)
+3. For each slug, `builder.ts` constructs nbformat v4.5 JSON:
+   - Markdown cells: title, background, dataset description, analysis steps
+   - Code cells: pandas import, data loading, EDA plots (matplotlib/seaborn), statistical summaries
+4. `zip.ts` reads the corresponding `.DAT` file from `handbook/datasets/` using Node.js `fs`
+5. `zip.ts` combines `.ipynb` JSON + `.DAT` file into a zip buffer using JSZip
+6. Endpoint returns `new Response(zipBuffer, { headers: { 'Content-Type': 'application/zip' } })`
+7. Astro writes the response to `dist/eda/notebooks/{slug}.zip`
 
-**When to use:** For every new guide added to the site.
+**User-facing flow:**
 
-**Trade-offs:** Requires adding 2 collection declarations to `content.config.ts` per guide (minor duplication) but avoids needing a multi-guide glob pattern that would complicate the data model. The schemas are shared, so validation stays DRY.
+1. User visits `/eda/notebooks/` landing page or a case study page
+2. Clicks "Download Notebook" button
+3. Browser downloads static `.zip` file from GitHub Pages CDN (no server needed)
 
-**Example (addition to content.config.ts):**
+## Key Design Decisions
+
+### Decision 1: Build-Time Generation (not pre-committed .ipynb files)
+
+**Rationale:** The codebase already generates OG images, SVG plots, and CSV downloads at build time. Pre-committing 10+ binary .ipynb/.zip files to git bloats the repo and creates maintenance drift. Build-time generation ensures notebooks stay synchronized with DATASET_SOURCES and case study content.
+
+**Pattern precedent:** `src/pages/open-graph/eda/[...slug].png.ts` uses `getStaticPaths()` from content collections, generates PNG in the `GET` handler, and returns a binary Response. The notebook endpoint follows the exact same pattern.
+
+### Decision 2: Dual Download Format (.zip primary, .ipynb secondary)
+
+**Rationale:** The `.zip` bundles the notebook with its `.DAT` data file, so the user can `jupyter notebook ceramic-strength.ipynb` immediately without hunting for the dataset. The standalone `.ipynb` endpoint exists for users who already have the data or want to inspect the notebook without downloading a zip.
+
+**Structure inside each zip:**
+```
+ceramic-strength/
+  ceramic-strength.ipynb
+  JAHANMI2.DAT
+  README.txt           (1-paragraph attribution + instructions)
+```
+
+### Decision 3: nbformat v4 JSON Construction in Pure TypeScript
+
+**Rationale:** The .ipynb format is just JSON with a specific schema. No Python tooling or nbconvert is needed. Building the JSON in TypeScript keeps the build pipeline simple (no Python dependency in CI). The schema is stable (nbformat v4 has been the standard since 2015, current minor is v4.5).
+
+**Minimal valid notebook structure:**
 ```typescript
-const claudeCodeGuidePages = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides/claude-code/pages' }),
-  schema: guidePageSchema,
-});
+interface NotebookV4 {
+  nbformat: 4;
+  nbformat_minor: 5;
+  metadata: {
+    kernelspec: { display_name: string; language: string; name: string };
+    language_info: { name: string; version: string };
+  };
+  cells: Array<MarkdownCell | CodeCell>;
+}
 
-const claudeCodeGuides = defineCollection({
-  loader: file('src/data/guides/claude-code/guide.json'),
-  schema: guideMetaSchema,
-});
+interface MarkdownCell {
+  cell_type: 'markdown';
+  id: string;
+  metadata: Record<string, unknown>;
+  source: string;
+}
 
-// Add to exports
-export const collections = {
-  blog, languages, dbModels, edaTechniques, edaDistributions,
-  edaPages, guidePages, guides,
-  claudeCodeGuidePages, claudeCodeGuides,  // new
+interface CodeCell {
+  cell_type: 'code';
+  id: string;
+  metadata: Record<string, unknown>;
+  source: string;
+  execution_count: null;
+  outputs: [];
+}
+```
+
+Notebooks ship with `execution_count: null` and empty `outputs` -- users execute cells themselves. Each cell requires a unique `id` field (alphanumeric, 1-64 characters) per the nbformat v4.5 spec.
+
+### Decision 4: JSZip for In-Memory Zip Creation
+
+**Rationale:** JSZip works entirely in memory (no temp files), has zero native dependencies (pure JS), works identically on macOS dev and Ubuntu CI, and handles the simple case (2-3 files per archive) without streaming complexity. `archiver` is overkill for 3 files totaling less than 500KB. The existing GitHub Actions CI (`withastro/action@v3`) needs no changes.
+
+### Decision 5: Python 3 + pandas + matplotlib as Notebook Target
+
+**Rationale:** This is the standard data science stack that the target audience (engineers reading the NIST handbook) will have. The notebooks import `pandas`, `matplotlib.pyplot`, and `scipy.stats` -- nothing exotic. Each notebook loads the `.DAT` file relative to its own directory with `pd.read_csv()` or `pd.read_fwf()` depending on the file format.
+
+### Decision 6: Landing Page at /eda/notebooks/ (New Section)
+
+**Rationale:** Follows the existing EDA section pattern. The EDA index already has a `SECTIONS` array with `foundations`, `graphical`, `quantitative`, `distributions`, `case-studies`, `reference`. Adding `notebooks` as a 7th section maintains the established information architecture. URL `/eda/notebooks/` is consistent with `/eda/case-studies/`, `/eda/distributions/`, etc.
+
+### Decision 7: Registry Array (not Content Collection)
+
+**Rationale:** Notebooks are 1:1 with case studies, not independent content. Adding a new Astro content collection in `src/content.config.ts` would create unnecessary schema overhead and require keeping two collections in sync. A simple TypeScript `NOTEBOOK_REGISTRY` array in `src/lib/eda/notebooks/registry.ts` is sufficient for 10 entries and can be validated at build time.
+
+## Component Details
+
+### NEW: `src/lib/eda/notebooks/types.ts`
+
+Defines the nbformat v4.5 TypeScript interfaces:
+
+```typescript
+export interface NotebookV4 {
+  nbformat: 4;
+  nbformat_minor: 5;
+  metadata: NotebookMetadata;
+  cells: NotebookCell[];
+}
+
+export interface NotebookMetadata {
+  kernelspec: {
+    display_name: string;
+    language: string;
+    name: string;
+  };
+  language_info: {
+    name: string;
+    version: string;
+  };
+}
+
+export type NotebookCell = MarkdownCell | CodeCell;
+
+export interface MarkdownCell {
+  cell_type: 'markdown';
+  id: string;
+  metadata: Record<string, unknown>;
+  source: string;
+}
+
+export interface CodeCell {
+  cell_type: 'code';
+  id: string;
+  metadata: Record<string, unknown>;
+  source: string;
+  execution_count: null;
+  outputs: [];
+}
+```
+
+### NEW: `src/lib/eda/notebooks/registry.ts`
+
+Single source of truth mapping case study slugs to notebook metadata. Derives from existing `DATASET_SOURCES` and `CASE_STUDY_MAP`:
+
+```typescript
+export interface NotebookEntry {
+  slug: string;
+  title: string;
+  description: string;
+  datFilename: string;
+  datLoadMethod: 'csv' | 'fwf';    // how pandas should read the .DAT file
+  nistSection: string;
+  responseVariable: string;
+}
+
+export const NOTEBOOK_REGISTRY: NotebookEntry[] = [
+  {
+    slug: 'normal-random-numbers',
+    title: 'Normal Random Numbers',
+    description: 'EDA of 500 standard normal random numbers from the Rand Corporation',
+    datFilename: 'RANDN.DAT',
+    datLoadMethod: 'fwf',
+    nistSection: '1.4.2.1',
+    responseVariable: 'value',
+  },
+  {
+    slug: 'uniform-random-numbers',
+    title: 'Uniform Random Numbers',
+    description: 'EDA of 500 uniform U(0,1) random numbers from the Rand Corporation',
+    datFilename: 'RANDU.DAT',
+    datLoadMethod: 'fwf',
+    nistSection: '1.4.2.2',
+    responseVariable: 'value',
+  },
+  // ... all 10 case studies
+];
+```
+
+The full registry maps to the 10 case study slugs already defined in `CaseStudyDataset.astro`:
+1. `normal-random-numbers` -> `RANDN.DAT`
+2. `uniform-random-numbers` -> `RANDU.DAT`
+3. `random-walk` -> `RANDWALK.DAT`
+4. `cryothermometry` -> `SOULEN.DAT`
+5. `beam-deflections` -> `LEW.DAT`
+6. `filter-transmittance` -> `MAVRO.DAT`
+7. `heat-flow-meter` -> `ZARR13.DAT`
+8. `fatigue-life` -> `BIRNSAUN.DAT`
+9. `ceramic-strength` -> `JAHANMI2.DAT`
+10. `standard-resistor` -> `DZIUBA1.DAT`
+
+### NEW: `src/lib/eda/notebooks/builder.ts`
+
+Core function that constructs a notebook for a given case study:
+
+```typescript
+import type { NotebookV4, NotebookCell } from './types';
+import { getTemplate } from './templates';
+
+export function buildNotebook(slug: string): NotebookV4 {
+  const template = getTemplate(slug);
+  return {
+    nbformat: 4,
+    nbformat_minor: 5,
+    metadata: {
+      kernelspec: {
+        display_name: 'Python 3',
+        language: 'python',
+        name: 'python3',
+      },
+      language_info: {
+        name: 'python',
+        version: '3.10.0',
+      },
+    },
+    cells: template.cells,
+  };
+}
+```
+
+### NEW: `src/lib/eda/notebooks/templates.ts`
+
+Contains the cell content for each case study. Each template returns an array of markdown and code cells that mirror the analysis on the web page. Helper functions (`md()`, `code()`) create properly shaped cell objects with unique IDs:
+
+```typescript
+function md(id: string, source: string): MarkdownCell {
+  return { cell_type: 'markdown', id, metadata: {}, source };
+}
+
+function code(id: string, source: string): CodeCell {
+  return { cell_type: 'code', id, metadata: {}, source, execution_count: null, outputs: [] };
+}
+
+export function getTemplate(slug: string): { cells: NotebookCell[] } {
+  const templateFn = TEMPLATES[slug];
+  if (!templateFn) throw new Error(`No notebook template for slug: ${slug}`);
+  return templateFn();
+}
+
+const TEMPLATES: Record<string, () => { cells: NotebookCell[] }> = {
+  'normal-random-numbers': normalRandomTemplate,
+  'uniform-random-numbers': uniformRandomTemplate,
+  'random-walk': randomWalkTemplate,
+  'cryothermometry': cryothermometryTemplate,
+  'beam-deflections': beamDeflectionsTemplate,
+  'filter-transmittance': filterTransmittanceTemplate,
+  'heat-flow-meter': heatFlowMeterTemplate,
+  'fatigue-life': fatigueLifeTemplate,
+  'ceramic-strength': ceramicStrengthTemplate,
+  'standard-resistor': standardResistorTemplate,
 };
 ```
 
-### Pattern 2: Build-Time SVG Diagram Generators
-
-**What:** TypeScript functions that produce SVG markup strings at build time using primitives from `diagram-base.ts` (roundedRect, arrowLine, arrowMarkerDef, textLabel). Each generator is wrapped by a thin Astro component that calls it and renders via `PlotFigure.astro`. Zero client-side JavaScript.
-
-**When to use:** For every architectural concept diagram (agentic loop, hook lifecycle, permission model, MCP architecture, agent teams).
-
-**Trade-offs:** More upfront work than dropping in an image, but produces theme-aware SVGs that respect CSS custom properties for dark/light mode, are fully accessible (aria-label), and scale perfectly at any viewport width.
-
-**Example (new diagram generator):**
+Each template function builds cells like:
 ```typescript
-// src/lib/guides/svg-diagrams/agentic-loop.ts
-import {
-  DIAGRAM_PALETTE,
-  type DiagramConfig,
-  diagramSvgOpen,
-  roundedRect,
-  arrowLine,
-  arrowMarkerDef,
-  textLabel,
-} from './diagram-base';
-
-const MARKER_ID = 'agentic-loop-arrow';
-
-export function generateAgenticLoop(): string {
-  const config: DiagramConfig = { width: 720, height: 400 };
-  const parts: string[] = [];
-  parts.push(diagramSvgOpen(config, 'Claude Code agentic loop: prompt, plan, tool use, observe, iterate'));
-  parts.push(arrowMarkerDef(MARKER_ID));
-  // ... layout boxes and arrows for the loop ...
-  parts.push('</svg>');
-  return parts.join('\n');
+function normalRandomTemplate(): { cells: NotebookCell[] } {
+  return {
+    cells: [
+      md('nrn-01', [
+        '# Normal Random Numbers -- EDA Case Study',
+        '',
+        'NIST/SEMATECH Section 1.4.2.1',
+        '',
+        '500 standard normal N(0,1) random numbers from the Rand Corporation.',
+        'This notebook applies the full 4-plot EDA diagnostic.',
+      ].join('\n')),
+      code('nrn-02', [
+        'import pandas as pd',
+        'import numpy as np',
+        'import matplotlib.pyplot as plt',
+        'from scipy import stats',
+        '',
+        '# Load the dataset',
+        "df = pd.read_fwf('RANDN.DAT', header=None, names=['value'])",
+        "print(f'Observations: {len(df)}')",
+        'df.head(10)',
+      ].join('\n')),
+      md('nrn-03', '## 4-Plot Diagnostic'),
+      code('nrn-04', [
+        'fig, axes = plt.subplots(2, 2, figsize=(12, 8))',
+        '# ... run sequence, lag plot, histogram, probability plot',
+      ].join('\n')),
+      // ... additional analysis cells
+    ],
+  };
 }
 ```
 
-**Example (wrapper component):**
-```astro
----
-// src/components/guide/AgenticLoopDiagram.astro
-import PlotFigure from '../eda/PlotFigure.astro';
-import { generateAgenticLoop } from '../../lib/guides/svg-diagrams';
-const svg = generateAgenticLoop();
----
-<PlotFigure svg={svg} caption="The Claude Code agentic loop" maxWidth="720px" />
+### NEW: `src/lib/eda/notebooks/zip.ts`
+
+```typescript
+import JSZip from 'jszip';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type { NotebookV4 } from './types';
+
+export async function buildZipBuffer(
+  slug: string,
+  notebook: NotebookV4,
+  datFilename: string,
+): Promise<Buffer> {
+  const zip = new JSZip();
+  const folder = zip.folder(slug)!;
+
+  // Add notebook JSON
+  folder.file(`${slug}.ipynb`, JSON.stringify(notebook, null, 1));
+
+  // Add .DAT file from handbook/datasets/
+  const datPath = join(process.cwd(), 'handbook', 'datasets', datFilename);
+  folder.file(datFilename, readFileSync(datPath));
+
+  // Add README with attribution
+  folder.file('README.txt', buildReadme(slug, datFilename));
+
+  return Buffer.from(await zip.generateAsync({ type: 'uint8array' }));
+}
+
+function buildReadme(slug: string, datFilename: string): string {
+  return [
+    `${slug} -- EDA Case Study Notebook`,
+    '',
+    'Source: NIST/SEMATECH e-Handbook of Statistical Methods',
+    `Dataset: ${datFilename}`,
+    '',
+    'To run:',
+    '  1. Install Python 3 with pandas, matplotlib, scipy',
+    '  2. jupyter notebook ' + slug + '.ipynb',
+    '',
+    'Generated by https://patrykgolabek.dev/eda/notebooks/',
+    '',
+  ].join('\n');
+}
 ```
 
-### Pattern 3: Inline Code Blocks (CodeBlock vs CodeFromRepo)
+### NEW: `src/pages/eda/notebooks/[slug].zip.ts`
 
-**What:** The FastAPI guide uses `CodeFromRepo.astro` to display code snippets with a "View source" link to the tagged GitHub repository. The Claude Code guide has no template repository -- its code examples (JSON config, YAML hooks, bash commands, TOML settings) are inline content. A new `CodeBlock.astro` component provides syntax-highlighted code blocks with a file-path annotation header but WITHOUT the GitHub source link.
+Follows the OG image endpoint pattern exactly:
 
-**When to use:** For all code examples in the Claude Code guide. Use `CodeFromRepo` only when referencing code from an external repository.
+```typescript
+import type { APIRoute } from 'astro';
+import { NOTEBOOK_REGISTRY, type NotebookEntry } from '../../../lib/eda/notebooks/registry';
+import { buildNotebook } from '../../../lib/eda/notebooks/builder';
+import { buildZipBuffer } from '../../../lib/eda/notebooks/zip';
 
-**Trade-offs:** One more component, but it avoids the awkward situation of `CodeFromRepo` with no meaningful source link. The component is simple -- it wraps `astro-expressive-code`'s `Code` component with the same file-path header bar styling.
+export function getStaticPaths() {
+  return NOTEBOOK_REGISTRY.map((entry) => ({
+    params: { slug: entry.slug },
+    props: entry,
+  }));
+}
 
-**Example:**
+export const GET: APIRoute = async ({ props }) => {
+  const { slug, datFilename } = props as NotebookEntry;
+  const notebook = buildNotebook(slug);
+  const zipBuffer = await buildZipBuffer(slug, notebook, datFilename);
+
+  return new Response(zipBuffer, {
+    headers: {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${slug}.zip"`,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
+};
+```
+
+### NEW: `src/pages/eda/notebooks/[slug].ipynb.ts`
+
+Standalone notebook download (no zip):
+
+```typescript
+import type { APIRoute } from 'astro';
+import { NOTEBOOK_REGISTRY, type NotebookEntry } from '../../../lib/eda/notebooks/registry';
+import { buildNotebook } from '../../../lib/eda/notebooks/builder';
+
+export function getStaticPaths() {
+  return NOTEBOOK_REGISTRY.map((entry) => ({
+    params: { slug: entry.slug },
+    props: entry,
+  }));
+}
+
+export const GET: APIRoute = async ({ props }) => {
+  const { slug } = props as NotebookEntry;
+  const notebook = buildNotebook(slug);
+
+  return new Response(JSON.stringify(notebook, null, 1), {
+    headers: {
+      'Content-Type': 'application/x-ipynb+json',
+      'Content-Disposition': `attachment; filename="${slug}.ipynb"`,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
+};
+```
+
+### NEW: `src/pages/eda/notebooks/index.astro`
+
+Landing page following the same pattern as `src/pages/eda/case-studies/index.astro`:
+
+- Uses `EDALayout` wrapper
+- `BreadcrumbJsonLd` with crumbs: Home > EDA > Notebooks
+- `EDAJsonLd` for structured data
+- `EdaBreadcrumb` component
+- Card grid showing all 10 notebooks with download buttons
+- Each card shows: title, description, NIST section, .DAT filename, download links (.zip + .ipynb)
+
+### NEW: `src/components/eda/NotebookDownload.astro`
+
+Compact download card for embedding in case study pages (below the existing `CaseStudyDataset` component):
+
 ```astro
 ---
-// src/components/guide/CodeBlock.astro
-import { Code } from 'astro-expressive-code/components';
+import { NOTEBOOK_REGISTRY } from '../../lib/eda/notebooks/registry';
 
 interface Props {
-  code: string;
-  lang: string;
-  title?: string;
+  slug: string;
 }
 
-const { code, lang, title } = Astro.props;
+const { slug } = Astro.props;
+const entry = NOTEBOOK_REGISTRY.find(e => e.slug === slug);
+if (!entry) return;
 ---
-<div class="my-6 not-prose">
-  {title && (
-    <div class="flex items-center px-3 py-2 bg-[var(--color-surface-alt)] border border-b-0 border-[var(--color-border)] rounded-t-lg text-sm">
-      <span class="font-mono text-[var(--color-text-secondary)] truncate">{title}</span>
-    </div>
-  )}
-  <div class:list={[title && '[&_.expressive-code]:!rounded-t-none [&_.expressive-code]:!mt-0 [&_.expressive-code]:!border-t-0']}>
-    <Code code={code} lang={lang} title={title} />
+<section class="mt-6 rounded-lg border border-[var(--color-border)] p-5">
+  <div class="flex items-center gap-3 mb-3">
+    <svg><!-- notebook icon --></svg>
+    <h2 class="text-lg font-heading font-bold">Jupyter Notebook</h2>
   </div>
-</div>
-```
-
-**Usage in MDX:**
-```mdx
-import CodeBlock from '../../../../components/guide/CodeBlock.astro';
-
-<CodeBlock
-  code={`{
-  "permissions": {
-    "allow": ["Read", "Glob", "Grep", "WebSearch"],
-    "deny": ["Bash(rm *)"]
-  }
-}`}
-  lang="json"
-  title=".claude/settings.json"
-/>
-```
-
-### Pattern 4: Interactive React Components via client:visible
-
-**What:** Client-hydrated React components loaded lazily when they scroll into view. Follows the `DeploymentTopology.tsx` pattern: static data defined in the component, React Flow + dagre for graph rendering, CSS-variable-based theming.
-
-**When to use:** For the Permission Flow Explorer and Hook Event Visualizer where static diagrams are insufficient because the user needs to interact (click nodes, explore paths, see event sequences).
-
-**Trade-offs:** Adds client-side JavaScript, but `client:visible` defers hydration until the element is in viewport, keeping initial page load fast. React Flow is already in the bundle from the FastAPI guide's DeploymentTopology.
-
-**Example (usage in MDX):**
-```mdx
-import PermissionFlowExplorer from '../../../../components/guide/PermissionFlowExplorer.tsx';
-
-<PermissionFlowExplorer client:visible />
-```
-
-## Data Flow
-
-### Content Collection Resolution (Build Time)
-
-```
-guide.json (claude-code)
-    |
-    v
-content.config.ts (claudeCodeGuides collection, guideMetaSchema validation)
-    |
-    v
-[slug].astro getStaticPaths() -> getCollection('claudeCodeGuidePages')
-    |                             getCollection('claudeCodeGuides')
-    |
-    v
-GuideLayout.astro (receives: guideTitle, guideSlug, chapters, currentSlug)
-    |
-    +-> GuideSidebar.astro (chapters, currentSlug, guideSlug)
-    +-> GuideBreadcrumb.astro (guideTitle, guideSlug, chapterTitle)
-    +-> GuideChapterNav.astro (chapters, currentSlug, guideSlug)
-    +-> <Content /> (MDX rendered with imported components)
-```
-
-### SVG Diagram Generation (Build Time)
-
-```
-diagram-base.ts (palette, primitives)
-    |
-    v
-agentic-loop.ts / hook-lifecycle.ts / ... (generator functions)
-    |
-    v
-AgenticLoopDiagram.astro / ... (call generator, get SVG string)
-    |
-    v
-PlotFigure.astro (render SVG in themed figure with caption)
-    |
-    v
-Static HTML output (zero JS, theme-aware via CSS custom properties)
-```
-
-### Interactive Component Hydration (Runtime)
-
-```
-MDX imports PermissionFlowExplorer.tsx with client:visible
-    |
-    v
-Astro renders placeholder <div> in static HTML
-    |
-    v
-IntersectionObserver fires when user scrolls to element
-    |
-    v
-React hydrates: ReactFlow + dagre compute layout
-    |
-    v
-User can pan, zoom, click nodes to explore permission flow
-```
-
-### OG Image Generation (Build Time)
-
-```
-[slug].png.ts getStaticPaths() -> getCollection('claudeCodeGuidePages')
-    |
-    v
-For each chapter: computeOgHash(title, description)
-    |
-    +-> Cache HIT:  return cached PNG
-    +-> Cache MISS: generateGuideOgImage(title, desc, label) -> cache -> return
-```
-
-## Integration Points: What Changes in Existing Files
-
-### 1. `src/content.config.ts` -- Add 2 Collections
-
-Add `claudeCodeGuidePages` (glob loader for MDX) and `claudeCodeGuides` (file loader for guide.json). Both reuse existing schemas from `src/lib/guides/schema.ts`. No schema changes needed.
-
-**Risk:** LOW. Additive change, does not affect existing collections.
-
-### 2. `src/layouts/GuideLayout.astro` -- Configurable Companion Link
-
-The current layout hardcodes a companion blog post link to the FastAPI guide blog post. This must become a prop-driven optional section.
-
-**Current (hardcoded):**
-```astro
-<aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
-  <p class="text-sm text-[var(--color-text-secondary)]">
-    For a high-level overview of all 13 production concerns, read the companion blog post:
-    <a href="/blog/fastapi-production-guide/" ...>
-      FastAPI Production Guide: What Your AI Agent Inherits
-    </a>
+  <p class="text-sm text-[var(--color-text-secondary)] mb-4">
+    Download a ready-to-run Python notebook for this case study,
+    bundled with the {entry.datFilename} dataset.
   </p>
-</aside>
+  <div class="flex flex-wrap gap-3">
+    <a href={`/eda/notebooks/${slug}.zip`} download
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
+              bg-[var(--color-accent)] !text-white hover:opacity-90 transition-opacity !no-underline">
+      Download .zip (notebook + data)
+    </a>
+    <a href={`/eda/notebooks/${slug}.ipynb`} download
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
+              border border-[var(--color-border)] !text-[var(--color-text-secondary)]
+              hover:!text-[var(--color-accent)] hover:border-[var(--color-accent)]
+              transition-colors !no-underline">
+      Download .ipynb only
+    </a>
+  </div>
+</section>
 ```
 
-**Proposed (prop-driven):**
+### MODIFY: `src/lib/eda/routes.ts`
+
+Add notebook route constants and URL helpers:
+
+```typescript
+export const EDA_ROUTES = {
+  // ... existing routes unchanged
+  notebooks: '/eda/notebooks/',     // NEW
+} as const;
+
+/** Map a case study slug to its notebook zip download URL */
+export function notebookZipUrl(slug: string): string {
+  return `${EDA_ROUTES.notebooks}${slug}.zip`;
+}
+
+/** Map a case study slug to its standalone notebook download URL */
+export function notebookUrl(slug: string): string {
+  return `${EDA_ROUTES.notebooks}${slug}.ipynb`;
+}
+```
+
+### MODIFY: `src/pages/eda/index.astro`
+
+Add "Notebooks" section to the landing page. Two arrays need entries:
+
+```typescript
+// In SECTIONS array (around line 112-119):
+{ id: 'notebooks', heading: 'Jupyter Notebooks', category: 'notebooks', indexHref: '/eda/notebooks/' },
+
+// In NAV_ITEMS array (around line 138-145):
+{ label: 'Notebooks', href: '#notebooks', indexHref: '/eda/notebooks/' },
+```
+
+The notebook cards on the landing page link to the landing page (not direct downloads) to provide context before download. The notebook section will not use the `getCards()` function since notebooks are not from a content collection -- it will render a custom section that imports `NOTEBOOK_REGISTRY` directly.
+
+### MODIFY: `src/pages/eda/case-studies/[...slug].astro`
+
+Add `NotebookDownload` component after the `<Content />` render:
+
 ```astro
 ---
-interface Props {
-  // ... existing props ...
-  companionLink?: { href: string; text: string; label: string };
-}
+// Add import (line ~6):
+import NotebookDownload from '../../../components/eda/NotebookDownload.astro';
 ---
-{companionLink && (
-  <aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
-    <p class="text-sm text-[var(--color-text-secondary)]">
-      {companionLink.label}
-      <a href={companionLink.href} class="text-[var(--color-accent)] hover:underline font-medium">
-        {companionLink.text}
-      </a>
-    </p>
-  </aside>
-)}
+<!-- After <Content /> inside the prose-foundations div, before closing </article>: -->
+<NotebookDownload slug={slug} />
 ```
 
-FastAPI's `[slug].astro` passes the companion link; Claude Code's `[slug].astro` omits it (or passes its own). Backward compatible.
+This is a 2-line change to the existing file.
 
-**Risk:** LOW. Existing FastAPI pages pass the prop; new Claude Code pages omit it.
+### NO CHANGE: `astro.config.mjs`
 
-### 3. `src/lib/guides/routes.ts` -- Remove Hardcoded Landing
+The new `/eda/notebooks/` pages will automatically be picked up by the existing sitemap integration since they match the `/eda/` URL pattern already handled with `priority: 0.5` and `changefreq: 'monthly'`. No config modifications needed.
 
-The `GUIDE_ROUTES.landing` constant currently hardcodes `/guides/fastapi-production/`. This should be removed or generalized since `guideLandingUrl(slug)` already handles all guides dynamically. The constant is only used in the guides hub page which should use `guideLandingUrl()` instead.
+### NO CHANGE: `.github/workflows/deploy.yml`
 
-**Risk:** LOW. The constant is not imported outside of the hub page.
+JSZip is a pure JavaScript dependency -- no native binaries, no Python runtime. The `withastro/action@v3` handles `npm install` and `astro build` unchanged.
 
-### 4. `src/components/guide/GuideJsonLd.astro` -- Parameterize isPartOf
+## Patterns to Follow
 
-Currently hardcodes `"FastAPI Production Guide"` and its URL in the `isPartOf` field for chapter pages. Change to accept guide name and URL via props.
+### Pattern 1: Static API Route for Binary Assets
 
-**Current:**
+**What:** Use Astro's `[param].ext.ts` endpoint pattern with `getStaticPaths()` to generate binary files at build time.
+
+**When:** Any time you need to produce downloadable files (zip, ipynb, pdf, etc.) that are deterministic from source data.
+
+**Why this over alternatives:**
+- A `prebuild` script would work but creates a parallel build system outside Astro's awareness
+- Committing built artifacts to git causes repo bloat and maintenance drift
+- The API route pattern is already proven in this codebase (20+ OG image endpoints use it)
+
+**Example from existing codebase:**
 ```typescript
-"isPartOf": {
-  "@type": "WebPage",
-  "name": "FastAPI Production Guide",
-  "url": "https://patrykgolabek.dev/guides/fastapi-production/",
-},
+// src/pages/open-graph/eda/case-studies.png.ts
+export const GET: APIRoute = async () => {
+  const png = await getOrGenerateOgImage('Case Studies', '...', () => generateEdaSectionOgImage(...));
+  return new Response(png, {
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' },
+  });
+};
 ```
 
-**Proposed:** Add `parentTitle` and `parentUrl` props, with defaults matching the FastAPI guide for backward compatibility.
+### Pattern 2: Registry-Driven Content
 
-**Risk:** LOW. Additive props with defaults.
+**What:** A single TypeScript module (`registry.ts`) maps slugs to metadata, used by both the endpoint `getStaticPaths()` and the landing page template.
 
-### 5. `src/pages/guides/index.astro` -- Multi-Guide Hub
+**When:** Multiple pages/endpoints need the same list of entries.
 
-Currently fetches only the single FastAPI guide and renders one card. Must fetch all guide metadata collections and render a card per guide.
+**Why:** Prevents the slug list from diverging between the endpoint, the landing page, and the download buttons. This is the same pattern used by `DATASET_SOURCES` in `datasets.ts` and the technique/distribution JSON collections.
 
-**Approach:** Since each guide has its own collection name, the hub page will fetch both `guides` and `claudeCodeGuides` collections and render a card for each. The card rendering logic can be extracted into a shared function or component. Each card gets its own branding treatment (FastAPI teal gradient, Claude Code orange/rust gradient).
+### Pattern 3: Notebook-as-Data (not Notebook-as-File)
 
-**Risk:** MEDIUM. Requires restructuring the page, but the existing card HTML is straightforward to parameterize.
+**What:** Notebooks are defined as TypeScript data structures (arrays of cell objects), not as `.ipynb` files checked into the repo.
 
-### 6. `src/lib/guides/svg-diagrams/index.ts` -- Add New Exports
+**When:** The notebook content is derived from existing data (datasets, analysis steps) rather than being hand-authored in Jupyter.
 
-Add barrel exports for the 5 new diagram generators. Purely additive.
+**Why:** Keeps the single source of truth in TypeScript. If a dataset changes or the analysis narrative is improved, the notebook regenerates automatically on next build.
 
-**Risk:** LOW.
+## Anti-Patterns to Avoid
 
-## Guide Metadata Schema: Reuse, Not Extend
+### Anti-Pattern 1: Pre-Built Notebooks in `public/`
 
-The existing `guideMetaSchema` already handles everything the Claude Code guide needs:
+**What:** Committing `.ipynb` and `.zip` files to `public/downloads/` or similar.
 
-| Field | FastAPI Guide Value | Claude Code Guide Value |
-|-------|--------------------|-----------------------|
-| `id` | `"fastapi-production"` | `"claude-code"` |
-| `title` | `"FastAPI Production Guide"` | `"Claude Code Guide"` |
-| `description` | Production concerns text | Agentic coding text |
-| `slug` | `"fastapi-production"` | `"claude-code"` |
-| `templateRepo` | GitHub URL | Anthropic docs URL or Claude Code docs URL |
-| `versionTag` | `"v1.0.0"` | `"1.0"` or current version |
-| `publishedDate` | `"2026-03-08"` | TBD |
-| `requirements` | `{ fastapi: "0.135+" ... }` | `{ "claude-code": "1.0+", "node": "18+" }` |
-| `chapters` | 14-item array | 10-12 item array |
+**Why bad:** Binary files in git cause repo bloat (10 zips x ~100KB = 1MB per change, accumulating across commits). The notebooks will drift from the actual datasets/analysis. No build-time validation. Every data correction requires manually rebuilding notebooks.
 
-The `templateRepo` field is `.url()` validated. For Claude Code (no template repo), use the official Anthropic documentation URL. The `requirements` field is `z.record(z.string(), z.string()).optional()`, so it accepts any key-value pairs.
+**Instead:** Generate at build time via API route endpoints.
 
-The `guidePageSchema` for MDX frontmatter is also fully reusable: `title`, `description`, `order`, `slug`. No changes needed.
+### Anti-Pattern 2: Python Build Step for Notebook Generation
 
-## Code Example Strategy: CodeBlock vs CodeFromRepo
+**What:** Adding a Python script to `scripts/` that uses `nbformat` or `nbconvert` to create notebooks, run as a `prebuild` step.
 
-The FastAPI guide's `CodeFromRepo` component is purpose-built for linking code back to a tagged GitHub repository. The Claude Code guide does not have a template repo -- its code examples are illustrative configurations, CLI commands, and hook definitions.
+**Why bad:** Introduces a Python runtime dependency into the CI pipeline (currently Node.js only). The `withastro/action@v3` GitHub Action does not include Python. The `.ipynb` format is just JSON -- TypeScript handles it directly without any external tooling.
 
-**Decision matrix:**
+**Instead:** Build nbformat v4 JSON in TypeScript.
 
-| Example Type | Component | Rationale |
-|--------------|-----------|-----------|
-| `.claude/settings.json` config | `CodeBlock` | Inline JSON, no source repo |
-| CLAUDE.md file content | `CodeBlock` | Inline markdown/text, no source repo |
-| Hook YAML definitions | `CodeBlock` | Inline YAML, no source repo |
-| Bash CLI commands | `CodeBlock` | Inline bash, no source repo |
-| TOML configuration | `CodeBlock` | Inline TOML, no source repo |
-| MCP server config JSON | `CodeBlock` | Inline JSON, no source repo |
+### Anti-Pattern 3: Client-Side Zip Generation
 
-`CodeFromRepo` is NOT used in the Claude Code guide. All examples use `CodeBlock`.
+**What:** Using JSZip in the browser to assemble zips on-demand when the user clicks download.
 
-## SVG Diagram Specifications
+**Why bad:** Requires shipping JSZip (~100KB) to the client. Requires fetching the .DAT file and .ipynb separately before zipping. Violates the "zero client-side JS" philosophy of the EDA section (all plots are build-time SVG). Fails for users with JS disabled.
 
-Five build-time SVG diagrams following the established `diagram-base.ts` pattern:
+**Instead:** Pre-build the zip at build time, serve as a static file.
 
-### DIAG-CC-01: Agentic Loop
+### Anti-Pattern 4: Separate Content Collection for Notebooks
 
-**Concept:** Circular flow showing Claude Code's core execution cycle: User Prompt -> Plan -> Tool Selection -> Tool Execution -> Observe Result -> (loop back or) Respond.
+**What:** Creating a new Astro content collection in `src/content.config.ts` for notebook metadata.
 
-**Layout:** Central loop with 5-6 labeled nodes connected by directional arrows. Emphasis on the iteration cycle with a "loop back" arrow from Observe to Plan.
+**Why bad:** Notebooks are 1:1 with case studies, not independent content. Adding a collection creates unnecessary schema overhead (Zod schema, loader config, type exports) and requires keeping two collections in sync. A simple TypeScript registry array is sufficient for 10 entries.
 
-**Dimensions:** 720 x 400 (landscape, matches default config).
+**Instead:** Use a plain `NOTEBOOK_REGISTRY` array in `src/lib/eda/notebooks/registry.ts`.
 
-### DIAG-CC-02: Hook Lifecycle
+### Anti-Pattern 5: Overloading CaseStudyDataset Component
 
-**Concept:** Timeline/sequence showing when hooks fire: PreToolUse -> (tool executes) -> PostToolUse, and the separate Notification hook. Shows the hook config format and how hooks can block, modify, or log tool calls.
+**What:** Adding notebook download buttons directly into the existing `CaseStudyDataset.astro` component.
 
-**Layout:** Vertical timeline with hook firing points marked as nodes. Left column: event flow. Right column: hook action (allow/block/modify).
+**Why bad:** `CaseStudyDataset` already has a clear responsibility: dataset preview + CSV download + NIST source link. Adding notebook downloads would violate single-responsibility and make the component harder to maintain. The component is already 320 lines long.
 
-**Dimensions:** 720 x 500.
+**Instead:** Create a separate `NotebookDownload.astro` component placed after `CaseStudyDataset` in the case study page template.
 
-### DIAG-CC-03: Permission Model
+## File Structure Summary
 
-**Concept:** Layered permission hierarchy: Default Deny -> User Settings -> Project Settings (.claude/settings.json) -> Session Overrides -> Per-Tool Decisions. Shows how permissions cascade and which level wins.
+```
+NEW files:
+  src/lib/eda/notebooks/
+    types.ts                  - NotebookV4 interface, Cell types
+    builder.ts                - buildNotebook(slug) -> NotebookV4
+    templates.ts              - Per-case-study cell definitions (10 template functions)
+    zip.ts                    - buildZipBuffer() using JSZip
+    registry.ts               - NOTEBOOK_REGISTRY array (10 entries)
+  src/pages/eda/notebooks/
+    index.astro               - Landing page at /eda/notebooks/
+    [slug].zip.ts             - Build-time zip endpoint (10 files generated)
+    [slug].ipynb.ts           - Build-time ipynb endpoint (10 files generated)
+  src/components/eda/
+    NotebookDownload.astro    - Download button for case study pages
 
-**Layout:** Stacked horizontal layers from top (most general) to bottom (most specific), with arrow showing override direction.
+MODIFIED files:
+  src/lib/eda/routes.ts       - Add notebooks route + 2 URL helpers
+  src/pages/eda/index.astro   - Add Notebooks to SECTIONS + NAV_ITEMS arrays
+  src/pages/eda/case-studies/[...slug].astro  - Import + render NotebookDownload
 
-**Dimensions:** 720 x 420.
+UNCHANGED files:
+  src/data/eda/datasets.ts          - Read-only reference for DATASET_SOURCES
+  handbook/datasets/*.DAT           - Read-only reference for .DAT file contents
+  astro.config.mjs                  - Sitemap auto-picks up /eda/ pages
+  .github/workflows/deploy.yml     - JSZip is pure JS, no CI changes
+  src/content.config.ts             - No new content collections needed
+  src/layouts/EDALayout.astro       - Reused as-is by notebooks landing page
+  src/components/eda/EdaBreadcrumb.astro  - Reused as-is
+  src/components/BreadcrumbJsonLd.astro   - Reused as-is
+```
 
-### DIAG-CC-04: MCP Architecture
+## Integration Points with Existing Architecture
 
-**Concept:** Client-server protocol: Claude Code (client) -> JSON-RPC -> MCP Server (providing tools/resources/prompts). Show multiple servers providing different capabilities.
-
-**Layout:** Hub-and-spoke: Claude Code in center-left, 3-4 MCP servers on right, with labeled JSON-RPC connections showing tool/resource namespaces.
-
-**Dimensions:** 720 x 400.
-
-### DIAG-CC-05: Agent Teams
-
-**Concept:** Multi-agent orchestration: Orchestrator agent spawning specialized sub-agents (researcher, coder, reviewer) with message passing. Shows the `/gsd` or custom slash command patterns.
-
-**Layout:** Tree/hierarchy: orchestrator at top, sub-agents below with labeled communication arrows showing task delegation and result aggregation.
-
-**Dimensions:** 720 x 450.
-
-## Interactive React Component Specifications
-
-### PermissionFlowExplorer (React Flow + dagre)
-
-**Concept:** Interactive graph where users click through a permission decision flow. Start at "Tool Request" node, branch through "Is tool allowed?", "Is path in scope?", "Auto-approve or prompt?", ending at "Execute" or "Deny" terminal nodes.
-
-**Implementation:** Follow `DeploymentTopology.tsx` pattern exactly:
-- Static node/edge data defined in component
-- Dagre layout computed once (not in useMemo since data is static)
-- Custom node type with colored borders per decision type
-- `client:visible` loading in MDX
-- CSS custom properties for theme compatibility
-- 350-450px height container
-
-**Node types:** Start (blue), Decision (amber), Action (green/red), Terminal (gray).
-
-### HookEventVisualizer (React Flow + dagre)
-
-**Concept:** Interactive timeline showing a sequence of tool calls with hook interceptions. Users can see how PreToolUse and PostToolUse hooks fire for different tool types (Bash, Read, Write). Each hook node shows the event payload.
-
-**Implementation:** Same React Flow + dagre pattern. Vertical flow (rankdir: TB). Tool call nodes with hook interception points branching off to show hook execution. Clicking a node highlights the relevant event payload.
-
-**Node types:** Tool Call (blue), Hook Fire (amber), Hook Result (green = allow, red = block).
-
-## Chapter Organization (Suggested)
-
-| Order | Slug | Title | Key Diagrams/Interactive |
-|-------|------|-------|-------------------------|
-| 0 | `introduction` | What Is Claude Code | None (text-focused) |
-| 1 | `agentic-loop` | The Agentic Loop | DIAG-CC-01 (AgenticLoopDiagram) |
-| 2 | `tools` | Tool Use & Permissions | DIAG-CC-03 (PermissionModelDiagram), PermissionFlowExplorer |
-| 3 | `hooks` | The Hook System | DIAG-CC-02 (HookLifecycleDiagram), HookEventVisualizer |
-| 4 | `mcp-servers` | MCP Servers | DIAG-CC-04 (McpArchitectureDiagram) |
-| 5 | `claude-md` | CLAUDE.md & Memory | CodeBlock examples |
-| 6 | `agent-teams` | Multi-Agent Orchestration | DIAG-CC-05 (AgentTeamsDiagram) |
-| 7 | `workflows` | Custom Slash Commands | CodeBlock examples |
-| 8 | `git-integration` | Git & GitHub Integration | CodeBlock examples |
-| 9 | `configuration` | Settings & Configuration | CodeBlock examples |
-| 10 | `advanced-patterns` | Advanced Patterns | CodeBlock examples |
-| 11 | `conclusion` | Reference & Resources | None (links, summary) |
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Nested Dynamic Guide Routes
-
-**What people do:** Create `src/pages/guides/[guide]/[slug].astro` to handle all guides with a single dynamic route.
-
-**Why it's wrong:** Astro content collections are defined per-collection in `content.config.ts`. A nested dynamic route would need to resolve which collection to query based on the `[guide]` param, which creates runtime collection switching that does not work well with Astro's typed `getCollection()` API. The existing codebase already uses per-guide page directories.
-
-**Do this instead:** Create a parallel `src/pages/guides/claude-code/[slug].astro` that queries its own collection. This is 40 lines of largely duplicated code, but it is explicit, type-safe, and consistent with the established pattern.
-
-### Anti-Pattern 2: Extending guideMetaSchema for Claude-Code-Specific Fields
-
-**What people do:** Add Claude-Code-specific fields to the shared schema (e.g., `claudeVersion`, `mcpSupport`).
-
-**Why it's wrong:** The shared schema must remain generic. Guide-specific metadata belongs in the guide.json `requirements` record or in the landing page itself.
-
-**Do this instead:** Use the `requirements` record for version info (`{ "claude-code": "1.0+" }`). Put narrative-specific content in the landing page Astro component.
-
-### Anti-Pattern 3: Using CodeFromRepo Without a Source Repository
-
-**What people do:** Pass an empty or placeholder URL to `CodeFromRepo` for inline examples.
-
-**Why it's wrong:** The component renders a "View source" link that would lead nowhere or to an irrelevant page. The component's entire purpose is source attribution.
-
-**Do this instead:** Create `CodeBlock.astro` for inline examples. It reuses the same styling but omits the source link.
-
-### Anti-Pattern 4: Putting Interactive Components in Every Chapter
-
-**What people do:** Add React Flow components to most/all chapters for visual flair.
-
-**Why it's wrong:** Each `client:visible` React component adds to the overall JS bundle. React Flow + dagre together contribute non-trivial weight. The FastAPI guide uses exactly ONE interactive component (DeploymentTopology) across 14 chapters.
-
-**Do this instead:** Limit interactive React components to 2-3 chapters where interactivity genuinely adds value (permission flow exploration, hook event sequences). Use build-time SVG diagrams for everything else.
-
-## Dependency-Aware Build Order
-
-The build order is structured so each phase produces artifacts the next phase consumes. No phase references components or data that has not been created yet.
-
-### Phase 1: Schema & Infrastructure (No Content Dependencies)
-
-1. **Modify `src/lib/guides/routes.ts`** -- Remove hardcoded `GUIDE_ROUTES.landing`. Make `guideLandingUrl()` the single source of truth.
-2. **Modify `src/layouts/GuideLayout.astro`** -- Add optional `companionLink` prop. Default behavior (no prop) renders nothing.
-3. **Modify `src/components/guide/GuideJsonLd.astro`** -- Add `parentTitle` and `parentUrl` props with FastAPI defaults.
-4. **Update `src/pages/guides/fastapi-production/[slug].astro`** -- Pass `companionLink` prop to `GuideLayout`.
-
-**Test gate:** Existing FastAPI guide renders identically. No visual regression.
-
-### Phase 2: Content Collections & Data
-
-5. **Create `src/data/guides/claude-code/guide.json`** -- Guide metadata with chapter list.
-6. **Create `src/data/guides/claude-code/pages/` directory** -- Start with one stub MDX (`introduction.mdx`) for pipeline validation.
-7. **Modify `src/content.config.ts`** -- Add `claudeCodeGuidePages` and `claudeCodeGuides` collections.
-
-**Test gate:** `astro build` succeeds. Collection type-checks pass. Schema validation passes.
-
-### Phase 3: Page Routes & OG Images
-
-8. **Create `src/pages/guides/claude-code/index.astro`** -- Landing page (chapter card grid).
-9. **Create `src/pages/guides/claude-code/[slug].astro`** -- Chapter rendering page.
-10. **Create `src/pages/open-graph/guides/claude-code.png.ts`** -- Landing OG image.
-11. **Create `src/pages/open-graph/guides/claude-code/[slug].png.ts`** -- Chapter OG images.
-12. **Modify `src/pages/guides/index.astro`** -- Add Claude Code guide card to hub.
-
-**Test gate:** Navigate to `/guides/claude-code/`. Landing page renders with chapter grid. Stub chapter renders in GuideLayout. OG images generate. Hub page shows both guides.
-
-### Phase 4: CodeBlock Component
-
-13. **Create `src/components/guide/CodeBlock.astro`** -- Inline code block component.
-
-**Test gate:** Add a CodeBlock to the stub introduction chapter. Syntax highlighting works. No "View source" link renders.
-
-### Phase 5: SVG Diagram Generators
-
-14. **Create `src/lib/guides/svg-diagrams/agentic-loop.ts`** (DIAG-CC-01)
-15. **Create `src/lib/guides/svg-diagrams/hook-lifecycle.ts`** (DIAG-CC-02)
-16. **Create `src/lib/guides/svg-diagrams/permission-model.ts`** (DIAG-CC-03)
-17. **Create `src/lib/guides/svg-diagrams/mcp-architecture.ts`** (DIAG-CC-04)
-18. **Create `src/lib/guides/svg-diagrams/agent-teams.ts`** (DIAG-CC-05)
-19. **Modify `src/lib/guides/svg-diagrams/index.ts`** -- Add barrel exports.
-20. **Create 5 Astro wrapper components** (AgenticLoopDiagram.astro, etc.)
-
-**Test gate:** Each diagram renders in a test page. Dark/light theme toggle shows correct palette. SVG is accessible (aria-label).
-
-### Phase 6: Interactive React Components
-
-21. **Create `src/components/guide/PermissionFlowExplorer.tsx`**
-22. **Create `src/components/guide/HookEventVisualizer.tsx`**
-23. **Create supporting CSS if needed** (follow `deployment-topology.css` pattern)
-
-**Test gate:** Components render with `client:visible`. Pan/zoom works. Theme-compatible. No hydration errors.
-
-### Phase 7: MDX Content Chapters
-
-24-35. **Write each of the 10-12 MDX chapter files** with proper frontmatter, component imports, diagrams, CodeBlock examples, and prose.
-
-**Test gate:** All chapters render. Navigation (sidebar, breadcrumbs, prev/next) works correctly. No 404s.
-
-### Phase 8: FAQ & Polish
-
-36. **Optionally create FAQ page** (`src/pages/guides/claude-code/faq.astro`)
-37. **Write companion blog post** (if desired, following FastAPI pattern)
-38. **Final review:** Check all OG images, JSON-LD structured data, breadcrumbs, cross-guide navigation.
+| Existing System | Integration Point | Change Type |
+|----------------|-------------------|-------------|
+| `EDALayout.astro` | Used by notebooks/index.astro | No change to layout |
+| `EdaBreadcrumb.astro` | Used by notebooks/index.astro | No change to component |
+| `BreadcrumbJsonLd.astro` | Used by notebooks/index.astro | No change to component |
+| `EDAJsonLd.astro` | Used by notebooks/index.astro, may need `pageType` variant | Minor: add `'notebook'` to `pageType` union |
+| `src/lib/eda/routes.ts` | Add `notebooks` route + 2 helpers | 3 additive lines |
+| `DATASET_SOURCES` in datasets.ts | Read `.name` field for .DAT filenames | Read-only reference |
+| `handbook/datasets/*.DAT` | Read at build time by zip.ts | Read-only reference |
+| `src/pages/eda/index.astro` | Add notebooks to SECTIONS + NAV_ITEMS | 2 array entries |
+| `src/pages/eda/case-studies/[...slug].astro` | Import + render NotebookDownload | 2-line change |
+| Sitemap integration | Auto-picks up /eda/notebooks/ | No config change |
+| GitHub Actions CI | JSZip is pure JS | No CI change |
+| OG images | May add notebooks OG image endpoint | Optional future enhancement |
+
+## Suggested Build Order
+
+The build order respects dependencies -- each phase only uses components from prior phases:
+
+### Phase 1: Types + Registry (no dependencies)
+- `src/lib/eda/notebooks/types.ts` -- nbformat v4.5 TypeScript interfaces
+- `src/lib/eda/notebooks/registry.ts` -- NOTEBOOK_REGISTRY array with all 10 entries
+- **Test gate:** TypeScript compiles. Registry entries match DATASET_SOURCES .DAT filenames.
+
+### Phase 2: Notebook Builder (depends on Phase 1)
+- `src/lib/eda/notebooks/builder.ts` -- buildNotebook() function
+- `src/lib/eda/notebooks/templates.ts` -- Start with 1-2 templates (normal-random-numbers, ceramic-strength) for validation
+- **Test gate:** `buildNotebook('normal-random-numbers')` returns valid nbformat v4.5 JSON. JSON validates against nbformat schema.
+
+### Phase 3: Zip Assembler (depends on Phase 1 + 2)
+- `npm install jszip` (add to dependencies)
+- `src/lib/eda/notebooks/zip.ts` -- buildZipBuffer() function
+- **Test gate:** Generated zip can be opened. Contains .ipynb, .DAT, README.txt in a named subfolder.
+
+### Phase 4: API Route Endpoints (depends on Phase 1 + 2 + 3)
+- `src/pages/eda/notebooks/[slug].zip.ts`
+- `src/pages/eda/notebooks/[slug].ipynb.ts`
+- **Test gate:** `astro build` succeeds. `dist/eda/notebooks/normal-random-numbers.zip` exists and is a valid zip. `dist/eda/notebooks/normal-random-numbers.ipynb` exists and is valid JSON.
+
+### Phase 5: Routes Update (no dependencies on Phases 1-4)
+- Modify `src/lib/eda/routes.ts` -- add `notebooks` route + URL helpers
+- **Test gate:** TypeScript compiles. `notebookZipUrl('foo')` returns `/eda/notebooks/foo.zip`.
+
+### Phase 6: NotebookDownload Component (depends on Phase 1 + 5)
+- `src/components/eda/NotebookDownload.astro`
+- **Test gate:** Component renders download buttons with correct URLs.
+
+### Phase 7: Landing Page (depends on Phase 1 + 5)
+- `src/pages/eda/notebooks/index.astro`
+- **Test gate:** `/eda/notebooks/` renders card grid with all 10 notebooks. Breadcrumbs correct. JSON-LD validates.
+
+### Phase 8: Case Study Integration (depends on Phase 6)
+- Modify `src/pages/eda/case-studies/[...slug].astro` -- add NotebookDownload import + render
+- **Test gate:** Each case study page shows notebook download section below the dataset panel.
+
+### Phase 9: EDA Index Update (depends on Phase 7)
+- Modify `src/pages/eda/index.astro` -- add Notebooks to SECTIONS + NAV_ITEMS
+- **Test gate:** `/eda/` shows Notebooks section with link to `/eda/notebooks/`.
+
+### Phase 10: Remaining Templates (depends on Phase 2)
+- Complete all 10 template functions in `templates.ts`
+- **Test gate:** All 10 notebooks generate. All 10 zips contain correct .DAT files.
+
+## .DAT File Format Handling
+
+Each NIST .DAT file has a different format. The notebook templates must use the correct `pandas` loading method:
+
+| Case Study | .DAT File | Format | pandas Method |
+|-----------|-----------|--------|---------------|
+| Normal Random Numbers | RANDN.DAT | Fixed-width, 10 values/line | `pd.read_fwf()` with widths |
+| Uniform Random Numbers | RANDU.DAT | Fixed-width, 10 values/line | `pd.read_fwf()` with widths |
+| Random Walk | RANDWALK.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Cryothermometry | SOULEN.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Beam Deflections | LEW.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Filter Transmittance | MAVRO.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Heat Flow Meter | ZARR13.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Fatigue Life | BIRNSAUN.DAT | Fixed-width, single column | `pd.read_fwf()` |
+| Ceramic Strength | JAHANMI2.DAT | Fixed-width, multi-column (15 vars) | `pd.read_fwf()` with column names |
+| Standard Resistor | DZIUBA1.DAT | Fixed-width, single column | `pd.read_fwf()` |
+
+This mapping is stored in the `datLoadMethod` field of each `NotebookEntry` in the registry.
+
+## Scalability Considerations
+
+| Concern | At 10 notebooks | At 50 notebooks | At 200 notebooks |
+|---------|-----------------|-----------------|-------------------|
+| Build time | Negligible (<2s added) | ~5-10s | Consider parallel generation or caching |
+| Repo size | No impact (generated at build) | No impact | No impact |
+| Deploy size | ~1MB total (10 zips) | ~5MB total | May need CDN for large datasets |
+| Template maintenance | 10 template functions | Extract shared cell patterns | Auto-generate from structured analysis metadata |
 
 ## Sources
 
-- Direct codebase analysis of existing guide architecture (content.config.ts, schema.ts, GuideLayout.astro, CodeFromRepo.astro, diagram-base.ts, DeploymentTopology.tsx, guide.json, OG image routes, PlotFigure.astro)
-- Existing ARCHITECTURE.md research for FastAPI Production Guide (2026-03-08)
-- Astro 5 content collections documentation (file/glob loaders, Zod schema validation)
-- React Flow (@xyflow/react) integration pattern from DeploymentTopology.tsx
-
----
-*Architecture research for: Claude Code Guide integration into existing Astro 5 portfolio guide architecture*
-*Researched: 2026-03-10*
+- [nbformat v4.5 JSON Schema](https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.5.schema.json) -- Official notebook format schema (HIGH confidence)
+- [The Notebook file format -- nbformat 5.10 documentation](https://nbformat.readthedocs.io/en/latest/format_description.html) -- Notebook format specification (HIGH confidence)
+- [Astro Endpoints documentation](https://docs.astro.build/en/guides/endpoints/) -- Static file endpoint patterns with getStaticPaths (HIGH confidence)
+- [JSZip npm package](https://www.npmjs.com/package/jszip) -- In-memory zip creation, pure JS (HIGH confidence)
+- [ADM-ZIP](https://github.com/cthackers/adm-zip) -- Alternative considered, heavier API surface (HIGH confidence)
+- Existing codebase patterns verified by direct code inspection (HIGH confidence):
+  - `src/pages/open-graph/eda/[...slug].png.ts` -- Binary asset endpoint pattern
+  - `src/pages/open-graph/eda/case-studies.png.ts` -- Static OG image endpoint
+  - `src/components/eda/CaseStudyDataset.astro` -- Dataset panel with CSV download
+  - `src/data/eda/datasets.ts` -- DATASET_SOURCES with .DAT file mappings
+  - `src/lib/eda/routes.ts` -- EDA_ROUTES constant pattern
+  - `src/pages/eda/case-studies/index.astro` -- Landing page card grid pattern
+  - `src/pages/eda/index.astro` -- SECTIONS/NAV_ITEMS pattern
+  - `astro.config.mjs` -- Static output mode, sitemap /eda/ handling
+  - `.github/workflows/deploy.yml` -- withastro/action@v3 CI pipeline
