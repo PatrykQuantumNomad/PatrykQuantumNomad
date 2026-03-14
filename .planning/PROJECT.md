@@ -260,7 +260,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(None — next milestone to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.17 EDA Jupyter Notebooks
+
+**Goal:** Provide downloadable Jupyter Notebooks for all 10 EDA case studies with full NIST analysis pipelines, bundled datasets, and site integration.
+
+**Target features:**
+- 10 Jupyter Notebooks (one per case study) with complete analysis: data loading, 4-plot, hypothesis tests, model fitting, interpretation
+- Scientific Python stack (NumPy, SciPy, pandas, matplotlib, seaborn)
+- Each notebook zipped with its NIST .DAT dataset file
+- Download buttons on each case study page
+- Notebooks landing page at /eda/notebooks/
+- Companion blog post
 
 ### Out of Scope
 
@@ -290,6 +300,7 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 ## Context
 
 Shipped v1.16 Claude Code Guide on top of 15 previous milestones (v1.0 through v1.15). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (11 chapters with 5 SVG diagrams and 2 interactive React Flow visualizers).
+Current milestone (v1.17) adds downloadable Jupyter Notebooks for all 10 EDA case studies.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 requirements delivered (806 total). ~1090+ pages total. Lighthouse 90+ on mobile.
@@ -441,4 +452,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-11 after v1.16 milestone*
+*Last updated: 2026-03-14 after v1.17 milestone start*

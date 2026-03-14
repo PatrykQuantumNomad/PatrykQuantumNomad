@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.16
-milestone_name: Claude Code Guide
-status: milestone_complete
-stopped_at: v1.16 milestone archived
-last_updated: "2026-03-11T01:30:00Z"
-last_activity: 2026-03-11 — v1.16 milestone complete
+milestone: v1.17
+milestone_name: EDA Jupyter Notebooks
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-14T00:00:00Z"
+last_activity: 2026-03-14 — Milestone v1.17 started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-11)
+See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.17 EDA Jupyter Notebooks
 
 ## Current Position
 
-Phase: Milestone complete
-Plan: Not started
-Status: Ready to plan next milestone
-Last activity: 2026-03-11 — v1.16 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-14 — Milestone v1.17 started
 
-Progress: [██████████] 100% (v1.16 shipped)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -86,7 +86,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-11
-Stopped at: v1.16 milestone archived
+Last session: 2026-03-14
+Stopped at: Defining requirements for v1.17
 Resume file: None
-Next: /gsd:new-milestone (start next milestone)
+Next: Define requirements → create roadmap
