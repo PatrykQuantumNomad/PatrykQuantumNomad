@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Completed 96-02-PLAN.md
+milestone: v1.17
+milestone_name: EDA Jupyter Notebooks
+status: phase_complete
+stopped_at: Phase 96 verified
 last_updated: "2026-03-14T20:17:55Z"
 last_activity: 2026-03-14 — Completed 96-02-PLAN.md (registry + requirements + theme)
 progress:
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.17 EDA Jupyter Notebooks — Phase 96 (Notebook Foundation)
+**Current focus:** v1.17 EDA Jupyter Notebooks — Phase 97 (Standard Case Study Notebooks)
 
 ## Current Position
 
-Phase: 96 of 101 (Notebook Foundation) — first of 6 phases in v1.17
-Plan: 02 of 2 complete (phase done)
-Status: Phase 96 complete
-Last activity: 2026-03-14 — Completed 96-02-PLAN.md (registry + requirements + theme)
+Phase: 96 complete, 97 next
+Plan: —
+Status: Phase 96 verified, ready to plan Phase 97
+Last activity: 2026-03-14 — Phase 96 verified (11/11 must-haves, 60/60 tests)
 
-Progress: [██████████] 100%
+Progress: [█░░░░░░░░░] 17% (1/6 phases)
 
 ## Performance Metrics
 
@@ -86,7 +86,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-14T20:17:55Z
-Stopped at: Completed 96-02-PLAN.md (Phase 96 complete)
+Last session: 2026-03-14
+Stopped at: Phase 96 verified
 Resume file: None
 Next: `/gsd:plan-phase 97`
