@@ -66,7 +66,7 @@ export function buildFourPlot(
     'ax = axes[1, 0]',
     "ax.hist(y, bins='auto', color=QUANTUM_COLORS['accent'],",
     "        edgecolor=QUANTUM_COLORS['border'], alpha=0.8)",
-    "ax.set_xlabel(f'{varName}')" === '' ? '' : `ax.set_xlabel('${varName}')`,
+    `ax.set_xlabel('${varName}')`,
     "ax.set_ylabel('Frequency')",
     "ax.set_title('Histogram')",
     '',
