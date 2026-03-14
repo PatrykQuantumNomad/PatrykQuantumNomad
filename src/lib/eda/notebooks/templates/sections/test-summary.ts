@@ -8,9 +8,7 @@
 import type { Cell } from '../../types';
 import type { CaseStudyConfig } from '../../registry/types';
 import { codeCell, markdownCell } from '../../cells';
-
-/** Slugs where distribution/outlier tests were skipped */
-const SKIP_DISTRIBUTION_SLUGS = ['filter-transmittance', 'standard-resistor'];
+import { SKIP_DISTRIBUTION_SLUGS } from './hypothesis-tests';
 
 /**
  * Build test summary section cells.

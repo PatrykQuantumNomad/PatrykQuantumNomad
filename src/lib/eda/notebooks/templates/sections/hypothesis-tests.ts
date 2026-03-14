@@ -20,7 +20,45 @@ import type { CaseStudyConfig } from '../../registry/types';
 import { codeCell, markdownCell } from '../../cells';
 
 /** Slugs with severe autocorrelation that skip distribution/outlier tests */
-const SKIP_DISTRIBUTION_SLUGS = ['filter-transmittance', 'standard-resistor'];
+export const SKIP_DISTRIBUTION_SLUGS = ['filter-transmittance', 'standard-resistor'];
+
+/** Python code lines for Grubbs' test (reused for standard and fatigue-life paths) */
+function grubbsTestCode(varName: string): string[] {
+  return [
+    "# Grubbs' test for outliers (manual implementation)",
+    'def grubbs_test(data, alpha=0.05):',
+    '    """',
+    "    Grubbs' test for a single outlier.',",
+    '    Returns (G_statistic, critical_value, is_outlier, suspect_value).',
+    '    """',
+    '    n = len(data)',
+    '    mean = np.mean(data)',
+    '    std = np.std(data, ddof=1)',
+    '    abs_devs = np.abs(data - mean)',
+    '    max_idx = np.argmax(abs_devs)',
+    '    G = abs_devs[max_idx] / std',
+    '',
+    '    # Critical value from t-distribution',
+    '    from scipy.stats import t as t_dist',
+    '    t_crit = t_dist.ppf(1 - alpha / (2 * n), n - 2)',
+    '    G_crit = ((n - 1) / np.sqrt(n)) * np.sqrt(t_crit**2 / (n - 2 + t_crit**2))',
+    '',
+    '    return G, G_crit, G > G_crit, data[max_idx]',
+    '',
+    `y = df['${varName}'].values`,
+    'G, G_crit, is_outlier, suspect = grubbs_test(y)',
+    '',
+    "print(\"Grubbs' Test for Outliers\")",
+    "print('=' * 40)",
+    "print(f'G statistic:    {G:.4f}')",
+    "print(f'Critical value: {G_crit:.4f}')",
+    "print(f'Suspect value:  {suspect:.4f}')",
+    "if is_outlier:",
+    "    print(f'Result: {suspect:.4f} IS an outlier (G={G:.4f} > {G_crit:.4f})')",
+    "else:",
+    "    print(f'Result: No outlier detected (G={G:.4f} <= {G_crit:.4f})')",
+  ];
+}
 
 /**
  * Build hypothesis tests section cells.
@@ -288,40 +326,7 @@ export function buildHypothesisTests(
       "Grubbs' test identifies single outliers in a univariate dataset.",
     ]));
 
-    cells.push(codeCell(slug, idx++, [
-      "# Grubbs' test for outliers (manual implementation)",
-      'def grubbs_test(data, alpha=0.05):',
-      '    """',
-      "    Grubbs' test for a single outlier.',",
-      '    Returns (G_statistic, critical_value, is_outlier, suspect_value).',
-      '    """',
-      '    n = len(data)',
-      '    mean = np.mean(data)',
-      '    std = np.std(data, ddof=1)',
-      '    abs_devs = np.abs(data - mean)',
-      '    max_idx = np.argmax(abs_devs)',
-      '    G = abs_devs[max_idx] / std',
-      '',
-      '    # Critical value from t-distribution',
-      '    from scipy.stats import t as t_dist',
-      '    t_crit = t_dist.ppf(1 - alpha / (2 * n), n - 2)',
-      '    G_crit = ((n - 1) / np.sqrt(n)) * np.sqrt(t_crit**2 / (n - 2 + t_crit**2))',
-      '',
-      '    return G, G_crit, G > G_crit, data[max_idx]',
-      '',
-      `y = df['${varName}'].values`,
-      'G, G_crit, is_outlier, suspect = grubbs_test(y)',
-      '',
-      "print(\"Grubbs' Test for Outliers\")",
-      "print('=' * 40)",
-      "print(f'G statistic:    {G:.4f}')",
-      "print(f'Critical value: {G_crit:.4f}')",
-      "print(f'Suspect value:  {suspect:.4f}')",
-      "if is_outlier:",
-      "    print(f'Result: {suspect:.4f} IS an outlier (G={G:.4f} > {G_crit:.4f})')",
-      "else:",
-      "    print(f'Result: No outlier detected (G={G:.4f} <= {G_crit:.4f})')",
-    ]));
+    cells.push(codeCell(slug, idx++, grubbsTestCode(varName)));
   } else {
     // Standard: Anderson-Darling + Grubbs
     cells.push(markdownCell(slug, idx++, [
@@ -360,40 +365,7 @@ export function buildHypothesisTests(
       "Grubbs' test identifies single outliers in a univariate dataset.",
     ]));
 
-    cells.push(codeCell(slug, idx++, [
-      "# Grubbs' test for outliers (manual implementation)",
-      'def grubbs_test(data, alpha=0.05):',
-      '    """',
-      "    Grubbs' test for a single outlier.',",
-      '    Returns (G_statistic, critical_value, is_outlier, suspect_value).',
-      '    """',
-      '    n = len(data)',
-      '    mean = np.mean(data)',
-      '    std = np.std(data, ddof=1)',
-      '    abs_devs = np.abs(data - mean)',
-      '    max_idx = np.argmax(abs_devs)',
-      '    G = abs_devs[max_idx] / std',
-      '',
-      '    # Critical value from t-distribution',
-      '    from scipy.stats import t as t_dist',
-      '    t_crit = t_dist.ppf(1 - alpha / (2 * n), n - 2)',
-      '    G_crit = ((n - 1) / np.sqrt(n)) * np.sqrt(t_crit**2 / (n - 2 + t_crit**2))',
-      '',
-      '    return G, G_crit, G > G_crit, data[max_idx]',
-      '',
-      `y = df['${varName}'].values`,
-      'G, G_crit, is_outlier, suspect = grubbs_test(y)',
-      '',
-      "print(\"Grubbs' Test for Outliers\")",
-      "print('=' * 40)",
-      "print(f'G statistic:    {G:.4f}')",
-      "print(f'Critical value: {G_crit:.4f}')",
-      "print(f'Suspect value:  {suspect:.4f}')",
-      "if is_outlier:",
-      "    print(f'Result: {suspect:.4f} IS an outlier (G={G:.4f} > {G_crit:.4f})')",
-      "else:",
-      "    print(f'Result: No outlier detected (G={G:.4f} <= {G_crit:.4f})')",
-    ]));
+    cells.push(codeCell(slug, idx++, grubbsTestCode(varName)));
   }
 
   return { cells, nextIndex: idx };
