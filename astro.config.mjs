@@ -9,6 +9,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkReadingTime } from './remark-reading-time.mjs';
 import indexNow from './src/integrations/indexnow';
+import notebookPackager from './src/integrations/notebook-packager';
 
 import react from '@astrojs/react';
 
@@ -109,7 +110,7 @@ export default defineConfig({
 
       return item;
     },
-  }), indexNow(), react()],
+  }), indexNow(), notebookPackager(), react()],
   markdown: {
     remarkPlugins: [remarkReadingTime, remarkMath],
     rehypePlugins: [rehypeKatex],
