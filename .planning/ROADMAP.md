@@ -31,20 +31,23 @@
   4. A shared requirements.txt template specifies numpy, scipy, pandas, matplotlib, seaborn with floor version pins
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 96-01-PLAN.md — nbformat v4.5 types, cell factories, and notebook assembler with tests
-- [ ] 96-02-PLAN.md — Case study registry (10 configs), requirements.txt template, and dark theme module with tests
+- [x] 96-01-PLAN.md — nbformat v4.5 types, cell factories, and notebook assembler with tests
+- [x] 96-02-PLAN.md — Case study registry (10 configs), requirements.txt template, and dark theme module with tests
 
 ### Phase 97: Standard Case Study Notebooks
 **Goal**: Deliver 7 standard-template notebooks that validate the full generation pipeline
 **Depends on**: Phase 96
 **Requirements**: NBSTD-01, NBSTD-02, NBSTD-03, NBSTD-04, NBSTD-05, NBSTD-06, NBSTD-07
 **Success Criteria** (what must be TRUE):
-  1. `buildNotebook(slug)` produces valid nbformat v4.5 JSON for each of the 7 standard case studies
+  1. `buildStandardNotebook(slug)` produces valid nbformat v4.5 JSON for each of the 7 standard case studies
   2. Each notebook contains interleaved markdown narrative and code cells: title, requirements check, imports, data loading with per-dataset parsing parameters, summary statistics, 4-plot, individual plots, hypothesis tests, test summary table, interpretation, and conclusions
   3. Each notebook opens without errors in JupyterLab, VS Code, and Google Colab
   4. Data loading cells include row-count assertions matching NIST dataset sizes
   5. All 7 notebooks use a single parameterized standard template with case-study-specific configuration (dataset name, skiprows, column names, expected statistics)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 97-01-PLAN.md — Template skeleton with setup, data loading, and visualization sections (TDD)
+- [ ] 97-02-PLAN.md — Hypothesis tests, test summary, interpretation, and conclusions (TDD)
 
 ### Phase 98: Packaging Pipeline
 **Goal**: Notebooks are packaged as downloadable ZIP files and served from the built site
@@ -98,7 +101,7 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
-| 97. Standard Case Study Notebooks | 0/TBD | Not started | - |
+| 97. Standard Case Study Notebooks | 0/2 | Planned | - |
 | 98. Packaging Pipeline | 0/TBD | Not started | - |
 | 99. Download UI and Colab Integration | 0/TBD | Not started | - |
 | 100. Advanced Case Study Notebooks | 0/TBD | Not started | - |
