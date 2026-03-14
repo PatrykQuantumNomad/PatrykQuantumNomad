@@ -211,3 +211,187 @@ describe('visualization sections', () => {
     expect(codeCellsAfter.length).toBeGreaterThanOrEqual(4);
   });
 });
+
+// ============================================================
+// Plan 02: Hypothesis tests, test summary, interpretation, conclusions
+// ============================================================
+
+describe('hypothesis tests', () => {
+  // Location test: every notebook uses scipy linregress
+  it.each(SLUGS)('%s contains linregress in a code cell (location test)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(getCodeSources(nb)).toContain('linregress');
+  });
+
+  // Variation test: every notebook uses bartlett or levene
+  it.each(SLUGS)('%s contains bartlett or levene in a code cell (variation test)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    const code = getCodeSources(nb);
+    expect(code).toMatch(/bartlett|levene/i);
+  });
+
+  // Randomness test: manual runs test (no statsmodels)
+  it.each(SLUGS)('%s contains def runs_test(data): in a code cell (manual runs test)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(getCodeSources(nb)).toContain('def runs_test(');
+  });
+
+  // No statsmodels in any notebook
+  it.each(SLUGS)('%s does NOT contain statsmodels in any cell', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(getAllSource(nb)).not.toContain('statsmodels');
+  });
+
+  // Autocorrelation critical value: 2/sqrt(N)
+  it.each(SLUGS)('%s contains 2 / np.sqrt or 2/np.sqrt (autocorrelation critical value)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    const code = getCodeSources(nb);
+    expect(code).toMatch(/2\s*\/\s*np\.sqrt/);
+  });
+
+  // Distribution tests: applied for some, skipped for others
+  it('normal-random-numbers contains anderson in code cell', () => {
+    const nb = buildStandardNotebook('normal-random-numbers');
+    expect(getCodeSources(nb)).toContain('anderson');
+  });
+
+  it('normal-random-numbers contains grubbs or Grubbs in code cell', () => {
+    const nb = buildStandardNotebook('normal-random-numbers');
+    expect(getCodeSources(nb)).toMatch(/[Gg]rubbs/);
+  });
+
+  it('uniform-random-numbers contains anderson in code cell', () => {
+    const nb = buildStandardNotebook('uniform-random-numbers');
+    expect(getCodeSources(nb)).toContain('anderson');
+  });
+
+  it('heat-flow-meter contains anderson in code cell', () => {
+    const nb = buildStandardNotebook('heat-flow-meter');
+    expect(getCodeSources(nb)).toContain('anderson');
+  });
+
+  it('cryothermometry contains anderson in code cell', () => {
+    const nb = buildStandardNotebook('cryothermometry');
+    expect(getCodeSources(nb)).toContain('anderson');
+  });
+
+  // Filter-transmittance: skip distribution/outlier due to severe autocorrelation
+  it('filter-transmittance does NOT contain anderson in code cell (skipped)', () => {
+    const nb = buildStandardNotebook('filter-transmittance');
+    expect(getCodeSources(nb)).not.toContain('anderson');
+  });
+
+  it('filter-transmittance contains autocorrelation and skipped/omitted in cell source', () => {
+    const nb = buildStandardNotebook('filter-transmittance');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/autocorrelation/i);
+    expect(all).toMatch(/skipped|omitted/i);
+  });
+
+  // Standard-resistor: skip distribution/outlier due to severe autocorrelation
+  it('standard-resistor does NOT contain anderson in code cell (skipped)', () => {
+    const nb = buildStandardNotebook('standard-resistor');
+    expect(getCodeSources(nb)).not.toContain('anderson');
+  });
+
+  it('standard-resistor contains autocorrelation and skipped/omitted in cell source', () => {
+    const nb = buildStandardNotebook('standard-resistor');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/autocorrelation/i);
+    expect(all).toMatch(/skipped|omitted/i);
+  });
+
+  // Fatigue-life: Weibull/Gamma distribution comparison
+  it('fatigue-life contains weibull or Weibull in code cell', () => {
+    const nb = buildStandardNotebook('fatigue-life');
+    expect(getCodeSources(nb)).toMatch(/[Ww]eibull/);
+  });
+
+  it('fatigue-life contains gamma or Gamma in code cell', () => {
+    const nb = buildStandardNotebook('fatigue-life');
+    expect(getCodeSources(nb)).toMatch(/[Gg]amma/);
+  });
+});
+
+describe('test summary', () => {
+  it.each(SLUGS)('%s contains a cell with Test Summary', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(getAllSource(nb)).toMatch(/Test Summary/);
+  });
+
+  it.each(SLUGS)('%s contains Location, Variation, and Randomness in a code cell (summary table)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    const code = getCodeSources(nb);
+    expect(code).toContain('Location');
+    expect(code).toContain('Variation');
+    expect(code).toContain('Randomness');
+  });
+});
+
+describe('per-study interpretation (NBSTD-01 through NBSTD-07)', () => {
+  it('NBSTD-01: normal-random-numbers interpretation contains assumptions and satisfied/pass', () => {
+    const nb = buildStandardNotebook('normal-random-numbers');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/assumptions/i);
+    expect(all).toMatch(/satisfied|pass/i);
+  });
+
+  it('NBSTD-02: uniform-random-numbers interpretation contains non-normal or non-normality', () => {
+    const nb = buildStandardNotebook('uniform-random-numbers');
+    expect(getAllSource(nb)).toMatch(/non-normal|non-normality/i);
+  });
+
+  it('NBSTD-03: heat-flow-meter interpretation contains non-random or randomness', () => {
+    const nb = buildStandardNotebook('heat-flow-meter');
+    expect(getAllSource(nb)).toMatch(/non-random|randomness/i);
+  });
+
+  it('NBSTD-04: filter-transmittance interpretation contains autocorrelation and serial', () => {
+    const nb = buildStandardNotebook('filter-transmittance');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/autocorrelation/i);
+    expect(all).toMatch(/serial/i);
+  });
+
+  it('NBSTD-05: cryothermometry interpretation contains discrete and integer', () => {
+    const nb = buildStandardNotebook('cryothermometry');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/discrete/i);
+    expect(all).toMatch(/integer/i);
+  });
+
+  it('NBSTD-06: fatigue-life interpretation contains skewed and Weibull/reliability', () => {
+    const nb = buildStandardNotebook('fatigue-life');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/right-skewed|skewed/i);
+    expect(all).toMatch(/Weibull|reliability/i);
+  });
+
+  it('NBSTD-07: standard-resistor interpretation contains drift and non-stationary/trend', () => {
+    const nb = buildStandardNotebook('standard-resistor');
+    const all = getAllSource(nb);
+    expect(all).toMatch(/drift/i);
+    expect(all).toMatch(/non-stationary|trend/i);
+  });
+});
+
+describe('conclusions', () => {
+  it.each(SLUGS)('%s contains Conclusions or Key Findings in markdown', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(getMarkdownSources(nb)).toMatch(/## Conclusions|## Key Findings/);
+  });
+
+  it.each(SLUGS)('%s contains nistUrl in a markdown cell (reference link)', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    // Build the notebook and get its config's nistUrl via content check
+    const md = getMarkdownSources(nb);
+    expect(md).toMatch(/itl\.nist\.gov/);
+  });
+});
+
+describe('cell count', () => {
+  it.each(SLUGS)('%s has at least 25 cells', (slug) => {
+    const nb = buildStandardNotebook(slug);
+    expect(nb.cells.length).toBeGreaterThanOrEqual(25);
+  });
+});
