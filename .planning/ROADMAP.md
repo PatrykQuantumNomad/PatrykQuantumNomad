@@ -87,9 +87,9 @@ Plans:
   4. All 3 notebooks run end-to-end in a clean Python environment and statistical values match NIST-verified website values from v1.9
 **Plans:** 3/4 plans executed
 Plans:
-- [ ] 100-01-PLAN.md — Beam Deflections notebook with sinusoidal model fitting and residual validation (TDD)
-- [ ] 100-02-PLAN.md — Random Walk notebook with AR(1) model development and residual analysis (TDD)
-- [ ] 100-03-PLAN.md — Ceramic Strength notebook with DOE batch effects, factor analysis, and ANOVA (TDD)
+- [x] 100-01-PLAN.md — Beam Deflections notebook with sinusoidal model fitting and residual validation (TDD)
+- [x] 100-02-PLAN.md — Random Walk notebook with AR(1) model development and residual analysis (TDD)
+- [x] 100-03-PLAN.md — Ceramic Strength notebook with DOE batch effects, factor analysis, and ANOVA (TDD)
 - [ ] 100-04-PLAN.md — Infrastructure wiring: packager, generation script, committed notebooks, and URL helpers for all 10 slugs
 
 ### Phase 101: Site Integration
