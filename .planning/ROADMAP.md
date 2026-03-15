@@ -14,7 +14,7 @@
 - [x] **Phase 96: Notebook Foundation** - TypeScript nbformat v4.5 types, cell factories, case study registry, and requirements.txt template (completed 2026-03-14)
 - [x] **Phase 97: Standard Case Study Notebooks** - 7 standard-template notebooks with parameterized 4-plot analysis, hypothesis tests, and interpretation (completed 2026-03-14)
 - [x] **Phase 98: Packaging Pipeline** - ZIP packaging with archiver, Astro build integration hook, and static file serving (completed 2026-03-14)
-- [ ] **Phase 99: Download UI and Colab Integration** - Download buttons on case study pages, Open in Colab badges, and committed .ipynb files for Colab GitHub URLs
+- [x] **Phase 99: Download UI and Colab Integration** - Download buttons on case study pages, Open in Colab badges, and committed .ipynb files for Colab GitHub URLs (completed 2026-03-15)
 - [ ] **Phase 100: Advanced Case Study Notebooks** - 3 complex notebooks: sinusoidal model fitting, AR(1) development, and DOE multi-factor analysis
 - [ ] **Phase 101: Site Integration** - Notebooks landing page, companion blog post, LLMs.txt update, sitemap inclusion, and OG image
 
@@ -71,10 +71,10 @@ Plans:
   1. Every case study page shows a download button that triggers a file save dialog for the corresponding ZIP file
   2. Every case study page shows an "Open in Colab" badge that opens the notebook in Google Colab via the GitHub URL scheme
   3. All 7 standard .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern (the 3 advanced notebooks are added by Phase 100)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests
-- [ ] 99-02-PLAN.md — NotebookActions component with download button and Colab badge, wired into page template
+- [x] 99-02-PLAN.md — NotebookActions component with download button and Colab badge, wired into page template
 
 ### Phase 100: Advanced Case Study Notebooks
 **Goal**: The 3 complex case studies have specialized notebooks with model development and DOE analysis
@@ -109,6 +109,6 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
 | 97. Standard Case Study Notebooks | 2/2 | Complete   | 2026-03-14 |
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
-| 99. Download UI and Colab Integration | 1/2 | In Progress | - |
+| 99. Download UI and Colab Integration | 2/2 | Complete   | 2026-03-15 |
 | 100. Advanced Case Study Notebooks | 0/TBD | Not started | - |
 | 101. Site Integration | 0/TBD | Not started | - |

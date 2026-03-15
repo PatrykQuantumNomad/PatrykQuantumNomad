@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PACK-01 | Phase 98 | Complete |
 | PACK-02 | Phase 98 | Complete |
 | PACK-03 | Phase 98 | Complete |
-| UI-01 | Phase 99 | Pending |
-| UI-02 | Phase 99 | Pending |
+| UI-01 | Phase 99 | Complete |
+| UI-02 | Phase 99 | Complete |
 | UI-03 | Phase 99 | Complete |
 | SITE-01 | Phase 101 | Pending |
 | SITE-02 | Phase 101 | Pending |
