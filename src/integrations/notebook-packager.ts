@@ -2,7 +2,7 @@
  * Astro integration that generates ZIP downloads for EDA notebooks
  * at build time via the `astro:build:done` hook.
  *
- * For each standard case study slug, creates a ZIP containing:
+ * For each of the 10 case study slugs, creates a ZIP containing:
  *   - {slug}.ipynb — the generated notebook
  *   - {dataFile}.DAT — NIST dataset
  *   - requirements.txt — Python dependencies
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { createZipFile, buildNotebookZipEntries } from '../lib/eda/notebooks/packager';
-import { STANDARD_SLUGS } from '../lib/eda/notebooks/templates/standard';
+import { ALL_CASE_STUDY_SLUGS } from '../lib/eda/notebooks/registry/index';
 
 export default function notebookPackager(): AstroIntegration {
   return {
@@ -28,13 +28,13 @@ export default function notebookPackager(): AstroIntegration {
 
         const start = Date.now();
 
-        for (const slug of STANDARD_SLUGS) {
+        for (const slug of ALL_CASE_STUDY_SLUGS) {
           const entries = buildNotebookZipEntries(slug, process.cwd());
           await createZipFile(join(outDir, `${slug}.zip`), entries);
         }
 
         const elapsed = ((Date.now() - start) / 1000).toFixed(2);
-        logger.info(`Packaged ${STANDARD_SLUGS.length} notebooks in ${elapsed}s`);
+        logger.info(`Packaged ${ALL_CASE_STUDY_SLUGS.length} notebooks in ${elapsed}s`);
       },
     },
   };

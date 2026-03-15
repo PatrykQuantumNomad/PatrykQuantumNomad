@@ -14,8 +14,12 @@ import archiver from 'archiver';
 import { createWriteStream, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { buildStandardNotebook } from './templates/standard';
+import { buildBeamDeflectionsNotebook } from './templates/advanced/beam-deflections';
+import { buildRandomWalkNotebook } from './templates/advanced/random-walk';
+import { buildCeramicStrengthNotebook } from './templates/advanced/ceramic-strength';
 import { getCaseStudyConfig } from './registry/index';
 import { REQUIREMENTS_TXT } from './requirements';
+import type { NotebookV4 } from './types';
 
 /**
  * A single entry to be added to a ZIP archive.
@@ -80,6 +84,25 @@ export async function createZipFile(
 }
 
 /**
+ * Build a notebook for any case study slug.
+ *
+ * Dispatches to the appropriate advanced builder for beam-deflections,
+ * random-walk, and ceramic-strength. All other slugs use the standard template.
+ */
+export function buildNotebook(slug: string): NotebookV4 {
+  switch (slug) {
+    case 'beam-deflections':
+      return buildBeamDeflectionsNotebook();
+    case 'random-walk':
+      return buildRandomWalkNotebook();
+    case 'ceramic-strength':
+      return buildCeramicStrengthNotebook();
+    default:
+      return buildStandardNotebook(slug);
+  }
+}
+
+/**
  * Build the 3 ZIP entries for a case study notebook download.
  *
  * Returns:
@@ -96,7 +119,7 @@ export function buildNotebookZipEntries(slug: string, projectRoot: string): ZipE
   }
 
   // Build notebook and serialize with 1-space indent + trailing newline
-  const notebook = buildStandardNotebook(slug);
+  const notebook = buildNotebook(slug);
   const notebookJson = JSON.stringify(notebook, null, 1) + '\n';
 
   // Read .DAT file and normalize to LF-only line endings

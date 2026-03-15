@@ -2,13 +2,12 @@
  * URL construction helpers for notebook downloads and Colab links.
  *
  * Pure functions consumed by the NotebookActions.astro component.
- * Phase 100 will extend NOTEBOOK_SLUGS to include advanced case studies.
  */
 
-import { STANDARD_SLUGS } from './templates/standard';
+import { ALL_CASE_STUDY_SLUGS } from './registry/index';
 
-/** Slugs that currently have generated notebooks. */
-export const NOTEBOOK_SLUGS: string[] = STANDARD_SLUGS;
+/** Slugs that currently have generated notebooks (all 10 case studies). */
+export const NOTEBOOK_SLUGS: string[] = ALL_CASE_STUDY_SLUGS;
 
 /** Return the local download path for a notebook ZIP. */
 export function getDownloadUrl(slug: string): string {
