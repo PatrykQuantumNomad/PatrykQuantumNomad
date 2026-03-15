@@ -71,7 +71,10 @@ Plans:
   1. Every case study page shows a download button that triggers a file save dialog for the corresponding ZIP file
   2. Every case study page shows an "Open in Colab" badge that opens the notebook in Google Colab via the GitHub URL scheme
   3. All 10 .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests
+- [ ] 99-02-PLAN.md — NotebookActions component with download button and Colab badge, wired into page template
 
 ### Phase 100: Advanced Case Study Notebooks
 **Goal**: The 3 complex case studies have specialized notebooks with model development and DOE analysis
@@ -106,6 +109,6 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
 | 97. Standard Case Study Notebooks | 2/2 | Complete   | 2026-03-14 |
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
-| 99. Download UI and Colab Integration | 0/TBD | Not started | - |
+| 99. Download UI and Colab Integration | 0/2 | Not started | - |
 | 100. Advanced Case Study Notebooks | 0/TBD | Not started | - |
 | 101. Site Integration | 0/TBD | Not started | - |
