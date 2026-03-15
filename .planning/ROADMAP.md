@@ -70,7 +70,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Every case study page shows a download button that triggers a file save dialog for the corresponding ZIP file
   2. Every case study page shows an "Open in Colab" badge that opens the notebook in Google Colab via the GitHub URL scheme
-  3. All 10 .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern
+  3. All 7 standard .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern (the 3 advanced notebooks are added by Phase 100)
 **Plans:** 2 plans
 Plans:
 - [ ] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests

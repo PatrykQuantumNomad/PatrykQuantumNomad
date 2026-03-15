@@ -377,13 +377,13 @@ https://colab.research.google.com/github/PatrykQuantumNomad/PatrykQuantumNomad/b
 |----------|-------|
 | Framework | Vitest 4.x |
 | Config file | `vitest.config.ts` |
-| Quick run command | `npx vitest run src/components/eda/__tests__/notebook-actions.test.ts` |
+| Quick run command | `npx vitest run src/lib/eda/notebooks/__tests__/notebook-urls.test.ts` |
 | Full suite command | `npx vitest run` |
 
 ### Phase Requirements to Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| UI-01 | Download button links to correct ZIP path for each slug | unit | `npx vitest run src/components/eda/__tests__/notebook-actions.test.ts -x` | Wave 0 |
+| UI-01 | Download button links to correct ZIP path for each slug | unit | `npx vitest run src/lib/eda/notebooks/__tests__/notebook-urls.test.ts -x` | Wave 0 |
 | UI-01 | Download link has `download` attribute | unit | (same test file) | Wave 0 |
 | UI-02 | Colab URL follows correct format for each slug | unit | (same test file) | Wave 0 |
 | UI-02 | Colab link opens in new tab (target=_blank) | unit | (same test file) | Wave 0 |
@@ -393,12 +393,12 @@ https://colab.research.google.com/github/PatrykQuantumNomad/PatrykQuantumNomad/b
 | UI-02 | Colab badge visible on case study page | smoke | `npx astro build && grep -l 'colab-badge.svg' dist/eda/case-studies/*/index.html` | manual |
 
 ### Sampling Rate
-- **Per task commit:** `npx vitest run src/components/eda/__tests__/notebook-actions.test.ts`
+- **Per task commit:** `npx vitest run src/lib/eda/notebooks/__tests__/notebook-urls.test.ts`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green + `astro build` produces pages with both buttons + committed .ipynb files
 
 ### Wave 0 Gaps
-- [ ] `src/components/eda/__tests__/notebook-actions.test.ts` -- covers UI-01, UI-02 (URL construction and slug filtering logic)
+- [ ] `src/lib/eda/notebooks/__tests__/notebook-urls.test.ts` -- covers UI-01, UI-02 (URL construction and slug filtering logic)
 - [ ] `src/lib/eda/notebooks/__tests__/committed-notebooks.test.ts` -- covers UI-03 (committed notebook validation)
 
 Note: Testing Astro component rendering directly is complex (requires Astro's compiler). Instead, extract the URL construction and slug availability logic into testable pure functions, and test those. The component template is simple enough that visual verification via build output is sufficient.
