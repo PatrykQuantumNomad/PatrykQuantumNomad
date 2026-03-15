@@ -14,6 +14,7 @@ export const EDA_ROUTES = {
   foundations: '/eda/foundations/',
   caseStudies: '/eda/case-studies/',
   reference: '/eda/reference/',
+  notebooks: '/eda/notebooks/',
   landing: '/eda/',
 } as const;
 
