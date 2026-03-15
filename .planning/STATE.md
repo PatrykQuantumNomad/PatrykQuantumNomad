@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.17
 milestone_name: EDA Jupyter Notebooks
-status: phase_complete
-stopped_at: Phase 98 verified
-last_updated: "2026-03-14T23:43:48Z"
-last_activity: 2026-03-14 — Completed 98-02-PLAN.md (notebookPackager Astro integration, 7 ZIPs in 0.02s, 658/658 suite)
+status: in_progress
+stopped_at: Completed 99-01-PLAN.md
+last_updated: "2026-03-15T00:16:06Z"
+last_activity: 2026-03-15 — Completed 99-01-PLAN.md (7 committed .ipynb notebooks for Colab, 29/29 tests)
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 33
+  total_plans: 8
+  completed_plans: 7
+  percent: 50
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 98 complete, 99 next
-Plan: —
-Status: Phase 98 verified, ready to plan Phase 99
-Last activity: 2026-03-14 — Phase 98 verified (4/4 must-haves, 19/19 tests, 658/658 full suite)
+Phase: 99 in progress
+Plan: 01 of 02 complete
+Status: Executing Phase 99 — Plan 01 done, Plan 02 pending
+Last activity: 2026-03-15 — Completed 99-01-PLAN.md (7 committed .ipynb notebooks, 29/29 validation tests)
 
 Progress: [█████░░░░░] 50% (3/6 phases)
 
@@ -50,6 +50,7 @@ Progress: [█████░░░░░] 50% (3/6 phases)
 | Phase 97 P02 | 5min | 1 task (TDD) | 5 files |
 | Phase 98 P01 | 2min | 1 task (TDD) | 4 files |
 | Phase 98 P02 | 2min | 2 tasks (TDD) | 3 files |
+| Phase 99 P01 | 4min | 1 task (TDD) | 10 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Research decisions for v1.17:
 - 1-space JSON indentation for notebook serialization (smallest valid nbformat v4.5) (98-01)
 - notebookPackager registered between indexNow and react in astro.config.mjs integrations array (98-02)
 - Simple STANDARD_SLUGS loop for build-time packaging; Phase 100 will extend for advanced slugs (98-02)
+- tsx dev dependency for TypeScript script execution via node --import tsx (99-01)
+- notebooks/eda/{slug}.ipynb naming convention for committed notebooks (99-01)
 
 ### Pending Todos
 
@@ -101,7 +104,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-14
-Stopped at: Phase 98 verified
+Last session: 2026-03-15
+Stopped at: Completed 99-01-PLAN.md
 Resume file: None
-Next: `/gsd:plan-phase 99`
+Next: Execute 99-02-PLAN.md

@@ -73,7 +73,7 @@ Plans:
   3. All 7 standard .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern (the 3 advanced notebooks are added by Phase 100)
 **Plans:** 2 plans
 Plans:
-- [ ] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests
+- [x] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests
 - [ ] 99-02-PLAN.md — NotebookActions component with download button and Colab badge, wired into page template
 
 ### Phase 100: Advanced Case Study Notebooks
@@ -109,6 +109,6 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
 | 97. Standard Case Study Notebooks | 2/2 | Complete   | 2026-03-14 |
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
-| 99. Download UI and Colab Integration | 0/2 | Not started | - |
+| 99. Download UI and Colab Integration | 1/2 | In Progress | - |
 | 100. Advanced Case Study Notebooks | 0/TBD | Not started | - |
 | 101. Site Integration | 0/TBD | Not started | - |

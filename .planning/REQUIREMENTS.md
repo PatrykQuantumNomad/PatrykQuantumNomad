@@ -40,7 +40,7 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 - [ ] **UI-01**: Download button on each case study page linking to the .zip file
 - [ ] **UI-02**: "Open in Colab" badge/link on each case study page for zero-install execution
-- [ ] **UI-03**: Notebook .ipynb files committed to repo to enable Colab GitHub URL format
+- [x] **UI-03**: Notebook .ipynb files committed to repo to enable Colab GitHub URL format
 
 ### Site Integration
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PACK-03 | Phase 98 | Complete |
 | UI-01 | Phase 99 | Pending |
 | UI-02 | Phase 99 | Pending |
-| UI-03 | Phase 99 | Pending |
+| UI-03 | Phase 99 | Complete |
 | SITE-01 | Phase 101 | Pending |
 | SITE-02 | Phase 101 | Pending |
 | SITE-03 | Phase 101 | Pending |
