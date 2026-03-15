@@ -142,6 +142,7 @@ const NAV_ITEMS = [
   { label: 'Distributions', href: '#distributions', indexHref: '/eda/distributions/' },
   { label: 'Case Studies', href: '#case-studies', indexHref: '/eda/case-studies/' },
   { label: 'Reference', href: '#reference', indexHref: '/eda/reference/' },
+  { label: 'Notebooks', href: '#notebooks', indexHref: '/eda/notebooks/' },
 ];
 ---
 
@@ -252,6 +253,23 @@ const NAV_ITEMS = [
         class="inline-flex items-center gap-2 text-[var(--color-accent)] font-semibold hover:underline"
       >
         Read: Exploratory Data Analysis &mdash; A Visual Encyclopedia
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </section>
+
+    <!-- Jupyter Notebooks -->
+    <section id="notebooks" class="mb-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8">
+      <h2 class="text-xl font-heading font-bold mb-3">Jupyter Notebooks</h2>
+      <p class="text-[var(--color-text-secondary)] mb-4">
+        Practice EDA hands-on with 10 downloadable Jupyter notebooks. Each notebook includes a
+        bundled NIST dataset, data loading, 4-plot diagnostics, hypothesis tests, and interpretation.
+        Run them locally or open them instantly in Google Colab.
+      </p>
+      <a
+        href="/eda/notebooks/"
+        class="inline-flex items-center gap-2 text-[var(--color-accent)] font-semibold hover:underline"
+      >
+        Browse all 10 notebooks
         <span aria-hidden="true">&rarr;</span>
       </a>
     </section>

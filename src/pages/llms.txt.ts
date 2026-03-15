@@ -4,6 +4,8 @@ import { totalScore } from '../lib/beauty-index/schema';
 import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
 import { techniqueUrl, distributionUrl, foundationUrl, caseStudyUrl, referenceUrl } from '../lib/eda/routes';
 import { guidePageUrl } from '../lib/guides/routes';
+import { CASE_STUDY_REGISTRY, ALL_CASE_STUDY_SLUGS } from '../lib/eda/notebooks/registry/index';
+import { getDownloadUrl, getColabUrl } from '../lib/eda/notebooks/notebook-urls';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -183,7 +185,7 @@ export async function GET(context: APIContext) {
         return `- [${p.data.title}](https://patrykgolabek.dev${foundationUrl(slug)}): ${p.data.description}`;
       }),
     '',
-    '### Case Studies (9 pages)',
+    '### Case Studies (10 pages)',
     '',
     ...edaPages
       .filter(p => p.data.category === 'case-studies')
@@ -202,6 +204,17 @@ export async function GET(context: APIContext) {
         const slug = p.id.replace('reference/', '');
         return `- [${p.data.title}](https://patrykgolabek.dev${referenceUrl(slug)}): ${p.data.description}`;
       }),
+    '',
+    '### Jupyter Notebooks (10 notebooks)',
+    '',
+    'Download Jupyter notebooks with bundled NIST datasets for hands-on Exploratory Data Analysis in Python. Each notebook includes data loading, 4-plot diagnostics, hypothesis tests, and interpretation.',
+    '',
+    '- [Notebooks Landing Page](https://patrykgolabek.dev/eda/notebooks/): All 10 notebooks with descriptions, download links, and Colab badges',
+    '',
+    ...ALL_CASE_STUDY_SLUGS.map(slug => {
+      const config = CASE_STUDY_REGISTRY[slug];
+      return `- ${config.title} Notebook: Download https://patrykgolabek.dev${getDownloadUrl(slug)} | Colab: ${getColabUrl(slug)}`;
+    }),
     '',
     '## FastAPI Production Guide',
     '',
