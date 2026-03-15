@@ -1,0 +1,86 @@
+---
+title: "Learning EDA with Jupyter Notebooks"
+description: "10 hands-on Jupyter notebooks for Exploratory Data Analysis using real NIST datasets. Download notebooks with bundled data files, or run them instantly in Google Colab."
+publishedDate: 2026-03-15
+tags: ["eda", "jupyter", "python", "data-science", "statistics", "notebooks"]
+draft: false
+---
+
+Exploratory Data Analysis is one of those disciplines where reading about it only gets you halfway. You can memorize the definition of a run sequence plot, understand why lag plots detect autocorrelation, and know that the 4-plot diagnostic is the universal starting point for any dataset. But the real understanding comes from loading a dataset, generating the plots, interpreting what you see, and discovering patterns that summary statistics alone would miss.
+
+The [EDA Visual Encyclopedia](/eda/) covers 90+ pages of theory, interactive visualizations, and reference material based on the NIST/SEMATECH Engineering Statistics Handbook. It is a comprehensive reference for understanding what each technique does and when to use it. But reading about histograms is not the same as building one from real measurement data and deciding whether the distribution is normal, skewed, or bimodal.
+
+That is why I built 10 hands-on Jupyter notebooks that pair with the encyclopedia. Each notebook uses a real NIST/SEMATECH dataset, walks through a complete EDA workflow, and produces publication-quality plots with interpretation. You can [browse all 10 notebooks](/eda/notebooks/), download them with bundled data files, or open them instantly in Google Colab with zero setup.
+
+## What Is Inside Each Notebook
+
+Every notebook follows a consistent structure designed to teach EDA methodology, not just produce charts.
+
+The workflow starts with **environment setup**, importing numpy, scipy, pandas, matplotlib, and seaborn. The **data loading** section reads from a local file bundled in the ZIP download, with an automatic fallback to a GitHub raw URL when running in Google Colab. This means the same notebook works identically in both environments without any code changes.
+
+Next comes **summary statistics**: sample size, mean, median, standard deviation, skewness, kurtosis, minimum, and maximum. These numbers provide the first quantitative snapshot of the data, but the real analysis begins with the **4-plot diagnostic**. This single visualization combines a run sequence plot (detecting trends, shifts, and outliers over time), a lag plot (revealing autocorrelation and non-randomness), a histogram (showing distributional shape), and a normal probability plot (assessing normality). Together, these four plots can diagnose most common data pathologies in seconds.
+
+After the 4-plot, each notebook generates **individual plots with interpretation** sections that explain what the visualization reveals about the specific dataset. The analysis continues with **hypothesis tests** covering four categories: a location test (whether the mean equals a reference value), a variation test (whether the standard deviation is stable), a randomness test (whether the data sequence is random), and a distribution test (whether the data follow a normal distribution). A **test summary table** consolidates all results, and a **conclusions** section synthesizes the findings.
+
+Three advanced notebooks go further. The **beam deflections** notebook adds sinusoidal model fitting and residual validation. The **random walk** notebook develops an AR(1) autoregressive model with residual diagnostics. The **ceramic strength** notebook performs multi-factor Design of Experiments analysis including batch effects, factor rankings, and ANOVA.
+
+## The 10 Notebooks
+
+### Standard Case Studies (7 notebooks)
+
+- **Normal Random Numbers** -- 200 computer-generated normal random numbers. Verifies that the generator produces data consistent with a standard normal distribution. [Download](/downloads/notebooks/normal-random-numbers.zip) | [Case study](/eda/case-studies/normal-random-numbers/)
+- **Uniform Random Numbers** -- 200 computer-generated uniform random numbers. Tests whether the generator output matches the expected uniform distribution. [Download](/downloads/notebooks/uniform-random-numbers.zip) | [Case study](/eda/case-studies/uniform-random-numbers/)
+- **Heat Flow Meter 1** -- 195 measurements from a heat flow meter calibration. Demonstrates a well-behaved process with fixed location, variation, and normal distribution. [Download](/downloads/notebooks/heat-flow-meter.zip) | [Case study](/eda/case-studies/heat-flow-meter/)
+- **Filter Transmittance** -- 50 filter transmittance measurements revealing a non-random process with a significant upward shift. [Download](/downloads/notebooks/filter-transmittance.zip) | [Case study](/eda/case-studies/filter-transmittance/)
+- **Josephson Junction Cryothermometry** -- 800 voltage measurements from a cryogenic thermometry experiment exhibiting strong autocorrelation. [Download](/downloads/notebooks/cryothermometry.zip) | [Case study](/eda/case-studies/cryothermometry/)
+- **Fatigue Life of Aluminum Alloy Specimens** -- 126 fatigue failure times compared across four candidate distributions: normal, log-normal, Weibull, and gamma. [Download](/downloads/notebooks/fatigue-life.zip) | [Case study](/eda/case-studies/fatigue-life/)
+- **Standard Resistor** -- 1000 precision resistance measurements from a calibration study demonstrating excellent process stability. [Download](/downloads/notebooks/standard-resistor.zip) | [Case study](/eda/case-studies/standard-resistor/)
+
+### Advanced Case Studies (3 notebooks)
+
+- **Beam Deflections** -- 200 measurements of steel-concrete beam deflections. Fits a sinusoidal model to the systematic periodic structure detected by autocorrelation and spectral analysis, then validates residuals. [Download](/downloads/notebooks/beam-deflections.zip) | [Case study](/eda/case-studies/beam-deflections/)
+- **Random Walk** -- 500 observations exhibiting non-stationary behavior consistent with a random walk process. Develops an AR(1) autoregressive model and validates that the residuals satisfy the four underlying assumptions. [Download](/downloads/notebooks/random-walk.zip) | [Case study](/eda/case-studies/random-walk/)
+- **Ceramic Strength** -- A designed experiment measuring silicon nitride ceramic strength across multiple batches, table speeds, and down feed rates. Performs factor ranking, interaction analysis, and ANOVA to uncover an unexpected batch effect. [Download](/downloads/notebooks/ceramic-strength.zip) | [Case study](/eda/case-studies/ceramic-strength/)
+
+## Running the Notebooks
+
+### Running Locally
+
+Download the ZIP file for any notebook from the [notebooks page](/eda/notebooks/). Each ZIP contains the `.ipynb` notebook file, the original NIST `.DAT` data file, and a `requirements.txt` with all Python dependencies.
+
+Extract the archive, install the dependencies, and launch Jupyter:
+
+```bash
+unzip normal-random-numbers.zip
+cd normal-random-numbers
+pip install -r requirements.txt
+jupyter notebook normal-random-numbers.ipynb
+```
+
+Python 3.10 or later is recommended. All notebooks use standard scientific Python libraries: numpy, scipy, pandas, matplotlib, and seaborn.
+
+### Running in Google Colab
+
+For a zero-install experience, click the "Open in Colab" button on the [notebooks page](/eda/notebooks/) or on any individual [case study](/eda/case-studies/normal-random-numbers/) page. Colab provides a free cloud-based Jupyter environment with all scientific Python libraries pre-installed.
+
+The data loads automatically via GitHub raw URLs, so there is no file upload step. Open the notebook, run all cells, and start exploring.
+
+## What You Will Learn
+
+Working through these notebooks builds practical EDA skills that transfer directly to real-world data analysis:
+
+- **Assumption verification using the 4-plot** -- The single most useful diagnostic in all of EDA, combining four complementary views into one assessment.
+- **Interpreting run sequence plots** -- Detecting trends, shifts, and outliers in time-ordered data before they contaminate downstream analysis.
+- **Using lag plots for autocorrelation detection** -- Identifying non-randomness and serial correlation that violate independence assumptions.
+- **Histogram interpretation for distribution shape** -- Recognizing normality, skewness, bimodality, and heavy tails from the empirical density.
+- **Normal probability plot assessment** -- Using the linearized quantile-quantile plot to evaluate whether data follow a normal distribution.
+- **Hypothesis test interpretation** -- Reading p-values and test statistics in context, understanding what each test does and does not prove.
+- **Model fitting and residual analysis** (advanced notebooks) -- Fitting sinusoidal and autoregressive models, then validating that residuals satisfy the underlying assumptions.
+- **Design of Experiments analysis** (ceramic strength notebook) -- Factor ranking, interaction effects, ANOVA, and multi-factor analysis for engineered systems.
+
+## Further Reading
+
+- [EDA Visual Encyclopedia](/eda/) -- The full 90+ page interactive reference covering all graphical techniques, quantitative methods, probability distributions, case studies, and reference material.
+- [What Is Exploratory Data Analysis?](/eda/foundations/what-is-eda/) -- The foundational concepts behind EDA, from Tukey's original philosophy to modern practice.
+- [Graphical Techniques](/eda/techniques/) -- All 29 graphical technique pages with interactive SVG visualizations.
+- [Exploratory Data Analysis: A Visual Encyclopedia](/blog/eda-visual-encyclopedia/) -- The companion blog post covering the encyclopedia's methodology, technical implementation, and why EDA matters in the age of AI.
