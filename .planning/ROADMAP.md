@@ -85,7 +85,7 @@ Plans:
   2. Random Walk notebook includes AR(1) coefficient estimation, model development, and residual analysis
   3. Ceramic Strength notebook includes multi-column data loading (480 rows), batch effect analysis, factor rankings, interaction plots, and one-way ANOVA
   4. All 3 notebooks run end-to-end in a clean Python environment and statistical values match NIST-verified website values from v1.9
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 Plans:
 - [ ] 100-01-PLAN.md — Beam Deflections notebook with sinusoidal model fitting and residual validation (TDD)
 - [ ] 100-02-PLAN.md — Random Walk notebook with AR(1) model development and residual analysis (TDD)
@@ -115,5 +115,5 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 97. Standard Case Study Notebooks | 2/2 | Complete   | 2026-03-14 |
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
 | 99. Download UI and Colab Integration | 2/2 | Complete   | 2026-03-15 |
-| 100. Advanced Case Study Notebooks | 0/4 | Not started | - |
+| 100. Advanced Case Study Notebooks | 2/4 | In Progress|  |
 | 101. Site Integration | 0/TBD | Not started | - |
