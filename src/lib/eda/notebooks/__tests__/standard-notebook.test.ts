@@ -129,7 +129,7 @@ describe('data loading', () => {
     expect(getAllSource(nb)).toContain('assert len(df) == 1000');
   });
 
-  // CSV-based data loading
+  // CSV-based data loading from GitHub URL
   it('all notebooks use pd.read_csv for data loading', () => {
     for (const slug of SLUGS) {
       const nb = buildStandardNotebook(slug);
@@ -137,11 +137,11 @@ describe('data loading', () => {
     }
   });
 
-  it('data loading has Colab fallback to GitHub URL', () => {
+  it('data loading uses GitHub raw URL', () => {
     const nb = buildStandardNotebook('normal-random-numbers');
     const src = getCodeSources(nb);
-    expect(src).toContain('GITHUB_URL');
-    expect(src).toContain('FileNotFoundError');
+    expect(src).toContain('DATA_URL');
+    expect(src).toContain('raw.githubusercontent.com');
   });
 });
 

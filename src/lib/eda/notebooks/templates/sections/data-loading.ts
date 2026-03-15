@@ -1,9 +1,10 @@
 /**
- * Data loading section: load CSV data with Colab fallback + preview + assertion.
+ * Data loading section: load CSV data from GitHub + preview + assertion.
  *
  * CSV files are pre-generated from NIST .DAT datasets and committed to the repo
- * at notebooks/eda/data/{slug}.csv. This enables both local use (ZIP download)
- * and Google Colab access (GitHub raw URL).
+ * at notebooks/eda/data/{slug}.csv. Notebooks load directly from the GitHub raw
+ * URL, which works in both Colab and local environments with internet access.
+ * The ZIP download also includes the CSV for offline use.
  */
 
 import type { Cell } from '../../types';
@@ -11,21 +12,14 @@ import type { CaseStudyConfig } from '../../registry/types';
 import { codeCell, markdownCell } from '../../cells';
 
 /**
- * Build the Python source for loading data from a CSV file.
- * Uses pd.read_csv() with Colab fallback to GitHub raw URL.
+ * Build the Python source for loading data from the GitHub raw CSV URL.
  */
 function buildLoadCode(config: CaseStudyConfig): string[] {
-  const csvFile = `${config.slug}.csv`;
   const lines: string[] = [];
 
   lines.push(`# Load dataset (CSV generated from NIST ${config.dataFile})`);
-  lines.push(`DATA_FILE = '${csvFile}'`);
-  lines.push(`GITHUB_URL = '${config.githubRawUrl}'`);
-  lines.push('');
-  lines.push('try:');
-  lines.push('    df = pd.read_csv(DATA_FILE)');
-  lines.push('except FileNotFoundError:');
-  lines.push('    df = pd.read_csv(GITHUB_URL)');
+  lines.push(`DATA_URL = '${config.githubRawUrl}'`);
+  lines.push('df = pd.read_csv(DATA_URL)');
   lines.push('');
   lines.push(`print(f'Loaded {len(df)} rows')`);
   lines.push(`assert len(df) == ${config.expectedRows}, f'Expected ${config.expectedRows} rows, got {len(df)}'`);
