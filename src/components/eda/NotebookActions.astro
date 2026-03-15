@@ -1,0 +1,49 @@
+---
+/**
+ * Renders download button and Colab badge for case study pages
+ * that have an associated Jupyter notebook.
+ *
+ * Renders nothing for slugs without a notebook (advanced case studies).
+ */
+import { getDownloadUrl, getColabUrl, hasNotebook } from '../../lib/eda/notebooks/notebook-urls';
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+if (!hasNotebook(slug)) {
+  return;
+}
+
+const downloadUrl = getDownloadUrl(slug);
+const colabUrl = getColabUrl(slug);
+---
+
+<section class="my-6 flex flex-wrap items-center gap-3">
+  <a
+    href={downloadUrl}
+    download
+    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
+           bg-[var(--color-accent)] !text-white hover:opacity-90 transition-opacity !no-underline"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+    </svg>
+    Download Notebook
+  </a>
+  <a
+    href={colabUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center !no-underline"
+  >
+    <img
+      src="https://colab.research.google.com/assets/colab-badge.svg"
+      alt="Open in Colab"
+      width="117"
+      height="20"
+    />
+  </a>
+</section>
