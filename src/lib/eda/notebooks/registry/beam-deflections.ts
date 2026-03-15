@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: -162.0,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4251.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/LEW.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/beam-deflections.csv',
   plotTitles: {
     fourPlot: '4-Plot of Beam Deflections',
     runSequence: 'Run Sequence Plot of Beam Deflections',

@@ -129,35 +129,19 @@ describe('data loading', () => {
     expect(getAllSource(nb)).toContain('assert len(df) == 1000');
   });
 
-  // Multi-value parsing
-  it('normal-random-numbers data loading contains flatten()', () => {
+  // CSV-based data loading
+  it('all notebooks use pd.read_csv for data loading', () => {
+    for (const slug of SLUGS) {
+      const nb = buildStandardNotebook(slug);
+      expect(getCodeSources(nb)).toContain('pd.read_csv');
+    }
+  });
+
+  it('data loading has Colab fallback to GitHub URL', () => {
     const nb = buildStandardNotebook('normal-random-numbers');
-    expect(getCodeSources(nb)).toContain('flatten()');
-  });
-
-  it('uniform-random-numbers data loading contains flatten()', () => {
-    const nb = buildStandardNotebook('uniform-random-numbers');
-    expect(getCodeSources(nb)).toContain('flatten()');
-  });
-
-  it('cryothermometry data loading contains flatten()', () => {
-    const nb = buildStandardNotebook('cryothermometry');
-    expect(getCodeSources(nb)).toContain('flatten()');
-  });
-
-  it('heat-flow-meter data loading does NOT contain flatten()', () => {
-    const nb = buildStandardNotebook('heat-flow-meter');
-    expect(getCodeSources(nb)).not.toContain('flatten()');
-  });
-
-  // Multi-column
-  it('standard-resistor data loading contains column names', () => {
-    const nb = buildStandardNotebook('standard-resistor');
     const src = getCodeSources(nb);
-    expect(src).toContain('Month');
-    expect(src).toContain('Day');
-    expect(src).toContain('Year');
-    expect(src).toContain('Resistance');
+    expect(src).toContain('GITHUB_URL');
+    expect(src).toContain('FileNotFoundError');
   });
 });
 

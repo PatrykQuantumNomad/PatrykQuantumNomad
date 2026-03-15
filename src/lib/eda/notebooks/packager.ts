@@ -3,7 +3,7 @@
  *
  * Creates self-contained ZIP downloads containing:
  * - {slug}.ipynb — the generated notebook (nbformat v4.5)
- * - {dataFile}.DAT — the NIST dataset with LF-only line endings
+ * - {slug}.csv — the NIST dataset as CSV
  * - requirements.txt — Python dependencies
  *
  * Uses archiver (locked decision over JSZip due to encoding issues
@@ -107,7 +107,7 @@ export function buildNotebook(slug: string): NotebookV4 {
  *
  * Returns:
  * 1. {slug}.ipynb — notebook JSON (1-space indent, trailing newline)
- * 2. {dataFile} — NIST .DAT content with LF-only line endings
+ * 2. {slug}.csv — dataset as CSV (generated from NIST data)
  * 3. requirements.txt — Python package pins
  *
  * @throws Error if slug is not found in the registry
@@ -122,13 +122,13 @@ export function buildNotebookZipEntries(slug: string, projectRoot: string): ZipE
   const notebook = buildNotebook(slug);
   const notebookJson = JSON.stringify(notebook, null, 1) + '\n';
 
-  // Read .DAT file and normalize to LF-only line endings
-  const datPath = join(projectRoot, 'handbook', 'datasets', config.dataFile);
-  const datContent = readFileSync(datPath, 'utf-8').replace(/\r\n/g, '\n');
+  // Read CSV data file (committed at notebooks/eda/data/{slug}.csv)
+  const csvPath = join(projectRoot, 'notebooks', 'eda', 'data', `${slug}.csv`);
+  const csvContent = readFileSync(csvPath, 'utf-8');
 
   return [
     { name: `${slug}.ipynb`, content: notebookJson },
-    { name: config.dataFile, content: datContent },
+    { name: `${slug}.csv`, content: csvContent },
     { name: 'requirements.txt', content: REQUIREMENTS_TXT },
   ];
 }

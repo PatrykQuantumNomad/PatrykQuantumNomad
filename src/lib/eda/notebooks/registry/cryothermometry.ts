@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: 2899.0,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4241.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/SOULEN.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/cryothermometry.csv',
   plotTitles: {
     fourPlot: '4-Plot of Cryothermometry Voltage Counts',
     runSequence: 'Run Sequence Plot of Cryothermometry Voltage Counts',

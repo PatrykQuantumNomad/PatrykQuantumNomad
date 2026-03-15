@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: 9.261952,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4281.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/ZARR13.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/heat-flow-meter.csv',
   plotTitles: {
     fourPlot: '4-Plot of Heat Flow Meter Calibration Factor',
     runSequence: 'Run Sequence Plot of Heat Flow Meter Calibration Factor',

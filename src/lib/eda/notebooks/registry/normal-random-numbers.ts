@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: -0.0930,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4211.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/RANDN.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/normal-random-numbers.csv',
   plotTitles: {
     fourPlot: '4-Plot of Normal Random Numbers',
     runSequence: 'Run Sequence Plot of Normal Random Numbers',

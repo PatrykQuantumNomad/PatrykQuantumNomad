@@ -21,7 +21,7 @@ export const config: CaseStudyConfig = {
     median: 646.6275,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda42a1.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/JAHANMI2.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/ceramic-strength.csv',
   plotTitles: {
     fourPlot: '4-Plot of Ceramic Strength',
     runSequence: 'Run Sequence Plot of Ceramic Strength',

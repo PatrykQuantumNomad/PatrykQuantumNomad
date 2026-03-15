@@ -116,13 +116,13 @@ describe('skipRows values', () => {
 });
 
 describe('githubRawUrls', () => {
-  it('all start with the correct GitHub raw prefix', () => {
+  it('all point to CSV files in notebooks/eda/data/', () => {
     for (const slug of ALL_SLUGS) {
       const config = CASE_STUDY_REGISTRY[slug];
       expect(
         config.githubRawUrl,
-        `${slug} githubRawUrl should start with correct prefix`
-      ).toMatch(/^https:\/\/raw\.githubusercontent\.com\/PatrykQuantumNomad\//);
+        `${slug} githubRawUrl should point to CSV data file`
+      ).toBe(`https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/${slug}.csv`);
     }
   });
 });

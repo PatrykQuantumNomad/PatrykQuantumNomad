@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createZipFile, buildNotebookZipEntries, buildNotebook, type ZipEntry } from '../packager';
 import { REQUIREMENTS_TXT } from '../requirements';
-import { getCaseStudyConfig, ALL_CASE_STUDY_SLUGS } from '../registry/index';
+import { ALL_CASE_STUDY_SLUGS } from '../registry/index';
 import { STANDARD_SLUGS } from '../templates/standard';
 
 /**
@@ -117,17 +117,18 @@ describe('buildNotebookZipEntries', () => {
     expect(entries[0].content!.endsWith('\n')).toBe(true);
   });
 
-  it('entry[1] name matches the config dataFile', () => {
-    const config = getCaseStudyConfig(TEST_SLUG)!;
+  it('entry[1] name is {slug}.csv', () => {
     const entries = buildNotebookZipEntries(TEST_SLUG, PROJECT_ROOT);
-    expect(entries[1].name).toBe(config.dataFile);
+    expect(entries[1].name).toBe(`${TEST_SLUG}.csv`);
   });
 
-  it('entry[1] content has no CRLF (LF-only line endings)', () => {
+  it('entry[1] content is valid CSV with header row', () => {
     const entries = buildNotebookZipEntries(TEST_SLUG, PROJECT_ROOT);
-    expect(entries[1].content!).not.toContain('\r\n');
-    // Should contain at least some newlines (it is a data file)
-    expect(entries[1].content!).toContain('\n');
+    const lines = entries[1].content!.trim().split('\n');
+    // First line is a header
+    expect(lines[0]).toMatch(/^[A-Za-z]/);
+    // Has data rows
+    expect(lines.length).toBeGreaterThan(1);
   });
 
   it('entry[2] name is requirements.txt', () => {

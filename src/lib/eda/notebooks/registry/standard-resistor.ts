@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: 28.02910,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4271.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/DZIUBA1.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/standard-resistor.csv',
   plotTitles: {
     fourPlot: '4-Plot of Standard Resistor Values',
     runSequence: 'Run Sequence Plot of Standard Resistor Values',

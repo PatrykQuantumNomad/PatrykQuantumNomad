@@ -17,7 +17,7 @@ export const config: CaseStudyConfig = {
     median: 1340,
   },
   nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4291.htm',
-  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/handbook/datasets/BIRNSAUN.DAT',
+  githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/fatigue-life.csv',
   plotTitles: {
     fourPlot: '4-Plot of Fatigue Life',
     runSequence: 'Run Sequence Plot of Fatigue Life',
