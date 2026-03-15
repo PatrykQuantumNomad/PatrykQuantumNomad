@@ -2,9 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createZipFile, buildNotebookZipEntries, type ZipEntry } from '../packager';
+import { createZipFile, buildNotebookZipEntries, buildNotebook, type ZipEntry } from '../packager';
 import { REQUIREMENTS_TXT } from '../requirements';
-import { getCaseStudyConfig } from '../registry/index';
+import { getCaseStudyConfig, ALL_CASE_STUDY_SLUGS } from '../registry/index';
 import { STANDARD_SLUGS } from '../templates/standard';
 
 /**
@@ -150,6 +150,46 @@ describe('buildNotebookZipEntries', () => {
       expect(entries).toHaveLength(3);
       expect(entries[0].name).toBe(`${slug}.ipynb`);
       expect(entries[2].name).toBe('requirements.txt');
+    }
+  });
+
+  it('works for all 10 case study slugs (standard + advanced)', () => {
+    expect(ALL_CASE_STUDY_SLUGS.length).toBe(10);
+    for (const slug of ALL_CASE_STUDY_SLUGS) {
+      const entries = buildNotebookZipEntries(slug, PROJECT_ROOT);
+      expect(entries).toHaveLength(3);
+      expect(entries[0].name).toBe(`${slug}.ipynb`);
+      expect(entries[2].name).toBe('requirements.txt');
+    }
+  });
+});
+
+describe('buildNotebook', () => {
+  const ADVANCED_SLUGS = ['beam-deflections', 'random-walk', 'ceramic-strength'];
+
+  it('dispatches advanced slugs to their specialized builders', () => {
+    for (const slug of ADVANCED_SLUGS) {
+      const notebook = buildNotebook(slug);
+      expect(notebook.nbformat).toBe(4);
+      expect(notebook.nbformat_minor).toBe(5);
+      expect(notebook.cells.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('dispatches standard slugs to buildStandardNotebook', () => {
+    for (const slug of STANDARD_SLUGS) {
+      const notebook = buildNotebook(slug);
+      expect(notebook.nbformat).toBe(4);
+      expect(notebook.nbformat_minor).toBe(5);
+      expect(notebook.cells.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('works for all 10 case study slugs', () => {
+    for (const slug of ALL_CASE_STUDY_SLUGS) {
+      const notebook = buildNotebook(slug);
+      expect(notebook.nbformat).toBe(4);
+      expect(notebook.nbformat_minor).toBe(5);
     }
   });
 });
