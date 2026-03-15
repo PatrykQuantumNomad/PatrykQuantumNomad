@@ -44,11 +44,11 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 ### Site Integration
 
-- [ ] **SITE-01**: Notebooks landing page at /eda/notebooks/ listing all 10 notebooks with descriptions and download links
+- [x] **SITE-01**: Notebooks landing page at /eda/notebooks/ listing all 10 notebooks with descriptions and download links
 - [ ] **SITE-02**: Companion blog post about EDA learning with Jupyter notebooks
 - [ ] **SITE-03**: LLMs.txt updated with notebooks section
 - [ ] **SITE-04**: Sitemap includes notebooks landing page
-- [ ] **SITE-05**: OG image for notebooks landing page
+- [x] **SITE-05**: OG image for notebooks landing page
 
 ## Future Requirements
 
@@ -94,11 +94,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-01 | Phase 99 | Complete |
 | UI-02 | Phase 99 | Complete |
 | UI-03 | Phase 99 | Complete |
-| SITE-01 | Phase 101 | Pending |
+| SITE-01 | Phase 101 | Complete |
 | SITE-02 | Phase 101 | Pending |
 | SITE-03 | Phase 101 | Pending |
 | SITE-04 | Phase 101 | Pending |
-| SITE-05 | Phase 101 | Pending |
+| SITE-05 | Phase 101 | Complete |
 
 **Coverage:**
 - v1.17 requirements: 25 total

@@ -102,7 +102,7 @@ Plans:
   3. A companion blog post about EDA learning with Jupyter notebooks is published
   4. LLMs.txt includes a notebooks section and the notebooks landing page appears in the sitemap
   5. An OG image is generated for the notebooks landing page via Satori + Sharp
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 101-01-PLAN.md — Notebooks landing page at /eda/notebooks/ with card grid, OG image endpoint, and EDA_ROUTES update
 - [ ] 101-02-PLAN.md — Companion blog post, LLMs.txt notebooks subsection, and EDA index cross-link
@@ -119,4 +119,4 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
 | 99. Download UI and Colab Integration | 2/2 | Complete   | 2026-03-15 |
 | 100. Advanced Case Study Notebooks | 4/4 | Complete   | 2026-03-15 |
-| 101. Site Integration | 0/2 | Not started | - |
+| 101. Site Integration | 1/2 | In Progress|  |

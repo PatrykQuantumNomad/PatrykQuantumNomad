@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 100-04-PLAN.md
-last_updated: "2026-03-15T11:04:39Z"
-last_activity: 2026-03-15 — Phase 100 complete (all 10 notebooks wired, packaged, committed)
+status: completed
+stopped_at: Completed 101-01-PLAN.md
+last_updated: "2026-03-15T11:33:10.192Z"
+last_activity: 2026-03-15 — 101-01 complete (notebooks landing page, OG image, routes)
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
-  percent: 83
+  total_plans: 14
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 100 complete, ready for Phase 101
-Plan: 100-04 complete (Phase 100 fully done)
-Status: Phase 100 complete — all 10 notebooks built, packaged, committed, and discoverable
-Last activity: 2026-03-15 — Phase 100 complete (all 10 notebooks wired, packaged, committed)
+Phase: 101 (Site Integration)
+Plan: 101-01 complete, ready for 101-02
+Status: Notebooks landing page live at /eda/notebooks/ with OG image endpoint
+Last activity: 2026-03-15 — 101-01 complete (notebooks landing page, OG image, routes)
 
-Progress: [████████░░] 83% (5/6 phases)
+Progress: [██████████] 100% (14/14 plans completed)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [████████░░] 83% (5/6 phases)
 | Phase 100 P02 | 3min | 1 task (TDD) | 3 files |
 | Phase 100 P03 | 3min | 1 task (TDD) | 5 files |
 | Phase 100 P04 | 5min | 2 tasks | 10 files |
+| Phase 101 P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Research decisions for v1.17:
 - Lab effect section inline in ceramic template (ceramic-specific, not reusable) (100-03)
 - buildNotebook() switch dispatcher in packager.ts for advanced slug routing (100-04)
 - ALL_CASE_STUDY_SLUGS from registry replaces STANDARD_SLUGS in all infrastructure files (100-04)
+- [Phase 101]: Card uses div (not anchor) since each card has 3 independent links
+- [Phase 101]: OG image follows existing case-studies.png.ts pattern with getOrGenerateOgImage caching
 
 ### Pending Todos
 
@@ -122,7 +125,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T11:04:39Z
-Stopped at: Completed 100-04-PLAN.md
+Last session: 2026-03-15T11:33:10.189Z
+Stopped at: Completed 101-01-PLAN.md
 Resume file: None
 Next: Phase 101 (Site Integration) — notebooks landing page, blog post, LLMs.txt, sitemap, OG image
