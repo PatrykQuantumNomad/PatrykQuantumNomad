@@ -1,0 +1,92 @@
+---
+/**
+ * Jupyter Notebooks landing page — /eda/notebooks/
+ * Card grid of all 10 NIST case study notebooks with download and Colab links.
+ */
+import EDALayout from '../../../layouts/EDALayout.astro';
+import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import EDAJsonLd from '../../../components/eda/EDAJsonLd.astro';
+import { CASE_STUDY_REGISTRY, ALL_CASE_STUDY_SLUGS } from '../../../lib/eda/notebooks/registry/index';
+import { getDownloadUrl, getColabUrl } from '../../../lib/eda/notebooks/notebook-urls';
+import { caseStudyUrl } from '../../../lib/eda/routes';
+
+const notebooks = ALL_CASE_STUDY_SLUGS.map((slug) => {
+  const config = CASE_STUDY_REGISTRY[slug];
+  return {
+    slug,
+    title: config.title,
+    description: config.description ?? '',
+    nistSection: config.nistSection,
+    downloadUrl: getDownloadUrl(slug),
+    colabUrl: getColabUrl(slug),
+    caseStudyUrl: caseStudyUrl(slug),
+  };
+});
+---
+
+<EDALayout
+  title="Jupyter Notebooks | EDA Visual Encyclopedia"
+  description="Download 10 Jupyter notebooks for hands-on Exploratory Data Analysis with real NIST datasets. Each notebook includes data loading, 4-plot diagnostics, hypothesis tests, and interpretation. Run locally or instantly in Google Colab."
+  ogImage="/open-graph/eda/notebooks.png"
+  ogImageAlt="Jupyter Notebooks -- EDA Visual Encyclopedia"
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'EDA', url: 'https://patrykgolabek.dev/eda/' },
+    { name: 'Jupyter Notebooks', url: 'https://patrykgolabek.dev/eda/notebooks/' },
+  ]} />
+  <EDAJsonLd
+    title="Jupyter Notebooks"
+    description="Download 10 Jupyter notebooks for hands-on Exploratory Data Analysis with real NIST datasets. Each notebook includes data loading, 4-plot diagnostics, hypothesis tests, and interpretation. Run locally or instantly in Google Colab."
+    url="https://patrykgolabek.dev/eda/notebooks/"
+    pageType="reference"
+  />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <EdaBreadcrumb category="Jupyter Notebooks" />
+
+    <header class="mb-10">
+      <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Jupyter Notebooks</h1>
+      <p class="text-sm text-[var(--color-text-secondary)]">10 notebooks for hands-on EDA</p>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-3xl">
+        Each notebook walks through a complete Exploratory Data Analysis on a real NIST dataset,
+        including data loading, 4-plot diagnostics, hypothesis tests, and interpretation.
+        Download the ZIP to run locally or open instantly in Google Colab.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {notebooks.map((nb) => (
+        <div class="rounded-lg border border-[var(--color-border)] p-5">
+          <h3 class="text-base font-heading font-bold">{nb.title}</h3>
+          <p class="text-xs text-[var(--color-text-secondary)] mt-1">Section {nb.nistSection}</p>
+          <p class="text-sm text-[var(--color-text-secondary)] mt-2 line-clamp-3">{nb.description}</p>
+          <div class="flex flex-wrap items-center gap-3 mt-4">
+            <a
+              href={nb.downloadUrl}
+              download
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded bg-[var(--color-accent)] !text-white hover:opacity-90 transition-opacity !no-underline"
+            >
+              Download ZIP
+            </a>
+            <a
+              href={nb.colabUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded border border-[var(--color-border)] !text-[var(--color-text-secondary)] hover:!text-[var(--color-accent)] hover:border-[var(--color-accent)] transition-colors !no-underline"
+            >
+              Open in Colab
+            </a>
+            <a
+              href={nb.caseStudyUrl}
+              class="text-sm text-[var(--color-accent)] hover:underline"
+            >
+              View case study
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </article>
+</EDALayout>
