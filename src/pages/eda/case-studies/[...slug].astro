@@ -4,6 +4,7 @@ import EDALayout from '../../../layouts/EDALayout.astro';
 import EdaBreadcrumb from '../../../components/eda/EdaBreadcrumb.astro';
 import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import EDAJsonLd from '../../../components/eda/EDAJsonLd.astro';
+import NotebookActions from '../../../components/eda/NotebookActions.astro';
 export async function getStaticPaths() {
   const pages = await getCollection('edaPages');
   const caseStudies = pages.filter((p) => p.data.category === 'case-studies');
@@ -56,6 +57,8 @@ const slug = page.id.replace('case-studies/', '');
         NIST/SEMATECH Section {page.data.nistSection}
       </p>
     </header>
+
+    <NotebookActions slug={slug} />
 
     <div class="prose-foundations
       [&>h2]:text-xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:mt-10 [&>h2]:mb-4
