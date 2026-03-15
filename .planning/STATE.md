@@ -90,7 +90,9 @@ Research decisions for v1.17:
 - NotebookActions placed outside prose-foundations div to avoid CSS conflicts (99-02)
 - Inlined residual 4-plot in random-walk builder (Plan 01/02 parallel Wave 1, no cross-import) (100-02)
 - AR(1) section builder follows standard (config, slug, startIndex) signature in model-fitting/ subdirectory (100-02)
-- [Phase 100]: Inlined residual 4-plot in random-walk builder (Plan 01/02 parallel Wave 1, no cross-import)
+- Inline markdown for beam-specific EDA interpretation, residual summary, and conclusions (not reusable, beam-specific) (100-01)
+- Separate reusable section builders for sinusoidal fit and residual validation in model-fitting/ subdirectory (100-01)
+- Advanced template directory templates/advanced/ for non-standard notebook builders (100-01)
 
 ### Pending Todos
 
@@ -116,4 +118,4 @@ None.
 Last session: 2026-03-15T10:55:38.203Z
 Stopped at: Completed 100-02-PLAN.md
 Resume file: None
-Next: Continue Phase 100 (Plans 01, 03, 04 remaining)
+Next: Continue Phase 100 (Plans 03, 04 remaining)

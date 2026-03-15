@@ -26,7 +26,7 @@ Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap pha
 
 ### Advanced Notebooks
 
-- [ ] **NBADV-01**: Beam Deflections notebook with sinusoidal model fitting and residual validation
+- [x] **NBADV-01**: Beam Deflections notebook with sinusoidal model fitting and residual validation
 - [x] **NBADV-02**: Random Walk notebook with AR(1) model development and residual analysis
 - [ ] **NBADV-03**: Ceramic Strength notebook with DOE analysis (batch effects, factor rankings, interaction plots)
 
@@ -85,7 +85,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NBSTD-05 | Phase 97 | Complete |
 | NBSTD-06 | Phase 97 | Complete |
 | NBSTD-07 | Phase 97 | Complete |
-| NBADV-01 | Phase 100 | Pending |
+| NBADV-01 | Phase 100 | Complete |
 | NBADV-02 | Phase 100 | Complete |
 | NBADV-03 | Phase 100 | Pending |
 | PACK-01 | Phase 98 | Complete |
