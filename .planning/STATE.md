@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 100-03-PLAN.md
-last_updated: "2026-03-15T10:54:42Z"
-last_activity: 2026-03-15 — Plan 100-03 complete (ceramic strength DOE notebook, 21/21 tests)
+stopped_at: Completed 100-04-PLAN.md
+last_updated: "2026-03-15T11:04:39Z"
+last_activity: 2026-03-15 — Phase 100 complete (all 10 notebooks wired, packaged, committed)
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
-  percent: 67
+  completed_phases: 5
+  total_plans: 13
+  completed_plans: 13
+  percent: 83
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.17 EDA Jupyter Notebooks — Phase 100 (Advanced Case Study Notebooks)
+**Current focus:** v1.17 EDA Jupyter Notebooks — Phase 101 (Site Integration)
 
 ## Current Position
 
-Phase: 100 in progress
-Plan: 100-03 complete (Wave 1)
-Status: Executing Phase 100 plans (Wave 1: Plans 01, 02, 03 complete)
-Last activity: 2026-03-15 — Plan 100-03 complete (ceramic strength DOE notebook, 21/21 tests)
+Phase: 100 complete, ready for Phase 101
+Plan: 100-04 complete (Phase 100 fully done)
+Status: Phase 100 complete — all 10 notebooks built, packaged, committed, and discoverable
+Last activity: 2026-03-15 — Phase 100 complete (all 10 notebooks wired, packaged, committed)
 
-Progress: [██████░░░░] 67% (4/6 phases)
+Progress: [████████░░] 83% (5/6 phases)
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [██████░░░░] 67% (4/6 phases)
 | Phase 100 P01 | 3min | 1 task (TDD) | 4 files |
 | Phase 100 P02 | 3min | 1 task (TDD) | 3 files |
 | Phase 100 P03 | 3min | 1 task (TDD) | 5 files |
+| Phase 100 P04 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Research decisions for v1.17:
 - Custom DOE intro with 4 goals (factor rankings, effect magnitudes, optimal settings, batch variability) instead of standard 5 EDA goals (100-03)
 - DOE section builders in sections/doe/ subdirectory (batch-effect, factor-analysis, anova) (100-03)
 - Lab effect section inline in ceramic template (ceramic-specific, not reusable) (100-03)
+- buildNotebook() switch dispatcher in packager.ts for advanced slug routing (100-04)
+- ALL_CASE_STUDY_SLUGS from registry replaces STANDARD_SLUGS in all infrastructure files (100-04)
 
 ### Pending Todos
 
@@ -119,7 +122,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T10:54:42Z
-Stopped at: Completed 100-03-PLAN.md
+Last session: 2026-03-15T11:04:39Z
+Stopped at: Completed 100-04-PLAN.md
 Resume file: None
-Next: Continue Phase 100 (Plan 04 remaining)
+Next: Phase 101 (Site Integration) — notebooks landing page, blog post, LLMs.txt, sitemap, OG image
