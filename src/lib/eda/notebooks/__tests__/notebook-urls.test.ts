@@ -6,6 +6,7 @@ import {
   NOTEBOOK_SLUGS,
 } from '../notebook-urls';
 import { STANDARD_SLUGS } from '../templates/standard';
+import { ALL_CASE_STUDY_SLUGS } from '../registry/index';
 
 describe('getDownloadUrl', () => {
   it('returns correct download path for a standard slug', () => {
@@ -44,8 +45,14 @@ describe('hasNotebook', () => {
     expect(hasNotebook('normal-random-numbers')).toBe(true);
   });
 
-  it('returns false for an advanced slug (beam-deflections)', () => {
-    expect(hasNotebook('beam-deflections')).toBe(false);
+  it('returns true for an advanced slug (beam-deflections)', () => {
+    expect(hasNotebook('beam-deflections')).toBe(true);
+  });
+
+  it('returns true for all 10 case study slugs', () => {
+    for (const slug of ALL_CASE_STUDY_SLUGS) {
+      expect(hasNotebook(slug)).toBe(true);
+    }
   });
 
   it('returns false for a nonexistent slug', () => {
@@ -54,8 +61,20 @@ describe('hasNotebook', () => {
 });
 
 describe('NOTEBOOK_SLUGS', () => {
-  it('has exactly 7 entries matching STANDARD_SLUGS', () => {
-    expect(NOTEBOOK_SLUGS).toHaveLength(7);
-    expect(NOTEBOOK_SLUGS).toEqual(STANDARD_SLUGS);
+  it('has exactly 10 entries matching ALL_CASE_STUDY_SLUGS', () => {
+    expect(NOTEBOOK_SLUGS).toHaveLength(10);
+    expect(NOTEBOOK_SLUGS).toEqual(ALL_CASE_STUDY_SLUGS);
+  });
+
+  it('includes all 7 standard slugs', () => {
+    for (const slug of STANDARD_SLUGS) {
+      expect(NOTEBOOK_SLUGS).toContain(slug);
+    }
+  });
+
+  it('includes all 3 advanced slugs', () => {
+    expect(NOTEBOOK_SLUGS).toContain('beam-deflections');
+    expect(NOTEBOOK_SLUGS).toContain('random-walk');
+    expect(NOTEBOOK_SLUGS).toContain('ceramic-strength');
   });
 });
