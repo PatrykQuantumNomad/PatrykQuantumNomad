@@ -462,14 +462,14 @@ const ALL_SLUGS = [...STANDARD_SLUGS, ...ADVANCED_SLUGS];
 ### Phase Requirements -> Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| NBADV-01 | Beam notebook has sinusoidal model fit with curve_fit | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "beam" -x` | No - Wave 0 |
-| NBADV-01 | Beam notebook residuals 4-plot section present | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "residual" -x` | No - Wave 0 |
-| NBADV-02 | Random walk notebook has AR(1) linregress fit | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "random-walk" -x` | No - Wave 0 |
-| NBADV-02 | Random walk residual analysis present | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "residual" -x` | No - Wave 0 |
-| NBADV-03 | Ceramic notebook has batch effect analysis | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "ceramic" -x` | No - Wave 0 |
-| NBADV-03 | Ceramic notebook has interaction plots | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "interaction" -x` | No - Wave 0 |
-| NBADV-03 | Ceramic notebook has one-way ANOVA | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "anova" -x` | No - Wave 0 |
-| ALL | All 3 notebooks produce valid nbformat v4.5 JSON | unit | `npx vitest run src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts -t "nbformat" -x` | No - Wave 0 |
+| NBADV-01 | Beam notebook has sinusoidal model fit with curve_fit | unit | `npx vitest run src/lib/eda/notebooks/__tests__/beam-deflections-notebook.test.ts` | No - Wave 0 |
+| NBADV-01 | Beam notebook residuals 4-plot section present | unit | `npx vitest run src/lib/eda/notebooks/__tests__/beam-deflections-notebook.test.ts` | No - Wave 0 |
+| NBADV-02 | Random walk notebook has AR(1) linregress fit | unit | `npx vitest run src/lib/eda/notebooks/__tests__/random-walk-notebook.test.ts` | No - Wave 0 |
+| NBADV-02 | Random walk residual analysis present | unit | `npx vitest run src/lib/eda/notebooks/__tests__/random-walk-notebook.test.ts` | No - Wave 0 |
+| NBADV-03 | Ceramic notebook has batch effect analysis | unit | `npx vitest run src/lib/eda/notebooks/__tests__/ceramic-strength-notebook.test.ts` | No - Wave 0 |
+| NBADV-03 | Ceramic notebook has interaction plots | unit | `npx vitest run src/lib/eda/notebooks/__tests__/ceramic-strength-notebook.test.ts` | No - Wave 0 |
+| NBADV-03 | Ceramic notebook has one-way ANOVA | unit | `npx vitest run src/lib/eda/notebooks/__tests__/ceramic-strength-notebook.test.ts` | No - Wave 0 |
+| ALL | All 3 notebooks produce valid nbformat v4.5 JSON | unit | `npx vitest run src/lib/eda/notebooks/__tests__/*-notebook.test.ts` | No - Wave 0 |
 | ALL | All 3 .ipynb committed files exist in notebooks/eda/ | unit | `npx vitest run src/lib/eda/notebooks/__tests__/committed-notebooks.test.ts -x` | Yes (needs update) |
 | ALL | Packager produces ZIPs for all 10 slugs | unit | `npx vitest run src/lib/eda/notebooks/__tests__/notebook-packager.test.ts -x` | Yes (needs update) |
 
@@ -479,7 +479,9 @@ const ALL_SLUGS = [...STANDARD_SLUGS, ...ADVANCED_SLUGS];
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
-- [ ] `src/lib/eda/notebooks/__tests__/advanced-notebooks.test.ts` -- covers NBADV-01, NBADV-02, NBADV-03
+- [ ] `src/lib/eda/notebooks/__tests__/beam-deflections-notebook.test.ts` -- covers NBADV-01
+- [ ] `src/lib/eda/notebooks/__tests__/random-walk-notebook.test.ts` -- covers NBADV-02
+- [ ] `src/lib/eda/notebooks/__tests__/ceramic-strength-notebook.test.ts` -- covers NBADV-03
 - [ ] Update `committed-notebooks.test.ts` -- extend to validate all 10 slugs
 - [ ] Update `notebook-packager.test.ts` -- extend to package all 10 slugs
 
