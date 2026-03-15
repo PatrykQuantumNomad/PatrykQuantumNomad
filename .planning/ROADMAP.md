@@ -16,7 +16,7 @@
 - [x] **Phase 98: Packaging Pipeline** - ZIP packaging with archiver, Astro build integration hook, and static file serving (completed 2026-03-14)
 - [x] **Phase 99: Download UI and Colab Integration** - Download buttons on case study pages, Open in Colab badges, and committed .ipynb files for Colab GitHub URLs (completed 2026-03-15)
 - [x] **Phase 100: Advanced Case Study Notebooks** - 3 complex notebooks: sinusoidal model fitting, AR(1) development, and DOE multi-factor analysis (completed 2026-03-15)
-- [ ] **Phase 101: Site Integration** - Notebooks landing page, companion blog post, LLMs.txt update, sitemap inclusion, and OG image
+- [x] **Phase 101: Site Integration** - Notebooks landing page, companion blog post, LLMs.txt update, sitemap inclusion, and OG image (completed 2026-03-15)
 
 ## Phase Details
 
@@ -102,10 +102,10 @@ Plans:
   3. A companion blog post about EDA learning with Jupyter notebooks is published
   4. LLMs.txt includes a notebooks section and the notebooks landing page appears in the sitemap
   5. An OG image is generated for the notebooks landing page via Satori + Sharp
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 101-01-PLAN.md — Notebooks landing page at /eda/notebooks/ with card grid, OG image endpoint, and EDA_ROUTES update
-- [ ] 101-02-PLAN.md — Companion blog post, LLMs.txt notebooks subsection, and EDA index cross-link
+- [x] 101-01-PLAN.md — Notebooks landing page at /eda/notebooks/ with card grid, OG image endpoint, and EDA_ROUTES update
+- [x] 101-02-PLAN.md — Companion blog post, LLMs.txt notebooks subsection, and EDA index cross-link
 
 ## Progress
 
@@ -119,4 +119,4 @@ Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
 | 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
 | 99. Download UI and Colab Integration | 2/2 | Complete   | 2026-03-15 |
 | 100. Advanced Case Study Notebooks | 4/4 | Complete   | 2026-03-15 |
-| 101. Site Integration | 1/2 | In Progress|  |
+| 101. Site Integration | 2/2 | Complete   | 2026-03-15 |

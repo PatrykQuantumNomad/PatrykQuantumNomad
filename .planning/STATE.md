@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 101-01-PLAN.md
-last_updated: "2026-03-15T11:33:10.192Z"
-last_activity: 2026-03-15 — 101-01 complete (notebooks landing page, OG image, routes)
+stopped_at: Completed 101-02-PLAN.md
+last_updated: "2026-03-15T11:33:56Z"
+last_activity: 2026-03-15 — Phase 101 complete (all site integration done, milestone v1.17 complete)
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 14
   completed_plans: 14
   percent: 100
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 101 (Site Integration)
-Plan: 101-01 complete, ready for 101-02
-Status: Notebooks landing page live at /eda/notebooks/ with OG image endpoint
-Last activity: 2026-03-15 — 101-01 complete (notebooks landing page, OG image, routes)
+Phase: 101 complete (Site Integration) — all 6 phases done
+Plan: 101-02 complete (Phase 101 fully done, milestone v1.17 complete)
+Status: v1.17 EDA Jupyter Notebooks milestone complete — 14 plans across 6 phases
+Last activity: 2026-03-15 — Phase 101 complete (blog post, LLMs.txt, EDA index callout)
 
 Progress: [██████████] 100% (14/14 plans completed)
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100% (14/14 plans completed)
 | Phase 100 P03 | 3min | 1 task (TDD) | 5 files |
 | Phase 100 P04 | 5min | 2 tasks | 10 files |
 | Phase 101 P01 | 3min | 2 tasks | 3 files |
+| Phase 101 P02 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Research decisions for v1.17:
 - ALL_CASE_STUDY_SLUGS from registry replaces STANDARD_SLUGS in all infrastructure files (100-04)
 - [Phase 101]: Card uses div (not anchor) since each card has 3 independent links
 - [Phase 101]: OG image follows existing case-studies.png.ts pattern with getOrGenerateOgImage caching
+- [Phase 101]: Case Studies count updated from 9 to 10 in LLMs.txt (101-02)
+- [Phase 101]: Registry-driven LLMs.txt content via imported CASE_STUDY_REGISTRY (101-02)
 
 ### Pending Todos
 
@@ -125,7 +128,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T11:33:10.189Z
-Stopped at: Completed 101-01-PLAN.md
+Last session: 2026-03-15T11:33:56Z
+Stopped at: Completed 101-02-PLAN.md
 Resume file: None
-Next: Phase 101 (Site Integration) — notebooks landing page, blog post, LLMs.txt, sitemap, OG image
+Next: Milestone v1.17 complete — all 6 phases (96-101) shipped
