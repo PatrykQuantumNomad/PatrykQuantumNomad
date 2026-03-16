@@ -1,14 +1,28 @@
 /**
- * Intro section: title + background + goals markdown cells.
+ * Intro section: branding + title + background + goals markdown cells.
  *
- * Produces 2 markdown cells:
- * 1. Title with case study name and NIST section reference
- * 2. Background description and analysis goals
+ * Produces 3 markdown cells:
+ * 1. Branding banner with author and site link
+ * 2. Title with case study name and NIST section reference
+ * 3. Background description and analysis goals
  */
 
 import type { Cell } from '../../types';
 import type { CaseStudyConfig } from '../../registry/types';
 import { markdownCell } from '../../cells';
+
+/**
+ * Build the branding banner cell shown at the top of every notebook.
+ */
+export function buildBrandingCell(slug: string, index: number): Cell {
+  return markdownCell(slug, index, [
+    '> **EDA Visual Encyclopedia** | [patrykgolabek.dev/eda](https://patrykgolabek.dev/eda/)',
+    '>',
+    '> *By Patryk Golabek — Cloud-Native Software Architect*',
+    '>',
+    '> Interactive case studies, technique references, and downloadable notebooks for Exploratory Data Analysis.',
+  ]);
+}
 
 /**
  * Build intro section cells.
@@ -24,6 +38,9 @@ export function buildIntro(
 ): { cells: Cell[]; nextIndex: number } {
   let idx = startIndex;
   const cells: Cell[] = [];
+
+  // Branding banner
+  cells.push(buildBrandingCell(slug, idx++));
 
   // Title cell
   cells.push(markdownCell(slug, idx++, [

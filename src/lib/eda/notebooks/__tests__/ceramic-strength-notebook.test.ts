@@ -37,10 +37,10 @@ describe('buildCeramicStrengthNotebook structure', () => {
     expect(nb.cells.length).toBeGreaterThanOrEqual(25);
   });
 
-  it('first markdown cell contains "Ceramic Strength" (title)', () => {
+  it('second markdown cell contains "Ceramic Strength" (title after branding)', () => {
     const nb = buildCeramicStrengthNotebook();
-    const firstMd = nb.cells.find((c) => c.cell_type === 'markdown')!;
-    const src = Array.isArray(firstMd.source) ? firstMd.source.join('') : firstMd.source;
+    const mdCells = nb.cells.filter((c) => c.cell_type === 'markdown');
+    const src = Array.isArray(mdCells[1].source) ? mdCells[1].source.join('') : mdCells[1].source;
     expect(src).toContain('Ceramic Strength');
   });
 
@@ -65,11 +65,11 @@ describe('buildCeramicStrengthNotebook structure', () => {
 });
 
 describe('custom DOE intro (not standard 5 EDA goals)', () => {
-  it('second markdown cell contains DOE goals (strongest factor / factor rankings / optimal settings)', () => {
+  it('third markdown cell contains DOE goals (strongest factor / factor rankings / optimal settings)', () => {
     const nb = buildCeramicStrengthNotebook();
     const mdCells = nb.cells.filter((c) => c.cell_type === 'markdown');
-    const secondMdSrc = Array.isArray(mdCells[1].source)
-      ? mdCells[1].source.join('')
+    const secondMdSrc = Array.isArray(mdCells[2].source)
+      ? mdCells[2].source.join('')
       : mdCells[1].source;
     // Must contain DOE-specific goals, not standard 5 EDA goals
     expect(secondMdSrc).toMatch(/strongest factor|factor rankings|optimal settings/i);

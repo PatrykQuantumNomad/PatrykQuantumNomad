@@ -43,11 +43,11 @@ describe('Random Walk Advanced Notebook', () => {
       expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('first markdown cell contains "Random Walk"', () => {
-      expect(notebook.cells[0].cell_type).toBe('markdown');
-      const src = Array.isArray(notebook.cells[0].source)
-        ? notebook.cells[0].source.join('')
-        : notebook.cells[0].source;
+    it('second markdown cell contains "Random Walk" (title after branding)', () => {
+      expect(notebook.cells[1].cell_type).toBe('markdown');
+      const src = Array.isArray(notebook.cells[1].source)
+        ? notebook.cells[1].source.join('')
+        : notebook.cells[1].source;
       expect(src).toContain('Random Walk');
     });
   });

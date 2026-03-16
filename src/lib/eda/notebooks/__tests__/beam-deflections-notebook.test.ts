@@ -58,10 +58,10 @@ describe('buildBeamDeflectionsNotebook structure', () => {
 });
 
 describe('standard sections (reused)', () => {
-  it('first markdown cell contains "Beam Deflections" (intro section)', () => {
+  it('second markdown cell contains "Beam Deflections" (title after branding)', () => {
     const nb = buildBeamDeflectionsNotebook();
-    const firstMd = nb.cells.find((c) => c.cell_type === 'markdown')!;
-    const src = Array.isArray(firstMd.source) ? firstMd.source.join('') : firstMd.source;
+    const mdCells = nb.cells.filter((c) => c.cell_type === 'markdown');
+    const src = Array.isArray(mdCells[1].source) ? mdCells[1].source.join('') : mdCells[1].source;
     expect(src).toContain('Beam Deflections');
   });
 

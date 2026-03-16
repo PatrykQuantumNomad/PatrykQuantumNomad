@@ -22,6 +22,7 @@ import type { NotebookV4, Cell } from '../../types';
 import { getCaseStudyConfig } from '../../registry/index';
 import { createNotebook } from '../../notebook';
 import { markdownCell, codeCell } from '../../cells';
+import { buildBrandingCell } from '../sections/intro';
 import { buildSetup } from '../sections/setup';
 import { buildDataLoading } from '../sections/data-loading';
 import { buildSummaryStats } from '../sections/summary-stats';
@@ -48,6 +49,9 @@ export function buildCeramicStrengthNotebook(): NotebookV4 {
   let idx = 0;
 
   // ── Section 1: Custom DOE Intro (NOT standard buildIntro) ──
+  // Branding banner
+  allCells.push(buildBrandingCell(slug, idx++));
+
   // Title cell
   allCells.push(markdownCell(slug, idx++, [
     `# ${config.title}`,
