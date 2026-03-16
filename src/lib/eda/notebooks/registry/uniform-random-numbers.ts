@@ -16,7 +16,7 @@ export const config: CaseStudyConfig = {
     max: 0.9971,
     median: 0.5184,
   },
-  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4212.htm',
+  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda422.htm',
   githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/uniform-random-numbers.csv',
   plotTitles: {
     fourPlot: '4-Plot of Uniform Random Numbers',

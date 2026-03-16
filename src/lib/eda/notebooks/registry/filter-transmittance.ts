@@ -16,7 +16,7 @@ export const config: CaseStudyConfig = {
     max: 2.0027,
     median: 2.0018,
   },
-  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4261.htm',
+  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda426.htm',
   githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/filter-transmittance.csv',
   plotTitles: {
     fourPlot: '4-Plot of Filter Transmittance',

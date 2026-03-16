@@ -15,7 +15,7 @@ export const config: CaseStudyConfig = {
     min: -1.6384,
     max: 7.4152,
   },
-  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4231.htm',
+  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda423.htm',
   githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/random-walk.csv',
   plotTitles: {
     fourPlot: '4-Plot of Random Walk',

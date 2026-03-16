@@ -20,7 +20,7 @@ export const config: CaseStudyConfig = {
     max: 821.6540,
     median: 646.6275,
   },
-  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda42a1.htm',
+  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda42a.htm',
   githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/ceramic-strength.csv',
   plotTitles: {
     fourPlot: '4-Plot of Ceramic Strength',
