@@ -16,7 +16,7 @@ export const config: CaseStudyConfig = {
     max: 300.0,
     median: -162.0,
   },
-  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda4251.htm',
+  nistUrl: 'https://www.itl.nist.gov/div898/handbook/eda/section4/eda425.htm',
   githubRawUrl: 'https://raw.githubusercontent.com/PatrykQuantumNomad/PatrykQuantumNomad/main/notebooks/eda/data/beam-deflections.csv',
   plotTitles: {
     fourPlot: '4-Plot of Beam Deflections',
