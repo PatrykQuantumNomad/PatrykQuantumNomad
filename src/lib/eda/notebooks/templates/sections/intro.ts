@@ -2,9 +2,9 @@
  * Intro section: branding + title + background + goals markdown cells.
  *
  * Produces 3 markdown cells:
- * 1. Branding banner with author and site link
+ * 1. Branding banner with site link
  * 2. Title with case study name and NIST section reference
- * 3. Background description and analysis goals
+ * 3. Background with generation context and analysis goals
  */
 
 import type { Cell } from '../../types';
@@ -16,11 +16,7 @@ import { markdownCell } from '../../cells';
  */
 export function buildBrandingCell(slug: string, index: number): Cell {
   return markdownCell(slug, index, [
-    '> **EDA Visual Encyclopedia** | [patrykgolabek.dev/eda](https://patrykgolabek.dev/eda/)',
-    '>',
-    '> *By Patryk Golabek — Cloud-Native Software Architect*',
-    '>',
-    '> Interactive case studies, technique references, and downloadable notebooks for Exploratory Data Analysis.',
+    '**[EDA Visual Encyclopedia](https://patrykgolabek.dev/eda/)** — Interactive case studies, technique references, and downloadable notebooks for Exploratory Data Analysis.',
   ]);
 }
 
@@ -52,15 +48,18 @@ export function buildIntro(
   ]));
 
   // Background and goals cell
-  const descLine = config.description
-    ? `${config.description}.`
-    : `EDA case study for ${config.title}.`;
-
-  cells.push(markdownCell(slug, idx++, [
+  const backgroundLines: string[] = [
     '## Background',
     '',
-    descLine,
-    '',
+  ];
+
+  if (config.generation) {
+    backgroundLines.push('### Generation', '', config.generation, '');
+  } else if (config.description) {
+    backgroundLines.push(`${config.description}.`, '');
+  }
+
+  backgroundLines.push(
     '### Analysis Goals',
     '',
     '1. **Location:** What is a typical value?',
@@ -68,7 +67,9 @@ export function buildIntro(
     '3. **Distribution:** What is the shape of the distribution?',
     '4. **Randomness:** Are the data random (no autocorrelation or trend)?',
     '5. **Outliers:** Are there any outliers in the data?',
-  ]));
+  );
+
+  cells.push(markdownCell(slug, idx++, backgroundLines));
 
   return { cells, nextIndex: idx };
 }

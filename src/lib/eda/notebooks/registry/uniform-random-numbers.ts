@@ -31,4 +31,5 @@ export const config: CaseStudyConfig = {
   },
   valuesPerLine: 5,
   description: 'Rand Corporation 500 uniform U(0,1) random numbers',
+  generation: 'The uniform random numbers used in this case study are from a Rand Corporation publication. The motivation for studying a set of uniform random numbers is to illustrate the effects of a known underlying non-normal distribution.',
 };

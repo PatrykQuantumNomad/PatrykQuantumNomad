@@ -29,4 +29,5 @@ export const config: CaseStudyConfig = {
     type: 'sinusoidal',
   },
   description: 'H. S. Lew, NBS, steel-concrete beam deflection (1969)',
+  generation: 'This data set was collected by H. S. Lew of NIST in 1969 to measure steel-concrete beam deflections, with the response variable being the deflection of a beam from the center point. The motivation is to show how the underlying assumptions are affected by periodic data.',
 };

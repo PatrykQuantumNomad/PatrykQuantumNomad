@@ -61,11 +61,13 @@ export function buildCeramicStrengthNotebook(): NotebookV4 {
     `Source: [${config.nistUrl}](${config.nistUrl})`,
   ]));
 
-  // Background with DOE-specific goals
+  // Background with generation context and DOE-specific goals
   allCells.push(markdownCell(slug, idx++, [
     '## Background',
     '',
-    `${config.description}.`,
+    '### Generation',
+    '',
+    config.generation || `${config.description}.`,
     '',
     'This is a **2^4 full factorial design of experiment (DOE)** with factors:',
     '- **X1:** Table Speed (-1 = slow, +1 = fast)',

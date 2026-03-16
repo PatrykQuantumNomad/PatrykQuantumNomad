@@ -66,4 +66,6 @@ export interface CaseStudyConfig {
   valuesPerLine?: number;
   /** Brief description of the case study */
   description?: string;
+  /** How the data was generated/collected (from NIST Background and Data page) */
+  generation?: string;
 }

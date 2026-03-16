@@ -27,4 +27,5 @@ export const config: CaseStudyConfig = {
   },
   valuesPerLine: 5,
   description: 'Bob Soulen, NIST, Josephson junction voltage counts (Oct 1971)',
+  generation: 'This data set was collected by Bob Soulen of NIST in October 1971 as a sequence of observations from a volt meter to ascertain the process temperature in a Josephson junction cryothermometry experiment, with the response variable being voltage counts. The motivation is to illustrate the case where there is discreteness in the measurements, but the underlying assumptions hold.',
 };

@@ -36,4 +36,5 @@ export const config: CaseStudyConfig = {
     { name: 'Direction', column: 'X4', levels: [-1, 1] },
   ],
   description: 'Said Jahanmir, NIST Ceramics Division, ceramic flexural strength (1996)',
+  generation: 'The data were collected by Said Jahanmir of the NIST Ceramics Division in 1996 in connection with a NIST/industry ceramics consortium for strength optimization of ceramic strength. The motivation is to illustrate the analysis of multiple factors from a designed experiment.',
 };

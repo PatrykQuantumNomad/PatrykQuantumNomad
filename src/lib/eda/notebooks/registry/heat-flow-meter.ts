@@ -26,4 +26,5 @@ export const config: CaseStudyConfig = {
     probabilityPlot: 'Normal Probability Plot of Heat Flow Meter Calibration Factor',
   },
   description: 'Bob Zarr, NIST, heat flow meter calibration factor (Jan 1990)',
+  generation: 'This data set was collected by Bob Zarr of NIST in January 1990 from a heat flow meter calibration and stability analysis, with the response variable being a calibration factor. The motivation is to illustrate a well-behaved process where the underlying assumptions hold and the process is in statistical control.',
 };

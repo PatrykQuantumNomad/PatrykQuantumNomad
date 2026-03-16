@@ -26,4 +26,5 @@ export const config: CaseStudyConfig = {
     probabilityPlot: 'Normal Probability Plot of Fatigue Life',
   },
   description: 'Birnbaum & Saunders (1958), 6061-T6 aluminum fatigue life (kcycles)',
+  generation: 'This data set comprises measurements of fatigue life (thousands of cycles until rupture) of rectangular strips of 6061-T6 aluminum sheeting, subjected to periodic loading with maximum stress of 21,000 psi, as reported by Birnbaum and Saunders (1958).',
 };

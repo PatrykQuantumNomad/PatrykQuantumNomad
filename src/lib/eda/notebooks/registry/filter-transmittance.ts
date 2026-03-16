@@ -26,4 +26,5 @@ export const config: CaseStudyConfig = {
     probabilityPlot: 'Normal Probability Plot of Filter Transmittance',
   },
   description: 'Mavrodineanu, NIST, glass filter transmittance (1970s)',
+  generation: 'This data set was collected by NIST chemist Radu Mavrodineanu in the 1970s from an automatic data acquisition system for a filter transmittance experiment. The motivation is to show how underlying autocorrelation in a relatively small data set helped the scientist detect problems with the automatic data acquisition system.',
 };

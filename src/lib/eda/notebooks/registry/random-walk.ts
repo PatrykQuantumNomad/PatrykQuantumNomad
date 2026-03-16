@@ -28,4 +28,5 @@ export const config: CaseStudyConfig = {
     type: 'ar1',
   },
   description: 'Cumulative sum of uniform random numbers minus 0.5',
+  generation: 'A random walk can be generated from a set of uniform random numbers by the formula R(i) = SUM[j=1 to i][(U(j) - 0.5)]. The motivation for studying random walk data is to illustrate the effects of a known underlying autocorrelation structure (i.e., non-randomness) in the data.',
 };

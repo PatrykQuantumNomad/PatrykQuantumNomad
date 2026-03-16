@@ -31,4 +31,5 @@ export const config: CaseStudyConfig = {
   },
   valuesPerLine: 10,
   description: 'Rand Corporation 500 standard normal N(0,1) random numbers',
+  generation: 'The normal random numbers used in this case study are from a Rand Corporation publication. The motivation for studying a set of normal random numbers is to illustrate the ideal case where all four underlying assumptions hold.',
 };

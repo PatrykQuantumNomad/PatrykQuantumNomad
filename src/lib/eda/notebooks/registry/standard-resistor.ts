@@ -26,4 +26,5 @@ export const config: CaseStudyConfig = {
     probabilityPlot: 'Normal Probability Plot of Standard Resistor Values',
   },
   description: 'Ron Dziuba, NIST, standard resistor measurements (1980-1985)',
+  generation: 'This data set was collected by Ron Dziuba of NIST over a 5-year period from 1980 to 1985, with the response variable being resistor values. The motivation is to illustrate data that violate the assumptions of constant location and scale.',
 };
