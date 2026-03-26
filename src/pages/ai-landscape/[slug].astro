@@ -1,0 +1,151 @@
+---
+/**
+ * [slug].astro -- AI Landscape concept detail page.
+ * Generates 51 static pages at /ai-landscape/{slug}/ using getStaticPaths.
+ * Each page shows simple + technical descriptions, whyItMatters, ancestry breadcrumb,
+ * related concepts, cluster color accent, and JSON-LD structured data.
+ * Zero client-side JavaScript -- purely static SEO content pages.
+ */
+import { getCollection } from 'astro:content';
+import graphData from '../../data/ai-landscape/graph.json';
+import { getNodeRelationships } from '../../lib/ai-landscape/schema';
+import type { AiNode, Cluster } from '../../lib/ai-landscape/schema';
+import { buildAncestryChain } from '../../lib/ai-landscape/ancestry';
+import { conceptUrl, ogImageUrl, AI_LANDSCAPE_BASE } from '../../lib/ai-landscape/routes';
+import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import DefinedTermJsonLd from '../../components/ai-landscape/DefinedTermJsonLd.astro';
+import AncestryBreadcrumb from '../../components/ai-landscape/AncestryBreadcrumb.astro';
+import RelatedConcepts from '../../components/ai-landscape/RelatedConcepts.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('aiLandscape');
+  const nodesMap = new Map<string, AiNode>(entries.map((e) => [e.data.slug, e.data as AiNode]));
+  const clusters = new Map<string, Cluster>(graphData.clusters.map((c) => [c.id, c as Cluster]));
+
+  return entries.map((entry) => {
+    const node = entry.data as AiNode;
+    const relationships = getNodeRelationships(node.slug, graphData.edges);
+    const ancestry = buildAncestryChain(node.slug, nodesMap);
+    const cluster = clusters.get(node.cluster);
+
+    // Convert Map to Record with only the fields needed by RelatedConcepts
+    const nodesRecord: Record<string, { name: string; slug: string }> = {};
+    for (const [key, value] of nodesMap) {
+      nodesRecord[key] = { name: value.name, slug: value.slug };
+    }
+
+    return {
+      params: { slug: node.slug },
+      props: {
+        node,
+        cluster,
+        relationships,
+        ancestry,
+        nodesMap: nodesRecord,
+      },
+    };
+  });
+}
+
+const { node, cluster, relationships, ancestry, nodesMap } = Astro.props;
+
+// SEO metadata
+const metaDescription = node.whyItMatters.length <= 155
+  ? node.whyItMatters
+  : node.whyItMatters.slice(0, 155).replace(/\s+\S*$/, '') + '...';
+const ogImage = new URL(ogImageUrl(node.slug), Astro.site).toString();
+const canonicalUrl = new URL(conceptUrl(node.slug), Astro.site).toString();
+
+// Breadcrumb JSON-LD crumbs: Home > AI Landscape > ...ancestry... > current
+const breadcrumbCrumbs = [
+  { name: 'Home', url: 'https://patrykgolabek.dev/' },
+  { name: 'AI Landscape', url: 'https://patrykgolabek.dev/ai-landscape/' },
+  ...ancestry.map((item) => ({
+    name: item.name,
+    url: 'https://patrykgolabek.dev' + conceptUrl(item.slug),
+  })),
+  { name: node.name, url: 'https://patrykgolabek.dev' + conceptUrl(node.slug) },
+];
+---
+
+<Layout
+  title={`${node.name} -- AI Landscape | Patryk Golabek`}
+  description={metaDescription}
+  ogImage={ogImage}
+  ogImageAlt={`AI Landscape concept: ${node.name} (${cluster?.name || node.cluster})`}
+>
+  <DefinedTermJsonLd
+    name={node.name}
+    description={node.simpleDescription}
+    url={canonicalUrl}
+  />
+  <BreadcrumbJsonLd crumbs={breadcrumbCrumbs} />
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Back link -->
+    <a
+      href={AI_LANDSCAPE_BASE}
+      class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6"
+    >
+      <span aria-hidden="true">&larr;</span> Back to AI Landscape
+    </a>
+
+    <!-- Visual ancestry breadcrumb -->
+    <AncestryBreadcrumb ancestry={ancestry} currentName={node.name} />
+
+    <!-- Header with cluster color accent -->
+    <header class="mt-4" style={`border-left: 4px solid ${cluster?.darkColor || '#c44b20'}`}>
+      <div class="pl-4">
+        <h1 class="text-3xl sm:text-4xl font-heading font-bold">{node.name}</h1>
+        <span
+          class="inline-block mt-2 px-3 py-1 text-xs font-bold rounded-full"
+          style={`background-color: ${cluster?.color || '#f5f5f5'}; color: ${cluster?.darkColor || '#c44b20'}`}
+        >
+          {cluster?.name || node.cluster}
+        </span>
+      </div>
+    </header>
+
+    <!-- Simple explanation (tier 1) -->
+    <section class="mt-10">
+      <h2 class="text-xl font-heading font-bold mb-3">What is {node.name}?</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed">{node.simpleDescription}</p>
+    </section>
+
+    <!-- Technical explanation (tier 2) -->
+    <section class="mt-10">
+      <h2 class="text-xl font-heading font-bold mb-3">Technical Deep Dive</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed">{node.technicalDescription}</p>
+    </section>
+
+    <!-- Why it matters -->
+    <section class="mt-10">
+      <h2 class="text-xl font-heading font-bold mb-3">Why It Matters</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed">{node.whyItMatters}</p>
+    </section>
+
+    <!-- Examples (if any) -->
+    {node.examples.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-xl font-heading font-bold mb-3">Examples</h2>
+        <ul class="space-y-2">
+          {node.examples.map((ex) => (
+            <li class="text-[var(--color-text-secondary)] leading-relaxed">
+              <strong class="text-[var(--color-text-primary)]">{ex.name}</strong>: {ex.description}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- Related concepts -->
+    <RelatedConcepts
+      currentSlug={node.slug}
+      parents={relationships.parents}
+      children={relationships.children}
+      related={relationships.related}
+      nodesMap={nodesMap}
+    />
+  </article>
+</Layout>
