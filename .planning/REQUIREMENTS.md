@@ -10,10 +10,10 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 ### Data Foundation
 
 - [ ] **DATA-01**: DOT file converted to canonical TypeScript/JSON data model with ~80 nodes, cluster membership, and edge relationships
-- [ ] **DATA-02**: Zod-validated content collection schema for AI landscape concepts (slug, name, cluster, simpleDescription, technicalDescription, relationships)
+- [x] **DATA-02**: Zod-validated content collection schema for AI landscape concepts (slug, name, cluster, simpleDescription, technicalDescription, relationships)
 - [ ] **DATA-03**: Two-tier educational content (simple + technical) written for all ~80 nodes in plain English for non-technical audience
-- [ ] **DATA-04**: Edge data preserves relationship labels from DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
-- [ ] **DATA-05**: Content collection registered in Astro config with file() loader
+- [x] **DATA-04**: Edge data preserves relationship labels from DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
+- [x] **DATA-05**: Content collection registered in Astro config with file() loader
 
 ### Interactive Graph
 
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DATA-01 | Phase 102 | Pending |
-| DATA-02 | Phase 102 | Pending |
+| DATA-02 | Phase 102 | Complete |
 | DATA-03 | Phase 102 | Pending |
-| DATA-04 | Phase 102 | Pending |
-| DATA-05 | Phase 102 | Pending |
+| DATA-04 | Phase 102 | Complete |
+| DATA-05 | Phase 102 | Complete |
 | GRAPH-01 | Phase 105 | Pending |
 | GRAPH-02 | Phase 104 | Pending |
 | GRAPH-03 | Phase 105 | Pending |
