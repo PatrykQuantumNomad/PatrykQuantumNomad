@@ -95,13 +95,52 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| DATA-01 | Phase 102 | Pending |
+| DATA-02 | Phase 102 | Pending |
+| DATA-03 | Phase 102 | Pending |
+| DATA-04 | Phase 102 | Pending |
+| DATA-05 | Phase 102 | Pending |
+| GRAPH-01 | Phase 105 | Pending |
+| GRAPH-02 | Phase 104 | Pending |
+| GRAPH-03 | Phase 105 | Pending |
+| GRAPH-04 | Phase 105 | Pending |
+| GRAPH-05 | Phase 105 | Pending |
+| GRAPH-06 | Phase 105 | Pending |
+| GRAPH-07 | Phase 104 | Pending |
+| GRAPH-08 | Phase 104 | Pending |
+| GRAPH-09 | Phase 109 | Pending |
+| GRAPH-10 | Phase 109 | Pending |
+| GRAPH-11 | Phase 109 | Pending |
+| PANEL-01 | Phase 106 | Pending |
+| PANEL-02 | Phase 106 | Pending |
+| PANEL-03 | Phase 106 | Pending |
+| PANEL-04 | Phase 106 | Pending |
+| PANEL-05 | Phase 106 | Pending |
+| SEO-01 | Phase 103 | Pending |
+| SEO-02 | Phase 103 | Pending |
+| SEO-03 | Phase 103 | Pending |
+| SEO-04 | Phase 103 | Pending |
+| SEO-05 | Phase 107 | Pending |
+| SEO-06 | Phase 107 | Pending |
+| SEO-07 | Phase 108 | Pending |
+| SEO-08 | Phase 108 | Pending |
+| NAV-01 | Phase 107 | Pending |
+| NAV-02 | Phase 107 | Pending |
+| NAV-03 | Phase 108 | Pending |
+| NAV-04 | Phase 108 | Pending |
+| SITE-01 | Phase 104 | Pending |
+| SITE-02 | Phase 110 | Pending |
+| SITE-03 | Phase 110 | Pending |
+| SITE-04 | Phase 110 | Pending |
+| SITE-05 | Phase 110 | Pending |
+| SITE-06 | Phase 110 | Pending |
+| SITE-07 | Phase 110 | Pending |
 
 **Coverage:**
 - v1.18 requirements: 40 total
-- Mapped to phases: 0
-- Unmapped: 40
+- Mapped to phases: 40
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-26*
-*Last updated: 2026-03-26 after initial definition*
+*Last updated: 2026-03-26 after roadmap creation*

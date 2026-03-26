@@ -3,13 +3,17 @@
 ## Milestones
 
 - v1.0 through v1.16: Shipped (see MILESTONES.md)
-- **v1.17 EDA Jupyter Notebooks** - Phases 96-101 (in progress)
+- v1.17 EDA Jupyter Notebooks: Shipped (Phases 96-101)
+- **v1.18 AI Landscape Explorer** - Phases 102-110 (in progress)
 
 ## Phases
 
 **Phase Numbering:**
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+<details>
+<summary>v1.17 EDA Jupyter Notebooks (Phases 96-101) - SHIPPED 2026-03-15</summary>
 
 - [x] **Phase 96: Notebook Foundation** - TypeScript nbformat v4.5 types, cell factories, case study registry, and requirements.txt template (completed 2026-03-14)
 - [x] **Phase 97: Standard Case Study Notebooks** - 7 standard-template notebooks with parameterized 4-plot analysis, hypothesis tests, and interpretation (completed 2026-03-14)
@@ -18,105 +22,146 @@
 - [x] **Phase 100: Advanced Case Study Notebooks** - 3 complex notebooks: sinusoidal model fitting, AR(1) development, and DOE multi-factor analysis (completed 2026-03-15)
 - [x] **Phase 101: Site Integration** - Notebooks landing page, companion blog post, LLMs.txt update, sitemap inclusion, and OG image (completed 2026-03-15)
 
+</details>
+
+### v1.18 AI Landscape Explorer
+
+- [ ] **Phase 102: Data Foundation** - DOT-to-JSON extraction, Zod schema, two-tier educational content for ~80 nodes, content collection registration
+- [ ] **Phase 103: SEO Concept Pages** - Individual /ai-landscape/[slug] pages with structured data, breadcrumbs, and OG images
+- [ ] **Phase 104: Static Landing Page & Force Layout** - Build-time force simulation, static SVG fallback, landing page with legend and concept list
+- [ ] **Phase 105: Interactive Graph Core** - D3 force-directed React island with pan/zoom, tooltips, and edge labels
+- [ ] **Phase 106: Detail Panel & Node Selection** - Side panel (desktop) and bottom sheet (mobile) with ELI5 toggle and ancestry path
+- [ ] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation
+- [ ] **Phase 108: Guided Tours & Compare Mode** - Curated learning paths with tour UI, side-by-side comparison, and VS pages
+- [ ] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map
+- [ ] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image
+
 ## Phase Details
 
-### Phase 96: Notebook Foundation
-**Goal**: Establish the TypeScript contracts and factories that all notebook generation builds on
-**Depends on**: Nothing (first phase of v1.17)
-**Requirements**: NBGEN-01, NBGEN-02, NBGEN-03, NBGEN-04
+### Phase 102: Data Foundation
+**Goal**: Establish the canonical data model that every downstream phase builds on — graph, pages, panel, and SEO all consume this data
+**Depends on**: Nothing (first phase of v1.18)
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
-  1. TypeScript compiles with complete nbformat v4.5 interfaces (NotebookV4, MarkdownCell, CodeCell with required `id`, `execution_count: null`, `outputs: []`)
-  2. `markdownCell()` and `codeCell()` factories produce cells with deterministic IDs and newline-terminated source lines
-  3. Notebook registry maps all 10 case study slugs to their NIST .DAT filenames and analysis parameters
-  4. A shared requirements.txt template specifies numpy, scipy, pandas, matplotlib, seaborn with floor version pins
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 96-01-PLAN.md — nbformat v4.5 types, cell factories, and notebook assembler with tests
-- [x] 96-02-PLAN.md — Case study registry (10 configs), requirements.txt template, and dark theme module with tests
+  1. A TypeScript/JSON data model exists with ~80 nodes containing slug, name, cluster membership, and edge relationships extracted from the DOT file
+  2. Zod schema validates every node with required fields: slug, name, cluster, simpleDescription, technicalDescription, and relationships array
+  3. Every node has two tiers of hand-crafted educational content — a plain-English "simple" description and a "technical" description — each at least 100 words
+  4. Edge data preserves labeled relationship types from the DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
+  5. Content collection is registered in Astro config with file() loader and a test build confirms all nodes are accessible via getCollection('aiNodes')
+**Plans**: TBD
 
-### Phase 97: Standard Case Study Notebooks
-**Goal**: Deliver 7 standard-template notebooks that validate the full generation pipeline
-**Depends on**: Phase 96
-**Requirements**: NBSTD-01, NBSTD-02, NBSTD-03, NBSTD-04, NBSTD-05, NBSTD-06, NBSTD-07
+### Phase 103: SEO Concept Pages
+**Goal**: Every AI concept has its own indexable page delivering search value before the interactive graph exists
+**Depends on**: Phase 102
+**Requirements**: SEO-01, SEO-02, SEO-03, SEO-04
 **Success Criteria** (what must be TRUE):
-  1. `buildStandardNotebook(slug)` produces valid nbformat v4.5 JSON for each of the 7 standard case studies
-  2. Each notebook contains interleaved markdown narrative and code cells: title, requirements check, imports, data loading with per-dataset parsing parameters, summary statistics, 4-plot, individual plots, hypothesis tests, test summary table, interpretation, and conclusions
-  3. Each notebook opens without errors in JupyterLab, VS Code, and Google Colab
-  4. Data loading cells include row-count assertions matching NIST dataset sizes
-  5. All 7 notebooks use a single parameterized standard template with case-study-specific configuration (dataset name, skiprows, column names, expected statistics)
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 97-01-PLAN.md — Template skeleton with setup, data loading, and visualization sections (TDD)
-- [x] 97-02-PLAN.md — Hypothesis tests, test summary, interpretation, and conclusions (TDD)
+  1. Visiting /ai-landscape/[slug]/ for any concept renders a complete page with both explanation tiers, ancestry breadcrumb, related concepts list, and a link back to the graph landing page
+  2. Each concept page includes JSON-LD DefinedTerm and BreadcrumbList structured data that passes the Google Rich Results Test
+  3. Each concept page has a build-time OG image using a shared template showing the concept name and cluster color
+  4. Production build generates ~80 static concept pages without errors
+**Plans**: TBD
+**UI hint**: yes
 
-### Phase 98: Packaging Pipeline
-**Goal**: Notebooks are packaged as downloadable ZIP files and served from the built site
-**Depends on**: Phase 97
-**Requirements**: PACK-01, PACK-02, PACK-03
+### Phase 104: Static Landing Page & Force Layout
+**Goal**: Users can visit /ai-landscape/ and see the full AI landscape as a static, color-coded SVG with a navigable concept list — no JavaScript required
+**Depends on**: Phase 102
+**Requirements**: GRAPH-08, GRAPH-02, GRAPH-07, SITE-01
 **Success Criteria** (what must be TRUE):
-  1. Each case study produces a self-contained ZIP containing the .ipynb notebook, the NIST .DAT dataset file (LF-normalized), and a requirements.txt
-  2. ZIP files are generated at build time via an Astro `astro:build:done` integration hook using archiver (not JSZip)
-  3. `astro build` produces ZIP files at `dist/downloads/notebooks/{slug}.zip` that are served as static assets with correct MIME type
-  4. Build time regression from notebook generation is under 5 seconds
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 98-01-PLAN.md — Core ZIP packaging functions with archiver: createZipFile and buildNotebookZipEntries (TDD)
-- [x] 98-02-PLAN.md — Astro notebookPackager integration hook and config registration
+  1. A build-time script runs d3-force headlessly (~300 ticks) and produces a deterministic layout.json with x/y positions for all nodes
+  2. The /ai-landscape/ landing page renders a static SVG from layout.json with cluster-colored nodes matching the DOT hierarchy (cyan, green, yellow, amber, pink, purple, blue, grey) and dark mode equivalents
+  3. A color-coded legend on the landing page explains cluster colors, node shapes, and edge styles
+  4. The landing page includes a category-grouped concept list linking to individual /ai-landscape/[slug]/ pages
+  5. The static SVG is the first meaningful paint — visible before any JavaScript loads
+**Plans**: TBD
+**UI hint**: yes
 
-### Phase 99: Download UI and Colab Integration
-**Goal**: Users can download notebooks and open them in Colab directly from case study pages
-**Depends on**: Phase 98
-**Requirements**: UI-01, UI-02, UI-03
+### Phase 105: Interactive Graph Core
+**Goal**: Users can explore the AI landscape as a live, pannable, zoomable force-directed graph rendered from pre-computed positions
+**Depends on**: Phase 104
+**Requirements**: GRAPH-01, GRAPH-03, GRAPH-04, GRAPH-05, GRAPH-06
 **Success Criteria** (what must be TRUE):
-  1. Every case study page shows a download button that triggers a file save dialog for the corresponding ZIP file
-  2. Every case study page shows an "Open in Colab" badge that opens the notebook in Google Colab via the GitHub URL scheme
-  3. All 7 standard .ipynb files are committed to the repo at `notebooks/eda/` to support the Colab `colab.research.google.com/github/...` URL pattern (the 3 advanced notebooks are added by Phase 100)
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 99-01-PLAN.md — Generate and commit 7 standard .ipynb files with generation script and validation tests
-- [x] 99-02-PLAN.md — NotebookActions component with download button and Colab badge, wired into page template
+  1. A React island (client:only="react") renders the ~80 nodes as an interactive SVG force-directed graph from pre-computed layout.json positions
+  2. Users can pan (drag) and zoom (mouse wheel on desktop, pinch on mobile) without accidentally trapping page scroll — modifier key guard is active
+  3. A zoom-to-fit reset button returns the viewport to the full graph overview
+  4. Hovering over any node shows a tooltip with the concept's brief description
+  5. Edge labels are visible — "subset of" backbone edges always shown, other relationship labels appear on hover
+**Plans**: TBD
+**UI hint**: yes
 
-### Phase 100: Advanced Case Study Notebooks
-**Goal**: The 3 complex case studies have specialized notebooks with model development and DOE analysis
-**Depends on**: Phase 96, Phase 98
-**Requirements**: NBADV-01, NBADV-02, NBADV-03
+### Phase 106: Detail Panel & Node Selection
+**Goal**: Users can click any node to learn about that AI concept in context, with progressive disclosure and ancestry navigation
+**Depends on**: Phase 105
+**Requirements**: PANEL-01, PANEL-02, PANEL-03, PANEL-04, PANEL-05
 **Success Criteria** (what must be TRUE):
-  1. Beam Deflections notebook includes sinusoidal model fitting via `scipy.optimize.curve_fit` with residual validation plots
-  2. Random Walk notebook includes AR(1) coefficient estimation, model development, and residual analysis
-  3. Ceramic Strength notebook includes multi-column data loading (480 rows), batch effect analysis, factor rankings, interaction plots, and one-way ANOVA
-  4. All 3 notebooks run end-to-end in a clean Python environment and statistical values match NIST-verified website values from v1.9
-**Plans:** 4/4 plans complete
-Plans:
-- [x] 100-01-PLAN.md — Beam Deflections notebook with sinusoidal model fitting and residual validation (TDD)
-- [x] 100-02-PLAN.md — Random Walk notebook with AR(1) model development and residual analysis (TDD)
-- [x] 100-03-PLAN.md — Ceramic Strength notebook with DOE batch effects, factor analysis, and ANOVA (TDD)
-- [x] 100-04-PLAN.md — Infrastructure wiring: packager, generation script, committed notebooks, and URL helpers for all 10 slugs
+  1. Clicking a node on desktop opens a slide-out side panel showing the concept title, explanation, grouped relationships, and a link to the full concept page
+  2. The "Explain Like I'm 5" toggle switches between simple and technical descriptions, defaulting to simple
+  3. Clicking "How did we get here?" highlights the full ancestry chain on the graph (e.g., GPT-4o -> LLM -> GenAI -> DL -> NN -> ML -> AI)
+  4. Relationships in the panel are grouped by type: "Part of", "Includes", "Enables", "Examples"
+  5. On mobile (below 768px), the detail panel renders as a bottom sheet instead of a side panel
+**Plans**: TBD
+**UI hint**: yes
 
-### Phase 101: Site Integration
-**Goal**: Notebooks are discoverable from the EDA section and promoted across the site
-**Depends on**: Phase 100
-**Requirements**: SITE-01, SITE-02, SITE-03, SITE-04, SITE-05
+### Phase 107: Search, Navigation & Deep Links
+**Goal**: Users can find any concept instantly via search, navigate the graph with keyboard, and share specific concept views via URL
+**Depends on**: Phase 106
+**Requirements**: NAV-01, NAV-02, SEO-05, SEO-06
 **Success Criteria** (what must be TRUE):
-  1. A notebooks landing page at `/eda/notebooks/` lists all 10 notebooks with descriptions, download links, and Colab badges
-  2. The EDA index page links to the notebooks section
-  3. A companion blog post about EDA learning with Jupyter notebooks is published
-  4. LLMs.txt includes a notebooks section and the notebooks landing page appears in the sitemap
-  5. An OG image is generated for the notebooks landing page via Satori + Sharp
-**Plans:** 2/2 plans complete
-Plans:
-- [x] 101-01-PLAN.md — Notebooks landing page at /eda/notebooks/ with card grid, OG image endpoint, and EDA_ROUTES update
-- [x] 101-02-PLAN.md — Companion blog post, LLMs.txt notebooks subsection, and EDA index cross-link
+  1. A search autocomplete field filters nodes by name — selecting a result zooms the graph to that node and opens its detail panel
+  2. The graph layout is fully responsive: full-width graph with side panel on desktop, bottom sheet on mobile, and a readable experience at 350px width
+  3. Selecting a node updates the URL to /ai-landscape?node=[slug] and visiting that URL restores the selection, zoom, and panel state
+  4. Keyboard navigation works: arrow keys traverse edges between nodes, Enter selects/opens panel, Escape deselects, Tab cycles through nodes
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 108: Guided Tours & Compare Mode
+**Goal**: Non-technical users can follow curated learning paths through the landscape, and curious users can compare concepts side by side
+**Depends on**: Phase 107
+**Requirements**: NAV-03, NAV-04, SEO-07, SEO-08
+**Success Criteria** (what must be TRUE):
+  1. At least 3 guided learning paths are available ("The Big Picture", "How ChatGPT Works", "What is Agentic AI") that step through a curated sequence of nodes
+  2. The tour UI shows a progress indicator, next/previous controls, and highlights the current node plus its connections on the graph
+  3. Selecting two concepts activates a side-by-side comparison view showing both descriptions, relationships, and ancestry paths
+  4. Popular comparisons have dedicated VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] with structured data and OG images
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 109: Graph Polish
+**Goal**: The graph experience feels premium with cluster zoom, animated edge highlighting, and spatial orientation aids
+**Depends on**: Phase 105
+**Requirements**: GRAPH-09, GRAPH-10, GRAPH-11
+**Success Criteria** (what must be TRUE):
+  1. Clicking a cluster label in the legend zooms the viewport smoothly into that cluster's region of the graph
+  2. When a node is selected, a GSAP-animated pulse travels along the edges connecting it to its parent and child nodes
+  3. A mini-map in the corner (desktop only) shows the full graph with a highlighted rectangle indicating the current viewport position
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 110: Site Integration
+**Goal**: The AI Landscape Explorer is fully woven into the site — discoverable from every navigation path, indexed by search engines, and announced via blog post
+**Depends on**: Phase 103, Phase 104
+**Requirements**: SITE-02, SITE-03, SITE-04, SITE-05, SITE-06, SITE-07
+**Success Criteria** (what must be TRUE):
+  1. The site header navigation includes an "AI Landscape" link that navigates to /ai-landscape/
+  2. The homepage features a callout card linking to the AI Landscape Explorer
+  3. All AI Landscape pages (landing + ~80 concept pages + VS pages) appear in the sitemap
+  4. LLMs.txt includes entries describing the AI Landscape section and its key concepts
+  5. A companion blog post about navigating the AI landscape for non-technical readers is published with cross-links to the explorer and concept pages
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 96 -> 97 -> 98 -> 99 -> 100 -> 101
+Phases execute in numeric order: 102 -> 103 -> 104 -> 105 -> 106 -> 107 -> 108 -> 109 -> 110
+Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. Phase 110 depends on 103 and 104.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 96. Notebook Foundation | 2/2 | Complete   | 2026-03-14 |
-| 97. Standard Case Study Notebooks | 2/2 | Complete   | 2026-03-14 |
-| 98. Packaging Pipeline | 2/2 | Complete   | 2026-03-14 |
-| 99. Download UI and Colab Integration | 2/2 | Complete   | 2026-03-15 |
-| 100. Advanced Case Study Notebooks | 4/4 | Complete   | 2026-03-15 |
-| 101. Site Integration | 2/2 | Complete   | 2026-03-15 |
+| 102. Data Foundation | 0/? | Not started | - |
+| 103. SEO Concept Pages | 0/? | Not started | - |
+| 104. Static Landing Page & Force Layout | 0/? | Not started | - |
+| 105. Interactive Graph Core | 0/? | Not started | - |
+| 106. Detail Panel & Node Selection | 0/? | Not started | - |
+| 107. Search, Navigation & Deep Links | 0/? | Not started | - |
+| 108. Guided Tours & Compare Mode | 0/? | Not started | - |
+| 109. Graph Polish | 0/? | Not started | - |
+| 110. Site Integration | 0/? | Not started | - |

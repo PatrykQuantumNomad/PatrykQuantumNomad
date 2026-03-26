@@ -5,9 +5,9 @@ milestone_name: AI Landscape Explorer
 status: active
 stopped_at: null
 last_updated: "2026-03-26T00:00:00Z"
-last_activity: 2026-03-26 — Milestone v1.18 started
+last_activity: 2026-03-26 — Roadmap created (9 phases, 40 requirements mapped)
 progress:
-  total_phases: 0
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 AI Landscape Explorer
+**Current focus:** v1.18 AI Landscape Explorer — Phase 102 (Data Foundation)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-26 — Milestone v1.18 started
+Phase: 102 — first of 9 phases (102-110) in v1.18
+Plan: 0 of ? in current phase (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-26 — Roadmap created for v1.18 AI Landscape Explorer (9 phases, 40 requirements)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,20 +36,26 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 - Total plans completed: 231 (across 17 milestones)
-- v1.17 plans completed: 14
+- v1.18 plans completed: 0
 
 **Cumulative Stats:**
 
 | Milestone | Phases | Plans | Requirements | Date |
 |-----------|--------|-------|--------------|------|
 | v1.0 through v1.17 | 1-101 | 231 | 831 | 2026-02-11 to 2026-03-15 |
-| **v1.18 AI Landscape Explorer** | **TBD** | **TBD** | **TBD** | **In progress** |
+| **v1.18 AI Landscape Explorer** | **102-110** | **TBD** | **40** | **In progress** |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
+Recent decisions affecting current work:
+
+- Research recommends build-time force pre-computation over runtime simulation (user decision pending before Phase 105)
+- Content tiering strategy: research recommends full content for top ~20 concepts, noindex the rest until written
+- D3 micro-module imports only (never umbrella d3 package) — bundle isolation critical
+- client:only="react" for graph island (never client:visible) — prevents SSR crash
 
 ### Pending Todos
 
@@ -57,7 +63,10 @@ None.
 
 ### Blockers/Concerns
 
-- Hub page (/guides/) uses Tailwind dynamic class interpolation for accentColor — should migrate to inline style attributes (tech debt from v1.16)
+- Content authoring for ~80 nodes is the longest-pole constraint — not engineering, but writing
+- Build-time vs runtime simulation decision must be resolved before Phase 105 planning
+- Dark mode cluster colors not yet defined (needed by Phase 104)
+- Hub page (/guides/) uses Tailwind dynamic class interpolation for accentColor — tech debt from v1.16
 - Beauty Index OG image "Cannot find module renderers.mjs" error (pre-existing)
 
 ### Quick Tasks Completed
@@ -70,7 +79,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-26T00:00:00Z
-Stopped at: Milestone v1.18 started — defining requirements
+Last session: 2026-03-26
+Stopped at: Roadmap created for v1.18 AI Landscape Explorer (9 phases, 40 requirements)
 Resume file: None
-Next: Define requirements and create roadmap for v1.18
+Next: `/gsd:plan-phase 102` to plan Data Foundation
