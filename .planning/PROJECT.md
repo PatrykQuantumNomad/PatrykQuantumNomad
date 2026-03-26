@@ -257,20 +257,31 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ 2 interactive React Flow visualizers (permission flow explorer, hook event sequence) — v1.16
 - ✓ 11-chapter Claude Code guide covering setup through enterprise administration (4,032 lines MDX) — v1.16
 - ✓ Claude Code guide site integration (header nav, homepage callout, hub page, sitemap, LLMs.txt, JSON-LD, 12 OG images, companion blog post) — v1.16
+- ✓ Build-time TypeScript notebook builder generating valid nbformat v4.5 JSON with deterministic cell IDs — v1.17
+- ✓ Cell factory for markdown, code, and output cells following nbformat schema — v1.17
+- ✓ Notebook registry mapping all 10 case studies to dataset files and analysis parameters — v1.17
+- ✓ 7 standard EDA notebooks (Normal, Uniform, Heat Flow, Filter, Cryothermometry, Fatigue Life, Standard Resistor) — v1.17
+- ✓ 3 advanced EDA notebooks (Beam Deflections sinusoidal fit, Random Walk AR(1), Ceramic Strength DOE) — v1.17
+- ✓ Each notebook zipped with NIST .DAT dataset as self-contained download — v1.17
+- ✓ Zip files generated at build time via Astro integration hook — v1.17
+- ✓ Download buttons and "Open in Colab" links on each case study page — v1.17
+- ✓ Notebooks landing page at /eda/notebooks/ with descriptions and download links — v1.17
+- ✓ Companion blog post, LLMs.txt, sitemap, and OG image for notebooks section — v1.17
 
 ### Active
 
-## Current Milestone: v1.17 EDA Jupyter Notebooks
+## Current Milestone: v1.18 AI Landscape Explorer
 
-**Goal:** Provide downloadable Jupyter Notebooks for all 10 EDA case studies with full NIST analysis pipelines, bundled datasets, and site integration.
+**Goal:** Provide an interactive, explorable AI Landscape map that helps non-technical users understand how AI concepts relate to each other — from broad AI fields down to specific models and frameworks.
 
 **Target features:**
-- 10 Jupyter Notebooks (one per case study) with complete analysis: data loading, 4-plot, hypothesis tests, model fitting, interpretation
-- Scientific Python stack (NumPy, SciPy, pandas, matplotlib, seaborn)
-- Each notebook zipped with its NIST .DAT dataset file
-- Download buttons on each case study page
-- Notebooks landing page at /eda/notebooks/
-- Companion blog post
+- D3 force-directed graph with ~80 nodes derived from DOT file structure
+- Zoom, pan, click navigation — interactive map experience
+- Nested cluster visualization (AI → ML → NN → DL → GenAI, Agentic AI, Dev Tools, Intelligence Levels)
+- Click any node → slide-out side panel with plain-English explanation, examples, connections
+- All ~80 nodes with educational content written for non-technical audience
+- Individual /ai-landscape/[slug] SEO pages for each concept
+- Companion blog post + full site integration (header nav, homepage, OG image, LLMs.txt)
 
 ### Out of Scope
 
@@ -299,11 +310,11 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.16 Claude Code Guide on top of 15 previous milestones (v1.0 through v1.15). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (11 chapters with 5 SVG diagrams and 2 interactive React Flow visualizers).
-Current milestone (v1.17) adds downloadable Jupyter Notebooks for all 10 EDA case studies.
+Shipped v1.17 EDA Jupyter Notebooks on top of 16 previous milestones (v1.0 through v1.16). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (11 chapters with 5 SVG diagrams and 2 interactive React Flow visualizers). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
+Current milestone (v1.18) adds an interactive AI Landscape Explorer — a D3 force-directed graph with ~80 nodes, side panel educational content, and individual SEO pages for each AI concept.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 requirements delivered (806 total). ~1090+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 requirements delivered (831 total). ~1090+ pages total. Lighthouse 90+ on mobile.
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 24 posts (14 local MDX + 10 external from Kubert AI and Translucent Computing).
@@ -452,4 +463,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-14 after v1.17 milestone start*
+*Last updated: 2026-03-26 after v1.18 milestone start*

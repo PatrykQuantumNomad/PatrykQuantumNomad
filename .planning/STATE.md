@@ -1,111 +1,55 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 101-02-PLAN.md
-last_updated: "2026-03-15T11:33:56Z"
-last_activity: 2026-03-15 — Phase 101 complete (all site integration done, milestone v1.17 complete)
+milestone: v1.18
+milestone_name: AI Landscape Explorer
+status: active
+stopped_at: null
+last_updated: "2026-03-26T00:00:00Z"
+last_activity: 2026-03-26 — Milestone v1.18 started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 14
-  completed_plans: 14
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-14)
+See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.17 EDA Jupyter Notebooks — Phase 101 (Site Integration)
+**Current focus:** v1.18 AI Landscape Explorer
 
 ## Current Position
 
-Phase: 101 complete (Site Integration) — all 6 phases done
-Plan: 101-02 complete (Phase 101 fully done, milestone v1.17 complete)
-Status: v1.17 EDA Jupyter Notebooks milestone complete — 14 plans across 6 phases
-Last activity: 2026-03-15 — Phase 101 complete (blog post, LLMs.txt, EDA index callout)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-26 — Milestone v1.18 started
 
-Progress: [██████████] 100% (14/14 plans completed)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 217 (across 16 milestones)
-- v1.16 plans completed: 17
+- Total plans completed: 231 (across 17 milestones)
+- v1.17 plans completed: 14
 
 **Cumulative Stats:**
 
 | Milestone | Phases | Plans | Requirements | Date |
 |-----------|--------|-------|--------------|------|
-| v1.0 through v1.16 | 1-95 | 217 | 806 | 2026-02-11 to 2026-03-11 |
-| **v1.17 EDA Jupyter Notebooks** | **96-101** | **TBD** | **25** | **In progress** |
-| Phase 96 P01 | 2min | 2 tasks | 5 files |
-| Phase 96 P02 | 5min | 2 tasks | 16 files |
-| Phase 97 P01 | 4min | 1 task (TDD) | 12 files |
-| Phase 97 P02 | 5min | 1 task (TDD) | 5 files |
-| Phase 98 P01 | 2min | 1 task (TDD) | 4 files |
-| Phase 98 P02 | 2min | 2 tasks (TDD) | 3 files |
-| Phase 99 P01 | 4min | 1 task (TDD) | 10 files |
-| Phase 99 P02 | 5min | 2 tasks (TDD+checkpoint) | 4 files |
-| Phase 100 P01 | 3min | 1 task (TDD) | 4 files |
-| Phase 100 P02 | 3min | 1 task (TDD) | 3 files |
-| Phase 100 P03 | 3min | 1 task (TDD) | 5 files |
-| Phase 100 P04 | 5min | 2 tasks | 10 files |
-| Phase 101 P01 | 3min | 2 tasks | 3 files |
-| Phase 101 P02 | 4min | 2 tasks | 3 files |
+| v1.0 through v1.17 | 1-101 | 231 | 831 | 2026-02-11 to 2026-03-15 |
+| **v1.18 AI Landscape Explorer** | **TBD** | **TBD** | **TBD** | **In progress** |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-
-Research decisions for v1.17:
-- archiver over JSZip for ZIP creation (JSZip encoding issues with mixed binary/UTF-8)
-- Astro `astro:build:done` integration hook over API route endpoints (follows indexnow.ts pattern)
-- nbformat v4.5 JSON generated directly from TypeScript (no Python tooling in CI)
-- Floor version pins in requirements.txt (educational notebooks, not production lockfiles)
-- SHA-256 hash truncated to 8 hex chars for deterministic cell IDs (96-01)
-- normalizeSource adds \n to all lines except last for nbformat compliance (96-01)
-- Python 3 kernelspec with ipython3 pygments_lexer as notebook defaults (96-01)
-- Expected stats sourced from project MDX pages with NIST-verified values (96-02)
-- Theme/dependency code as string[] arrays for codeCell factory integration (96-02)
-- Ceramic strength columns use short NIST JAHANMI2.DAT header labels (96-02)
-- Section builders return { cells, nextIndex } tuples for composable index management (97-01)
-- Data loading uses try/except FileNotFoundError with urllib fallback for Colab (97-01)
-- Individual plots as 4 separate code cells for better Colab UX (97-01)
-- Manual Grubbs test using scipy.stats.t critical value, no statsmodels dependency (97-02)
-- SKIP_DISTRIBUTION_SLUGS exported as shared constant between hypothesis-tests and test-summary (97-02)
-- Fatigue-life uses Weibull/Gamma/Log-normal comparison instead of simple Anderson-Darling (97-02)
-- Autocorrelation critical value uses 2/sqrt(N) per NIST handbook (97-02)
-- createZipFile resolves on output stream close event, not finalize() (prevents truncated ZIPs) (98-01)
-- 1-space JSON indentation for notebook serialization (smallest valid nbformat v4.5) (98-01)
-- notebookPackager registered between indexNow and react in astro.config.mjs integrations array (98-02)
-- Simple STANDARD_SLUGS loop for build-time packaging; Phase 100 will extend for advanced slugs (98-02)
-- tsx dev dependency for TypeScript script execution via node --import tsx (99-01)
-- notebooks/eda/{slug}.ipynb naming convention for committed notebooks (99-01)
-- Inline SVG icon for Colab button instead of external colab-badge.svg (external image failed to load) (99-02)
-- Secondary button style for Colab link, primary style for download button (99-02)
-- NotebookActions placed outside prose-foundations div to avoid CSS conflicts (99-02)
-- Inlined residual 4-plot in random-walk builder (Plan 01/02 parallel Wave 1, no cross-import) (100-02)
-- AR(1) section builder follows standard (config, slug, startIndex) signature in model-fitting/ subdirectory (100-02)
-- Inline markdown for beam-specific EDA interpretation, residual summary, and conclusions (not reusable, beam-specific) (100-01)
-- Separate reusable section builders for sinusoidal fit and residual validation in model-fitting/ subdirectory (100-01)
-- Advanced template directory templates/advanced/ for non-standard notebook builders (100-01)
-- Custom DOE intro with 4 goals (factor rankings, effect magnitudes, optimal settings, batch variability) instead of standard 5 EDA goals (100-03)
-- DOE section builders in sections/doe/ subdirectory (batch-effect, factor-analysis, anova) (100-03)
-- Lab effect section inline in ceramic template (ceramic-specific, not reusable) (100-03)
-- buildNotebook() switch dispatcher in packager.ts for advanced slug routing (100-04)
-- ALL_CASE_STUDY_SLUGS from registry replaces STANDARD_SLUGS in all infrastructure files (100-04)
-- [Phase 101]: Card uses div (not anchor) since each card has 3 independent links
-- [Phase 101]: OG image follows existing case-studies.png.ts pattern with getOrGenerateOgImage caching
-- [Phase 101]: Case Studies count updated from 9 to 10 in LLMs.txt (101-02)
-- [Phase 101]: Registry-driven LLMs.txt content via imported CASE_STUDY_REGISTRY (101-02)
 
 ### Pending Todos
 
@@ -115,8 +59,6 @@ None.
 
 - Hub page (/guides/) uses Tailwind dynamic class interpolation for accentColor — should migrate to inline style attributes (tech debt from v1.16)
 - Beauty Index OG image "Cannot find module renderers.mjs" error (pre-existing)
-- Resolved: Colab data delivery uses GitHub raw URL fetch with try/except FileNotFoundError fallback (97-01)
-- Open question: Numerical precision threshold for Python vs TypeScript statistical values (recommend 3-4 sig digits)
 
 ### Quick Tasks Completed
 
@@ -128,7 +70,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T11:33:56Z
-Stopped at: Completed 101-02-PLAN.md
+Last session: 2026-03-26T00:00:00Z
+Stopped at: Milestone v1.18 started — defining requirements
 Resume file: None
-Next: Milestone v1.17 complete — all 6 phases (96-101) shipped
+Next: Define requirements and create roadmap for v1.18
