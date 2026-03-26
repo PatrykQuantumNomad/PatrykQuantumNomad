@@ -1,0 +1,24 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  url: string;
+}
+
+const { name, description, url } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "name": name,
+  "description": description,
+  "url": url,
+  "inDefinedTermSet": {
+    "@type": "DefinedTermSet",
+    "name": "AI Landscape Explorer",
+    "url": "https://patrykgolabek.dev/ai-landscape/"
+  }
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
