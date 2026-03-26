@@ -17,3 +17,5 @@ skills-lock.json
 
 # Live sample-project dir (restored from zip by record.sh reset)
 recordings-workspace/sample-project/
+
+.ipynb_checkpoints
