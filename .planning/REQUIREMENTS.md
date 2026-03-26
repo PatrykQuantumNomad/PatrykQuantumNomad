@@ -1,72 +1,93 @@
 # Requirements: patrykgolabek.dev
 
-**Defined:** 2026-03-14
+**Defined:** 2026-03-26
 **Core Value:** The site must be fast, fully SEO-optimized, and visually distinctive — a portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
 
-## v1.17 Requirements
+## v1.18 Requirements
 
-Requirements for milestone v1.17 EDA Jupyter Notebooks. Each maps to roadmap phases.
+Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap phases.
 
-### Notebook Generation
+### Data Foundation
 
-- [x] **NBGEN-01**: Build-time TypeScript notebook builder generates valid nbformat v4.5 JSON with deterministic cell IDs
-- [x] **NBGEN-02**: Cell factory creates markdown, code, and output cells following nbformat schema
-- [x] **NBGEN-03**: Notebook registry maps all 10 case studies to their dataset files and analysis parameters
-- [x] **NBGEN-04**: Each notebook bundles a requirements.txt specifying numpy, scipy, pandas, matplotlib, seaborn
+- [ ] **DATA-01**: DOT file converted to canonical TypeScript/JSON data model with ~80 nodes, cluster membership, and edge relationships
+- [ ] **DATA-02**: Zod-validated content collection schema for AI landscape concepts (slug, name, cluster, simpleDescription, technicalDescription, relationships)
+- [ ] **DATA-03**: Two-tier educational content (simple + technical) written for all ~80 nodes in plain English for non-technical audience
+- [ ] **DATA-04**: Edge data preserves relationship labels from DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
+- [ ] **DATA-05**: Content collection registered in Astro config with file() loader
 
-### Standard Notebooks
+### Interactive Graph
 
-- [x] **NBSTD-01**: Normal Random Numbers notebook with full 4-plot analysis, hypothesis tests, and interpretation
-- [x] **NBSTD-02**: Uniform Random Numbers notebook with distribution detection and non-normality analysis
-- [x] **NBSTD-03**: Heat Flow Meter notebook with mild non-randomness analysis
-- [x] **NBSTD-04**: Filter Transmittance notebook with extreme autocorrelation detection
-- [x] **NBSTD-05**: Cryothermometry notebook with discrete data analysis
-- [x] **NBSTD-06**: Fatigue Life notebook with distribution comparison and model selection
-- [x] **NBSTD-07**: Standard Resistor notebook with multi-assumption failure analysis
+- [ ] **GRAPH-01**: D3 force-directed graph renders ~80 nodes as SVG with spatial clustering
+- [ ] **GRAPH-02**: Cluster coloring matches DOT hierarchy (cyan=AI, green=ML, yellow=NN, amber=DL, pink=GenAI, purple=Agentic, blue=DevTools, grey=Levels) with dark mode equivalents
+- [ ] **GRAPH-03**: Pan and zoom via d3-zoom supporting both mouse (wheel+drag) and touch (pinch+swipe)
+- [ ] **GRAPH-04**: Zoom-to-fit reset button to return to full overview
+- [ ] **GRAPH-05**: Node hover tooltips showing brief description
+- [ ] **GRAPH-06**: Edge labels visible for key relationships ("subset of" backbone always shown, others on hover)
+- [ ] **GRAPH-07**: Color-coded legend explaining cluster colors, node shapes, and edge styles
+- [ ] **GRAPH-08**: Static SVG fallback pre-computed at build time for instant first paint before JS hydrates
+- [ ] **GRAPH-09**: Cluster zoom — click cluster label to zoom into that area
+- [ ] **GRAPH-10**: Animated edge traversal — GSAP pulse along edges connecting selected node to parents/children
+- [ ] **GRAPH-11**: Mini-map overview in corner showing current viewport position (desktop only)
 
-### Advanced Notebooks
+### Detail Panel
 
-- [x] **NBADV-01**: Beam Deflections notebook with sinusoidal model fitting and residual validation
-- [x] **NBADV-02**: Random Walk notebook with AR(1) model development and residual analysis
-- [x] **NBADV-03**: Ceramic Strength notebook with DOE analysis (batch effects, factor rankings, interaction plots)
+- [ ] **PANEL-01**: Click node opens slide-out side panel with title, explanation, relationships, and link to full page
+- [ ] **PANEL-02**: "Explain Like I'm 5" toggle switches between simple and technical descriptions (simple is default)
+- [ ] **PANEL-03**: "How did we get here?" ancestry path — clicking any node highlights the full hierarchy chain (e.g., GPT-4o → LLM → GenAI → DL → NN → ML → AI)
+- [ ] **PANEL-04**: Relationships grouped by type in panel ("Part of", "Includes", "Enables", "Examples")
+- [ ] **PANEL-05**: Bottom sheet layout on mobile instead of side panel
 
-### Packaging
+### SEO Pages
 
-- [x] **PACK-01**: Each notebook zipped with its NIST .DAT dataset file(s) as self-contained download
-- [x] **PACK-02**: Zip files generated at build time via Astro integration hook or prebuild script
-- [x] **PACK-03**: Generated zip files served as static assets from GitHub Pages
+- [ ] **SEO-01**: Individual /ai-landscape/[slug] page for each of the ~80 concepts
+- [ ] **SEO-02**: Each concept page shows full explanation (both tiers), ancestry breadcrumb, related concepts, and link back to graph
+- [ ] **SEO-03**: JSON-LD DefinedTerm + BreadcrumbList structured data on each concept page
+- [ ] **SEO-04**: Build-time OG image per concept (shared template with concept name + cluster color)
+- [ ] **SEO-05**: Shareable deep links — URL updates with selected node (/ai-landscape?node=LLM)
+- [ ] **SEO-06**: Keyboard navigation — arrow keys traverse edges, Enter selects, Escape deselects, Tab through nodes
+- [ ] **SEO-07**: Compare mode — select two concepts for side-by-side comparison
+- [ ] **SEO-08**: VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] for popular comparisons
 
-### User Interface
+### Search & Navigation
 
-- [ ] **UI-01**: Download button on each case study page linking to the .zip file
-- [ ] **UI-02**: "Open in Colab" badge/link on each case study page for zero-install execution
-- [x] **UI-03**: Notebook .ipynb files committed to repo to enable Colab GitHub URL format
+- [ ] **NAV-01**: Search autocomplete that filters nodes — on select, zooms to node and opens panel
+- [ ] **NAV-02**: Mobile-responsive layout — full-width graph on mobile, detail as bottom sheet
+- [ ] **NAV-03**: Guided learning paths — 3-4 curated tours ("The Big Picture", "How ChatGPT Works", "What is Agentic AI")
+- [ ] **NAV-04**: Tour UI with progress indicator, next/prev controls, sequential node highlighting
 
 ### Site Integration
 
-- [x] **SITE-01**: Notebooks landing page at /eda/notebooks/ listing all 10 notebooks with descriptions and download links
-- [x] **SITE-02**: Companion blog post about EDA learning with Jupyter notebooks
-- [x] **SITE-03**: LLMs.txt updated with notebooks section
-- [x] **SITE-04**: Sitemap includes notebooks landing page
-- [x] **SITE-05**: OG image for notebooks landing page
+- [ ] **SITE-01**: Landing page at /ai-landscape/ with graph embed and category-grouped concept list
+- [ ] **SITE-02**: Header navigation link for AI Landscape
+- [ ] **SITE-03**: Homepage callout card linking to AI Landscape
+- [ ] **SITE-04**: All AI Landscape pages in sitemap
+- [ ] **SITE-05**: LLMs.txt entries for AI Landscape section
+- [ ] **SITE-06**: Companion blog post about navigating the AI landscape for non-technical readers
+- [ ] **SITE-07**: Build-time OG image for landing page
 
 ## Future Requirements
 
-### Notebook Enhancements
+### Enhancements
 
-- **NBFUT-01**: Interactive widgets (ipywidgets) for parameter exploration
-- **NBFUT-02**: JupyterLite in-browser execution on the site
-- **NBFUT-03**: Collection download (single zip with all 10 notebooks)
+- **FUT-01**: Auto-updating concept descriptions from curated feeds
+- **FUT-02**: User-submitted concept corrections via GitHub Issues
+- **FUT-03**: Collection download (landscape poster PDF)
+- **FUT-04**: Additional guided tour paths based on user feedback
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| In-browser notebook execution (JupyterLite/Pyodide) | 14MB+ WASM payload; defer to future |
-| Pre-executed notebook outputs | Inflates file size, stale outputs mislead users |
-| Real-time as-you-type notebook editing on site | Not a notebook editor — download and run locally |
-| statsmodels dependency | Implement runs test manually to keep deps minimal |
-| Auto-grading or exercises | Educational content, not courseware |
+| 3D graph visualization | Disorienting for non-technical users, GPU contention with HeadScene |
+| Real-time DOT parsing at build time | Fragile; use pre-processed JSON instead |
+| User-editable graph / drag-to-rearrange | Educational tool, not a graph editor |
+| Auto-updating from live APIs | Stale data risk; curated content is the value |
+| Quiz / gamification | Patronizing to target audience (managers, recruiters) |
+| Chat / AI assistant integration | Write excellent static explanations instead |
+| Complex filtering / faceted search | Graph clustering is the visual filter for ~80 nodes |
+| Physics simulation controls | Meaningless to non-technical users |
+| In-browser Python/Pyodide | Not relevant to AI landscape content |
+| Infinite scroll concept list | Terrible for SEO; individual pages per concept |
 
 ## Traceability
 
@@ -74,37 +95,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NBGEN-01 | Phase 96 | Complete |
-| NBGEN-02 | Phase 96 | Complete |
-| NBGEN-03 | Phase 96 | Complete |
-| NBGEN-04 | Phase 96 | Complete |
-| NBSTD-01 | Phase 97 | Complete |
-| NBSTD-02 | Phase 97 | Complete |
-| NBSTD-03 | Phase 97 | Complete |
-| NBSTD-04 | Phase 97 | Complete |
-| NBSTD-05 | Phase 97 | Complete |
-| NBSTD-06 | Phase 97 | Complete |
-| NBSTD-07 | Phase 97 | Complete |
-| NBADV-01 | Phase 100 | Complete |
-| NBADV-02 | Phase 100 | Complete |
-| NBADV-03 | Phase 100 | Complete |
-| PACK-01 | Phase 98 | Complete |
-| PACK-02 | Phase 98 | Complete |
-| PACK-03 | Phase 98 | Complete |
-| UI-01 | Phase 99 | Complete |
-| UI-02 | Phase 99 | Complete |
-| UI-03 | Phase 99 | Complete |
-| SITE-01 | Phase 101 | Complete |
-| SITE-02 | Phase 101 | Complete |
-| SITE-03 | Phase 101 | Complete |
-| SITE-04 | Phase 101 | Complete |
-| SITE-05 | Phase 101 | Complete |
+| (Populated during roadmap creation) | | |
 
 **Coverage:**
-- v1.17 requirements: 25 total
-- Mapped to phases: 25
-- Unmapped: 0
+- v1.18 requirements: 40 total
+- Mapped to phases: 0
+- Unmapped: 40
 
 ---
-*Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after roadmap creation (phases 96-101)*
+*Requirements defined: 2026-03-26*
+*Last updated: 2026-03-26 after initial definition*
