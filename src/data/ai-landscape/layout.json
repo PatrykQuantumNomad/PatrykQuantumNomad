@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "width": 1200,
+    "height": 900,
+    "ticks": 300,
+    "generated": "2026-03-26T20:25:40.491Z"
+  },
+  "positions": [
+    {
+      "id": "artificial-intelligence",
+      "x": 539.42,
+      "y": 253.02
+    },
+    {
+      "id": "natural-language-processing",
+      "x": 485.95,
+      "y": 205.97
+    },
+    {
+      "id": "computer-vision",
+      "x": 577.02,
+      "y": 198.15
+    },
+    {
+      "id": "robotics",
+      "x": 475.7,
+      "y": 254.89
+    },
+    {
+      "id": "expert-systems",
+      "x": 529.75,
+      "y": 181.9
+    },
+    {
+      "id": "planning-scheduling",
+      "x": 627.43,
+      "y": 285.58
+    },
+    {
+      "id": "knowledge-representation",
+      "x": 492.51,
+      "y": 148.54
+    },
+    {
+      "id": "speech-recognition",
+      "x": 448.7,
+      "y": 172.63
+    },
+    {
+      "id": "search-optimization",
+      "x": 438.45,
+      "y": 221.56
+    },
+    {
+      "id": "ai-safety-ethics",
+      "x": 567.39,
+      "y": 149
+    },
+    {
+      "id": "machine-learning",
+      "x": 471.2,
+      "y": 344.75
+    },
+    {
+      "id": "supervised-learning",
+      "x": 372.08,
+      "y": 351.47
+    },
+    {
+      "id": "unsupervised-learning",
+      "x": 391.55,
+      "y": 305.43
+    },
+    {
+      "id": "reinforcement-learning",
+      "x": 585.89,
+      "y": 395.92
+    },
+    {
+      "id": "semi-supervised-learning",
+      "x": 411.65,
+      "y": 382.02
+    },
+    {
+      "id": "self-supervised-learning",
+      "x": 319.37,
+      "y": 320.44
+    },
+    {
+      "id": "neural-networks",
+      "x": 393.89,
+      "y": 457.78
+    },
+    {
+      "id": "deep-learning",
+      "x": 450.08,
+      "y": 553.12
+    },
+    {
+      "id": "convolutional-neural-networks",
+      "x": 367.21,
+      "y": 620.11
+    },
+    {
+      "id": "recurrent-neural-networks",
+      "x": 376.72,
+      "y": 521.53
+    },
+    {
+      "id": "transformers",
+      "x": 518.72,
+      "y": 520.3
+    },
+    {
+      "id": "autoencoders",
+      "x": 417.16,
+      "y": 618.15
+    },
+    {
+      "id": "foundation-models",
+      "x": 588.78,
+      "y": 524.62
+    },
+    {
+      "id": "deep-reinforcement-learning",
+      "x": 559.54,
+      "y": 484.07
+    },
+    {
+      "id": "mixture-of-experts",
+      "x": 513.86,
+      "y": 570.05
+    },
+    {
+      "id": "multimodal-ai",
+      "x": 365.16,
+      "y": 570.17
+    },
+    {
+      "id": "reasoning-models",
+      "x": 654.7,
+      "y": 469.81
+    },
+    {
+      "id": "generative-ai",
+      "x": 556.19,
+      "y": 624.18
+    },
+    {
+      "id": "generative-adversarial-networks",
+      "x": 590.85,
+      "y": 724.37
+    },
+    {
+      "id": "variational-autoencoders",
+      "x": 500.11,
+      "y": 684.24
+    },
+    {
+      "id": "diffusion-models",
+      "x": 540.9,
+      "y": 722.42
+    },
+    {
+      "id": "large-language-models",
+      "x": 670.03,
+      "y": 554.5
+    },
+    {
+      "id": "rlhf-dpo",
+      "x": 612.76,
+      "y": 627.07
+    },
+    {
+      "id": "prompt-engineering",
+      "x": 705.78,
+      "y": 663.73
+    },
+    {
+      "id": "few-zero-shot-learning",
+      "x": 666.65,
+      "y": 694.85
+    },
+    {
+      "id": "hallucination",
+      "x": 600.71,
+      "y": 578.57
+    },
+    {
+      "id": "retrieval-augmented-generation",
+      "x": 620.14,
+      "y": 676.51
+    },
+    {
+      "id": "fine-tuning",
+      "x": 698.39,
+      "y": 614.28
+    },
+    {
+      "id": "context-windows",
+      "x": 659.26,
+      "y": 645.4
+    },
+    {
+      "id": "artificial-narrow-intelligence",
+      "x": 757,
+      "y": 242.14
+    },
+    {
+      "id": "actually-competent-intelligence",
+      "x": 784.94,
+      "y": 362.03
+    },
+    {
+      "id": "artificial-general-intelligence",
+      "x": 887.94,
+      "y": 236.43
+    },
+    {
+      "id": "artificial-superintelligence",
+      "x": 952.42,
+      "y": 171.98
+    },
+    {
+      "id": "agentic-ai",
+      "x": 775.46,
+      "y": 483.25
+    },
+    {
+      "id": "autonomy",
+      "x": 898.08,
+      "y": 440.94
+    },
+    {
+      "id": "agent-planning",
+      "x": 816.23,
+      "y": 402.37
+    },
+    {
+      "id": "tool-use",
+      "x": 898.86,
+      "y": 527.77
+    },
+    {
+      "id": "agent-memory",
+      "x": 873.27,
+      "y": 484.35
+    },
+    {
+      "id": "self-correction",
+      "x": 923.26,
+      "y": 484.14
+    },
+    {
+      "id": "ai-coding-assistants",
+      "x": 798.99,
+      "y": 607.11
+    },
+    {
+      "id": "model-context-protocol",
+      "x": 871.25,
+      "y": 616.6
+    }
+  ]
+}
