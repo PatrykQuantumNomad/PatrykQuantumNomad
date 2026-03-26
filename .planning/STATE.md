@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: executing
-stopped_at: Completed 103-03-PLAN.md
-last_updated: "2026-03-26T16:44:14.596Z"
+stopped_at: Completed 103-02-PLAN.md
+last_updated: "2026-03-26T16:50:45.064Z"
 last_activity: 2026-03-26
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 67
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 103-seo-concept-pages
-Plan: 2 of 3 complete
+Plan: 3 of 3 complete
 Status: Ready to execute
 Last activity: 2026-03-26
 
@@ -49,6 +49,7 @@ Progress: [███████░░░] 67%
 | Phase 102 P03 | 9min | 2 tasks | 2 files |
 | Phase 103 P01 | 2min | 2 tasks | 5 files |
 | Phase 103 P03 | 4min | 2 tasks | 2 files |
+| Phase 103 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - [Phase 102]: 380-test content quality suite validates all nodes for word counts, schema compliance, cluster coverage, and edge-node referential integrity
 - [Phase 103]: Tests use real nodes.json data (not mocks) for ancestry chain validation — caught plan's incorrect 3-ancestor expectation for transformers (actual: 4)
 - [Phase 103]: AI landscape OG images use cluster darkColor for accent bar gradient and decorative block instead of site-wide orange
+- [Phase 103]: nodesMap passed as Record<string, {name, slug}> to components (not full AiNode) for lightweight props
 
 ### Pending Todos
 
@@ -91,7 +93,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-26T16:44:14.592Z
-Stopped at: Completed 103-03-PLAN.md
+Last session: 2026-03-26T16:50:45.061Z
+Stopped at: Completed 103-02-PLAN.md
 Resume file: None
 Next: `/gsd:execute-phase 103` (Plan 02 next — concept page route)

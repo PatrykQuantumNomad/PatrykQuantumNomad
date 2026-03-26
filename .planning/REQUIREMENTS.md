@@ -39,7 +39,7 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 
 ### SEO Pages
 
-- [ ] **SEO-01**: Individual /ai-landscape/[slug] page for each of the ~80 concepts
+- [x] **SEO-01**: Individual /ai-landscape/[slug] page for each of the ~80 concepts
 - [x] **SEO-02**: Each concept page shows full explanation (both tiers), ancestry breadcrumb, related concepts, and link back to graph
 - [x] **SEO-03**: JSON-LD DefinedTerm + BreadcrumbList structured data on each concept page
 - [x] **SEO-04**: Build-time OG image per concept (shared template with concept name + cluster color)
@@ -116,7 +116,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PANEL-03 | Phase 106 | Pending |
 | PANEL-04 | Phase 106 | Pending |
 | PANEL-05 | Phase 106 | Pending |
-| SEO-01 | Phase 103 | Pending |
+| SEO-01 | Phase 103 | Complete |
 | SEO-02 | Phase 103 | Complete |
 | SEO-03 | Phase 103 | Complete |
 | SEO-04 | Phase 103 | Complete |
