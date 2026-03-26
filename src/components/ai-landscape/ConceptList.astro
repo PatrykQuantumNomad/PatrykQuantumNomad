@@ -1,0 +1,53 @@
+---
+/**
+ * ConceptList — Category-grouped concept links for the AI Landscape.
+ * Displays nodes grouped by cluster with alphabetical sorting.
+ * Skips clusters with no nodes (e.g., agent-frameworks).
+ * Pure Astro component (zero JS). Rendered at build time.
+ */
+import type { AiNode, Cluster } from '../../lib/ai-landscape/schema';
+import { conceptUrl } from '../../lib/ai-landscape/routes';
+
+interface Props {
+  nodesByCluster: Map<string, AiNode[]>;
+  clusters: Cluster[];
+}
+
+const { nodesByCluster, clusters } = Astro.props;
+---
+
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-16">
+  <h2 class="text-2xl font-heading font-bold mb-8">Explore by Category</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    {clusters.map((cluster) => {
+      const nodes = nodesByCluster.get(cluster.id);
+      if (!nodes || nodes.length === 0) return null;
+
+      const sorted = [...nodes].sort((a, b) => a.name.localeCompare(b.name));
+
+      return (
+        <div>
+          <h3
+            class="text-lg font-heading font-bold mb-3"
+            style={`border-left: 4px solid ${cluster.darkColor}; padding-left: 0.75rem`}
+          >
+            {cluster.name}
+          </h3>
+          <ul class="space-y-1.5">
+            {sorted.map((node) => (
+              <li>
+                <a
+                  href={conceptUrl(node.slug)}
+                  class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+                >
+                  {node.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    })}
+  </div>
+</section>

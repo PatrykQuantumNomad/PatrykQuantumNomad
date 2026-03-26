@@ -1,0 +1,74 @@
+---
+/**
+ * GraphLegend — Color-coded legend explaining cluster colors, node sizes,
+ * and edge styles for the AI Landscape SVG graph.
+ * Pure Astro component (zero JS). Rendered at build time.
+ */
+import type { Cluster } from '../../lib/ai-landscape/schema';
+
+interface Props {
+  clusters: Cluster[];
+}
+
+const { clusters } = Astro.props;
+---
+
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+  <h2 class="text-xl font-heading font-bold mb-4">Legend</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    {/* Column 1: Clusters */}
+    <div>
+      <h3 class="text-sm font-heading font-bold mb-2 text-[var(--color-text-secondary)]">Clusters</h3>
+      <ul class="space-y-1.5">
+        {clusters.map((c) => (
+          <li class="flex items-center gap-2 text-sm text-[var(--color-text-primary)]">
+            <span
+              class="inline-block w-4 h-4 rounded-full shrink-0 dark:hidden"
+              style={`background:${c.color};border:1px solid ${c.darkColor}`}
+            />
+            <span
+              class="hidden dark:inline-block w-4 h-4 rounded-full shrink-0"
+              style={`background:${c.darkColor};border:1px solid ${c.color}`}
+            />
+            {c.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Column 2: Node Sizes */}
+    <div>
+      <h3 class="text-sm font-heading font-bold mb-2 text-[var(--color-text-secondary)]">Node Sizes</h3>
+      <ul class="space-y-2">
+        <li class="flex items-center gap-2 text-sm text-[var(--color-text-primary)]">
+          <span class="inline-block w-6 h-6 rounded-full border-2 border-[var(--color-border)] shrink-0" />
+          Root concepts (AI, ML, NN, DL, GenAI)
+        </li>
+        <li class="flex items-center gap-2 text-sm text-[var(--color-text-primary)]">
+          <span class="inline-block w-4 h-4 rounded-full border-2 border-[var(--color-border)] shrink-0" />
+          Individual concepts
+        </li>
+      </ul>
+    </div>
+
+    {/* Column 3: Edge Styles (Connections) */}
+    <div>
+      <h3 class="text-sm font-heading font-bold mb-2 text-[var(--color-text-secondary)]">Connections</h3>
+      <ul class="space-y-2">
+        <li class="flex items-center gap-3 text-sm text-[var(--color-text-primary)]">
+          <span class="inline-block w-8 h-0.5 bg-[var(--color-border)] shrink-0" />
+          Structural hierarchy
+        </li>
+        <li class="flex items-center gap-3 text-sm text-[var(--color-text-primary)]">
+          <span class="inline-block w-8 shrink-0 border-t-2 border-dashed border-[var(--color-border)]" />
+          Set membership
+        </li>
+        <li class="flex items-center gap-3 text-sm text-[var(--color-text-primary)]">
+          <span class="inline-block w-8 shrink-0 border-t border-dotted border-[var(--color-border)] opacity-50" />
+          Related concepts
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
