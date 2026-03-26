@@ -1,0 +1,86 @@
+---
+/**
+ * RelatedConcepts.astro -- Shows related concepts grouped by relationship type,
+ * with links to their individual pages. Groups: Part of (parents), Includes (children),
+ * Connected to (related/non-hierarchical).
+ */
+import type { Edge } from '../../lib/ai-landscape/schema';
+import { conceptUrl } from '../../lib/ai-landscape/routes';
+
+interface Props {
+  currentSlug: string;
+  parents: Edge[];
+  children: Edge[];
+  related: Edge[];
+  nodesMap: Record<string, { name: string; slug: string }>;
+}
+
+const { currentSlug, parents, children, related, nodesMap } = Astro.props;
+
+/** Resolve the "other" node in an edge relative to the current concept */
+function otherSlug(edge: Edge): string {
+  return edge.source === currentSlug ? edge.target : edge.source;
+}
+
+const hasAny = parents.length > 0 || children.length > 0 || related.length > 0;
+---
+
+{hasAny && (
+  <section class="mt-12">
+    <h2 class="text-xl font-heading font-bold mb-4">Related Concepts</h2>
+
+    {parents.length > 0 && (
+      <div class="mb-4">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Part of</h3>
+        <ul class="space-y-1">
+          {parents.map((edge) => {
+            const slug = otherSlug(edge);
+            const node = nodesMap[slug];
+            return node ? (
+              <li>
+                <a href={conceptUrl(slug)} class="text-[var(--color-accent)] hover:underline">{node.name}</a>
+                <span class="text-[var(--color-text-secondary)] text-sm"> ({edge.label})</span>
+              </li>
+            ) : null;
+          })}
+        </ul>
+      </div>
+    )}
+
+    {children.length > 0 && (
+      <div class="mb-4">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Includes</h3>
+        <ul class="space-y-1">
+          {children.map((edge) => {
+            const slug = otherSlug(edge);
+            const node = nodesMap[slug];
+            return node ? (
+              <li>
+                <a href={conceptUrl(slug)} class="text-[var(--color-accent)] hover:underline">{node.name}</a>
+                <span class="text-[var(--color-text-secondary)] text-sm"> ({edge.label})</span>
+              </li>
+            ) : null;
+          })}
+        </ul>
+      </div>
+    )}
+
+    {related.length > 0 && (
+      <div class="mb-4">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Connected to</h3>
+        <ul class="space-y-1">
+          {related.map((edge) => {
+            const slug = otherSlug(edge);
+            const node = nodesMap[slug];
+            return node ? (
+              <li>
+                <a href={conceptUrl(slug)} class="text-[var(--color-accent)] hover:underline">{node.name}</a>
+                <span class="text-[var(--color-text-secondary)] text-sm"> ({edge.label})</span>
+              </li>
+            ) : null;
+          })}
+        </ul>
+      </div>
+    )}
+  </section>
+)}

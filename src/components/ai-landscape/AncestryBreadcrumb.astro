@@ -1,0 +1,28 @@
+---
+/**
+ * AncestryBreadcrumb.astro -- Visual breadcrumb trail showing the concept's
+ * lineage through the AI taxonomy. This is the educational/navigational breadcrumb
+ * (the JSON-LD BreadcrumbList is handled separately by BreadcrumbJsonLd).
+ */
+import type { AncestryItem } from '../../lib/ai-landscape/ancestry';
+import { conceptUrl, AI_LANDSCAPE_BASE } from '../../lib/ai-landscape/routes';
+
+interface Props {
+  ancestry: AncestryItem[];
+  currentName: string;
+}
+
+const { ancestry, currentName } = Astro.props;
+---
+
+<nav aria-label="Concept ancestry" class="text-sm text-[var(--color-text-secondary)] mb-4 flex flex-wrap items-center gap-1">
+  <a href={AI_LANDSCAPE_BASE} class="text-[var(--color-accent)] hover:underline">AI Landscape</a>
+  {ancestry.map((item) => (
+    <>
+      <span aria-hidden="true">/</span>
+      <a href={conceptUrl(item.slug)} class="text-[var(--color-accent)] hover:underline">{item.name}</a>
+    </>
+  ))}
+  <span aria-hidden="true">/</span>
+  <span class="font-bold text-[var(--color-text-primary)]">{currentName}</span>
+</nav>
