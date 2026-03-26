@@ -4,6 +4,7 @@ import { languageSchema } from './lib/beauty-index/schema';
 import { dbModelSchema } from './lib/db-compass/schema';
 import { edaTechniqueSchema, edaDistributionSchema } from './lib/eda/schema';
 import { guidePageSchema, guideMetaSchema } from './lib/guides/schema';
+import { aiNodeSchema } from './lib/ai-landscape/schema';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/blog' }),
@@ -71,4 +72,9 @@ const claudeCodeGuide = defineCollection({
   schema: guideMetaSchema,
 });
 
-export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages, guidePages, guides, claudeCodePages, claudeCodeGuide };
+const aiLandscape = defineCollection({
+  loader: file('src/data/ai-landscape/nodes.json'),
+  schema: aiNodeSchema,
+});
+
+export const collections = { blog, languages, dbModels, edaTechniques, edaDistributions, edaPages, guidePages, guides, claudeCodePages, claudeCodeGuide, aiLandscape };
