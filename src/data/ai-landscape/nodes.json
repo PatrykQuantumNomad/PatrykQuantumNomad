@@ -1,1 +1,203 @@
-[]
+[
+  {
+    "id": "artificial-intelligence",
+    "name": "Artificial Intelligence (AI)",
+    "slug": "artificial-intelligence",
+    "cluster": "ai",
+    "parentId": null,
+    "simpleDescription": "Artificial intelligence is the broad field of building machines and software that can perform tasks we normally think of as requiring human intelligence. This includes understanding language, recognizing images, making decisions, and solving complex problems. AI is not one single technology but rather an umbrella term covering dozens of approaches, from simple rule-based systems to sophisticated learning algorithms. Some AI systems follow strict instructions written by programmers, while others learn patterns from enormous amounts of data. The field has existed since the 1950s but has accelerated dramatically in recent years thanks to faster computers, more data, and breakthroughs in a technique called deep learning. Today AI powers everything from smartphone assistants to medical diagnosis tools.",
+    "technicalDescription": "Artificial intelligence encompasses computational systems designed to perform tasks that typically require human cognitive abilities, including perception, reasoning, learning, planning, and natural language understanding. The field originated at the 1956 Dartmouth Conference and has progressed through symbolic AI (expert systems, knowledge representation), statistical methods, and modern connectionist approaches. Contemporary AI spans multiple paradigms: supervised, unsupervised, and reinforcement learning for pattern recognition; search and optimization algorithms for decision-making; and neural network architectures for representation learning. The current era is dominated by deep learning and large-scale pretrained models, though classical approaches remain prevalent in constrained domains. AI systems are evaluated on benchmarks measuring specific capabilities, with no single system yet demonstrating human-level generality across all cognitive tasks.",
+    "whyItMatters": "AI is the foundation behind virtual assistants like Siri and Alexa, recommendation engines on Netflix and Spotify, self-driving car technology, and tools like ChatGPT that can write, code, and reason.",
+    "examples": [],
+    "dotNodeId": "AI_Node"
+  },
+  {
+    "id": "natural-language-processing",
+    "name": "Natural Language Processing (NLP)",
+    "slug": "natural-language-processing",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Natural language processing is the branch of AI focused on helping computers understand, interpret, and generate human language. When you ask a voice assistant a question, use Google Translate, or get autocomplete suggestions while typing an email, NLP is working behind the scenes. The challenge is that human language is incredibly complex -- words can have multiple meanings, grammar rules vary across languages, and context matters enormously. Early NLP systems relied on hand-written grammar rules, but modern approaches use machine learning to analyze massive amounts of text and learn language patterns automatically. This shift has led to dramatic improvements in translation quality, text summarization, sentiment analysis, and conversational AI systems that can hold surprisingly natural dialogues.",
+    "technicalDescription": "Natural language processing is a subfield of AI and computational linguistics concerned with the interaction between computers and human language. Core tasks include tokenization, part-of-speech tagging, named entity recognition, dependency parsing, semantic role labeling, machine translation, text summarization, and question answering. The field has evolved from rule-based systems and statistical methods (n-gram models, HMMs, CRFs) through word embeddings (Word2Vec, GloVe) to transformer-based architectures that achieve state-of-the-art results across virtually all NLP benchmarks. Modern NLP leverages pretrained language models fine-tuned for specific tasks, with large language models demonstrating emergent capabilities in zero-shot and few-shot settings. Key challenges include multilingual understanding, pragmatic reasoning, factual grounding, and handling ambiguity inherent in natural language.",
+    "whyItMatters": "NLP is what allows Google Translate to handle 130+ languages, enables ChatGPT to hold conversations, powers email spam filters, and lets businesses automatically analyze thousands of customer reviews for sentiment.",
+    "examples": [],
+    "dotNodeId": "NLP"
+  },
+  {
+    "id": "computer-vision",
+    "name": "Computer Vision",
+    "slug": "computer-vision",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Computer vision is the field of AI that teaches machines to interpret and understand visual information from the world -- photos, videos, and live camera feeds. Just as humans effortlessly recognize faces, read signs, and navigate crowded spaces using their eyes and brain, computer vision systems learn to extract meaning from pixels. Modern computer vision can identify objects in photos, detect faces with remarkable accuracy, read handwritten text, analyze medical scans for tumors, and guide autonomous vehicles through traffic. The technology relies heavily on deep learning, where neural networks are trained on millions of labeled images to recognize patterns. Progress has been so rapid that some computer vision systems now outperform humans at specific visual tasks like classifying skin lesions or identifying manufacturing defects.",
+    "technicalDescription": "Computer vision is a multidisciplinary field focused on enabling machines to derive high-level understanding from digital images and video. Fundamental tasks include image classification, object detection, semantic and instance segmentation, pose estimation, optical flow computation, depth estimation, and 3D reconstruction. The field was transformed by convolutional neural networks (CNNs), beginning with AlexNet's 2012 ImageNet breakthrough, followed by architectures like VGG, ResNet, and EfficientNet. Modern approaches increasingly employ vision transformers (ViT) and multimodal models that jointly process images and text. Key techniques include transfer learning from pretrained backbones, data augmentation, and self-supervised pretraining on unlabeled image datasets. Applications span autonomous driving, medical imaging, satellite analysis, augmented reality, industrial quality control, and biometric authentication.",
+    "whyItMatters": "Computer vision enables self-driving cars to see the road, allows your phone to unlock with your face, helps doctors detect diseases in X-rays and MRIs earlier, and powers visual search in apps like Google Lens.",
+    "examples": [],
+    "dotNodeId": "CV"
+  },
+  {
+    "id": "robotics",
+    "name": "Robotics",
+    "slug": "robotics",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Robotics is the branch of AI and engineering focused on designing, building, and programming machines that can interact with the physical world. While the word 'robot' might conjure images of humanoid machines from science fiction, most real robots look nothing like humans. They include factory arms that weld car parts, warehouse robots that sort packages, surgical systems that assist doctors with precision operations, drones that deliver goods, and vacuum cleaners that navigate your living room. AI makes robots smarter by giving them the ability to perceive their surroundings through sensors and cameras, make decisions about what to do next, and learn from experience rather than following only preprogrammed instructions. Modern robots combine computer vision, motion planning, and reinforcement learning to handle increasingly complex real-world tasks.",
+    "technicalDescription": "Robotics integrates mechanical engineering, electrical engineering, and computer science to create autonomous or semi-autonomous machines capable of perceiving and acting in physical environments. Core AI components include simultaneous localization and mapping (SLAM), motion planning algorithms (RRT, A*), inverse kinematics for manipulator control, computer vision for perception, and reinforcement learning for adaptive behavior. Robot architectures range from fixed industrial manipulators to mobile platforms, humanoids, and soft robotics. The field addresses challenges in sensor fusion (LiDAR, cameras, IMUs), real-time control loops, sim-to-real transfer for learned policies, grasping and manipulation of novel objects, and human-robot interaction. Recent advances leverage foundation models for task understanding and large-scale simulation environments for training robust policies without costly physical experimentation.",
+    "whyItMatters": "Robotics powers Amazon warehouse automation that delivers packages in days, enables surgeons to perform minimally invasive procedures with robotic precision, and is driving the development of self-driving vehicles and humanoid robots.",
+    "examples": [],
+    "dotNodeId": "Robotics"
+  },
+  {
+    "id": "expert-systems",
+    "name": "Expert Systems",
+    "slug": "expert-systems",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Expert systems are AI programs designed to mimic the decision-making ability of a human specialist in a specific field. Instead of learning from data like modern AI, they use a collection of 'if-then' rules written by human experts. For example, a medical expert system might contain thousands of rules like 'if the patient has a fever and a rash and recently traveled to a tropical region, consider malaria.' These systems were among the first commercially successful AI applications in the 1970s and 1980s, used in medical diagnosis, mineral exploration, and financial planning. While they have been largely overshadowed by machine learning approaches, expert systems remain valuable in regulated industries where decisions must be transparent, explainable, and traceable -- you can always see exactly why the system reached a particular conclusion.",
+    "technicalDescription": "Expert systems are knowledge-based AI systems that encode domain expertise as declarative rules within an inference engine. The classic architecture consists of a knowledge base (production rules, frames, or semantic networks), an inference engine (forward or backward chaining), a working memory for current facts, and an explanation facility that traces reasoning chains. Notable early systems include MYCIN (bacterial infection diagnosis), DENDRAL (chemical structure analysis), and R1/XCON (computer configuration). Expert systems dominated commercial AI through the 1980s before the AI winter diminished investment. Modern descendants include business rule engines (Drools, CLIPS), clinical decision support systems, and neuro-symbolic architectures that combine neural networks with explicit reasoning. Their key advantage remains interpretability -- every conclusion can be traced to specific rules and facts.",
+    "whyItMatters": "Expert systems still power critical decisions in healthcare (clinical guidelines), finance (fraud detection rules), and aviation (diagnostic checklists) where transparency and accountability matter more than raw predictive power.",
+    "examples": [],
+    "dotNodeId": "ExpertSystems"
+  },
+  {
+    "id": "planning-scheduling",
+    "name": "Planning & Scheduling",
+    "slug": "planning-scheduling",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Planning and scheduling is the area of AI concerned with creating sequences of actions to achieve goals and allocating resources efficiently over time. Think of it as teaching computers to figure out the best order to do things. When a delivery company needs to route hundreds of trucks to thousands of addresses, when an airline creates flight crew schedules, or when a factory decides which products to manufacture on which machines and in what order, planning and scheduling algorithms find solutions that would take humans days to calculate. These systems consider constraints like time windows, resource limits, and dependencies between tasks. Classical approaches use search algorithms to explore possible action sequences, while modern methods increasingly combine these techniques with machine learning to handle uncertainty and adapt to changing conditions.",
+    "technicalDescription": "AI planning and scheduling encompasses automated reasoning about actions, states, and goals to produce executable plans or resource-temporal allocations. Classical planning uses STRIPS-style representations with preconditions and effects, solved via heuristic search (A*, Fast Downward), planning graphs (Graphplan), or SAT-based encoders. Scheduling extends planning with temporal constraints, resource capacities, and optimization objectives. Key frameworks include constraint programming (CP), mixed-integer linear programming (MILP), and metaheuristics (genetic algorithms, simulated annealing). Hierarchical task network (HTN) planning decomposes complex goals into manageable subtasks. Modern approaches integrate reinforcement learning for online replanning under uncertainty and leverage large language models for plan generation in natural language. The field underpins applications in logistics, manufacturing, autonomous systems, and the emerging agentic AI paradigm where agents decompose and execute multi-step goals.",
+    "whyItMatters": "Planning and scheduling algorithms save billions of dollars annually by optimizing airline schedules, supply chain logistics, manufacturing workflows, and delivery routes for companies like UPS and FedEx.",
+    "examples": [],
+    "dotNodeId": "PlanningScheduling"
+  },
+  {
+    "id": "knowledge-representation",
+    "name": "Knowledge Representation",
+    "slug": "knowledge-representation",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Knowledge representation is the branch of AI focused on how to store and organize information so that computers can use it to reason, draw conclusions, and answer questions. Humans naturally organize knowledge into categories, relationships, and hierarchies -- we know that a dog is a type of animal, that animals need food, and therefore dogs need food. Teaching computers to handle this kind of reasoning requires formal structures for encoding facts and the relationships between them. Common approaches include knowledge graphs (networks of connected facts), ontologies (formal vocabularies for a domain), and semantic networks. Google's Knowledge Graph, which powers those information boxes you see in search results, is one of the most visible applications. These systems enable AI to go beyond pattern matching and actually reason about the world.",
+    "technicalDescription": "Knowledge representation and reasoning (KR&R) is a foundational AI discipline concerned with encoding information about the world in formal, machine-processable structures that support inference. Core formalisms include first-order logic, description logics (underlying OWL ontologies), semantic networks, frames, production rules, and probabilistic graphical models. Modern implementations include knowledge graphs (RDF/SPARQL), property graphs (Neo4j), and embedding-based representations that map entities and relations into continuous vector spaces (TransE, RotatE). The Semantic Web stack (RDF, OWL, SHACL) provides standards for interoperable knowledge representation. Current research focuses on neuro-symbolic integration, combining the pattern recognition of neural networks with the logical reasoning of symbolic systems. Knowledge graphs power entity linking, question answering, and recommendation systems at companies like Google, Amazon, and Meta.",
+    "whyItMatters": "Knowledge representation powers Google's Knowledge Graph (those info boxes in search results), enables smart assistants to answer factual questions, and helps AI systems reason about complex relationships in medicine and science.",
+    "examples": [],
+    "dotNodeId": "KnowledgeRep"
+  },
+  {
+    "id": "speech-recognition",
+    "name": "Speech Recognition",
+    "slug": "speech-recognition",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Speech recognition is the AI technology that converts spoken words into text. Every time you talk to Siri, dictate a text message, or use voice commands in your car, speech recognition is translating your voice into words a computer can understand. The challenge is enormous -- human speech varies wildly in accent, speed, pitch, and clarity, and background noise makes it even harder. Early systems required speaking slowly and clearly with pauses between words, but modern speech recognition handles natural, continuous conversation remarkably well. The technology uses deep learning models trained on thousands of hours of recorded speech to learn the patterns that connect sound waves to words and sentences. Recent models can even distinguish between multiple speakers and handle dozens of languages, making voice interaction feel increasingly natural and effortless.",
+    "technicalDescription": "Speech recognition (automatic speech recognition, ASR) converts audio signals into text transcriptions through a pipeline of signal processing and statistical modeling. The audio processing chain includes feature extraction (mel-frequency cepstral coefficients or learned filterbanks), acoustic modeling (mapping audio frames to phonemes or characters), and language modeling (predicting word sequences). Classical systems used hidden Markov models with Gaussian mixture models (HMM-GMM), progressing through deep neural network acoustic models to modern end-to-end architectures. Current state-of-the-art systems like OpenAI Whisper, Google USM, and Meta MMS use transformer or conformer architectures trained on hundreds of thousands of hours of multilingual speech data. Key challenges include domain adaptation, low-resource languages, disfluency handling, speaker diarization, and robust performance in noisy or reverberant environments.",
+    "whyItMatters": "Speech recognition enables Siri, Google Assistant, and Alexa to understand your voice commands, powers real-time captioning for accessibility, and allows hands-free interaction with devices while driving or cooking.",
+    "examples": [],
+    "dotNodeId": "SpeechRec"
+  },
+  {
+    "id": "search-optimization",
+    "name": "Search & Optimization",
+    "slug": "search-optimization",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Search and optimization is the area of AI focused on finding the best solution from a large set of possibilities. Imagine trying every possible route between two cities to find the shortest one -- with enough cities, the number of routes grows astronomically. Search and optimization algorithms use clever strategies to explore possibilities efficiently without checking every single option. These techniques help airlines minimize fuel costs by finding optimal flight paths, help engineers design stronger structures using less material, and help logistics companies plan the most efficient delivery routes. Some algorithms mimic natural processes -- genetic algorithms evolve solutions like biological evolution, while simulated annealing mimics how metals cool to find stable structures. These approaches are fundamental to AI because many intelligent behaviors, from playing chess to planning robot movements, can be framed as finding the best action among many alternatives.",
+    "technicalDescription": "Search and optimization in AI encompasses algorithms that systematically explore state spaces or solution landscapes to find optimal or satisfactory solutions. Uninformed search methods (BFS, DFS, iterative deepening) guarantee completeness, while informed search (A*, IDA*) uses heuristics to improve efficiency. Local search methods include hill climbing, simulated annealing, tabu search, and evolutionary algorithms (genetic algorithms, genetic programming, differential evolution). Constraint satisfaction problems (CSPs) combine search with constraint propagation techniques (arc consistency, backjumping). Mathematical optimization spans linear programming, convex optimization, gradient descent, and mixed-integer programming. Metaheuristics like particle swarm optimization, ant colony optimization, and Bayesian optimization handle complex, non-convex landscapes. Modern applications combine classical optimization with machine learning, using neural networks to learn heuristics, predict solution quality, or guide search in combinatorial optimization problems.",
+    "whyItMatters": "Search and optimization algorithms route GPS navigation, schedule airline flights, optimize investment portfolios, and power game-playing AI like the chess engines that defeated world champions.",
+    "examples": [],
+    "dotNodeId": "SearchOptimization"
+  },
+  {
+    "id": "ai-safety-ethics",
+    "name": "AI Safety & Ethics",
+    "slug": "ai-safety-ethics",
+    "cluster": "ai",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "AI safety and ethics is the field dedicated to ensuring artificial intelligence systems are built and deployed responsibly, without causing harm. As AI becomes more powerful and pervasive, important questions arise: How do we prevent AI from making biased decisions that discriminate against certain groups? How do we ensure AI systems are transparent about their reasoning? Who is accountable when an AI makes a harmful mistake? This field tackles practical concerns like algorithmic bias (where AI trained on historical data perpetuates existing discrimination in hiring, lending, or criminal justice), privacy protection (how AI handles personal data), and alignment (ensuring AI systems actually do what we intend, not something subtly different). It also addresses longer-term questions about autonomous weapons, surveillance, job displacement, and the societal impact of increasingly capable AI systems.",
+    "technicalDescription": "AI safety and ethics is an interdisciplinary field spanning computer science, philosophy, law, and social science, focused on the responsible development and deployment of AI systems. Core technical areas include alignment research (ensuring AI objectives match human intentions), robustness and reliability (performance under distribution shift and adversarial attack), interpretability and explainability (understanding model decisions via SHAP, LIME, attention visualization), fairness and bias mitigation (demographic parity, equalized odds, counterfactual fairness metrics), and privacy-preserving techniques (differential privacy, federated learning). Regulatory frameworks include the EU AI Act, NIST AI Risk Management Framework, and various national AI strategies. The field addresses existential risk from advanced AI systems, dual-use concerns, deepfake detection, content authenticity, and the socioeconomic impact of automation. Organizations like Anthropic, DeepMind, and OpenAI maintain dedicated safety research teams.",
+    "whyItMatters": "AI safety and ethics directly affects hiring algorithms that screen your job applications, credit scoring that determines your loan rates, and content moderation that shapes what billions of people see on social media.",
+    "examples": [],
+    "dotNodeId": "AI_Ethics"
+  },
+  {
+    "id": "machine-learning",
+    "name": "Machine Learning (ML)",
+    "slug": "machine-learning",
+    "cluster": "ml",
+    "parentId": "artificial-intelligence",
+    "simpleDescription": "Machine learning is the branch of AI where computers learn to perform tasks by studying examples and data rather than following explicit step-by-step instructions. Instead of a programmer writing rules like 'if the email contains these words, it is spam,' a machine learning system examines thousands of emails already labeled as spam or not spam and figures out the patterns on its own. This approach works remarkably well for problems where writing rules by hand would be impractical -- recognizing faces, predicting stock prices, recommending movies, or detecting credit card fraud. The computer gets better at these tasks as it sees more data, much like how a child learns to recognize cats by seeing many different cats rather than memorizing a checklist of features. Machine learning has become the dominant approach in modern AI.",
+    "technicalDescription": "Machine learning is a subfield of artificial intelligence focused on algorithms that improve performance on tasks through experience, formalized as learning functions from data without explicit programming. The field encompasses three primary paradigms: supervised learning (learning from labeled input-output pairs), unsupervised learning (discovering structure in unlabeled data), and reinforcement learning (learning through environmental interaction and reward signals). Core theoretical foundations include statistical learning theory, computational learning theory (PAC learning), and the bias-variance tradeoff. Key techniques span linear models, kernel methods, ensemble methods, probabilistic graphical models, and neural networks. The ML pipeline involves data collection, preprocessing, feature engineering (increasingly automated via deep learning), model selection, hyperparameter tuning, evaluation (cross-validation, held-out test sets), and deployment. Modern ML emphasizes scalability, AutoML, and MLOps for production systems.",
+    "whyItMatters": "Machine learning powers Netflix recommendations, email spam filters, credit card fraud detection, medical diagnosis tools, and virtually every modern AI application you interact with daily.",
+    "examples": [],
+    "dotNodeId": "ML_Node"
+  },
+  {
+    "id": "supervised-learning",
+    "name": "Supervised Learning",
+    "slug": "supervised-learning",
+    "cluster": "ml",
+    "parentId": "machine-learning",
+    "simpleDescription": "Supervised learning is the most common type of machine learning, where you teach a computer by showing it examples with correct answers already provided. Think of it like a student learning from a textbook with an answer key. You give the system thousands of examples -- labeled photos of cats and dogs, emails tagged as spam or not spam, house listings with their sale prices -- and it learns the patterns that connect the inputs to the correct outputs. Once trained, the system can make predictions on new data it has never seen before. There are two main flavors: classification (sorting things into categories, like 'spam' or 'not spam') and regression (predicting a number, like a house price). Supervised learning requires labeled data, which means someone has to provide those correct answers for training, and this labeling process can be expensive and time-consuming.",
+    "technicalDescription": "Supervised learning is a machine learning paradigm where models learn a mapping function from input features to output labels using a training set of labeled examples. The two primary tasks are classification (predicting categorical labels) and regression (predicting continuous values). The learning process minimizes a loss function measuring prediction error via optimization algorithms (gradient descent, coordinate descent). Key algorithms include linear regression, logistic regression, decision trees, random forests, gradient boosting (XGBoost, LightGBM), support vector machines, k-nearest neighbors, and neural networks. Model evaluation uses metrics like accuracy, precision, recall, F1-score, AUC-ROC for classification, and MSE, MAE, R-squared for regression. Critical concerns include overfitting (addressed via regularization, cross-validation, early stopping), class imbalance (addressed via resampling, class weights), and the requirement for large, accurately labeled datasets.",
+    "whyItMatters": "Supervised learning is behind email spam filters, medical image diagnosis, voice assistants understanding your speech, credit scoring systems, and weather forecasting models that predict tomorrow's temperature.",
+    "examples": [
+      { "name": "Decision Trees", "description": "Tree-structured models that make predictions by learning simple decision rules from data features, splitting data at each node based on the most informative attribute" },
+      { "name": "Support Vector Machines (SVM)", "description": "Classification algorithm that finds the optimal hyperplane separating different classes with maximum margin in high-dimensional feature space" },
+      { "name": "Linear Regression", "description": "Foundational statistical method that models the relationship between input variables and a continuous output by fitting a linear equation to observed data" },
+      { "name": "Logistic Regression", "description": "Classification algorithm that predicts probabilities of categorical outcomes using a logistic function, widely used for binary classification tasks like spam detection" },
+      { "name": "Ensemble Methods", "description": "Techniques that combine multiple models (bagging, boosting, stacking) to produce better predictions than any single model, including Random Forests and XGBoost" }
+    ],
+    "dotNodeId": "Supervised"
+  },
+  {
+    "id": "unsupervised-learning",
+    "name": "Unsupervised Learning",
+    "slug": "unsupervised-learning",
+    "cluster": "ml",
+    "parentId": "machine-learning",
+    "simpleDescription": "Unsupervised learning is a type of machine learning where the computer finds patterns and structure in data without being given any correct answers to learn from. Unlike supervised learning, there are no labels or categories provided -- the system must discover groupings and relationships on its own. Imagine dumping thousands of news articles in front of a computer and asking it to organize them into topics without telling it what those topics should be. The system might discover clusters around politics, sports, technology, and entertainment purely based on word patterns. Common tasks include clustering (grouping similar items together), dimensionality reduction (simplifying complex data while preserving important patterns), and anomaly detection (spotting unusual items that do not fit any group). This approach is especially valuable when labeled data is scarce or when you want to discover hidden patterns that humans might not think to look for.",
+    "technicalDescription": "Unsupervised learning encompasses machine learning methods that discover structure in unlabeled data without explicit target variables. Primary tasks include clustering (K-means, DBSCAN, hierarchical clustering, Gaussian mixture models), dimensionality reduction (PCA, t-SNE, UMAP, autoencoders), density estimation (kernel density estimation, normalizing flows), and anomaly detection (isolation forests, one-class SVM). The objective functions are typically based on data likelihood, reconstruction error, or distance metrics rather than prediction accuracy. Evaluation is inherently challenging without ground truth labels, relying on metrics like silhouette score, Davies-Bouldin index, and domain-specific validation. Unsupervised learning is foundational to representation learning, where models learn useful feature representations from raw data. Modern applications include customer segmentation, topic modeling (LDA), feature learning for downstream supervised tasks, and discovering latent structure in scientific datasets. Self-supervised learning has emerged as a powerful variant.",
+    "whyItMatters": "Unsupervised learning helps retailers discover customer segments for targeted marketing, enables anomaly detection that catches credit card fraud and network intrusions, and powers recommendation systems that group similar products together.",
+    "examples": [
+      { "name": "K-Means Clustering", "description": "Algorithm that partitions data into K distinct groups by iteratively assigning points to the nearest cluster center and updating centers to minimize within-cluster distances" },
+      { "name": "PCA (Principal Component Analysis)", "description": "Dimensionality reduction technique that identifies the directions of maximum variance in high-dimensional data, enabling visualization and noise reduction while preserving important patterns" }
+    ],
+    "dotNodeId": "Unsupervised"
+  },
+  {
+    "id": "reinforcement-learning",
+    "name": "Reinforcement Learning",
+    "slug": "reinforcement-learning",
+    "cluster": "ml",
+    "parentId": "machine-learning",
+    "simpleDescription": "Reinforcement learning is a type of machine learning where an AI agent learns by trial and error, receiving rewards for good actions and penalties for bad ones, much like training a dog with treats. The agent interacts with an environment -- a game, a simulated world, or even the real world -- taking actions and observing what happens. Over thousands or millions of attempts, it discovers which strategies lead to the highest rewards. This approach is behind some of AI's most impressive achievements: DeepMind's AlphaGo defeated the world champion at the ancient board game Go, a feat once thought to be decades away. Reinforcement learning is particularly powerful for sequential decision-making problems where each choice affects future options -- playing games, controlling robots, managing investment portfolios, and optimizing data center energy usage. The agent learns a policy, which is essentially a strategy for choosing the best action in any situation.",
+    "technicalDescription": "Reinforcement learning (RL) is a computational framework where an agent learns optimal behavior through interaction with an environment, modeled as a Markov Decision Process (MDP) with states, actions, transition dynamics, and reward signals. Core algorithms include value-based methods (Q-learning, DQN, Double DQN), policy gradient methods (REINFORCE, PPO, A3C), and actor-critic architectures that combine both. The agent learns to maximize cumulative discounted reward through exploration-exploitation tradeoffs (epsilon-greedy, UCB, entropy regularization). Key challenges include sparse rewards, credit assignment over long horizons, sample efficiency, and sim-to-real transfer. Model-based RL learns environment dynamics for planning (Dreamer, MuZero), while model-free approaches learn directly from experience. Multi-agent RL extends the framework to competitive and cooperative settings. RL has achieved superhuman performance in Atari games, Go, StarCraft II, and robotic manipulation tasks.",
+    "whyItMatters": "Reinforcement learning is how AlphaGo defeated the world Go champion, how data centers reduce energy consumption by 40%, and how robotics companies teach robots to walk, grasp objects, and navigate warehouses.",
+    "examples": [],
+    "dotNodeId": "Reinforcement"
+  },
+  {
+    "id": "semi-supervised-learning",
+    "name": "Semi-Supervised Learning",
+    "slug": "semi-supervised-learning",
+    "cluster": "ml",
+    "parentId": "machine-learning",
+    "simpleDescription": "Semi-supervised learning is a machine learning approach that combines a small amount of labeled data with a large amount of unlabeled data during training. Labeling data is often expensive and time-consuming -- imagine hiring doctors to annotate thousands of medical images or paying people to categorize millions of customer support tickets. Semi-supervised learning addresses this cost by using just a handful of labeled examples to guide learning from a much larger pool of unlabeled data. The key insight is that the structure and patterns in unlabeled data carry useful information. For example, if you label just 100 photos of cats and dogs but have 100,000 unlabeled animal photos, the system can use the unlabeled images to understand what animals generally look like, making its classifications much more accurate than training on just the 100 labeled examples alone.",
+    "technicalDescription": "Semi-supervised learning (SSL) leverages both labeled and unlabeled data to improve model performance beyond what either source provides alone, addressing the practical constraint that labeled data is scarce while unlabeled data is abundant. Core techniques include self-training (pseudo-labeling unlabeled data with model predictions), co-training (multiple models teaching each other on different feature views), graph-based methods (label propagation on similarity graphs), and consistency regularization (enforcing invariant predictions under data augmentations). Modern approaches include FixMatch (combining pseudo-labeling with consistency regularization), MixMatch, and temporal ensembling. Theoretical foundations rest on smoothness, cluster, and manifold assumptions about data distribution. The paradigm is particularly effective when the marginal distribution of inputs carries class-relevant structure. Semi-supervised learning is closely related to self-supervised pretraining strategies used in modern foundation models and has seen renewed interest with contrastive learning frameworks.",
+    "whyItMatters": "Semi-supervised learning makes AI practical for medical diagnosis, rare language translation, and scientific research where expert-labeled data is scarce and expensive but raw unlabeled data is plentiful.",
+    "examples": [],
+    "dotNodeId": "SemiSupervised"
+  },
+  {
+    "id": "self-supervised-learning",
+    "name": "Self-Supervised Learning",
+    "slug": "self-supervised-learning",
+    "cluster": "ml",
+    "parentId": "unsupervised-learning",
+    "simpleDescription": "Self-supervised learning is a clever technique where the AI creates its own training tasks from unlabeled data, essentially teaching itself. Instead of needing humans to label every piece of data, the system generates learning objectives automatically. For example, a language model might hide random words in a sentence and try to predict the missing ones, or an image model might learn to match two differently cropped versions of the same photo. By solving millions of these self-generated puzzles, the model develops a deep understanding of language, images, or other data types. This approach is the secret behind the most powerful AI systems today -- ChatGPT, Claude, and similar language models were pretrained using self-supervised learning on enormous amounts of text from the internet. The technique dramatically reduces the need for expensive human-labeled data while producing remarkably capable models.",
+    "technicalDescription": "Self-supervised learning (SSL) is a representation learning paradigm where supervisory signals are derived from the data itself, creating pretext tasks that require understanding data structure. In NLP, masked language modeling (BERT) and autoregressive next-token prediction (GPT) are foundational SSL objectives. In computer vision, SSL methods include contrastive learning (SimCLR, MoCo, BYOL), masked image modeling (MAE, BEiT), and DINO/DINOv2 for vision transformers. The learned representations transfer effectively to downstream supervised tasks via fine-tuning or linear probing. SSL bridges supervised and unsupervised learning -- it uses unlabeled data but creates structured prediction objectives. The approach has become the dominant pretraining strategy for foundation models across modalities. Key theoretical insights relate to information maximization, the information bottleneck principle, and the connection between SSL objectives and mutual information. SSL is the driving paradigm behind the current era of large-scale pretrained models.",
+    "whyItMatters": "Self-supervised learning is the technique that made ChatGPT, Claude, and BERT possible by allowing AI models to learn from the vast amount of unlabeled text, images, and video available on the internet without manual annotation.",
+    "examples": [],
+    "dotNodeId": "SelfSupervised"
+  }
+]
