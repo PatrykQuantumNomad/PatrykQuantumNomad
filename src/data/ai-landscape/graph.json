@@ -1,0 +1,465 @@
+{
+  "clusters": [
+    {
+      "id": "ai",
+      "name": "Artificial Intelligence (AI)",
+      "color": "#e0f7fa",
+      "darkColor": "#00696e",
+      "parentClusterId": null
+    },
+    {
+      "id": "ml",
+      "name": "Machine Learning (ML)",
+      "color": "#c8e6c9",
+      "darkColor": "#2e7d32",
+      "parentClusterId": "ai"
+    },
+    {
+      "id": "nn",
+      "name": "Neural Networks (NN)",
+      "color": "#fff9c4",
+      "darkColor": "#827717",
+      "parentClusterId": "ml"
+    },
+    {
+      "id": "dl",
+      "name": "Deep Learning (DL)",
+      "color": "#ffecb3",
+      "darkColor": "#e65100",
+      "parentClusterId": "nn"
+    },
+    {
+      "id": "genai",
+      "name": "Generative AI (GenAI)",
+      "color": "#ffcdd2",
+      "darkColor": "#c62828",
+      "parentClusterId": "dl"
+    },
+    {
+      "id": "levels",
+      "name": "Levels of Intelligence",
+      "color": "#eeeeee",
+      "darkColor": "#424242",
+      "parentClusterId": null
+    },
+    {
+      "id": "agentic",
+      "name": "Agentic AI Paradigm",
+      "color": "#d1c4e9",
+      "darkColor": "#4527a0",
+      "parentClusterId": null
+    },
+    {
+      "id": "agent-frameworks",
+      "name": "Agent Frameworks & Systems",
+      "color": "#b39ddb",
+      "darkColor": "#311b92",
+      "parentClusterId": "agentic"
+    },
+    {
+      "id": "devtools",
+      "name": "AI-Powered Developer Tools",
+      "color": "#b3e5fc",
+      "darkColor": "#01579b",
+      "parentClusterId": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "artificial-intelligence",
+      "target": "natural-language-processing",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "computer-vision",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "robotics",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "expert-systems",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "planning-scheduling",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "knowledge-representation",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "speech-recognition",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "search-optimization",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "ai-safety-ethics",
+      "label": "includes fields",
+      "type": "includes"
+    },
+    {
+      "source": "machine-learning",
+      "target": "supervised-learning",
+      "label": "types",
+      "type": "includes"
+    },
+    {
+      "source": "machine-learning",
+      "target": "unsupervised-learning",
+      "label": "types",
+      "type": "includes"
+    },
+    {
+      "source": "machine-learning",
+      "target": "reinforcement-learning",
+      "label": "types",
+      "type": "includes"
+    },
+    {
+      "source": "machine-learning",
+      "target": "semi-supervised-learning",
+      "label": "types",
+      "type": "includes"
+    },
+    {
+      "source": "unsupervised-learning",
+      "target": "self-supervised-learning",
+      "label": "specialisation of",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "convolutional-neural-networks",
+      "label": "architectures",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "recurrent-neural-networks",
+      "label": "architectures",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "transformers",
+      "label": "architectures",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "autoencoders",
+      "label": "architectures",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "foundation-models",
+      "label": "paradigms",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "deep-reinforcement-learning",
+      "label": "paradigms",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "mixture-of-experts",
+      "label": "technique",
+      "type": "includes"
+    },
+    {
+      "source": "deep-learning",
+      "target": "multimodal-ai",
+      "label": "paradigm",
+      "type": "includes"
+    },
+    {
+      "source": "reinforcement-learning",
+      "target": "deep-reinforcement-learning",
+      "label": "combined with DL",
+      "type": "relates"
+    },
+    {
+      "source": "transformers",
+      "target": "foundation-models",
+      "label": "enables",
+      "type": "enables"
+    },
+    {
+      "source": "foundation-models",
+      "target": "reasoning-models",
+      "label": "enables",
+      "type": "enables"
+    },
+    {
+      "source": "foundation-models",
+      "target": "large-language-models",
+      "label": "e.g.",
+      "type": "example"
+    },
+    {
+      "source": "generative-ai",
+      "target": "generative-adversarial-networks",
+      "label": "includes",
+      "type": "includes"
+    },
+    {
+      "source": "generative-ai",
+      "target": "variational-autoencoders",
+      "label": "includes",
+      "type": "includes"
+    },
+    {
+      "source": "generative-ai",
+      "target": "diffusion-models",
+      "label": "includes",
+      "type": "includes"
+    },
+    {
+      "source": "generative-ai",
+      "target": "large-language-models",
+      "label": "includes",
+      "type": "includes"
+    },
+    {
+      "source": "large-language-models",
+      "target": "rlhf-dpo",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "prompt-engineering",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "few-zero-shot-learning",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "hallucination",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "retrieval-augmented-generation",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "fine-tuning",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "large-language-models",
+      "target": "context-windows",
+      "label": "related tech/concepts",
+      "type": "relates"
+    },
+    {
+      "source": "autoencoders",
+      "target": "variational-autoencoders",
+      "label": "extends to",
+      "type": "relates"
+    },
+    {
+      "source": "transformers",
+      "target": "large-language-models",
+      "label": "powers",
+      "type": "enables"
+    },
+    {
+      "source": "mixture-of-experts",
+      "target": "large-language-models",
+      "label": "scaling technique for",
+      "type": "relates"
+    },
+    {
+      "source": "machine-learning",
+      "target": "artificial-intelligence",
+      "label": "subset of",
+      "type": "hierarchy"
+    },
+    {
+      "source": "neural-networks",
+      "target": "machine-learning",
+      "label": "subset of",
+      "type": "hierarchy"
+    },
+    {
+      "source": "deep-learning",
+      "target": "neural-networks",
+      "label": "subset of",
+      "type": "hierarchy"
+    },
+    {
+      "source": "generative-ai",
+      "target": "deep-learning",
+      "label": "subset of",
+      "type": "hierarchy"
+    },
+    {
+      "source": "artificial-intelligence",
+      "target": "artificial-narrow-intelligence",
+      "label": "primarily develops",
+      "type": "relates"
+    },
+    {
+      "source": "artificial-narrow-intelligence",
+      "target": "actually-competent-intelligence",
+      "label": "Potential Progression",
+      "type": "progression"
+    },
+    {
+      "source": "actually-competent-intelligence",
+      "target": "artificial-general-intelligence",
+      "label": "Potential Progression",
+      "type": "progression"
+    },
+    {
+      "source": "artificial-general-intelligence",
+      "target": "artificial-superintelligence",
+      "label": "Potential Progression",
+      "type": "progression"
+    },
+    {
+      "source": "large-language-models",
+      "target": "agentic-ai",
+      "label": "enables",
+      "type": "enables"
+    },
+    {
+      "source": "foundation-models",
+      "target": "agentic-ai",
+      "label": "enables",
+      "type": "enables"
+    },
+    {
+      "source": "reasoning-models",
+      "target": "agentic-ai",
+      "label": "enables",
+      "type": "enables"
+    },
+    {
+      "source": "planning-scheduling",
+      "target": "agent-planning",
+      "label": "relates to",
+      "type": "relates"
+    },
+    {
+      "source": "reinforcement-learning",
+      "target": "agentic-ai",
+      "label": "informs",
+      "type": "relates"
+    },
+    {
+      "source": "deep-reinforcement-learning",
+      "target": "agentic-ai",
+      "label": "informs",
+      "type": "relates"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "autonomy",
+      "label": "characterized by",
+      "type": "characterizes"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "agent-planning",
+      "label": "characterized by",
+      "type": "characterizes"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "tool-use",
+      "label": "characterized by",
+      "type": "characterizes"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "agent-memory",
+      "label": "characterized by",
+      "type": "characterizes"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "self-correction",
+      "label": "characterized by",
+      "type": "characterizes"
+    },
+    {
+      "source": "model-context-protocol",
+      "target": "tool-use",
+      "label": "standardizes",
+      "type": "standardizes"
+    },
+    {
+      "source": "model-context-protocol",
+      "target": "agentic-ai",
+      "label": "enables interop",
+      "type": "standardizes"
+    },
+    {
+      "source": "large-language-models",
+      "target": "ai-coding-assistants",
+      "label": "powers",
+      "type": "enables"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "ai-coding-assistants",
+      "label": "paradigm applied",
+      "type": "applies"
+    },
+    {
+      "source": "large-language-models",
+      "target": "actually-competent-intelligence",
+      "label": "aspires to",
+      "type": "aspires"
+    },
+    {
+      "source": "agentic-ai",
+      "target": "actually-competent-intelligence",
+      "label": "aims for",
+      "type": "aspires"
+    },
+    {
+      "source": "reasoning-models",
+      "target": "actually-competent-intelligence",
+      "label": "steps toward",
+      "type": "aspires"
+    }
+  ]
+}
