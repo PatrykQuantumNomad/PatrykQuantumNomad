@@ -43,11 +43,11 @@
 **Depends on**: Nothing (first phase of v1.18)
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05
 **Success Criteria** (what must be TRUE):
-  1. A TypeScript/JSON data model exists with ~80 nodes containing slug, name, cluster membership, and edge relationships extracted from the DOT file
-  2. Zod schema validates every node with required fields: slug, name, cluster, simpleDescription, technicalDescription, and relationships array
-  3. Every node has two tiers of hand-crafted educational content — a plain-English "simple" description and a "technical" description — each at least 100 words
-  4. Edge data preserves labeled relationship types from the DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
-  5. Content collection is registered in Astro config with file() loader and a test build confirms all nodes are accessible via getCollection('aiNodes')
+  1. ✅ A TypeScript/JSON data model exists with 51 concept nodes (plus ~32 grouped examples) containing slug, name, cluster membership, and edge relationships extracted from the DOT file
+  2. ✅ Zod schema validates every node with required fields: slug, name, cluster, simpleDescription, technicalDescription; relationships computed via getNodeRelationships() helper from edges array
+  3. ✅ Every node has two tiers of hand-crafted educational content — a plain-English "simple" description and a "technical" description — each at least 100 words
+  4. ✅ Edge data preserves labeled relationship types from the DOT file ("subset of", "enables", "e.g.", "powers", "characterized by") across 66 edges
+  5. ✅ Content collection is registered in Astro config with file() loader and a test build confirms all nodes are accessible via getCollection('aiLandscape')
 **Plans:** 3/3 plans complete
 
 Plans:

@@ -9,9 +9,9 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 
 ### Data Foundation
 
-- [x] **DATA-01**: DOT file converted to canonical TypeScript/JSON data model with ~80 nodes, cluster membership, and edge relationships
-- [x] **DATA-02**: Zod-validated content collection schema for AI landscape concepts (slug, name, cluster, simpleDescription, technicalDescription, relationships)
-- [x] **DATA-03**: Two-tier educational content (simple + technical) written for all ~80 nodes in plain English for non-technical audience
+- [x] **DATA-01**: DOT file converted to canonical TypeScript/JSON data model with 51 concept nodes + ~32 grouped examples, cluster membership, and 66 edge relationships
+- [x] **DATA-02**: Zod-validated content collection schema for AI landscape concepts (slug, name, cluster, simpleDescription, technicalDescription, whyItMatters, examples); relationships computed via helper function from edges array
+- [x] **DATA-03**: Two-tier educational content (simple + technical) written for all 51 concept nodes in plain English for non-technical audience
 - [x] **DATA-04**: Edge data preserves relationship labels from DOT file ("subset of", "enables", "e.g.", "powers", "characterized by")
 - [x] **DATA-05**: Content collection registered in Astro config with file() loader
 
