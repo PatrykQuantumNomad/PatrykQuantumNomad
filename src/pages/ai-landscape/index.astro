@@ -1,0 +1,73 @@
+---
+/**
+ * AI Landscape Explorer — /ai-landscape/
+ * Landing page assembling the pre-computed force-directed SVG graph,
+ * a color-coded legend, and a category-grouped concept list.
+ * The static SVG is the first meaningful paint — zero JavaScript required.
+ */
+import { getCollection } from 'astro:content';
+import graphData from '../../data/ai-landscape/graph.json';
+import layoutData from '../../data/ai-landscape/layout.json';
+import { buildLandscapeSvg } from '../../lib/ai-landscape/svg-builder';
+import { AI_LANDSCAPE_BASE } from '../../lib/ai-landscape/routes';
+import type { AiNode, Cluster } from '../../lib/ai-landscape/schema';
+import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import GraphLegend from '../../components/ai-landscape/GraphLegend.astro';
+import ConceptList from '../../components/ai-landscape/ConceptList.astro';
+
+const entries = await getCollection('aiLandscape');
+const allNodes: AiNode[] = entries.map((e) => e.data as AiNode);
+
+const svgString = buildLandscapeSvg(
+  allNodes,
+  graphData.edges as Parameters<typeof buildLandscapeSvg>[1],
+  layoutData.positions,
+  graphData.clusters as Cluster[],
+  layoutData.meta,
+);
+
+// Group nodes by cluster, preserving cluster order from graph.json
+const nodesByCluster = new Map<string, AiNode[]>();
+for (const node of allNodes) {
+  const list = nodesByCluster.get(node.cluster);
+  if (list) {
+    list.push(node);
+  } else {
+    nodesByCluster.set(node.cluster, [node]);
+  }
+}
+---
+
+<Layout
+  title="AI Landscape Explorer: Visual Guide to Artificial Intelligence (2026) | Patryk Golabek"
+  description="Explore the AI landscape — from machine learning to generative AI, agentic systems, and developer tools. Visual guide with 51 concepts explained simply and technically."
+>
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'AI Landscape', url: 'https://patrykgolabek.dev/ai-landscape/' },
+  ]} />
+
+  {/* Hero Section */}
+  <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
+    <span class="inline-block text-xs font-mono text-[var(--color-accent)] border border-[var(--color-accent)]/30 rounded-full px-3 py-1 mb-4">2026 Edition</span>
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      AI Landscape Explorer
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto">
+      A visual guide to 51 key concepts in artificial intelligence — from foundational
+      machine learning to cutting-edge agentic systems and developer tools.
+    </p>
+  </section>
+
+  {/* Static SVG Graph (first meaningful paint, no JS) */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto" aria-label="AI landscape visualization">
+    <Fragment set:html={svgString} />
+  </section>
+
+  {/* Legend */}
+  <GraphLegend clusters={graphData.clusters as Cluster[]} />
+
+  {/* Category-Grouped Concept List */}
+  <ConceptList nodesByCluster={nodesByCluster} clusters={graphData.clusters as Cluster[]} />
+</Layout>
