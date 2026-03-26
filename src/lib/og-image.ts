@@ -3283,3 +3283,190 @@ export async function generateGuideOgImage(
 
   return renderOgPng(layout);
 }
+
+/**
+ * Generates a branded OG image for an AI Landscape concept page.
+ * Two-column layout: concept name + cluster pill + description on the left,
+ * large cluster-colored decorative block on the right, with cluster-colored accent bar.
+ */
+export async function generateAiLandscapeOgImage(
+  concept: { name: string; cluster: string; simpleDescription: string },
+  clusterName: string,
+  clusterDarkColor: string,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const displayName = truncate(concept.name, 60);
+  const displayDescription = truncate(concept.simpleDescription, 160);
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'row' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        // Cluster-colored accent bar at top
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              top: 0,
+              left: 0,
+              width: '1200px',
+              height: '6px',
+              backgroundImage: `linear-gradient(to right, ${clusterDarkColor}, ${clusterDarkColor}88)`,
+            },
+          },
+        },
+        // Left column: text content
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              justifyContent: 'center',
+              width: '700px',
+              padding: '40px 0px 60px 56px',
+              gap: '16px',
+            },
+            children: [
+              // Series label
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: clusterDarkColor,
+                    fontWeight: 600,
+                  },
+                  children: 'AI Landscape Explorer',
+                },
+              },
+              // Concept name
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '52px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                  },
+                  children: displayName,
+                },
+              },
+              // Cluster pill
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '15px',
+                          color: '#ffffff',
+                          backgroundColor: clusterDarkColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: clusterName,
+                      },
+                    },
+                  ],
+                },
+              },
+              // Simple description excerpt
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '18px',
+                    color: '#555566',
+                    lineHeight: 1.5,
+                  },
+                  children: displayDescription,
+                },
+              },
+            ],
+          },
+        },
+        // Right column: cluster-colored decorative block
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '500px',
+              height: '630px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '280px',
+                    height: '280px',
+                    borderRadius: '40px',
+                    backgroundColor: `${clusterDarkColor}18`,
+                    border: `3px solid ${clusterDarkColor}40`,
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '100px',
+                          color: clusterDarkColor,
+                        },
+                        children: 'AI',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Bottom-left branding
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
