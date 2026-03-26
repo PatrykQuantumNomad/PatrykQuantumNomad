@@ -1,316 +1,314 @@
-# Research Summary: v1.17 EDA Jupyter Notebooks
+# Project Research Summary
 
-**Project:** patrykgolabek.dev — v1.17 Downloadable Jupyter Notebooks for EDA Case Studies
-**Domain:** Build-time notebook generation for Astro 5 static site (GitHub Pages)
-**Researched:** 2026-03-14
+**Project:** AI Landscape Explorer
+**Domain:** Interactive educational knowledge map — force-directed graph with SEO concept pages
+**Researched:** 2026-03-26
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone adds downloadable Jupyter notebooks for all 10 NIST EDA case studies to patrykgolabek.dev. The research is unambiguously clear on approach: generate `.ipynb` files at build time in TypeScript (the format is plain JSON — no Python tooling needed), bundle each notebook with its `.DAT` dataset file into a `.zip` archive using `archiver`, and serve them as static files from the Astro build output. This fits cleanly inside the existing build pipeline on GitHub Pages without new CI infrastructure, no Python runtime in CI, and only two new npm dependencies (`archiver` + its types).
+The AI Landscape Explorer converts an existing `ai_landscape.dot` file (~83 nodes, ~120 edges, 7 nested clusters) into two deliverables: (1) a force-directed SVG graph with pan/zoom/click interactions, and (2) ~80 individual static SEO pages, one per AI concept. This is a content and visualization expansion layered onto an existing Astro 5 portfolio site — not a new product — and the existing codebase already provides 90% of the necessary infrastructure: D3 micro-modules, React islands, Nanostores, content collections, Satori OG images, and JSON-LD patterns. Only one new runtime npm package is required (`d3-force`, ~5.5KB gzipped). All other D3 modules needed for interaction (`d3-zoom`, `d3-drag`, `d3-selection`, `d3-transition`) are already installed as transitive dependencies of `@xyflow/react`.
 
-The core implementation work is writing Python analysis code inside cell templates, not infrastructure. The TypeScript notebook builder and zip packager together are under 300 lines. The bulk of the effort is the 10 per-case-study cell template modules — 7 share a standard parameterized template, 2 are model-development variations (beam deflections with sinusoidal regression, random walk with AR(1)), and 1 is the complex DOE variant (ceramic strength). Building the standard template first delivers 70% of the milestone's content and validates the full pipeline before tackling the harder notebooks.
+The recommended implementation order is strictly data-first: extract the DOT file to typed JSON, author educational content for each concept, then build the SEO pages, then the interactive graph. The single most important differentiator for audience impact is the "Explain Like I'm 5" content toggle — it requires two description fields per node in the data model (authored once) and zero additional code complexity, but directly serves the non-technical target audience (recruiters, managers, curious people) that every competing AI landscape map ignores. The force-directed graph should render from pre-computed positions (build-time force simulation) rather than running a live physics simulation in the browser, delivering instant first paint and eliminating layout jank for non-technical users.
 
-The primary risk is correctness, not complexity. Notebooks that open but fail to run — due to invalid nbformat JSON, broken `.DAT` file parsing, missing Python dependencies, or statistical values that disagree with the NIST-verified website — will undermine user trust. Every notebook must pass a build-time format check and a manual end-to-end run in a clean Python environment before the milestone is considered done.
+The highest-stakes risks are content quality and bundle isolation — not technical complexity. Google's Helpful Content system will penalize thin auto-generated pages with site-wide ranking consequences across all 1090+ existing pages. Each of the ~80 concept pages requires hand-crafted content of at least 300-500 words before being indexed. Separately, D3 force modules must be imported from individual micro-packages only and the graph island must be isolated so force modules never leak into the shared bundle.
+
+---
+
+## Researcher Disagreement: Build-Time vs Runtime D3 Force Simulation
+
+**This is a real architectural disagreement between STACK.md and ARCHITECTURE.md with concrete product consequences. It must be resolved before Phase 4 planning.**
+
+**STACK.md (runtime simulation):** `d3-force` must run at runtime in the browser. The simulation produces organic node settling, live drag-to-rearrange, and the "breathing" layout that defines force-directed graphs. Pre-computing positions at build time produces "a dead static diagram."
+
+**ARCHITECTURE.md (build-time simulation):** Run `d3-force` headlessly at build time (300 ticks via `simulation.stop()` + `simulation.tick()`), write a deterministic `layout.json`. The client React island renders from pre-computed positions. No simulation runs in the browser. `d3-force` stays out of the client bundle entirely — zero bundle impact.
+
+**FEATURES.md (implicit support for build-time):** Lists drag-to-rearrange as an explicit anti-feature ("This is an educational tool, not a graph editor") and lists the Static SVG Fallback as a differentiator requiring pre-computed positions. Also flags that non-technical users have low patience for loading spinners.
+
+**Comparison of approaches:**
+
+| Concern | Runtime Simulation | Build-Time Pre-compute |
+|---|---|---|
+| Drag-to-rearrange nodes | Yes | No (or partial with re-init on drag) |
+| Organic settling animation on load | Yes | No (nodes appear at known positions) |
+| Deterministic layout across loads | No | Yes |
+| `d3-force` in client bundle | ~5.5KB | 0KB |
+| First meaningful paint | 1-3s delay while sim converges | Instant |
+| Consistent UX on slow devices | Variable (sim takes longer) | Consistent |
+
+**Recommendation:** Build-time pre-computation is the better fit for an educational tool targeting non-technical users. The anti-feature list explicitly excludes drag-to-rearrange. Instant first paint matters more than organic settling for an audience that has low patience for loading spinners. A pragmatic middle path is possible: pre-compute at build time, but allow optional drag on client — which triggers a lightweight re-simulation scoped to the dragged node, not a full-graph simulation on every tick.
+
+**This is an open question requiring user decision** before Phase 4 is planned (see Open Questions section).
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-Only two new npm dependencies are needed. The `.ipynb` format is nbformat v4.5 JSON — constructable directly from a TypeScript type definition without any npm notebook library.
+Only one new runtime npm package is required: `d3-force ^3.0.0` (~5.5KB gzipped). `d3-quadtree` is a transitive dependency of `d3-force` that installs automatically (+~3.5KB). All other D3 modules needed for client-side interaction are already installed as transitive deps of `@xyflow/react`: `d3-zoom` (3.0.0), `d3-drag` (3.0.0), `d3-transition` (3.0.1), `d3-dispatch` (3.0.1), `d3-timer` (3.0.1). Four type-definition dev packages are needed: `@types/d3-force`, `@types/d3-zoom`, `@types/d3-drag`, `@types/d3-transition`.
 
-**New npm dependencies:**
-- `archiver ^7.0.1` — stream-based ZIP creation (14.6M weekly downloads, mature, ESM-compatible). Preferred over JSZip for build-time server-side generation because of its streaming API and correct handling of binary files alongside UTF-8 strings. JSZip has documented encoding issues with mixed binary/text content (issue #368).
-- `@types/archiver ^7.0.0` — TypeScript types for the above.
+No graph-specific library should be added. React Flow (`@xyflow/react`) uses dagre layout for DAGs — wrong paradigm for a force-directed concept map. `react-force-graph` is Canvas-based and loses CSS styling, accessibility, and native click handling. `cytoscape`, `vis-network`, and `sigma.js` are all 100-200KB+ libraries designed for graph algorithm problems or 5000+ node visualizations, not an 80-node educational display.
 
-**Python stack declared inside notebooks (not in package.json):**
+**Core technologies:**
+- `d3-force ^3.0.0` — only new runtime dependency; force simulation engine powering cluster-aware layout via `forceX`/`forceY`; can be build-time-only if pre-computation approach is chosen
+- `d3-zoom` (already installed) — pan and zoom on SVG container; present as transitive dep of `@xyflow/react`
+- `d3-drag` (already installed) — optional node dragging; present as transitive dep of `@xyflow/react`
+- `d3-selection`, `d3-scale`, `d3-array` (already installed, direct deps) — SVG manipulation, cluster color mapping, viewport bounds
+- Nanostores (already installed, 22+ usages) — `selectedNodeId`, `hoveredNodeId`, `activeCluster` atoms; zero new state library needed
+- Astro content collections with `file()` loader — `nodes.json` collection; follows `techniques.json` / `distributions.json` pattern exactly
+- Satori + Sharp (already installed) — OG image generation for 83 concept pages
+- Tailwind CSS (already installed) — side panel, controls layout; inline styles for dynamic cluster colors (not dynamic Tailwind class strings)
 
-| Library | Pin | Purpose |
-|---------|-----|---------|
-| numpy | >=1.26,<3 | Numerical arrays, statistics |
-| scipy | >=1.11 | Statistical tests, distributions |
-| pandas | >=2.0,<4 | DataFrame operations, DAT loading |
-| matplotlib | >=3.7 | Plotting |
-| seaborn | >=0.12 | Plot styling |
+**Total new client bundle impact:** ~9KB gzipped (d3-force + d3-quadtree) if runtime simulation. 0KB additional if build-time-only. Full graph island on a fresh page load: ~22KB total including React component.
 
-Pin philosophy: floor versions (`>=`) not exact pins. Notebooks are educational — exact pins block installation for users with recent Python. Floor versions ensure API compatibility.
+**What not to add:** `d3` (umbrella, 280KB), `react-force-graph` (Canvas, 60KB+), `vis-network` (200KB+), `sigma.js` (WebGL, wrong tier), `cytoscape.js` (170KB), `ts-graphviz` / `dotparser` (DOT parser libraries for one-time conversion), `framer-motion` (animation already covered by d3-transition + GSAP).
 
-**What NOT to add:** nbformat Python library, nbconvert, any JS notebook execution library, Python runtime in CI, ADM-Zip, yauzl, or any pre-built `.ipynb`/`.zip` files committed to the repo.
+See `.planning/research/STACK-ai-landscape.md` for complete dependency tree, `npm ls` verification, API surface, and alternatives considered.
 
-See: `.planning/research/STACK-jupyter-notebooks.md`
+### Expected Features
 
-### Features: Table Stakes vs Differentiators
+**Must have (table stakes) — users expect these, absence feels broken:**
+- Force-directed graph with cluster coloring — 7 color-coded clusters matching DOT file (`#e0f7fa` cyan for AI through `#f3e5f5` purple for Agentic)
+- Click-to-select node with detail side panel (desktop) / bottom sheet (mobile)
+- Pan and zoom — mouse wheel + touch with modifier key guard to prevent scroll trap
+- Node hover tooltips showing brief concept description
+- Individual concept pages `/ai-landscape/[slug]/` — ~83 static SEO pages
+- Edge labels showing relationship types ("subset of", "enables", "example", "includes")
+- Legend explaining cluster colors, node shapes, and edge styles
+- Search / find node with autocomplete — zoom-to-node + open detail panel on select
+- JSON-LD `DefinedTerm` + `DefinedTermSet` structured data on every concept page
+- Landing page `/ai-landscape/` with graph embed and category-grouped concept list
+- Mobile-responsive layout — bottom sheet panel, list view fallback below 768px
 
-**Must-have (table stakes — missing = product feels broken):**
-- Valid nbformat v4.5 JSON with correct `kernelspec` — opens in Jupyter, VS Code, and Colab without errors
-- Inline data embedding as Python list literals — no external file dependencies for running cells (the standard for educational notebooks)
-- Import cell with `%matplotlib inline` and `sns.set_theme()` — standard setup preamble
-- Markdown narrative interleaved with every code cell — what distinguishes a notebook from a script
-- Summary statistics, 4-plot reproduction, hypothesis test cells with interpretation — the analytical core that mirrors each web page
-- All 10 case studies covered — partial coverage looks like a bug
-- Download button on every case study page alongside the existing CSV button
+**Should have (differentiators) — not expected but create high-value moments:**
+- "Explain Like I'm 5" content toggle — plain vs technical descriptions — HIGHEST audience impact per line of code; requires two description fields in data model; default to plain
+- "How did we get here?" ancestry path highlight — illuminates the full hierarchy chain for any buzzword node
+- Shareable deep links — `/ai-landscape?node=LLM` — reuses `lz-string` / URL state already in codebase
+- Open Graph images per concept — extend existing Satori pipeline
+- Guided learning paths — 3-4 curated step-by-step tours ("The Big Picture", "How ChatGPT Works", "What is Agentic AI")
+- Keyboard navigation + ARIA — WCAG 2.1 compliance
+- Static SVG fallback (SSR preview) — instant first paint before JS hydrates; requires pre-computed layout positions
 
-**Should-have (differentiators — not expected, but valued):**
-- "Open in Google Colab" button on case study pages and as a badge in each notebook's title cell — zero-setup execution
-- NIST source attribution + site backlinks in every notebook — each notebook becomes an SEO outpost when shared
-- Seaborn-styled plots (`sns.set_theme()`) — one line, dramatic improvement over raw matplotlib defaults
-- Requirements header cell with commented `!pip install` and a dependency-check code cell — reduces first-run failures
-- Notebooks landing page at `/eda/notebooks/` — new EDA section following existing section patterns
-- Collection ZIP (all 10 + shared requirements.txt + README) from the landing page
-- Case-study-specific advanced analysis for the 3 complex notebooks (sinusoidal curve fit, AR(1), DOE ANOVA)
+**Defer to post-launch:**
+- Compare concepts VS pages — high complexity; validate user interest first
+- Mini-map — useful but not essential for 83 nodes
+- Animated edge traversal (GSAP pulse) — pure polish after core is stable
+- Cluster zoom on cluster label click — search + pan/zoom achieves same result initially
 
-**Anti-features (explicitly do not build):**
-- In-browser notebook execution (JupyterLite/Pyodide) — massive complexity for worse UX than existing SVG plots
-- Pre-executed notebooks with saved cell outputs — bloats files 5-50x, creates stale outputs, violates educational standard
-- Separate `.DAT` files bundled independently from data embedded in cells (causes path resolution failures)
-- Binder integration — Colab is faster, more reliable, and more widely used
-- Notebook preview component on case study pages — the case study page itself is the preview
+**Anti-features (explicitly exclude):**
+- 3D visualization, real-time data feeds, quiz/gamification, AI assistant chatbot, physics simulation controls sliders, user-editable/drag-to-rearrange graph, complex multi-axis filtering, infinite scroll concept list, real-time collaboration
 
-See: `.planning/research/FEATURES-jupyter-notebooks.md`
+See `.planning/research/FEATURES-ai-landscape.md` for full feature dependency tree, non-technical audience considerations, and MVP phase recommendation.
 
 ### Architecture Approach
 
-**Recommended pattern: Astro integration hook (`astro:build:done`) + archiver + static file serving**
+The architecture has three clean layers: a build-time data pipeline (DOT parsing, content authoring, optional force layout pre-computation), Astro static page generation (83 SEO pages via `getStaticPaths`), and a React island for interactive graph rendering. All three layers consume the same canonical JSON data model at `src/data/ai-landscape/`. The pattern is identical to how EDA distributions work — JSON files consumed by content collections and by React islands — with the addition of a build-time DOT extraction step.
 
-The research produced two competing architecture proposals:
+**Major components:**
+1. `scripts/parse-ai-landscape.ts` — one-time DOT-to-JSON extractor producing `nodes.json` skeleton and `edges.json`; run via `npx tsx`; custom regex parser (ts-graphviz deprecated; dotparser unnecessary dep for one-time job)
+2. `scripts/compute-ai-layout.ts` — `d3-force` headless simulation (300 ticks, `simulation.stop()`) producing deterministic `layout.json` with x/y positions; re-runnable to regenerate
+3. `src/lib/ai-landscape/schema.ts` — Zod schemas for `aiNodeSchema`, `aiEdgeSchema`, `layoutPositionSchema`; extracted to own file following `src/lib/eda/schema.ts` pattern
+4. `src/content.config.ts` addition — `aiNodes` collection via `file()` loader from `nodes.json`; edges and layout are plain JSON imports, not collections
+5. `src/pages/ai-landscape/[slug].astro` — 83 static pages via `getStaticPaths()` from `getCollection('aiNodes')`; follows `eda/distributions/[slug].astro` exactly
+6. `src/components/ai-landscape/LandscapeGraph.tsx` — React island (`client:only="react"`); renders SVG from pre-computed `layout.json` positions; d3-zoom for pan/zoom
+7. `src/components/ai-landscape/LandscapeSidePanel.tsx` — slide-in drawer driven by `landscapeStore.selectedNodeId`; plain-English educational content from node data
+8. `src/stores/landscapeStore.ts` — nanostores atoms: `selectedNodeId`, `hoveredNodeId`, `activeCluster`; same pattern as `categoryFilterStore.ts`
+9. `src/pages/ai-landscape/index.astro` — landing page; static SVG fallback from `layout.json`; React island hydrated over it via CSS `:has()` hiding pattern
+10. OG image endpoint — extends existing Satori pipeline; per-concept images for concept pages
 
-- **ARCHITECTURE.md** (from one researcher) recommends Astro API route endpoints (`[slug].zip.ts` / `[slug].ipynb.ts` with `getStaticPaths()`) using JSZip for in-memory zip creation, following the OG image endpoint pattern.
-- **ARCHITECTURE-jupyter-notebooks.md** and **STACK.md** (from a second researcher) recommend an Astro integration hook (`astro:build:done`) with archiver for streaming zip creation, writing to `dist/downloads/notebooks/`. This follows the existing `indexnow.ts` integration pattern.
+**Build-time data flow:** `ai_landscape.dot` → parse script → `nodes.json` skeleton + `edges.json` → manual content authoring → force layout script → `layout.json` → Astro build → 83 static pages + static SVG + OG images + sitemap.
 
-**Go with the Astro integration hook + archiver approach.** The PITFALLS research provides the deciding factor: JSZip has documented encoding problems when mixing binary (`.DAT` files) and UTF-8 (notebook JSON) content in the same archive. archiver's streaming API handles this correctly. The integration hook also receives the `dir` parameter directly — no need to hardcode `dist/`. The existing `indexnow.ts` is a direct template in this codebase.
+**Runtime data flow:** Static SVG renders instantly → React island hydrates (`client:only`) → renders SVG from `layout.json` positions → d3-zoom enables pan/zoom → node click → nanostores update → side panel slides in → "Learn more" → full page nav to `/ai-landscape/[slug]/`.
 
-The API route approach is not wrong, but archiver is the better zip tool for this use case.
+**Key architectural choices:**
+- `client:only="react"` not `client:visible` — graph is primary content of landing page, should load immediately not wait for scroll
+- `nodes.json` only as a content collection (maps 1:1 to pages); `edges.json` and `layout.json` are plain JSON imports
+- React owns ALL state; D3 reads from React via refs, never stores its own selection state
+- Inline styles (`style={{ backgroundColor: cluster.color }}`) for dynamic cluster colors — never dynamic Tailwind class strings
 
-**Component structure (new files):**
-
-| Component | Responsibility |
-|-----------|---------------|
-| `src/lib/notebook/types.ts` | TypeScript interfaces for nbformat v4.5 |
-| `src/lib/notebook/config.ts` | `NOTEBOOK_REGISTRY` array (slug to dataset metadata) |
-| `src/lib/notebook/cells.ts` | `markdownCell()` / `codeCell()` factories with deterministic IDs |
-| `src/lib/notebook/builder.ts` | Constructs `NotebookV4` JSON from slug + template |
-| `src/lib/notebook/templates/` | Per-case-study cell definitions (10 template modules) |
-| `src/lib/notebook/packager.ts` | Creates `.zip` using archiver (notebook + `.DAT` + requirements.txt) |
-| `src/integrations/notebook-generator.ts` | Astro `astro:build:done` hook, orchestration loop |
-| `src/pages/eda/notebooks/index.astro` | Landing page at `/eda/notebooks/` |
-| `src/components/eda/NotebookDownload.astro` | Download buttons for case study pages |
-
-**Modified existing files (minimal changes):**
-- `src/lib/eda/routes.ts` — add `notebooks` route constant + `notebookZipUrl()` helper
-- `src/pages/eda/index.astro` — add Notebooks to `SECTIONS` and `NAV_ITEMS` arrays
-- `src/pages/eda/case-studies/[...slug].astro` — import and render `NotebookDownload` (2 lines)
-- `astro.config.mjs` — register `notebookGenerator()` in integrations array
-
-**Unchanged:** `datasets.ts`, `handbook/datasets/*.DAT`, `.github/workflows/deploy.yml`, `astro.config.mjs` sitemap config, `src/content.config.ts`
-
-**Download URL pattern:** `/downloads/notebooks/{slug}.zip` and `/downloads/notebooks/{slug}.ipynb`
-
-**ZIP structure per archive:**
-```
-{slug}/
-  {slug}.ipynb          (notebook JSON, clean — no executed outputs)
-  {DATASET_NAME}.DAT    (line endings normalized to LF)
-  requirements.txt      (Python version floors)
-```
-
-**Google Colab strategy:** Commit 10 raw `.ipynb` files to `notebooks/eda/` in the repo. Colab links require GitHub repository paths (`colab.research.google.com/github/PatrykQuantumNomad/...`), not GitHub Pages static URLs. Total size: ~150-250KB, negligible.
-
-See: `.planning/research/ARCHITECTURE.md`, `.planning/research/ARCHITECTURE-jupyter-notebooks.md`
+See `.planning/research/ARCHITECTURE-ai-landscape.md` for full file structure, component designs, build order, and integration points with the existing codebase.
 
 ### Critical Pitfalls
 
-Five pitfalls have the highest probability of causing user-facing failures:
+1. **Thin content penalty — site-wide SEO risk (Pitfall 5, CRITICAL):** 80 auto-generated pages with <300 words each can trigger Google's Helpful Content penalty site-wide, dragging down rankings for all existing 1090+ pages. Prevention: tiered content strategy — hand-craft 300-500 words per concept before indexing; apply `noindex` to any page below the quality bar; cross-link to existing blog posts. This is the hardest to fix retroactively and the highest-stakes risk in the project.
 
-1. **Invalid nbformat v4.5 JSON** — Missing `id` fields on cells (required in v4.5 per JEP 62), wrong `execution_count` type (must be `null`, not `undefined` or omitted), or `source` array format errors cause cells to not render or notebook validators to reject the file. JupyterLab may silently show blank cells. Google Colab masks some issues during testing. Prevention: define strict TypeScript interfaces, always set `execution_count: null` and `outputs: []` on code cells, use deterministic cell IDs (slug prefix + zero-padded counter), run `nbformat.validate()` in a build-time check.
+2. **D3 zoom scroll trap on mobile (Pitfall 2, CRITICAL):** `d3-zoom` captures wheel and touch events by default, trapping mobile users who try to scroll past the graph. Prevention: `zoom.filter()` requiring modifier key (Ctrl+scroll on desktop; two-finger pinch on mobile); fixed-height container; visible hint text. Must be solved during initial zoom implementation, not retrofitted.
 
-2. **`.DAT` file parsing fails on first run** — NIST `.DAT` files are not standard CSV. They use fixed-width format, have varying header line counts to skip, inconsistent delimiters, mixed CRLF/LF line endings, and different column structures. A generic `pd.read_csv()` call fails on most of them. Prevention: per-dataset loading code with explicit `skiprows`, `names`, and `sep` parameters; normalize `.DAT` files to LF line endings when copying into ZIP; add a row-count assertion after loading (`assert len(df) == 200`).
+3. **Bundle bloat from umbrella D3 import (Pitfall 1, CRITICAL):** `import { forceSimulation } from 'd3'` instead of `import { forceSimulation } from 'd3-force'` adds 280KB gzipped to the bundle. Force modules must also be isolated to the AI landscape island via `client:only="react"` to prevent leaking into the shared bundle. Prevention: micro-module imports only; verify isolation with rollup-plugin-visualizer (already in devDependencies) after build.
 
-3. **ZIP encoding corruption** — JSZip has known issues encoding binary files alongside UTF-8 strings. archiver handles this correctly but requires explicit types: `archive.append(buffer, ...)` for binary `.DAT` files and `archive.append(jsonString, ...)` for notebook JSON. Additionally, always await `output.on('close')` not `archive.finalize()` to avoid stream truncation races.
+4. **SSR crash from D3 DOM access at build time (Pitfall 4, CRITICAL):** D3 accesses `window` and `document`. If the React island uses any hydration directive other than `client:only="react"`, Astro's static build fails with `ReferenceError: window is not defined`. Prevention: `client:only="react"` — set it in the initial component skeleton, never change it. Never import D3 in `.astro` frontmatter.
 
-4. **Users cannot run notebooks due to missing dependencies** — The most common failure mode for distributed notebooks. Users in different virtual environments get `ModuleNotFoundError` immediately. Google Colab testing masks this because packages are pre-installed there. Prevention: dependency-check cell as the first code cell (prints install command for missing packages); include `requirements.txt` in every ZIP; prominently feature "Open in Colab" as the zero-install path.
+5. **OG image build time blowout (Pitfall 6, MODERATE-HIGH):** Adding 83 OG image endpoints adds ~80 seconds to build time (Satori + Sharp is CPU-bound, ~1s per image). Prevention: use a shared template for AI landscape pages initially (like the existing `default.png.ts` pattern); add per-concept images as a later increment; monitor `astro build` time before and after.
 
-5. **Notebook values disagree with website** — The website's TypeScript analysis is NIST-verified (completed in v1.9). Python's SciPy may compute slightly different p-values or apply different default parameters than the TypeScript implementations. Users who notice discrepancies lose trust in both the website and the notebook. Prevention: cross-reference all statistical values against verified NIST values from `src/data/eda/datasets.ts` and case study pages; document any systematic differences in interpretation cells.
+**Moderate pitfalls:**
+- Pitfall 3: Force simulation lifecycle in React — if sim runs in browser, initialize once in `useRef`, cleanup in `useEffect`; stop on alpha < 0.01 and on tab background (applies only if runtime simulation is chosen)
+- Pitfall 7: Force graph unreadable on mobile at 350px — show list view below 768px, not force graph
+- Pitfall 8: DOT hierarchy does not map cleanly to force layout — accept visual difference; use `forceX`/`forceY` + convex hull overlays for loose cluster grouping
+- Pitfall 9: Side panel state desync — React owns ALL state; D3 reads from refs, never stores selection state directly
+- Pitfall 14: Tailwind dynamic class interpolation for cluster colors — use inline styles, never `\`bg-${cluster}\``
 
-**Additional pitfall requiring a decision:** Google Colab users cannot access the bundled `.DAT` file automatically. Either add a Colab-specific upload cell (simple) or fetch the `.DAT` from a GitHub raw URL conditionally (more friction). This must be decided before templates are written.
-
-See: `.planning/research/PITFALLS.md`, `.planning/research/PITFALLS-jupyter-notebooks.md`
+---
 
 ## Implications for Roadmap
 
-### Suggested Phase Structure
+Based on research, suggested four-phase structure:
 
-The build order is strictly constrained by dependencies: types and config first (no dependencies), then cell factories and builder (depend on types), then packager (depends on builder), then Astro integration (depends on all library code), then UI components (depend on routes), then landing page and EDA index integration.
+### Phase 1: Data Foundation
 
----
+**Rationale:** Everything downstream — graph component, SEO pages, OG images, JSON-LD — depends on a well-structured, content-rich JSON data model. The schema must be right before any pages or components are built. This phase is also the longest human-time phase: content authoring for ~83 concepts. Get it right first.
 
-**Phase 1: Foundation — Types, Config, and Cell Factory**
+**Delivers:** `nodes.json` (83 concepts with full educational content in two tiers: plain English + technical), `edges.json`, Zod schema in `src/lib/ai-landscape/schema.ts`, `aiNodes` content collection registered in `content.config.ts`, DOT parse script.
 
-Rationale: Zero external dependencies. Establishes the TypeScript contracts that all subsequent phases build on. Getting the nbformat schema right here prevents schema bugs from propagating into all 10 templates.
+**Features addressed:** All table stakes features are unblocked. "Explain Like I'm 5" toggle (highest-impact differentiator) requires two description fields authored here. Edge relationship types typed here.
 
-Delivers:
-- `src/lib/notebook/types.ts` — nbformat v4.5 TypeScript interfaces (NotebookV4, MarkdownCell, CodeCell)
-- `src/lib/notebook/config.ts` — NOTEBOOK_REGISTRY array (10 entries, slug to DAT filename + NIST metadata)
-- `src/lib/notebook/cells.ts` — `markdownCell()` / `codeCell()` with deterministic IDs and correct `\n`-terminated source line format
+**Avoids:** Pitfall 5 (thin content) — content quality bar set and enforced in this phase; Pitfall 13 (schema bloat) — schema extracted to own file from day one.
 
-Test gate: TypeScript compiles. `markdownCell('test')` returns correct nbformat shape. Registry entries match DATASET_SOURCES DAT filenames. Cell IDs are unique per notebook.
+**Open question for user:** Content tiering strategy: (a) write full-length content for all 83 concepts before publishing, (b) write full-length for top ~20 (LLM, Transformer, GenAI, Agentic AI, Deep Learning, etc.) and `noindex` the rest until written, or (c) abbreviated content for all with progressive `noindex` removal. Research strongly recommends option (b) as the safe launch path.
 
-Avoids: Pitfall 1 (invalid nbformat), source line newline convention bug (PITFALLS-jupyter-notebooks Pitfall 5).
+**Research flag:** Standard patterns (Zod schema, content collection). No additional research needed. Content authoring is the constraint.
 
----
+### Phase 2: SEO Pages
 
-**Phase 2: Notebook Builder + Standard Template (7 case studies)**
+**Rationale:** Static concept pages deliver immediate search value independently of the interactive graph. They follow the established `[slug].astro` + `getStaticPaths` pattern with zero novel technical risk and can ship before the graph component is written. Early indexing means earlier ranking signal accumulation.
 
-Rationale: The 7 standard-template case studies share a single parameterized cell sequence. Building and validating this template first delivers 70% of the milestone content and proves the full generation pipeline before tackling the complex notebooks.
+**Delivers:** 83 static pages at `/ai-landscape/[slug]/`, JSON-LD `DefinedTerm` + `DefinedTermSet` markup, breadcrumb navigation, related concept links, OG images (shared template via existing Satori pipeline), sitemap integration.
 
-Delivers:
-- `src/lib/notebook/builder.ts` — `buildNotebook(slug)` function
-- `src/lib/notebook/templates/standard.ts` — standard cell sequence (title, requirements, imports, data loading, summary stats, 4-plot, individual plots, hypothesis tests, test summary table, interpretation, conclusions)
-- Per-case-study configs for: normal-random-numbers, uniform-random-numbers, cryothermometry, filter-transmittance, heat-flow-meter, fatigue-life, standard-resistor
+**Features addressed:** Individual concept pages (table stakes), JSON-LD structured data (table stakes), breadcrumb navigation, Open Graph images (differentiator via existing pipeline).
 
-Test gate: `buildNotebook('normal-random-numbers')` returns valid JSON. Validate against nbformat schema. Open in JupyterLab and VS Code without errors. Data loading cell asserts correct row count.
+**Uses:** `getStaticPaths`, `getCollection('aiNodes')`, `BreadcrumbJsonLd.astro`, existing `generateOgImage()` with new AI landscape template.
 
-Avoids: Pitfall 1 (format version), Pitfall 2 (per-dataset loading parameters verified for all 7 files).
+**Avoids:** Pitfall 6 (OG image scale) — shared template initially; Pitfall 10 (tone mismatch) — progressive disclosure structure on each page (plain lead paragraph → gentle technical → collapsible deep dive → why it matters).
 
-Research flag: Standard patterns, no deeper research needed. Cell sequence is fully documented in FEATURES.md. Per-dataset `skiprows` and `names` parameters must be empirically verified in Python — this is implementation work.
+**Research flag:** Standard patterns. Direct mirror of `eda/distributions/[slug].astro`. No additional research needed.
 
----
+### Phase 3: Static Landing Page + Force Layout
 
-**Phase 3: ZIP Packager + Astro Integration**
+**Rationale:** Build the landing page and force layout pre-computation before adding client-side interactivity. A working navigable page with a static SVG fallback and a concept list is a complete, useful experience without JavaScript. This phase also validates the force layout approach and resolves the build-time vs runtime simulation decision at low risk before the interactive component is written.
 
-Rationale: Depends on builder output. Establishes the delivery mechanism. Without this, notebooks exist as JSON in memory but never reach the user's browser.
+**Delivers:** `scripts/compute-ai-layout.ts` (headless `d3-force` simulation producing `layout.json`), `/ai-landscape/` landing page with hero text, static SVG fallback rendered from `layout.json` positions, category-grouped concept list, legend, alphabetical index.
 
-Delivers:
-- `npm install archiver @types/archiver`
-- `src/lib/notebook/packager.ts` — `createNotebookZip()` using archiver (notebook + DAT + requirements.txt, LF-normalized line endings)
-- `src/integrations/notebook-generator.ts` — Astro `astro:build:done` hook with `mkdirSync` guard, generation loop, Astro logger output
-- Register `notebookGenerator()` in `astro.config.mjs`
-- Update `src/lib/eda/routes.ts` with `notebooks` route and `notebookZipUrl()` helper
-- Add generated output paths to `.gitignore`
+**Features addressed:** Landing page (table stakes), legend (table stakes), static SVG fallback (differentiator).
 
-Test gate: `astro build` succeeds. `dist/downloads/notebooks/normal-random-numbers.zip` exists, extracts correctly on macOS and Linux, contains correct files with LF line endings. Build time regression under 5 seconds.
+**Uses:** `d3-force` (new install), `npx tsx` build script, `layout.json` positions passed as Astro props.
 
-Avoids: Pitfall 3 (ZIP encoding), stream finalization race (PITFALLS-jupyter-notebooks Pitfall 4), output directory not existing (PITFALLS-jupyter-notebooks Pitfall 6).
+**Avoids:** Pitfall 8 (DOT-to-force mismatch) — cluster centroid positions tuned here; Pitfall 1 (bundle bloat) — `d3-force` used only in build script at this stage, not in client bundle.
 
----
+**Open question resolved here:** Build-time vs runtime simulation debate must be settled in this phase. The layout script establishes what positions the client will render from. Decision directly determines whether `d3-force` ships in the client bundle in Phase 4.
 
-**Phase 4: Download UI + Case Study Integration**
+**Research flag:** Standard patterns. D3 headless simulation is documented via Observable examples. No additional research needed.
 
-Rationale: Depends on routes being defined. Wires the generated files to the user interface with minimal changes to existing files.
+### Phase 4: Interactive Graph
 
-Delivers:
-- `src/components/eda/NotebookDownload.astro` — download buttons (`.zip` primary, `.ipynb` secondary) with "Open in Colab" badge
-- Modify `src/pages/eda/case-studies/[...slug].astro` — import and render `NotebookDownload` (2 lines)
-- Commit 10 `.ipynb` files to `notebooks/eda/` in the repo for Colab GitHub URL scheme
+**Rationale:** Interactivity is the final layer. All previous phases are fully functional without it. This phase has the most implementation risk (SSR crash, zoom scroll trap, simulation lifecycle, state sync between D3 and React) and benefits from stable data and layout from prior phases.
 
-Test gate: Every case study page shows notebook download section. Colab links open the correct notebooks. Download button triggers file save dialog (not browser navigation). Content-Type header is `application/zip`.
+**Delivers:** `LandscapeGraph.tsx` React island (SVG rendered from `layout.json` positions, `client:only="react"`), `LandscapeSidePanel.tsx` (slide-in drawer), `landscapeStore.ts` (nanostores atoms), d3-zoom pan/zoom with scroll trap guard, node click/hover interactions, cluster convex hull overlays, search autocomplete with zoom-to-node, "How did we get here?" ancestry highlight, shareable deep links, keyboard navigation + ARIA, static SVG fallback hidden via CSS `:has()` when React mounts.
 
-Avoids: MIME type pitfall (static file served with download attribute, not data: URI), Colab URL scheme pitfall.
+**Features addressed:** Force-directed graph (table stakes), click-to-select detail panel (table stakes), pan and zoom (table stakes), hover tooltips (table stakes), search/find node (table stakes), cluster coloring (table stakes), ancestry path highlight (differentiator), shareable deep links (differentiator), keyboard navigation (differentiator).
 
----
+**Uses:** `d3-zoom`, `d3-drag`, `d3-selection`, `d3-transition` (all already installed), nanostores, Tailwind for side panel, inline styles for cluster colors.
 
-**Phase 5: Advanced Templates — Beam Deflections, Random Walk, Ceramic Strength**
+**Avoids:**
+- Pitfall 2 — `zoom.filter()` with Ctrl+scroll on desktop, two-finger pinch on mobile; add hint text
+- Pitfall 3 — pre-computed positions eliminate live simulation; if runtime sim chosen, `useRef` pattern for lifecycle
+- Pitfall 4 — `client:only="react"` set in initial scaffold; never change
+- Pitfall 9 — React owns ALL state; D3 click handler calls `setSelectedNodeId(id)`; `useEffect([selectedNodeId])` applies highlighting
+- Pitfall 11 — `transition:persist` + nanostores URL persistence for zoom state on navigation
+- Pitfall 12 — `role="img"` on SVG, `role="button"` + `tabindex` on nodes, `<title>` + `<desc>` elements
+- Pitfall 14 — inline styles for cluster colors only
+- Pitfall 15 — stop simulation on `visibilitychange` hidden event
 
-Rationale: These 3 notebooks are in a higher complexity tier and depend on the standard pipeline being proven. Beam deflections needs `scipy.optimize.curve_fit` for sinusoidal regression. Random walk needs AR(1) coefficient estimation. Ceramic strength needs multi-column data loading (480 rows × 8 columns), two-sample t-test, F-test, one-way ANOVA, and DOE factor analysis.
+**Research flag:** This phase benefits from a `/gsd:research-phase` pass scoped to: (a) the precise `zoom.filter()` pattern for modifier-key zoom guard, (b) the CSS `:has()` selector pattern for hiding static SVG fallback when React mounts, and (c) the `transition:persist` + nanostores combination for view transition state persistence. These three implementation details are fiddly and have documented edge cases worth pre-researching.
 
-Delivers:
-- `src/lib/notebook/templates/beam-deflections.ts` — sinusoidal model development variant
-- `src/lib/notebook/templates/random-walk.ts` — AR(1) model development variant
-- `src/lib/notebook/templates/ceramic-strength.ts` — DOE variant (~65KB notebook, most complex)
+### Phase 5: Learning Experience Polish (Post-Launch)
 
-Test gate: All 3 notebooks open and run end-to-end in a clean Python environment. Statistical values match NIST-verified website values from v1.9. Ceramic strength loads correctly from JAHANMI2.DAT (480 rows × 8 columns, multi-column fixed-width format).
+**Rationale:** Differentiator features that enhance the experience but are not required for a functional, SEO-complete product. Defer until core product is live and validated.
 
-Avoids: Pitfall 5 (drift from website), Pitfall 2 (JAHANMI2.DAT is the most complex DAT format).
+**Delivers:** Guided learning paths (3-4 curated tours with step-by-step progression and progress indicator), animated edge traversal (GSAP path dash-offset pulse on selection), cluster zoom on cluster label click, mini-map (desktop only), compare concepts VS pages (`/ai-landscape/vs/[slug1]-vs-[slug2]`).
 
-Research flag: Statistical values for sinusoidal parameters (beam deflections), AR(1) coefficients (random walk), and ANOVA F-statistics (ceramic strength) must be cross-referenced against NIST-verified website values from v1.9 during implementation. This is the highest-risk phase for value drift.
-
----
-
-**Phase 6: Notebooks Landing Page + EDA Index Integration**
-
-Rationale: The landing page and EDA index update are independent of the notebook content itself. They surface the feature to users who arrive at the EDA section without going to a specific case study.
-
-Delivers:
-- `src/pages/eda/notebooks/index.astro` — landing page with card grid (all 10 notebooks, download links, NIST section references)
-- Modify `src/pages/eda/index.astro` — add Notebooks to SECTIONS + NAV_ITEMS
-- Collection ZIP (all 10 + shared requirements.txt + collection README) from the landing page
-
-Test gate: `/eda/notebooks/` renders with correct breadcrumbs and JSON-LD. EDA index shows Notebooks section. Collection ZIP downloads and contains all 10 notebooks plus README.
-
----
+**Features addressed:** Guided learning paths (differentiator), animated edge traversal (differentiator), cluster zoom (differentiator), compare concepts (post-launch differentiator).
 
 ### Phase Ordering Rationale
 
-- Phases 1 through 3 follow strict dependency order (types → builder → packager → integration). Nothing can be built out of sequence.
-- Phase 4 (UI) is intentionally decoupled from Phase 5 (advanced templates). Download buttons for the 7 standard-template notebooks can go live while the 3 complex notebooks are still in development.
-- Phase 6 (landing page) is structurally independent and can be done in parallel with Phase 5 once Phase 3 is complete.
-- Standard template first (Phase 2) validates the full pipeline before the complexity of advanced templates.
+- Data precedes everything: the JSON data model is the prerequisite for every other phase
+- SEO pages before the interactive graph: deliver search value immediately via zero-risk established patterns; early indexing means more time for ranking signals to accumulate
+- Static landing page before interactive graph: validates force layout approach and resolves the build-time vs runtime decision at low risk before writing the interactive component
+- Interactive graph last: highest implementation risk; benefits from stable data and layout from all prior phases; is the last layer on an already-functional product
+- This ordering matches both FEATURES.md's MVP recommendation and ARCHITECTURE.md's suggested build order — strong cross-researcher agreement
 
 ### Research Flags
 
-**Phases needing attention during implementation:**
-- **Phase 2:** Per-dataset `.DAT` parsing parameters (`skiprows`, `names`, `sep`) must be manually verified in Python for all 7 standard-template files. Do not assume generic parsing works — each file has a different structure.
-- **Phase 5:** Statistical values for beam deflections (sinusoidal model parameters), random walk (AR(1) coefficients), and ceramic strength (ANOVA F-statistics, batch effects) must be cross-referenced against the NIST-verified website values from v1.9. These are the highest-risk notebooks for value drift.
-- **Phase 3:** Test ZIP extraction on both macOS and Linux. Verify `Content-Type: application/zip` after first deployment.
+**Phases needing deeper research during planning:**
+- **Phase 4 (Interactive Graph):** Recommend `/gsd:research-phase` scoped to (a) `d3-zoom` modifier-key scroll guard pattern, (b) CSS `:has()` static SVG fallback hiding, (c) `transition:persist` + nanostores view transition state preservation. These three implementation details have documented pitfalls and the codebase does not yet have examples of them.
+- **Phase 1 (Data Foundation):** Not a technical research question — content tiering strategy requires user decision before writing begins (see Open Questions). Flag for early clarification.
 
-**Phases with standard patterns (no deeper research needed):**
-- **Phase 1:** Pure TypeScript type definitions matching a stable JSON schema. No ambiguity.
-- **Phase 4:** Follows exact patterns from existing `CaseStudyDataset.astro` CSV download buttons.
-- **Phase 6:** Follows exact pattern from `src/pages/eda/case-studies/index.astro` card grid.
+**Phases with standard patterns (skip research-phase):**
+- **Phase 2 (SEO Pages):** Direct mirror of `eda/distributions/[slug].astro`. Zero novel patterns.
+- **Phase 3 (Static Landing Page):** Headless force layout is a 30-line script; well-documented via D3 Observable examples.
+- **Phase 5 (Polish):** Each feature is small and independent. Research inline during implementation.
 
-## Open Questions and Decisions Needed
+---
 
-1. **Colab data file delivery** — Colab users cannot access the bundled `.DAT` file automatically. Options: (a) add a Colab-specific upload cell at the top of each notebook, or (b) fetch the `.DAT` file from a GitHub raw URL conditionally. Option (a) is simpler and avoids network dependencies. Must be decided before Phase 2 templates are written since it affects the title and data-loading cells.
+## Open Questions Requiring User Decision
 
-2. **`source` field format in notebook cells** — Both a single multi-line string and a string array (with `\n` appended to all lines except the last) are valid per the nbformat spec. ARCHITECTURE.md recommends single string for simplicity; ARCHITECTURE-jupyter-notebooks.md recommends string array for spec fidelity. Recommendation: use single multi-line string. JupyterLab, VS Code, and Colab all handle both correctly. Simplify the cell factory.
+These are not technical unknowns. They are product decisions the research identified but cannot resolve without user input.
 
-3. **Collection ZIP scope** — FEATURES.md lists this as a Phase 2 differentiator for the `/eda/notebooks/` landing page. Confirm whether this is in scope for v1.17 or deferred. It requires all 10 notebooks to be complete first.
+1. **Build-time vs runtime force simulation:** Do users need drag-to-rearrange interactivity (requires runtime simulation and ~5.5KB d3-force in client bundle) or is a zoomable/clickable educational map sufficient (build-time pre-computation, 0KB additional client JS, instant first paint)? Research and the anti-feature list both lean strongly toward build-time as the better fit for an educational tool targeting non-technical users.
 
-4. **Numerical precision threshold** — Python SciPy may compute slightly different p-values than the TypeScript implementations. Decide the acceptable precision threshold before writing interpretation cells. Recommendation: match to 3-4 significant digits, document any systematic differences in a comment.
+2. **Content tiering strategy for launch:** Will all 83 concepts have hand-crafted 300-500 word content before first publish, or will the site launch with full content on the most important ~20 concepts (LLM, Transformer, GenAI, Agentic AI, Neural Networks, Deep Learning, etc.) and `noindex` on the rest? Research strongly recommends the tiered approach as the only safe path to avoid Google's Helpful Content penalty affecting the entire site.
 
-5. **`astro:build:done` vs API route endpoints** — Resolved in favor of integration hook + archiver (see Architecture section). Only reopen this decision if the integration hook approach hits unexpected issues during Phase 3.
+3. **Mobile graph strategy:** Show the force graph on mobile (with heavy simplification — top-level clusters only) or show a list view below 768px with a "View on desktop" message? Research recommends the list view fallback for the non-technical audience who will be on mobile, but this is a UX preference call.
+
+4. **"Explain Like I'm 5" toggle vs single blended description:** Two-tier content (plain default + technical toggle) or a single accessible description written at a grade 8-10 reading level? The toggle is the highest-impact differentiator per line of code but doubles content authoring load. Single blended is faster to author but less differentiated from competitors.
+
+5. **OG image strategy:** Per-concept OG images (83 additional images, ~80s added to build time) or a shared AI Landscape template for all concept pages initially? Research recommends shared template at launch, per-concept images as a later post-launch increment.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | nbformat v4.5 spec verified against official schema and JEP 62. archiver downloads and API verified on npm. Python package versions verified on PyPI. JSZip encoding issues confirmed in library issue tracker. |
-| Features | HIGH | Cell order and quality checklist derived from fast.ai, Jake VanderPlas PDSH, STScI JDAT notebooks, and Jupyter4Edu pedagogical patterns — gold standard sources. Anti-features grounded in documented tradeoffs. |
-| Architecture | HIGH | Existing `indexnow.ts` integration and OG image endpoint patterns are proven in this codebase. archiver vs JSZip decision is based on documented encoding issues. Component boundaries follow single-responsibility principle from existing codebase. |
-| Pitfalls | HIGH | `.DAT` file format variability verified by direct `file` command inspection of files in `handbook/datasets/`. JSZip encoding issue documented in the library's own issue tracker (#368). nbformat cell ID requirement in official spec (JEP 62). NIST value cross-reference requirement grounded in v1.9 verification work. |
+|---|---|---|
+| Stack | HIGH | npm versions verified against registry API; `npm ls` confirmed transitive deps already installed; bundle sizes from bundlephobia + minified dist inspection; alternatives evaluated against documented limitations |
+| Features | HIGH | Table stakes derived from established UX research and competitor analysis; differentiators grounded in peer-reviewed visualization research (IEEE D-Tour 2024); anti-features grounded in documented technical limitations |
+| Architecture | HIGH | Derived from direct codebase analysis of 22+ existing patterns; all proposed patterns have running implementations in the same repo; component boundaries follow established conventions |
+| Pitfalls | HIGH | Most critical pitfalls verified against D3 GitHub issues, Astro documentation, and existing codebase tech debt; SEO thin content risk grounded in documented Google HCU cases; scroll trap issue documented in D3 GitHub issues #2549 and #141 |
 
-**Overall confidence: HIGH**
+**Overall confidence: HIGH.** The project is well-understood technically. The main uncertainties are product decisions (content tiering, simulation approach), not technical unknowns. Research from all four files converges on the same build order and architecture.
 
 ### Gaps to Address
 
-- **Exact `.DAT` parsing parameters for all 10 files** — Known formats documented in PITFALLS.md, but `skiprows` counts and column names need empirical verification in Python. This is implementation work, not a research gap.
-- **Numerical agreement with website** — Will not be known until Python code is written and compared cell-by-cell with the website values. The v1.9 website values are the ground truth. Requires careful implementation discipline, not additional research.
-- **Colab `.DAT` file delivery** — No decision made yet (Open Question #1). Must be resolved before Phase 2 templates begin.
+- **Simulation approach decision:** Must be resolved in Phase 3 planning before writing Phase 4 code. See researcher disagreement section and Open Questions #1.
+- **Content volume / time estimate:** No researcher assessed actual authoring time for 83 hand-crafted concept descriptions. This is the longest-pole constraint — not engineering, but writing. Phase 1 should be flagged as high-effort and may need to span multiple work sessions before Phase 2 begins.
+- **Dark mode cluster colors:** The DOT file uses pastel hex values (`#e0f7fa`, `#c8e6c9`, `#fff9c4`, etc.) that wash out or disappear in dark mode. Dark mode equivalents for all 7 cluster colors need to be defined during Phase 3 when the static SVG fallback is rendered.
+- **View transition compatibility (Pitfall 11):** `transition:persist` + nanostores URL persistence is the mitigation direction but has not been tested in this codebase's view transition setup. Flag for Phase 4 testing.
+
+---
 
 ## Sources
 
-### Primary (HIGH confidence)
-- [nbformat v4.5 JSON Schema](https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.5.schema.json)
-- [nbformat v4.5 format description](https://nbformat.readthedocs.io/en/latest/format_description.html)
-- [Cell ID JEP 62](https://jupyter.org/enhancement-proposals/62-cell-id/cell-id.html)
-- [Astro Integration API](https://docs.astro.build/en/reference/integrations-reference/)
-- [Astro Endpoints documentation](https://docs.astro.build/en/guides/endpoints/)
-- [archiver npm package](https://www.npmjs.com/package/archiver)
-- [npm trends: archiver vs jszip vs alternatives](https://npmtrends.com/archiver-vs-jszip-vs-node-stream-zip-vs-yauzl-vs-yazl-vs-zip-js)
-- Existing codebase patterns (direct code inspection): `src/integrations/indexnow.ts`, `src/pages/open-graph/eda/[...slug].png.ts`, `src/components/eda/CaseStudyDataset.astro`, `src/data/eda/datasets.ts`, `src/lib/eda/routes.ts`, `src/pages/eda/case-studies/index.astro`
-- [Teaching and Learning with Jupyter — Pedagogical Patterns](https://jupyter4edu.github.io/jupyter-edu-book/catalogue.html)
-- [Jake VanderPlas Python Data Science Handbook notebooks](https://github.com/jakevdp/PythonDataScienceHandbook)
-- [STScI JDAT Notebooks requirements specification](https://spacetelescope.github.io/jdat_notebooks/docs/requirements.html)
-- [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
-- NumPy, SciPy, pandas, matplotlib, seaborn — PyPI releases verified
+### Primary (HIGH confidence — verified official sources)
+- [npm registry: d3-force, d3-zoom, d3-drag, d3-quadtree, d3-transition](https://registry.npmjs.org/) — versions 3.0.0 / 3.0.1 confirmed 2026-03-26
+- [D3 Force documentation](https://d3js.org/d3-force) — API reference: forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, forceX, forceY
+- [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/) — file() loader, getStaticPaths patterns
+- [Astro Islands Architecture](https://docs.astro.build/en/concepts/islands/) — client:only, client:visible hydration directives
+- [schema.org/DefinedTerm](https://schema.org/DefinedTerm) — JSON-LD markup type for taxonomy concept pages
+- Codebase analysis: `package.json`, `npm ls d3-zoom d3-drag`, `src/components/eda/DistributionExplorer.tsx`, `src/components/guide/DeploymentTopology.tsx`, `src/stores/categoryFilterStore.ts`, `src/content.config.ts`, `src/lib/eda/schema.ts`, `src/lib/beauty-index/schema.ts`, `src/lib/og-image.ts`
 
-### Secondary (MEDIUM-HIGH confidence)
-- [JSZip encoding issue #368](https://github.com/Stuk/jszip/issues/368) — UTF-8 encoding not preserved after zip generation
-- [Archiver string stream issue #375](https://github.com/archiverjs/node-archiver/issues/375) — invalid ZIP from string-based streams
-- [Google Colab GitHub integration](https://github.com/googlecolab/open_in_colab) — URL pattern requirement
-- [Writing Good Jupyter Notebooks — Practical Data Science](https://www.practicaldatascience.org/notebooks/PDS_not_yet_in_coursera/20_programming_concepts/writing_good_jupyter_notebooks.html)
-- [nbformat MissingIDFieldWarning #335](https://github.com/jupyter/nbformat/issues/335)
-- `handbook/datasets/*.DAT` — direct file inspection confirming mixed CRLF/LF line endings
+### Secondary (MEDIUM confidence — multiple sources agree)
+- [Graph visualization performance study (PMC)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12061801/) — SVG performant for sub-1000 nodes; Canvas wins at 5000+
+- [D3 Zoom Scroll Conflict (GitHub #2549)](https://github.com/d3/d3/issues/2549) — scroll trap behavior and zoom.filter() pattern documented
+- [D3 Zoom Touch Issues (GitHub #141)](https://github.com/d3/d3-zoom/issues/141) — touch event capture issues
+- [D-Tour: IEEE 2024](https://ieeexplore.ieee.org/document/10678807/) — guided tours improve non-expert visualization comprehension
+- [Knowledge Graph Visualization (Datavid, yFiles)](https://datavid.com/blog/knowledge-graph-visualization) — detail panel and progressive disclosure patterns
+- [Google Helpful Content 2026](https://orbitinfotech.com/blog/google-2026-helpful-content-update/) — thin content site-wide penalty patterns documented
+- [Bundlephobia: d3-force, d3-zoom](https://bundlephobia.com/) — bundle size estimates
+
+### Tertiary (reference only)
+- [Static force-directed graph (Observable)](https://observablehq.com/@d3/static-force-directed-graph) — build-time pre-computation pattern reference
+- [React + D3 Force Graphs with TypeScript (Medium)](https://medium.com/@qdangdo/visualizing-connections-a-guide-to-react-d3-force-graphs-typescript-74b7af728c90) — React+D3 integration pattern
+- [D3 Accessibility Patterns (fossheim.io)](https://fossheim.io/writing/posts/accessible-dataviz-d3-intro/) — ARIA labels on SVG elements
 
 ---
-*Research completed: 2026-03-14*
+*Research completed: 2026-03-26*
 *Ready for roadmap: yes*
