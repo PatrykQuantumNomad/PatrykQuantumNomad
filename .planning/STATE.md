@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: executing
-stopped_at: Completed 109-01
-last_updated: "2026-03-27T20:30:00.000Z"
+stopped_at: Completed 109-02
+last_updated: "2026-03-27T20:35:00.000Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 21
-  completed_plans: 19
-  percent: 96
+  completed_plans: 20
+  percent: 97
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 AI Landscape Explorer — Phase 109 Plan 01 complete, next: Plan 02 (GSAP edge pulse)
+**Current focus:** v1.18 AI Landscape Explorer — Phase 109 Plan 02 complete, next: Plan 03 (mini-map)
 
 ## Current Position
 
 Phase: 109 (Graph Polish)
-Plan: 1 of 3 in phase 109
-Status: Plan 01 complete — cluster zoom with interactive legend
+Plan: 2 of 3 in phase 109
+Status: Plan 02 complete — GSAP edge pulse animation
 Last activity: 2026-03-27
 
 Progress: [█████████░] 96%
@@ -104,6 +104,10 @@ Recent decisions affecting current work:
 - [Phase 109]: Cluster zoom scale clamped to [0.5, 3] — tighter than zoom extent [0.3, 4] — consistent with viewBox-relative math pattern from zoomToNode
 - [Phase 109]: Interactive cluster legend inside React island is separate from static GraphLegend.astro (preserved for SEO/noscript)
 - [Phase 109]: Dark mode color dots use dual-span pattern (dark:hidden / hidden dark:inline-block) matching GraphLegend.astro
+- [Phase 109]: useGSAP from @gsap/react handles animation cleanup automatically — no manual timeline teardown needed
+- [Phase 109]: Pulse radiates outward from selected node via directional strokeDashoffset animation (15% dash length, 1.2s, power1.inOut)
+- [Phase 109]: Pulse overlay rendered between edges and nodes layers with pointerEvents=none for correct z-order
+- [Phase 109]: prefers-reduced-motion: reduce skips edge pulse entirely (decorative animation)
 
 ### Pending Todos
 
