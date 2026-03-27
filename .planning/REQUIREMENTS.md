@@ -53,7 +53,7 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 - [x] **NAV-01**: Search autocomplete that filters nodes — on select, zooms to node and opens panel
 - [x] **NAV-02**: Mobile-responsive layout — full-width graph on mobile, detail as bottom sheet
 - [x] **NAV-03**: Guided learning paths — 3-4 curated tours ("The Big Picture", "How ChatGPT Works", "What is Agentic AI")
-- [ ] **NAV-04**: Tour UI with progress indicator, next/prev controls, sequential node highlighting
+- [x] **NAV-04**: Tour UI with progress indicator, next/prev controls, sequential node highlighting
 
 ### Site Integration
 
@@ -127,7 +127,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NAV-01 | Phase 107 | Complete |
 | NAV-02 | Phase 107 | Complete |
 | NAV-03 | Phase 108 | Complete |
-| NAV-04 | Phase 108 | Pending |
+| NAV-04 | Phase 108 | Complete |
 | SITE-01 | Phase 104 | Pending |
 | SITE-02 | Phase 110 | Pending |
 | SITE-03 | Phase 110 | Pending |
