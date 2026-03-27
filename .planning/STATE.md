@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
-status: active
-stopped_at: null
-last_updated: "2026-03-27T00:00:00Z"
-last_activity: 2026-03-27 — Phase 104 Static Landing Page verified and complete (2/2 plans, 31 tests, visual checkpoint approved)
+status: executing
+stopped_at: Completed 105-01-PLAN.md
+last_updated: "2026-03-27T12:52:08.358Z"
+last_activity: "2026-03-27 — Completed 105-01 (Interactive Graph Core: graph-data.ts + InteractiveGraph.tsx)"
 progress:
   total_phases: 9
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
-  percent: 33
+  total_plans: 10
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 
 ## Current Position
 
-Phase: 104 complete — next: 105 (Interactive Graph Core)
-Plan: 0 of ? in next phase (not yet planned)
-Status: Phase 104 verified, ready to plan next phase
-Last activity: 2026-03-27 — Phase 104 verified and complete
+Phase: 105 (Interactive Graph Core)
+Plan: 1 of 2 in phase 105
+Status: Executing phase 105
+Last activity: 2026-03-27 — Completed 105-01 (Interactive Graph Core: graph-data.ts + InteractiveGraph.tsx)
 
-Progress: [███░░░░░░░] 33%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 103 P03 | 4min | 2 tasks | 2 files |
 | Phase 103 P02 | 3min | 2 tasks | 3 files |
 | Phase 104 P01 | 35min | 2 tasks | 7 files |
+| Phase 105 P01 | 31min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 104]: CSS class-based cluster coloring (.ai-cluster-{id}) with html.dark overrides for dark mode
 - [Phase 104]: SVG builder uses CSS vars (--color-text-primary, --color-border) for theme integration
 - [Phase 104]: Root nodes (parentId null) get r=24, child nodes r=18 for visual hierarchy
+- [Phase 105]: d3-zoom + React integration: zoom behavior in useRef, transform state applied to single wrapping <g> for O(1) diff per frame
+- [Phase 105]: Modifier key guard: d3-zoom .filter() rejects unmodified wheel, native listener shows auto-hiding overlay hint
+- [Phase 105]: Embedded SVG CSS via dangerouslySetInnerHTML for cluster coloring and html.dark overrides inside React-rendered SVG
 
 ### Pending Todos
 
@@ -98,7 +102,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27
-Stopped at: Phase 104 verified and complete
+Last session: 2026-03-27T12:52:08.354Z
+Stopped at: Completed 105-01-PLAN.md
 Resume file: None
 Next: `/gsd:plan-phase 105` (Interactive Graph Core)

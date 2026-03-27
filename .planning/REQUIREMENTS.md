@@ -17,10 +17,10 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 
 ### Interactive Graph
 
-- [ ] **GRAPH-01**: D3 force-directed graph renders ~80 nodes as SVG with spatial clustering
+- [x] **GRAPH-01**: D3 force-directed graph renders ~80 nodes as SVG with spatial clustering
 - [x] **GRAPH-02**: Cluster coloring matches DOT hierarchy (cyan=AI, green=ML, yellow=NN, amber=DL, pink=GenAI, purple=Agentic, blue=DevTools, grey=Levels) with dark mode equivalents
-- [ ] **GRAPH-03**: Pan and zoom via d3-zoom supporting both mouse (wheel+drag) and touch (pinch+swipe)
-- [ ] **GRAPH-04**: Zoom-to-fit reset button to return to full overview
+- [x] **GRAPH-03**: Pan and zoom via d3-zoom supporting both mouse (wheel+drag) and touch (pinch+swipe)
+- [x] **GRAPH-04**: Zoom-to-fit reset button to return to full overview
 - [ ] **GRAPH-05**: Node hover tooltips showing brief description
 - [ ] **GRAPH-06**: Edge labels visible for key relationships ("subset of" backbone always shown, others on hover)
 - [ ] **GRAPH-07**: Color-coded legend explaining cluster colors, node shapes, and edge styles
@@ -100,10 +100,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-03 | Phase 102 | Complete |
 | DATA-04 | Phase 102 | Complete |
 | DATA-05 | Phase 102 | Complete |
-| GRAPH-01 | Phase 105 | Pending |
+| GRAPH-01 | Phase 105 | Complete |
 | GRAPH-02 | Phase 104 | Complete |
-| GRAPH-03 | Phase 105 | Pending |
-| GRAPH-04 | Phase 105 | Pending |
+| GRAPH-03 | Phase 105 | Complete |
+| GRAPH-04 | Phase 105 | Complete |
 | GRAPH-05 | Phase 105 | Pending |
 | GRAPH-06 | Phase 105 | Pending |
 | GRAPH-07 | Phase 104 | Pending |

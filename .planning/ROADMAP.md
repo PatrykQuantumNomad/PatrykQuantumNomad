@@ -102,7 +102,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 105-01-PLAN.md — Install d3-zoom, graph-data.ts types, InteractiveGraph.tsx with pan/zoom/modifier key guard/zoom reset
+- [x] 105-01-PLAN.md — Install d3-zoom, graph-data.ts types, InteractiveGraph.tsx with pan/zoom/modifier key guard/zoom reset
 - [ ] 105-02-PLAN.md — Node tooltips, edge labels (backbone + hover), wire into index.astro with noscript fallback, visual checkpoint
 **UI hint**: yes
 
@@ -177,7 +177,7 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 102. Data Foundation | 3/3 | Complete   | 2026-03-26 |
 | 103. SEO Concept Pages | 3/3 | Complete   | 2026-03-26 |
 | 104. Static Landing Page & Force Layout | 2/2 | Complete   | 2026-03-27 |
-| 105. Interactive Graph Core | 0/? | Not started | - |
+| 105. Interactive Graph Core | 1/2 | In Progress|  |
 | 106. Detail Panel & Node Selection | 0/? | Not started | - |
 | 107. Search, Navigation & Deep Links | 0/? | Not started | - |
 | 108. Guided Tours & Compare Mode | 0/? | Not started | - |
