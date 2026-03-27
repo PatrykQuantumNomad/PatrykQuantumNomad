@@ -99,7 +99,11 @@ Plans:
   3. A zoom-to-fit reset button returns the viewport to the full graph overview
   4. Hovering over any node shows a tooltip with the concept's brief description
   5. Edge labels are visible — "subset of" backbone edges always shown, other relationship labels appear on hover
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 105-01-PLAN.md — Install d3-zoom, graph-data.ts types, InteractiveGraph.tsx with pan/zoom/modifier key guard/zoom reset
+- [ ] 105-02-PLAN.md — Node tooltips, edge labels (backbone + hover), wire into index.astro with noscript fallback, visual checkpoint
 **UI hint**: yes
 
 ### Phase 106: Detail Panel & Node Selection
