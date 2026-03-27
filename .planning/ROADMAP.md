@@ -82,11 +82,11 @@ Plans:
   3. A color-coded legend on the landing page explains cluster colors, node shapes, and edge styles
   4. The landing page includes a category-grouped concept list linking to individual /ai-landscape/[slug]/ pages
   5. The static SVG is the first meaningful paint — visible before any JavaScript loads
-**Plans**: 2 plans
+**Plans**: 2/2 plans complete
 
 Plans:
 - [x] 104-01-PLAN.md — Layout generation pipeline (d3-force prebuild script, layout-schema, SVG builder, tests)
-- [ ] 104-02-PLAN.md — Landing page assembly (GraphLegend, ConceptList, index.astro, visual checkpoint)
+- [x] 104-02-PLAN.md — Landing page assembly (GraphLegend, ConceptList, index.astro, visual checkpoint)
 **UI hint**: yes
 
 ### Phase 105: Interactive Graph Core
@@ -172,7 +172,7 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 |-------|----------------|--------|-----------|
 | 102. Data Foundation | 3/3 | Complete   | 2026-03-26 |
 | 103. SEO Concept Pages | 3/3 | Complete   | 2026-03-26 |
-| 104. Static Landing Page & Force Layout | 1/2 | In Progress|  |
+| 104. Static Landing Page & Force Layout | 2/2 | Complete   | 2026-03-27 |
 | 105. Interactive Graph Core | 0/? | Not started | - |
 | 106. Detail Panel & Node Selection | 0/? | Not started | - |
 | 107. Search, Navigation & Deep Links | 0/? | Not started | - |
