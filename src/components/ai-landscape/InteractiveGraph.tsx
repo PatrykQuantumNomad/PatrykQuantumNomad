@@ -17,6 +17,9 @@ import { buildAncestryChain } from '../../lib/ai-landscape/ancestry';
 import { buildAdjacencyMap, nearestNeighborInDirection } from '../../lib/ai-landscape/graph-navigation';
 import { useUrlNodeState } from './useUrlNodeState';
 import { SearchBar } from './SearchBar';
+import { useTour } from './useTour';
+import { TourSelector } from './TourSelector';
+import { TourBar } from './TourBar';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -77,6 +80,9 @@ export default function InteractiveGraph({
 
   // URL state hook — reads ?node= param on mount, provides syncToUrl callback
   const { initialNodeSlug, syncToUrl } = useUrlNodeState(nodeMap);
+
+  // Tour state machine
+  const tour = useTour();
 
   // Build CSS string for cluster coloring and dark mode overrides
   const cssString = useMemo(() => {
@@ -200,6 +206,24 @@ export default function InteractiveGraph({
     attemptZoom();
   }, [initialNodeSlug, nodeMap, zoomToNode]);
 
+  // Tour activation effect — drives selection, zoom, highlighting when tour step changes
+  useEffect(() => {
+    if (tour.isActive && tour.currentNodeId) {
+      const node = nodeMap.get(tour.currentNodeId);
+      if (node) {
+        setSelectedNode(node);
+        setHighlightedNodeIds(tour.highlightNodeIds);
+        zoomToNode(tour.currentNodeId);
+        syncToUrl(tour.currentNodeId);
+      }
+    }
+    // When tour exits, reset graph state
+    if (!tour.isActive && tour.currentNodeId === null) {
+      // Only call handleClosePanel if we were previously in a tour
+      // (avoid running on initial mount when isActive is already false)
+    }
+  }, [tour.isActive, tour.currentNodeId, tour.highlightNodeIds, nodeMap, zoomToNode, syncToUrl]);
+
   // Search select handler — zoom to node and update URL
   const handleSearchSelect = useCallback((node: AiNode) => {
     setSelectedNode(node);
@@ -229,12 +253,13 @@ export default function InteractiveGraph({
 
   // Node click handler — opens detail panel and syncs URL
   const handleNodeClick = useCallback((node: AiNode) => {
+    if (tour.isActive) return; // Block clicks during guided tour
     if (hasDragged.current) return; // Ignore clicks after drag
     setSelectedNode(node);
     setHighlightedNodeIds(new Set()); // Clear ancestry highlight when selecting new node
     setFocusedNodeId(null);
     syncToUrl(node.id);
-  }, [syncToUrl]);
+  }, [tour.isActive, syncToUrl]);
 
   // Ancestry highlight handler — highlights ancestry chain on graph
   const handleShowAncestry = useCallback((nodeSlug: string) => {
@@ -257,8 +282,40 @@ export default function InteractiveGraph({
     syncToUrl(null);
   }, [syncToUrl]);
 
+  // When tour exits, clean up graph state
+  const prevTourActive = useRef(false);
+  useEffect(() => {
+    if (prevTourActive.current && !tour.isActive) {
+      handleClosePanel();
+    }
+    prevTourActive.current = tour.isActive;
+  }, [tour.isActive, handleClosePanel]);
+
   // Keyboard handler for graph navigation (arrow keys, Enter, Escape, Tab)
   const handleGraphKeyDown = useCallback((e: React.KeyboardEvent<SVGSVGElement>) => {
+    // Tour mode keyboard override — arrow keys navigate tour steps, not graph neighbors
+    if (tour.isActive) {
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault();
+          tour.next();
+          return;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault();
+          tour.prev();
+          return;
+        case 'Escape':
+          e.preventDefault();
+          tour.exit();
+          return;
+        default:
+          e.preventDefault();
+          return;
+      }
+    }
+
     const current = focusedNodeId || selectedNode?.id;
 
     if (!current) {
@@ -337,16 +394,39 @@ export default function InteractiveGraph({
         break;
       }
     }
-  }, [focusedNodeId, selectedNode, nodeMap, adjacencyMap, posMap, transform, meta.width, meta.height, zoomToNode, syncToUrl]);
+  }, [tour, focusedNodeId, selectedNode, nodeMap, adjacencyMap, posMap, transform, meta.width, meta.height, zoomToNode, syncToUrl]);
 
   // Determine if highlighting is active
   const isHighlighting = highlightedNodeIds.size > 0;
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="mb-3">
-        <SearchBar nodes={nodes} onSelect={handleSearchSelect} />
-      </div>
+      {/* Tour bar when a tour is active (replaces search bar) */}
+      {tour.isActive && tour.activeTour && (
+        <div className="mb-3">
+          <TourBar
+            tour={tour.activeTour}
+            currentStep={tour.currentStep}
+            narrative={tour.narrative ?? ''}
+            onNext={tour.next}
+            onPrev={tour.prev}
+            onExit={tour.exit}
+            totalSteps={tour.activeTour.steps.length}
+          />
+        </div>
+      )}
+      {/* Search bar when no tour is active */}
+      {!tour.isActive && (
+        <div className="mb-3">
+          <SearchBar nodes={nodes} onSelect={handleSearchSelect} />
+        </div>
+      )}
+      {/* Tour selector when idle (no tour active, no node selected) */}
+      {!tour.isActive && !selectedNode && (
+        <div className="mb-3">
+          <TourSelector onStartTour={tour.start} />
+        </div>
+      )}
       <div className="flex">
         {/* SVG area */}
         <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative`}>
