@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: verifying
-stopped_at: Completed 107-01-PLAN.md
-last_updated: "2026-03-27T16:01:27.823Z"
+stopped_at: Completed 107-02-PLAN.md
+last_updated: "2026-03-27T16:55:28.480Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 9
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 90
 ---
 
@@ -56,6 +56,7 @@ Progress: [█████████░] 90%
 | Phase 106 P01 | 3min | 2 tasks | 3 files |
 | Phase 106 P02 | 5min | 2 tasks | 2 files |
 | Phase 107 P01 | 2min | 2 tasks | 3 files |
+| Phase 107 P02 | 10min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Recent decisions affecting current work:
 - [Phase 106]: DetailPanel is pure presentational — no positioning or open/close state; Plan 02 wrapper handles layout
 - [Phase 107]: Dead-end fallback: nearestNeighborInDirection returns best-scored neighbor in any direction when no neighbor within 90 degrees
 - [Phase 107]: URL sync uses history.replaceState (not pushState) to avoid polluting browser history
+- [Phase 107]: zoomToNode uses viewBox dimensions (meta.width/2) not pixel getBoundingClientRect for correct transform at scale=2 — Viewport-relative math required for d3-zoom programmatic transitions
 
 ### Pending Todos
 
@@ -111,7 +113,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T16:01:27.820Z
-Stopped at: Completed 107-01-PLAN.md
+Last session: 2026-03-27T16:55:10.265Z
+Stopped at: Completed 107-02-PLAN.md
 Resume file: None
 Next: `/gsd:plan-phase 105` (Interactive Graph Core)

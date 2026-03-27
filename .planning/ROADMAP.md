@@ -31,7 +31,7 @@
 - [ ] **Phase 104: Static Landing Page & Force Layout** - Build-time force simulation, static SVG fallback, landing page with legend and concept list
 - [x] **Phase 105: Interactive Graph Core** - D3 force-directed React island with pan/zoom, tooltips, and edge labels (completed 2026-03-27)
 - [x] **Phase 106: Detail Panel & Node Selection** - Side panel (desktop) and bottom sheet (mobile) with ELI5 toggle, grouped relationships, and ancestry path highlighting (completed 2026-03-27)
-- [ ] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation
+- [x] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation (completed 2026-03-27)
 - [ ] **Phase 108: Guided Tours & Compare Mode** - Curated learning paths with tour UI, side-by-side comparison, and VS pages
 - [ ] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map
 - [ ] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image
@@ -134,7 +134,7 @@ Plans:
   4. Keyboard navigation works: arrow keys traverse edges between nodes, Enter selects/opens panel, Escape deselects, Tab cycles through nodes
 **Plans**: 2 plans
 - [x] 107-01-PLAN.md — New utility files: graph-navigation.ts, useUrlNodeState.ts, SearchBar.tsx
-- [ ] 107-02-PLAN.md — Integrate search, keyboard nav, URL deep links, and zoom-to-node into InteractiveGraph
+- [x] 107-02-PLAN.md — Integrate search, keyboard nav, URL deep links, and zoom-to-node into InteractiveGraph
 **UI hint**: yes
 
 ### Phase 108: Guided Tours & Compare Mode
@@ -185,7 +185,7 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 104. Static Landing Page & Force Layout | 2/2 | Complete   | 2026-03-27 |
 | 105. Interactive Graph Core | 2/2 | Complete   | 2026-03-27 |
 | 106. Detail Panel & Node Selection | 2/2 | Complete   | 2026-03-27 |
-| 107. Search, Navigation & Deep Links | 1/2 | In Progress|  |
+| 107. Search, Navigation & Deep Links | 2/2 | Complete   | 2026-03-27 |
 | 108. Guided Tours & Compare Mode | 0/? | Not started | - |
 | 109. Graph Polish | 0/? | Not started | - |
 | 110. Site Integration | 0/? | Not started | - |
