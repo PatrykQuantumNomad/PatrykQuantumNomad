@@ -30,7 +30,7 @@
 - [x] **Phase 103: SEO Concept Pages** - Individual /ai-landscape/[slug] pages with structured data, breadcrumbs, and OG images (completed 2026-03-26)
 - [ ] **Phase 104: Static Landing Page & Force Layout** - Build-time force simulation, static SVG fallback, landing page with legend and concept list
 - [x] **Phase 105: Interactive Graph Core** - D3 force-directed React island with pan/zoom, tooltips, and edge labels (completed 2026-03-27)
-- [ ] **Phase 106: Detail Panel & Node Selection** - Side panel (desktop) and bottom sheet (mobile) with ELI5 toggle and ancestry path
+- [ ] **Phase 106: Detail Panel & Node Selection** - Side panel (desktop) and bottom sheet (mobile) with ELI5 toggle, grouped relationships, and ancestry path highlighting
 - [ ] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation
 - [ ] **Phase 108: Guided Tours & Compare Mode** - Curated learning paths with tour UI, side-by-side comparison, and VS pages
 - [ ] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map
@@ -116,7 +116,11 @@ Plans:
   3. Clicking "How did we get here?" highlights the full ancestry chain on the graph (e.g., GPT-4o -> LLM -> GenAI -> DL -> NN -> ML -> AI)
   4. Relationships in the panel are grouped by type: "Part of", "Includes", "Enables", "Examples"
   5. On mobile (below 768px), the detail panel renders as a bottom sheet instead of a side panel
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 106-01-PLAN.md — Relationship grouper helper, useMediaQuery hook, DetailPanel presentational component
+- [ ] 106-02-PLAN.md — BottomSheet wrapper, selection state + click handler + ancestry highlighting in InteractiveGraph, responsive panel/sheet switching, visual checkpoint
 **UI hint**: yes
 
 ### Phase 107: Search, Navigation & Deep Links
