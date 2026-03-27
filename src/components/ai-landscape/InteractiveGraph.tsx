@@ -14,6 +14,9 @@ import { DetailPanel } from './DetailPanel';
 import { BottomSheet } from './BottomSheet';
 import { useMediaQuery } from './useMediaQuery';
 import { buildAncestryChain } from '../../lib/ai-landscape/ancestry';
+import { buildAdjacencyMap, nearestNeighborInDirection } from '../../lib/ai-landscape/graph-navigation';
+import { useUrlNodeState } from './useUrlNodeState';
+import { SearchBar } from './SearchBar';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -45,6 +48,8 @@ export default function InteractiveGraph({
   const [selectedNode, setSelectedNode] = useState<AiNode | null>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<Set<string>>(new Set());
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  // Keyboard focus state for graph navigation
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   // Click-vs-drag discrimination
   const hasDragged = useRef(false);
 
@@ -65,6 +70,13 @@ export default function InteractiveGraph({
     () => new Set(nodes.filter((n) => n.parentId === null).map((n) => n.id)),
     [nodes],
   );
+  const adjacencyMap = useMemo(
+    () => buildAdjacencyMap(edges),
+    [edges],
+  );
+
+  // URL state hook — reads ?node= param on mount, provides syncToUrl callback
+  const { initialNodeSlug, syncToUrl } = useUrlNodeState(nodeMap);
 
   // Build CSS string for cluster coloring and dark mode overrides
   const cssString = useMemo(() => {
@@ -145,6 +157,60 @@ export default function InteractiveGraph({
       .call(zoomBehavior.transform, zoomIdentity);
   }, []);
 
+  // Zoom-to-node: animate pan+zoom to center a specific node
+  const zoomToNode = useCallback((nodeId: string) => {
+    const svg = svgRef.current;
+    const zoomBehavior = zoomRef.current;
+    const pos = posMap.get(nodeId);
+    if (!svg || !zoomBehavior || !pos) return;
+
+    // Use viewBox dimensions (NOT element pixel dimensions)
+    const scale = 2;
+    const tx = meta.width / 2 - scale * pos.x;
+    const ty = meta.height / 2 - scale * pos.y;
+    const newTransform = zoomIdentity.translate(tx, ty).scale(scale);
+
+    select(svg)
+      .transition()
+      .duration(750)
+      .call(zoomBehavior.transform, newTransform);
+  }, [posMap, meta.width, meta.height]);
+
+  // Deep link restoration — select and zoom to node from URL on mount
+  useEffect(() => {
+    if (!initialNodeSlug) return;
+    const node = nodeMap.get(initialNodeSlug);
+    if (!node) return;
+
+    // Set selection state immediately (panel opens)
+    setSelectedNode(node);
+
+    // Zoom to node — retry once if zoomRef not ready yet
+    const attemptZoom = () => {
+      if (zoomRef.current && svgRef.current) {
+        zoomToNode(initialNodeSlug);
+      } else {
+        requestAnimationFrame(() => {
+          if (zoomRef.current && svgRef.current) {
+            zoomToNode(initialNodeSlug);
+          }
+        });
+      }
+    };
+    attemptZoom();
+  }, [initialNodeSlug, nodeMap, zoomToNode]);
+
+  // Search select handler — zoom to node and update URL
+  const handleSearchSelect = useCallback((node: AiNode) => {
+    setSelectedNode(node);
+    setHighlightedNodeIds(new Set());
+    setFocusedNodeId(null);
+    zoomToNode(node.id);
+    syncToUrl(node.id);
+    // Return focus to SVG container for keyboard nav after search
+    svgRef.current?.focus();
+  }, [zoomToNode, syncToUrl]);
+
   // Node hover handlers for tooltips
   const handleNodeEnter = (e: React.MouseEvent, node: AiNode) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -161,12 +227,14 @@ export default function InteractiveGraph({
     setTooltip(null);
   };
 
-  // Node click handler — opens detail panel
+  // Node click handler — opens detail panel and syncs URL
   const handleNodeClick = useCallback((node: AiNode) => {
     if (hasDragged.current) return; // Ignore clicks after drag
     setSelectedNode(node);
     setHighlightedNodeIds(new Set()); // Clear ancestry highlight when selecting new node
-  }, []);
+    setFocusedNodeId(null);
+    syncToUrl(node.id);
+  }, [syncToUrl]);
 
   // Ancestry highlight handler — highlights ancestry chain on graph
   const handleShowAncestry = useCallback((nodeSlug: string) => {
@@ -181,17 +249,104 @@ export default function InteractiveGraph({
     setHighlightedNodeIds(highlightIds);
   }, [nodeMap]);
 
-  // Close panel handler — clears selection and highlights
+  // Close panel handler — clears selection, highlights, focus, and URL
   const handleClosePanel = useCallback(() => {
     setSelectedNode(null);
     setHighlightedNodeIds(new Set());
-  }, []);
+    setFocusedNodeId(null);
+    syncToUrl(null);
+  }, [syncToUrl]);
+
+  // Keyboard handler for graph navigation (arrow keys, Enter, Escape, Tab)
+  const handleGraphKeyDown = useCallback((e: React.KeyboardEvent<SVGSVGElement>) => {
+    const current = focusedNodeId || selectedNode?.id;
+
+    if (!current) {
+      // Nothing focused/selected — Tab focuses first node alphabetically
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const sortedIds = [...nodeMap.keys()].sort();
+        if (sortedIds.length > 0) setFocusedNodeId(sortedIds[0]);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        e.preventDefault();
+        const dir = e.key.replace('Arrow', '').toLowerCase() as 'up' | 'down' | 'left' | 'right';
+        const next = nearestNeighborInDirection(current, dir, adjacencyMap, posMap);
+        if (next) {
+          setFocusedNodeId(next);
+          // Auto-pan to keep focused node visible without changing zoom level
+          const svg = svgRef.current;
+          const zoomBehavior = zoomRef.current;
+          const pos = posMap.get(next);
+          if (svg && zoomBehavior && pos) {
+            const currentTransform = transform;
+            const screenX = currentTransform.applyX(pos.x);
+            const screenY = currentTransform.applyY(pos.y);
+            // Check if node is outside visible area (with 10% margin)
+            const marginX = meta.width * 0.1;
+            const marginY = meta.height * 0.1;
+            if (screenX < marginX || screenX > meta.width - marginX ||
+                screenY < marginY || screenY > meta.height - marginY) {
+              // Pan to center the node at current zoom level
+              const tx = meta.width / 2 - currentTransform.k * pos.x;
+              const ty = meta.height / 2 - currentTransform.k * pos.y;
+              const newTransform = zoomIdentity.translate(tx, ty).scale(currentTransform.k);
+              select(svg)
+                .transition()
+                .duration(300)
+                .call(zoomBehavior.transform, newTransform);
+            }
+          }
+        }
+        break;
+      }
+      case 'Enter': {
+        e.preventDefault();
+        const node = nodeMap.get(focusedNodeId ?? '');
+        if (node) {
+          setSelectedNode(node);
+          setHighlightedNodeIds(new Set());
+          zoomToNode(node.id);
+          syncToUrl(node.id);
+        }
+        break;
+      }
+      case 'Escape': {
+        e.preventDefault();
+        setSelectedNode(null);
+        setHighlightedNodeIds(new Set());
+        setFocusedNodeId(null);
+        syncToUrl(null);
+        break;
+      }
+      case 'Tab': {
+        e.preventDefault();
+        const sortedIds = [...nodeMap.keys()].sort();
+        const currentIdx = sortedIds.indexOf(current);
+        const nextIdx = e.shiftKey
+          ? (currentIdx - 1 + sortedIds.length) % sortedIds.length
+          : (currentIdx + 1) % sortedIds.length;
+        setFocusedNodeId(sortedIds[nextIdx]);
+        break;
+      }
+    }
+  }, [focusedNodeId, selectedNode, nodeMap, adjacencyMap, posMap, transform, meta.width, meta.height, zoomToNode, syncToUrl]);
 
   // Determine if highlighting is active
   const isHighlighting = highlightedNodeIds.size > 0;
 
   return (
     <div ref={containerRef} className="relative">
+      <div className="mb-3">
+        <SearchBar nodes={nodes} onSelect={handleSearchSelect} />
+      </div>
       <div className="flex">
         {/* SVG area */}
         <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative`}>
@@ -199,9 +354,12 @@ export default function InteractiveGraph({
             ref={svgRef}
             viewBox={`0 0 ${meta.width} ${meta.height}`}
             className="w-full h-auto"
-            style={{ maxWidth: `${meta.width}px`, cursor: 'grab' }}
-            role="img"
-            aria-label={`Interactive AI Landscape graph with ${nodes.length} concepts across ${clusters.length} clusters`}
+            style={{ maxWidth: `${meta.width}px`, cursor: 'grab', outline: 'none' }}
+            tabIndex={0}
+            onKeyDown={handleGraphKeyDown}
+            role="application"
+            aria-activedescendant={focusedNodeId ? `node-${focusedNodeId}` : undefined}
+            aria-label="Interactive AI Landscape graph. Use arrow keys to navigate between connected concepts, Enter to select, Escape to deselect, Tab to cycle through all concepts."
           >
             <style dangerouslySetInnerHTML={{ __html: cssString }} />
             <g transform={transform.toString()}>
@@ -321,6 +479,7 @@ export default function InteractiveGraph({
                   return (
                     <g
                       key={node.id}
+                      id={`node-${node.id}`}
                       style={{ cursor: 'pointer' }}
                       pointerEvents="all"
                       opacity={nodeOpacity}
@@ -328,6 +487,18 @@ export default function InteractiveGraph({
                       onMouseLeave={handleNodeLeave}
                       onClick={() => handleNodeClick(node)}
                     >
+                      {/* Keyboard focus ring (dashed, behind selection ring) */}
+                      {focusedNodeId === node.id && selectedNode?.id !== node.id && (
+                        <circle
+                          cx={pos.x}
+                          cy={pos.y}
+                          r={r + 4}
+                          fill="none"
+                          stroke="var(--color-accent)"
+                          strokeWidth={2}
+                          strokeDasharray="4 3"
+                        />
+                      )}
                       {/* Selection ring (behind the node circle) */}
                       {isSelected && (
                         <circle
