@@ -45,7 +45,7 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 - [x] **SEO-04**: Build-time OG image per concept (shared template with concept name + cluster color)
 - [x] **SEO-05**: Shareable deep links — URL updates with selected node (/ai-landscape?node=LLM)
 - [x] **SEO-06**: Keyboard navigation — arrow keys traverse edges, Enter selects, Escape deselects, Tab through nodes
-- [ ] **SEO-07**: Compare mode — select two concepts for side-by-side comparison
+- [x] **SEO-07**: Compare mode — select two concepts for side-by-side comparison
 - [x] **SEO-08**: VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] for popular comparisons
 
 ### Search & Navigation
@@ -122,7 +122,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-04 | Phase 103 | Complete |
 | SEO-05 | Phase 107 | Complete |
 | SEO-06 | Phase 107 | Complete |
-| SEO-07 | Phase 108 | Pending |
+| SEO-07 | Phase 108 | Complete |
 | SEO-08 | Phase 108 | Complete |
 | NAV-01 | Phase 107 | Complete |
 | NAV-02 | Phase 107 | Complete |
