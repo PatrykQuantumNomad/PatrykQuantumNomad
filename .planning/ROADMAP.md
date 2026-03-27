@@ -163,7 +163,12 @@ Plans:
   1. Clicking a cluster label in the legend zooms the viewport smoothly into that cluster's region of the graph
   2. When a node is selected, a GSAP-animated pulse travels along the edges connecting it to its parent and child nodes
   3. A mini-map in the corner (desktop only) shows the full graph with a highlighted rectangle indicating the current viewport position
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 109-01-PLAN.md — Cluster zoom (getClusterBounds helper, zoomToCluster callback, interactive cluster legend in React island)
+- [ ] 109-02-PLAN.md — GSAP edge pulse animation (install @gsap/react, useEdgePulse hook, pulse overlay lines)
+- [ ] 109-03-PLAN.md — Desktop mini-map (MiniMap component with cluster-colored dots and viewport rectangle)
 **UI hint**: yes
 
 ### Phase 110: Site Integration
