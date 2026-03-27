@@ -3,10 +3,12 @@ import { select } from 'd3-selection';
 import { zoom, zoomIdentity, type ZoomTransform, type ZoomBehavior } from 'd3-zoom';
 import {
   type GraphProps,
+  type AiNode,
   ROOT_NODE_RADIUS,
   NODE_RADIUS,
   LABEL_FONT_SIZE,
   stripParenthetical,
+  firstSentence,
 } from '../../lib/ai-landscape/graph-data';
 
 /**
@@ -29,16 +31,19 @@ export default function InteractiveGraph({
   // State
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
   const [showZoomHint, setShowZoomHint] = useState(false);
-  // Stub state for Plan 02 (tooltip + edge labels)
-  const [_hoveredNode, _setHoveredNode] = useState<string | null>(null);
-  const [_hoveredEdge, _setHoveredEdge] = useState<string | null>(null);
+  // Tooltip state for node hover
+  const [tooltip, setTooltip] = useState<{
+    x: number; y: number; name: string; description: string;
+  } | null>(null);
+  // Edge hover state for showing non-hierarchy edge labels
+  const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
 
   // Memoized lookups
   const posMap = useMemo(
     () => new Map(positions.map((p) => [p.id, p])),
     [positions],
   );
-  const _nodeMap = useMemo(
+  const nodeMap = useMemo(
     () => new Map(nodes.map((n) => [n.id, n])),
     [nodes],
   );
@@ -126,6 +131,22 @@ export default function InteractiveGraph({
       .call(zoomBehavior.transform, zoomIdentity);
   }, []);
 
+  // Node hover handlers for tooltips
+  const handleNodeEnter = (e: React.MouseEvent, node: AiNode) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setTooltip({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      name: node.name,
+      description: firstSentence(node.simpleDescription),
+    });
+  };
+
+  const handleNodeLeave = () => {
+    setTooltip(null);
+  };
+
   return (
     <div ref={containerRef} className="relative">
       <svg
@@ -171,6 +192,48 @@ export default function InteractiveGraph({
                     strokeDasharray={strokeDasharray}
                     opacity={opacity}
                   />
+                  {/* Invisible wider hit-area for non-hierarchy edge hover */}
+                  {edge.type !== 'hierarchy' && (
+                    <line
+                      x1={src.x}
+                      y1={src.y}
+                      x2={tgt.x}
+                      y2={tgt.y}
+                      stroke="transparent"
+                      strokeWidth={12}
+                      style={{ cursor: 'pointer' }}
+                      onMouseEnter={() => setHoveredEdge(edgeKey)}
+                      onMouseLeave={() => setHoveredEdge(null)}
+                    />
+                  )}
+                  {/* Edge label: backbone always visible, others on hover */}
+                  {(edge.type === 'hierarchy' || hoveredEdge === edgeKey) && (() => {
+                    const mx = (src.x + tgt.x) / 2;
+                    const my = (src.y + tgt.y) / 2 - 4;
+                    const labelWidth = edge.label.length * 4.5 + 8;
+                    return (
+                      <>
+                        <rect
+                          x={mx - labelWidth / 2}
+                          y={my - 7}
+                          width={labelWidth}
+                          height={12}
+                          rx={3}
+                          className="fill-[var(--color-surface)]"
+                          opacity={0.85}
+                        />
+                        <text
+                          x={mx}
+                          y={my}
+                          textAnchor="middle"
+                          className="ai-edge-label"
+                          fontSize={8}
+                        >
+                          {edge.label}
+                        </text>
+                      </>
+                    );
+                  })()}
                 </g>
               );
             })}
@@ -192,7 +255,13 @@ export default function InteractiveGraph({
               const labelY = pos.y + r + LABEL_FONT_SIZE + 2;
 
               return (
-                <g key={node.id}>
+                <g
+                  key={node.id}
+                  style={{ cursor: 'pointer' }}
+                  pointerEvents="all"
+                  onMouseEnter={(e) => handleNodeEnter(e, node)}
+                  onMouseLeave={handleNodeLeave}
+                >
                   <circle
                     cx={pos.x}
                     cy={pos.y}
@@ -234,6 +303,22 @@ export default function InteractiveGraph({
             </kbd>{' '}
             + scroll to zoom
           </div>
+        </div>
+      )}
+
+      {/* Node hover tooltip */}
+      {tooltip && (
+        <div
+          role="tooltip"
+          className="absolute z-10 pointer-events-none max-w-xs px-3 py-2 rounded-lg shadow-lg border text-sm
+            bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)]"
+          style={{
+            left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 260),
+            top: tooltip.y - 8,
+          }}
+        >
+          <strong className="block text-xs font-heading mb-1">{tooltip.name}</strong>
+          <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">{tooltip.description}</p>
         </div>
       )}
     </div>
