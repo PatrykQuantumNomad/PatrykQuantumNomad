@@ -4,11 +4,13 @@ import { zoom, zoomIdentity, type ZoomTransform, type ZoomBehavior } from 'd3-zo
 import {
   type GraphProps,
   type AiNode,
+  type ClusterBounds,
   ROOT_NODE_RADIUS,
   NODE_RADIUS,
   LABEL_FONT_SIZE,
   stripParenthetical,
   firstSentence,
+  getClusterBounds,
 } from '../../lib/ai-landscape/graph-data';
 import { DetailPanel } from './DetailPanel';
 import { ComparePanel } from './ComparePanel';
@@ -81,6 +83,16 @@ export default function InteractiveGraph({
     () => buildAdjacencyMap(edges),
     [edges],
   );
+
+  // Pre-compute cluster bounding boxes for cluster zoom
+  const clusterBoundsMap = useMemo(() => {
+    const map = new Map<string, ClusterBounds>();
+    for (const c of clusters) {
+      const bounds = getClusterBounds(c.id, nodes, posMap);
+      if (bounds) map.set(c.id, bounds);
+    }
+    return map;
+  }, [clusters, nodes, posMap]);
 
   // URL state hook — reads ?node= param on mount, provides syncToUrl callback
   const { initialNodeSlug, syncToUrl } = useUrlNodeState(nodeMap);
@@ -185,6 +197,31 @@ export default function InteractiveGraph({
       .duration(750)
       .call(zoomBehavior.transform, newTransform);
   }, [posMap, meta.width, meta.height]);
+
+  // Zoom-to-cluster: animate pan+zoom to center a cluster's bounding box
+  const zoomToCluster = useCallback((clusterId: string) => {
+    const svg = svgRef.current;
+    const zoomBehavior = zoomRef.current;
+    const bounds = clusterBoundsMap.get(clusterId);
+    if (!svg || !zoomBehavior || !bounds) return;
+
+    const { x0, y0, x1, y1 } = bounds;
+    const scale = Math.min(
+      meta.width / (x1 - x0),
+      meta.height / (y1 - y0),
+    );
+
+    // Clamp to [0.5, 3] — tighter than zoom extent [0.3, 4]
+    const clampedScale = Math.max(0.5, Math.min(3, scale));
+    const tx = meta.width / 2 - clampedScale * (x0 + x1) / 2;
+    const ty = meta.height / 2 - clampedScale * (y0 + y1) / 2;
+    const clampedTransform = zoomIdentity.translate(tx, ty).scale(clampedScale);
+
+    select(svg)
+      .transition()
+      .duration(750)
+      .call(zoomBehavior.transform, clampedTransform);
+  }, [clusterBoundsMap, meta.width, meta.height]);
 
   // Deep link restoration — select and zoom to node from URL on mount
   useEffect(() => {
@@ -506,6 +543,29 @@ export default function InteractiveGraph({
           Click a node to start comparing
         </div>
       )}
+      {/* Interactive cluster legend — click to zoom into a cluster region */}
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        {clusters.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => zoomToCluster(c.id)}
+            className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-0.5 text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-secondary)] transition-colors"
+            title={`Zoom to ${c.name} cluster`}
+            aria-label={`Zoom to ${c.name} cluster`}
+          >
+            <span
+              className="inline-block w-2.5 h-2.5 rounded-full shrink-0 dark:hidden"
+              style={{ background: c.color, border: `1px solid ${c.darkColor}` }}
+            />
+            <span
+              className="hidden dark:inline-block w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ background: c.darkColor, border: `1px solid ${c.color}` }}
+            />
+            {c.name}
+          </button>
+        ))}
+      </div>
       <div className="flex">
         {/* SVG area */}
         <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative`}>
