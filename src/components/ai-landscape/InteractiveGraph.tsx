@@ -483,7 +483,6 @@ export default function InteractiveGraph({
   const { pulseRefs } = useEdgePulse({
     selectedNodeId: selectedNode?.id ?? null,
     edges,
-    posMap,
     containerRef,
   });
 

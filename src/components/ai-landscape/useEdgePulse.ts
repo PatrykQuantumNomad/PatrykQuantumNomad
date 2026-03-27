@@ -2,14 +2,12 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import type { Edge } from '../../lib/ai-landscape/graph-data';
-import type { LayoutPosition } from '../../lib/ai-landscape/layout-schema';
 
 gsap.registerPlugin(useGSAP);
 
 interface UseEdgePulseOptions {
   selectedNodeId: string | null;
   edges: Edge[];
-  posMap: Map<string, LayoutPosition>;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -25,7 +23,6 @@ interface UseEdgePulseOptions {
 export function useEdgePulse({
   selectedNodeId,
   edges,
-  posMap,
   containerRef,
 }: UseEdgePulseOptions) {
   const pulseRefs = useRef<Map<string, SVGLineElement>>(new Map());
