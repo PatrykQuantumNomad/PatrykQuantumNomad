@@ -10,6 +10,10 @@ import {
   stripParenthetical,
   firstSentence,
 } from '../../lib/ai-landscape/graph-data';
+import { DetailPanel } from './DetailPanel';
+import { BottomSheet } from './BottomSheet';
+import { useMediaQuery } from './useMediaQuery';
+import { buildAncestryChain } from '../../lib/ai-landscape/ancestry';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -37,6 +41,12 @@ export default function InteractiveGraph({
   } | null>(null);
   // Edge hover state for showing non-hierarchy edge labels
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
+  // Node selection state for detail panel
+  const [selectedNode, setSelectedNode] = useState<AiNode | null>(null);
+  const [highlightedNodeIds, setHighlightedNodeIds] = useState<Set<string>>(new Set());
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  // Click-vs-drag discrimination
+  const hasDragged = useRef(false);
 
   // Memoized lookups
   const posMap = useMemo(
@@ -92,7 +102,11 @@ export default function InteractiveGraph({
           (event as WheelEvent).ctrlKey || (event as WheelEvent).metaKey
         );
       })
+      .on('start', () => {
+        hasDragged.current = false;
+      })
       .on('zoom', (event) => {
+        if (event.sourceEvent) hasDragged.current = true;
         setTransform(event.transform);
       });
 
@@ -147,179 +161,281 @@ export default function InteractiveGraph({
     setTooltip(null);
   };
 
+  // Node click handler — opens detail panel
+  const handleNodeClick = useCallback((node: AiNode) => {
+    if (hasDragged.current) return; // Ignore clicks after drag
+    setSelectedNode(node);
+    setHighlightedNodeIds(new Set()); // Clear ancestry highlight when selecting new node
+  }, []);
+
+  // Ancestry highlight handler — highlights ancestry chain on graph
+  const handleShowAncestry = useCallback((nodeSlug: string) => {
+    const chain = buildAncestryChain(nodeSlug, nodeMap);
+    const highlightIds = new Set<string>();
+    // Add ancestry chain nodes (slug === id in this dataset)
+    for (const ancestor of chain) {
+      highlightIds.add(ancestor.slug);
+    }
+    // Add the node itself
+    highlightIds.add(nodeSlug);
+    setHighlightedNodeIds(highlightIds);
+  }, [nodeMap]);
+
+  // Close panel handler — clears selection and highlights
+  const handleClosePanel = useCallback(() => {
+    setSelectedNode(null);
+    setHighlightedNodeIds(new Set());
+  }, []);
+
+  // Determine if highlighting is active
+  const isHighlighting = highlightedNodeIds.size > 0;
+
   return (
     <div ref={containerRef} className="relative">
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${meta.width} ${meta.height}`}
-        className="w-full h-auto"
-        style={{ maxWidth: `${meta.width}px`, cursor: 'grab' }}
-        role="img"
-        aria-label={`Interactive AI Landscape graph with ${nodes.length} concepts across ${clusters.length} clusters`}
-      >
-        <style dangerouslySetInnerHTML={{ __html: cssString }} />
-        <g transform={transform.toString()}>
-          {/* Edges layer (rendered first for z-order) */}
-          <g className="edges">
-            {edges.map((edge) => {
-              const src = posMap.get(edge.source);
-              const tgt = posMap.get(edge.target);
-              if (!src || !tgt) return null;
+      <div className="flex">
+        {/* SVG area */}
+        <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative`}>
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${meta.width} ${meta.height}`}
+            className="w-full h-auto"
+            style={{ maxWidth: `${meta.width}px`, cursor: 'grab' }}
+            role="img"
+            aria-label={`Interactive AI Landscape graph with ${nodes.length} concepts across ${clusters.length} clusters`}
+          >
+            <style dangerouslySetInnerHTML={{ __html: cssString }} />
+            <g transform={transform.toString()}>
+              {/* Edges layer (rendered first for z-order) */}
+              <g className="edges">
+                {edges.map((edge) => {
+                  const src = posMap.get(edge.source);
+                  const tgt = posMap.get(edge.target);
+                  if (!src || !tgt) return null;
 
-              let strokeWidth = '1';
-              let strokeDasharray: string | undefined;
-              let opacity: number | undefined;
+                  let strokeWidth = '1';
+                  let strokeDasharray: string | undefined;
+                  let opacity: number | undefined;
 
-              if (edge.type === 'hierarchy') {
-                strokeWidth = '2';
-              } else if (edge.type === 'includes') {
-                strokeWidth = '1.5';
-                strokeDasharray = '4 3';
-              } else {
-                opacity = 0.4;
-              }
+                  if (edge.type === 'hierarchy') {
+                    strokeWidth = '2';
+                  } else if (edge.type === 'includes') {
+                    strokeWidth = '1.5';
+                    strokeDasharray = '4 3';
+                  } else {
+                    opacity = 0.4;
+                  }
 
-              const edgeKey = `${edge.source}-${edge.target}`;
-              return (
-                <g key={edgeKey}>
-                  <line
-                    x1={src.x}
-                    y1={src.y}
-                    x2={tgt.x}
-                    y2={tgt.y}
-                    className="ai-edge"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={strokeDasharray}
-                    opacity={opacity}
-                  />
-                  {/* Invisible wider hit-area for non-hierarchy edge hover */}
-                  {edge.type !== 'hierarchy' && (
-                    <line
-                      x1={src.x}
-                      y1={src.y}
-                      x2={tgt.x}
-                      y2={tgt.y}
-                      stroke="transparent"
-                      strokeWidth={12}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => setHoveredEdge(edgeKey)}
-                      onMouseLeave={() => setHoveredEdge(null)}
-                    />
-                  )}
-                  {/* Edge label: backbone always visible, others on hover */}
-                  {(edge.type === 'hierarchy' || hoveredEdge === edgeKey) && (() => {
-                    const mx = (src.x + tgt.x) / 2;
-                    const my = (src.y + tgt.y) / 2 - 4;
-                    const labelWidth = edge.label.length * 4.5 + 8;
-                    return (
-                      <>
-                        <rect
-                          x={mx - labelWidth / 2}
-                          y={my - 7}
-                          width={labelWidth}
-                          height={12}
-                          rx={3}
-                          className="fill-[var(--color-surface)]"
-                          opacity={0.85}
+                  // Ancestry highlighting for edges
+                  const bothInChain = isHighlighting
+                    && highlightedNodeIds.has(edge.source)
+                    && highlightedNodeIds.has(edge.target);
+
+                  if (isHighlighting && bothInChain) {
+                    strokeWidth = '2.5';
+                  }
+
+                  const edgeOpacity = isHighlighting
+                    ? (bothInChain ? undefined : 0.1)
+                    : opacity;
+
+                  const edgeKey = `${edge.source}-${edge.target}`;
+                  return (
+                    <g key={edgeKey}>
+                      <line
+                        x1={src.x}
+                        y1={src.y}
+                        x2={tgt.x}
+                        y2={tgt.y}
+                        className="ai-edge"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={strokeDasharray}
+                        opacity={edgeOpacity}
+                        stroke={isHighlighting && bothInChain ? 'var(--color-accent)' : undefined}
+                      />
+                      {/* Invisible wider hit-area for non-hierarchy edge hover */}
+                      {edge.type !== 'hierarchy' && (
+                        <line
+                          x1={src.x}
+                          y1={src.y}
+                          x2={tgt.x}
+                          y2={tgt.y}
+                          stroke="transparent"
+                          strokeWidth={12}
+                          style={{ cursor: 'pointer' }}
+                          onMouseEnter={() => setHoveredEdge(edgeKey)}
+                          onMouseLeave={() => setHoveredEdge(null)}
                         />
-                        <text
-                          x={mx}
-                          y={my}
-                          textAnchor="middle"
-                          className="ai-edge-label"
-                          fontSize={8}
-                        >
-                          {edge.label}
-                        </text>
-                      </>
-                    );
-                  })()}
-                </g>
-              );
-            })}
-          </g>
+                      )}
+                      {/* Edge label: backbone always visible, others on hover */}
+                      {(edge.type === 'hierarchy' || hoveredEdge === edgeKey) && (() => {
+                        const mx = (src.x + tgt.x) / 2;
+                        const my = (src.y + tgt.y) / 2 - 4;
+                        const labelWidth = edge.label.length * 4.5 + 8;
+                        return (
+                          <>
+                            <rect
+                              x={mx - labelWidth / 2}
+                              y={my - 7}
+                              width={labelWidth}
+                              height={12}
+                              rx={3}
+                              className="fill-[var(--color-surface)]"
+                              opacity={0.85}
+                            />
+                            <text
+                              x={mx}
+                              y={my}
+                              textAnchor="middle"
+                              className="ai-edge-label"
+                              fontSize={8}
+                            >
+                              {edge.label}
+                            </text>
+                          </>
+                        );
+                      })()}
+                    </g>
+                  );
+                })}
+              </g>
 
-          {/* Nodes layer */}
-          <g className="nodes">
-            {nodes.map((node) => {
-              const pos = posMap.get(node.id);
-              if (!pos) return null;
-              const r = rootNodeIds.has(node.id)
-                ? ROOT_NODE_RADIUS
-                : NODE_RADIUS;
-              const cluster = clusterMap.get(node.cluster);
-              const clusterClass = cluster
-                ? `ai-cluster-${cluster.id}`
-                : '';
-              const label = stripParenthetical(node.name);
-              const labelY = pos.y + r + LABEL_FONT_SIZE + 2;
+              {/* Nodes layer */}
+              <g className="nodes">
+                {nodes.map((node) => {
+                  const pos = posMap.get(node.id);
+                  if (!pos) return null;
+                  const r = rootNodeIds.has(node.id)
+                    ? ROOT_NODE_RADIUS
+                    : NODE_RADIUS;
+                  const cluster = clusterMap.get(node.cluster);
+                  const clusterClass = cluster
+                    ? `ai-cluster-${cluster.id}`
+                    : '';
+                  const label = stripParenthetical(node.name);
+                  const labelY = pos.y + r + LABEL_FONT_SIZE + 2;
 
-              return (
-                <g
-                  key={node.id}
-                  style={{ cursor: 'pointer' }}
-                  pointerEvents="all"
-                  onMouseEnter={(e) => handleNodeEnter(e, node)}
-                  onMouseLeave={handleNodeLeave}
-                >
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={r}
-                    className={clusterClass}
-                  />
-                  <text
-                    x={pos.x}
-                    y={labelY}
-                    textAnchor="middle"
-                    className="ai-label"
-                  >
-                    {label}
-                  </text>
-                </g>
-              );
-            })}
-          </g>
-        </g>
-      </svg>
+                  const inChain = highlightedNodeIds.has(node.id);
+                  const isSelected = selectedNode?.id === node.id;
+                  const nodeOpacity = isHighlighting && !inChain ? 0.2 : undefined;
 
-      {/* Zoom-to-fit reset button */}
-      <button
-        onClick={resetZoom}
-        className="absolute top-3 right-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs font-mono text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-secondary)] transition-colors shadow-sm"
-        title="Reset zoom to fit all nodes"
-        aria-label="Reset zoom to fit all nodes"
-      >
-        Reset View
-      </button>
+                  return (
+                    <g
+                      key={node.id}
+                      style={{ cursor: 'pointer' }}
+                      pointerEvents="all"
+                      opacity={nodeOpacity}
+                      onMouseEnter={(e) => handleNodeEnter(e, node)}
+                      onMouseLeave={handleNodeLeave}
+                      onClick={() => handleNodeClick(node)}
+                    >
+                      {/* Selection ring (behind the node circle) */}
+                      {isSelected && (
+                        <circle
+                          cx={pos.x}
+                          cy={pos.y}
+                          r={r + 4}
+                          fill="none"
+                          stroke="var(--color-accent)"
+                          strokeWidth={2}
+                        />
+                      )}
+                      {/* Ancestry highlight ring */}
+                      {isHighlighting && inChain && !isSelected && (
+                        <circle
+                          cx={pos.x}
+                          cy={pos.y}
+                          r={r + 2}
+                          fill="none"
+                          stroke="var(--color-accent)"
+                          strokeWidth={3}
+                        />
+                      )}
+                      <circle
+                        cx={pos.x}
+                        cy={pos.y}
+                        r={r}
+                        className={clusterClass}
+                      />
+                      <text
+                        x={pos.x}
+                        y={labelY}
+                        textAnchor="middle"
+                        className="ai-label"
+                      >
+                        {label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            </g>
+          </svg>
 
-      {/* Modifier key zoom hint overlay */}
-      {showZoomHint && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-black/70 text-white text-sm px-4 py-2 rounded-lg">
-            Use{' '}
-            <kbd className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-xs">
-              Ctrl
-            </kbd>{' '}
-            + scroll to zoom
+          {/* Zoom-to-fit reset button */}
+          <button
+            onClick={resetZoom}
+            className="absolute top-3 right-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs font-mono text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-secondary)] transition-colors shadow-sm"
+            title="Reset zoom to fit all nodes"
+            aria-label="Reset zoom to fit all nodes"
+          >
+            Reset View
+          </button>
+
+          {/* Modifier key zoom hint overlay */}
+          {showZoomHint && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-black/70 text-white text-sm px-4 py-2 rounded-lg">
+                Use{' '}
+                <kbd className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-xs">
+                  Ctrl
+                </kbd>{' '}
+                + scroll to zoom
+              </div>
+            </div>
+          )}
+
+          {/* Node hover tooltip */}
+          {tooltip && (
+            <div
+              role="tooltip"
+              className="absolute z-10 pointer-events-none max-w-xs px-3 py-2 rounded-lg shadow-lg border text-sm
+                bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)]"
+              style={{
+                left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 260),
+                top: tooltip.y - 8,
+              }}
+            >
+              <strong className="block text-xs font-heading mb-1">{tooltip.name}</strong>
+              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">{tooltip.description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop side panel */}
+        {selectedNode && isDesktop && (
+          <div className="w-80 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[600px]">
+            <DetailPanel
+              node={selectedNode}
+              edges={edges}
+              nodeMap={nodeMap}
+              onClose={handleClosePanel}
+              onShowAncestry={handleShowAncestry}
+            />
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Node hover tooltip */}
-      {tooltip && (
-        <div
-          role="tooltip"
-          className="absolute z-10 pointer-events-none max-w-xs px-3 py-2 rounded-lg shadow-lg border text-sm
-            bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)]"
-          style={{
-            left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 260),
-            top: tooltip.y - 8,
-          }}
-        >
-          <strong className="block text-xs font-heading mb-1">{tooltip.name}</strong>
-          <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">{tooltip.description}</p>
-        </div>
+      {/* Mobile bottom sheet */}
+      {selectedNode && !isDesktop && (
+        <BottomSheet isOpen={!!selectedNode} onClose={handleClosePanel}>
+          <DetailPanel
+            node={selectedNode}
+            edges={edges}
+            nodeMap={nodeMap}
+            onClose={handleClosePanel}
+            onShowAncestry={handleShowAncestry}
+          />
+        </BottomSheet>
       )}
     </div>
   );
