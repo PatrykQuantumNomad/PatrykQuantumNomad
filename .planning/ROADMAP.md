@@ -181,7 +181,13 @@ Plans:
   3. All AI Landscape pages (landing + ~80 concept pages + VS pages) appear in the sitemap
   4. LLMs.txt includes entries describing the AI Landscape section and its key concepts
   5. A companion blog post about navigating the AI landscape for non-technical readers is published with cross-links to the explorer and concept pages
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 110-01-PLAN.md — Header nav link, sitemap rule, homepage callout card
+- [ ] 110-02-PLAN.md — OG image endpoint and landing page ogImage prop
+- [ ] 110-03-PLAN.md — LLMs.txt and LLMs-full.txt AI Landscape sections
+- [ ] 110-04-PLAN.md — Companion blog post for non-technical readers
 
 ## Progress
 
