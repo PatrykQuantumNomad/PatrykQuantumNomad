@@ -1,0 +1,276 @@
+---
+/**
+ * [slug].astro -- AI Landscape VS comparison page.
+ * Generates ~12 static pages at /ai-landscape/vs/{slug}/ using getStaticPaths.
+ * Each page shows side-by-side descriptions, ancestry paths, relationship groups,
+ * FAQPage + DefinedTerm JSON-LD structured data, and a branded OG image.
+ * Targets high-value "X vs Y" search queries for SEO.
+ */
+import { getCollection } from 'astro:content';
+import graphData from '../../../data/ai-landscape/graph.json';
+import { POPULAR_COMPARISONS } from '../../../lib/ai-landscape/comparisons';
+import { buildAncestryChain } from '../../../lib/ai-landscape/ancestry';
+import { groupRelationshipsByType } from '../../../lib/ai-landscape/schema';
+import type { AiNode, Cluster } from '../../../lib/ai-landscape/schema';
+import type { RelationshipGroup } from '../../../lib/ai-landscape/schema';
+import type { AncestryItem } from '../../../lib/ai-landscape/ancestry';
+import { conceptUrl, vsPageUrl, vsOgImageUrl, AI_LANDSCAPE_BASE } from '../../../lib/ai-landscape/routes';
+import Layout from '../../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import DefinedTermJsonLd from '../../../components/ai-landscape/DefinedTermJsonLd.astro';
+
+interface VsProps {
+  pair: typeof POPULAR_COMPARISONS[number];
+  node1: AiNode;
+  node2: AiNode;
+  cluster1: Cluster | undefined;
+  cluster2: Cluster | undefined;
+  ancestry1: AncestryItem[];
+  ancestry2: AncestryItem[];
+  relationships1: RelationshipGroup[];
+  relationships2: RelationshipGroup[];
+}
+
+export async function getStaticPaths() {
+  const entries = await getCollection('aiLandscape');
+  const nodesMap = new Map<string, AiNode>(entries.map((e) => [e.data.slug, e.data as AiNode]));
+  const clusterMap = new Map<string, Cluster>(graphData.clusters.map((c) => [c.id, c as Cluster]));
+
+  return POPULAR_COMPARISONS
+    .filter((pair) => nodesMap.has(pair.concept1) && nodesMap.has(pair.concept2))
+    .map((pair) => {
+      const node1 = nodesMap.get(pair.concept1)!;
+      const node2 = nodesMap.get(pair.concept2)!;
+
+      return {
+        params: { slug: pair.slug },
+        props: {
+          pair,
+          node1,
+          node2,
+          cluster1: clusterMap.get(node1.cluster),
+          cluster2: clusterMap.get(node2.cluster),
+          ancestry1: buildAncestryChain(pair.concept1, nodesMap),
+          ancestry2: buildAncestryChain(pair.concept2, nodesMap),
+          relationships1: groupRelationshipsByType(pair.concept1, graphData.edges, nodesMap),
+          relationships2: groupRelationshipsByType(pair.concept2, graphData.edges, nodesMap),
+        },
+      };
+    });
+}
+
+const { pair, node1, node2, cluster1, cluster2, ancestry1, ancestry2, relationships1, relationships2 } = Astro.props as VsProps;
+
+const ogImage = new URL(vsOgImageUrl(pair.slug), Astro.site).toString();
+const canonicalUrl1 = new URL(conceptUrl(node1.slug), Astro.site).toString();
+const canonicalUrl2 = new URL(conceptUrl(node2.slug), Astro.site).toString();
+
+const breadcrumbCrumbs = [
+  { name: 'Home', url: 'https://patrykgolabek.dev/' },
+  { name: 'AI Landscape', url: 'https://patrykgolabek.dev/ai-landscape/' },
+  { name: `${node1.name} vs ${node2.name}`, url: `https://patrykgolabek.dev${vsPageUrl(pair.slug)}` },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": `What is the difference between ${node1.name} and ${node2.name}?`,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": pair.summary,
+    },
+  }],
+};
+---
+
+<Layout
+  title={`${pair.question} | AI Landscape -- Patryk Golabek`}
+  description={pair.summary}
+  ogImage={ogImage}
+  ogImageAlt={`AI Landscape comparison: ${node1.name} vs ${node2.name}`}
+>
+  <DefinedTermJsonLd
+    name={node1.name}
+    description={node1.simpleDescription}
+    url={canonicalUrl1}
+  />
+  <DefinedTermJsonLd
+    name={node2.name}
+    description={node2.simpleDescription}
+    url={canonicalUrl2}
+  />
+  <BreadcrumbJsonLd crumbs={breadcrumbCrumbs} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Back link -->
+    <a
+      href={AI_LANDSCAPE_BASE}
+      class="inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors mb-6"
+    >
+      <span aria-hidden="true">&larr;</span> Back to AI Landscape
+    </a>
+
+    <!-- Page heading -->
+    <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4">
+      {node1.name} vs {node2.name}
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] leading-relaxed mb-12">
+      {pair.summary}
+    </p>
+
+    <!-- Side-by-side comparison grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Concept 1 -->
+      <div
+        class="border-l-4 pl-6"
+        style={`border-color: ${cluster1?.darkColor || '#c44b20'}`}
+      >
+        <h2 class="text-2xl font-heading font-bold mb-2">
+          <a href={conceptUrl(node1.slug)} class="hover:text-[var(--color-accent)] transition-colors">
+            {node1.name}
+          </a>
+        </h2>
+        <span
+          class="inline-block mb-4 px-3 py-1 text-xs font-bold rounded-full"
+          style={`background-color: ${cluster1?.color || '#f5f5f5'}; color: ${cluster1?.darkColor || '#c44b20'}`}
+        >
+          {cluster1?.name || node1.cluster}
+        </span>
+
+        <section class="mb-6">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Simple Explanation</h3>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{node1.simpleDescription}</p>
+        </section>
+
+        <section class="mb-6">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Technical Deep Dive</h3>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{node1.technicalDescription}</p>
+        </section>
+
+        {ancestry1.length > 0 && (
+          <section class="mb-6">
+            <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Ancestry</h3>
+            <nav class="text-sm flex flex-wrap items-center gap-1">
+              {ancestry1.map((item, i) => (
+                <>
+                  {i > 0 && <span aria-hidden="true" class="text-[var(--color-text-secondary)]">/</span>}
+                  <a href={conceptUrl(item.slug)} class="text-[var(--color-accent)] hover:underline">{item.name}</a>
+                </>
+              ))}
+              <span aria-hidden="true" class="text-[var(--color-text-secondary)]">/</span>
+              <span class="font-bold text-[var(--color-text-primary)]">{node1.name}</span>
+            </nav>
+          </section>
+        )}
+
+        {relationships1.length > 0 && (
+          <section>
+            <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Key Relationships</h3>
+            {relationships1.slice(0, 3).map((group) => (
+              <div class="mb-3">
+                <h4 class="text-xs font-bold text-[var(--color-text-secondary)] mb-1">{group.label}</h4>
+                <ul class="space-y-1">
+                  {group.items.slice(0, 4).map((item) => (
+                    <li>
+                      <a href={conceptUrl(item.slug)} class="text-sm text-[var(--color-accent)] hover:underline">{item.name}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
+
+      <!-- Concept 2 -->
+      <div
+        class="border-l-4 pl-6"
+        style={`border-color: ${cluster2?.darkColor || '#c44b20'}`}
+      >
+        <h2 class="text-2xl font-heading font-bold mb-2">
+          <a href={conceptUrl(node2.slug)} class="hover:text-[var(--color-accent)] transition-colors">
+            {node2.name}
+          </a>
+        </h2>
+        <span
+          class="inline-block mb-4 px-3 py-1 text-xs font-bold rounded-full"
+          style={`background-color: ${cluster2?.color || '#f5f5f5'}; color: ${cluster2?.darkColor || '#c44b20'}`}
+        >
+          {cluster2?.name || node2.cluster}
+        </span>
+
+        <section class="mb-6">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Simple Explanation</h3>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{node2.simpleDescription}</p>
+        </section>
+
+        <section class="mb-6">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Technical Deep Dive</h3>
+          <p class="text-[var(--color-text-secondary)] leading-relaxed">{node2.technicalDescription}</p>
+        </section>
+
+        {ancestry2.length > 0 && (
+          <section class="mb-6">
+            <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Ancestry</h3>
+            <nav class="text-sm flex flex-wrap items-center gap-1">
+              {ancestry2.map((item, i) => (
+                <>
+                  {i > 0 && <span aria-hidden="true" class="text-[var(--color-text-secondary)]">/</span>}
+                  <a href={conceptUrl(item.slug)} class="text-[var(--color-accent)] hover:underline">{item.name}</a>
+                </>
+              ))}
+              <span aria-hidden="true" class="text-[var(--color-text-secondary)]">/</span>
+              <span class="font-bold text-[var(--color-text-primary)]">{node2.name}</span>
+            </nav>
+          </section>
+        )}
+
+        {relationships2.length > 0 && (
+          <section>
+            <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] mb-2">Key Relationships</h3>
+            {relationships2.slice(0, 3).map((group) => (
+              <div class="mb-3">
+                <h4 class="text-xs font-bold text-[var(--color-text-secondary)] mb-1">{group.label}</h4>
+                <ul class="space-y-1">
+                  {group.items.slice(0, 4).map((item) => (
+                    <li>
+                      <a href={conceptUrl(item.slug)} class="text-sm text-[var(--color-accent)] hover:underline">{item.name}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
+    </div>
+
+    <!-- Explore more -->
+    <section class="mt-16 pt-8 border-t border-[var(--color-border)]">
+      <h2 class="text-xl font-heading font-bold mb-4">Explore More</h2>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href={conceptUrl(node1.slug)}
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-sm font-medium"
+        >
+          Learn more about {node1.name} &rarr;
+        </a>
+        <a
+          href={conceptUrl(node2.slug)}
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-sm font-medium"
+        >
+          Learn more about {node2.name} &rarr;
+        </a>
+        <a
+          href={AI_LANDSCAPE_BASE}
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-sm font-medium"
+        >
+          Explore the full AI Landscape &rarr;
+        </a>
+      </div>
+    </section>
+  </article>
+</Layout>

@@ -3470,3 +3470,272 @@ export async function generateAiLandscapeOgImage(
 
   return renderOgPng(layout);
 }
+
+/**
+ * Generates an Open Graph image (1200x630) for an AI Landscape VS comparison page.
+ * Dark background with split layout: left side for concept1, right side for concept2,
+ * center "VS" divider, and bottom branding bar.
+ */
+export async function generateAiLandscapeVsOgImage(
+  concept1: { name: string; cluster: string },
+  concept2: { name: string; cluster: string },
+  cluster1Name: string,
+  cluster2Name: string,
+  cluster1DarkColor: string,
+  cluster2DarkColor: string,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const name1 = truncate(concept1.name, 40);
+  const name2 = truncate(concept2.name, 40);
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#0a0a0f',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        // Top accent bar: gradient from cluster1 to cluster2
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              top: 0,
+              left: 0,
+              width: '1200px',
+              height: '6px',
+              backgroundImage: `linear-gradient(to right, ${cluster1DarkColor}, ${cluster2DarkColor})`,
+            },
+          },
+        },
+        // Series label
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: '36px',
+              paddingBottom: '8px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '16px',
+                    color: '#888899',
+                    fontWeight: 600,
+                    letterSpacing: '0.05em',
+                  },
+                  children: 'AI LANDSCAPE EXPLORER',
+                },
+              },
+            ],
+          },
+        },
+        // Main comparison row
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'row' as const,
+              flex: 1,
+              alignItems: 'center',
+              padding: '0 40px',
+            },
+            children: [
+              // Left side: concept 1
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'column' as const,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '480px',
+                    gap: '16px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '38px',
+                          color: '#ffffff',
+                          textAlign: 'center' as const,
+                          lineHeight: 1.2,
+                        },
+                        children: name1,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '14px',
+                          color: '#ffffff',
+                          backgroundColor: cluster1DarkColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: cluster1Name,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          width: '80px',
+                          height: '4px',
+                          backgroundColor: cluster1DarkColor,
+                          borderRadius: '2px',
+                          marginTop: '4px',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              // Center VS divider
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '200px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '52px',
+                          color: '#555566',
+                        },
+                        children: 'VS',
+                      },
+                    },
+                  ],
+                },
+              },
+              // Right side: concept 2
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'column' as const,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '480px',
+                    gap: '16px',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: 700,
+                          fontSize: '38px',
+                          color: '#ffffff',
+                          textAlign: 'center' as const,
+                          lineHeight: 1.2,
+                        },
+                        children: name2,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          fontSize: '14px',
+                          color: '#ffffff',
+                          backgroundColor: cluster2DarkColor,
+                          borderRadius: '20px',
+                          padding: '4px 16px',
+                          fontWeight: 600,
+                        },
+                        children: cluster2Name,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          width: '80px',
+                          height: '4px',
+                          backgroundColor: cluster2DarkColor,
+                          borderRadius: '2px',
+                          marginTop: '4px',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Bottom branding bar (centered)
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '0px',
+              width: '1200px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: [
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    color: '#ffffff',
+                    backgroundColor: '#c44b20',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                  },
+                  children: 'PG',
+                },
+              },
+              {
+                type: 'div',
+                props: {
+                  style: { fontSize: '16px', color: '#888899' },
+                  children: 'patrykgolabek.dev',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
