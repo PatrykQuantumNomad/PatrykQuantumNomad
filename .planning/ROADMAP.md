@@ -146,10 +146,10 @@ Plans:
   2. The tour UI shows a progress indicator, next/previous controls, and highlights the current node plus its connections on the graph
   3. Selecting two concepts activates a side-by-side comparison view showing both descriptions, relationships, and ancestry paths
   4. Popular comparisons have dedicated VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] with structured data and OG images
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 108-01-PLAN.md — Tour and comparison data files (tours.ts, comparisons.ts, route helpers) with unit tests
+- [x] 108-01-PLAN.md — Tour and comparison data files (tours.ts, comparisons.ts, route helpers) with unit tests
 - [ ] 108-02-PLAN.md — Tour UI (useTour hook, TourSelector, TourBar) and InteractiveGraph tour mode integration
 - [ ] 108-03-PLAN.md — VS comparison pages with structured data and OG images
 - [ ] 108-04-PLAN.md — Compare mode (ComparePanel, compare toggle) in InteractiveGraph with visual checkpoint
@@ -192,6 +192,6 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 105. Interactive Graph Core | 2/2 | Complete   | 2026-03-27 |
 | 106. Detail Panel & Node Selection | 2/2 | Complete   | 2026-03-27 |
 | 107. Search, Navigation & Deep Links | 2/2 | Complete   | 2026-03-27 |
-| 108. Guided Tours & Compare Mode | 0/4 | Not started | - |
+| 108. Guided Tours & Compare Mode | 1/4 | In Progress|  |
 | 109. Graph Polish | 0/? | Not started | - |
 | 110. Site Integration | 0/? | Not started | - |

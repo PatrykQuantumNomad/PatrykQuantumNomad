@@ -46,13 +46,13 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 - [x] **SEO-05**: Shareable deep links — URL updates with selected node (/ai-landscape?node=LLM)
 - [x] **SEO-06**: Keyboard navigation — arrow keys traverse edges, Enter selects, Escape deselects, Tab through nodes
 - [ ] **SEO-07**: Compare mode — select two concepts for side-by-side comparison
-- [ ] **SEO-08**: VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] for popular comparisons
+- [x] **SEO-08**: VS pages at /ai-landscape/vs/[slug1]-vs-[slug2] for popular comparisons
 
 ### Search & Navigation
 
 - [x] **NAV-01**: Search autocomplete that filters nodes — on select, zooms to node and opens panel
 - [x] **NAV-02**: Mobile-responsive layout — full-width graph on mobile, detail as bottom sheet
-- [ ] **NAV-03**: Guided learning paths — 3-4 curated tours ("The Big Picture", "How ChatGPT Works", "What is Agentic AI")
+- [x] **NAV-03**: Guided learning paths — 3-4 curated tours ("The Big Picture", "How ChatGPT Works", "What is Agentic AI")
 - [ ] **NAV-04**: Tour UI with progress indicator, next/prev controls, sequential node highlighting
 
 ### Site Integration
@@ -123,10 +123,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-05 | Phase 107 | Complete |
 | SEO-06 | Phase 107 | Complete |
 | SEO-07 | Phase 108 | Pending |
-| SEO-08 | Phase 108 | Pending |
+| SEO-08 | Phase 108 | Complete |
 | NAV-01 | Phase 107 | Complete |
 | NAV-02 | Phase 107 | Complete |
-| NAV-03 | Phase 108 | Pending |
+| NAV-03 | Phase 108 | Complete |
 | NAV-04 | Phase 108 | Pending |
 | SITE-01 | Phase 104 | Pending |
 | SITE-02 | Phase 110 | Pending |
