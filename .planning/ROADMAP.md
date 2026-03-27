@@ -33,7 +33,7 @@
 - [x] **Phase 106: Detail Panel & Node Selection** - Side panel (desktop) and bottom sheet (mobile) with ELI5 toggle, grouped relationships, and ancestry path highlighting (completed 2026-03-27)
 - [x] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation (completed 2026-03-27)
 - [x] **Phase 108: Guided Tours & Compare Mode** - Curated learning paths with tour UI, side-by-side comparison, and VS pages (completed 2026-03-27)
-- [ ] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map
+- [x] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map (completed 2026-03-27)
 - [ ] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image
 
 ## Phase Details
@@ -163,12 +163,12 @@ Plans:
   1. Clicking a cluster label in the legend zooms the viewport smoothly into that cluster's region of the graph
   2. When a node is selected, a GSAP-animated pulse travels along the edges connecting it to its parent and child nodes
   3. A mini-map in the corner (desktop only) shows the full graph with a highlighted rectangle indicating the current viewport position
-**Plans**: 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 109-01-PLAN.md — Cluster zoom (getClusterBounds helper, zoomToCluster callback, interactive cluster legend in React island)
-- [ ] 109-02-PLAN.md — GSAP edge pulse animation (install @gsap/react, useEdgePulse hook, pulse overlay lines)
-- [ ] 109-03-PLAN.md — Desktop mini-map (MiniMap component with cluster-colored dots and viewport rectangle)
+- [x] 109-01-PLAN.md — Cluster zoom (getClusterBounds helper, zoomToCluster callback, interactive cluster legend in React island)
+- [x] 109-02-PLAN.md — GSAP edge pulse animation (install @gsap/react, useEdgePulse hook, pulse overlay lines)
+- [x] 109-03-PLAN.md — Desktop mini-map (MiniMap component with cluster-colored dots and viewport rectangle)
 **UI hint**: yes
 
 ### Phase 110: Site Integration
@@ -198,5 +198,5 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 106. Detail Panel & Node Selection | 2/2 | Complete   | 2026-03-27 |
 | 107. Search, Navigation & Deep Links | 2/2 | Complete   | 2026-03-27 |
 | 108. Guided Tours & Compare Mode | 4/4 | Complete   | 2026-03-27 |
-| 109. Graph Polish | 0/? | Not started | - |
+| 109. Graph Polish | 3/3 | Complete   | 2026-03-27 |
 | 110. Site Integration | 0/? | Not started | - |
