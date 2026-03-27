@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: executing
-stopped_at: Completed phase 108
-last_updated: "2026-03-27T19:10:00.000Z"
+stopped_at: Completed 109-01
+last_updated: "2026-03-27T20:30:00.000Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 9
   completed_phases: 7
-  total_plans: 18
-  completed_plans: 18
-  percent: 95
+  total_plans: 21
+  completed_plans: 19
+  percent: 96
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 AI Landscape Explorer — Phase 108 complete, next: Phase 109 (Graph Polish)
+**Current focus:** v1.18 AI Landscape Explorer — Phase 109 Plan 01 complete, next: Plan 02 (GSAP edge pulse)
 
 ## Current Position
 
-Phase: 108 (Guided Tours & Compare Mode)
-Plan: 4 of 4 in phase 108
-Status: Phase complete — verified
+Phase: 109 (Graph Polish)
+Plan: 1 of 3 in phase 109
+Status: Plan 01 complete — cluster zoom with interactive legend
 Last activity: 2026-03-27
 
-Progress: [█████████░] 95%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
@@ -100,6 +100,10 @@ Recent decisions affecting current work:
 - [Phase 108]: VS page relationship groups capped to 3 groups x 4 items per column to prevent overflow
 - [Phase 108]: TourBar replaces SearchBar during active tour to reduce visual clutter and prevent conflicting navigation
 - [Phase 108]: prevTourActive useRef pattern detects tour exit without firing handleClosePanel on initial mount
+- [Phase 109]: getClusterBounds enforces minimum 200 SVG unit bounding box to prevent extreme zoom on single-node clusters (nn)
+- [Phase 109]: Cluster zoom scale clamped to [0.5, 3] — tighter than zoom extent [0.3, 4] — consistent with viewBox-relative math pattern from zoomToNode
+- [Phase 109]: Interactive cluster legend inside React island is separate from static GraphLegend.astro (preserved for SEO/noscript)
+- [Phase 109]: Dark mode color dots use dual-span pattern (dark:hidden / hidden dark:inline-block) matching GraphLegend.astro
 
 ### Pending Todos
 
