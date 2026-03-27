@@ -23,6 +23,7 @@ import { SearchBar } from './SearchBar';
 import { useTour } from './useTour';
 import { TourSelector } from './TourSelector';
 import { TourBar } from './TourBar';
+import { useEdgePulse } from './useEdgePulse';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -478,6 +479,14 @@ export default function InteractiveGraph({
   // Determine if highlighting is active
   const isHighlighting = highlightedNodeIds.size > 0;
 
+  // Edge pulse animation — animated dashes along connected edges when a node is selected
+  const { pulseRefs } = useEdgePulse({
+    selectedNodeId: selectedNode?.id ?? null,
+    edges,
+    posMap,
+    containerRef,
+  });
+
   return (
     <div ref={containerRef} className="relative">
       {/* Tour bar when a tour is active (replaces search bar) */}
@@ -674,6 +683,41 @@ export default function InteractiveGraph({
                     </g>
                   );
                 })}
+              </g>
+
+              {/* Edge pulse overlay — animated by GSAP, rendered above base edges */}
+              <g className="edge-pulse-overlay" pointerEvents="none">
+                {selectedNode &&
+                  edges
+                    .filter(
+                      (e) =>
+                        e.source === selectedNode.id ||
+                        e.target === selectedNode.id,
+                    )
+                    .map((edge) => {
+                      const src = posMap.get(edge.source);
+                      const tgt = posMap.get(edge.target);
+                      if (!src || !tgt) return null;
+                      const key = `${edge.source}-${edge.target}`;
+                      return (
+                        <line
+                          key={`pulse-${key}`}
+                          ref={(el) => {
+                            if (el) pulseRefs.current.set(key, el);
+                            else pulseRefs.current.delete(key);
+                          }}
+                          x1={src.x}
+                          y1={src.y}
+                          x2={tgt.x}
+                          y2={tgt.y}
+                          stroke="var(--color-accent)"
+                          strokeWidth={3}
+                          opacity={0}
+                          strokeLinecap="round"
+                          pointerEvents="none"
+                        />
+                      );
+                    })}
               </g>
 
               {/* Nodes layer */}
