@@ -33,9 +33,9 @@ Requirements for milestone v1.18 AI Landscape Explorer. Each maps to roadmap pha
 
 - [x] **PANEL-01**: Click node opens slide-out side panel with title, explanation, relationships, and link to full page
 - [x] **PANEL-02**: "Explain Like I'm 5" toggle switches between simple and technical descriptions (simple is default)
-- [ ] **PANEL-03**: "How did we get here?" ancestry path — clicking any node highlights the full hierarchy chain (e.g., GPT-4o → LLM → GenAI → DL → NN → ML → AI)
+- [x] **PANEL-03**: "How did we get here?" ancestry path — clicking any node highlights the full hierarchy chain (e.g., GPT-4o → LLM → GenAI → DL → NN → ML → AI)
 - [x] **PANEL-04**: Relationships grouped by type in panel ("Part of", "Includes", "Enables", "Examples")
-- [ ] **PANEL-05**: Bottom sheet layout on mobile instead of side panel
+- [x] **PANEL-05**: Bottom sheet layout on mobile instead of side panel
 
 ### SEO Pages
 
@@ -113,9 +113,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GRAPH-11 | Phase 109 | Pending |
 | PANEL-01 | Phase 106 | Complete |
 | PANEL-02 | Phase 106 | Complete |
-| PANEL-03 | Phase 106 | Pending |
+| PANEL-03 | Phase 106 | Complete |
 | PANEL-04 | Phase 106 | Complete |
-| PANEL-05 | Phase 106 | Pending |
+| PANEL-05 | Phase 106 | Complete |
 | SEO-01 | Phase 103 | Complete |
 | SEO-02 | Phase 103 | Complete |
 | SEO-03 | Phase 103 | Complete |
