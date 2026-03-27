@@ -133,7 +133,7 @@ Plans:
   3. Selecting a node updates the URL to /ai-landscape?node=[slug] and visiting that URL restores the selection, zoom, and panel state
   4. Keyboard navigation works: arrow keys traverse edges between nodes, Enter selects/opens panel, Escape deselects, Tab cycles through nodes
 **Plans**: 2 plans
-- [ ] 107-01-PLAN.md — New utility files: graph-navigation.ts, useUrlNodeState.ts, SearchBar.tsx
+- [x] 107-01-PLAN.md — New utility files: graph-navigation.ts, useUrlNodeState.ts, SearchBar.tsx
 - [ ] 107-02-PLAN.md — Integrate search, keyboard nav, URL deep links, and zoom-to-node into InteractiveGraph
 **UI hint**: yes
 
@@ -185,7 +185,7 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 104. Static Landing Page & Force Layout | 2/2 | Complete   | 2026-03-27 |
 | 105. Interactive Graph Core | 2/2 | Complete   | 2026-03-27 |
 | 106. Detail Panel & Node Selection | 2/2 | Complete   | 2026-03-27 |
-| 107. Search, Navigation & Deep Links | 0/? | Not started | - |
+| 107. Search, Navigation & Deep Links | 1/2 | In Progress|  |
 | 108. Guided Tours & Compare Mode | 0/? | Not started | - |
 | 109. Graph Polish | 0/? | Not started | - |
 | 110. Site Integration | 0/? | Not started | - |
