@@ -132,7 +132,9 @@ Plans:
   2. The graph layout is fully responsive: full-width graph with side panel on desktop, bottom sheet on mobile, and a readable experience at 350px width
   3. Selecting a node updates the URL to /ai-landscape?node=[slug] and visiting that URL restores the selection, zoom, and panel state
   4. Keyboard navigation works: arrow keys traverse edges between nodes, Enter selects/opens panel, Escape deselects, Tab cycles through nodes
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 107-01-PLAN.md — New utility files: graph-navigation.ts, useUrlNodeState.ts, SearchBar.tsx
+- [ ] 107-02-PLAN.md — Integrate search, keyboard nav, URL deep links, and zoom-to-node into InteractiveGraph
 **UI hint**: yes
 
 ### Phase 108: Guided Tours & Compare Mode
