@@ -11,6 +11,7 @@ import {
   firstSentence,
 } from '../../lib/ai-landscape/graph-data';
 import { DetailPanel } from './DetailPanel';
+import { ComparePanel } from './ComparePanel';
 import { BottomSheet } from './BottomSheet';
 import { useMediaQuery } from './useMediaQuery';
 import { buildAncestryChain } from '../../lib/ai-landscape/ancestry';
@@ -51,6 +52,9 @@ export default function InteractiveGraph({
   const [selectedNode, setSelectedNode] = useState<AiNode | null>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<Set<string>>(new Set());
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  // Compare mode state
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareNode, setCompareNode] = useState<AiNode | null>(null);
   // Keyboard focus state for graph navigation
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   // Click-vs-drag discrimination
@@ -209,6 +213,10 @@ export default function InteractiveGraph({
   // Tour activation effect — drives selection, zoom, highlighting when tour step changes
   useEffect(() => {
     if (tour.isActive && tour.currentNodeId) {
+      // Tour and compare mode are mutually exclusive — exit compare on tour start
+      setCompareMode(false);
+      setCompareNode(null);
+
       const node = nodeMap.get(tour.currentNodeId);
       if (node) {
         setSelectedNode(node);
@@ -251,15 +259,33 @@ export default function InteractiveGraph({
     setTooltip(null);
   };
 
-  // Node click handler — opens detail panel and syncs URL
+  // Node click handler — opens detail panel or handles compare mode selection
   const handleNodeClick = useCallback((node: AiNode) => {
     if (tour.isActive) return; // Block clicks during guided tour
     if (hasDragged.current) return; // Ignore clicks after drag
+
+    if (compareMode) {
+      if (selectedNode) {
+        // Second node selection — can't compare a node with itself
+        if (node.id === selectedNode.id) return;
+        setCompareNode(node);
+        setHighlightedNodeIds(new Set([selectedNode.id, node.id]));
+      } else {
+        // First node of comparison
+        setSelectedNode(node);
+        setHighlightedNodeIds(new Set());
+        setFocusedNodeId(null);
+        syncToUrl(node.id);
+      }
+      return;
+    }
+
+    // Normal mode
     setSelectedNode(node);
     setHighlightedNodeIds(new Set()); // Clear ancestry highlight when selecting new node
     setFocusedNodeId(null);
     syncToUrl(node.id);
-  }, [tour.isActive, syncToUrl]);
+  }, [tour.isActive, compareMode, selectedNode, syncToUrl]);
 
   // Ancestry highlight handler — highlights ancestry chain on graph
   const handleShowAncestry = useCallback((nodeSlug: string) => {
@@ -274,13 +300,22 @@ export default function InteractiveGraph({
     setHighlightedNodeIds(highlightIds);
   }, [nodeMap]);
 
-  // Close panel handler — clears selection, highlights, focus, and URL
+  // Close panel handler — clears selection, highlights, focus, compare mode, and URL
   const handleClosePanel = useCallback(() => {
     setSelectedNode(null);
+    setCompareMode(false);
+    setCompareNode(null);
     setHighlightedNodeIds(new Set());
     setFocusedNodeId(null);
     syncToUrl(null);
   }, [syncToUrl]);
+
+  // Close compare panel specifically — exits compare mode but preserves selectedNode
+  const handleCloseCompare = useCallback(() => {
+    setCompareMode(false);
+    setCompareNode(null);
+    setHighlightedNodeIds(new Set());
+  }, []);
 
   // When tour exits, clean up graph state
   const prevTourActive = useRef(false);
@@ -377,10 +412,17 @@ export default function InteractiveGraph({
       }
       case 'Escape': {
         e.preventDefault();
-        setSelectedNode(null);
-        setHighlightedNodeIds(new Set());
-        setFocusedNodeId(null);
-        syncToUrl(null);
+        if (compareMode) {
+          // Exit compare mode first
+          setCompareMode(false);
+          setCompareNode(null);
+          setHighlightedNodeIds(new Set());
+        } else {
+          setSelectedNode(null);
+          setHighlightedNodeIds(new Set());
+          setFocusedNodeId(null);
+          syncToUrl(null);
+        }
         break;
       }
       case 'Tab': {
@@ -394,7 +436,7 @@ export default function InteractiveGraph({
         break;
       }
     }
-  }, [tour, focusedNodeId, selectedNode, nodeMap, adjacencyMap, posMap, transform, meta.width, meta.height, zoomToNode, syncToUrl]);
+  }, [tour, compareMode, focusedNodeId, selectedNode, nodeMap, adjacencyMap, posMap, transform, meta.width, meta.height, zoomToNode, syncToUrl]);
 
   // Determine if highlighting is active
   const isHighlighting = highlightedNodeIds.size > 0;
@@ -415,16 +457,53 @@ export default function InteractiveGraph({
           />
         </div>
       )}
-      {/* Search bar when no tour is active */}
+      {/* Search bar with compare toggle when no tour is active */}
       {!tour.isActive && (
-        <div className="mb-3">
-          <SearchBar nodes={nodes} onSelect={handleSearchSelect} />
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <SearchBar nodes={nodes} onSelect={handleSearchSelect} />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setCompareMode((prev) => {
+                if (prev) {
+                  // Turning off: clear compare state
+                  setCompareNode(null);
+                  setHighlightedNodeIds(new Set());
+                }
+                return !prev;
+              });
+            }}
+            disabled={tour.isActive}
+            className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-mono transition-colors ${
+              compareMode
+                ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
+                : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-secondary)]'
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
+            title={compareMode ? 'Exit compare mode' : 'Compare two concepts side by side'}
+            aria-label={compareMode ? 'Cancel compare mode' : 'Enter compare mode'}
+            aria-pressed={compareMode}
+          >
+            {compareMode ? 'Cancel Compare' : 'Compare'}
+          </button>
         </div>
       )}
       {/* Tour selector when idle (no tour active, no node selected) */}
-      {!tour.isActive && !selectedNode && (
+      {!tour.isActive && !selectedNode && !compareMode && (
         <div className="mb-3">
           <TourSelector onStartTour={tour.start} />
+        </div>
+      )}
+      {/* Compare mode hint */}
+      {compareMode && selectedNode && !compareNode && (
+        <div className="mb-2 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 px-3 py-2 text-xs text-[var(--color-text-secondary)]">
+          Click another node to compare with <strong className="text-[var(--color-text-primary)]">{selectedNode.name}</strong>
+        </div>
+      )}
+      {compareMode && !selectedNode && (
+        <div className="mb-2 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 px-3 py-2 text-xs text-[var(--color-text-secondary)]">
+          Click a node to start comparing
         </div>
       )}
       <div className="flex">
@@ -662,8 +741,21 @@ export default function InteractiveGraph({
           )}
         </div>
 
-        {/* Desktop side panel */}
-        {selectedNode && isDesktop && (
+        {/* Desktop compare panel (wider, replaces detail panel) */}
+        {isDesktop && compareMode && selectedNode && compareNode && (
+          <div className="w-96 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[600px]">
+            <ComparePanel
+              node1={selectedNode}
+              node2={compareNode}
+              edges={edges}
+              nodeMap={nodeMap}
+              clusterMap={clusterMap}
+              onClose={handleCloseCompare}
+            />
+          </div>
+        )}
+        {/* Desktop detail panel (when not in compare mode or compare incomplete) */}
+        {isDesktop && !(compareMode && compareNode) && selectedNode && (
           <div className="w-80 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[600px]">
             <DetailPanel
               node={selectedNode}
@@ -676,8 +768,21 @@ export default function InteractiveGraph({
         )}
       </div>
 
-      {/* Mobile bottom sheet */}
-      {selectedNode && !isDesktop && (
+      {/* Mobile bottom sheet: compare panel */}
+      {!isDesktop && compareMode && selectedNode && compareNode && (
+        <BottomSheet isOpen onClose={handleCloseCompare}>
+          <ComparePanel
+            node1={selectedNode}
+            node2={compareNode}
+            edges={edges}
+            nodeMap={nodeMap}
+            clusterMap={clusterMap}
+            onClose={handleCloseCompare}
+          />
+        </BottomSheet>
+      )}
+      {/* Mobile bottom sheet: detail panel (when not in compare mode or compare incomplete) */}
+      {!isDesktop && !(compareMode && compareNode) && selectedNode && (
         <BottomSheet isOpen={!!selectedNode} onClose={handleClosePanel}>
           <DetailPanel
             node={selectedNode}
