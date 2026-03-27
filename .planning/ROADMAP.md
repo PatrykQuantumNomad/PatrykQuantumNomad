@@ -119,7 +119,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 106-01-PLAN.md — Relationship grouper helper, useMediaQuery hook, DetailPanel presentational component
+- [x] 106-01-PLAN.md — Relationship grouper helper, useMediaQuery hook, DetailPanel presentational component
 - [ ] 106-02-PLAN.md — BottomSheet wrapper, selection state + click handler + ancestry highlighting in InteractiveGraph, responsive panel/sheet switching, visual checkpoint
 **UI hint**: yes
 
@@ -182,7 +182,7 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 103. SEO Concept Pages | 3/3 | Complete   | 2026-03-26 |
 | 104. Static Landing Page & Force Layout | 2/2 | Complete   | 2026-03-27 |
 | 105. Interactive Graph Core | 2/2 | Complete   | 2026-03-27 |
-| 106. Detail Panel & Node Selection | 0/? | Not started | - |
+| 106. Detail Panel & Node Selection | 1/2 | In Progress|  |
 | 107. Search, Navigation & Deep Links | 0/? | Not started | - |
 | 108. Guided Tours & Compare Mode | 0/? | Not started | - |
 | 109. Graph Polish | 0/? | Not started | - |
