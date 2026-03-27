@@ -24,6 +24,7 @@ import { useTour } from './useTour';
 import { TourSelector } from './TourSelector';
 import { TourBar } from './TourBar';
 import { useEdgePulse } from './useEdgePulse';
+import { MiniMap } from './MiniMap';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -78,6 +79,10 @@ export default function InteractiveGraph({
   );
   const rootNodeIds = useMemo(
     () => new Set(nodes.filter((n) => n.parentId === null).map((n) => n.id)),
+    [nodes],
+  );
+  const nodeClusterMap = useMemo(
+    () => new Map(nodes.map((n) => [n.id, n.cluster])),
     [nodes],
   );
   const adjacencyMap = useMemo(
@@ -825,6 +830,18 @@ export default function InteractiveGraph({
                 + scroll to zoom
               </div>
             </div>
+          )}
+
+          {/* Desktop-only mini-map showing full graph with viewport rectangle */}
+          {isDesktop && (
+            <MiniMap
+              positions={positions}
+              clusters={clusters}
+              clusterMap={clusterMap}
+              nodeClusterMap={nodeClusterMap}
+              transform={transform}
+              meta={meta}
+            />
           )}
 
           {/* Node hover tooltip */}
