@@ -13,6 +13,7 @@ import { AI_LANDSCAPE_BASE } from '../../lib/ai-landscape/routes';
 import type { AiNode, Cluster } from '../../lib/ai-landscape/schema';
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import InteractiveGraph from '../../components/ai-landscape/InteractiveGraph';
 import GraphLegend from '../../components/ai-landscape/GraphLegend.astro';
 import ConceptList from '../../components/ai-landscape/ConceptList.astro';
 
@@ -60,10 +61,24 @@ for (const node of allNodes) {
     </p>
   </section>
 
-  {/* Static SVG Graph (first meaningful paint, no JS) */}
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto" aria-label="AI landscape visualization">
-    <Fragment set:html={svgString} />
+  {/* Interactive Graph (React island, renders after JS loads) */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="AI landscape visualization">
+    <InteractiveGraph
+      client:only="react"
+      nodes={allNodes}
+      edges={graphData.edges}
+      positions={layoutData.positions}
+      clusters={graphData.clusters}
+      meta={layoutData.meta}
+    />
   </section>
+
+  {/* Static SVG fallback (visible if JS disabled) */}
+  <noscript>
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto" aria-label="AI landscape visualization (static)">
+      <Fragment set:html={svgString} />
+    </section>
+  </noscript>
 
   {/* Legend */}
   <GraphLegend clusters={graphData.clusters as Cluster[]} />
