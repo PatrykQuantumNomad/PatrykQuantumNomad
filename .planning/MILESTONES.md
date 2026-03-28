@@ -1,5 +1,31 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.18 AI Landscape Explorer (Shipped: 2026-03-27)
+
+**Delivered:** Interactive AI Landscape Explorer with D3 force-directed graph visualization of 51 AI concepts across 9 clusters, guided tours, side-by-side concept comparisons, 51 concept pages with structured data, 12 VS comparison pages, and full site integration with header nav, homepage callout, sitemap, LLMs.txt, OG images, and companion blog post
+
+**Phases completed:** 102-110 (25 plans total)
+
+**Key accomplishments:**
+- Built 51-node educational dataset with two-tier content (simple + technical descriptions) organized into 9 clusters covering AI, ML, NN, DL, GenAI, Agentic AI, plus DevTools, Levels, and MCP
+- Created D3 force-directed graph with pre-computed layout, pan/zoom, modifier key guard, cluster coloring, and dark mode support — renders as static SVG for instant first paint before React island hydrates
+- Interactive graph with detail panel (desktop side panel / mobile bottom sheet), ELI5 toggle, ancestry path highlighting, search autocomplete, keyboard navigation, and deep-link URL state
+- Built 3 guided learning paths and compare mode with 12 curated VS comparison pages including structured data and OG images
+- Premium graph polish: cluster zoom, GSAP edge pulse animation, and desktop mini-map for spatial orientation
+- Full site integration: header nav, homepage card, sitemap rules, dynamic LLMs.txt sections, landing page OG image, and companion blog post
+
+**Stats:**
+- 121 files changed (+21,126 / -117 lines)
+- ~3,728 LOC across AI landscape feature files
+- 9 phases, 25 plans, 102 commits
+- 2 days from start to ship (2026-03-26 to 2026-03-27)
+
+**Git range:** `feat(102-01)` to `docs(phase-110)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.16 Claude Code Guide (Shipped: 2026-03-11)
 
 **Delivered:** Comprehensive 11-chapter Claude Code guide at `/guides/claude-code/` covering zero-to-hero learning path from installation through enterprise administration, with 5 build-time SVG architecture diagrams, 2 interactive React Flow visualizers, multi-guide infrastructure refactoring, and full site integration with companion blog post
