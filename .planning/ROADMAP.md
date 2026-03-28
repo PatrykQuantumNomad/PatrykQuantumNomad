@@ -34,7 +34,7 @@
 - [x] **Phase 107: Search, Navigation & Deep Links** - Search autocomplete, mobile-responsive layout, shareable URL state, keyboard navigation (completed 2026-03-27)
 - [x] **Phase 108: Guided Tours & Compare Mode** - Curated learning paths with tour UI, side-by-side comparison, and VS pages (completed 2026-03-27)
 - [x] **Phase 109: Graph Polish** - Cluster zoom, animated edge traversal, and mini-map (completed 2026-03-27)
-- [ ] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image
+- [x] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image (completed 2026-03-27)
 
 ## Phase Details
 
@@ -185,9 +185,9 @@ Plans:
 
 Plans:
 - [x] 110-01-PLAN.md — Header nav link, sitemap rule, homepage callout card
-- [ ] 110-02-PLAN.md — OG image endpoint and landing page ogImage prop
-- [ ] 110-03-PLAN.md — LLMs.txt and LLMs-full.txt AI Landscape sections
-- [ ] 110-04-PLAN.md — Companion blog post for non-technical readers
+- [x] 110-02-PLAN.md — OG image endpoint and landing page ogImage prop
+- [x] 110-03-PLAN.md — LLMs.txt and LLMs-full.txt AI Landscape sections
+- [x] 110-04-PLAN.md — Companion blog post for non-technical readers
 
 ## Progress
 
@@ -205,4 +205,4 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 107. Search, Navigation & Deep Links | 2/2 | Complete   | 2026-03-27 |
 | 108. Guided Tours & Compare Mode | 4/4 | Complete   | 2026-03-27 |
 | 109. Graph Polish | 3/3 | Complete   | 2026-03-27 |
-| 110. Site Integration | 1/4 | In progress | - |
+| 110. Site Integration | 4/4 | Complete   | 2026-03-27 |
