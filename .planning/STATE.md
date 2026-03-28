@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: executing
-stopped_at: Completed 109-03
-last_updated: "2026-03-27T22:45:00.000Z"
+stopped_at: Completed 110-01
+last_updated: "2026-03-27T23:30:00.000Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 9
   completed_phases: 8
-  total_plans: 21
-  completed_plans: 21
-  percent: 100
+  total_plans: 25
+  completed_plans: 22
+  percent: 88
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 AI Landscape Explorer — Phase 109 complete, next: Phase 110 (Site Integration)
+**Current focus:** v1.18 AI Landscape Explorer — Phase 110 (Site Integration) plan 01 complete, next: 110-02
 
 ## Current Position
 
-Phase: 109 (Graph Polish)
-Plan: 3 of 3 in phase 109
-Status: Phase complete — verified and approved
+Phase: 110 (Site Integration)
+Plan: 1 of 4 in phase 110
+Status: Plan 01 complete — header nav, sitemap, homepage card
 Last activity: 2026-03-27
 
 Progress: [██████████] 100%
@@ -37,7 +37,7 @@ Progress: [██████████] 100%
 **Velocity:**
 
 - Total plans completed: 232 (across 17 milestones)
-- v1.18 plans completed: 8
+- v1.18 plans completed: 9
 
 **Cumulative Stats:**
 
@@ -111,6 +111,9 @@ Recent decisions affecting current work:
 - [Phase 109]: MiniMap is read-only (no click-to-pan) with aria-hidden=true — visual orientation aid, not interactive
 - [Phase 109]: Viewport rectangle derived from d3-zoom transform inversion: viewX = -transform.x / transform.k
 - [Phase 109]: Mini-map uses React.memo and nodeClusterMap useMemo for efficient rendering during frequent transform updates
+- [Phase 110]: AI Landscape nav link placed after Blog, before Beauty Index — alphabetical among content sections (11 total nav items)
+- [Phase 110]: Sitemap /ai-landscape/ added to existing beauty-index/db-compass/eda condition (monthly, priority 0.5) — no separate block
+- [Phase 110]: Homepage card uses inline SVG node-graph motif (8 circles, 10 edges, cluster darkColors at 70% opacity) via frontmatter IIFE + set:html
 
 ### Pending Todos
 

@@ -184,7 +184,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 110-01-PLAN.md — Header nav link, sitemap rule, homepage callout card
+- [x] 110-01-PLAN.md — Header nav link, sitemap rule, homepage callout card
 - [ ] 110-02-PLAN.md — OG image endpoint and landing page ogImage prop
 - [ ] 110-03-PLAN.md — LLMs.txt and LLMs-full.txt AI Landscape sections
 - [ ] 110-04-PLAN.md — Companion blog post for non-technical readers
@@ -205,4 +205,4 @@ Note: Phases 103 and 104 both depend only on 102 and could execute in parallel. 
 | 107. Search, Navigation & Deep Links | 2/2 | Complete   | 2026-03-27 |
 | 108. Guided Tours & Compare Mode | 4/4 | Complete   | 2026-03-27 |
 | 109. Graph Polish | 3/3 | Complete   | 2026-03-27 |
-| 110. Site Integration | 0/? | Not started | - |
+| 110. Site Integration | 1/4 | In progress | - |
