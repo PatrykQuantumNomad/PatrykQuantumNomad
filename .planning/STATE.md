@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: AI Landscape Explorer
 status: executing
-stopped_at: Completed 110-01
-last_updated: "2026-03-27T23:30:00.000Z"
+stopped_at: Completed 110-04
+last_updated: "2026-03-28T00:00:00.000Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 25
-  completed_plans: 22
-  percent: 88
+  completed_plans: 25
+  percent: 100
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 AI Landscape Explorer — Phase 110 (Site Integration) plan 01 complete, next: 110-02
+**Current focus:** v1.18 AI Landscape Explorer — Phase 110 (Site Integration) complete, all 4 plans done
 
 ## Current Position
 
 Phase: 110 (Site Integration)
-Plan: 1 of 4 in phase 110
-Status: Plan 01 complete — header nav, sitemap, homepage card
+Plan: 4 of 4 in phase 110
+Status: Phase complete — all site integration requirements (SITE-02 through SITE-07) addressed
 Last activity: 2026-03-27
 
 Progress: [██████████] 100%
@@ -36,8 +36,8 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 232 (across 17 milestones)
-- v1.18 plans completed: 9
+- Total plans completed: 235 (across 17 milestones)
+- v1.18 plans completed: 12
 
 **Cumulative Stats:**
 
@@ -114,6 +114,8 @@ Recent decisions affecting current work:
 - [Phase 110]: AI Landscape nav link placed after Blog, before Beauty Index — alphabetical among content sections (11 total nav items)
 - [Phase 110]: Sitemap /ai-landscape/ added to existing beauty-index/db-compass/eda condition (monthly, priority 0.5) — no separate block
 - [Phase 110]: Homepage card uses inline SVG node-graph motif (8 circles, 10 edges, cluster darkColors at 70% opacity) via frontmatter IIFE + set:html
+- [Phase 110]: Companion blog post targets non-technical audience with 1721 words, 16 concept page cross-links, 4 VS comparison links
+- [Phase 110]: Blog post uses node slug /ai-landscape/autonomy/ (not /autonomy-levels/) — verified from nodes.json
 
 ### Pending Todos
 
