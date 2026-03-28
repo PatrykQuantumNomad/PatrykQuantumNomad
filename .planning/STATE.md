@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 108 P01 | 2min | 2 tasks | 5 files |
 | Phase 108 P03 | 6min | 1 tasks | 3 files |
 | Phase 108 P02 | 6min | 2 tasks | 4 files |
+| Phase 110 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,7 @@ Recent decisions affecting current work:
 - [Phase 110]: Homepage card uses inline SVG node-graph motif (8 circles, 10 edges, cluster darkColors at 70% opacity) via frontmatter IIFE + set:html
 - [Phase 110]: Companion blog post targets non-technical audience with 1721 words, 16 concept page cross-links, 4 VS comparison links
 - [Phase 110]: Blog post uses node slug /ai-landscape/autonomy/ (not /autonomy-levels/) — verified from nodes.json
+- [Phase 110]: Landing OG image uses light background (#faf8f5) with 5-cluster gradient accent bar; centered layout with cluster name pills (not two-column)
 
 ### Pending Todos
 
