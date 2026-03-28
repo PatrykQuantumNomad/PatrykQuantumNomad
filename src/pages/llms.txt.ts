@@ -6,7 +6,7 @@ import { techniqueUrl, distributionUrl, foundationUrl, caseStudyUrl, referenceUr
 import { guidePageUrl } from '../lib/guides/routes';
 import { CASE_STUDY_REGISTRY, ALL_CASE_STUDY_SLUGS } from '../lib/eda/notebooks/registry/index';
 import { getDownloadUrl, getColabUrl } from '../lib/eda/notebooks/notebook-urls';
-import { conceptUrl, vsPageUrl } from '../lib/ai-landscape/routes';
+import { vsPageUrl } from '../lib/ai-landscape/routes';
 import { POPULAR_COMPARISONS } from '../lib/ai-landscape/comparisons';
 
 export async function GET(context: APIContext) {
