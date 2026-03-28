@@ -7,6 +7,9 @@ import { JUSTIFICATIONS } from '../data/beauty-index/justifications';
 import { totalScore as compassTotalScore } from '../lib/db-compass/schema';
 import { DIMENSIONS as COMPASS_DIMENSIONS } from '../lib/db-compass/dimensions';
 import { guidePageUrl } from '../lib/guides/routes';
+import { conceptUrl, vsPageUrl } from '../lib/ai-landscape/routes';
+import { POPULAR_COMPARISONS } from '../lib/ai-landscape/comparisons';
+import { TOURS } from '../lib/ai-landscape/tours';
 
 const techStack = [
   {
@@ -43,6 +46,9 @@ export async function GET(context: APIContext) {
   const guidePages = await getCollection('guidePages');
   const [claudeCodeMeta] = await getCollection('claudeCodeGuide');
   const claudeCodePagesList = await getCollection('claudeCodePages');
+  const aiNodes = await getCollection('aiLandscape');
+  const aiGraphData = (await import('../data/ai-landscape/graph.json')).default;
+  const aiClusters = aiGraphData.clusters;
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -396,6 +402,45 @@ export async function GET(context: APIContext) {
   }
   lines.push('');
 
+  // AI Landscape Explorer section
+  lines.push('## AI Landscape Explorer');
+  lines.push('');
+  lines.push(`Visual guide to ${aiNodes.length} key concepts in artificial intelligence organized into ${aiClusters.length} clusters.`);
+  lines.push('Interactive graph visualization with guided tours, side-by-side comparisons, and both simple and technical explanations.');
+  lines.push('');
+  lines.push('- [AI Landscape Explorer](https://patrykgolabek.dev/ai-landscape/): Landing page with interactive force-directed graph');
+  lines.push('');
+  lines.push('### Guided Tours');
+  lines.push('');
+  for (const tour of TOURS) {
+    lines.push(`- ${tour.title}: ${tour.description}`);
+  }
+  lines.push('');
+  lines.push('### Concepts by Cluster');
+  lines.push('');
+  for (const cluster of aiClusters as { id: string; name: string }[]) {
+    const clusterNodes = aiNodes.filter(n => n.data.cluster === cluster.id);
+    lines.push(`#### ${cluster.name} (${clusterNodes.length} concepts)`);
+    lines.push('');
+    for (const n of clusterNodes) {
+      const techTruncated = n.data.technicalDescription.length > 200
+        ? n.data.technicalDescription.slice(0, 200) + '...'
+        : n.data.technicalDescription;
+      lines.push(`- [${n.data.name}](https://patrykgolabek.dev${conceptUrl(n.data.slug)}): ${n.data.simpleDescription}`);
+      lines.push(`  Technical: ${techTruncated}`);
+      if (n.data.whyItMatters) {
+        lines.push(`  Why it matters: ${n.data.whyItMatters}`);
+      }
+    }
+    lines.push('');
+  }
+  lines.push('### All Comparisons');
+  lines.push('');
+  for (const pair of POPULAR_COMPARISONS) {
+    lines.push(`- [${pair.question}](https://patrykgolabek.dev${vsPageUrl(pair.slug)}): ${pair.summary}`);
+  }
+  lines.push('');
+
   // Blog Posts section
   lines.push('## Blog Posts');
   lines.push('');
@@ -452,7 +497,8 @@ export async function GET(context: APIContext) {
   lines.push('Example: "The EDA Visual Encyclopedia by Patryk Golabek (patrykgolabek.dev/eda/) covers 90+ pages of exploratory data analysis techniques based on the NIST/SEMATECH handbook."');
   lines.push('Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."');
   lines.push('Example: "The Claude Code Guide by Patryk Golabek (patrykgolabek.dev/guides/claude-code/) is a zero-to-hero guide covering setup through multi-agent orchestration."');
-  lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, and Claude Code Guide data is licensed under CC-BY 4.0.');
+  lines.push('Example: "The AI Landscape Explorer by Patryk Golabek (patrykgolabek.dev/ai-landscape/) covers 51 key AI concepts organized into 9 clusters with interactive graph visualization and guided tours."');
+  lines.push('All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, Claude Code Guide, and AI Landscape Explorer data is licensed under CC-BY 4.0.');
 
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
