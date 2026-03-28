@@ -12,6 +12,30 @@ import fastapiLogo from '../assets/images/fastapi-logo-teal.png';
 
 const edaCardSvg = generateEdaHeroSvg({ width: 280, height: 160 });
 
+// AI Landscape card SVG — abstract node-graph motif with cluster colors
+const aiLandscapeCardSvg = (() => {
+  const nodes = [
+    { cx: 60,  cy: 50,  r: 10, fill: '#00696e' },  // AI
+    { cx: 130, cy: 35,  r: 8,  fill: '#2e7d32' },  // ML
+    { cx: 200, cy: 55,  r: 9,  fill: '#c62828' },  // GenAI
+    { cx: 100, cy: 100, r: 7,  fill: '#4527a0' },  // Agentic
+    { cx: 170, cy: 110, r: 6,  fill: '#e65100' },  // DL
+    { cx: 240, cy: 90,  r: 5,  fill: '#827717' },  // NN
+    { cx: 45,  cy: 120, r: 4,  fill: '#1565c0' },  // extra accent
+    { cx: 220, cy: 140, r: 5,  fill: '#311b92' },  // Agent Frameworks
+  ];
+  const edges = [
+    [0, 1], [1, 2], [0, 3], [1, 4], [2, 5], [3, 4], [4, 5], [3, 6], [5, 7], [2, 7],
+  ];
+  const lines = edges.map(([a, b]) =>
+    `<line x1="${nodes[a].cx}" y1="${nodes[a].cy}" x2="${nodes[b].cx}" y2="${nodes[b].cy}" stroke="var(--color-border)" stroke-width="0.75" opacity="0.6"/>`
+  ).join('');
+  const circles = nodes.map(n =>
+    `<circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${n.fill}" opacity="0.7"/>`
+  ).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" width="280" height="160" class="max-w-full h-auto">${lines}${circles}</svg>`;
+})();
+
 const posts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
 });
@@ -265,6 +289,19 @@ const pageDescription = `Portfolio of ${siteConfig.name}, ${siteConfig.descripti
               11 chapters from first agentic interaction through multi-agent orchestration. Skills, hooks, MCP, worktrees, and enterprise security.
             </p>
             <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Read the guide &rarr;</span>
+          </div>
+        </article>
+      </a>
+      <a href="/ai-landscape/" class="block card-hover rounded-lg border border-[var(--color-border)] no-underline overflow-hidden" data-reveal data-tilt>
+        <article>
+          <div class="bg-[var(--color-surface-alt)] px-6 pt-6 pb-4 flex justify-center items-center" aria-hidden="true" set:html={aiLandscapeCardSvg} />
+          <div class="p-6 pt-4">
+            <p class="meta-mono text-[var(--color-accent)]">51 Concepts</p>
+            <h3 class="text-lg font-heading font-bold text-[var(--color-text-primary)] mt-2">AI Landscape Explorer</h3>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2">
+              Visual guide to artificial intelligence — from machine learning fundamentals to generative AI, agentic systems, and developer tools.
+            </p>
+            <span class="inline-block mt-4 text-sm font-medium text-[var(--color-accent)]">Explore the landscape &rarr;</span>
           </div>
         </article>
       </a>
