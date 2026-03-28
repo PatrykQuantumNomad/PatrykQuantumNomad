@@ -3739,3 +3739,141 @@ export async function generateAiLandscapeVsOgImage(
 
   return renderOgPng(layout);
 }
+
+/**
+ * Generates a branded OG image for the AI Landscape landing page.
+ * Light background with cluster-color gradient accent bar, title, stats subtitle,
+ * cluster name pills, and standard PG branding footer.
+ */
+export async function generateAiLandscapeLandingOgImage(): Promise<Uint8Array<ArrayBuffer>> {
+  const clusterPills = [
+    { name: 'Artificial Intelligence', color: '#00696e' },
+    { name: 'Machine Learning', color: '#c62828' },
+    { name: 'Deep Learning', color: '#4527a0' },
+    { name: 'Generative AI', color: '#1565c0' },
+    { name: 'Agentic AI', color: '#ef6c00' },
+  ];
+
+  const layout = {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        backgroundColor: '#faf8f5',
+        position: 'relative' as const,
+        fontFamily: 'Inter',
+      },
+      children: [
+        // Top accent bar: multi-cluster gradient
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              top: 0,
+              left: 0,
+              width: '1200px',
+              height: '6px',
+              backgroundImage:
+                'linear-gradient(to right, #00696e, #c62828, #4527a0, #1565c0, #ef6c00)',
+            },
+          },
+        },
+        // Main content area
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column' as const,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: 1,
+              padding: '60px 80px 40px',
+              gap: '24px',
+            },
+            children: [
+              // Title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontFamily: 'Space Grotesk',
+                    fontWeight: 700,
+                    fontSize: '48px',
+                    color: '#1a1a2e',
+                    lineHeight: 1.15,
+                    textAlign: 'center' as const,
+                  },
+                  children: 'AI Landscape Explorer',
+                },
+              },
+              // Subtitle
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    fontSize: '22px',
+                    color: '#6b7280',
+                    textAlign: 'center' as const,
+                    lineHeight: 1.4,
+                  },
+                  children: '51 Concepts | 9 Clusters | Interactive Visual Guide',
+                },
+              },
+              // Cluster pills row
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexWrap: 'wrap' as const,
+                    justifyContent: 'center',
+                    gap: '10px',
+                    marginTop: '8px',
+                  },
+                  children: clusterPills.map((pill) => ({
+                    type: 'div',
+                    props: {
+                      style: {
+                        fontSize: '14px',
+                        color: '#ffffff',
+                        backgroundColor: pill.color,
+                        borderRadius: '20px',
+                        padding: '6px 16px',
+                        fontWeight: 600,
+                      },
+                      children: pill.name,
+                    },
+                  })),
+                },
+              },
+            ],
+          },
+        },
+        // Bottom branding row
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute' as const,
+              bottom: '24px',
+              left: '0px',
+              width: '1200px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: brandingRow().props.children,
+          },
+        },
+      ],
+    },
+  };
+
+  return renderOgPng(layout);
+}
