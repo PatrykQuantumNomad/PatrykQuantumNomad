@@ -6,6 +6,8 @@ import { techniqueUrl, distributionUrl, foundationUrl, caseStudyUrl, referenceUr
 import { guidePageUrl } from '../lib/guides/routes';
 import { CASE_STUDY_REGISTRY, ALL_CASE_STUDY_SLUGS } from '../lib/eda/notebooks/registry/index';
 import { getDownloadUrl, getColabUrl } from '../lib/eda/notebooks/notebook-urls';
+import { conceptUrl, vsPageUrl } from '../lib/ai-landscape/routes';
+import { POPULAR_COMPARISONS } from '../lib/ai-landscape/comparisons';
 
 export async function GET(context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -18,6 +20,8 @@ export async function GET(context: APIContext) {
   const guidePages = await getCollection('guidePages');
   const [claudeCodeMeta] = await getCollection('claudeCodeGuide');
   const claudeCodePagesList = await getCollection('claudeCodePages');
+  const aiNodes = await getCollection('aiLandscape');
+  const aiClusters = (await import('../data/ai-landscape/graph.json')).default.clusters;
   const sortedPosts = posts.toSorted(
     (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
   );
@@ -237,6 +241,27 @@ export async function GET(context: APIContext) {
       .sort((a, b) => a.data.order - b.data.order)
       .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(claudeCodeMeta.data.slug, p.data.slug)}): ${p.data.description}`),
     '',
+    '## AI Landscape Explorer',
+    '',
+    `Visual guide to ${aiNodes.length} key concepts in artificial intelligence organized into ${aiClusters.length} clusters — from machine learning fundamentals to generative AI, agentic systems, and developer tools.`,
+    '',
+    '- [AI Landscape Explorer](https://patrykgolabek.dev/ai-landscape/): Interactive graph visualization with guided tours',
+    '',
+    '### Clusters',
+    '',
+    ...aiClusters.flatMap((cluster: { id: string; name: string }) => {
+      const clusterNodes = aiNodes.filter(n => n.data.cluster === cluster.id);
+      const count = clusterNodes.length;
+      const examples = clusterNodes.slice(0, 3).map(n => n.data.name).join(', ');
+      return [`- ${cluster.name}: ${count} concepts including ${examples}`];
+    }),
+    '',
+    '### Popular Comparisons',
+    '',
+    ...POPULAR_COMPARISONS.map(pair =>
+      `- [${pair.question}](https://patrykgolabek.dev${vsPageUrl(pair.slug)}): ${pair.summary}`
+    ),
+    '',
     '## Blog Posts',
     '',
     ...sortedPosts.map(
@@ -270,7 +295,8 @@ export async function GET(context: APIContext) {
     'Example: "The Normal Distribution page (patrykgolabek.dev/eda/distributions/normal/) provides interactive PDF/CDF visualization with parameter explorers."',
     'Example: "The FastAPI Production Guide by Patryk Golabek (patrykgolabek.dev/guides/fastapi-production/) covers 13 production concerns for the FastAPI Chassis."',
     'Example: "The Claude Code Guide by Patryk Golabek (patrykgolabek.dev/guides/claude-code/) is a zero-to-hero guide covering setup through multi-agent orchestration."',
-    'All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, and Claude Code Guide data is licensed under CC-BY 4.0.',
+    'Example: "The AI Landscape Explorer by Patryk Golabek (patrykgolabek.dev/ai-landscape/) covers 51 key AI concepts organized into 9 clusters with interactive graph visualization."',
+    'All Beauty Index, Database Compass, EDA Visual Encyclopedia, FastAPI Production Guide, Claude Code Guide, and AI Landscape Explorer data is licensed under CC-BY 4.0.',
   ];
 
   return new Response(lines.join('\n'), {
