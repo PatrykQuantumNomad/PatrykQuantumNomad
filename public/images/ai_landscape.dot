@@ -1,0 +1,322 @@
+digraph AI_Universe_Explained {
+    compound=true; // Enable edges between clusters
+    rankdir=LR; // Left-to-right layout
+
+    nodesep=0.5; // Increase separation between nodes
+    ranksep=1.0; // Increase separation between ranks
+    labelloc="t"; // Place title at the top
+    label="The Landscape of Artificial Intelligence (2026 Edition)";
+    fontsize=20;
+    node [shape=box, style="rounded,filled", fillcolor=white, fontsize=10];
+    edge [fontsize=9];
+
+    // --- Main Hierarchy Clusters ---
+
+    // AI Cluster (Outermost)
+    subgraph cluster_AI {
+        label = "Artificial Intelligence (AI)";
+        bgcolor = "#e0f7fa"; // Light cyan
+        style = "filled,rounded";
+        node [fillcolor="#ffffff"];
+
+        AI_Node [label="AI\nEnabling machines to mimic\nhuman intelligence", shape=ellipse, fontsize=12];
+
+        // AI Subfields
+        {
+          rank=same;
+          NLP [label="Natural Language\nProcessing"];
+          CV [label="Computer Vision"];
+          Robotics;
+          ExpertSystems [label="Expert Systems"];
+          PlanningScheduling [label="Planning &\nScheduling"];
+          KnowledgeRep [label="Knowledge\nRepresentation"];
+          SpeechRec [label="Speech\nRecognition"];
+          SearchOptimization [label="Search &\nOptimization"];
+          AI_Ethics [label="AI Safety &\nEthics"];
+        }
+
+        AI_Node -> {NLP, CV, Robotics, ExpertSystems, PlanningScheduling, KnowledgeRep, SpeechRec, SearchOptimization, AI_Ethics} [label=" includes fields", style=dashed];
+
+        // Machine Learning Cluster (Inside AI)
+        subgraph cluster_ML {
+            label = "Machine Learning (ML)";
+            bgcolor = "#c8e6c9"; // Light green
+            style = "filled,rounded";
+            node [fillcolor="#ffffff"];
+
+            ML_Node [label="ML\nLearning from data\nwithout explicit programming", shape=ellipse, fontsize=11];
+
+            // ML Types
+            {
+              rank=same;
+              Supervised [label="Supervised Learning\n(Labelled Data)"];
+              Unsupervised [label="Unsupervised Learning\n(Unlabelled Data)"];
+              Reinforcement [label="Reinforcement Learning\n(Rewards/Penalties)"];
+              SemiSupervised [label="Semi-Supervised"];
+            }
+
+            ML_Node -> {Supervised, Unsupervised, Reinforcement, SemiSupervised} [label=" types", style=dashed];
+
+            // Self-Supervised as a specialisation of Unsupervised
+            SelfSupervised [label="Self-Supervised\nLearning"];
+            Unsupervised -> SelfSupervised [label=" specialisation of", style=dotted];
+
+            // ML Techniques
+            DecisionTrees [label="Decision Trees"];
+            SVM [label="Support Vector\nMachines (SVM)"];
+            KMeans [label="K-Means Clustering"];
+            LinReg [label="Linear Regression"];
+            LogReg [label="Logistic Regression"];
+            PCA [label="PCA (Dim. Reduction)"];
+            Ensemble [label="Ensemble Methods"];
+
+            Supervised -> {DecisionTrees, SVM, LinReg, LogReg, Ensemble} [style=dotted];
+            Unsupervised -> {KMeans, PCA} [style=dotted];
+
+            // Neural Networks Cluster (Inside ML)
+            subgraph cluster_NN {
+                label = "Neural Networks (NN)";
+                bgcolor = "#fff9c4"; // Light yellow
+                style = "filled,rounded";
+                node [fillcolor="#ffffff"];
+
+                NN_Node [label="NN\nInspired by biological brains", shape=ellipse, fontsize=10];
+
+                // NN Concepts
+                {
+                   rank=same;
+                   Perceptron;
+                   MLP [label="Multi-Layer\nPerceptron (MLP)"];
+                   Backpropagation [label="Backpropagation\n(Training Algorithm)"];
+                   ActivationFunc [label="Activation\nFunctions"];
+                   SOM [label="Self-Organising\nMaps (SOM)"];
+                }
+
+                NN_Node -> {Perceptron, MLP, Backpropagation, ActivationFunc, SOM} [style=dashed];
+
+                // Deep Learning Cluster (Inside NN)
+                subgraph cluster_DL {
+                    label = "Deep Learning (DL)";
+                    bgcolor = "#ffecb3"; // Amber
+                    style = "filled,rounded";
+                    node [fillcolor="#ffffff"];
+
+                    DL_Node [label="DL\nNNs with many layers ('deep')", shape=ellipse, fontsize=10];
+
+                    // DL Architectures
+                    {
+                       rank=same;
+                       CNN [label="CNN"];
+                       RNN [label="RNN"];
+                       Transformers;
+                       Autoencoders;
+                    }
+
+                    DL_Node -> {CNN, RNN, Transformers, Autoencoders} [label=" architectures", style=dashed];
+
+                    // DL Paradigms & Patterns (distinct from architectures)
+                    FoundationModels [label="Foundation Models\n(Pre-trained Paradigm)"];
+                    DeepRL [label="Deep Reinforcement\nLearning (Paradigm)"];
+                    MoE [label="Mixture of Experts\n(Scaling Technique)"];
+                    Multimodal [label="Multimodal AI\n(Cross-Modal Systems)"];
+
+                    DL_Node -> {FoundationModels, DeepRL} [label=" paradigms", style=dashed];
+                    DL_Node -> MoE [label=" technique", style=dotted];
+                    DL_Node -> Multimodal [label=" paradigm", style=dashed];
+
+                    // RNN variants
+                    LSTM [label="LSTM"];
+                    GRU [label="GRU"];
+                    RNN -> {LSTM, GRU} [label=" variants", style=dotted];
+
+                    // Historical DL architectures
+                    DBN [label="Deep Belief\nNetworks (DBN)"];
+                    Boltzmann [label="Boltzmann\nMachines"];
+                    DL_Node -> {DBN, Boltzmann} [style=dotted];
+
+                    // Key relationships
+                    Reinforcement -> DeepRL [label=" combined\n with DL", style=dotted, constraint=false];
+                    Transformers -> FoundationModels [label=" enables", style=dotted, constraint=false];
+
+                    // Foundation Model examples (encoder-only, not GenAI)
+                    BERT [label="BERT\n(Encoder-Only)"];
+                    FoundationModels -> BERT [label=" e.g.", style=dotted];
+                    SelfSupervised -> BERT [label=" trains via", style=dotted, constraint=false];
+
+                    // Reasoning Models (distinct paradigm)
+                    ReasoningModels [label="Reasoning Models\n(Chain-of-Thought)", fillcolor="#e1bee7"];
+                    ReasoningO1 [label="o1 / o3"];
+                    ReasoningR1 [label="DeepSeek R1"];
+                    ExtendedThinking [label="Extended Thinking\n(Anthropic)"];
+                    FoundationModels -> ReasoningModels [label=" enables", style=dotted, constraint=false];
+                    ReasoningModels -> {ReasoningO1, ReasoningR1, ExtendedThinking} [label=" e.g.", style=dotted];
+
+                    // Generative AI Cluster (Inside DL)
+                    subgraph cluster_GenAI {
+                        label = "Generative AI (GenAI)";
+                        bgcolor = "#ffcdd2"; // Light red/pink
+                        style = "filled,rounded";
+                        node [fillcolor="#ffffff"];
+
+                        GenAI_Node [label="GenAI\nCreating new content", shape=ellipse, fontsize=10];
+
+                        // GenAI Techniques/Models
+                        {
+                           rank=same;
+                           GANs [label="GANs"];
+                           VAEs [label="VAEs"];
+                           Diffusion [label="Diffusion Models"];
+                           LLM [label="Large Language\nModels (LLM)"];
+                        }
+
+                        GenAI_Node -> {GANs, VAEs, Diffusion, LLM} [style=dashed];
+
+                        // Diffusion model examples
+                        StableDiffusion [label="Stable Diffusion"];
+                        DALLE [label="DALL-E 2/3"];
+                        Midjourney;
+                        Sora [label="Sora (Video)"];
+                        Diffusion -> {StableDiffusion, DALLE, Midjourney, Sora} [label=" e.g.", style=dotted];
+
+                        // LLM examples (decoder / generative models)
+                        GPT [label="GPT-4o / GPT-5"];
+                        ClaudeLLM [label="Claude\n(Anthropic)"];
+                        Gemini [label="Gemini\n(Google)"];
+                        Llama [label="Llama\n(Meta)"];
+                        DeepSeek [label="DeepSeek"];
+
+                        // LLM Related Concepts
+                        RLHF [label="RLHF / DPO"];
+                        PromptEng [label="Prompt\nEngineering"];
+                        FewZeroShot [label="Few/Zero-Shot\nLearning"];
+                        Hallucination;
+                        RAG [label="RAG\n(Retrieval-Augmented\nGeneration)", fillcolor="#e8f5e9"];
+                        FineTuning [label="Fine-Tuning / LoRA"];
+                        ContextWindow [label="Long Context\nWindows"];
+
+                        LLM -> {GPT, ClaudeLLM, Gemini, Llama, DeepSeek} [label=" e.g.", style=dotted];
+                        LLM -> {RLHF, PromptEng, FewZeroShot, Hallucination, RAG, FineTuning, ContextWindow} [label=" related\n tech/concepts", style=dotted];
+
+                        Autoencoders -> VAEs [label=" extends to", style=dotted, constraint=false];
+                        FoundationModels -> LLM [label=" e.g.", style=dotted, constraint=false];
+                        Transformers -> {GPT, ClaudeLLM, Gemini} [label=" powers", style=dotted, constraint=false];
+                        MoE -> DeepSeek [label=" uses", style=dotted, constraint=false];
+
+                    } // End GenAI Cluster
+                } // End DL Cluster
+            } // End NN Cluster
+        } // End ML Cluster
+    } // End AI Cluster
+
+    // --- Separate Conceptual Clusters ---
+
+    // Cluster for Levels of Intelligence
+    subgraph cluster_Levels {
+        label = "Levels of Intelligence";
+        bgcolor = "#eeeeee"; // Light grey
+        style = "filled,rounded";
+        node [fillcolor="#f0f0f0"];
+
+        ANI [label="ANI\nArtificial Narrow Intelligence\n(Current AI - Task Specific)"];
+        ACI [label="ACI\nActually Competent Intelligence\n(Reliable, robust AI that\nconsistently performs well)", fillcolor="#c8e6c9"];
+        AGI [label="AGI\nArtificial General Intelligence\n(Hypothetical - Human-Level)"];
+        ASI [label="ASI\nArtificial Superintelligence\n(Hypothetical - Beyond Human)"];
+
+        ANI -> ACI [style=bold, color=red, label=" Potential\n Progression"];
+        ACI -> AGI [style=bold, color=red, label=" Potential\n Progression"];
+        AGI -> ASI [style=bold, color=red, label=" Potential\n Progression"];
+
+        AI_Node -> ANI [style=dashed, constraint=false, label=" primarily\ndevelops"];
+    }
+
+    // Agentic AI Cluster
+    subgraph cluster_Agentic {
+      label="Agentic AI Paradigm";
+      bgcolor="#d1c4e9"; // Light purple
+      style="filled,rounded";
+      node [fillcolor="#ffffff"];
+
+      AgenticAI [label="Agentic AI\nAutonomous goal-oriented systems", shape=ellipse, fontsize=11];
+
+      // Agentic Characteristics
+      {
+        rank=same;
+        Autonomy;
+        AgentPlanning [label="Planning &\nDecomposition"];
+        ToolUse [label="Tool Use\n(APIs, MCP, etc.)"];
+        AgentMemory [label="Memory"];
+        SelfCorrection [label="Self-Correction"];
+      }
+
+      AgenticAI -> {Autonomy, AgentPlanning, ToolUse, AgentMemory, SelfCorrection} [label=" characterized by", style=dashed];
+
+      // Agent Frameworks & Systems
+      subgraph cluster_AgentFrameworks {
+        label = "Agent Frameworks & Systems";
+        bgcolor = "#b39ddb"; // Deeper purple
+        style = "filled,rounded";
+        node [fillcolor="#ffffff"];
+
+        LangGraph [label="LangGraph\n(LangChain)"];
+        CrewAI [label="CrewAI"];
+        AutoGen [label="AutoGen\n(Microsoft)"];
+        AG2 [label="AG2\n(Community Fork)"];
+        AnthropicSDK [label="Anthropic\nAgent SDK"];
+        OpenClaw [label="OpenClaw\n(Autonomous Agent)"];
+      }
+
+      AgenticAI -> {LangGraph, CrewAI, AutoGen, AG2, AnthropicSDK} [label=" built with", style=dotted];
+      AgenticAI -> OpenClaw [label=" e.g. system", style=dotted];
+    }
+
+    // AI Developer Tools Cluster
+    subgraph cluster_DevTools {
+      label="AI-Powered Developer Tools";
+      bgcolor="#b3e5fc"; // Light blue
+      style="filled,rounded";
+      node [fillcolor="#ffffff"];
+
+      AIDevTools [label="AI Coding Assistants\nCode generation, editing,\ndebugging", shape=ellipse, fontsize=11];
+
+      ClaudeCode [label="Claude Code\n(CLI Agent)"];
+      CursorIDE [label="Cursor\n(AI-Native IDE)"];
+      Copilot [label="GitHub Copilot"];
+      Windsurf [label="Windsurf\n(Cognition AI)"];
+
+      AIDevTools -> {ClaudeCode, CursorIDE, Copilot, Windsurf} [label=" e.g.", style=dashed];
+    }
+
+    // MCP Protocol Node (standalone)
+    MCP [label="MCP\nModel Context Protocol\n(Open standard by Anthropic\nfor AI tool integration)", shape=box, fillcolor="#e8eaf6", style="rounded,filled,bold"];
+
+    // --- Inter-Cluster Edges (Hierarchy & Key Enablers) ---
+
+    // Main hierarchy links
+    ML_Node -> AI_Node [style=bold, dir=back, minlen=2, label=" subset of"];
+    NN_Node -> ML_Node [style=bold, dir=back, minlen=2, label=" subset of"];
+    DL_Node -> NN_Node [style=bold, dir=back, minlen=2, label=" subset of"];
+    GenAI_Node -> DL_Node [style=bold, dir=back, minlen=2, label=" subset of"];
+
+    // Agentic AI Enabler Links
+    LLM -> AgenticAI [style=bold, color="#6a1b9a", constraint=true, minlen=2, label=" Enables"];
+    FoundationModels -> AgenticAI [style=bold, color="#6a1b9a", constraint=true, minlen=2, label=" Enables"];
+    ReasoningModels -> AgenticAI [style=bold, color="#6a1b9a", constraint=false, label=" Enables"];
+    PlanningScheduling -> AgentPlanning [style=dashed, label=" relates to", constraint=false];
+    Reinforcement -> AgenticAI [style=dashed, label=" informs", constraint=false];
+    DeepRL -> AgenticAI [label=" informs", style=dotted, constraint=false];
+
+    // MCP connections
+    MCP -> ToolUse [style=bold, color="#283593", label=" standardizes"];
+    MCP -> AgenticAI [style=dashed, color="#283593", constraint=false, label=" enables\n interop"];
+    MCP -> ClaudeCode [style=dashed, color="#283593", constraint=false, label=" used by"];
+    MCP -> CursorIDE [style=dashed, color="#283593", constraint=false, label=" used by"];
+
+    // Developer Tools connections
+    LLM -> AIDevTools [style=bold, color="#01579b", constraint=true, minlen=2, label=" Powers"];
+    AgenticAI -> ClaudeCode [style=dashed, color="#6a1b9a", constraint=false, label=" paradigm\n applied"];
+
+    // ACI connections
+    LLM -> ACI [style=dashed, color="#2e7d32", constraint=false, label=" aspires to"];
+    AgenticAI -> ACI [style=dashed, color="#2e7d32", constraint=false, label=" aims for"];
+    ReasoningModels -> ACI [style=dashed, color="#2e7d32", constraint=false, label=" steps toward"];
+}

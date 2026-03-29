@@ -1,265 +1,265 @@
 {
   "meta": {
-    "width": 1200,
-    "height": 900,
+    "width": 1600,
+    "height": 1100,
     "ticks": 300,
-    "generated": "2026-03-26T20:25:40.491Z"
+    "generated": "2026-03-29T16:50:02.150Z"
   },
   "positions": [
     {
       "id": "artificial-intelligence",
-      "x": 539.42,
-      "y": 253.02
+      "x": 588.66,
+      "y": 206.12
     },
     {
       "id": "natural-language-processing",
-      "x": 485.95,
-      "y": 205.97
+      "x": 463.83,
+      "y": 241.97
     },
     {
       "id": "computer-vision",
-      "x": 577.02,
-      "y": 198.15
+      "x": 526.52,
+      "y": 40
     },
     {
       "id": "robotics",
-      "x": 475.7,
-      "y": 254.89
+      "x": 495.18,
+      "y": 115.92
     },
     {
       "id": "expert-systems",
-      "x": 529.75,
-      "y": 181.9
+      "x": 370.26,
+      "y": 151.78
     },
     {
       "id": "planning-scheduling",
-      "x": 627.43,
-      "y": 285.58
+      "x": 713.57,
+      "y": 170.25
     },
     {
       "id": "knowledge-representation",
-      "x": 492.51,
-      "y": 148.54
+      "x": 771.45,
+      "y": 40
     },
     {
       "id": "speech-recognition",
-      "x": 448.7,
-      "y": 172.63
+      "x": 672.18,
+      "y": 305.55
     },
     {
       "id": "search-optimization",
-      "x": 438.45,
-      "y": 221.56
+      "x": 401.64,
+      "y": 40
     },
     {
       "id": "ai-safety-ethics",
-      "x": 567.39,
-      "y": 149
+      "x": 620.01,
+      "y": 80.1
     },
     {
       "id": "machine-learning",
-      "x": 471.2,
-      "y": 344.75
+      "x": 387.7,
+      "y": 347.33
     },
     {
       "id": "supervised-learning",
-      "x": 372.08,
-      "y": 351.47
+      "x": 309.06,
+      "y": 450.81
     },
     {
       "id": "unsupervised-learning",
-      "x": 391.55,
-      "y": 305.43
+      "x": 516.94,
+      "y": 360.59
     },
     {
       "id": "reinforcement-learning",
-      "x": 585.89,
-      "y": 395.92
+      "x": 567.24,
+      "y": 480.42
     },
     {
       "id": "semi-supervised-learning",
-      "x": 411.65,
-      "y": 382.02
+      "x": 258.81,
+      "y": 330.97
     },
     {
       "id": "self-supervised-learning",
-      "x": 319.37,
-      "y": 320.44
+      "x": 437.96,
+      "y": 467.18
     },
     {
       "id": "neural-networks",
-      "x": 393.89,
-      "y": 457.78
+      "x": 246.5,
+      "y": 584.69
     },
     {
       "id": "deep-learning",
-      "x": 450.08,
-      "y": 553.12
+      "x": 246.83,
+      "y": 838.76
     },
     {
       "id": "convolutional-neural-networks",
-      "x": 367.21,
-      "y": 620.11
+      "x": 123.2,
+      "y": 878.73
     },
     {
       "id": "recurrent-neural-networks",
-      "x": 376.72,
-      "y": 521.53
+      "x": 219.67,
+      "y": 965.82
     },
     {
       "id": "transformers",
-      "x": 518.72,
-      "y": 520.3
+      "x": 343.31,
+      "y": 925.86
     },
     {
       "id": "autoencoders",
-      "x": 417.16,
-      "y": 618.15
+      "x": 274.02,
+      "y": 711.7
     },
     {
       "id": "foundation-models",
-      "x": 588.78,
-      "y": 524.62
+      "x": 493.98,
+      "y": 838.98
     },
     {
       "id": "deep-reinforcement-learning",
-      "x": 559.54,
-      "y": 484.07
+      "x": 397.69,
+      "y": 671.76
     },
     {
       "id": "mixture-of-experts",
-      "x": 513.86,
-      "y": 570.05
+      "x": 370.39,
+      "y": 798.81
     },
     {
       "id": "multimodal-ai",
-      "x": 365.16,
-      "y": 570.17
+      "x": 150.39,
+      "y": 751.66
     },
     {
       "id": "reasoning-models",
-      "x": 654.7,
-      "y": 469.81
+      "x": 521.28,
+      "y": 711.93
     },
     {
       "id": "generative-ai",
-      "x": 556.19,
-      "y": 624.18
+      "x": 530.75,
+      "y": 1035.99
     },
     {
       "id": "generative-adversarial-networks",
-      "x": 590.85,
-      "y": 724.37
+      "x": 650.75,
+      "y": 1060
     },
     {
       "id": "variational-autoencoders",
-      "x": 500.11,
-      "y": 684.24
+      "x": 490.75,
+      "y": 925.99
     },
     {
       "id": "diffusion-models",
-      "x": 540.9,
-      "y": 722.42
+      "x": 630.75,
+      "y": 975.99
     },
     {
       "id": "large-language-models",
-      "x": 670.03,
-      "y": 554.5
+      "x": 780.75,
+      "y": 755.99
     },
     {
       "id": "rlhf-dpo",
-      "x": 612.76,
-      "y": 627.07
+      "x": 890.15,
+      "y": 952.78
     },
     {
       "id": "prompt-engineering",
-      "x": 705.78,
-      "y": 663.73
+      "x": 840.75,
+      "y": 865.99
     },
     {
       "id": "few-zero-shot-learning",
-      "x": 666.65,
-      "y": 694.85
+      "x": 740.75,
+      "y": 955.99
     },
     {
       "id": "hallucination",
-      "x": 600.71,
-      "y": 578.57
+      "x": 1003.68,
+      "y": 889.57
     },
     {
       "id": "retrieval-augmented-generation",
-      "x": 620.14,
-      "y": 676.51
+      "x": 980.75,
+      "y": 975.99
     },
     {
       "id": "fine-tuning",
-      "x": 698.39,
-      "y": 614.28
+      "x": 660.75,
+      "y": 865.99
     },
     {
       "id": "context-windows",
-      "x": 659.26,
-      "y": 645.4
+      "x": 1000.75,
+      "y": 815.99
     },
     {
       "id": "artificial-narrow-intelligence",
-      "x": 757,
-      "y": 242.14
+      "x": 1280.46,
+      "y": 81.57
     },
     {
       "id": "actually-competent-intelligence",
-      "x": 784.94,
-      "y": 362.03
+      "x": 1275.19,
+      "y": 231.68
     },
     {
       "id": "artificial-general-intelligence",
-      "x": 887.94,
-      "y": 236.43
+      "x": 1397.41,
+      "y": 138.23
     },
     {
       "id": "artificial-superintelligence",
-      "x": 952.42,
-      "y": 171.98
+      "x": 1476.8,
+      "y": 40
     },
     {
       "id": "agentic-ai",
-      "x": 775.46,
-      "y": 483.25
+      "x": 1208.81,
+      "y": 610.89
     },
     {
       "id": "autonomy",
-      "x": 898.08,
-      "y": 440.94
+      "x": 1466.71,
+      "y": 643.03
     },
     {
       "id": "agent-planning",
-      "x": 816.23,
-      "y": 402.37
+      "x": 1288.46,
+      "y": 505.51
     },
     {
       "id": "tool-use",
-      "x": 898.86,
-      "y": 527.77
+      "x": 1337.87,
+      "y": 625.68
     },
     {
       "id": "agent-memory",
-      "x": 873.27,
-      "y": 484.35
+      "x": 1387.24,
+      "y": 745.88
     },
     {
       "id": "self-correction",
-      "x": 923.26,
-      "y": 484.14
+      "x": 1417.28,
+      "y": 522.83
     },
     {
       "id": "ai-coding-assistants",
-      "x": 798.99,
-      "y": 607.11
+      "x": 1121.03,
+      "y": 833.56
     },
     {
       "id": "model-context-protocol",
-      "x": 871.25,
-      "y": 616.6
+      "x": 1230.19,
+      "y": 904.07
     }
   ]
 }

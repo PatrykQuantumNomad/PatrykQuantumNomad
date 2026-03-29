@@ -8,9 +8,12 @@ import {
   ROOT_NODE_RADIUS,
   NODE_RADIUS,
   LABEL_FONT_SIZE,
+  EDGE_TYPE_COLORS,
   stripParenthetical,
   firstSentence,
   getClusterBounds,
+  linkArc,
+  arcMidpoint,
 } from '../../lib/ai-landscape/graph-data';
 import { DetailPanel } from './DetailPanel';
 import { ComparePanel } from './ComparePanel';
@@ -24,7 +27,6 @@ import { useTour } from './useTour';
 import { TourSelector } from './TourSelector';
 import { TourBar } from './TourBar';
 import { useEdgePulse } from './useEdgePulse';
-import { MiniMap } from './MiniMap';
 
 /**
  * Interactive AI Landscape graph rendered as an SVG React island.
@@ -81,10 +83,6 @@ export default function InteractiveGraph({
     () => new Set(nodes.filter((n) => n.parentId === null).map((n) => n.id)),
     [nodes],
   );
-  const nodeClusterMap = useMemo(
-    () => new Map(nodes.map((n) => [n.id, n.cluster])),
-    [nodes],
-  );
   const adjacencyMap = useMemo(
     () => buildAdjacencyMap(edges),
     [edges],
@@ -117,9 +115,19 @@ export default function InteractiveGraph({
         `html.dark .ai-cluster-${c.id} { fill: ${c.darkColor}; stroke: ${c.color}; }`,
       );
     }
-    lines.push(`.ai-edge { stroke: var(--color-border); }`);
+    for (const [type, colors] of Object.entries(EDGE_TYPE_COLORS)) {
+      lines.push(`.ai-edge-${type} { stroke: ${colors.light}; fill: none; opacity: 0.45; }`);
+      lines.push(`html.dark .ai-edge-${type} { stroke: ${colors.dark}; }`);
+    }
     lines.push(
       `.ai-label { fill: var(--color-text-primary); font-family: 'DM Sans', sans-serif; font-size: 9px; pointer-events: none; }`,
+    );
+    for (const cluster of clusters) {
+      lines.push(`.ai-abbr-${cluster.id} { fill: ${cluster.darkColor}; }`);
+      lines.push(`html.dark .ai-abbr-${cluster.id} { fill: ${cluster.color}; }`);
+    }
+    lines.push(
+      `.ai-node-abbr { font-family: 'DM Sans', sans-serif; font-weight: 600; pointer-events: none; }`,
     );
     lines.push(
       `.ai-edge-label { fill: var(--color-text-secondary); font-family: 'DM Sans', sans-serif; font-size: 8px; pointer-events: none; }`,
@@ -134,6 +142,7 @@ export default function InteractiveGraph({
 
     const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 4])
+      .extent([[0, 0], [meta.width, meta.height]])
       .filter((event: Event) => {
         // Allow drag and touch events unconditionally
         if (event.type !== 'wheel') return true;
@@ -174,7 +183,7 @@ export default function InteractiveGraph({
     return () => clearTimeout(timer);
   }, [showZoomHint]);
 
-  // Reset zoom to identity (zoom-to-fit)
+  // Reset zoom to fit entire graph
   const resetZoom = useCallback(() => {
     const svg = svgRef.current;
     const zoomBehavior = zoomRef.current;
@@ -211,16 +220,22 @@ export default function InteractiveGraph({
     const bounds = clusterBoundsMap.get(clusterId);
     if (!svg || !zoomBehavior || !bounds) return;
 
+    // Use viewBox dimensions for transform math (d3-zoom operates in viewBox space)
+    const vbW = meta.width;
+    const vbH = meta.height;
+
     const { x0, y0, x1, y1 } = bounds;
     const scale = Math.min(
-      meta.width / (x1 - x0),
-      meta.height / (y1 - y0),
+      vbW / (x1 - x0),
+      vbH / (y1 - y0),
     );
 
     // Clamp to [0.5, 3] — tighter than zoom extent [0.3, 4]
     const clampedScale = Math.max(0.5, Math.min(3, scale));
-    const tx = meta.width / 2 - clampedScale * (x0 + x1) / 2;
-    const ty = meta.height / 2 - clampedScale * (y0 + y1) / 2;
+    const cx = (x0 + x1) / 2;
+    const cy = (y0 + y1) / 2;
+    const tx = vbW / 2 - clampedScale * cx;
+    const ty = vbH / 2 - clampedScale * cy;
     const clampedTransform = zoomIdentity.translate(tx, ty).scale(clampedScale);
 
     select(svg)
@@ -288,8 +303,9 @@ export default function InteractiveGraph({
 
   // Node hover handlers for tooltips
   const handleNodeEnter = (e: React.MouseEvent, node: AiNode) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    const svgEl = svgRef.current;
+    if (!svgEl) return;
+    const rect = svgEl.getBoundingClientRect();
     setTooltip({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -493,6 +509,8 @@ export default function InteractiveGraph({
 
   return (
     <div ref={containerRef} className="relative">
+      {/* Search/tour controls — constrained to content width */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Tour bar when a tour is active (replaces search bar) */}
       {tour.isActive && tour.activeTour && (
         <div className="mb-3">
@@ -557,7 +575,7 @@ export default function InteractiveGraph({
         </div>
       )}
       {/* Interactive cluster legend — click to zoom into a cluster region */}
-      <div className="mb-2 flex flex-wrap gap-1.5">
+      <div className="mb-2 hidden md:flex flex-wrap gap-1.5">
         {clusters.map((c) => (
           <button
             key={c.id}
@@ -579,14 +597,15 @@ export default function InteractiveGraph({
           </button>
         ))}
       </div>
+      </div>
       <div className="flex">
         {/* SVG area */}
-        <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative`}>
+        <div className={`${selectedNode && isDesktop ? 'flex-1 min-w-0' : 'w-full'} relative rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] overflow-hidden`}>
           <svg
             ref={svgRef}
             viewBox={`0 0 ${meta.width} ${meta.height}`}
-            className="w-full h-auto"
-            style={{ maxWidth: `${meta.width}px`, cursor: 'grab', outline: 'none' }}
+            className="w-full"
+            style={{ cursor: 'grab', outline: 'none', height: '65vh', maxHeight: '700px' }}
             tabIndex={0}
             onKeyDown={handleGraphKeyDown}
             role="application"
@@ -594,6 +613,19 @@ export default function InteractiveGraph({
             aria-label="Interactive AI Landscape graph. Use arrow keys to navigate between connected concepts, Enter to select, Escape to deselect, Tab to cycle through all concepts."
           >
             <style dangerouslySetInnerHTML={{ __html: cssString }} />
+            <defs>
+              <marker
+                id="arrowhead"
+                viewBox="0 -5 10 10"
+                refX={8}
+                refY={0}
+                markerWidth={6}
+                markerHeight={6}
+                orient="auto"
+              >
+                <path d="M0,-5L10,0L0,5" fill="context-stroke" />
+              </marker>
+            </defs>
             <g transform={transform.toString()}>
               {/* Edges layer (rendered first for z-order) */}
               <g className="edges">
@@ -602,17 +634,25 @@ export default function InteractiveGraph({
                   const tgt = posMap.get(edge.target);
                   if (!src || !tgt) return null;
 
-                  let strokeWidth = '1';
+                  // Shorten target endpoint to node boundary for arrow placement
+                  const dist = Math.hypot(tgt.x - src.x, tgt.y - src.y);
+                  if (dist === 0) return null;
+                  const tgtR = rootNodeIds.has(edge.target) ? ROOT_NODE_RADIUS : NODE_RADIUS;
+                  const dx = (tgt.x - src.x) / dist;
+                  const dy = (tgt.y - src.y) / dist;
+                  const stx = tgt.x - dx * tgtR;
+                  const sty = tgt.y - dy * tgtR;
+
+                  const arcD = linkArc(src.x, src.y, stx, sty);
+
+                  let strokeWidth = '1.2';
                   let strokeDasharray: string | undefined;
-                  let opacity: number | undefined;
 
                   if (edge.type === 'hierarchy') {
                     strokeWidth = '2';
                   } else if (edge.type === 'includes') {
                     strokeWidth = '1.5';
                     strokeDasharray = '4 3';
-                  } else {
-                    opacity = 0.4;
                   }
 
                   // Ancestry highlighting for edges
@@ -624,32 +664,27 @@ export default function InteractiveGraph({
                     strokeWidth = '2.5';
                   }
 
-                  const edgeOpacity = isHighlighting
-                    ? (bothInChain ? undefined : 0.1)
-                    : opacity;
+                  const edgeOpacity = isHighlighting && !bothInChain ? 0.1 : undefined;
 
                   const edgeKey = `${edge.source}-${edge.target}`;
                   return (
                     <g key={edgeKey}>
-                      <line
-                        x1={src.x}
-                        y1={src.y}
-                        x2={tgt.x}
-                        y2={tgt.y}
-                        className="ai-edge"
+                      <path
+                        d={arcD}
+                        className={`ai-edge-${edge.type}`}
                         strokeWidth={strokeWidth}
                         strokeDasharray={strokeDasharray}
                         opacity={edgeOpacity}
                         stroke={isHighlighting && bothInChain ? 'var(--color-accent)' : undefined}
+                        fill="none"
+                        markerEnd="url(#arrowhead)"
                       />
                       {/* Invisible wider hit-area for non-hierarchy edge hover */}
                       {edge.type !== 'hierarchy' && (
-                        <line
-                          x1={src.x}
-                          y1={src.y}
-                          x2={tgt.x}
-                          y2={tgt.y}
+                        <path
+                          d={arcD}
                           stroke="transparent"
+                          fill="none"
                           strokeWidth={12}
                           style={{ cursor: 'pointer' }}
                           onMouseEnter={() => setHoveredEdge(edgeKey)}
@@ -658,8 +693,9 @@ export default function InteractiveGraph({
                       )}
                       {/* Edge label: backbone always visible, others on hover */}
                       {(edge.type === 'hierarchy' || hoveredEdge === edgeKey) && (() => {
-                        const mx = (src.x + tgt.x) / 2;
-                        const my = (src.y + tgt.y) / 2 - 4;
+                        const mid = arcMidpoint(src.x, src.y, stx, sty);
+                        const mx = mid.x;
+                        const my = mid.y - 4;
                         const labelWidth = edge.label.length * 4.5 + 8;
                         return (
                           <>
@@ -702,18 +738,22 @@ export default function InteractiveGraph({
                       const src = posMap.get(edge.source);
                       const tgt = posMap.get(edge.target);
                       if (!src || !tgt) return null;
+                      const dist = Math.hypot(tgt.x - src.x, tgt.y - src.y);
+                      if (dist === 0) return null;
+                      const tgtR = rootNodeIds.has(edge.target) ? ROOT_NODE_RADIUS : NODE_RADIUS;
+                      const dx = (tgt.x - src.x) / dist;
+                      const dy = (tgt.y - src.y) / dist;
+                      const arcD = linkArc(src.x, src.y, tgt.x - dx * tgtR, tgt.y - dy * tgtR);
                       const key = `${edge.source}-${edge.target}`;
                       return (
-                        <line
+                        <path
                           key={`pulse-${key}`}
                           ref={(el) => {
                             if (el) pulseRefs.current.set(key, el);
                             else pulseRefs.current.delete(key);
                           }}
-                          x1={src.x}
-                          y1={src.y}
-                          x2={tgt.x}
-                          y2={tgt.y}
+                          d={arcD}
+                          fill="none"
                           stroke="var(--color-accent)"
                           strokeWidth={3}
                           opacity={0}
@@ -796,6 +836,17 @@ export default function InteractiveGraph({
                       />
                       <text
                         x={pos.x}
+                        y={pos.y}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        className={`ai-node-abbr ai-abbr-${node.cluster}`}
+                        fontSize={r <= NODE_RADIUS ? 7 : 9}
+                        pointerEvents="none"
+                      >
+                        {node.shortLabel}
+                      </text>
+                      <text
+                        x={pos.x}
                         y={labelY}
                         textAnchor="middle"
                         className="ai-label"
@@ -832,17 +883,12 @@ export default function InteractiveGraph({
             </div>
           )}
 
-          {/* Desktop-only mini-map showing full graph with viewport rectangle */}
-          {isDesktop && (
-            <MiniMap
-              positions={positions}
-              clusters={clusters}
-              clusterMap={clusterMap}
-              nodeClusterMap={nodeClusterMap}
-              transform={transform}
-              meta={meta}
-            />
-          )}
+          {/* Interaction hints */}
+          <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1 text-[10px] font-mono text-[var(--color-text-secondary)]/60 pointer-events-none select-none">
+            <span>Drag to pan</span>
+            <span><kbd className="bg-[var(--color-surface)] border border-[var(--color-border)] px-1 rounded text-[9px]">Ctrl</kbd> + scroll to zoom</span>
+            <span>Click node to explore</span>
+          </div>
 
           {/* Node hover tooltip */}
           {tooltip && (
@@ -851,7 +897,7 @@ export default function InteractiveGraph({
               className="absolute z-10 pointer-events-none max-w-xs px-3 py-2 rounded-lg shadow-lg border text-sm
                 bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)]"
               style={{
-                left: Math.min(tooltip.x + 12, (containerRef.current?.clientWidth ?? 400) - 260),
+                left: Math.min(tooltip.x + 12, (svgRef.current?.clientWidth ?? 400) - 260),
                 top: tooltip.y - 8,
               }}
             >
@@ -863,7 +909,7 @@ export default function InteractiveGraph({
 
         {/* Desktop compare panel (wider, replaces detail panel) */}
         {isDesktop && compareMode && selectedNode && compareNode && (
-          <div className="w-96 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[600px]">
+          <div className="w-[560px] shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[70vh] sticky top-20 overscroll-contain" onWheel={(e) => e.stopPropagation()}>
             <ComparePanel
               node1={selectedNode}
               node2={compareNode}
@@ -876,7 +922,7 @@ export default function InteractiveGraph({
         )}
         {/* Desktop detail panel (when not in compare mode or compare incomplete) */}
         {isDesktop && !(compareMode && compareNode) && selectedNode && (
-          <div className="w-80 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[600px]">
+          <div className="w-[480px] shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto max-h-[70vh] sticky top-20 overscroll-contain" onWheel={(e) => e.stopPropagation()}>
             <DetailPanel
               node={selectedNode}
               edges={edges}

@@ -30,7 +30,7 @@ export function DetailPanel({
   const groups = groupRelationshipsByType(node.id, edges, nodeMap);
 
   return (
-    <div className="overflow-y-auto p-4">
+    <div className="p-4">
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-bold" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -58,7 +58,7 @@ export function DetailPanel({
         <span
           className={isSimple ? 'font-semibold text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}
         >
-          Simple
+          Overview
         </span>
         <button
           type="button"

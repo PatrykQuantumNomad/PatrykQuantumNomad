@@ -1,5 +1,6 @@
 import type { AiNode, Edge, Cluster } from './schema';
 import type { LayoutPosition, LayoutMeta } from './layout-schema';
+import { EDGE_TYPE_COLORS, linkArc } from './graph-data';
 
 // --- Constants ---
 
@@ -68,13 +69,24 @@ export function buildLandscapeSvg(
     })
     .join('\n');
 
+  const edgeStyles = Object.entries(EDGE_TYPE_COLORS)
+    .map(([type, colors]) => [
+      `.ai-edge-${type} { stroke: ${colors.light}; fill: none; opacity: 0.45; }`,
+      `html.dark .ai-edge-${type} { stroke: ${colors.dark}; }`,
+    ].join('\n'))
+    .join('\n');
+
   const baseStyles = [
-    `.ai-edge { stroke: var(--color-border); }`,
-    `html.dark .ai-edge { stroke: var(--color-border); }`,
+    edgeStyles,
     `.ai-label { fill: var(--color-text-primary); font-family: ${FONT_FAMILY}; font-size: ${LABEL_FONT_SIZE}px; pointer-events: none; }`,
+    ...clusters.map(c => `.ai-abbr-${c.id} { fill: ${c.darkColor}; }\nhtml.dark .ai-abbr-${c.id} { fill: ${c.color}; }`),
+    `.ai-node-abbr { font-family: ${FONT_FAMILY}; font-weight: 600; pointer-events: none; }`,
   ].join('\n');
 
   const styleBlock = `<style>\n${clusterStyles}\n${baseStyles}\n</style>`;
+
+  // --- Marker definition ---
+  const markerDef = `<defs><marker id="arrowhead" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,-5L10,0L0,5" fill="context-stroke"/></marker></defs>`;
 
   // --- Edges ---
   const edgeLines = edges
@@ -83,20 +95,28 @@ export function buildLandscapeSvg(
       const tgt = posMap.get(e.target);
       if (!src || !tgt) return '';
 
-      let strokeWidth = '1';
+      // Shorten target to node boundary for arrow placement
+      const dist = Math.hypot(tgt.x - src.x, tgt.y - src.y);
+      if (dist === 0) return '';
+      const tgtR = rootNodeIds.has(e.target) ? ROOT_NODE_RADIUS : NODE_RADIUS;
+      const dx = (tgt.x - src.x) / dist;
+      const dy = (tgt.y - src.y) / dist;
+      const stx = tgt.x - dx * tgtR;
+      const sty = tgt.y - dy * tgtR;
+
+      const arcD = linkArc(src.x, src.y, stx, sty);
+
+      let strokeWidth = '1.2';
       let extra = '';
-      let opacity = '';
 
       if (e.type === 'hierarchy') {
         strokeWidth = '2';
       } else if (e.type === 'includes') {
         strokeWidth = '1.5';
         extra = ' stroke-dasharray="4 3"';
-      } else {
-        opacity = ' opacity="0.4"';
       }
 
-      return `<line x1="${src.x}" y1="${src.y}" x2="${tgt.x}" y2="${tgt.y}" class="ai-edge" stroke-width="${strokeWidth}"${extra}${opacity}/>`;
+      return `<path d="${arcD}" class="ai-edge-${escXml(e.type)}" stroke-width="${strokeWidth}"${extra} fill="none" marker-end="url(#arrowhead)"/>`;
     })
     .filter(Boolean)
     .join('\n');
@@ -113,8 +133,10 @@ export function buildLandscapeSvg(
       const label = stripParenthetical(n.name);
       const labelY = pos.y + r + LABEL_FONT_SIZE + 2;
 
+      const abbrSize = r <= NODE_RADIUS ? 7 : 9;
       return [
         `<circle cx="${pos.x}" cy="${pos.y}" r="${r}" class="${clusterClass}"/>`,
+        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" class="ai-node-abbr ai-abbr-${escXml(n.cluster)}" font-size="${abbrSize}">${escXml(n.shortLabel ?? '')}</text>`,
         `<text x="${pos.x}" y="${labelY}" text-anchor="middle" class="ai-label">${escXml(label)}</text>`,
       ].join('\n');
     })
@@ -128,6 +150,7 @@ export function buildLandscapeSvg(
 
   return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escXml(ariaLabel)}" style="width:100%;height:auto;max-width:${width}px">
 ${styleBlock}
+${markerDef}
 <g class="edges">
 ${edgeLines}
 </g>

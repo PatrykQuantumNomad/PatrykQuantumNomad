@@ -25,7 +25,7 @@ export function useEdgePulse({
   edges,
   containerRef,
 }: UseEdgePulseOptions) {
-  const pulseRefs = useRef<Map<string, SVGLineElement>>(new Map());
+  const pulseRefs = useRef<Map<string, SVGPathElement>>(new Map());
 
   useGSAP(
     () => {
@@ -47,12 +47,8 @@ export function useEdgePulse({
         const el = pulseRefs.current.get(key);
         if (!el) return;
 
-        // Compute line length for dash animation
-        const x1 = parseFloat(el.getAttribute('x1') || '0');
-        const y1 = parseFloat(el.getAttribute('y1') || '0');
-        const x2 = parseFloat(el.getAttribute('x2') || '0');
-        const y2 = parseFloat(el.getAttribute('y2') || '0');
-        const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        // Compute path length for dash animation
+        const length = el.getTotalLength();
 
         if (length === 0) return;
 

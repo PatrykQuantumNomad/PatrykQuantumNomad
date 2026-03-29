@@ -84,6 +84,54 @@ export function getClusterBounds(
   return { x0: finalX0, y0: finalY0, x1: finalX1, y1: finalY1, cx, cy };
 }
 
+// --- Edge type colors (light/dark mode pairs) ---
+
+/** Color palette for the 10 edge relationship types */
+export const EDGE_TYPE_COLORS: Record<string, { light: string; dark: string }> = {
+  hierarchy:     { light: '#5c6bc0', dark: '#7986cb' },
+  includes:      { light: '#26a69a', dark: '#4db6ac' },
+  enables:       { light: '#ef6c00', dark: '#ff9800' },
+  example:       { light: '#8d6e63', dark: '#a1887f' },
+  relates:       { light: '#78909c', dark: '#90a4ae' },
+  progression:   { light: '#7b1fa2', dark: '#ab47bc' },
+  characterizes: { light: '#00838f', dark: '#00acc1' },
+  aspires:       { light: '#c62828', dark: '#ef5350' },
+  applies:       { light: '#558b2f', dark: '#8bc34a' },
+  standardizes:  { light: '#f9a825', dark: '#ffca28' },
+};
+
+/**
+ * Generate an SVG arc path between two points.
+ * Radius equals the distance between source and target,
+ * producing a gentle curve (Mobile Patent Suits pattern).
+ */
+export function linkArc(sx: number, sy: number, tx: number, ty: number): string {
+  const r = Math.hypot(tx - sx, ty - sy);
+  return `M${sx},${sy}A${r},${r} 0 0,1 ${tx},${ty}`;
+}
+
+/**
+ * Compute the visual midpoint of an arc for label placement.
+ * The midpoint is the chord midpoint offset perpendicular by the sagitta.
+ * For sweep=1 arcs where r=chord length, sagitta ≈ 13.4% of chord length.
+ */
+export function arcMidpoint(
+  sx: number, sy: number, tx: number, ty: number,
+): { x: number; y: number } {
+  const mx = (sx + tx) / 2;
+  const my = (sy + ty) / 2;
+  const dist = Math.hypot(tx - sx, ty - sy);
+  if (dist === 0) return { x: mx, y: my };
+  // Sagitta for arc where r = chord length: r - r*cos(arcsin(0.5)) = r*(1 - √3/2)
+  const sagitta = dist * (1 - Math.sqrt(3) / 2);
+  // Perpendicular direction (rightward for sweep=1)
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const nx = -dy / dist;
+  const ny = dx / dist;
+  return { x: mx + nx * sagitta, y: my + ny * sagitta };
+}
+
 // Re-export imported types for single-file consumer imports
 export type { AiNode, Edge, Cluster } from './schema';
 export type { LayoutPosition, LayoutMeta } from './layout-schema';

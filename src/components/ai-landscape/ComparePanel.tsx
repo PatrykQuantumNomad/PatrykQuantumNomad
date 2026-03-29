@@ -80,7 +80,7 @@ export function ComparePanel({
               : 'text-[var(--color-text-secondary)]'
           }
         >
-          Simple
+          Overview
         </span>
         <button
           type="button"

@@ -42,14 +42,35 @@ for (const node of allNodes) {
 
 <Layout
   title="AI Landscape Explorer: Visual Guide to Artificial Intelligence (2026) | Patryk Golabek"
-  description="Explore the AI landscape — from machine learning to generative AI, agentic systems, and developer tools. Visual guide with 51 concepts explained simply and technically."
+  description="Explore the AI landscape, covering machine learning, deep learning, generative AI, agentic systems, and developer tools. Interactive visual guide with concepts explained simply and technically."
+  canonicalURL={new URL('/ai-landscape/', Astro.site)}
   ogImage={new URL('/open-graph/ai-landscape.png', Astro.site).toString()}
-  ogImageAlt="AI Landscape Explorer: Visual guide to 51 AI concepts across 9 clusters"
+  ogImageAlt="AI Landscape Explorer: Interactive visual guide to AI concepts across 9 clusters"
 >
   <BreadcrumbJsonLd crumbs={[
     { name: 'Home', url: 'https://patrykgolabek.dev/' },
     { name: 'AI Landscape', url: 'https://patrykgolabek.dev/ai-landscape/' },
   ]} />
+
+  {/* ItemList structured data for cluster categories */}
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "AI Landscape Explorer",
+    "description": `Visual guide to ${allNodes.length} key concepts in artificial intelligence organized into ${(graphData.clusters as Cluster[]).length} clusters.`,
+    "url": "https://patrykgolabek.dev/ai-landscape/",
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": (graphData.clusters as Cluster[]).length,
+      "itemListElement": (graphData.clusters as Cluster[]).map((cluster, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "name": cluster.name,
+        "description": `${nodesByCluster.get(cluster.id)?.length ?? 0} AI concepts in the ${cluster.name} cluster`,
+        "url": `https://patrykgolabek.dev/ai-landscape/?cluster=${cluster.id}`
+      }))
+    }
+  })} />
 
   {/* Hero Section */}
   <section class="text-center max-w-4xl mx-auto py-16 pb-12 px-4">
@@ -58,13 +79,13 @@ for (const node of allNodes) {
       AI Landscape Explorer
     </h1>
     <p class="text-lg text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto">
-      A visual guide to 51 key concepts in artificial intelligence — from foundational
-      machine learning to cutting-edge agentic systems and developer tools.
+      A visual guide to key concepts in artificial intelligence, covering foundational
+      machine learning, deep learning, generative AI, agentic systems, and developer tools.
     </p>
   </section>
 
   {/* Interactive Graph (React island, renders after JS loads) */}
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="AI landscape visualization">
+  <section class="px-2 sm:px-4" aria-label="AI landscape visualization">
     <InteractiveGraph
       client:only="react"
       nodes={allNodes}
@@ -77,7 +98,7 @@ for (const node of allNodes) {
 
   {/* Static SVG fallback (visible if JS disabled) */}
   <noscript>
-    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto" aria-label="AI landscape visualization (static)">
+    <section class="px-2 sm:px-4 overflow-x-auto" aria-label="AI landscape visualization (static)">
       <Fragment set:html={svgString} />
     </section>
   </noscript>

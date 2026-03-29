@@ -97,7 +97,10 @@ export default defineConfig({
       } else if (item.url.includes('/tools/') && !item.url.includes('/rules/')) {
         item.changefreq = 'monthly';
         item.priority = 0.6;
-      } else if (item.url.includes('/beauty-index/') || item.url.includes('/db-compass/') || item.url.includes('/eda/') || item.url.includes('/ai-landscape/')) {
+      } else if (item.url.includes('/ai-landscape/')) {
+        item.changefreq = 'monthly';
+        item.priority = 0.6;
+      } else if (item.url.includes('/beauty-index/') || item.url.includes('/db-compass/') || item.url.includes('/eda/')) {
         item.changefreq = 'monthly';
         item.priority = 0.5;
       } else if (item.url.includes('/rules/')) {

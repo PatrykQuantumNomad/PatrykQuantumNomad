@@ -18,7 +18,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/gsd-context-monitor.js"
+            "command": "node .claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ],
+        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/gsd-prompt-guard.js",
+            "timeout": 5
           }
         ]
       }
@@ -35,10 +49,14 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    "excludedCommands": ["node"],
+    "excludedCommands": [
+      "node"
+    ],
     "permissions": {
       "network": {
-        "allow": ["registry.npmjs.org"]
+        "allow": [
+          "registry.npmjs.org"
+        ]
       }
     }
   }

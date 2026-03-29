@@ -84,22 +84,24 @@ describe('buildLandscapeSvg', () => {
     expect(circleCount).toBe(51);
   });
 
-  it('contains line elements for edges', () => {
-    const lineCount = (svg.match(/<line/g) ?? []).length;
-    expect(lineCount).toBe(66);
+  it('contains path elements for all 66 edges', () => {
+    const pathCount = (svg.match(/<path[^>]*class="ai-edge-/g) ?? []).length;
+    expect(pathCount).toBe(66);
   });
 
-  it('contains text labels for node names', () => {
+  it('contains text labels for node names and abbreviations', () => {
     const textCount = (svg.match(/<text/g) ?? []).length;
-    expect(textCount).toBe(51);
+    expect(textCount).toBe(102); // 51 abbreviations inside circles + 51 labels below
   });
 
   it('uses var(--color-text-primary) for text fill', () => {
     expect(svg).toContain('var(--color-text-primary)');
   });
 
-  it('uses var(--color-border) for edge stroke', () => {
-    expect(svg).toContain('var(--color-border)');
+  it('uses edge-type-specific color classes', () => {
+    expect(svg).toContain('ai-edge-hierarchy');
+    expect(svg).toContain('ai-edge-includes');
+    expect(svg).toContain('ai-edge-relates');
   });
 
   it('assigns correct cluster class to each node circle', () => {
@@ -128,11 +130,24 @@ describe('buildLandscapeSvg', () => {
     expect(svg).not.toMatch(/>Natural Language Processing \(NLP\)</);
   });
 
-  it('differentiates edge types with different stroke styles', () => {
+  it('differentiates edge types with stroke styles and arrows', () => {
     // hierarchy edges should be solid/thick (stroke-width 2)
     expect(svg).toContain('stroke-width="2"');
     // includes edges should be dashed
     expect(svg).toContain('stroke-dasharray="4 3"');
+    // all edges have arrow markers
+    expect(svg).toContain('marker-end="url(#arrowhead)"');
+  });
+
+  it('contains arrowhead marker definition using context-stroke', () => {
+    expect(svg).toContain('<marker id="arrowhead"');
+    expect(svg).toContain('context-stroke');
+  });
+
+  it('uses arc path commands for edges', () => {
+    const arcPaths = svg.match(/d="M[\d.,-]+A[\d.,]+ 0 0,1 [\d.,-]+"/g);
+    expect(arcPaths).not.toBeNull();
+    expect(arcPaths!.length).toBe(66);
   });
 
   it('uses larger radius for root nodes (parentId null)', () => {

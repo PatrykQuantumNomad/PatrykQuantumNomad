@@ -24,22 +24,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 
 // --- Constants ---
-const WIDTH = 1200;
-const HEIGHT = 900;
+const WIDTH = 1600;
+const HEIGHT = 1100;
 const TICKS = 300;
 const PAD = 40;
 
 // Cluster centroids for spatial grouping (forceX / forceY targets)
 const CLUSTER_CENTROIDS = {
-  ai: { x: 420, y: 225 },
-  ml: { x: 360, y: 360 },
-  nn: { x: 300, y: 495 },
-  dl: { x: 360, y: 585 },
-  genai: { x: 540, y: 675 },
-  levels: { x: 900, y: 180 },
-  agentic: { x: 900, y: 495 },
-  'agent-frameworks': { x: 960, y: 585 },
-  devtools: { x: 840, y: 765 },
+  ai: { x: 500, y: 220 },
+  ml: { x: 400, y: 480 },
+  nn: { x: 280, y: 720 },
+  dl: { x: 260, y: 880 },
+  genai: { x: 850, y: 1050 },
+  levels: { x: 1400, y: 180 },
+  agentic: { x: 1380, y: 700 },
+  'agent-frameworks': { x: 1420, y: 850 },
+  devtools: { x: 1120, y: 980 },
 };
 
 // --- Read source data ---
@@ -70,19 +70,24 @@ const simulation = forceSimulation(simNodes)
     'link',
     forceLink(simLinks)
       .id((d) => d.id)
-      .distance(60)
-      .strength(0.3),
+      .distance(140)
+      .strength((link) => {
+        // Weaken cross-cluster links so cluster grouping wins
+        const srcCluster = simNodes.find((n) => n.id === (link.source.id ?? link.source))?.cluster;
+        const tgtCluster = simNodes.find((n) => n.id === (link.target.id ?? link.target))?.cluster;
+        return srcCluster === tgtCluster ? 0.3 : 0.08;
+      }),
   )
-  .force('charge', forceManyBody().strength(-200).distanceMax(300))
+  .force('charge', forceManyBody().strength(-600).distanceMax(600))
   .force('center', forceCenter(WIDTH / 2, HEIGHT / 2))
-  .force('collide', forceCollide(25))
+  .force('collide', forceCollide(65))
   .force(
     'x',
-    forceX((d) => CLUSTER_CENTROIDS[d.cluster]?.x ?? WIDTH / 2).strength(0.15),
+    forceX((d) => CLUSTER_CENTROIDS[d.cluster]?.x ?? WIDTH / 2).strength(0.35),
   )
   .force(
     'y',
-    forceY((d) => CLUSTER_CENTROIDS[d.cluster]?.y ?? HEIGHT / 2).strength(0.15),
+    forceY((d) => CLUSTER_CENTROIDS[d.cluster]?.y ?? HEIGHT / 2).strength(0.35),
   )
   .stop();
 
@@ -91,11 +96,71 @@ for (let i = 0; i < TICKS; i++) {
   simulation.tick();
 }
 
-// --- Clamp positions within viewBox bounds and round ---
+// --- Post-simulation nudges for specific nodes ---
+
+// Separate KR from Safe in the AI cluster
+const krNode = simNodes.find((n) => n.id === 'knowledge-representation');
+if (krNode) krNode.x += 120;
+
+// Position GenAI children relative to their parent nodes to avoid overlaps
+const llmNode = simNodes.find((n) => n.id === 'large-language-models');
+const genNode = simNodes.find((n) => n.id === 'generative-ai');
+if (llmNode) {
+  // LLM children: arrange in a grid below LLM
+  const llmNudges = {
+    'fine-tuning': { dx: -120, dy: 110 },
+    'prompt-engineering': { dx: 60, dy: 110 },
+    'few-zero-shot-learning': { dx: -40, dy: 200 },
+    'retrieval-augmented-generation': { dx: 200, dy: 220 },
+    'context-windows': { dx: 220, dy: 60 },
+  };
+  for (const [id, { dx, dy }] of Object.entries(llmNudges)) {
+    const node = simNodes.find((n) => n.id === id);
+    if (node) {
+      node.x = llmNode.x + dx;
+      node.y = llmNode.y + dy;
+    }
+  }
+}
+if (genNode) {
+  // Move Gen further left and down from LLM
+  if (llmNode) {
+    genNode.x = llmNode.x - 250;
+    genNode.y = llmNode.y + 280;
+  }
+  // Position VAE above Gen
+  const vaeNode = simNodes.find((n) => n.id === 'variational-autoencoders');
+  if (vaeNode) {
+    vaeNode.x = genNode.x - 40;
+    vaeNode.y = genNode.y - 110;
+  }
+  // GAN to the right of Gen
+  const ganNode = simNodes.find((n) => n.id === 'generative-adversarial-networks');
+  if (ganNode) {
+    ganNode.x = genNode.x + 120;
+    ganNode.y = genNode.y + 110;
+  }
+  // Diff below-right of Gen
+  const diffNode = simNodes.find((n) => n.id === 'diffusion-models');
+  if (diffNode) {
+    diffNode.x = genNode.x + 100;
+    diffNode.y = genNode.y - 60;
+  }
+}
+
+// --- Center the graph within the viewBox ---
+const rawXs = simNodes.map((n) => n.x);
+const rawYs = simNodes.map((n) => n.y);
+const nodeCx = (Math.min(...rawXs) + Math.max(...rawXs)) / 2;
+const nodeCy = (Math.min(...rawYs) + Math.max(...rawYs)) / 2;
+const shiftX = WIDTH / 2 - nodeCx;
+const shiftY = HEIGHT / 2 - nodeCy;
+
+// --- Apply centering shift, clamp within viewBox bounds, and round ---
 const positions = simNodes.map((n) => ({
   id: n.id,
-  x: Math.round(Math.max(PAD, Math.min(WIDTH - PAD, n.x)) * 100) / 100,
-  y: Math.round(Math.max(PAD, Math.min(HEIGHT - PAD, n.y)) * 100) / 100,
+  x: Math.round(Math.max(PAD, Math.min(WIDTH - PAD, n.x + shiftX)) * 100) / 100,
+  y: Math.round(Math.max(PAD, Math.min(HEIGHT - PAD, n.y + shiftY)) * 100) / 100,
 }));
 
 // --- Write layout.json ---

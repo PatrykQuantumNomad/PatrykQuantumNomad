@@ -16,6 +16,7 @@ export const aiNodeSchema = z.object({
   simpleDescription: z.string().min(50),
   technicalDescription: z.string().min(50),
   whyItMatters: z.string(),
+  shortLabel: z.string(),
   examples: z.array(exampleSchema).default([]),
   dotNodeId: z.string(),
 });
