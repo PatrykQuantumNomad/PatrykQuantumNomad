@@ -1,112 +1,69 @@
-# Testing Patterns
+# Testing
 
-**Analysis Date:** 2026-02-12
+## Framework
 
-## Test Framework
+- **Vitest 4.0** — test runner
+- **Config:** `vitest.config.ts` — includes `src/**/*.test.ts`
+- **No browser testing** — all tests are unit/integration tests running in Node
 
-**Runner:**
-- Not detected — no test framework currently configured
+## Test Organization
 
-**Assertion Library:**
-- Not detected
+Tests live in `__tests__/` directories co-located with source:
 
-**Run Commands:**
-- Not applicable — no test scripts in `package.json`
-
-**Current package.json scripts:**
-```bash
-npm run dev              # Start Astro dev server
-npm run build            # Build static site
-npm run preview          # Preview production build
+```
+src/lib/eda/notebooks/__tests__/          # 11 test files — notebook generation
+src/lib/tools/gha-validator/__tests__/    # 5 test files — GHA validation engine
+src/lib/tools/gha-validator/rules/__tests__/ # 7 test files — GHA rule sets
+src/lib/tools/dockerfile-analyzer/rules/*/__tests__/ # 2 test files — Dockerfile rules
+src/lib/ai-landscape/__tests__/           # 8 test files — graph data, tours, schema
+src/lib/guides/__tests__/                 # 3 test files — guide routes, schema, helpers
+src/lib/guides/svg-diagrams/__tests__/    # 8 test files — SVG diagram generators
+src/lib/guides/interactive-data/__tests__/ # 2 test files — interactive data
+src/integrations/__tests__/               # 1 test file — notebook packager
 ```
 
-## Test File Organization
+**Total: 47 test files**
 
-**Location:**
-- No test files found in project (searches for `*.test.*` and `*.spec.*` returned zero results in `src/`)
+## Test Patterns
 
-**Naming:**
-- Not applicable — no existing tests
+### Data-driven Tests
+```typescript
+it.each([...cases])('description %s', (input, expected) => { ... })
+```
+Used extensively in rule tests and schema validation.
 
-**Structure:**
-- Not applicable — no existing tests
+### Factory Helpers
+Test files create fixtures with helper functions rather than importing shared test utilities.
 
-## Test Structure
+### Lifecycle Hooks
+- `beforeAll` / `afterAll` for expensive setup (file reads, schema compilation)
+- `beforeEach` for per-test state reset
 
-**Suite Organization:**
-- Not detected — no test files exist
+### Mock-free Philosophy
+Tests use real implementations rather than mocks. Validation engines, parsers, and scorers are tested against actual input data.
 
-**Patterns:**
-- Not applicable
+## Coverage Landscape
 
-## Mocking
+### Well-tested Areas
+- EDA notebook generation (`src/lib/eda/notebooks/`) — 11 test files
+- GHA validator engine + rules — 12 test files
+- AI landscape data model — 8 test files
+- Guide SVG diagrams — 8 test files
 
-**Framework:**
-- Not detected
+### Untested Areas
+- **React components** (77 `.tsx` files) — 0 component tests
+- **Astro components** (100 `.astro` files) — 0 tests
+- **EDA SVG generators** (22 generators in `src/lib/eda/svg-generators/`) — 0 tests
+- **Compose validator rules** (`src/lib/tools/compose-validator/rules/`) — 0 tests
+- **K8s analyzer rules** (`src/lib/tools/k8s-analyzer/rules/`) — 0 tests
+- **EDA math functions** (`src/lib/eda/math/`) — 0 tests
+- **OG image generation** (`src/lib/og-image.ts`, 3,879 lines) — 0 tests
+- **Beauty index scoring** (`src/lib/beauty-index/`) — 0 tests
+- **DB compass logic** (`src/lib/db-compass/`) — 0 tests
 
-**Patterns:**
-- Not applicable — no tests exist
+## Running Tests
 
-**What to Mock:**
-- Not applicable
-
-**What NOT to Mock:**
-- Not applicable
-
-## Fixtures and Factories
-
-**Test Data:**
-- No test data fixtures detected
-- Production data located in `src/data/`:
-  - `src/data/site.ts` — Site configuration and metadata
-  - `src/data/projects.ts` — Project listing with categories
-
-**Location:**
-- Not applicable — no test fixtures
-
-## Coverage
-
-**Requirements:**
-- Not enforced — no coverage tooling detected
-
-**View Coverage:**
-- Not applicable
-
-## Test Types
-
-**Unit Tests:**
-- Not present
-
-**Integration Tests:**
-- Not present
-
-**E2E Tests:**
-- Not present
-
-## Common Patterns
-
-**Async Testing:**
-- Not applicable — no tests exist
-
-**Error Testing:**
-- Not applicable — no tests exist
-
-## Testing Recommendations
-
-Given this is an Astro static site project, consider:
-
-1. **Component testing:** Use `@astrojs/test` or Vitest for Astro component unit tests
-2. **E2E testing:** Playwright or Cypress for critical user flows (navigation, form submission on `/contact`)
-3. **Visual regression:** Percy or Chromatic for design consistency
-4. **Accessibility testing:** axe-core integration for a11y compliance
-5. **Build validation:** Ensure `npm run build` succeeds in CI pipeline
-
-**Testing gaps to address:**
-- Animation logic in `src/lib/smooth-scroll.ts`, `src/lib/scroll-animations.ts`, and `src/lib/animation-lifecycle.ts`
-- OG image generation in `src/lib/og-image.ts`
-- Content schema validation in `src/content.config.ts`
-- Blog post rendering and metadata extraction
-
----
-
-*Testing analysis: 2026-02-12*
+```bash
+npx vitest          # Watch mode
+npx vitest run      # Single run
+```

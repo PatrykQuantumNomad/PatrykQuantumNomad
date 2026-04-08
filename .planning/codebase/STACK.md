@@ -1,93 +1,83 @@
-# Technology Stack
-
-**Analysis Date:** 2026-02-12
+# Tech Stack
 
 ## Languages
 
-**Primary:**
-- TypeScript 5.9.3 - Component logic, content schemas, utility libraries
-- JavaScript (ES Module) - Build config, remark plugins, inline scripts
+| Language | Usage |
+|----------|-------|
+| TypeScript 5.9 | Primary — all source in `src/`, scripts in `scripts/` |
+| JavaScript (ESM) | Build scripts (`scripts/*.mjs`), AJV compiled validators |
+| Bash | `scripts/optimize-model.sh`, `scripts/test-validator-hooks.sh` |
+| MDX / Markdown | Blog posts, guide content in `src/data/blog/`, `src/data/guides/` |
 
-**Secondary:**
-- CSS - Global styles, component-scoped styles in Astro components
-- MDX - Blog post content with embedded components
+## Runtime & Build
 
-## Runtime
+- **Node.js 24.x** — runtime for build and dev server
+- **npm** — package manager (lockfile v3)
+- **Astro 5.3** — static site generator (`output: 'static'`)
+- **GitHub Actions** — CI/CD via `.github/workflows/deploy.yml`
+- **GitHub Pages** — hosting target
 
-**Environment:**
-- Node.js (version unspecified in package.json)
+## Core Frameworks
 
-**Package Manager:**
-- npm
-- Lockfile: present (`package-lock.json`)
-
-## Frameworks
-
-**Core:**
-- Astro 5.3.0 - Static site generator, primary framework
-- Tailwind CSS 3.4.19 - Utility-first CSS framework
-
-**Testing:**
-- Not detected
-
-**Build/Dev:**
-- Vite (bundled with Astro) - Build tool and dev server
-- TypeScript 5.9.3 - Type checking
-- `@astrojs/check` 0.9.6 - Astro-specific type checking
+| Framework | Version | Role |
+|-----------|---------|------|
+| Astro | 5.3 | SSG framework, routing, content collections |
+| React | 19.2 | Interactive components (`.tsx`) |
+| Tailwind CSS | 3.4 | Utility-first styling |
+| @tailwindcss/typography | 0.5 | Prose styling for blog/guide content |
 
 ## Key Dependencies
 
-**Critical:**
-- `@astrojs/mdx` 4.3.13 - MDX support for blog content
-- `@astrojs/tailwind` 6.0.2 - Tailwind CSS integration
-- `@astrojs/sitemap` 3.7.0 - Automatic sitemap generation
-- `@astrojs/rss` 4.0.15 - RSS feed generation
+### 3D & Visualization
+- **Three.js 0.182** + `@react-three/fiber` + `@react-three/drei` — 3D hero scene (`HeadScene.tsx`)
+- **D3** (d3-array, d3-scale, d3-selection, d3-shape, d3-force, d3-zoom, d3-contour, d3-axis, d3-path) — EDA charts, force graphs
+- **@xyflow/react** + `@dagrejs/dagre` — flow graphs (AI landscape, tool dependency views)
 
-**Animation & Interaction:**
-- `gsap` 3.14.2 - Animation library with ScrollTrigger for scroll-based animations
-- `lenis` 1.3.17 - Smooth scroll library
-- `vanilla-tilt` 1.8.1 - 3D tilt hover effects
+### Animation
+- **GSAP 3.14** + `@gsap/react` — scroll/timeline animations
+- **Lenis 1.3** — smooth scrolling
+- **vanilla-tilt** — card tilt effects
 
-**Content Processing:**
-- `reading-time` 1.5.0 - Reading time estimation for blog posts
-- `mdast-util-to-string` 4.0.0 - Markdown AST to string conversion
-- `astro-expressive-code` 0.41.6 - Enhanced code syntax highlighting
+### Editor & Validation
+- **CodeMirror 6** + `@codemirror/lang-yaml` — in-browser YAML editors (tool validators)
+- **AJV 8.18** + `ajv-formats` — JSON Schema validation for compose/GHA/K8s tools
+- **dockerfile-ast** — Dockerfile parsing for analyzer tool
 
-**Image Generation:**
-- `satori` 0.19.2 - React to SVG/PNG converter for Open Graph images
-- `sharp` 0.34.5 - High-performance image processing
+### Content & SEO
+- **astro-expressive-code** — syntax highlighted code blocks
+- **remark-math** + **rehype-katex** — LaTeX math rendering
+- **@astrojs/mdx** — MDX content support
+- **@astrojs/sitemap** — sitemap generation with custom lastmod dates
+- **@astrojs/rss** — RSS feed generation
+- **satori 0.19** + **sharp 0.34** — OG image generation (`src/lib/og-image.ts`)
+- **reading-time** — estimated read time for posts
 
-**UI Enhancement:**
-- `@tailwindcss/typography` 0.5.19 - Prose styling for blog content
+### Utilities
+- **nanostores** + `@nanostores/react` — lightweight state management
+- **archiver** — ZIP generation (notebook packager)
+- **lz-string** — URL-safe compression for editor state sharing
+- **yaml** — YAML parsing
+- **asciinema-player** — terminal recording playback
 
-## Configuration
+## Dev Dependencies
 
-**Environment:**
-- No `.env` files detected - all configuration is static
-- Site URL configured in `astro.config.mjs`: `https://patrykgolabek.dev`
-- Output mode: static site generation
+- **Vitest 4.0** — test framework
+- **tsx** — TypeScript execution for scripts
+- **rollup-plugin-visualizer** — bundle analysis
 
-**Build:**
-- `astro.config.mjs` - Astro framework config (MDX, Tailwind, sitemap, expressive-code)
-- `tailwind.config.mjs` - Custom colors, fonts, typography plugin
-- `tsconfig.json` - Extends `astro/tsconfigs/strict`
-- `remark-reading-time.mjs` - Custom remark plugin for reading time
+## Configuration Files
 
-**TypeScript:**
-- Strict mode enabled via Astro's strict preset
-- ES modules (`"type": "module"` in package.json)
+| File | Purpose |
+|------|---------|
+| `astro.config.mjs` | Astro config — site URL, integrations, markdown plugins |
+| `tsconfig.json` | Extends `astro/tsconfigs/strict`, React JSX |
+| `tailwind.config.mjs` | Tailwind customization |
+| `vitest.config.ts` | Test config — includes `src/**/*.test.ts` |
+| `ec.config.mjs` | Expressive Code configuration |
+| `remark-reading-time.mjs` | Custom remark plugin for reading time |
 
-## Platform Requirements
+## Build Pipeline
 
-**Development:**
-- Node.js (modern version supporting ES modules)
-- npm for dependency installation
-
-**Production:**
-- Static hosting (outputs pre-rendered HTML/CSS/JS)
-- No server-side runtime required
-- Deployment target: `https://patrykgolabek.dev` (configured in `astro.config.mjs`)
-
----
-
-*Stack analysis: 2026-02-12*
+1. **Prebuild:** `download-actionlint-wasm.mjs` fetches actionlint WASM, `generate-layout.mjs` computes AI landscape graph layout
+2. **Build:** `astro build` — static site generation
+3. **Deploy:** GitHub Actions → GitHub Pages

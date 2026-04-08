@@ -1,276 +1,149 @@
-# Codebase Structure
+# Directory Structure
 
-**Analysis Date:** 2026-02-12
-
-## Directory Layout
+## Top Level
 
 ```
 PatrykQuantumNomad/
-├── .claude/                    # Claude Code configuration and custom commands
-├── .planning/                  # Project planning documents (phases, research)
-├── public/                     # Static assets served as-is
-│   ├── images/                 # Public images (not imported)
-│   ├── CNAME                   # GitHub Pages domain config
-│   └── robots.txt              # Search engine directives
-├── src/                        # Source code
-│   ├── assets/                 # Imported assets (optimized by Astro)
-│   ├── components/             # Reusable UI components
-│   ├── data/                   # Static data and content
-│   ├── layouts/                # Page layout wrappers
-│   ├── lib/                    # Client-side utilities
-│   ├── pages/                  # File-based routing
-│   ├── styles/                 # Global CSS
-│   └── content.config.ts       # Content collections schema
-├── astro.config.mjs            # Astro framework configuration
-├── tailwind.config.mjs         # Tailwind CSS configuration
-├── package.json                # Dependencies and scripts
-└── README.md                   # GitHub profile README
+├── .github/workflows/      # CI/CD (deploy.yml)
+├── .planning/               # GSD planning artifacts
+├── handbook/                # NIST/SEMATECH reference data (local copy)
+│   ├── eda/                 # Chapter 1 — EDA techniques (primary source)
+│   └── datasets/            # Original NIST .DAT files
+├── notebooks/               # Generated Jupyter notebooks
+├── public/                  # Static assets (favicons, fonts, WASM)
+├── recordings-workspace/    # Asciinema terminal recordings
+├── scripts/                 # Build-time scripts
+├── skills/                  # Claude Code skills
+├── src/                     # Application source
+├── astro.config.mjs         # Astro configuration
+├── tailwind.config.mjs      # Tailwind configuration
+├── tsconfig.json            # TypeScript configuration
+├── vitest.config.ts         # Test configuration
+├── package.json             # Dependencies and scripts
+└── README.md                # GitHub profile README
 ```
 
-## Directory Purposes
+## Source Directory (`src/`)
 
-**`.claude/`:**
-- Purpose: Claude Code agent definitions, hooks, and custom commands
-- Contains: Agent YAML files, command scripts, GSD workflow templates
-- Key files: `.claude/settings.json`, `.claude/commands/gsd/`
+```
+src/
+├── assets/
+│   ├── fonts/               # Inter, Space Grotesk (WOFF)
+│   └── images/              # Personal photos, logos
+├── components/
+│   ├── ai-landscape/        # Interactive graph explorer (React)
+│   ├── animations/          # GSAP animation components (Astro)
+│   ├── beauty-index/        # Language beauty scoring UI
+│   ├── blog/                # Blog-specific components (Callout, Lede, etc.)
+│   ├── db-compass/          # Database comparison tool UI
+│   ├── eda/                 # EDA chart components + distribution explorer
+│   ├── guide/               # Guide chapter components
+│   ├── tools/               # Validator/analyzer tool UIs (React)
+│   └── *.astro / *.tsx      # Shared components (Header, Footer, SEO, JsonLd)
+├── content.config.ts        # Astro content collection definitions
+├── data/
+│   ├── ai-landscape/        # graph.json, nodes.json, layout.json
+│   ├── beauty-index/        # Language scoring data + code features
+│   ├── blog/                # MDX blog posts (20+ articles)
+│   ├── db-compass/          # models.json (database comparisons)
+│   ├── eda/                 # EDA technique definitions, datasets
+│   ├── guides/              # Multi-chapter guides (claude-code, fastapi)
+│   ├── projects.ts          # Project card data
+│   └── site.ts              # Site-wide config (name, URL, tagline)
+├── integrations/
+│   ├── indexnow.ts          # IndexNow SEO submission
+│   └── notebook-packager.ts # Jupyter notebook ZIP packaging
+├── layouts/
+│   ├── Layout.astro         # Base layout (head, nav, footer)
+│   ├── EDALayout.astro      # EDA-specific layout
+│   └── GuideLayout.astro    # Guide chapter layout
+├── lib/
+│   ├── ai-landscape/        # Graph data, ancestry, tours, comparisons
+│   ├── animation-lifecycle.ts # GSAP animation management
+│   ├── beauty-index/        # Scoring algorithms
+│   ├── db-compass/          # Database comparison logic
+│   ├── eda/
+│   │   ├── math/            # statistics.ts, distribution-math.ts
+│   │   ├── notebooks/       # Jupyter notebook generation
+│   │   ├── svg-generators/  # 22 D3-based chart generators
+│   │   └── technique-content/ # Technique narrative content
+│   ├── guides/
+│   │   ├── svg-diagrams/    # SVG diagram generators for guides
+│   │   ├── interactive-data/ # Interactive data for guide components
+│   │   └── code-helpers.ts  # Code snippet helpers
+│   ├── og-image.ts          # OG image generation (3,879 lines)
+│   ├── scroll-animations.ts # Scroll-triggered animation setup
+│   ├── smooth-scroll.ts     # Lenis smooth scroll init
+│   └── tools/
+│       ├── compose-validator/ # Docker Compose validation engine
+│       ├── dockerfile-analyzer/ # Dockerfile analysis engine
+│       ├── gha-validator/     # GitHub Actions validation engine
+│       └── k8s-analyzer/      # Kubernetes manifest analyzer
+├── pages/
+│   ├── index.astro          # Homepage
+│   ├── about.astro          # About page
+│   ├── contact.astro        # Contact page
+│   ├── 404.astro            # Not found page
+│   ├── ai-landscape/        # AI landscape explorer pages
+│   ├── beauty-index/        # Language beauty index pages
+│   ├── blog/                # Blog listing + individual posts
+│   ├── db-compass/          # Database compass pages
+│   ├── eda/                 # EDA visual encyclopedia pages
+│   ├── guides/              # Multi-chapter guide pages
+│   ├── open-graph/          # OG image generation endpoints
+│   ├── projects/            # Project listing
+│   ├── tools/               # Tool pages (validators/analyzers)
+│   ├── rss.xml.ts           # RSS feed
+│   ├── llms.txt.ts          # LLMs.txt endpoint
+│   └── llms-full.txt.ts     # Full LLMs.txt endpoint
+├── stores/                  # Nanostores for client state
+│   ├── categoryFilterStore.ts
+│   ├── compassFilterStore.ts
+│   ├── composeValidatorStore.ts
+│   ├── dockerfileAnalyzerStore.ts
+│   ├── ghaValidatorStore.ts
+│   ├── k8sAnalyzerStore.ts
+│   ├── languageFilterStore.ts
+│   └── tabStore.ts
+└── styles/                  # Global CSS
+```
 
-**`.planning/`:**
-- Purpose: Development roadmap, phase plans, and codebase documentation
-- Contains: Milestone definitions, phase execution plans, research notes
-- Key files: `.planning/milestones/`, `.planning/phases/`, `.planning/codebase/`
+## Scripts Directory
 
-**`public/`:**
-- Purpose: Static files served directly without processing
-- Contains: Domain config, SEO files, images not requiring optimization
-- Key files: `public/CNAME`, `public/robots.txt`, `public/images/`
-
-**`src/assets/`:**
-- Purpose: Images and media that are imported and optimized by Astro
-- Contains: Hero images, profile photos, illustrations
-- Key files: `src/assets/images/meandbatman.jpg`, `src/assets/images/hulk.png`
-
-**`src/components/`:**
-- Purpose: Reusable Astro components (UI, animations, structured data)
-- Contains: Header, Footer, BlogCard, animation components, JSON-LD components
-- Key files: `src/components/Header.astro`, `src/components/Footer.astro`, `src/components/animations/`
-
-**`src/components/animations/`:**
-- Purpose: Client-side animation effects (GSAP-based)
-- Contains: CustomCursor, TiltCard, MagneticButton, SplitText, TextScramble, WordReveal, FloatingOrbs, TimelineDrawLine
-- Key files: `src/components/animations/CustomCursor.astro`, `src/components/animations/TiltCard.astro`
-
-**`src/components/blog/`:**
-- Purpose: Blog-specific UI components
-- Contains: Blog listing components, author info, reading progress
-- Key files: Components in this directory are blog-focused
-
-**`src/data/`:**
-- Purpose: Static data and blog content in Markdown/MDX
-- Contains: Site configuration, project listings, blog posts
-- Key files: `src/data/site.ts`, `src/data/projects.ts`, `src/data/blog/*.md`
-
-**`src/layouts/`:**
-- Purpose: Page layout templates with shared structure
-- Contains: Main layout wrapper with header, footer, SEO, animations
-- Key files: `src/layouts/Layout.astro`
-
-**`src/lib/`:**
-- Purpose: Client-side utilities and animation lifecycle management
-- Contains: GSAP scroll animations, Lenis smooth scroll, animation cleanup
-- Key files: `src/lib/scroll-animations.ts`, `src/lib/smooth-scroll.ts`, `src/lib/animation-lifecycle.ts`, `src/lib/og-image.ts`
-
-**`src/pages/`:**
-- Purpose: File-based routing (each file becomes a route)
-- Contains: Index page, blog routes, projects, about, contact
-- Key files: `src/pages/index.astro`, `src/pages/blog/[slug].astro`, `src/pages/projects/index.astro`
-
-**`src/styles/`:**
-- Purpose: Global CSS with theme system
-- Contains: CSS custom properties, global styles, dark/light mode
-- Key files: `src/styles/global.css`
-
-## Key File Locations
-
-**Entry Points:**
-- `src/pages/index.astro`: Homepage with hero, skills, latest posts, CTA
-- `src/pages/blog/index.astro`: Blog listing page
-- `src/pages/blog/[slug].astro`: Individual blog post dynamic route
-- `src/pages/projects/index.astro`: Projects portfolio page
-- `src/pages/about.astro`: About page with biography and timeline
-- `src/pages/contact.astro`: Contact page with form and social links
-
-**Configuration:**
-- `astro.config.mjs`: Astro build config, integrations, plugins
-- `tailwind.config.mjs`: Tailwind CSS theme customization
-- `src/content.config.ts`: Content collections schema (blog posts)
-- `package.json`: NPM dependencies and build scripts
-- `remark-reading-time.mjs`: Custom remark plugin for reading time
-
-**Core Logic:**
-- `src/data/site.ts`: Site metadata and configuration constants
-- `src/data/projects.ts`: Project portfolio data with categories
-- `src/lib/scroll-animations.ts`: GSAP ScrollTrigger initialization
-- `src/lib/smooth-scroll.ts`: Lenis smooth scroll setup
-- `src/lib/animation-lifecycle.ts`: Animation cleanup on navigation
-
-**Testing:**
-- Not detected (no test files present)
-
-**SEO & Metadata:**
-- `src/components/SEOHead.astro`: Meta tags, Open Graph, Twitter Cards
-- `src/components/PersonJsonLd.astro`: Person structured data
-- `src/components/BlogPostingJsonLd.astro`: Blog post structured data
-- `src/pages/rss.xml.ts`: RSS feed generation
-- `src/pages/llms.txt.ts`: LLM context file for AI crawlers
+```
+scripts/
+├── compile-compose-schema.mjs   # AJV schema compilation for compose
+├── compile-gha-schema.mjs       # AJV schema compilation for GHA
+├── compile-k8s-schemas.mjs      # AJV schema compilation for K8s
+├── copy-katex-assets.mjs        # KaTeX font/CSS copying
+├── download-actionlint-wasm.mjs # Actionlint WASM binary download
+├── generate-layout.mjs          # AI landscape graph layout computation
+├── generate-notebooks.ts        # Jupyter notebook generation
+├── optimize-model.sh            # 3D model optimization
+├── schemas/                     # Source JSON schemas
+├── test-validator-hooks.sh      # Validator hook testing
+└── validate-eda-data.ts         # EDA data validation
+```
 
 ## Naming Conventions
 
-**Files:**
-- `.astro` files: PascalCase for components (`Header.astro`, `BlogCard.astro`), kebab-case for pages (`[slug].astro`)
-- `.ts` files: kebab-case (`scroll-animations.ts`, `animation-lifecycle.ts`)
-- Data files: kebab-case (`site.ts`, `projects.ts`)
-- Markdown blog posts: kebab-case in `src/data/blog/`
+| Type | Convention | Example |
+|------|-----------|---------|
+| Astro components | PascalCase.astro | `BlogCard.astro`, `SEOHead.astro` |
+| React components | PascalCase.tsx | `InteractiveGraph.tsx`, `SearchBar.tsx` |
+| Libraries | kebab-case.ts | `og-image.ts`, `animation-lifecycle.ts` |
+| Data files | kebab-case.ts/json | `code-features.ts`, `models.json` |
+| Stores | camelCaseStore.ts | `ghaValidatorStore.ts` |
+| Tests | `__tests__/` dirs with `.test.ts` | `src/lib/eda/notebooks/__tests__/cells.test.ts` |
+| Scripts | kebab-case.mjs/ts/sh | `generate-layout.mjs` |
+| Pages | kebab-case.astro or dynamic `[slug].astro` | `index.astro`, `[...slug].astro` |
 
-**Directories:**
-- kebab-case for multi-word directories (`blog/`, `animations/`, `open-graph/`)
-- Single-word directories when possible (`lib/`, `data/`, `pages/`)
+## Component Counts
 
-**Components:**
-- PascalCase component names match file names
-- Animation components descriptive (`CustomCursor`, `MagneticButton`, `TiltCard`)
-- Structured data components end in `JsonLd` (`PersonJsonLd`, `BlogPostingJsonLd`)
-
-**Data Attributes:**
-- Animation triggers use `data-` prefix (`data-reveal`, `data-tilt`, `data-magnetic`, `data-word-reveal`)
-- Directional reveals use values (`data-reveal="left"`, `data-reveal="right"`, `data-reveal="up"`)
-
-## Where to Add New Code
-
-**New Page:**
-- Primary code: `src/pages/{page-name}.astro`
-- Tests: Not applicable (no test infrastructure)
-- SEO: Add meta props to `<Layout>` component
-- Navigation: Update `navLinks` array in `src/components/Header.astro`
-
-**New Blog Post:**
-- Implementation: `src/data/blog/{post-slug}.md` or `.mdx`
-- Schema: Already defined in `src/content.config.ts`
-- Frontmatter: `title`, `description`, `publishedDate`, `tags`, `draft`, optional `externalUrl` and `source`
-
-**New Component:**
-- Implementation: `src/components/{ComponentName}.astro`
-- Animation component: `src/components/animations/{AnimationName}.astro`
-- Blog-specific: `src/components/blog/{ComponentName}.astro`
-- Import into: Layout or specific pages as needed
-
-**New Animation Effect:**
-- Implementation: `src/components/animations/{EffectName}.astro` or add to `src/lib/scroll-animations.ts`
-- Pattern: Use `data-` attribute for declarative triggers
-- Lifecycle: Ensure cleanup in `src/lib/animation-lifecycle.ts` if using ScrollTrigger
-
-**Utilities:**
-- Shared helpers: `src/lib/{utility-name}.ts`
-- Client-side only: Must be imported in `<script>` tags, not in Astro frontmatter
-- Build-time: Can be imported in frontmatter
-
-**Static Data:**
-- Configuration: `src/data/{data-name}.ts`
-- Export as `const` with TypeScript types
-- Import in components or pages as needed
-
-**Styling:**
-- Global styles: Add to `src/styles/global.css`
-- Theme colors: Use CSS custom properties defined in `global.css`
-- Tailwind utilities: Extend in `tailwind.config.mjs`
-- Component styles: Use `<style>` blocks in `.astro` files (scoped by default)
-
-## Special Directories
-
-**`node_modules/`:**
-- Purpose: NPM dependencies
-- Generated: Yes (via `npm install`)
-- Committed: No (in `.gitignore`)
-
-**`dist/`:**
-- Purpose: Build output for deployment
-- Generated: Yes (via `npm run build`)
-- Committed: No (in `.gitignore`)
-
-**`.astro/`:**
-- Purpose: Astro build cache and content collection types
-- Generated: Yes (during development and build)
-- Committed: No (in `.gitignore`)
-
-**`.github/workflows/`:**
-- Purpose: GitHub Actions CI/CD pipelines
-- Generated: No (manually created)
-- Committed: Yes
-
-**`src/data/blog/`:**
-- Purpose: Blog post content (Markdown/MDX files)
-- Generated: No (manually authored)
-- Committed: Yes
-
-**`src/assets/images/`:**
-- Purpose: Imported images optimized by Astro
-- Generated: No (manually added)
-- Committed: Yes
-
-**`public/images/`:**
-- Purpose: Static images served as-is
-- Generated: No (manually added)
-- Committed: Yes
-
-## Import Patterns
-
-**Astro Component Imports:**
-```astro
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-```
-
-**Astro Built-in APIs:**
-```astro
-import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
-```
-
-**Data Imports:**
-```astro
-import { siteConfig } from '../data/site';
-import { projects } from '../data/projects';
-```
-
-**Asset Imports:**
-```astro
-import heroImg from '../assets/images/meandbatman.jpg';
-```
-
-**Client-Side Library Imports (in `<script>` tags only):**
-```typescript
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { initSmoothScroll } from '../lib/smooth-scroll';
-```
-
-## Page Organization
-
-**Route Structure:**
-- `/` → `src/pages/index.astro`
-- `/blog/` → `src/pages/blog/index.astro`
-- `/blog/{slug}/` → `src/pages/blog/[slug].astro`
-- `/blog/tags/{tag}/` → `src/pages/blog/tags/[tag].astro`
-- `/projects/` → `src/pages/projects/index.astro`
-- `/about/` → `src/pages/about.astro`
-- `/contact/` → `src/pages/contact.astro`
-- `/rss.xml` → `src/pages/rss.xml.ts`
-- `/llms.txt` → `src/pages/llms.txt.ts`
-- `/open-graph/blog/{slug}.png` → `src/pages/open-graph/blog/[slug].png.ts`
-
-**Dynamic Routes:**
-- Blog posts: `[slug].astro` uses `getStaticPaths()` to generate routes from content collection
-- Tag pages: `tags/[tag].astro` generates routes for each unique tag
-
----
-
-*Structure analysis: 2026-02-12*
+| Type | Count |
+|------|-------|
+| Astro components (`.astro`) | ~100 |
+| React components (`.tsx`) | ~77 |
+| Test files (`.test.ts`) | 47 |
+| Nanostores | 8 |
+| Layouts | 3 |
