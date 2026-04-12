@@ -20,9 +20,9 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 - [ ] **UPD-09**: Ch9 Worktrees & Subagents updated with memory, background, initialPrompt, sparsePaths
 - [ ] **UPD-10**: Ch10 Agent Teams updated with /agents UI, initialPrompt, dynamic agents
 - [x] **UPD-11**: Ch11 Security updated with Auto Mode, 6 permission modes, Bash hardening
-- [ ] **UPD-12**: All updated chapters have bumped `lastVerified` and `updatedDate` frontmatter
+- [x] **UPD-12**: All updated chapters have bumped `lastVerified` and `updatedDate` frontmatter
 - [x] **UPD-13**: Deprecations reflected across all chapters (/tag removed, /vim removed, effort default changed, thinking summaries default)
-- [ ] **UPD-14**: Cross-references verified across all 11 chapters (30+ bidirectional links intact)
+- [x] **UPD-14**: Cross-references verified across all 11 chapters (30+ bidirectional links intact)
 
 ### New Chapters
 
@@ -50,10 +50,10 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 
 ### Site Integration
 
-- [ ] **SITE-01**: LLMs.txt entries updated for cheatsheet page and new chapters
-- [ ] **SITE-02**: guide.json metadata updated (chapter count, descriptions)
-- [ ] **SITE-03**: Guide landing page reflects new chapter count and cheatsheet link
-- [ ] **SITE-04**: Sitemap includes all new pages
+- [x] **SITE-01**: LLMs.txt entries updated for cheatsheet page and new chapters
+- [x] **SITE-02**: guide.json metadata updated (chapter count, descriptions)
+- [x] **SITE-03**: Guide landing page reflects new chapter count and cheatsheet link
+- [x] **SITE-04**: Sitemap includes all new pages
 - [ ] **SITE-05**: Lighthouse 90+ on all updated and new pages
 
 ## Future Requirements
@@ -92,9 +92,9 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | UPD-09 | Phase 113 | Pending |
 | UPD-10 | Phase 113 | Pending |
 | UPD-11 | Phase 111 | Complete |
-| UPD-12 | Phase 116 | Pending |
+| UPD-12 | Phase 116 | Complete |
 | UPD-13 | Phase 111 | Complete |
-| UPD-14 | Phase 116 | Pending |
+| UPD-14 | Phase 116 | Complete |
 | NEW-01 | Phase 112 | Pending |
 | NEW-02 | Phase 112 | Complete |
 | NEW-03 | Phase 112 | Pending |
@@ -110,10 +110,10 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | BLOG-02 | Phase 115 | Complete |
 | BLOG-03 | Phase 115 | Complete |
 | BLOG-04 | Phase 115 | Complete |
-| SITE-01 | Phase 116 | Pending |
-| SITE-02 | Phase 116 | Pending |
-| SITE-03 | Phase 116 | Pending |
-| SITE-04 | Phase 116 | Pending |
+| SITE-01 | Phase 116 | Complete |
+| SITE-02 | Phase 116 | Complete |
+| SITE-03 | Phase 116 | Complete |
+| SITE-04 | Phase 116 | Complete |
 | SITE-05 | Phase 116 | Pending |
 
 **Coverage:**

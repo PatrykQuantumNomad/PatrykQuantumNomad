@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: verifying
-stopped_at: Completed 115-02-PLAN.md
-last_updated: "2026-04-12T18:07:16.358Z"
+stopped_at: Completed 116-01-PLAN.md
+last_updated: "2026-04-12T21:39:34.792Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 23
-  completed_plans: 23
-  percent: 100
+  total_plans: 25
+  completed_plans: 24
+  percent: 96
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.19 Claude Code Guide Refresh — Phase 114 Cheatsheet
+**Current focus:** v1.19 Claude Code Guide Refresh — Phase 116 Site Integration
 
 ## Current Position
 
-Phase: 114 of 116 (Cheatsheet) -- COMPLETE
-Plan: 3 of 3 (build verification + visual checkpoint) -- COMPLETE
-Status: Phase complete — ready for verification
+Phase: 116 of 116 (Site Integration)
+Plan: 1 of 2 (LLMs.txt + metadata verification) -- COMPLETE
+Status: Executing phase 116
 Last activity: 2026-04-12
 
-Progress: [██████████] 100%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 114 P03 | 5min | 2 tasks | 0 files |
 | Phase 115 P01 | 1m 30s | 2 tasks | 2 files |
 | Phase 115 P02 | 2m 32s | 2 tasks | 2 files |
+| Phase 116 P01 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 114]: Consolidated INPUT section from 4 to 2 entries to fit within 840px column boundary after 60px vertical shift
 - [Phase 115]: Cover SVG uses stacked card layout showing 3 New Chapters / 5 Major Rewrites / Updated Cheatsheet
 - [Phase 115]: Used What's New theme-by-theme approach rather than chapter-by-chapter walk-through
+- [Phase 116]: Cheatsheet added as static LLMs.txt entry since standalone Astro pages outside content collections need manual entries
 
 ### Pending Todos
 
@@ -123,7 +125,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T18:07:16.355Z
-Stopped at: Completed 115-02-PLAN.md
+Last session: 2026-04-12T21:39:34.789Z
+Stopped at: Completed 116-01-PLAN.md
 Resume file: None
 Next: Phase 114 verification, then Phase 115 (Blog Post)
