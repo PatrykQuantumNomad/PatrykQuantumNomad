@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.18
-milestone_name: AI Landscape Explorer
-status: complete
-stopped_at: Milestone complete
-last_updated: "2026-03-28T00:00:00.000Z"
-last_activity: 2026-03-28
+milestone: v1.19
+milestone_name: Claude Code Guide Refresh
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-04-12T00:00:00.000Z"
+last_activity: 2026-04-12
 progress:
-  total_phases: 9
-  completed_phases: 9
-  total_plans: 25
-  completed_plans: 25
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.18 complete. Next milestone TBD via /gsd:new-milestone
+**Current focus:** v1.19 Claude Code Guide Refresh — update guide with new features, publish cheatsheets, new blog post
 
 ## Current Position
 
-Phase: 110 (Site Integration) — FINAL
-Plan: 4 of 4 in phase 110
-Status: Milestone v1.18 complete — all 9 phases verified
-Last activity: 2026-03-28
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-12 — Milestone v1.19 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 

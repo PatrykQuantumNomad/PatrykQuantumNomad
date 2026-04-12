@@ -278,6 +278,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
+## Current Milestone: v1.19 Claude Code Guide Refresh
+
+**Goal:** Update the Claude Code guide with ~10 weeks of new features, publish dedicated cheatsheet page, and write a new companion blog post.
+
+**Target features:**
+- Research and integrate new Claude Code features from What's New (Feb-Apr 2026)
+- Update existing guide chapters with new capabilities
+- Add new chapters if major new feature areas warrant them
+- Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with SVG rendering and downloads
+- New blog post covering Claude Code updates
+- Site integration updates (OG images, LLMs.txt, sitemap)
+
 ### Out of Scope
 
 - Cloning Astro Nano or any starter template — building custom from scratch (achieved in v1.0)
@@ -466,4 +478,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-03-28 after v1.18 milestone completion*
+*Last updated: 2026-04-12 after v1.19 milestone start*
