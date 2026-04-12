@@ -71,7 +71,7 @@ Plans:
 - [x] 111-04-PLAN.md -- Ch8 Hooks rewrite + component updates (24 events, if field, defer, PermissionDenied)
 - [x] 111-05-PLAN.md -- Ch11 Security rewrite (Auto Mode governance, Bash hardening, protected paths)
 - [x] 111-06-PLAN.md -- guide.json updates + cross-chapter deprecation sweep
-- [ ] 111-07-PLAN.md -- Gap closure: fix event count inconsistencies (26->24) + env var name fix
+- [x] 111-07-PLAN.md -- Gap closure: fix event count inconsistencies (26->24) + env var name fix (completed 2026-04-12)
 
 ### Phase 112: New Chapters
 **Goal**: Three new guide chapters cover Plugins, Agent SDK, and Computer Use as complete, self-contained learning resources integrated into the guide structure
@@ -139,7 +139,7 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 111. High-Impact Chapter Rewrites | 6/7 | Gap closure | - |
+| 111. High-Impact Chapter Rewrites | 7/7 | Complete | 2026-04-12 |
 | 112. New Chapters | 0/TBD | Not started | - |
 | 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
 | 114. Cheatsheet | 0/TBD | Not started | - |

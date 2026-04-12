@@ -4,13 +4,13 @@ milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: verifying
 stopped_at: Completed 111-06-PLAN.md (Phase 111 complete)
-last_updated: "2026-04-12T12:56:50.502Z"
+last_updated: "2026-04-12T13:29:21.977Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 100
 ---
 
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 111 of 116 (High-Impact Chapter Rewrites)
-Plan: 6 of 6 (Ch4 Environment Rewrite) -- COMPLETE
-Status: Phase complete — ready for verification
+Plan: 7 of 7 (Gap Closure: Event Count + Env Var Fixes) -- COMPLETE
+Status: Phase complete — all plans executed including gap closure
 Last activity: 2026-04-12
 
 Progress: [██████████] 100%
@@ -52,6 +52,7 @@ Progress: [██████████] 100%
 | Phase 111 P05 | 5min | 2 tasks | 1 files |
 | Phase 111 P04 | 9m | 3 tasks | 6 files |
 | Phase 111 P06 | 3m | 2 tasks | 1 files |
+| Phase 111 P07 | 3m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -70,7 +71,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 111]: Ch7 Skills: guide.json description synced to prevent stale landing page metadata
 - [Phase 111]: Ch11 Auto Mode Governance placed after Permission Governance and before Hook Governance as standalone section
 - [Phase 111]: Ch11 added standalone Skill Governance section for disableSkillShellExecution (new section not in original)
-- [Phase 111]: Ch8 restructured around full 26-event reference table with conditional if field and defer decision
+- [Phase 111]: Ch8 restructured around full 24-event reference table with conditional if field and defer decision
 - [Phase 111]: All 5 rewritten chapters verified clean of deprecated terms; guide.json descriptions synced for Ch3/Ch4/Ch11
 
 ### Pending Todos
@@ -91,7 +92,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T12:56:50.499Z
-Stopped at: Completed 111-06-PLAN.md (Phase 111 complete)
+Last session: 2026-04-12T13:28:39Z
+Stopped at: Completed 111-07-PLAN.md (Phase 111 fully complete with gap closure)
 Resume file: None
-Next: Execute 111-03-PLAN.md (Ch7 Skills rewrite)
+Next: Phase 112 (New Chapters)
