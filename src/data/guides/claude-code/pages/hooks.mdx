@@ -1,6 +1,6 @@
 ---
 title: "Hooks & Lifecycle Automation"
-description: "Automate quality enforcement with 26 lifecycle events, conditional if-field filtering, the PermissionDenied event for auto mode integration, and defer decisions for SDK workflows."
+description: "Automate quality enforcement with 24 lifecycle events, conditional if-field filtering, the PermissionDenied event for auto mode integration, and defer decisions for SDK workflows."
 order: 7
 slug: "hooks"
 lastVerified: 2026-04-12
@@ -14,7 +14,7 @@ import HookEventVisualizer from '../../../../components/guide/HookEventVisualize
 
 ## What You'll Learn
 
-This chapter walks you through Claude Code's hook system, which lets you automate actions at specific points in the tool's lifecycle. We'll cover all 26 lifecycle events (split across three categories), the four handler types you can use to respond to events, configuration format with the conditional `if` field for fine-grained filtering, matcher patterns, exit code semantics, the hookSpecificOutput schema for PreToolUse decision control (including the `defer` decision for SDK workflows), the PermissionDenied event and its connection to Auto Mode, the hook output size cap, and how to manage hooks interactively.
+This chapter walks you through Claude Code's hook system, which lets you automate actions at specific points in the tool's lifecycle. We'll cover all 24 lifecycle events (split across three categories), the four handler types you can use to respond to events, configuration format with the conditional `if` field for fine-grained filtering, matcher patterns, exit code semantics, the hookSpecificOutput schema for PreToolUse decision control (including the `defer` decision for SDK workflows), the PermissionDenied event and its connection to Auto Mode, the hook output size cap, and how to manage hooks interactively.
 
 By the end, you'll be able to configure hooks that lint code before commits, block dangerous commands, send notifications on task completion, log denied auto mode actions, and enforce project-specific workflows.
 
@@ -30,7 +30,7 @@ You configure hooks in settings files (user, project, or managed), and they appl
 
 ## Hook Lifecycle Overview
 
-Claude Code fires 26 lifecycle events across three categories: session events that bookend the overall session, loop events that fire during the agentic loop, and standalone async events that fire independently of the main loop.
+Claude Code fires 24 lifecycle events across three categories: session events that bookend the overall session, loop events that fire during the agentic loop, and standalone async events that fire independently of the main loop.
 
 <HookLifecycleDiagram />
 
@@ -67,7 +67,7 @@ Here's a quick look at hooks in action, a SessionStart hook fires at startup, an
 
 ## Event Reference
 
-Claude Code's 26 lifecycle events fall into three categories. The table below is the full reference. After it, we'll walk through representative examples of the most commonly used events.
+Claude Code's 24 lifecycle events fall into three categories. The table below is the full reference. After it, we'll walk through representative examples of the most commonly used events.
 
 | Event | Category | Trigger | Key Payload Fields | Can Block |
 |-------|----------|---------|-------------------|-----------|
@@ -94,6 +94,7 @@ Claude Code's 26 lifecycle events fall into three categories. The table below is
 | WorktreeRemove | Standalone | Git worktree removed | worktree_path, branch, session_id | No |
 | CwdChanged | Standalone | Working directory changes | old_cwd, new_cwd, session_id | No |
 | FileChanged | Standalone | File system change detected | file_path, change_type, session_id | No |
+| PermissionDenied | Standalone | Tool call denied (async notification) | tool_name, tool_input, deny_reason, permission_mode | No |
 
 Notice that **PreToolUse is the only event that can block execution.** Every other event is purely observational. They let you react to what happened, but they can't prevent it.
 
@@ -127,7 +128,7 @@ Session events fire once at the start and end of each Claude Code session.
 
 ### Loop Events
 
-Loop events fire during the agentic loop as Claude processes prompts and uses tools. There are 17 of them in total. Five are critical for most hook workflows; the rest handle more specialized needs.
+Loop events fire during the agentic loop as Claude processes prompts and uses tools. There are 15 of them in total. Five are critical for most hook workflows; the rest handle more specialized needs.
 
 **UserPromptSubmit** fires when the user submits a prompt, before Claude starts processing it. It's useful for prompt preprocessing, input validation, or logging user activity. This event fires for every prompt in a session, including follow up messages.
 
