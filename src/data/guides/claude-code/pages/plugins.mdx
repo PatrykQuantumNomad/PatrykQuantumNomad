@@ -1,0 +1,472 @@
+---
+title: "Plugins"
+description: "Build shareable plugin packages with manifests, bin/ executables, userConfig, hooks, and marketplace publishing for distribution across teams and the community."
+order: 11
+slug: "plugins"
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code plugins", "plugin manifest", "plugin marketplace", "bin executables", "userConfig", "plugin publishing", "plugin development", "plugin structure"]
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+
+## What You Will Learn
+
+This chapter walks you through the Plugin system: how to build, test, and publish shareable packages that bundle skills, agents, hooks, MCP servers, and executables into a single distributable unit. We'll cover the plugin manifest format, directory structure, every component type a plugin can include, how `bin/` executables get added to PATH, how `userConfig` handles settings and keychain-backed secrets at enable time, the namespacing model that prevents collisions, local development workflow, marketplace publishing, and the security restrictions that apply to plugin subagents.
+
+Skills are local instruction sets -- Plugins are shareable packages that bundle skills, agents, hooks, MCP servers, and executables for distribution. If you've read [Custom Skills](/guides/claude-code/custom-skills/), think of plugins as the packaging and distribution layer that sits on top of the skill system.
+
+## Quick Start
+
+Get a working plugin running in under two minutes.
+
+<CodeBlock
+  code={`# Create the plugin directory structure
+mkdir -p my-plugin/.claude-plugin
+mkdir -p my-plugin/skills/format-md
+
+# Write the plugin manifest
+cat > my-plugin/.claude-plugin/plugin.json << 'EOF'
+{
+  "name": "markdown-formatter",
+  "description": "Format Markdown files to consistent style",
+  "version": "1.0.0",
+  "author": "your-github-username"
+}
+EOF
+
+# Write a skill
+cat > my-plugin/skills/format-md/SKILL.md << 'EOF'
+---
+name: format-md
+description: Format a Markdown file to consistent style
+argument-hint: "[file-path]"
+allowed-tools: Read, Write, Glob
+---
+
+Read the file at $ARGUMENTS and reformat it following these rules:
+
+1. Use ATX-style headings (# not underlines)
+2. One blank line before and after headings
+3. Wrap lines at 80 characters
+4. Use dashes for unordered lists
+5. Add a trailing newline
+
+Write the formatted result back to the same file.
+EOF
+
+echo "Plugin created. Load it with:"
+echo "  claude --plugin-dir ./my-plugin"`}
+  lang="bash"
+  title="Terminal"
+  caption="A minimal plugin with one skill. Load it with claude --plugin-dir ./my-plugin, then invoke it with /markdown-formatter:format-md [file]."
+/>
+
+Once loaded, the skill is available as `/markdown-formatter:format-md`. The namespace prefix (`markdown-formatter:`) comes from the plugin name in the manifest, and `format-md` is the skill name. You can also ask Claude to format a Markdown file naturally, and it will auto-invoke the skill if it determines it's relevant.
+
+## What Are Plugins?
+
+If you've read [Custom Skills](/guides/claude-code/custom-skills/), you know how SKILL.md files extend Claude Code with reusable instruction sets stored locally. Plugins take that concept further by wrapping skills -- along with agents, hooks, MCP servers, LSP servers, executables, and default settings -- into a single package that can be installed, shared, and distributed through marketplaces.
+
+The relationship is straightforward: skills are the content, plugins are the container. A plugin without skills is still valid (it might only provide `bin/` executables or MCP server configurations), but the most common pattern is a plugin that bundles one or more skills with supporting components.
+
+Plugins solve the distribution problem. Without them, sharing a skill means copying SKILL.md files between projects or repositories. With plugins, you publish once to a marketplace and anyone can install with a single command:
+
+<CodeBlock
+  code={`# Install a plugin from the marketplace
+/plugin install markdown-formatter@official
+
+# List installed plugins
+/plugin list
+
+# Remove a plugin
+/plugin uninstall markdown-formatter`}
+  lang="bash"
+  title="Terminal"
+  caption="Plugin lifecycle: install, list, and uninstall from the marketplace."
+/>
+
+## Plugin Structure
+
+Every plugin follows the same directory layout. The only required file is `.claude-plugin/plugin.json` -- everything else is optional.
+
+<CodeBlock
+  code={`my-plugin/
+  .claude-plugin/
+    plugin.json          # Required: manifest (name, description, version, author)
+  skills/                # SKILL.md directories (same format as project skills)
+    format-md/
+      SKILL.md
+    lint-prose/
+      SKILL.md
+  commands/              # Legacy flat Markdown commands (backward compat)
+  agents/                # AGENT.md files for plugin-provided subagents
+    reviewer/
+      AGENT.md
+  hooks/
+    hooks.json           # Hook configurations (same schema as settings.json hooks)
+  .mcp.json              # MCP server configurations
+  .lsp.json              # LSP server configurations
+  bin/                   # Executables added to Claude Code's PATH
+    format-check
+    lint-runner
+  settings.json          # Default settings (currently supports "agent" key)`}
+  lang="text"
+  title="Plugin Directory Structure"
+  caption="The complete plugin directory layout. Only .claude-plugin/plugin.json is required."
+/>
+
+The directory names matter. Claude Code looks for specific directory names (`skills/`, `agents/`, `hooks/`, `bin/`) relative to the plugin root. If you put a SKILL.md file in a directory called `my-skills/` instead of `skills/`, it won't be discovered.
+
+## The Plugin Manifest
+
+The `plugin.json` manifest lives in the `.claude-plugin/` directory and defines the plugin's identity. It has four fields.
+
+<CodeBlock
+  code={`{
+  "name": "markdown-formatter",
+  "description": "Consistent Markdown formatting with configurable rules",
+  "version": "1.0.0",
+  "author": "your-github-username"
+}`}
+  lang="json"
+  title=".claude-plugin/plugin.json"
+  caption="A complete plugin manifest. All four fields are required for marketplace submission."
+/>
+
+**name** is the plugin identifier. It must be unique within the marketplace you publish to. This name becomes the namespace prefix for all skills in the plugin (e.g., `/markdown-formatter:format-md`). Use lowercase with hyphens, similar to npm package naming conventions.
+
+**description** is a human-readable summary shown in marketplace listings and when users browse available plugins. Write it to be clear and specific -- "Format Markdown files to consistent style" is better than "Markdown tool."
+
+**version** follows semantic versioning (major.minor.patch). Bump it when you publish updates. The marketplace uses this to track releases and notify users of available updates.
+
+**author** identifies you or your organization. This typically matches your GitHub username or organization name and appears in marketplace listings alongside the plugin name.
+
+## Plugin Components
+
+A plugin can include any combination of the following component types. Each follows the same format it would use outside of a plugin -- the plugin system just provides the packaging and distribution wrapper.
+
+### skills/
+
+Skills in a plugin work identically to project skills described in [Custom Skills](/guides/claude-code/custom-skills/). Each skill lives in its own subdirectory under `skills/` with a SKILL.md file and optional supporting files. The full frontmatter reference (name, description, argument-hint, allowed-tools, model, context, paths, hooks, and all other fields) applies unchanged.
+
+<CodeBlock
+  code={`skills/
+  format-md/
+    SKILL.md               # Skill definition
+    templates/
+      style-guide.md       # Supporting file referenced via CLAUDE_SKILL_DIR
+  lint-prose/
+    SKILL.md
+    .proselint.json        # Config file for the linting skill`}
+  lang="text"
+  title="Plugin skills directory"
+  caption="Each skill gets its own subdirectory, just like project skills."
+/>
+
+The key difference from project skills is namespacing. A skill named `format-md` in a plugin named `markdown-formatter` becomes `/markdown-formatter:format-md` when invoked. See the Namespacing section below for the full collision resolution model.
+
+### commands/
+
+Legacy flat Markdown command files for backward compatibility. These are the older `.claude/commands/` format -- single Markdown files without frontmatter-based configuration. New plugins should use `skills/` instead, which support richer configuration through frontmatter, automatic discovery in nested directories, and supporting files.
+
+### agents/
+
+AGENT.md files that define plugin-provided subagents. These follow the same format as project agents described in [Git Worktrees & Subagent Delegation](/guides/claude-code/worktrees/). Plugin agents are available alongside your project and personal agents, namespaced to the plugin.
+
+### hooks/hooks.json
+
+Hook configurations that activate when the plugin is enabled. The `hooks.json` file uses the same schema as the `hooks` object in `settings.json` -- the same event names, matcher patterns, handler types, and `if` field syntax described in [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
+
+<CodeBlock
+  code={`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "format-check --stdin",
+            "if": "Write(*.md)"
+          }
+        ]
+      }
+    ]
+  }
+}`}
+  lang="json"
+  title="hooks/hooks.json"
+  caption="Plugin hooks use the same schema as settings.json hooks. This one runs a format check before any Markdown file write."
+/>
+
+Plugin hooks merge with hooks from other sources (user, project, managed settings) -- they don't override them. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for the full merging behavior.
+
+### .mcp.json
+
+MCP server configurations that the plugin provides. When the plugin is enabled, these servers become available in the session. This follows the same format as project-level `.mcp.json` files described in [Model Context Protocol](/guides/claude-code/mcp/).
+
+### .lsp.json
+
+LSP (Language Server Protocol) server configurations for code intelligence features. Pre-built plugins exist for common languages, so most plugin authors won't need to configure this unless they're providing language support for a niche technology.
+
+### settings.json
+
+Default settings applied when the plugin is enabled. Currently, this supports the `agent` key for specifying a default agent the plugin provides. As the plugin system evolves, additional settings may become configurable here.
+
+## bin/ Executables
+
+When a plugin includes a `bin/` directory, Claude Code adds it to the Bash tool's PATH while the plugin is enabled. This means any executables you place in `bin/` can be called as bare commands by Claude without specifying the full path.
+
+This is useful for packaging CLI helpers alongside your skills. A formatting plugin might include a `format-check` binary that both the plugin's hooks and its skills invoke, without requiring the user to install anything separately.
+
+<CodeBlock
+  code={`# Plugin structure with bin/ executables
+my-plugin/
+  .claude-plugin/
+    plugin.json
+  bin/
+    format-check           # Must be executable (chmod +x)
+    lint-runner
+  skills/
+    format-md/
+      SKILL.md`}
+  lang="text"
+  title="Plugin with bin/ executables"
+  caption="Executables in bin/ are added to PATH. Claude can invoke them as bare commands."
+/>
+
+Here's an example of a complete `bin/` executable and the skill that uses it:
+
+<CodeBlock
+  code={`#!/usr/bin/env bash
+# bin/format-check -- Validate Markdown formatting
+# Claude Code adds this plugin's bin/ to PATH automatically
+
+set -euo pipefail
+
+FILE="\${1:?Usage: format-check <file.md>}"
+
+ERRORS=0
+
+# Check for trailing whitespace
+if grep -nP '\\S\\s+$' "$FILE" 2>/dev/null; then
+  echo "WARN: Trailing whitespace found"
+  ERRORS=$((ERRORS + 1))
+fi
+
+# Check for consistent heading style
+if grep -nP '^[^#\\n].*\\n[=-]+$' "$FILE" 2>/dev/null; then
+  echo "WARN: Use ATX-style headings (# heading) not underline style"
+  ERRORS=$((ERRORS + 1))
+fi
+
+if [ "$ERRORS" -eq 0 ]; then
+  echo "OK: $FILE passes format checks"
+fi
+
+exit 0`}
+  lang="bash"
+  title="bin/format-check"
+  caption="A bin/ executable that validates Markdown formatting. Make it executable with chmod +x."
+/>
+
+<CodeBlock
+  code={`---
+name: format-md
+description: Format a Markdown file to consistent style
+argument-hint: "[file-path]"
+allowed-tools: Read, Write, Bash
+---
+
+First, run the format checker on the target file:
+
+format-check $ARGUMENTS
+
+If the checker reports warnings, read the file and fix each issue.
+Write the corrected file back. Then run format-check again to confirm
+all issues are resolved.`}
+  lang="yaml"
+  title="skills/format-md/SKILL.md"
+  caption="The skill references format-check as a bare command -- no path needed because bin/ is on PATH."
+/>
+
+Executables must have the execute permission set (`chmod +x`). If Claude can't execute a `bin/` file, it's almost always a missing permission.
+
+## userConfig
+
+Plugins can declare configuration values that users provide at enable time through the `userConfig` mechanism. This is how plugins collect API keys, preferences, and other settings without hardcoding them.
+
+When a plugin with `userConfig` is enabled, Claude Code prompts the user for each declared value. Values marked as secrets are stored in the system keychain (macOS Keychain, Windows Credential Manager, or Linux Secret Service) rather than in plain-text settings files.
+
+<CodeBlock
+  code={`{
+  "name": "code-review-bot",
+  "description": "Automated code review with configurable style",
+  "version": "1.0.0",
+  "author": "your-org",
+  "userConfig": {
+    "github_token": {
+      "description": "GitHub Personal Access Token for PR access",
+      "required": true,
+      "secret": true
+    },
+    "review_style": {
+      "description": "Review thoroughness: quick, standard, or thorough",
+      "required": false,
+      "default": "standard"
+    },
+    "max_files": {
+      "description": "Maximum files to review per PR",
+      "required": false,
+      "default": "20"
+    }
+  }
+}`}
+  lang="json"
+  title=".claude-plugin/plugin.json"
+  caption="userConfig with a keychain-backed secret (github_token) and two optional settings with defaults."
+/>
+
+Each `userConfig` field supports these properties:
+
+- **description** -- Human-readable prompt shown to the user at enable time
+- **required** -- Whether the user must provide a value (default: false)
+- **secret** -- Whether the value is stored in the system keychain (default: false)
+- **default** -- Default value used if the user doesn't provide one
+
+The keychain-backed secret storage is important for API keys and tokens. Unlike environment variables or settings files, keychain values are encrypted at rest by the operating system and don't appear in shell history, process listings, or configuration file diffs.
+
+## Namespacing
+
+Plugin skills, agents, and commands are namespaced to their plugin name to prevent collisions. The pattern is `/plugin-name:component-name`.
+
+<CodeBlock
+  code={`# Plugin "markdown-formatter" provides skill "format-md"
+/markdown-formatter:format-md README.md
+
+# Plugin "code-quality" also provides a skill named "format-md"
+/code-quality:format-md src/index.ts
+
+# No collision -- each is uniquely identified by its plugin namespace`}
+  lang="bash"
+  title="Terminal"
+  caption="Namespacing prevents collisions when multiple plugins define identically named skills."
+/>
+
+Precedence rules when names overlap:
+
+1. **Project skills** (`.claude/skills/`) take highest precedence when invoked without a namespace prefix
+2. **Personal skills** (`~/.claude/skills/`) come next
+3. **Plugin skills** require the namespace prefix when a local skill shares the same name
+
+This means your local project skills always win for unqualified names. If you have a project skill named `format-md` and a plugin skill named `markdown-formatter:format-md`, typing `/format-md` invokes the project skill. To reach the plugin version, use the full `/markdown-formatter:format-md`.
+
+## Local Development
+
+You don't need to publish a plugin to test it. The `--plugin-dir` flag loads a plugin from a local directory, and `/reload-plugins` picks up changes without restarting the session.
+
+<CodeBlock
+  code={`# Start Claude Code with your local plugin loaded
+claude --plugin-dir ./my-plugin
+
+# Inside the session, after making changes to plugin files:
+/reload-plugins
+
+# Your updated skills, hooks, and bin/ executables are now active`}
+  lang="bash"
+  title="Terminal"
+  caption="Local development workflow: load with --plugin-dir, iterate with /reload-plugins."
+/>
+
+The development loop is:
+
+1. **Create** your plugin directory with `plugin.json` and at least one component
+2. **Load** it with `claude --plugin-dir ./path-to-plugin`
+3. **Test** by invoking skills, triggering hooks, or running `bin/` executables
+4. **Edit** plugin files in your regular editor
+5. **Reload** with `/reload-plugins` in the Claude Code session to pick up changes
+6. **Repeat** until the plugin behaves as expected
+
+You can also load multiple local plugins at once by passing `--plugin-dir` multiple times:
+
+<CodeBlock
+  code={`claude --plugin-dir ./my-formatter --plugin-dir ./my-linter`}
+  lang="bash"
+  title="Terminal"
+  caption="Load multiple local plugins in the same session."
+/>
+
+## Publishing to Marketplace
+
+Once your plugin is tested and ready for distribution, you can submit it to the official Anthropic marketplace through claude.ai or the Anthropic Console.
+
+The submission process involves:
+
+1. **Prepare** your plugin directory with a complete `plugin.json` manifest (all four fields: name, description, version, author)
+2. **Test** thoroughly using `--plugin-dir` to verify all components work correctly
+3. **Submit** through claude.ai (Settings > Plugins > Submit) or through the Anthropic Console's plugin management interface
+4. **Review** -- Anthropic reviews the submission for security and quality
+5. **Publish** -- Once approved, the plugin appears in the marketplace and can be installed by anyone using `/plugin install name@marketplace`
+
+After publishing, users install your plugin with a single command:
+
+<CodeBlock
+  code={`# Install from the official marketplace
+/plugin install markdown-formatter@official
+
+# The plugin's skills are immediately available
+/markdown-formatter:format-md README.md`}
+  lang="bash"
+  title="Terminal"
+  caption="Users install published plugins with /plugin install."
+/>
+
+When you release updates, bump the `version` field in `plugin.json` and submit again. Users with the plugin installed are notified of available updates.
+
+## Security Restrictions
+
+Plugins run within a restricted security context. The most important restriction is that **plugin subagents cannot use `hooks`, `mcpServers`, or `permissionMode`** in their agent definitions. This prevents a plugin from escalating its own permissions, injecting hook automations that bypass user approval, or connecting to arbitrary external services through MCP.
+
+This restriction exists because plugins are third-party code. Unlike project-level agents that you write and control, plugin agents come from external sources. Restricting their capabilities ensures that installing a plugin doesn't inadvertently grant it control over your hook pipeline, permission system, or MCP server connections.
+
+<CodeBlock
+  code={`# In a plugin's agents/reviewer/AGENT.md:
+
+---
+name: reviewer
+description: Code review agent
+allowed-tools: Read, Grep, Glob
+# hooks: ...        <-- NOT ALLOWED in plugin agents
+# mcpServers: ...   <-- NOT ALLOWED in plugin agents
+# permissionMode: ...<-- NOT ALLOWED in plugin agents
+---
+
+Review the code changes and provide feedback...`}
+  lang="yaml"
+  title="agents/reviewer/AGENT.md"
+  caption="Plugin subagents are restricted: hooks, mcpServers, and permissionMode fields are blocked."
+/>
+
+Enterprise administrators have additional control over the plugin ecosystem through managed settings. See [Security & Enterprise Administration](/guides/claude-code/security/) for the full governance model, including `strictKnownMarketplaces` (restrict plugin sources to approved marketplaces), `blockedMarketplaces` (block specific marketplaces), and `pluginTrustMessage` (custom message shown when users install plugins).
+
+## Best Practices
+
+- **Start with a single skill and iterate.** A focused plugin that does one thing well is easier to test, maintain, and explain than a sprawling multi-skill package. Add components as your use case demands.
+
+- **Use `bin/` for reusable logic.** If multiple skills or hooks need the same validation or transformation logic, put it in a `bin/` executable rather than duplicating it across skill instructions. This keeps skills concise and logic centralized.
+
+- **Use `userConfig` for secrets, not environment variables.** Keychain-backed `secret` fields are encrypted at rest and don't leak through shell history, process listings, or config file diffs. Reserve environment variables for non-sensitive configuration.
+
+- **Test with `--plugin-dir` before publishing.** The local development workflow catches issues before they reach users. Test every skill, hook, and executable in a real session.
+
+- **Write clear descriptions in the manifest.** The `description` field is the first thing users see in marketplace listings. Be specific about what the plugin does and what problem it solves.
+
+- **Keep plugin names short and descriptive.** The plugin name becomes the namespace prefix for all components. A name like `markdown-formatter` is clearer than `mf` and more practical than `comprehensive-markdown-formatting-and-linting-toolkit`.
+
+- **Document userConfig fields thoroughly.** The `description` property in each userConfig entry is the only guidance users see when enabling the plugin. Tell them exactly what value is expected and where to find it.
+
+## Further Reading
+
+- <a href="https://code.claude.com/docs/en/plugins" target="_blank" rel="noopener noreferrer">Plugins</a>, the official documentation on plugin structure, manifest format, and marketplace publishing
+- Previous chapter: [Custom Skills](/guides/claude-code/custom-skills/) covers the SKILL.md format, frontmatter fields, and invocation modes that plugin skills build on
+- Next up: [Agent SDK](/guides/claude-code/agent-sdk/) covers the Python and TypeScript SDKs for embedding Claude Code's agent loop into production applications
