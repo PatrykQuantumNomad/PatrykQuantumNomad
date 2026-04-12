@@ -43,12 +43,14 @@ const isComposePost = post.id === 'docker-compose-best-practices';
 const isDockerfilePost = post.id === 'dockerfile-best-practices';
 const isGhaPost = post.id === 'github-actions-best-practices';
 const isClaudeCodeGuidePost = post.id === 'claude-code-guide';
+const isClaudeCodeRefreshPost = post.id === 'claude-code-guide-refresh';
 const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isK8sPost ? 'Kubernetes Security'
   : isComposePost ? 'Docker Best Practices'
   : isDockerfilePost ? 'Docker Security'
   : isGhaPost ? 'GitHub Actions Security'
   : isClaudeCodeGuidePost ? 'AI Developer Tools'
+  : isClaudeCodeRefreshPost ? 'AI Developer Tools'
   : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
@@ -61,6 +63,8 @@ const aboutDataset = isBeautyIndexPost
   : isGhaPost
     ? { type: 'SoftwareApplication', name: 'GitHub Actions Workflow Validator', url: 'https://patrykgolabek.dev/tools/gha-validator/' }
   : isClaudeCodeGuidePost
+    ? { type: 'WebPage', name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' }
+  : isClaudeCodeRefreshPost
     ? { type: 'WebPage', name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' }
     : undefined;
 
@@ -178,6 +182,17 @@ const claudeCodeGuideFAQ = isClaudeCodeGuidePost ? [
   },
 ] : [];
 
+const claudeCodeRefreshFAQ = isClaudeCodeRefreshPost ? [
+  {
+    question: 'What is new in the Claude Code Guide refresh?',
+    answer: 'The guide grew from 11 to 14 chapters. Three new chapters cover Plugins (marketplace, manifests, bin executables), Agent SDK (Python and TypeScript APIs for embedding Claude Code), and Computer Use (desktop GUI control with per-app approval). Every existing chapter was rewritten with 6+ months of new features including Auto Mode, 1M Opus context, 24 hook events, and remote control server mode.',
+  },
+  {
+    question: 'Where can I find the Claude Code cheatsheet?',
+    answer: 'The dedicated cheatsheet page is at patrykgolabek.dev/guides/claude-code/cheatsheet/. It includes both interactive and print-friendly SVG cheatsheets covering every keyboard shortcut, slash command, and mode toggle in Claude Code.',
+  },
+] : [];
+
 // Shorten title tag for SEO (Google truncates ~60 chars)
 const suffix = ' — Patryk Golabek';
 const titleTag = (title.length + suffix.length > 65)
@@ -258,6 +273,7 @@ const titleTag = (title.length + suffix.length > 65)
     {dockerfileFAQ.length > 0 && <FAQPageJsonLd items={dockerfileFAQ} />}
     {ghaFAQ.length > 0 && <FAQPageJsonLd items={ghaFAQ} />}
     {claudeCodeGuideFAQ.length > 0 && <FAQPageJsonLd items={claudeCodeGuideFAQ} />}
+    {claudeCodeRefreshFAQ.length > 0 && <FAQPageJsonLd items={claudeCodeRefreshFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },
