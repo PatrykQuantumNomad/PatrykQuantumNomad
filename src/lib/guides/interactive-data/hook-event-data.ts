@@ -1,7 +1,7 @@
 /**
  * Hook event data for the interactive Hook Event Visualizer (INTV-02).
  *
- * Defines 26 hook events across 3 categories (Session, Loop, Standalone Async)
+ * Defines 24 hook events across 3 categories (Session, Loop, Standalone Async)
  * with node/edge definitions for React Flow and detail content for the
  * click-to-reveal panel.
  *
@@ -47,7 +47,7 @@ export const rawNodes: Node[] = [
     id: 'loop-events',
     type: 'category',
     position: pos,
-    data: { label: 'Loop Events', count: 17 },
+    data: { label: 'Loop Events', count: 15 },
   },
   {
     id: 'standalone-events',
@@ -247,7 +247,7 @@ export const rawEdges: Edge[] = [
 // ---- Detail Content ----
 
 /**
- * Detail content for each of the 26 hook events.
+ * Detail content for each of the 24 hook events.
  * Shown in the HookDetailPanel when an event node is clicked.
  *
  * All events receive session context (session_id, session_type, transcript_path).

@@ -1,8 +1,8 @@
 /**
  * DIAG-02: Hook Lifecycle Event Flow
  *
- * Generates a build-time SVG showing all 26 hook lifecycle events
- * grouped into three categories: Session Events (2), Loop Events (17),
+ * Generates a build-time SVG showing all 24 hook lifecycle events
+ * grouped into three categories: Session Events (2), Loop Events (15),
  * and Standalone Async Events (7). PreToolUse is highlighted with a
  * "CAN BLOCK" indicator.
  */
@@ -65,7 +65,7 @@ export function generateHookLifecycle(): string {
   const parts: string[] = [];
 
   // SVG open
-  parts.push(diagramSvgOpen(config, 'Hook lifecycle: 26 event types across session, loop, and async categories'));
+  parts.push(diagramSvgOpen(config, 'Hook lifecycle: 24 event types across session, loop, and async categories'));
 
   // Arrow marker
   parts.push(arrowMarkerDef(MARKER_ID));
