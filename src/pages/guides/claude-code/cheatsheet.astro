@@ -1,0 +1,112 @@
+---
+/**
+ * Claude Code Cheatsheet — /guides/claude-code/cheatsheet/
+ * Standalone resource page displaying both SVG cheatsheets (interactive dark
+ * and print-friendly light) with download buttons, TechArticle JSON-LD,
+ * breadcrumb structured data, and OG image.
+ */
+import Layout from '../../../layouts/Layout.astro';
+import GuideJsonLd from '../../../components/guide/GuideJsonLd.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+
+const ogImageURL = new URL('/open-graph/guides/claude-code/cheatsheet.png', Astro.site).toString();
+---
+
+<Layout
+  title="Claude Code Cheatsheet | Interactive Mode Shortcuts & Commands"
+  description="Every keyboard shortcut, slash command, and mode toggle for Claude Code interactive sessions. Download printable SVG cheatsheets."
+  ogImage={ogImageURL}
+  ogImageAlt="Claude Code Cheatsheet"
+  ogType="article"
+>
+  <GuideJsonLd
+    title="Claude Code Cheatsheet"
+    description="Every keyboard shortcut, slash command, and mode toggle for Claude Code interactive sessions. Download printable SVG cheatsheets."
+    url="https://patrykgolabek.dev/guides/claude-code/cheatsheet/"
+    isLanding={false}
+    parentTitle="Claude Code Guide"
+    parentUrl="https://patrykgolabek.dev/guides/claude-code/"
+    keywords={["claude code", "cheatsheet", "keyboard shortcuts", "slash commands", "interactive mode"]}
+  />
+  <BreadcrumbJsonLd crumbs={[
+    { name: 'Home', url: 'https://patrykgolabek.dev/' },
+    { name: 'Guides', url: 'https://patrykgolabek.dev/guides/' },
+    { name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' },
+    { name: 'Cheatsheet', url: 'https://patrykgolabek.dev/guides/claude-code/cheatsheet/' },
+  ]} />
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <!-- Breadcrumb nav -->
+    <nav class="text-sm text-[var(--color-text-secondary)] mb-8 font-mono">
+      <a href="/" class="hover:text-[var(--color-accent)]">Home</a>
+      <span class="mx-1">/</span>
+      <a href="/guides/" class="hover:text-[var(--color-accent)]">Guides</a>
+      <span class="mx-1">/</span>
+      <a href="/guides/claude-code/" class="hover:text-[var(--color-accent)]">Claude Code Guide</a>
+      <span class="mx-1">/</span>
+      <span class="text-[var(--color-text-primary)]">Cheatsheet</span>
+    </nav>
+
+    <!-- Page heading -->
+    <h1 class="text-4xl sm:text-5xl font-heading font-bold">
+      Claude Code Cheatsheet
+    </h1>
+    <p class="text-lg text-[var(--color-text-secondary)] mt-6 leading-relaxed max-w-3xl">
+      Every keyboard shortcut, slash command, and mode toggle for Claude Code
+      interactive sessions. Two versions below: a dark theme for on-screen
+      reference and a light theme optimised for printing.
+    </p>
+
+    <!-- Interactive (dark) cheatsheet -->
+    <section class="mt-16">
+      <h2 class="text-2xl font-heading font-bold mb-6">Interactive Version (Dark)</h2>
+      <div class="overflow-x-auto rounded-lg border border-[var(--color-border)]">
+        <img
+          src="/images/cheatsheet/claude-code-cheatsheet.svg"
+          alt="Claude Code interactive cheatsheet showing keyboard shortcuts, slash commands, and mode toggles on a dark background"
+          width="100%"
+          loading="lazy"
+        />
+      </div>
+      <div class="mt-4">
+        <a
+          href="/images/cheatsheet/claude-code-cheatsheet.svg"
+          download="claude-code-cheatsheet.svg"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm font-mono hover:border-[var(--color-text-secondary)] transition-colors"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 011-1z" />
+            <path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
+          </svg>
+          Download SVG (Dark)
+        </a>
+      </div>
+    </section>
+
+    <!-- Print-friendly (light) cheatsheet -->
+    <section class="mt-16">
+      <h2 class="text-2xl font-heading font-bold mb-6">Print-Friendly Version (Light)</h2>
+      <div class="overflow-x-auto rounded-lg border border-[var(--color-border)]">
+        <img
+          src="/images/cheatsheet/claude-code-cheatsheet-print.svg"
+          alt="Claude Code print-friendly cheatsheet showing keyboard shortcuts, slash commands, and mode toggles on a light background"
+          width="100%"
+          loading="lazy"
+        />
+      </div>
+      <div class="mt-4">
+        <a
+          href="/images/cheatsheet/claude-code-cheatsheet-print.svg"
+          download="claude-code-cheatsheet-print.svg"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm font-mono hover:border-[var(--color-text-secondary)] transition-colors"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 011-1z" />
+            <path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
+          </svg>
+          Download SVG (Light)
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>
