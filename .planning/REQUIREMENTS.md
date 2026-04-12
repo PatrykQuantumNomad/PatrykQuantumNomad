@@ -12,7 +12,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 - [ ] **UPD-01**: Ch1 Introduction updated with new surfaces (Desktop App, web), /powerup, install methods
 - [ ] **UPD-02**: Ch2 Context Management updated with autoMemoryDirectory, PostCompact hook
 - [ ] **UPD-03**: Ch3 Models & Costs updated with 1M Opus context, effort level restructure, /effort command
-- [ ] **UPD-04**: Ch4 Environment updated with new env vars, managed-settings.d/, --bare, NO_FLICKER
+- [x] **UPD-04**: Ch4 Environment updated with new env vars, managed-settings.d/, --bare, NO_FLICKER
 - [ ] **UPD-05**: Ch5 Remote & Headless updated with Remote Control server mode, Channels, --bare, scheduled tasks
 - [ ] **UPD-06**: Ch6 MCP updated with elicitation, per-tool result-size caps
 - [ ] **UPD-07**: Ch7 Skills updated with paths frontmatter, lifecycle/compaction, Plugins relationship
@@ -84,7 +84,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | UPD-01 | Phase 113 | Pending |
 | UPD-02 | Phase 113 | Pending |
 | UPD-03 | Phase 111 | Pending |
-| UPD-04 | Phase 111 | Pending |
+| UPD-04 | Phase 111 | Complete |
 | UPD-05 | Phase 113 | Pending |
 | UPD-06 | Phase 113 | Pending |
 | UPD-07 | Phase 111 | Pending |
