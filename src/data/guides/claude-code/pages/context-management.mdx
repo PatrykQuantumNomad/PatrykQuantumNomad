@@ -3,9 +3,9 @@ title: "Project Context & Memory"
 description: "Master the CLAUDE.md hierarchy, auto-memory system, path-specific rules, and context window management to get dramatically better results from Claude Code."
 order: 1
 slug: "context-management"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["CLAUDE.md", "context window", "auto-memory", "project context", "claude code configuration", "context engineering", "file exclusion"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["CLAUDE.md", "context window", "auto-memory", "project context", "claude code configuration", "context engineering", "file exclusion", "autoMemoryDirectory"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
@@ -52,6 +52,8 @@ This is a Node.js REST API built with Express and TypeScript.
 />
 
 Without a CLAUDE.md, Claude Code still works. It reads your code and infers patterns. But explicit instructions produce far more consistent results, especially for conventions that can't be inferred from code alone (like naming preferences or architectural decisions).
+
+If you're starting a new project and want help generating a CLAUDE.md, the `/init` command walks you through an interactive setup. For a more thorough experience, the opt-in preview flow (enabled with `CLAUDE_CODE_NEW_INIT=1`) runs a multi-phase interactive initialization that explores your codebase, asks follow-up questions, and generates a CLAUDE.md along with skills and hook configurations tailored to your project.
 
 ## CLAUDE.md Hierarchy
 
@@ -252,6 +254,17 @@ Memory gets stored in the `~/.claude/projects/` directory, organized by project.
 
 Claude Code creates and updates these files automatically based on your conversations. You don't need to manage them directly, though you can always review and edit them if you want to.
 
+The `autoMemoryDirectory` setting lets you override the default storage location. Instead of `~/.claude/projects/`, Claude Code stores auto-memory files in a directory you specify. This is useful when you want to share team memory through a repository (by pointing to a checked-in directory) or keep memory files alongside the project rather than in the home directory.
+
+<CodeBlock
+  code={`{
+  "autoMemoryDirectory": "/path/to/custom/memory"
+}`}
+  lang="json"
+  title="settings.json"
+  caption="Set autoMemoryDirectory to store auto-memory files in a custom location instead of the default ~/.claude/projects/ directory."
+/>
+
 The `/memory` command lets you browse loaded memory files and toggle auto memory on or off. It also opens the memory file in your default editor so you can review or prune old entries.
 
 <CodeBlock
@@ -319,6 +332,8 @@ Claude Code operates within a context window, which is the total amount of text 
 
 This is especially useful during long sessions where you've shifted focus. Compacting with a focus instruction makes sure the most relevant context sticks around.
 
+After compaction completes, Claude Code fires a `PostCompact` hook event. This lets you trigger custom scripts in response to compaction -- for example, logging what was compacted, updating external dashboards, or notifying monitoring systems. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for full hook documentation and configuration details.
+
 **Starting fresh.** The `/clear` command resets the conversation entirely. Use it between unrelated tasks in the same session. It wipes the context window and lets Claude Code start with a clean slate.
 
 <CodeBlock
@@ -341,10 +356,10 @@ After `/clear`, Claude Code reloads your CLAUDE.md and memory files automaticall
 
 `/btw` has full visibility into the current conversation, so you can ask about code Claude Code has already read, decisions it made earlier, or anything else from the session. A few things to know:
 
-- **Works while Claude is processing** — you can run `/btw` even while Claude Code is mid-response. The side question runs independently and doesn't interrupt the main turn.
-- **No tool access** — side questions answer only from what's already in context. Claude Code won't read files, run commands, or search when answering.
-- **Single response** — there are no follow-up turns. If you need a back-and-forth, use a normal prompt instead.
-- **Low cost** — the side question reuses the parent conversation's prompt cache, so the additional cost is minimal.
+- **Works while Claude is processing** -- you can run `/btw` even while Claude Code is mid-response. The side question runs independently and doesn't interrupt the main turn.
+- **No tool access** -- side questions answer only from what's already in context. Claude Code won't read files, run commands, or search when answering.
+- **Single response** -- there are no follow-up turns. If you need a back-and-forth, use a normal prompt instead.
+- **Low cost** -- the side question reuses the parent conversation's prompt cache, so the additional cost is minimal.
 
 Think of `/btw` as the inverse of a subagent: `/btw` sees your full conversation but has no tools, while a subagent has full tools but starts with an empty context. Use `/btw` to ask about what Claude Code already knows; use a subagent to go find out something new.
 
@@ -428,7 +443,7 @@ Together, `respectGitignore` and `claudeMdExcludes` give you fine-grained contro
 
 - **Clear context between unrelated tasks.** Done with a refactoring task? Run `/clear` before starting a bug fix in a different part of the codebase. A clean context produces better results than a stale one.
 
-- **Review auto-memory periodically.** Check `~/.claude/projects/` to see what Claude Code has remembered. Prune outdated entries to keep memory relevant and within the 200-line limit.
+- **Review auto-memory periodically.** Check `~/.claude/projects/` (or your custom `autoMemoryDirectory` path) to see what Claude Code has remembered. Prune outdated entries to keep memory relevant and within the 200-line limit.
 
 - **Use @imports for detailed documentation.** Keep CLAUDE.md as a high-level overview and import your detailed guides, architecture docs, and convention documents.
 
