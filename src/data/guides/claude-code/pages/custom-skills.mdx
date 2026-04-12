@@ -1,17 +1,17 @@
 ---
 title: "Custom Skills"
-description: "Build reusable SKILL.md files that encode team conventions as slash commands or auto-invoked capabilities, with tool restrictions and subagent isolation."
+description: "Build reusable SKILL.md files with conditional activation via path patterns, content lifecycle management across compaction, and distribution through the Plugins system."
 order: 6
 slug: "custom-skills"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code skills", "SKILL.md", "slash commands", "custom automation", "skill creator", "team workflow", "agent skills"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code skills", "SKILL.md", "slash commands", "custom automation", "skill creator", "team workflow", "agent skills", "paths", "compaction", "plugins", "lifecycle"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
 ## What You Will Learn
 
-This chapter walks you through the SKILL.md system: how to create reusable, shareable instruction sets that extend what Claude Code can do. We'll cover the anatomy of a SKILL.md file, all ten frontmatter configuration fields, the three invocation modes (slash command, auto-invocation, and both), the four storage locations where skills can live, string substitutions for dynamic content, dynamic injection syntax for shell command preprocessing, and the bundled skills that ship with Claude Code.
+This chapter walks you through the SKILL.md system: how to create reusable, shareable instruction sets that extend what Claude Code can do. We'll cover the anatomy of a SKILL.md file, all twelve frontmatter configuration fields, the three invocation modes (slash command, auto-invocation, and both), the four storage locations where skills can live, how skills are distributed through the Plugins system, string substitutions for dynamic content, dynamic injection syntax for shell command preprocessing, how skill content survives context compaction, and the bundled skills that ship with Claude Code.
 
 By the end, you'll be able to create custom skills tailored to your workflow and share them across your team.
 
@@ -21,7 +21,7 @@ By the end, you'll be able to create custom skills tailored to your workflow and
 
 Skills are reusable instruction sets that extend what Claude Code can do. Each skill lives in a SKILL.md file containing YAML frontmatter for configuration and a markdown body with instructions Claude reads and follows when the skill runs. They follow the Agent Skills open standard.
 
-There are three ways to invoke a skill: as a slash command you type in chat, automatically when Claude decides it's relevant to your request, or both. Skills can also restrict which tools Claude uses, override the model, run in isolated subagents, and even embed their own hook configurations.
+There are three ways to invoke a skill: as a slash command you type in chat, automatically when Claude decides it's relevant to your request, or both. Skills can also restrict which tools Claude uses, override the model, run in isolated subagents, conditionally activate based on which files you're working with, and even embed their own hook configurations.
 
 If you've used the older `.claude/commands/` directory, skills are the replacement. Command files still work for backward compatibility, but skills are the recommended approach because they support richer configuration through frontmatter, automatic discovery in nested directories, and supporting files alongside the skill definition.
 
@@ -57,7 +57,7 @@ The **markdown body** (everything after the closing `---`) contains the instruct
 
 ## Frontmatter Reference
 
-SKILL.md supports ten optional frontmatter fields. None are required, and sensible defaults kick in when you omit them.
+SKILL.md supports twelve optional frontmatter fields. None are required, and sensible defaults kick in when you omit them.
 
 **name:** A human readable name for the skill. If you leave it out, the filename or directory name is used instead. This name shows up in `/help` output and the slash command menu.
 
@@ -87,6 +87,50 @@ name: deploy-staging
 
 **hooks:** Skill scoped hook configuration, using the same format as `settings.json` hooks. Hooks defined here only apply while this skill is running. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for the full hook configuration format.
 
+**paths:** An array of glob patterns that control when this skill is conditionally activated. When `paths` is set, the skill is only auto-loaded when Claude reads or modifies files matching at least one of the patterns. This keeps the skill out of context for unrelated work, reducing noise and saving tokens.
+
+<CodeBlock
+  code={`---
+name: api-conventions
+description: Enforce REST API naming and error handling conventions
+paths:
+  - "src/api/**/*.ts"
+  - "src/middleware/**"
+  - "src/routes/**/*.ts"
+---
+
+You are an API standards enforcer. When the developer is working
+on API routes or middleware, ensure that:
+
+1. Route names use kebab-case
+2. All endpoints return standard error envelope format
+3. Authentication middleware is applied to protected routes
+4. Response status codes follow REST conventions`}
+  lang="yaml"
+  title=".claude/skills/api-conventions/SKILL.md"
+  caption="This skill only activates when Claude is working with files under src/api/, src/middleware/, or src/routes/."
+/>
+
+Without `paths`, this skill would load into every session regardless of what you're working on. With `paths`, it stays dormant until you start editing API files, then activates automatically. Glob patterns follow standard matching rules: `**` matches any number of directories, `*` matches any filename characters.
+
+**shell:** Overrides the shell used for inline `!`command`` execution within the skill body. By default, skills execute dynamic injection commands using the system's default shell. Set `shell` to use a different shell, such as `powershell` on Windows.
+
+<CodeBlock
+  code={`---
+name: windows-deploy
+description: Deploy using PowerShell scripts
+shell: powershell
+---
+
+Deploy the application using the project's PowerShell scripts.
+
+Current deployment status: !\`Get-Content .\\deploy-status.txt\`
+Active environment: !\`$env:DEPLOY_ENV\``}
+  lang="yaml"
+  title=".claude/skills/windows-deploy/SKILL.md"
+  caption="The shell field routes dynamic injection commands through PowerShell instead of the default shell."
+/>
+
 Here's a skill that brings several frontmatter fields together.
 
 <CodeBlock
@@ -99,6 +143,9 @@ allowed-tools: Read, Grep, Glob
 model: opus
 context: fork
 agent: Explore
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.js"
 ---
 
 You are a senior security engineer performing a code audit.
@@ -117,7 +164,7 @@ For each finding, report:
 3. A recommended fix with code example`}
   lang="yaml"
   title=".claude/skills/security-review/SKILL.md"
-  caption="A security review skill: user only invocation, read only tools, runs in an isolated Explore subagent."
+  caption="A security review skill: user only invocation, read only tools, runs in an isolated Explore subagent, activates only for TypeScript and JavaScript source files."
 />
 
 ## Where Skills Live
@@ -156,6 +203,14 @@ Skills can live in four locations, each with a different scope and audience.
 />
 
 Claude Code discovers skills automatically by scanning for `SKILL.md` files in `.claude/skills/` directories at any depth in your project. If you're working in a monorepo with multiple packages, each package can define its own skills and they'll all be available when Claude Code runs from the project root.
+
+### Skills and Plugins
+
+The Plugins system is the distribution mechanism for skills. When you install a plugin, any skills it contains become available in your session alongside your personal and project skills. Plugin skills are namespaced to avoid collisions: a skill named `lint` from a plugin called `code-quality` is invoked as `/code-quality:lint` rather than just `/lint`.
+
+This namespacing means you can install multiple plugins that each define skills with the same name without conflicts. Your own project and personal skills always take precedence when invoked without a namespace prefix.
+
+The Plugins chapter covers plugin installation, marketplace discovery, and the full plugin manifest format including how to package your own skills for distribution.
 
 ## Invocation Modes
 
@@ -311,6 +366,54 @@ Do not modify any files.`}
 
 The subagent runs to completion and returns its results to the parent session. Your main conversation continues uninterrupted, and the skill's work doesn't eat into your available context window. This pattern is especially useful for expensive analysis tasks that need to read many files.
 
+The relationship between skills and subagents works in both directions. Skills with `context: fork` run inside subagents, and subagents defined with a `skills` field in their AGENT.md frontmatter can preload specific skill content into their context. This lets you build specialized agents that always have certain skills available without waiting for auto-invocation.
+
+## Content Lifecycle and Compaction
+
+When a long session triggers context compaction, Claude Code preserves skill content so your active skills continue influencing behavior. Understanding how this works helps you write skills that remain effective throughout extended sessions.
+
+After compaction, the first **5,000 tokens** of each invoked skill's content are re-attached to the context window. This means the most important instructions in your skill should appear near the top of the markdown body. If your skill is under 5,000 tokens, it survives compaction entirely intact.
+
+Across all invoked skills in a session, Claude Code allocates a combined budget of **25,000 tokens** for post-compaction skill content. When multiple skills are active, the most recently invoked skills are prioritized for re-attachment. Skills that haven't been used recently may be dropped from context to stay within the budget.
+
+<CodeBlock
+  code={`---
+name: coding-standards
+description: Enforce team coding standards
+---
+
+## Critical Rules (keep in first 5,000 tokens)
+
+These rules MUST be followed in every code change:
+
+1. All functions must have TypeScript return types
+2. No any types -- use unknown and narrow
+3. Error handling must use Result types, not try/catch
+4. All public APIs must have JSDoc comments
+
+## Extended Guidelines
+
+These additional guidelines apply when context allows:
+
+- Prefer composition over inheritance
+- Use barrel exports for module boundaries
+- Keep files under 300 lines
+- ...`}
+  lang="yaml"
+  title=".claude/skills/coding-standards/SKILL.md"
+  caption="Structure skills with critical content in the first 5,000 tokens so it survives context compaction."
+/>
+
+**Practical implications:**
+
+- **Put critical instructions first.** The top of your skill body is the most durable part. Move non-negotiable rules, required patterns, and essential context above any nice-to-have guidance.
+
+- **Keep skills concise.** A focused 3,000 token skill survives compaction fully intact. A sprawling 20,000 token skill loses 75% of its content after compaction.
+
+- **Watch for skill count.** With a 25,000 token combined budget, five 5,000 token skills fit perfectly. If you're running ten active skills, some will be dropped. Reduce active skill count by using `paths` to conditionally activate skills only when relevant files are in play.
+
+- **Recently invoked wins.** If a skill hasn't been invoked recently, it may be deprioritized after compaction. For skills that must persist, consider invoking them periodically or structuring them as shorter, higher-priority instructions.
+
 ## Bundled Skills
 
 Claude Code ships with several built in skills that are available in every session without any setup.
@@ -344,6 +447,19 @@ Permission rules let you control which skills are allowed to run. The `Skill(nam
 
 Enterprise administrators can use managed settings to enforce skill restrictions across the organization, ensuring only approved skills run in production sensitive environments.
 
+For environments where inline shell execution in skills poses a security concern, the `disableSkillShellExecution` managed setting blocks all `!`command`` dynamic injection from running in skills, slash commands, and plugin commands. When enabled, the `!`command`` syntax is treated as literal text rather than being executed. Bundled skills and managed skills are not affected by this setting.
+
+<CodeBlock
+  code={`{
+    "disableSkillShellExecution": true
+}`}
+  lang="json"
+  title="managed-settings.json"
+  caption="Blocks inline shell execution in skills. Only configurable through managed settings -- users cannot override it."
+/>
+
+This is a managed-only setting, meaning it can only be configured by enterprise administrators through managed settings. Individual users cannot enable or disable it in their personal or project settings. See [Security & Governance](/guides/claude-code/security/) for the full managed settings reference and other enterprise security controls.
+
 ## Best Practices
 
 - **Keep skills focused on one task.** A skill that does one thing well is more reusable and easier to debug than one that tries to handle multiple scenarios.
@@ -351,6 +467,10 @@ Enterprise administrators can use managed settings to enforce skill restrictions
 - **Write clear descriptions for discoverability.** The description field is what users see in the slash command menu and what Claude uses to decide when to auto-invoke. Make it specific and action oriented.
 
 - **Use allowed-tools to limit scope.** A code review skill shouldn't need write access. A documentation generator shouldn't need to run shell commands. Restricting tools prevents unintended side effects.
+
+- **Use paths to reduce context noise.** Skills without `paths` load into every session. Set glob patterns so skills only activate when you're working on relevant files, saving context window space and keeping unrelated skills from interfering.
+
+- **Structure content for compaction survival.** Put your most critical instructions in the first 5,000 tokens of the skill body. After context compaction, only this portion is guaranteed to be re-attached.
 
 - **Test skills with simple inputs first.** Before rolling out a complex skill to your team, test it with straightforward cases to make sure the instructions produce the expected behavior.
 
