@@ -1,17 +1,17 @@
 ---
 title: "Security & Enterprise Administration"
-description: "Deploy Claude Code at organizational scale with managed settings, permission governance, sandbox enforcement, and OpenTelemetry audit compliance."
+description: "Deploy Claude Code at organizational scale with managed settings, six permission modes, Auto Mode governance, sandbox enforcement, and OpenTelemetry audit compliance."
 order: 10
 slug: "security"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code enterprise", "managed settings", "security governance", "permission governance", "sandbox enforcement", "opentelemetry", "prompt injection"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code enterprise", "managed settings", "security governance", "permission governance", "sandbox enforcement", "opentelemetry", "prompt injection", "auto mode", "managed-settings.d", "protected paths", "bash hardening"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
 ## What You'll Learn
 
-This chapter walks through the enterprise security and governance features you'll need to deploy Claude Code across an organization. We'll cover the security model behind every interaction, the five managed settings delivery mechanisms, the settings precedence hierarchy, and governance controls for permissions, hooks, MCP servers, and plugins. You'll also learn how to enforce filesystem and network sandboxing, configure authentication controls, and use vulnerability scanning as a capability pattern, not a standalone feature.
+This chapter walks through the enterprise security and governance features you'll need to deploy Claude Code across an organization. We'll cover the security model behind every interaction, the managed settings delivery mechanisms (including the `managed-settings.d/` drop-in directory), the settings precedence hierarchy, and governance controls for permissions, Auto Mode, hooks, skills, MCP servers, and plugins. You'll also learn how to enforce filesystem and network sandboxing with Bash hardening and protected paths, configure authentication controls, and use vulnerability scanning as a capability pattern.
 
 By the end, you'll be able to answer the question: "How do I deploy Claude Code securely at scale?"
 
@@ -24,7 +24,7 @@ Claude Code is built on a permission based architecture. Every potentially dange
 The security model follows a defense in depth strategy with three layers:
 
 1. **Built in protections.** Command blocklists, context aware prompt injection detection, and isolated fetch contexts are always active. You can't disable them.
-2. **Configurable permissions.** User facing permission rules that control which tools need approval, which can run automatically, and which are denied outright. See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for how the permission system works at the individual level.
+2. **Configurable permissions.** User facing permission rules that control which tools need approval, which can run automatically, and which are denied outright. Six permission modes (default, acceptEdits, plan, auto, dontAsk, and bypassPermissions) give developers different levels of automation. See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for how the permission system works at the individual level.
 3. **Enterprise governance.** Managed settings that override all user and project configuration. This is the layer we're focusing on here: the administrative controls that enforce security policy across an entire organization.
 
 Each layer builds on the one below it. Built in protections are the floor nobody can lower. Configurable permissions let individuals tune their workflow. Enterprise governance sets the ceiling nobody can raise.
@@ -60,11 +60,13 @@ Here's a representative enterprise managed settings file that shows the key gove
       "deny": [
         "Bash(rm -rf *)",
         "Bash(curl * | bash)"
-      ]
+      ],
+      "disableAutoMode": "disable"
     },
     "allowManagedPermissionRulesOnly": true,
     "allowManagedHooksOnly": true,
     "allowManagedMcpServersOnly": true,
+    "disableSkillShellExecution": true,
     "hooks": {
       "PreToolUse": [
         {
@@ -91,7 +93,68 @@ Here's a representative enterprise managed settings file that shows the key gove
 }`}
   lang="json"
   title="managed-settings.json"
-  caption="A comprehensive enterprise configuration covering permissions, hooks, MCP, sandbox, and authentication."
+  caption="A comprehensive enterprise configuration covering permissions, Auto Mode governance, hooks, skills, MCP, sandbox, and authentication."
+/>
+
+### The managed-settings.d/ Drop-in Directory
+
+For organizations with complex or team-specific policies, the `managed-settings.d/` directory provides layered policy management. Instead of maintaining a single monolithic `managed-settings.json`, you can distribute policy fragments as individual JSON files that get merged at load time.
+
+Files in `managed-settings.d/` are merged in alphabetical order. Each file's settings override any conflicting values from earlier files. The final merged result then applies as the managed settings layer, taking the same highest-priority position in the settings hierarchy.
+
+<CodeBlock
+  code={`managed-settings.d/
+  00-base-security.json      # Organization-wide baseline
+  10-network-policy.json     # Network isolation rules
+  20-team-frontend.json      # Frontend team overrides
+  30-team-platform.json      # Platform team overrides
+  90-compliance.json         # Compliance-mandated restrictions (last = highest priority)`}
+  lang="text"
+  title="managed-settings.d/ directory structure"
+  caption="Policy fragments merge alphabetically. Higher-numbered files override conflicting values from lower-numbered files."
+/>
+
+This pattern works well for organizations where different teams need different permission sets. The base security policy goes in a low-numbered file, team-specific overrides in the middle, and non-negotiable compliance requirements in a high-numbered file that always wins.
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "allow": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash(npm test)",
+        "Bash(npm run build)"
+      ]
+    },
+    "sandbox": {
+      "network": {
+        "allowedDomains": ["registry.npmjs.org", "github.com"]
+      }
+    }
+}`}
+  lang="json"
+  title="managed-settings.d/00-base-security.json"
+  caption="A base policy fragment granting read tools and safe build commands."
+/>
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "allow": [
+        "Bash(kubectl get *)",
+        "Bash(helm list *)"
+      ]
+    },
+    "sandbox": {
+      "network": {
+        "allowedDomains": ["k8s.internal.company.com"]
+      }
+    }
+}`}
+  lang="json"
+  title="managed-settings.d/30-team-platform.json"
+  caption="A team-specific fragment adding Kubernetes tools and internal cluster access."
 />
 
 Let's walk through each governance control in detail.
@@ -102,13 +165,15 @@ Let's walk through each governance control in detail.
 
 Claude Code evaluates settings in a strict hierarchy, where higher priority settings always win:
 
-1. **Managed settings** (highest priority): enterprise deployed configuration
+1. **Managed settings** (highest priority): enterprise deployed configuration from delivery mechanisms or `managed-settings.d/` merged fragments
 2. **CLI flags**: command line arguments passed when launching Claude Code
 3. **Local settings** (`.claude/settings.local.json`): machine specific overrides, not committed to Git
 4. **Project settings** (`.claude/settings.json`): project wide configuration, committed to Git
 5. **User settings** (`~/.claude/settings.json`): personal defaults across all projects
 
 Managed settings always take precedence. This is by design; it prevents developers from weakening enterprise security controls. A developer can't override a managed `allowManagedPermissionRulesOnly: true` setting by adding permissive rules to their project or user configuration.
+
+When using `managed-settings.d/`, the directory's fragments are merged first (alphabetically), then the merged result takes the managed settings position in this hierarchy. If both a `managed-settings.json` file and a `managed-settings.d/` directory exist, the directory fragments are merged on top of the single file, so directory entries take priority.
 
 Want to verify things are working? The `/status` command shows which settings are active and where they come from. Run it after deploying managed settings to confirm the hierarchy is behaving as expected.
 
@@ -153,6 +218,108 @@ When it's set to `true`, only permission rules defined in managed settings apply
 
 Any tool that isn't explicitly allowed or denied follows the default behavior: Claude Code asks the user for permission at runtime. The `allow` list covers tools that run without prompting. The `deny` list blocks tools entirely. Everything else requires interactive approval.
 
+Claude Code supports six permission modes that determine how tool approvals are handled: `default` (ask for everything), `acceptEdits` (auto-approve file edits and safe filesystem operations), `plan` (generate a plan then choose execution mode), `auto` (classifier-based automation), `dontAsk` (auto-deny unpermitted tools for CI), and `bypassPermissions` (skip all prompts). Enterprise admins can restrict which modes are available through managed settings, as covered in the Auto Mode Governance section below.
+
+---
+
+## Auto Mode Governance
+
+Auto Mode is a classifier-based permission system that automatically approves safe tool calls and blocks dangerous ones. It sits between the fully manual `default` mode and the fully permissive `bypassPermissions` mode, giving developers uninterrupted flow for routine operations while catching risky actions before they execute.
+
+### How the Classifier Works
+
+When Auto Mode is active, a background classifier model (Sonnet 4.6) evaluates each tool call before execution. The classifier sees the user's messages, the tool call being requested, and the project's CLAUDE.md, but it does not see tool results from previous calls. This design keeps classification fast while giving the classifier enough context to make informed decisions.
+
+The classifier runs on Sonnet 4.6 regardless of which model the session is using. If you're working with Opus 4.6 as your session model, the classifier still uses Sonnet 4.6 for its evaluations.
+
+A separate server-side probe also scans tool results for hostile content, catching prompt injection attempts that might try to escalate through auto-approved actions.
+
+### What Gets Blocked and Allowed
+
+The classifier maintains default rules for what's safe and what isn't. These defaults can be customized through the `autoMode.environment` setting.
+
+**Blocked by default:**
+
+- Piping downloaded content to a shell (`curl | bash` patterns)
+- Sending sensitive data to external endpoints
+- Production deployments and database migrations
+- Mass deletion of cloud storage resources
+- IAM permission grants and repository access changes
+- Force pushes or pushes to main/master branches
+- Destroying pre-existing files outside the working directory
+
+**Allowed by default:**
+
+- Local file operations within the working directory
+- Installing declared dependencies from package manifests
+- Reading `.env` files and sending credentials to their matching API endpoints
+- Read-only HTTP requests
+- Pushing to the current branch or Claude-created branches
+- Network access within sandbox-allowed domains
+
+### Subagent Handling
+
+When Auto Mode is active, subagent actions go through the classifier at three points:
+
+1. **At spawn.** The subagent's task description is evaluated before the subagent starts.
+2. **During execution.** Each tool call the subagent makes is individually classified.
+3. **On return.** The full action history is reviewed when the subagent completes.
+
+The `permissionMode` field in subagent frontmatter is ignored while Auto Mode is active. The classifier's decisions override any mode declared by the subagent itself.
+
+### Fallback Behavior
+
+Auto Mode includes built in fallback to prevent repeated blocking from stalling a session:
+
+- After 3 consecutive blocks or 20 total blocks, Auto Mode pauses and falls back to interactive prompting.
+- Approving the prompted action resumes Auto Mode.
+- In `-p` (pipe) mode, repeated blocks abort the session instead of prompting.
+
+### Availability
+
+Auto Mode requires:
+
+- A Team, Enterprise, or API plan (not available on Pro or Max plans)
+- Sonnet 4.6 or Opus 4.6 as the session model
+- Anthropic API as the provider (not available through Bedrock or Vertex AI)
+- Admin enablement for Team and Enterprise plans
+
+### Enterprise Controls
+
+Two managed settings govern Auto Mode at the organizational level:
+
+**`permissions.disableAutoMode`** controls whether Auto Mode is available. Set it to `"disable"` to prevent any developer from using Auto Mode, regardless of their plan or model. This is useful during initial rollout when you want to evaluate Auto Mode in a controlled pilot before enabling it org-wide.
+
+**`autoMode.environment`** customizes the classifier's behavior for your organization's infrastructure. Use it to declare trusted repositories, cloud buckets, internal services, and other resources that the classifier should treat differently from its defaults.
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "disableAutoMode": "disable"
+    }
+}`}
+  lang="json"
+  title="managed-settings.json"
+  caption="Disable Auto Mode across the entire organization."
+/>
+
+<CodeBlock
+  code={`{
+    "autoMode": {
+      "environment": {
+        "trustedRepos": ["github.com/acme-corp/*"],
+        "trustedBuckets": ["s3://acme-staging-*"],
+        "trustedServices": ["*.internal.acme.com"]
+      }
+    }
+}`}
+  lang="json"
+  title="managed-settings.json"
+  caption="Customize the Auto Mode classifier's environment awareness for your organization's infrastructure."
+/>
+
+For details on how individual developers enable and use Auto Mode, see [Models, Costs & Permissions](/guides/claude-code/models-and-costs/). For the `PermissionDenied` hook event that fires when Auto Mode blocks an action, see [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
+
 ---
 
 ## Hook Governance
@@ -166,6 +333,8 @@ Two additional settings give you fine-grained hook control:
 - **`allowedHttpHookUrls`** is a whitelist of HTTP endpoints that hooks are allowed to call. If a hook tries to send data to an endpoint not on this list, the request gets blocked.
 - **`httpHookAllowedEnvVars`** specifies which environment variables hook processes can access. This keeps hooks from reading sensitive environment variables like API keys or database credentials.
 
+Claude Code supports 26 lifecycle events that hooks can respond to. Managed hooks can target any of these events, giving you comprehensive coverage across the session lifecycle, tool execution, permission decisions, file changes, and configuration updates.
+
 <CodeBlock
   code={`{
     "allowManagedHooksOnly": true,
@@ -177,6 +346,16 @@ Two additional settings give you fine-grained hook control:
             {
               "type": "command",
               "command": "/opt/company/hooks/audit-file-changes.sh"
+            }
+          ]
+        }
+      ],
+      "PermissionDenied": [
+        {
+          "hooks": [
+            {
+              "type": "http",
+              "url": "https://telemetry.company.com/claude-denied-actions"
             }
           ]
         }
@@ -203,10 +382,35 @@ Two additional settings give you fine-grained hook control:
 }`}
   lang="json"
   title="managed-settings.json"
-  caption="Hook governance: only managed hooks run, HTTP calls restricted to approved endpoints."
+  caption="Hook governance: only managed hooks run, HTTP calls restricted to approved endpoints, with PermissionDenied logging for Auto Mode audit trails."
 />
 
-For more on hook lifecycle details, handler types, and exit code semantics, check out [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
+For more on hook lifecycle details, the 26 event types, handler configuration, and exit code semantics, check out [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
+
+---
+
+## Skill Governance
+
+Skills extend Claude Code with custom instructions and behaviors defined in SKILL.md files. Enterprise admins need to control two aspects of skill execution: which skills can run shell commands, and which skills are allowed to execute at all.
+
+### Disabling Skill Shell Execution
+
+The `disableSkillShellExecution` setting blocks inline shell commands (`!command` syntax) from executing within skills, slash commands, and plugin commands. When set to `true` in managed settings, any `!command` directive in a skill is ignored rather than executed.
+
+<CodeBlock
+  code={`{
+    "disableSkillShellExecution": true
+}`}
+  lang="json"
+  title="managed-settings.json"
+  caption="Block inline shell execution from all skills and commands. Bundled and managed skills are unaffected."
+/>
+
+This is a security-critical setting for organizations where skills come from multiple sources (project repos, plugins, user directories). Inline shell commands in skills could execute arbitrary code, and `disableSkillShellExecution` closes that vector without disabling skills entirely.
+
+Bundled skills (shipped with Claude Code) and managed skills (distributed via managed settings) are unaffected by this setting. Only user-authored and plugin-provided skills have their shell execution blocked.
+
+For more on skill anatomy, frontmatter fields, and invocation modes, see [Custom Skills](/guides/claude-code/custom-skills/).
 
 ---
 
@@ -283,9 +487,9 @@ Three settings handle this:
 
 ---
 
-## Sandbox Enforcement
+## Sandbox Enforcement and Bash Hardening
 
-Claude Code's sandbox provides two isolation dimensions: filesystem and network. Managed settings can enforce both to prevent data exfiltration and restrict where Claude Code can read, write, and connect.
+Claude Code's sandbox provides two isolation dimensions: filesystem and network. Managed settings can enforce both to prevent data exfiltration and restrict where Claude Code can read, write, and connect. The Bash tool includes additional hardening measures that protect critical paths regardless of permission mode.
 
 ### Filesystem Isolation
 
@@ -306,6 +510,28 @@ Two settings control network access:
 
 The `allowUnsandboxedCommands` setting controls whether commands can bypass the sandbox. Set it to `false`, and all commands execute within sandbox restrictions. This stops developers from using shell commands to access files or network endpoints that the sandbox would otherwise block.
 
+### Protected Paths
+
+Certain filesystem paths are never auto-approved for modification, regardless of which permission mode is active. Even in `acceptEdits`, `auto`, or `bypassPermissions` mode, operations targeting these protected paths require explicit user confirmation.
+
+Protected paths include:
+
+- **Claude Code's own configuration:** `.claude/settings.json`, `.claude/settings.local.json`, managed settings files
+- **Git internals:** `.git/` directory contents (hooks, config, objects)
+- **Shell configuration:** `.bashrc`, `.zshrc`, `.profile`, `.bash_profile`, shell startup scripts
+- **SSH keys and configuration:** `.ssh/` directory contents
+- **System credentials:** `/etc/shadow`, `/etc/passwd`, credential stores
+
+This protection layer exists because these paths represent trust boundaries. A compromised prompt or malicious instruction that gets Claude Code to modify shell startup scripts or Git hooks could persist beyond the current session. The protected paths list ensures these high-value targets always require human confirmation, even when the developer has opted into a permissive mode.
+
+### Bash Hardening
+
+The Bash tool includes hardening improvements that go beyond filesystem and network sandboxing:
+
+- **Command analysis.** Before executing a command, the Bash tool analyzes it for dangerous patterns (pipe-to-shell, encoded payloads, privilege escalation attempts). Known dangerous patterns are blocked before reaching the shell.
+- **Working directory enforcement.** Commands that attempt to operate outside the project's working directory tree face additional scrutiny from both the sandbox and the permission system.
+- **Environment isolation.** The Bash tool runs commands in a controlled environment where sensitive environment variables are filtered based on sandbox configuration and `httpHookAllowedEnvVars` settings.
+
 <CodeBlock
   code={`{
     "sandbox": {
@@ -320,7 +546,10 @@ The `allowUnsandboxedCommands` setting controls whether commands can bypass the 
           "/etc/**",
           "/usr/**",
           "**/.env",
-          "**/.env.*"
+          "**/.env.*",
+          "**/.git/hooks/**",
+          "**/.bashrc",
+          "**/.zshrc"
         ],
         "denyRead": [
           "/etc/shadow",
@@ -344,10 +573,10 @@ The `allowUnsandboxedCommands` setting controls whether commands can bypass the 
 }`}
   lang="json"
   title="managed-settings.json"
-  caption="Full sandbox configuration: filesystem write/read restrictions plus network domain whitelist."
+  caption="Full sandbox configuration: filesystem write/read restrictions, protected path coverage in denyWrite, plus network domain whitelist."
 />
 
-Together, filesystem and network isolation create a strong boundary around what Claude Code can access. If a prompt injection tries to exfiltrate code through a network request, the domain whitelist blocks it. If a malicious instruction tries to read credentials, the `denyRead` rules prevent access.
+Together, filesystem isolation, network restrictions, protected paths, and Bash hardening create a strong boundary around what Claude Code can access. If a prompt injection tries to exfiltrate code through a network request, the domain whitelist blocks it. If a malicious instruction tries to read credentials, the `denyRead` rules prevent access. If an attack targets shell configuration files, the protected paths layer catches it even when permissions would otherwise allow the write.
 
 ---
 
@@ -491,8 +720,9 @@ The `/status` output shows you:
 - Active permission rules and where they come from
 - Connected MCP servers and their governance status
 - Sandbox configuration and network restrictions
+- Auto Mode status and classifier availability
 
-Make `/status` part of your deployment checklist. After pushing managed settings through any of the five delivery mechanisms, have a team member run `/status` and confirm the expected settings show up.
+Make `/status` part of your deployment checklist. After pushing managed settings through any of the five delivery mechanisms (or placing fragments in `managed-settings.d/`), have a team member run `/status` and confirm the expected settings show up.
 
 ---
 
@@ -502,11 +732,19 @@ Make `/status` part of your deployment checklist. After pushing managed settings
 
 - **Use `allowManagedPermissionRulesOnly` for critical security controls.** This is the single most impactful governance setting. Once it's enabled, developers can't add permissive rules that weaken organizational security.
 
+- **Pilot Auto Mode before org-wide rollout.** Enable Auto Mode for a small team first, monitor the `PermissionDenied` hook events via your telemetry pipeline, and review what the classifier blocks. Use `autoMode.environment` to tune trusted resources based on real usage. Once the classifier's behavior matches your expectations, roll out to the wider organization.
+
+- **Use `disableAutoMode` during evaluation periods.** If your organization isn't ready for classifier-based automation, set `permissions.disableAutoMode` to `"disable"` in managed settings. This keeps the option off the table while you assess the security implications.
+
 - **Test managed settings on a pilot group first.** Roll out to a small team before going organization-wide. This catches configuration mistakes before they block hundreds of developers.
 
 - **Use sandbox network isolation to prevent data exfiltration.** The `allowedDomains` whitelist ensures Claude Code can only talk to approved endpoints. This is especially important if your organization handles sensitive source code.
 
 - **Keep `allowedHttpHookUrls` narrow.** Hooks that send HTTP requests should only reach your own infrastructure. A broad URL whitelist defeats the whole purpose of hook governance.
+
+- **Enable `disableSkillShellExecution` in high-security environments.** If your developers install skills from plugins or shared repositories, blocking inline shell execution removes a vector for arbitrary code execution while still allowing skills to provide instructions and context.
+
+- **Use `managed-settings.d/` for multi-team organizations.** Instead of maintaining one giant managed-settings.json, split policies into layered fragments. Base security in low-numbered files, team overrides in the middle, compliance requirements at the top.
 
 - **Document your managed settings for team visibility.** Publish your managed settings configuration (with secrets redacted) on an internal wiki. Developers who understand why a policy exists are far less likely to work around it.
 
@@ -518,5 +756,6 @@ Make `/status` part of your deployment checklist. After pushing managed settings
 
 - <a href="https://code.claude.com/docs/en/security" target="_blank" rel="noopener noreferrer">Security</a>: official documentation on Claude Code's security model and prompt injection protections
 - <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">Settings</a>: managed settings delivery, precedence hierarchy, and all governance controls
+- <a href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener noreferrer">Permission Modes</a>: the six permission modes including Auto Mode availability and behavior
 - <a href="https://code.claude.com/docs/en/plugins" target="_blank" rel="noopener noreferrer">Plugins</a>: plugin architecture, marketplace distribution, and governance settings
 - See [Models, Costs & Permissions](/guides/claude-code/models-and-costs/) for the individual level permission system that enterprise governance builds upon
