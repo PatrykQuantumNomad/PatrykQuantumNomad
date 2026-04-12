@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap');
+    </style>
+    <linearGradient id="keycap" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0" style="stop-color:#ffffff"/>
+      <stop offset="1" style="stop-color:#f0f0f4"/>
+    </linearGradient>
+    <linearGradient id="keycapHero" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0" style="stop-color:#fff7f2"/>
+      <stop offset="1" style="stop-color:#fdeee6"/>
+    </linearGradient>
+    <linearGradient id="keycapDanger" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0" style="stop-color:#fff5f5"/>
+      <stop offset="1" style="stop-color:#fde8e8"/>
+    </linearGradient>
+    <filter id="keyShadow">
+      <feDropShadow dx="0" dy="0.8" stdDeviation="0.4" flood-color="#000" flood-opacity="0.1"/>
+    </filter>
+    <bx:export>
+      <bx:file format="png" path="claude-code-cheatsheet-print.png"/>
+    </bx:export>
+  </defs>
+  <rect width="1600" height="1000" fill="#ffffff"/>
+  <text x="48" y="38" font-family="'JetBrains Mono', monospace" font-size="20" fill="#c45a30" font-weight="800" letter-spacing="1" style="white-space: pre;">Claude Code</text>
+  <text x="228" y="38" font-family="'JetBrains Mono', monospace" font-size="20" fill="#b0b0be" font-weight="400" style="white-space: pre;">Interactive Mode</text>
+  <text x="1552" y="38" font-family="'JetBrains Mono', monospace" font-size="9" fill="#d0d0d8" text-anchor="end" style="white-space: pre;">v5 · code.claude.com/docs</text>
+  <line x1="48" y1="50" x2="1552" y2="50" stroke="#e0e0e8" stroke-width="0.7"/>
+  <text x="48" y="78" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c45a30" font-weight="800" letter-spacing="3" style="white-space: pre;">CORE 5</text>
+  <line x1="48" y1="86" x2="400" y2="86" stroke="#c45a30" stroke-width="0.5" stroke-opacity="0.25"/>
+  <g transform="translate(48, 96)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycapHero)" stroke="#c45a30" stroke-width="0.7" stroke-opacity="0.4" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c45a30" font-weight="700" text-anchor="middle" style="white-space: pre;">⌃C</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="13" fill="#2a2a34" style="white-space: pre;">Stop generation</text>
+  </g>
+  <g transform="translate(48, 128)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycapHero)" stroke="#c45a30" stroke-width="0.7" stroke-opacity="0.4" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c45a30" font-weight="700" text-anchor="middle" style="white-space: pre;">⌃R</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="13" fill="#2a2a34" style="white-space: pre;">Search history</text>
+  </g>
+  <g transform="translate(48, 160)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycapHero)" stroke="#c45a30" stroke-width="0.7" stroke-opacity="0.4" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c45a30" font-weight="700" text-anchor="middle" style="white-space: pre;">⌥T</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="13" fill="#2a2a34" style="white-space: pre;">Toggle thinking</text>
+  </g>
+  <g transform="translate(48, 192)">
+    <rect x="0" y="0" width="50" height="24" rx="5" fill="url(#keycapHero)" stroke="#c45a30" stroke-width="0.7" stroke-opacity="0.4" filter="url(#keyShadow)"/>
+    <text x="25" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c45a30" font-weight="700" text-anchor="middle" style="white-space: pre;">⇧Tab</text>
+    <text x="60" y="16" font-family="'DM Sans', sans-serif" font-size="13" fill="#2a2a34" style="white-space: pre;">Cycle modes</text>
+    <text x="155" y="16" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" style="white-space: pre;">Normal → Auto → Plan</text>
+  </g>
+  <g transform="translate(48, 224)">
+    <rect x="0" y="0" width="72" height="24" rx="5" fill="url(#keycapHero)" stroke="#c45a30" stroke-width="0.7" stroke-opacity="0.4" filter="url(#keyShadow)"/>
+    <text x="36" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c45a30" font-weight="700" text-anchor="middle" style="white-space: pre;">/compact</text>
+    <text x="82" y="16" font-family="'DM Sans', sans-serif" font-size="13" fill="#2a2a34" style="white-space: pre;">Reclaim context</text>
+  </g>
+  <text x="48" y="276" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c03030" font-weight="800" letter-spacing="3" style="white-space: pre;">RECOVERY</text>
+  <line x1="48" y1="284" x2="400" y2="284" stroke="#c03030" stroke-width="0.4" stroke-opacity="0.25"/>
+  <g transform="translate(48, 294)">
+    <rect x="0" y="0" width="28" height="24" rx="5" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.6" stroke-opacity="0.35" filter="url(#keyShadow)"/>
+    <text x="14" y="16" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">Esc</text>
+    <rect x="32" y="0" width="28" height="24" rx="5" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.6" stroke-opacity="0.35" filter="url(#keyShadow)"/>
+    <text x="46" y="16" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">Esc</text>
+    <text x="70" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Rewind code + conversation</text>
+  </g>
+  <g transform="translate(48, 324)">
+    <rect x="0" y="0" width="62" height="24" rx="5" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.6" stroke-opacity="0.35" filter="url(#keyShadow)"/>
+    <text x="31" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">/rewind</text>
+    <text x="72" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Undo to checkpoint</text>
+  </g>
+  <g transform="translate(48, 354)">
+    <rect x="0" y="0" width="52" height="24" rx="5" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.6" stroke-opacity="0.35" filter="url(#keyShadow)"/>
+    <text x="26" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">/clear</text>
+    <text x="62" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Nuke conversation</text>
+  </g>
+  <g transform="translate(48, 384)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.6" stroke-opacity="0.35" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">⌃D</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Exit session</text>
+  </g>
+  <text x="48" y="436" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="800" letter-spacing="3" style="white-space: pre;">WHILE CODING</text>
+  <line x1="48" y1="444" x2="400" y2="444" stroke="#1a8a8a" stroke-width="0.4" stroke-opacity="0.2"/>
+  <g transform="translate(48, 454)">
+    <rect x="0" y="0" width="22" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="11" y="16" font-family="'JetBrains Mono', monospace" font-size="13" fill="#1a8a8a" font-weight="700" text-anchor="middle" style="white-space: pre;">!</text>
+    <text x="30" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" style="white-space: pre;">cmd</text>
+    <text x="66" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Run shell, skip Claude</text>
+  </g>
+  <g transform="translate(48, 484)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#1a8a8a" font-weight="700" text-anchor="middle" style="white-space: pre;">⌃B</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Background task</text>
+    <text x="175" y="16" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" style="white-space: pre;">2× in tmux</text>
+  </g>
+  <g transform="translate(48, 514)">
+    <rect x="0" y="0" width="60" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="30" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/review</text>
+    <text x="70" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Code review</text>
+  </g>
+  <g transform="translate(48, 544)">
+    <rect x="0" y="0" width="120" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="60" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/security-review</text>
+    <text x="130" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Security audit</text>
+  </g>
+  <g transform="translate(48, 574)">
+    <rect x="0" y="0" width="54" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="27" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/todos</text>
+    <text x="64" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Task list</text>
+  </g>
+  <g transform="translate(48, 604)">
+    <rect x="0" y="0" width="62" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="31" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/bashes</text>
+    <text x="72" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Background jobs</text>
+  </g>
+  <g transform="translate(48, 634)">
+    <rect x="0" y="0" width="72" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="36" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/sandbox</text>
+    <text x="82" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Isolated bash env</text>
+  </g>
+  <g transform="translate(48, 664)">
+    <rect x="0" y="0" width="100" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="50" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">/pr-comments</text>
+    <text x="110" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">PR feedback</text>
+  </g>
+  <text x="48" y="716" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="800" letter-spacing="3" style="white-space: pre;">WHILE EXPLORING</text>
+  <line x1="48" y1="724" x2="400" y2="724" stroke="#6848a8" stroke-width="0.4" stroke-opacity="0.2"/>
+  <g transform="translate(48, 734)">
+    <rect x="0" y="0" width="32" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="16" y="16" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="700" text-anchor="middle" style="white-space: pre;">⌃O</text>
+    <text x="42" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Toggle verbose</text>
+  </g>
+  <g transform="translate(48, 764)">
+    <rect x="0" y="0" width="70" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="35" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="600" text-anchor="middle" style="white-space: pre;">/context</text>
+    <text x="80" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Token usage</text>
+  </g>
+  <g transform="translate(48, 794)">
+    <rect x="0" y="0" width="48" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="24" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="600" text-anchor="middle" style="white-space: pre;">/cost</text>
+    <text x="58" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Token stats</text>
+  </g>
+  <g transform="translate(200, 734)">
+    <rect x="0" y="0" width="56" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="28" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="600" text-anchor="middle" style="white-space: pre;">/model</text>
+    <text x="66" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Switch model</text>
+  </g>
+  <g transform="translate(200, 764)">
+    <rect x="0" y="0" width="42" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="21" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="600" text-anchor="middle" style="white-space: pre;">@file</text>
+    <text x="52" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Add to context</text>
+  </g>
+  <g transform="translate(200, 794)">
+    <rect x="0" y="0" width="66" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="33" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6848a8" font-weight="600" text-anchor="middle" style="white-space: pre;">/resume</text>
+    <text x="76" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Prev session</text>
+  </g>
+  <line x1="420" y1="66" x2="420" y2="840" stroke="#e8e8ee" stroke-width="0.5"/>
+  <text x="440" y="78" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="800" letter-spacing="3" style="white-space: pre;">MANAGING SESSION</text>
+  <line x1="440" y1="86" x2="760" y2="86" stroke="#8a7820" stroke-width="0.4" stroke-opacity="0.2"/>
+  <g transform="translate(440, 96)">
+    <rect x="0" y="0" width="42" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="21" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/init</text>
+    <text x="52" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Create CLAUDE.md</text>
+  </g>
+  <g transform="translate(440, 126)">
+    <rect x="0" y="0" width="68" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="34" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/memory</text>
+    <text x="78" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Edit CLAUDE.md</text>
+  </g>
+  <g transform="translate(440, 156)">
+    <rect x="0" y="0" width="22" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="11" y="16" font-family="'JetBrains Mono', monospace" font-size="13" fill="#8a7820" font-weight="700" text-anchor="middle" style="white-space: pre;">#</text>
+    <text x="30" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" style="white-space: pre;">note</text>
+    <text x="72" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Quick save to CLAUDE.md</text>
+  </g>
+  <g transform="translate(440, 186)">
+    <rect x="0" y="0" width="60" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="30" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/config</text>
+    <text x="70" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Settings UI</text>
+  </g>
+  <g transform="translate(440, 216)">
+    <rect x="0" y="0" width="98" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="49" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/permissions</text>
+    <text x="108" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Tool access rules</text>
+  </g>
+  <g transform="translate(440, 246)">
+    <rect x="0" y="0" width="68" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="34" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/add-dir</text>
+    <text x="78" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Add working dirs</text>
+  </g>
+  <g transform="translate(440, 276)">
+    <rect x="0" y="0" width="62" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="31" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/export</text>
+    <text x="72" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Export conversation</text>
+  </g>
+  <g transform="translate(440, 306)">
+    <rect x="0" y="0" width="56" height="24" rx="5" fill="url(#keycap)" stroke="#d0d0d8" stroke-width="0.4" filter="url(#keyShadow)"/>
+    <text x="28" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" text-anchor="middle" style="white-space: pre;">/effort</text>
+    <text x="66" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Reasoning level</text>
+  </g>
+  <text x="440" y="358" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="800" letter-spacing="3" style="white-space: pre;">EXTENDING</text>
+  <line x1="440" y1="366" x2="760" y2="366" stroke="#983868" stroke-width="0.4" stroke-opacity="0.2"/>
+  <g transform="translate(440, 376)">
+    <rect x="0" y="0" width="64" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="32" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/agents</text>
+    <text x="74" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Manage subagents</text>
+  </g>
+  <g transform="translate(440, 406)">
+    <rect x="0" y="0" width="44" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="22" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/mcp</text>
+    <text x="54" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">MCP servers &amp; OAuth</text>
+  </g>
+  <g transform="translate(440, 436)">
+    <rect x="0" y="0" width="54" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="27" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/hooks</text>
+    <text x="64" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Event automation</text>
+  </g>
+  <g transform="translate(440, 466)">
+    <rect x="0" y="0" width="58" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="29" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/plugin</text>
+    <text x="68" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Plugin manager</text>
+  </g>
+  <g transform="translate(440, 496)">
+    <rect x="0" y="0" width="38" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="19" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/ide</text>
+    <text x="48" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">IDE integrations</text>
+  </g>
+  <g transform="translate(440, 526)">
+    <rect x="0" y="0" width="46" height="24" rx="5" fill="url(#keycap)" stroke="#d0d0d8" stroke-width="0.4" filter="url(#keyShadow)"/>
+    <text x="23" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">/loop</text>
+    <text x="56" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Recurring tasks</text>
+  </g>
+  <rect x="440" y="564" width="320" height="68" rx="6" fill="#fafafc" stroke="#d8d8e0" stroke-width="0.6"/>
+  <text x="454" y="582" font-family="'JetBrains Mono', monospace" font-size="10" fill="#983868" font-weight="700" style="white-space: pre;">CUSTOM COMMANDS</text>
+  <text x="454" y="598" font-family="'JetBrains Mono', monospace" font-size="10" fill="#606070" style="white-space: pre;">.claude/commands/name.md</text>
+  <text x="680" y="598" font-family="'DM Sans', sans-serif" font-size="9" fill="#a0a0ae" style="white-space: pre;">project</text>
+  <text x="454" y="612" font-family="'JetBrains Mono', monospace" font-size="10" fill="#606070" style="white-space: pre;">~/.claude/commands/name.md</text>
+  <text x="680" y="612" font-family="'DM Sans', sans-serif" font-size="9" fill="#a0a0ae" style="white-space: pre;">personal</text>
+  <text x="454" y="626" font-family="'JetBrains Mono', monospace" font-size="10" fill="#606070" style="white-space: pre;">.claude/skills/name/SKILL.md</text>
+  <text x="680" y="626" font-family="'DM Sans', sans-serif" font-size="9" fill="#a0a0ae" style="white-space: pre;">auto-discover</text>
+  <text x="440" y="664" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="800" letter-spacing="3" style="white-space: pre;">⌃R WORKFLOW</text>
+  <line x1="440" y1="672" x2="760" y2="672" stroke="#8a7820" stroke-width="0.4" stroke-opacity="0.2"/>
+  <rect x="440" y="680" width="320" height="88" rx="6" fill="#fafafc" stroke="#8a7820" stroke-width="0.3" stroke-opacity="0.25"/>
+  <g transform="translate(454, 696)">
+    <rect x="0" y="0" width="32" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5"/>
+    <text x="16" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8a7820" font-weight="700" text-anchor="middle" style="white-space: pre;">⌃R</text>
+    <text x="42" y="14" font-family="'DM Sans', sans-serif" font-size="11" fill="#505060" style="white-space: pre;">Start search</text>
+  </g>
+  <g transform="translate(454, 720)">
+    <text x="0" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#505060" style="white-space: pre;">type</text>
+    <text x="40" y="14" font-family="'DM Sans', sans-serif" font-size="11" fill="#808090" style="white-space: pre;">filter</text>
+    <text x="100" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a7820" font-weight="600" style="white-space: pre;">⌃R</text>
+    <text x="122" y="14" font-family="'DM Sans', sans-serif" font-size="11" fill="#808090" style="white-space: pre;">older match</text>
+  </g>
+  <g transform="translate(454, 744)">
+    <rect x="0" y="0" width="32" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5"/>
+    <text x="16" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">Tab</text>
+    <text x="38" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">edit</text>
+    <rect x="72" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5"/>
+    <text x="82" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">↵</text>
+    <text x="98" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">run</text>
+    <rect x="128" y="0" width="32" height="20" rx="4" fill="url(#keycapDanger)" stroke="#c03030" stroke-width="0.4" stroke-opacity="0.3"/>
+    <text x="144" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c03030" font-weight="600" text-anchor="middle" style="white-space: pre;">⌃C</text>
+    <text x="166" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">cancel</text>
+  </g>
+  <text x="440" y="798" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="800" letter-spacing="3" style="white-space: pre;">INPUT</text>
+  <line x1="440" y1="806" x2="760" y2="806" stroke="#1a8a8a" stroke-width="0.4" stroke-opacity="0.2"/>
+  <g transform="translate(440, 816)">
+    <rect x="0" y="0" width="38" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="19" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="700" text-anchor="middle" style="white-space: pre;">\ ↵</text>
+    <text x="48" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Newline</text>
+    <text x="110" y="16" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" style="white-space: pre;">universal</text>
+  </g>
+  <g transform="translate(600, 816)">
+    <rect x="0" y="0" width="36" height="24" rx="5" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="18" y="16" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1a8a8a" font-weight="600" text-anchor="middle" style="white-space: pre;">⇧↵</text>
+    <text x="46" y="16" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Newline</text>
+    <text x="110" y="16" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" style="white-space: pre;">after /terminal-setup</text>
+  </g>
+  <line x1="780" y1="66" x2="780" y2="840" stroke="#e8e8ee" stroke-width="0.5"/>
+  <text x="800" y="78" font-family="'JetBrains Mono', monospace" font-size="11" fill="#909098" font-weight="800" letter-spacing="3" style="white-space: pre;">STATUS &amp; ADMIN</text>
+  <line x1="800" y1="86" x2="1120" y2="86" stroke="#d0d0d8" stroke-width="0.4"/>
+  <text x="806" y="104" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/status</text>
+  <text x="890" y="104" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Version · model · account</text>
+  <text x="806" y="122" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/usage</text>
+  <text x="890" y="122" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Plan &amp; rate limits</text>
+  <text x="806" y="140" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/doctor</text>
+  <text x="890" y="140" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Health check</text>
+  <text x="806" y="158" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/login</text>
+  <text x="860" y="158" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Switch acct</text>
+  <text x="960" y="158" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/logout</text>
+  <text x="806" y="176" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/help</text>
+  <text x="860" y="176" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Usage help</text>
+  <text x="960" y="176" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/bug</text>
+  <text x="806" y="194" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/output-style</text>
+  <text x="914" y="194" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Set format</text>
+  <text x="806" y="212" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/vim</text>
+  <text x="860" y="212" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Vim mode</text>
+  <text x="960" y="212" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">⌃L</text>
+  <text x="990" y="212" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Clear screen</text>
+  <text x="806" y="230" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/terminal-setup</text>
+  <text x="806" y="248" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/install-github-app</text>
+  <text x="806" y="266" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/release-notes</text>
+  <text x="960" y="266" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/statusline</text>
+  <text x="806" y="284" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/privacy-settings</text>
+  <text x="806" y="302" font-family="'JetBrains Mono', monospace" font-size="11" fill="#808090" style="white-space: pre;">/remote-control</text>
+  <text x="940" y="302" font-family="'DM Sans', sans-serif" font-size="11" fill="#909098" style="white-space: pre;">Remote server</text>
+  <text x="800" y="334" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="800" letter-spacing="3" style="white-space: pre;">VIM MODE</text>
+  <text x="890" y="334" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" style="white-space: pre;">/vim to enable</text>
+  <line x1="800" y1="342" x2="1120" y2="342" stroke="#983868" stroke-width="0.4" stroke-opacity="0.2"/>
+  <text x="806" y="360" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" letter-spacing="1" style="white-space: pre;">INSERT</text>
+  <g transform="translate(806, 368)">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="10" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">i</text>
+    <text x="24" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">before</text>
+    <rect x="72" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="82" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">a</text>
+    <text x="96" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">after</text>
+    <rect x="138" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="148" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">o</text>
+    <text x="162" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">below</text>
+    <rect x="210" y="0" width="28" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="224" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">Esc</text>
+    <text x="244" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">→ normal</text>
+  </g>
+  <g transform="translate(806, 394)">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="10" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">I</text>
+    <text x="24" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">line start</text>
+    <rect x="90" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="100" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">A</text>
+    <text x="114" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">line end</text>
+    <rect x="174" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="184" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">O</text>
+    <text x="198" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">above</text>
+  </g>
+  <text x="806" y="430" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" letter-spacing="1" style="white-space: pre;">MOVE</text>
+  <g transform="translate(806, 438)">
+    <rect x="0" y="0" width="64" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="32" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">h j k l</text>
+    <text x="72" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">← ↓ ↑ →</text>
+    <rect x="138" y="0" width="52" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="164" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">w b e</text>
+    <text x="196" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">word/back/end</text>
+  </g>
+  <g transform="translate(806, 464)">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="10" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">0</text>
+    <text x="24" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">start</text>
+    <rect x="60" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="70" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">$</text>
+    <text x="84" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">end</text>
+    <rect x="114" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="124" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">^</text>
+    <text x="138" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">1st char</text>
+    <rect x="192" y="0" width="26" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="205" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">gg</text>
+    <text x="222" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">top</text>
+    <rect x="248" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="258" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">G</text>
+    <text x="272" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">bottom</text>
+  </g>
+  <text x="806" y="502" font-family="'JetBrains Mono', monospace" font-size="9" fill="#909098" letter-spacing="1" style="white-space: pre;">EDIT</text>
+  <g transform="translate(806, 510)">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="10" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">x</text>
+    <text x="24" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">char</text>
+    <rect x="58" y="0" width="26" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="71" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">dd</text>
+    <text x="88" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">line</text>
+    <rect x="118" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="128" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">D</text>
+    <text x="142" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">→end</text>
+    <rect x="178" y="0" width="44" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="200" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">dw db</text>
+    <text x="226" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">word</text>
+  </g>
+  <g transform="translate(806, 536)">
+    <rect x="0" y="0" width="26" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="13" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">cc</text>
+    <text x="30" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">chg line</text>
+    <rect x="90" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="100" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">C</text>
+    <text x="114" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">chg→end</text>
+    <rect x="172" y="0" width="44" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="194" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">cw cb</text>
+    <text x="220" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">chg w/b</text>
+    <rect x="270" y="0" width="20" height="20" rx="4" fill="url(#keycap)" stroke="#888898" stroke-width="0.5" filter="url(#keyShadow)"/>
+    <text x="280" y="14" font-family="'JetBrains Mono', monospace" font-size="11" fill="#983868" font-weight="600" text-anchor="middle" style="white-space: pre;">.</text>
+    <text x="294" y="14" font-family="'DM Sans', sans-serif" font-size="10" fill="#808090" style="white-space: pre;">repeat</text>
+  </g>
+  <text x="800" y="586" font-family="'JetBrains Mono', monospace" font-size="11" fill="#909098" font-weight="800" letter-spacing="3" style="white-space: pre;">COMMAND COST</text>
+  <line x1="800" y1="594" x2="1120" y2="594" stroke="#d0d0d8" stroke-width="0.4"/>
+  <rect x="800" y="602" width="320" height="88" rx="6" fill="#fafafc" stroke="#d8d8e0" stroke-width="0.5"/>
+  <circle cx="816" cy="618" r="4" fill="#1a8a8a"/>
+  <text x="826" y="622" font-family="'JetBrains Mono', monospace" font-size="10" fill="#1a8a8a" font-weight="600" style="white-space: pre;">SAFE</text>
+  <text x="870" y="622" font-family="'JetBrains Mono', monospace" font-size="9" fill="#808090" style="white-space: pre;">/help  /status  /cost  /context  ⌃O</text>
+  <circle cx="816" cy="636" r="4" fill="#8a7820"/>
+  <text x="826" y="640" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8a7820" font-weight="600" style="white-space: pre;">MODIFIES</text>
+  <text x="894" y="640" font-family="'JetBrains Mono', monospace" font-size="9" fill="#808090" style="white-space: pre;">/compact  /model  /permissions  /memory  /effort</text>
+  <circle cx="816" cy="654" r="4" fill="#c45a30"/>
+  <text x="826" y="658" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c45a30" font-weight="600" style="white-space: pre;">DESTRUCTIVE</text>
+  <text x="910" y="658" font-family="'JetBrains Mono', monospace" font-size="9" fill="#808090" style="white-space: pre;">/clear  Esc Esc  /rewind</text>
+  <circle cx="816" cy="672" r="4" fill="#c03030"/>
+  <text x="826" y="676" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c03030" font-weight="600" style="white-space: pre;">EXIT</text>
+  <text x="860" y="676" font-family="'JetBrains Mono', monospace" font-size="9" fill="#808090" style="white-space: pre;">⌃D  /exit</text>
+  <text x="930" y="676" font-family="'DM Sans', sans-serif" font-size="9" fill="#b0b0be" style="white-space: pre;">session gone</text>
+  <line x1="1140" y1="66" x2="1140" y2="840" stroke="#e8e8ee" stroke-width="0.5"/>
+  <text x="1160" y="78" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c45a30" font-weight="800" letter-spacing="3" style="white-space: pre;">INTENT → ACTION</text>
+  <text x="1310" y="78" font-family="'DM Sans', sans-serif" font-size="10" fill="#b0b0be" style="white-space: pre;">what am I trying to do?</text>
+  <line x1="1160" y1="86" x2="1552" y2="86" stroke="#c45a30" stroke-width="0.4" stroke-opacity="0.2"/>
+  <text x="1166" y="106" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Stop Claude</text>
+  <text x="1310" y="106" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="106" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c45a30" font-weight="600" style="white-space: pre;">⌃C</text>
+  <text x="1166" y="128" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Undo everything</text>
+  <text x="1310" y="128" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="128" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c03030" font-weight="600" style="white-space: pre;">Esc Esc</text>
+  <text x="1166" y="150" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Start fresh</text>
+  <text x="1310" y="150" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="150" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c03030" font-weight="600" style="white-space: pre;">/clear</text>
+  <text x="1166" y="172" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Running out of context</text>
+  <text x="1340" y="172" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··········</text>
+  <text x="1420" y="172" font-family="'JetBrains Mono', monospace" font-size="12" fill="#c45a30" font-weight="600" style="white-space: pre;">/compact</text>
+  <text x="1166" y="194" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Think harder</text>
+  <text x="1310" y="194" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="194" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="600" style="white-space: pre;">⌥T</text>
+  <text x="1166" y="216" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Hands-free mode</text>
+  <text x="1310" y="216" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="216" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="600" style="white-space: pre;">⇧Tab</text>
+  <text x="1470" y="216" font-family="'DM Sans', sans-serif" font-size="10" fill="#909098" style="white-space: pre;">→ Auto</text>
+  <text x="1166" y="238" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Just plan, don't act</text>
+  <text x="1330" y="238" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">············</text>
+  <text x="1420" y="238" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="600" style="white-space: pre;">⇧Tab ⇧Tab</text>
+  <line x1="1166" y1="250" x2="1540" y2="250" stroke="#e8e8ee" stroke-width="0.4"/>
+  <text x="1166" y="268" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Re-use old prompt</text>
+  <text x="1310" y="268" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="268" font-family="'JetBrains Mono', monospace" font-size="12" fill="#8a7820" font-weight="600" style="white-space: pre;">⌃R</text>
+  <text x="1166" y="290" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Quick shell command</text>
+  <text x="1310" y="290" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="290" font-family="'JetBrains Mono', monospace" font-size="12" fill="#1a8a8a" font-weight="600" style="white-space: pre;">! cmd</text>
+  <text x="1166" y="312" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Long-running task</text>
+  <text x="1310" y="312" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="312" font-family="'JetBrains Mono', monospace" font-size="12" fill="#1a8a8a" font-weight="600" style="white-space: pre;">⌃B</text>
+  <text x="1166" y="334" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Include a file</text>
+  <text x="1310" y="334" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="334" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="600" style="white-space: pre;">@path</text>
+  <line x1="1166" y1="346" x2="1540" y2="346" stroke="#e8e8ee" stroke-width="0.4"/>
+  <text x="1166" y="364" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Remember this</text>
+  <text x="1310" y="364" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="364" font-family="'JetBrains Mono', monospace" font-size="12" fill="#8a7820" font-weight="600" style="white-space: pre;"># note</text>
+  <text x="1166" y="386" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Code review</text>
+  <text x="1310" y="386" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="386" font-family="'JetBrains Mono', monospace" font-size="12" fill="#1a8a8a" font-weight="600" style="white-space: pre;">/review</text>
+  <text x="1166" y="408" font-family="'DM Sans', sans-serif" font-size="12" fill="#505060" style="white-space: pre;">Debug what I see</text>
+  <text x="1310" y="408" font-family="'JetBrains Mono', monospace" font-size="7" fill="#d8d8e0" letter-spacing="3" style="white-space: pre;">··················</text>
+  <text x="1420" y="408" font-family="'JetBrains Mono', monospace" font-size="12" fill="#6848a8" font-weight="600" style="white-space: pre;">⌃O</text>
+  <text x="1166" y="428" font-family="'DM Sans', sans-serif" font-size="9" fill="#c8c8d0" style="white-space: pre;">? = show env shortcuts</text>
+  <text x="1160" y="460" font-family="'JetBrains Mono', monospace" font-size="11" fill="#909098" font-weight="800" letter-spacing="3" style="white-space: pre;">CONCEPT MAP</text>
+  <line x1="1160" y1="468" x2="1552" y2="468" stroke="#d0d0d8" stroke-width="0.4"/>
+  <rect x="1160" y="476" width="392" height="148" rx="6" fill="#fafafc" stroke="#d8d8e0" stroke-width="0.5"/>
+  <circle cx="1176" cy="494" r="3.5" fill="#c45a30"/>
+  <text x="1186" y="498" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">CONTROL FLOW</text>
+  <text x="1300" y="498" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">⌃C  ⌃D  Esc Esc</text>
+  <circle cx="1176" cy="514" r="3.5" fill="#6848a8"/>
+  <text x="1186" y="518" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">AGENT BEHAVIOR</text>
+  <text x="1300" y="518" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">⌥T  ⇧Tab  ⌃O  /model</text>
+  <circle cx="1176" cy="534" r="3.5" fill="#8a7820"/>
+  <text x="1186" y="538" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">CONTEXT MGMT</text>
+  <text x="1300" y="538" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">/compact  /clear  /context  @file</text>
+  <circle cx="1176" cy="554" r="3.5" fill="#1a8a8a"/>
+  <text x="1186" y="558" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">SHELL ESCAPE</text>
+  <text x="1300" y="558" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">! cmd  ⌃B  /bashes</text>
+  <circle cx="1176" cy="574" r="3.5" fill="#2a8858"/>
+  <text x="1186" y="578" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">KNOWLEDGE</text>
+  <text x="1300" y="578" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;"># note  /memory  /init  CLAUDE.md</text>
+  <circle cx="1176" cy="594" r="3.5" fill="#983868"/>
+  <text x="1186" y="598" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">EXTENSIONS</text>
+  <text x="1300" y="598" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">/agents  /mcp  /hooks  /plugin</text>
+  <circle cx="1176" cy="614" r="3.5" fill="#c03030"/>
+  <text x="1186" y="618" font-family="'JetBrains Mono', monospace" font-size="10" fill="#505060" font-weight="600" style="white-space: pre;">RECOVERY</text>
+  <text x="1300" y="618" font-family="'JetBrains Mono', monospace" font-size="10" fill="#808090" style="white-space: pre;">Esc Esc  /rewind  /clear  ⌃D</text>
+  <line x1="48" y1="960" x2="1552" y2="960" stroke="#e0e0e8" stroke-width="0.5"/>
+  <text x="800" y="980" font-family="'JetBrains Mono', monospace" font-size="9" fill="#c0c0c8" text-anchor="middle" style="white-space: pre;">? = show env shortcuts · /help = full reference · code.claude.com/docs/en/interactive-mode</text>
+  <rect x="0" y="0" width="1600" height="2" fill="#c45a30" opacity="0.06"/>
+  <rect x="0" y="998" width="1600" height="2" fill="#c45a30" opacity="0.06"/>
+</svg>
