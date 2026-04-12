@@ -132,7 +132,7 @@ Plans:
   4. New blog post has a branded OG image
 **Plans**: 2 plans
 Plans:
-- [ ] 115-01-PLAN.md -- Old post update callout banner + branded cover SVG for new post
+- [x] 115-01-PLAN.md -- Old post update callout banner + branded cover SVG for new post
 - [ ] 115-02-PLAN.md -- New blog post authoring + FAQ JSON-LD registration
 
 ### Phase 116: Site Integration
@@ -158,5 +158,5 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | 112. New Chapters | 4/4 | Complete   | 2026-04-12 |
 | 113. Lower-Impact Chapter Updates | 7/7 | Complete | 2026-04-12 |
 | 114. Cheatsheet | 3/3 | Complete | 2026-04-12 |
-| 115. Blog Post | 0/2 | Not started | - |
+| 115. Blog Post | 1/2 | In Progress|  |
 | 116. Site Integration | 0/TBD | Not started | - |

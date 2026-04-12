@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: verifying
-stopped_at: Phase 114 complete — all 3 plans executed and verified
-last_updated: "2026-04-12T17:01:00.000Z"
+stopped_at: Completed 115-01-PLAN.md
+last_updated: "2026-04-12T18:04:25.384Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 21
-  completed_plans: 21
-  percent: 100
+  total_plans: 23
+  completed_plans: 22
+  percent: 96
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 Phase: 114 of 116 (Cheatsheet) -- COMPLETE
 Plan: 3 of 3 (build verification + visual checkpoint) -- COMPLETE
-Status: Phase complete — all plans executed, verification pending
+Status: Phase complete — ready for verification
 Last activity: 2026-04-12
 
 Progress: [██████████] 100%
@@ -67,6 +67,7 @@ Progress: [██████████] 100%
 | Phase 114-cheatsheet P02 | 4min | 2 tasks | 3 files |
 | Phase 114 P01 | 8min | 2 tasks | 2 files |
 | Phase 114 P03 | 5min | 2 tasks | 0 files |
+| Phase 115 P01 | 1m 30s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 113]: Cross-chapter sweep verified all Ch12-14 references are real hyperlinks across all 6 chapters
 - [Phase 114-cheatsheet]: Cheatsheet page uses max-w-6xl (wider than guide max-w-4xl) for better SVG display; Resources section uses 2-column grid
 - [Phase 114]: Consolidated INPUT section from 4 to 2 entries to fit within 840px column boundary after 60px vertical shift
+- [Phase 115]: Cover SVG uses stacked card layout showing 3 New Chapters / 5 Major Rewrites / Updated Cheatsheet
 
 ### Pending Todos
 
@@ -119,7 +121,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T17:01:00.000Z
-Stopped at: Phase 114 complete (all 3 plans executed, human-verified)
+Last session: 2026-04-12T18:04:25.381Z
+Stopped at: Completed 115-01-PLAN.md
 Resume file: None
 Next: Phase 114 verification, then Phase 115 (Blog Post)
