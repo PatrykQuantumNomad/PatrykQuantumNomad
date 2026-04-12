@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
-status: verifying
-stopped_at: Completed 111-06-PLAN.md (Phase 111 complete)
-last_updated: "2026-04-12T13:29:21.977Z"
+status: executing
+stopped_at: Completed 112-01-PLAN.md
+last_updated: "2026-04-12T14:27:26.807Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 11
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.19 Claude Code Guide Refresh — Phase 111 High-Impact Chapter Rewrites
+**Current focus:** v1.19 Claude Code Guide Refresh — Phase 112 New Chapters
 
 ## Current Position
 
-Phase: 111 of 116 (High-Impact Chapter Rewrites)
-Plan: 7 of 7 (Gap Closure: Event Count + Env Var Fixes) -- COMPLETE
-Status: Phase complete — all plans executed including gap closure
+Phase: 112 of 116 (New Chapters)
+Plan: 1 of 4 (Plugins Chapter) -- COMPLETE
+Status: Executing Phase 112
 Last activity: 2026-04-12
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██████████] 100%
 | Phase 111 P04 | 9m | 3 tasks | 6 files |
 | Phase 111 P06 | 3m | 2 tasks | 1 files |
 | Phase 111 P07 | 3m | 2 tasks | 5 files |
+| Phase 112 P01 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 111]: Ch11 added standalone Skill Governance section for disableSkillShellExecution (new section not in original)
 - [Phase 111]: Ch8 restructured around full 24-event reference table with conditional if field and defer decision
 - [Phase 111]: All 5 rewritten chapters verified clean of deprecated terms; guide.json descriptions synced for Ch3/Ch4/Ch11
+- [Phase 112]: Plugins chapter bridges from Ch7 Skills with 'Skills are local, Plugins are shareable' opening; uses markdown-formatter as realistic scenario throughout
 
 ### Pending Todos
 
@@ -92,7 +94,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T13:28:39Z
-Stopped at: Completed 111-07-PLAN.md (Phase 111 fully complete with gap closure)
+Last session: 2026-04-12T14:27:26.804Z
+Stopped at: Completed 112-01-PLAN.md
 Resume file: None
 Next: Phase 112 (New Chapters)
