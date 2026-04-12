@@ -1,17 +1,17 @@
 ---
 title: "Environment Sandboxing & Customization"
-description: "Configure Claude Code's four-tier settings hierarchy, enable macOS Seatbelt or Linux sandbox isolation, and customize the terminal status line."
+description: "Configure Claude Code's four-tier settings hierarchy including managed-settings.d/ enterprise policies, enable macOS Seatbelt or Linux sandbox isolation, and customize display with --bare mode and flicker-free rendering."
 order: 3
 slug: "environment"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code sandbox", "seatbelt macos", "settings hierarchy", "filesystem isolation", "network isolation", "status line", "environment variables"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code sandbox", "seatbelt macos", "settings hierarchy", "filesystem isolation", "network isolation", "status line", "environment variables", "managed-settings.d", "--bare", "NO_FLICKER", "transcript mode"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 
 ## What You Will Learn
 
-This chapter is all about locking down and personalizing your Claude Code setup. You'll learn how the four tier configuration system controls settings across enterprise, personal, and project scopes. We'll dig into how sandbox modes isolate Claude Code's access to your filesystem and network. And you'll see how to customize the terminal experience with environment variables and a status line. By the end, you'll be able to configure Claude Code to match your team's security requirements and your own workflow preferences.
+This chapter is all about locking down and personalizing your Claude Code setup. You'll learn how the four tier configuration system controls settings across enterprise, personal, and project scopes, including the drop-in directory for layered enterprise policies. We'll dig into how sandbox modes isolate Claude Code's access to your filesystem and network. And you'll see how to customize the terminal experience with environment variables, display modes, and a status line. By the end, you'll be able to configure Claude Code to match your team's security requirements and your own workflow preferences.
 
 ---
 
@@ -21,7 +21,7 @@ Claude Code organizes its settings into four tiers, each with its own purpose an
 
 ### Managed Settings
 
-Managed settings sit at the top of the hierarchy and can't be overridden by anything else. Enterprise admins use this file to enforce organization-wide policies, such as blocking certain commands across all developers or requiring sandbox mode.
+Managed settings sit at the top of the hierarchy and can't be overridden by anything else. Enterprise admins use these to enforce organization-wide policies, such as blocking certain commands across all developers or requiring sandbox mode.
 
 <CodeBlock
   code={`~/.claude/managed-settings.json`}
@@ -30,6 +30,53 @@ Managed settings sit at the top of the hierarchy and can't be overridden by anyt
 />
 
 Most individual developers won't ever need to create this file. It's really there for organizations that need centralized control over Claude Code's behavior across their engineering teams. If a managed setting denies a command, no project or personal setting can override that decision.
+
+#### Drop-in Policy Directory
+
+For organizations managing multiple policy layers, Claude Code also supports a `managed-settings.d/` directory alongside the main file. Each `.json` file in this directory is a policy fragment that gets merged into the final managed settings.
+
+<CodeBlock
+  code={`~/.claude/managed-settings.d/`}
+  lang="text"
+  caption="Drop-in directory for layered enterprise policy fragments"
+/>
+
+Files are merged alphabetically by filename, with later files overriding earlier ones for the same key. This makes it straightforward to layer policies from different sources, for example a base security policy, a department-specific overlay, and a compliance add-on.
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "deny": [
+        "Bash(curl * | bash)",
+        "Bash(wget * | bash)"
+      ]
+    },
+    "sandbox": {
+      "enabled": true
+    }
+}`}
+  lang="json"
+  title="~/.claude/managed-settings.d/10-security-baseline.json"
+  caption="A base security policy fragment denying download-and-execute patterns"
+/>
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "deny": [
+        "Bash(docker push *)",
+        "Bash(kubectl apply *)"
+      ]
+    }
+}`}
+  lang="json"
+  title="~/.claude/managed-settings.d/20-platform-team.json"
+  caption="A platform team overlay blocking production deployment commands"
+/>
+
+In this example, the final managed settings would include deny rules from both fragments. The `10-security-baseline.json` file loads first, then `20-platform-team.json` merges on top. If both files set the same key, the later file wins.
+
+The drop-in directory is particularly useful for configuration management tools like Chef, Puppet, or Ansible that can drop policy fragments without coordinating writes to a single file. For a deeper look at enterprise governance patterns with managed settings, see [Security Deep Dive & Governance](/guides/claude-code/security/).
 
 ### User Settings
 
@@ -135,7 +182,7 @@ export CLAUDE_CODE_OUTPUT_DIR=./output
 # Disable automatic updates
 export DISABLE_AUTOUPDATER=1
 
-# Default haiku model (replaces deprecated ANTHROPIC_SMALL_FAST_MODEL)
+# Default haiku model for background tasks
 export ANTHROPIC_DEFAULT_HAIKU_MODEL=haiku`}
   lang="bash"
   title="~/.zshrc"
@@ -144,7 +191,65 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL=haiku`}
 
 These variables take effect for the current shell session and any Claude Code sessions launched from it. For permanent changes, add them to your shell profile (`~/.zshrc`, `~/.bashrc`, or equivalent).
 
-One thing to note: the `ANTHROPIC_SMALL_FAST_MODEL` environment variable is deprecated. Use `ANTHROPIC_DEFAULT_HAIKU_MODEL` instead when configuring the lightweight model for background tasks.
+### Display and Input Variables
+
+Several environment variables control how Claude Code renders its terminal interface and handles input.
+
+<CodeBlock
+  code={`# Enable flicker-free alt-screen rendering
+export CLAUDE_CODE_NO_FLICKER=1
+
+# Disable mouse capture (keeps flicker-free rendering but without mouse interaction)
+export CLAUDE_CODE_DISABLE_MOUSE=1
+
+# Adjust scroll speed (1-20, default varies by terminal)
+export CLAUDE_CODE_SCROLL_SPEED=5`}
+  lang="bash"
+  title="~/.zshrc"
+  caption="Display customization variables for the terminal interface"
+/>
+
+`CLAUDE_CODE_NO_FLICKER=1` switches Claude Code to an alt-screen renderer, similar to how vim or less take over the terminal. The prompt stays pinned to the bottom, only visible content gets rendered, and memory usage stays flat regardless of conversation length. Mouse support is included by default: click to expand tool results, click to position the cursor, drag to select text with auto-copy, and click URLs to open them.
+
+If you want the flicker-free rendering but your workflow relies on terminal mouse features that conflict with Claude Code's mouse capture, set `CLAUDE_CODE_DISABLE_MOUSE=1` alongside the no-flicker variable. You get the stable rendering without any mouse interception.
+
+The flicker-free renderer works well in tmux (with `set -g mouse on` in your tmux config) but is incompatible with iTerm2's `tmux -CC` integration mode.
+
+### Transcript Mode
+
+Whether or not you use flicker-free rendering, pressing `Ctrl+O` opens transcript mode, a searchable view of your entire conversation history. Think of it like `less` for your Claude Code session.
+
+In transcript mode:
+- Press `/` to search, then `n` and `N` to step through matches
+- Use `j`/`k` or arrow keys to scroll, `g`/`G` to jump to top or bottom
+- Press `[` to write the full conversation to your terminal's native scrollback for terminal-level search
+- Press `v` to open the transcript in your `$EDITOR`
+- Press `Esc` to return to the normal prompt
+
+Transcript mode is especially useful for long sessions where you need to find a specific command, error message, or explanation that scrolled off screen.
+
+### Platform-Specific Variables
+
+<CodeBlock
+  code={`# Enable PowerShell as the shell tool on Windows
+export CLAUDE_CODE_USE_POWERSHELL_TOOL=1`}
+  lang="bash"
+  caption="Windows-specific: use PowerShell instead of the default Bash tool"
+/>
+
+On Windows, setting `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` tells Claude Code to use PowerShell for shell commands instead of the default Bash tool. This gives you native cmdlet support and proper Windows path handling.
+
+## CLI Flags
+
+Claude Code accepts several flags at startup that change how the session runs. One particularly useful flag for scripting and automation is `--bare`.
+
+<CodeBlock
+  code={`claude --bare "Summarize the changes in the last commit"`}
+  lang="bash"
+  caption="Bare mode: minimal startup, skips CLAUDE.md loading, great for quick scripting"
+/>
+
+The `--bare` flag starts Claude Code with minimal initialization. It skips loading CLAUDE.md files, project context, and other startup overhead. This makes it ideal for quick one-off questions, shell scripts that call Claude Code for a single task, and CI pipelines where you want fast responses without project context loading.
 
 ---
 
@@ -351,9 +456,13 @@ echo "[$MODEL] \$$COST spent"`}
 
 - **Keep `allowedDomains` minimal.** Only add domains your project genuinely needs. Every additional domain is a potential data exfiltration channel, so start with package registries and expand as needed.
 
+- **Use `--bare` for scripting.** When calling Claude Code from shell scripts or CI pipelines, the `--bare` flag skips project context loading and gives you faster, more predictable responses.
+
 - **Use the status line to track costs.** A custom status line showing the current session cost keeps spending visible without you having to run `/cost` manually. This is especially handy for teams with cost targets.
 
 - **Document your settings choices.** Add comments to your project's CLAUDE.md explaining why specific permission rules exist. Future team members (and future you) will thank you for documenting the reasoning behind deny rules.
+
+- **Layer enterprise policies with managed-settings.d/.** Instead of maintaining one monolithic managed-settings.json, break policies into focused fragments. This simplifies auditing, enables per-team overlays, and works naturally with configuration management tools.
 
 ## Further Reading
 
