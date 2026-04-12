@@ -48,7 +48,7 @@
 - [x] **Phase 112: New Chapters** - Author Plugins, Agent SDK, and Computer Use chapters with guide.json registration and OG images (completed 2026-04-12)
 - [ ] **Phase 113: Lower-Impact Chapter Updates** - Update Ch1, Ch2, Ch5, Ch6, Ch9, Ch10 with incremental feature additions
 - [ ] **Phase 114: Cheatsheet** - Update both SVG cheatsheets and build dedicated cheatsheet page with downloads
-- [ ] **Phase 115: Blog Post** - New companion blog post covering guide updates plus callout banner on old post
+- [x] **Phase 115: Blog Post** - New companion blog post covering guide updates plus callout banner on old post (completed 2026-04-12)
 - [ ] **Phase 116: Site Integration** - LLMs.txt, guide landing page, sitemap, cross-reference audit, lastVerified bumps, Lighthouse
 
 ## Phase Details
@@ -133,7 +133,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 115-01-PLAN.md -- Old post update callout banner + branded cover SVG for new post
-- [ ] 115-02-PLAN.md -- New blog post authoring + FAQ JSON-LD registration
+- [x] 115-02-PLAN.md -- New blog post authoring + FAQ JSON-LD registration
 
 ### Phase 116: Site Integration
 **Goal**: All new and updated pages are discoverable, indexed, cross-referenced, and pass quality gates
@@ -158,5 +158,5 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | 112. New Chapters | 4/4 | Complete   | 2026-04-12 |
 | 113. Lower-Impact Chapter Updates | 7/7 | Complete | 2026-04-12 |
 | 114. Cheatsheet | 3/3 | Complete | 2026-04-12 |
-| 115. Blog Post | 1/2 | In Progress|  |
+| 115. Blog Post | 2/2 | Complete   | 2026-04-12 |
 | 116. Site Integration | 0/TBD | Not started | - |

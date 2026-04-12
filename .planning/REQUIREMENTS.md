@@ -43,8 +43,8 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 
 ### Blog
 
-- [ ] **BLOG-01**: New blog post covering Claude Code updates (What's New highlights)
-- [ ] **BLOG-02**: New blog post cross-links to updated guide chapters and cheatsheet
+- [x] **BLOG-01**: New blog post covering Claude Code updates (What's New highlights)
+- [x] **BLOG-02**: New blog post cross-links to updated guide chapters and cheatsheet
 - [x] **BLOG-03**: Old blog post "The Context Window Is the Product" has update callout banner linking to new post
 - [x] **BLOG-04**: New blog post has OG image
 
@@ -106,8 +106,8 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | CS-04 | Phase 114 | Complete |
 | CS-05 | Phase 114 | Complete |
 | CS-06 | Phase 114 | Complete |
-| BLOG-01 | Phase 115 | Pending |
-| BLOG-02 | Phase 115 | Pending |
+| BLOG-01 | Phase 115 | Complete |
+| BLOG-02 | Phase 115 | Complete |
 | BLOG-03 | Phase 115 | Complete |
 | BLOG-04 | Phase 115 | Complete |
 | SITE-01 | Phase 116 | Pending |

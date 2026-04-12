@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: verifying
-stopped_at: Completed 115-01-PLAN.md
-last_updated: "2026-04-12T18:04:25.384Z"
+stopped_at: Completed 115-02-PLAN.md
+last_updated: "2026-04-12T18:07:16.358Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 23
-  completed_plans: 22
-  percent: 96
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | Phase 114 P01 | 8min | 2 tasks | 2 files |
 | Phase 114 P03 | 5min | 2 tasks | 0 files |
 | Phase 115 P01 | 1m 30s | 2 tasks | 2 files |
+| Phase 115 P02 | 2m 32s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 114-cheatsheet]: Cheatsheet page uses max-w-6xl (wider than guide max-w-4xl) for better SVG display; Resources section uses 2-column grid
 - [Phase 114]: Consolidated INPUT section from 4 to 2 entries to fit within 840px column boundary after 60px vertical shift
 - [Phase 115]: Cover SVG uses stacked card layout showing 3 New Chapters / 5 Major Rewrites / Updated Cheatsheet
+- [Phase 115]: Used What's New theme-by-theme approach rather than chapter-by-chapter walk-through
 
 ### Pending Todos
 
@@ -121,7 +123,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T18:04:25.381Z
-Stopped at: Completed 115-01-PLAN.md
+Last session: 2026-04-12T18:07:16.355Z
+Stopped at: Completed 115-02-PLAN.md
 Resume file: None
 Next: Phase 114 verification, then Phase 115 (Blog Post)
