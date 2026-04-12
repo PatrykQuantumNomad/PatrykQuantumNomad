@@ -61,16 +61,17 @@
   1. Ch3 (Models & Costs) documents 1M Opus context, restructured effort levels, and the /effort command
   2. Ch4 (Environment) documents new env vars, managed-settings.d/ directory, --bare flag, and NO_FLICKER
   3. Ch7 (Skills) documents paths frontmatter, lifecycle/compaction behavior, and relationship to the new Plugins system
-  4. Ch8 (Hooks) documents all 26 hook events (was 18), the conditional `if` field, PermissionDenied event, and defer behavior
+  4. Ch8 (Hooks) documents all 24 hook events (was 18), the conditional `if` field, PermissionDenied event, and defer behavior
   5. Ch11 (Security) documents Auto Mode, all 6 permission modes, and Bash hardening improvements
-**Plans:** 6/6 plans complete
+**Plans:** 7 plans (6 complete + 1 gap closure)
 Plans:
 - [x] 111-01-PLAN.md -- Ch3 Models & Costs rewrite (Auto Mode, 1M context, /effort, 6 permission modes)
 - [x] 111-02-PLAN.md -- Ch4 Environment rewrite (managed-settings.d/, --bare, NO_FLICKER)
 - [x] 111-03-PLAN.md -- Ch7 Skills rewrite (paths/shell frontmatter, lifecycle, Plugins mention)
-- [x] 111-04-PLAN.md -- Ch8 Hooks rewrite + component updates (26 events, if field, defer, PermissionDenied)
+- [x] 111-04-PLAN.md -- Ch8 Hooks rewrite + component updates (24 events, if field, defer, PermissionDenied)
 - [x] 111-05-PLAN.md -- Ch11 Security rewrite (Auto Mode governance, Bash hardening, protected paths)
 - [x] 111-06-PLAN.md -- guide.json updates + cross-chapter deprecation sweep
+- [ ] 111-07-PLAN.md -- Gap closure: fix event count inconsistencies (26->24) + env var name fix
 
 ### Phase 112: New Chapters
 **Goal**: Three new guide chapters cover Plugins, Agent SDK, and Computer Use as complete, self-contained learning resources integrated into the guide structure
@@ -138,7 +139,7 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 111. High-Impact Chapter Rewrites | 6/6 | Complete   | 2026-04-12 |
+| 111. High-Impact Chapter Rewrites | 6/7 | Gap closure | - |
 | 112. New Chapters | 0/TBD | Not started | - |
 | 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
 | 114. Cheatsheet | 0/TBD | Not started | - |
