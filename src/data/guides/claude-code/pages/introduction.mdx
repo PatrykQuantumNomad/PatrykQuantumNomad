@@ -3,9 +3,9 @@ title: "Introduction & Getting Started"
 description: "Learn how Claude Code's agentic loop works, install on macOS/Linux/Windows, explore the core tool set, and complete your first AI-assisted coding session."
 order: 0
 slug: "introduction"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code", "install claude code", "agentic loop", "ai coding tool", "anthropic", "terminal cli", "code editor ai"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code", "install claude code", "agentic loop", "ai coding tool", "anthropic", "terminal cli", "code editor ai", "desktop app", "powerup", "web interface"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import AgenticLoopDiagram from '../../../../components/guide/AgenticLoopDiagram.astro';
@@ -26,7 +26,7 @@ You describe what you want in plain English. Claude Code figures out which files
 
 Here's an important distinction: chat-based AI assistants answer questions about code you paste into them. Claude Code is different. It operates on your actual project, reading your files, understanding your directory structure, running your test suite, and modifying source code in place. The context isn't a snippet you copy; it's your entire repository.
 
-Claude Code is available across multiple interfaces. The terminal CLI is the primary experience with all features available. VS Code and JetBrains extensions provide inline integration. There's a desktop app for macOS and Windows, a web interface at console.anthropic.com, and Slack integration for team conversations. This guide focuses on the terminal CLI since it's the most complete interface and the one every other interface builds on.
+Claude Code is available across multiple interfaces. The terminal CLI is the primary experience with all features available. VS Code and JetBrains extensions provide inline integration. The Desktop app gives you a full GUI experience on macOS and Windows. There's a web interface at console.anthropic.com for browser-based access, and Slack integration for team conversations. This guide focuses on the terminal CLI since it's the most complete interface and the one every other interface builds on.
 
 ## The Agentic Loop
 
@@ -107,11 +107,11 @@ Claude Code runs across several interfaces, each suited to different workflows.
 
 **JetBrains plugin** provides similar integration for IntelliJ IDEA, WebStorm, PyCharm, and other JetBrains IDEs.
 
-**Desktop app** runs on macOS and Windows as a standalone application, giving you a dedicated window for Claude Code sessions without needing a terminal.
+**Desktop app** runs on macOS and Windows as a standalone application with three distinct tabs. The Code tab connects to your local machine for the same coding workflows you'd run in the terminal. The Cowork tab spins up a cloud VM where Claude works independently on longer tasks while you continue other work. The Chat tab provides a conversational interface for questions, brainstorming, and quick tasks that don't need filesystem access. The Desktop app also supports visual diff review, live app previews, and [computer use](/guides/claude-code/computer-use/) for GUI automation.
 
-**Web interface** at console.anthropic.com offers browser-based access for quick tasks or when you're away from your development machine.
+**Web interface** at console.anthropic.com provides browser-based access for quick tasks, PR monitoring, and working away from your development machine. It shares the same underlying capabilities as the CLI, so prompts and workflows transfer directly.
 
-**Slack integration** brings Claude Code into team channels, letting your team prompt collaboratively and share context across the organization.
+**Slack integration** lets your team mention `@Claude` in channels to kick off coding tasks. Slack auto-detects coding intent, creates a Claude Code web session, and posts progress updates back to the thread. It's useful for team-visible requests and collaborative debugging.
 
 All interfaces share the same underlying capabilities. A task started in VS Code uses the same agentic loop, the same tools, and the same context management as one run from the terminal. The only difference is the surrounding experience: inline editor integration versus a dedicated prompt.
 
@@ -121,7 +121,7 @@ The terminal CLI is where you'll spend most of your time. All examples in this g
 
 Claude Code uses five categories of tools autonomously during the agentic loop. You don't invoke these directly; Claude Code picks the right tool for each step on its own.
 
-**File operations** cover reading file contents, writing new files, and making targeted edits to existing ones. When Claude Code needs to understand your code, it reads files. When it needs to make changes, it writes or edits them. Edits are surgical, replacing specific sections rather than rewriting entire files.
+**File operations** cover reading file contents, writing new files, and making targeted edits to existing ones. When Claude Code needs to understand your code, it reads files. When it needs to make changes, it writes or edits them. Edits are surgical, replacing specific sections rather than rewriting entire files. You can drag and drop images directly into the prompt input area, and Claude Code represents them as numbered image chips for easy reference when discussing visual content.
 
 **Search** includes two complementary tools. Glob finds files by name patterns (like locating all TypeScript files in a directory). Grep searches file contents for text patterns (like finding every function that calls a specific API). Together, they let Claude Code navigate codebases of any size efficiently.
 
@@ -133,7 +133,7 @@ Claude Code uses five categories of tools autonomously during the agentic loop. 
 
 These tools work together seamlessly. When you ask Claude Code to refactor a function, it might Glob to find all files importing that function, Grep to find every call site, Read each file to understand the usage context, Edit the function and all its callers, then Bash to run the test suite and verify nothing broke. You never need to tell it which tools to use; it picks them based on the task.
 
-Claude Code also asks for your permission before doing anything potentially destructive, like writing files or running shell commands. You can configure these permission rules to match your workflow, covered in detail in the [Models, Costs & Permissions chapter](/guides/claude-code/models-and-costs/).
+Claude Code also asks for your permission before doing anything potentially destructive, like writing files or running shell commands. You can configure these permission rules to match your workflow, covered in detail in the [Models, Costs & Permissions chapter](/guides/claude-code/models-and-costs/). The [Plugins chapter](/guides/claude-code/plugins/) covers how third-party plugins can extend these built-in tools with additional capabilities.
 
 ## Checkpoints and Undo
 
@@ -286,7 +286,7 @@ Run the existing tests to make sure nothing breaks.`}
 
 This kind of multi-step task is where the agentic loop really shines. Claude Code iterates through the gather-action-verify cycle multiple times, handling each step and verifying along the way.
 
-When you're done with a session, type `/quit` or press **Ctrl+C** to exit. Your conversation history is saved automatically, and you can resume later with `claude --continue` to pick up where you left off.
+When you're done with a session, type `/quit` or press **Ctrl+C** to exit. Your conversation history is saved automatically, and you can resume later with `claude --continue` to pick up where you left off. If you come back after an extended break, Claude Code may suggest running `/clear` to start with a fresh context window, since stale conversation history can reduce response quality.
 
 ## Best Practices
 
@@ -304,6 +304,10 @@ These practices will help you get the most out of Claude Code from day one.
 
 - **Use Git as your safety net.** Commit before starting a new Claude Code task so you always have a clean baseline to return to. Since Claude Code works on your real files, Git discipline matters more than ever.
 
+- **Compose longer prompts in your editor.** Press **Ctrl+X Ctrl+E** to open an external editor for multi-line prompt composition, then save and close to submit. This is especially useful for detailed instructions that benefit from editing before submission.
+
+- **Try the flicker-free renderer.** Set `CLAUDE_CODE_NO_FLICKER=1` to enable alt-screen rendering with a pinned prompt, mouse support, and flat memory usage. See the [Environment chapter](/guides/claude-code/environment/) for full configuration details.
+
 ## Slash Commands Quick Reference
 
 Claude Code provides several slash commands you can type at the prompt. Here are the ones worth knowing right away:
@@ -315,6 +319,8 @@ Claude Code provides several slash commands you can type at the prompt. Here are
 - **/cost**: show token usage and cost for the current session (API users)
 - **/stats**: visualize daily usage, session history, and model preferences (subscribers)
 - **/usage**: show plan usage limits and rate limit status (subscribers)
+- **/status**: check what Claude Code is doing (works mid-response, so you can check progress without interrupting)
+- **/powerup**: launch interactive animated demos that teach Claude Code features one at a time, a great way to discover capabilities you might have missed
 
 Note: `/cost` is most relevant if you're on direct API billing (pay-per-token). If you're on a Claude Max, Pro, or Team subscription, use `/stats` to see your usage patterns and `/usage` to check your plan limits and rate limit status.
 
