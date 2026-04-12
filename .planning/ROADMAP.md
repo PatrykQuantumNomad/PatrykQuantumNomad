@@ -45,7 +45,7 @@
 **Milestone Goal:** Update the existing 11-chapter Claude Code guide with 6+ months of new features, add 3 new chapters (Plugins, Agent SDK, Computer Use), publish dedicated cheatsheet page with updated SVGs, write companion blog post, and update site integration
 
 - [x] **Phase 111: High-Impact Chapter Rewrites** - Rewrite Ch3, Ch4, Ch7, Ch8, Ch11 with major feature additions plus deprecation sweep (completed 2026-04-12)
-- [ ] **Phase 112: New Chapters** - Author Plugins, Agent SDK, and Computer Use chapters with guide.json registration and OG images
+- [x] **Phase 112: New Chapters** - Author Plugins, Agent SDK, and Computer Use chapters with guide.json registration and OG images (completed 2026-04-12)
 - [ ] **Phase 113: Lower-Impact Chapter Updates** - Update Ch1, Ch2, Ch5, Ch6, Ch9, Ch10 with incremental feature additions
 - [ ] **Phase 114: Cheatsheet** - Update both SVG cheatsheets and build dedicated cheatsheet page with downloads
 - [ ] **Phase 115: Blog Post** - New companion blog post covering guide updates plus callout banner on old post
@@ -140,7 +140,7 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 111. High-Impact Chapter Rewrites | 7/7 | Complete | 2026-04-12 |
-| 112. New Chapters | 3/4 | In Progress|  |
+| 112. New Chapters | 4/4 | Complete   | 2026-04-12 |
 | 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
 | 114. Cheatsheet | 0/TBD | Not started | - |
 | 115. Blog Post | 0/TBD | Not started | - |
