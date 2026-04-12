@@ -1,18 +1,18 @@
 ---
 title: "Model Context Protocol"
-description: "Connect Claude Code to external tools — databases, APIs, ticketing systems — using the Model Context Protocol with stdio, HTTP, and OAuth authentication."
+description: "Connect Claude Code to external tools using the Model Context Protocol with stdio, HTTP, OAuth, elicitation, and per-tool result-size controls."
 order: 5
 slug: "mcp"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["model context protocol", "mcp server", "claude code integrations", "mcp.json", "external tools", "oauth mcp", "tool search"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["model context protocol", "mcp server", "claude code integrations", "mcp.json", "external tools", "oauth mcp", "tool search", "elicitation", "result-size caps"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import McpArchitectureDiagram from '../../../../components/guide/McpArchitectureDiagram.astro';
 
 ## What You'll Learn
 
-This chapter is all about the Model Context Protocol (MCP), the standard for connecting Claude Code to external tools, databases, and APIs. By the end, you'll know how MCP servers work, which of the three transport modes to pick for your situation, how to add and configure servers at different scopes, how to share server configs with your team through `.mcp.json`, and how to troubleshoot connection issues when things go sideways.
+This chapter is all about the Model Context Protocol (MCP), the standard for connecting Claude Code to external tools, databases, and APIs. By the end, you'll know how MCP servers work, which of the three transport modes to pick for your situation, how to add and configure servers at different scopes, how to share server configs with your team through `.mcp.json`, how elicitation lets servers request structured input from you mid-conversation, and how to troubleshoot connection issues when things go sideways.
 
 ## What MCP Enables
 
@@ -20,17 +20,19 @@ This chapter is all about the Model Context Protocol (MCP), the standard for con
 
 MCP lets Claude Code reach beyond your local filesystem. On its own, Claude Code can read files, run shell commands, and search your codebase. Add MCP into the mix, and it can also query a database, create tickets in your project management tool, search a knowledge base, interact with cloud services, or call pretty much any API you connect.
 
-MCP servers expose **tools** that Claude Code calls just like its built in ones. Connect a PostgreSQL MCP server and Claude Code gains a `query` tool for running SQL. Hook up a Jira MCP server and it picks up tools for creating and updating tickets. From Claude Code's perspective, MCP tools work identically to its native file and shell tools. It decides when to use them based on what you're asking for.
+MCP servers expose **tools** that Claude Code calls just like its built-in ones. Connect a PostgreSQL MCP server and Claude Code gains a `query` tool for running SQL. Hook up a Jira MCP server and it picks up tools for creating and updating tickets. From Claude Code's perspective, MCP tools work identically to its native file and shell tools. It decides when to use them based on what you're asking for.
+
+Claude Code's [Computer Use](/guides/claude-code/computer-use/) feature is itself implemented as a built-in MCP server, giving it access to screen capture and input tools through the same protocol. [Plugins](/guides/claude-code/plugins/) can also bundle MCP servers, making them available automatically when the plugin is enabled.
 
 One important distinction: you don't build MCP servers yourself. Instead, you install and connect existing servers that other developers and organizations have published. This chapter focuses on connecting and configuring servers, not developing them.
 
 ## Architecture Overview
 
-MCP follows a client server architecture. Claude Code acts as the MCP **client**, connecting to one or more MCP **servers** that each provide a set of tools. These servers can run locally on your machine as child processes, or remotely on another host over the network.
+MCP follows a client-server architecture. Claude Code acts as the MCP **client**, connecting to one or more MCP **servers** that each provide a set of tools. These servers can run locally on your machine as child processes, or remotely on another host over the network.
 
 <McpArchitectureDiagram />
 
-The diagram above shows how everything fits together. Local servers connect via stdio (standard input/output) and run as child processes of Claude Code. Remote servers connect via HTTP over the network and can live anywhere: on a team server, in the cloud, or behind your corporate firewall. Each server exposes tools that show up in Claude Code's tool palette right alongside its built in capabilities.
+The diagram above shows how everything fits together. Local servers connect via stdio (standard input/output) and run as child processes of Claude Code. Remote servers connect via HTTP over the network and can live anywhere: on a team server, in the cloud, or behind your corporate firewall. Each server exposes tools that show up in Claude Code's tool palette right alongside its built-in capabilities.
 
 You can connect multiple servers at the same time, and Claude Code handles the connections and routes tool calls to the right server automatically. A typical project might have a local database server (stdio), a remote documentation search server (HTTP), and a cloud API integration (HTTP) all running simultaneously.
 
@@ -79,7 +81,7 @@ claude mcp add analytics \
 
 ### SSE (deprecated)
 
-Server Sent Events was the original remote transport for MCP. **SSE is explicitly deprecated in favor of HTTP.** It still works, but it'll be removed in a future release. If you've got existing SSE server configurations, it's time to migrate them to HTTP.
+Server-Sent Events was the original remote transport for MCP. **SSE is explicitly deprecated in favor of HTTP.** It still works, but it'll be removed in a future release. If you've got existing SSE server configurations, it's time to migrate them to HTTP.
 
 <CodeBlock
   code={`# DEPRECATED: use HTTP instead
@@ -146,6 +148,8 @@ MCP server configurations live at one of three scopes, and the scope determines 
 
 **User** stores the config in your user settings. The server is available to you across all projects on this machine. Use this for personal productivity tools you rely on everywhere.
 
+When the same MCP server appears at multiple scopes, the most local configuration wins. Project scope overrides user scope, and local scope overrides project scope. This means you can always override a team-wide server configuration with your own local settings without affecting anyone else.
+
 <CodeBlock
   code={`# Local scope (default)
 claude mcp add my-tool -- npx @my/tool
@@ -161,7 +165,7 @@ claude mcp add my-notes --scope user -- npx @mcp/notes`}
 
 ## .mcp.json Format
 
-The `.mcp.json` file at your project root defines project scoped MCP servers. It's a JSON file with a `mcpServers` object where each key is a server name and each value contains that server's configuration.
+The `.mcp.json` file at your project root defines project-scoped MCP servers. It's a JSON file with a `mcpServers` object where each key is a server name and each value contains that server's configuration.
 
 <CodeBlock
   code={`{
@@ -195,7 +199,7 @@ Notice the `${DB_PASSWORD}` and `${API_TOKEN}` syntax. Environment variables ref
 
 For stdio servers, you'll specify `command` and `args`. For HTTP servers, use `type: "http"` and `url`. Both support an `env` object for passing environment variables to the server process and a `headers` object for HTTP authentication.
 
-When a team member clones the repo and fires up Claude Code, all project scoped servers defined in `.mcp.json` start automatically. Each developer only needs to set the required environment variables (like `DB_PASSWORD` and `API_TOKEN` in the example above) in their local shell environment.
+When a team member clones the repo and fires up Claude Code, all project-scoped servers defined in `.mcp.json` start automatically. Each developer only needs to set the required environment variables (like `DB_PASSWORD` and `API_TOKEN` in the example above) in their local shell environment.
 
 ## OAuth Authentication
 
@@ -209,6 +213,8 @@ Some remote MCP servers require OAuth authentication, and Claude Code handles th
 />
 
 When you add a server that requires OAuth, Claude Code opens your browser for the authorization flow the first time you connect. After you authorize, tokens are stored locally and refreshed automatically. You don't need to manage tokens yourself.
+
+Claude Code follows RFC 9728 Protected Resource Metadata for automatic discovery of a server's OAuth requirements. When connecting to an OAuth-protected server, Claude Code reads the server's metadata document to determine the authorization endpoint, token endpoint, and supported scopes without any manual configuration. OAuth Client ID Metadata further streamlines this by letting servers publish their expected client identification, so Claude Code can present the right credentials during the authorization flow.
 
 If a token expires and the automatic refresh fails, Claude Code will prompt you to reauthorize through the browser flow. This typically only happens if the server's OAuth configuration changes or if the refresh token itself expires.
 
@@ -248,9 +254,53 @@ You reference MCP resources using `@` mentions in your prompts.
   caption="The @ syntax tells Claude Code to fetch data from the MCP resource."
 />
 
-Resources are read only references. They give Claude Code additional context for its reasoning without triggering any tool calls. Not every MCP server exposes resources, as it depends on the server implementation. Check the server's documentation to see what's available.
+Resources are read-only references. They give Claude Code additional context for its reasoning without triggering any tool calls. Not every MCP server exposes resources, as it depends on the server implementation. Check the server's documentation to see what's available.
 
 The distinction between tools and resources matters because of what happens when you mention them. Referencing a resource with `@` fetches data and adds it to context. Calling a tool executes an operation that may have side effects (inserting a database row, creating a ticket, sending a notification). Claude Code handles the distinction automatically. Just describe what you need and it'll figure out the rest.
+
+## Elicitation
+
+MCP servers can request structured input from you during tool execution through an interactive dialog. This capability, called **elicitation**, lets a server pause mid-operation, ask you a question, and use your response to continue. It's the server's way of gathering runtime information that shouldn't be hardcoded in configuration.
+
+When an MCP server sends an elicitation request, Claude Code presents it as an interactive form. You fill in the requested fields and submit. The server receives your response and continues its operation with that input. The whole exchange happens inline within the conversation flow.
+
+Servers use elicitation when they need runtime decisions or context that varies between uses. Common scenarios include:
+
+- **Confirmation prompts** before destructive operations (deleting records, overwriting files)
+- **Credential collection** for services that require per-session authentication
+- **Configuration choices** when a tool supports multiple modes or targets
+- **Disambiguation** when a query matches multiple results and the server needs you to pick one
+
+From the server author's perspective, an elicitation request specifies a JSON Schema describing the expected input:
+
+<CodeBlock
+  code={`{
+  "method": "elicitation/create",
+  "params": {
+    "message": "Which database environment should this migration run against?",
+    "requestedSchema": {
+      "type": "object",
+      "properties": {
+        "environment": {
+          "type": "string",
+          "enum": ["development", "staging", "production"],
+          "description": "Target database environment"
+        },
+        "confirm": {
+          "type": "boolean",
+          "description": "Confirm you want to proceed"
+        }
+      },
+      "required": ["environment", "confirm"]
+    }
+  }
+}`}
+  lang="json"
+  title="Elicitation request from an MCP server"
+  caption="The server specifies a JSON Schema. Claude Code renders it as an interactive form."
+/>
+
+There is nothing to configure on your end. Elicitation is automatic: if a connected MCP server sends an elicitation request, Claude Code handles the UI and routes your response back. The `Elicitation` and `ElicitationResult` hook events fire during this exchange, so you can add custom logic around elicitation requests through the [hooks system](/guides/claude-code/hooks/) if needed.
 
 ## Managed MCP
 
@@ -300,7 +350,7 @@ This shows each configured server with its current state: **connected** (running
 
 ### Common Issues
 
-**Server not starting.** Double check that the command path is correct. If the server is an npm package, make sure it's installed (`npx` will auto-install, but network issues can prevent this). Also verify that required environment variables are set.
+**Server not starting.** Double-check that the command path is correct. If the server is an npm package, make sure it's installed (`npx` will auto-install, but network issues can prevent this). Also verify that required environment variables are set.
 
 <CodeBlock
   code={`# Verify the server command works outside Claude Code
@@ -322,19 +372,73 @@ MAX_MCP_OUTPUT_TOKENS=50000 claude`}
   caption="Default is sufficient for most tools. Increase only if you see truncation."
 />
 
+### Per-Tool Result-Size Caps
+
+The global `MAX_MCP_OUTPUT_TOKENS` limit applies uniformly to every tool. But some tools legitimately return large results -- a code search server returning full file contents, or a database tool exporting a large result set. MCP server authors can set a per-tool maximum result size using the `_meta` field in their `tools/list` response, overriding the global cap for specific tools.
+
+The key is `anthropic/maxResultSizeChars` inside the tool's `_meta` object. It accepts values up to **500,000 characters**, giving server authors fine-grained control over which tools can return large payloads.
+
+<CodeBlock
+  code={`{
+  "tools": [
+    {
+      "name": "search_codebase",
+      "description": "Full-text search across the repository",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" }
+        }
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 200000
+      }
+    }
+  ]
+}`}
+  lang="json"
+  title="Per-tool result-size cap in tools/list response"
+  caption="Server authors set this in their tools/list response metadata. Users don't need to configure anything."
+/>
+
+This is a server-side mechanism. As a user, you don't need to configure per-tool caps. If you're building or maintaining an MCP server and certain tools need larger output limits, set the `_meta` field in your `tools/list` response. Claude Code respects the per-tool cap automatically, falling back to the global `MAX_MCP_OUTPUT_TOKENS` for tools that don't specify one.
+
 **Server timeout.** If a server takes too long to respond, Claude Code times out the request. This usually points to a network issue (for HTTP servers) or a slow operation (for database queries). Check your network connectivity and consider whether the operation can be scoped more narrowly.
 
-**Authentication failures.** For OAuth servers, try reauthenticating by running `/mcp` and following the auth flow again. For token based auth, verify that the token is still valid and correctly set in your headers or environment variables.
+**Authentication failures.** For OAuth servers, try reauthenticating by running `/mcp` and following the auth flow again. For token-based auth, verify that the token is still valid and correctly set in your headers or environment variables.
 
 **Tool not appearing.** If you added a server but its tools don't show up, check that the server is connected via `/mcp`. If tool search is active (see the Tool Search section above), the tools may have been unloaded to save context. They'll appear automatically when Claude Code determines they're relevant to your prompt. You can also try explicitly mentioning the tool or server name in your prompt to nudge tool search into reloading it.
 
 **Configuration not loading.** If you added a server via `claude mcp add` but it doesn't show up in your next session, verify the scope matches your expectation. A server added with `--scope project` only appears when Claude Code runs from that project directory. Check `~/.claude.json` for local servers and `.mcp.json` for project servers.
 
+### Environment Variables
+
+Several environment variables give you additional control over MCP behavior.
+
+| Variable | Purpose |
+|----------|---------|
+| `MAX_MCP_OUTPUT_TOKENS` | Global maximum output size for all MCP tools. Increase if you see truncation. |
+| `ENABLE_TOOL_SEARCH` | Toggle automatic tool search on (`true`) or off (`false`). |
+| `CLAUDE_CODE_MCP_SERVER_NAME` | Override the display name of an MCP server. |
+| `CLAUDE_CODE_MCP_SERVER_URL` | Override the URL for an HTTP MCP server at runtime. |
+| `MCP_CONNECTION_NONBLOCKING` | Set to `true` for `-p` (print) mode so MCP connections don't block the session. Useful in CI/CD pipelines where you don't want a slow server to delay output. |
+
+<CodeBlock
+  code={`# Non-blocking MCP connections in print mode
+MCP_CONNECTION_NONBLOCKING=true claude -p "list all database tables"
+
+# Override server URL at runtime
+CLAUDE_CODE_MCP_SERVER_URL=https://staging.mcp.example.com claude`}
+  lang="bash"
+  title="MCP environment variables"
+  caption="These are most useful in CI/CD pipelines and scripted workflows."
+/>
+
 ## Best Practices
 
 - **Start with stdio for local development.** It's the simplest transport, requires no configuration, and works for the vast majority of use cases. Only move to HTTP when you need remote access or team sharing.
 
-- **Use `.mcp.json` for team shared servers.** Commit the file to Git so every team member gets the same MCP configuration. Use `${VAR}` expansion for secrets to keep credentials out of version control.
+- **Use `.mcp.json` for team-shared servers.** Commit the file to Git so every team member gets the same MCP configuration. Use `${VAR}` expansion for secrets to keep credentials out of version control.
 
 - **Use environment variable expansion for secrets.** Never hardcode API keys, database passwords, or tokens in `.mcp.json`. Stick with `${VAR}` syntax and document which environment variables each team member needs to set.
 
