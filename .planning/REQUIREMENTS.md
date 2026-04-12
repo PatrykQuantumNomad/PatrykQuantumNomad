@@ -34,7 +34,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 
 ### Cheatsheet
 
-- [ ] **CS-01**: Both SVG cheatsheets updated with new commands/shortcuts (Auto Mode, /agents, new hooks, etc.)
+- [x] **CS-01**: Both SVG cheatsheets updated with new commands/shortcuts (Auto Mode, /agents, new hooks, etc.)
 - [x] **CS-02**: Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with inline SVG rendering
 - [x] **CS-03**: Download buttons for both SVG files (interactive + print versions)
 - [x] **CS-04**: Cheatsheet page has OG image
@@ -100,7 +100,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | NEW-03 | Phase 112 | Pending |
 | NEW-04 | Phase 112 | Complete |
 | NEW-05 | Phase 112 | Complete |
-| CS-01 | Phase 114 | Pending |
+| CS-01 | Phase 114 | Complete |
 | CS-02 | Phase 114 | Complete |
 | CS-03 | Phase 114 | Complete |
 | CS-04 | Phase 114 | Complete |
