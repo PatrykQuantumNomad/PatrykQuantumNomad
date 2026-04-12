@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
-status: verifying
-stopped_at: Phase 113 complete — all 7 plans executed
-last_updated: "2026-04-12T17:40:00.000Z"
+status: executing
+stopped_at: Completed 114-02-PLAN.md
+last_updated: "2026-04-12T16:53:15.421Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
+  total_plans: 21
+  completed_plans: 19
+  percent: 90
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.19 Claude Code Guide Refresh — Phase 113 Lower-Impact Chapter Updates
+**Current focus:** v1.19 Claude Code Guide Refresh — Phase 114 Cheatsheet
 
 ## Current Position
 
-Phase: 113 of 116 (Lower-Impact Chapter Updates) -- COMPLETE
-Plan: 7 of 7 (guide.json + verification sweep) -- COMPLETE
-Status: Phase complete — all plans executed, verification pending
+Phase: 114 of 116 (Cheatsheet)
+Plan: 2 of 3 (cheatsheet page + landing Resources) -- COMPLETE
+Status: Executing phase 114
 Last activity: 2026-04-12
 
-Progress: [█████░░░░░] 50%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [█████░░░░░] 50%
 | Phase 113 P05 | 4min | 2 tasks | 1 files |
 | Phase 113 P06 | 4min | 2 tasks | 1 files |
 | Phase 113 P07 | 3min | 2 tasks | 1 files |
+| Phase 114-cheatsheet P02 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 113]: Ch9 memory section expanded with storage paths, MEMORY.md entrypoint, topic files, 200-line/25KB limit
 - [Phase 113]: guide.json descriptions updated for Ch5 (Channels, server mode) and Ch9 (memory, sparsePaths) — Ch1/Ch2/Ch6/Ch10 verified adequate
 - [Phase 113]: Cross-chapter sweep verified all Ch12-14 references are real hyperlinks across all 6 chapters
+- [Phase 114-cheatsheet]: Cheatsheet page uses max-w-6xl (wider than guide max-w-4xl) for better SVG display; Resources section uses 2-column grid
 
 ### Pending Todos
 
@@ -114,7 +116,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T17:40:00.000Z
-Stopped at: Phase 113 complete (all 7 plans executed, verification pending)
+Last session: 2026-04-12T16:53:15.418Z
+Stopped at: Completed 114-02-PLAN.md
 Resume file: None
 Next: Phase 113 verification, then Phase 114 (Cheatsheet)

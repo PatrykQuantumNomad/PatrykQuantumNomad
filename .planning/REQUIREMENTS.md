@@ -35,11 +35,11 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 ### Cheatsheet
 
 - [ ] **CS-01**: Both SVG cheatsheets updated with new commands/shortcuts (Auto Mode, /agents, new hooks, etc.)
-- [ ] **CS-02**: Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with inline SVG rendering
-- [ ] **CS-03**: Download buttons for both SVG files (interactive + print versions)
-- [ ] **CS-04**: Cheatsheet page has OG image
-- [ ] **CS-05**: Cheatsheet page has JSON-LD structured data
-- [ ] **CS-06**: Cheatsheet linked from guide landing page Resources section
+- [x] **CS-02**: Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with inline SVG rendering
+- [x] **CS-03**: Download buttons for both SVG files (interactive + print versions)
+- [x] **CS-04**: Cheatsheet page has OG image
+- [x] **CS-05**: Cheatsheet page has JSON-LD structured data
+- [x] **CS-06**: Cheatsheet linked from guide landing page Resources section
 
 ### Blog
 
@@ -101,11 +101,11 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | NEW-04 | Phase 112 | Complete |
 | NEW-05 | Phase 112 | Complete |
 | CS-01 | Phase 114 | Pending |
-| CS-02 | Phase 114 | Pending |
-| CS-03 | Phase 114 | Pending |
-| CS-04 | Phase 114 | Pending |
-| CS-05 | Phase 114 | Pending |
-| CS-06 | Phase 114 | Pending |
+| CS-02 | Phase 114 | Complete |
+| CS-03 | Phase 114 | Complete |
+| CS-04 | Phase 114 | Complete |
+| CS-05 | Phase 114 | Complete |
+| CS-06 | Phase 114 | Complete |
 | BLOG-01 | Phase 115 | Pending |
 | BLOG-02 | Phase 115 | Pending |
 | BLOG-03 | Phase 115 | Pending |
