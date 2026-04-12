@@ -1,18 +1,18 @@
 ---
 title: "Git Worktrees & Subagent Delegation"
-description: "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions."
+description: "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions, persistent memory, initialPrompt auto-submit, and sparse-checkout for monorepos."
 order: 8
 slug: "worktrees"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code subagents", "git worktrees", "AGENT.md", "parallel development", "delegation", "custom agents", "worktree isolation"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code subagents", "git worktrees", "AGENT.md", "parallel development", "delegation", "custom agents", "worktree isolation", "sparsePaths", "initialPrompt", "agent memory", "background tasks"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
 
 ## What You'll Learn
 
-This chapter is all about subagents, specialized AI assistants you can delegate work to right from within a Claude Code session. We'll cover what subagents are and how they differ from agent teams, the three built in subagents and when to reach for each one, how to create custom subagents with AGENT.md files and YAML frontmatter, how git worktree isolation lets you develop in parallel without file conflicts, how persistent memory helps agents learn over time, and how foreground and background execution patterns work.
+This chapter is all about subagents, specialized AI assistants you can delegate work to right from within a Claude Code session. We'll cover what subagents are and how they differ from agent teams, the three built in subagents and when to reach for each one, how to create custom subagents with AGENT.md files and YAML frontmatter, how git worktree isolation lets you develop in parallel without file conflicts, how persistent memory helps agents learn over time with dedicated storage and topic files, how foreground and background execution patterns work, how `initialPrompt` auto-submits a first turn for session agents, and how sparse-checkout keeps monorepo worktrees lean.
 
 By the end, you'll be able to create purpose built agents for code review, security scanning, documentation, and other specialized tasks, and run them in parallel using git worktrees.
 
@@ -36,7 +36,7 @@ Claude Code ships with three built in subagents, each tuned for a different use 
 
 **General purpose** also inherits the parent session's model but has access to all tools, including file editing and command execution. It can do everything the parent session can. This is the one to use when you want to fully delegate a task: reading, editing, running tests, and verifying results.
 
-Invoking subagents is as simple as using natural language. Ask Claude Code to "explore the authentication module" and it'll use the Explore subagent. Say "plan a refactoring of the database layer" and it'll reach for the Plan subagent. Tell it to "implement input validation for the API endpoints" and it'll spin up a general purpose subagent.
+Invoking subagents is as simple as using natural language. Ask Claude Code to "explore the authentication module" and it'll use the Explore subagent. Say "plan a refactoring of the database layer" and it'll reach for the Plan subagent. Tell it to "implement input validation for the API endpoints" and it'll spin up a general purpose subagent. You can also type `@agent-name` in your prompt to invoke a specific subagent by name, whether it's a built in agent or one you've defined in an AGENT.md file.
 
 <CodeBlock
   code={`# Claude Code selects the appropriate built in subagent based on your request
@@ -48,10 +48,14 @@ Invoking subagents is as simple as using natural language. Ask Claude Code to "e
 → Uses Plan subagent (parent model, read only)
 
 "Implement rate limiting on all public API endpoints"
-→ Uses general purpose subagent (parent model, all tools)`}
+→ Uses general purpose subagent (parent model, all tools)
+
+# Or invoke a specific agent by name
+"@security-reviewer check the auth module for vulnerabilities"
+→ Invokes the named security-reviewer subagent directly`}
   lang="text"
   title="Invoking built in subagents"
-  caption="Claude Code chooses the right subagent based on the nature of your request."
+  caption="Claude Code chooses the right subagent based on your request, or you can target one by name with @agent-name."
 />
 
 ## Creating Custom Subagents
@@ -132,9 +136,11 @@ The YAML frontmatter in an AGENT.md file supports the following fields. They're 
 
 **model**: Overrides the model used by this subagent. Options include `sonnet`, `haiku`, `opus`, or a specific model identifier. If omitted, the subagent inherits the parent session's model.
 
-**permissionMode**: Controls how the subagent handles permission prompts. Choose from five modes: `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. See the Permission Modes section below for details.
+**permissionMode**: Controls how the subagent handles permission prompts. Choose from six modes: `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, or `bypassPermissions`. See the Permission Modes section below for details.
 
 **maxTurns**: The maximum number of agentic loop iterations the subagent can perform. This prevents runaway agents; if a subagent has been looping for 50 turns, it's probably stuck. A reasonable default is 10-25 depending on task complexity.
+
+**initialPrompt**: A prompt that auto-submits as the first turn when the agent runs as the main session agent (via the `--agent` flag or `agent` setting). Commands and skills referenced in the prompt are processed. If the user provides a prompt at launch, the `initialPrompt` is prepended to it.
 
 **skills**: Skills available to this subagent, specified as a YAML array. The subagent can invoke these skills during its execution.
 
@@ -147,6 +153,29 @@ The YAML frontmatter in an AGENT.md file supports the following fields. They're 
 **background**: Whether this subagent runs in the background by default. Set to `true` for agents that perform long running tasks you don't need to watch. Defaults to `false` (foreground).
 
 **isolation**: Set to `worktree` to give this subagent its own git worktree. The subagent works on an isolated copy of the codebase, preventing file conflicts with the parent session. See the Subagent Worktree Isolation section below.
+
+Here's an example that uses `initialPrompt` to auto-start a review workflow when the agent is launched as the main session agent:
+
+<CodeBlock
+  code={`---
+name: code-reviewer
+description: Reviews staged changes for security and quality issues
+tools: Read, Grep, Glob, Bash
+initialPrompt: "Review all staged changes for security issues and code quality. Use /compact if context gets large."
+memory: project
+---
+
+You are a senior code reviewer. Focus on:
+- Security vulnerabilities (injection, auth bypass, data exposure)
+- Logic errors and unhandled edge cases
+- Performance concerns
+- Missing error handling
+
+Output a structured report with severity levels and specific file references.`}
+  lang="markdown"
+  title=".claude/agents/code-reviewer.md"
+  caption="initialPrompt auto-submits when this agent runs as the main session agent via --agent code-reviewer."
+/>
 
 Here's a more advanced example that pulls several frontmatter fields together.
 
@@ -213,11 +242,20 @@ claude --agent "You are a documentation expert..."
 
 **CLI flag (session only)** creates a one off subagent for the current session only. Great for quick experiments. The agent definition is passed directly on the command line and isn't saved anywhere.
 
+You can also define multiple subagents inline at launch using the `--agents` flag with a JSON array. These agents exist only for the current session and aren't saved to disk.
+
+<CodeBlock
+  code={`claude --agents '[{"name": "reviewer", "description": "Reviews code for issues"}, {"name": "tester", "description": "Writes and runs tests"}]'`}
+  lang="bash"
+  title="Defining subagents inline with --agents"
+  caption="Session-only agents defined as JSON. Useful for automation scripts and quick experiments."
+/>
+
 **Project** agents live in `.claude/agents/` at your project root. They get committed to Git and shared with your team. This is the recommended spot for agents specific to your codebase.
 
 **User** agents live in `~/.claude/agents/` and are available to you across all projects. Perfect for personal productivity agents you use everywhere.
 
-**Plugin** agents are installed from plugin marketplaces and managed by Claude Code's plugin system.
+**Plugin** agents are installed from plugin marketplaces and managed by Claude Code's plugin system. For details on creating and distributing plugins that include agents, see [Plugins](/guides/claude-code/plugins/).
 
 ## Git Worktrees for Parallel Development
 
@@ -263,7 +301,24 @@ Here's a worktree session in action, Claude works in an isolated copy while the 
   The original project does NOT have the logging file. Isolation works.`}
 />
 
-By default, worktrees are cleaned up automatically when the session ends. Once the Claude Code session using the worktree finishes, the worktree directory is removed. You can configure this behavior if you'd rather have worktrees persist.
+By default, worktrees are cleaned up automatically when the session ends. The **ExitWorktree** tool handles this cleanup, removing the worktree branch once the session finishes and there are no uncommitted changes. You can configure this behavior if you'd rather have worktrees persist.
+
+### Sparse Checkout for Monorepos
+
+In large monorepos, checking out the entire repository for each worktree can be wasteful. The `worktree.sparsePaths` setting enables sparse-checkout, so worktrees only contain the directories each subagent actually needs.
+
+<CodeBlock
+  code={`{
+  "worktree": {
+    "sparsePaths": ["packages/frontend", "packages/shared"]
+  }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Worktrees only check out the specified directories instead of the full repo."
+/>
+
+This is particularly useful when you have subagents that work on specific parts of a monorepo. A frontend subagent only needs `packages/frontend` and shared libraries, not the entire backend, infrastructure, and documentation trees. Sparse checkout reduces disk usage and speeds up worktree creation.
 
 <CodeBlock
   code={`# Your main working directory stays untouched
@@ -310,13 +365,33 @@ Subagents can maintain persistent memory across sessions using the `memory` fiel
 
 There are three scopes to choose from:
 
-**user**: Global memory shared across all projects. Stored at the user level. Great for agents that need to remember your personal preferences regardless of which project you're working on.
+**user**: Global memory shared across all projects. Stored at `~/.claude/agent-memory/<name>/` where `<name>` is the agent's name. Great for agents that need to remember your personal preferences regardless of which project you're working on.
 
-**project**: Per-repository memory. Stored with the project. Use this for agents that need to remember project-specific conventions, architecture decisions, or patterns.
+**project**: Per-repository memory. Stored at `.claude/agent-memory/<name>/` in the project root. Use this for agents that need to remember project-specific conventions, architecture decisions, or patterns.
 
 **local**: Per-directory memory. Stored at the current directory level. Best for agents that operate on specific subsystems or modules within a project.
 
-Memory is stored in MEMORY.md files with a curated 200 line limit. As the agent accumulates observations and preferences, it summarizes and condenses its memory to stay within this limit. Older, less relevant memories get replaced by newer, more useful ones.
+Each agent's memory directory contains a **MEMORY.md** entrypoint file that the agent reads on startup. As the agent accumulates observations and preferences, it can also create **topic files** for specific subjects like coding standards, project architecture, or common patterns. This keeps memory organized and relevant.
+
+<CodeBlock
+  code={`# User-scoped memory (global, all projects)
+~/.claude/agent-memory/
+  code-reviewer/
+    MEMORY.md                    # Main entrypoint, read on startup
+    coding-standards.md          # Topic file: learned style preferences
+    common-patterns.md           # Topic file: recurring code patterns
+
+# Project-scoped memory (per-repository)
+my-project/.claude/agent-memory/
+  security-reviewer/
+    MEMORY.md                    # Project-specific memory
+    vulnerability-history.md     # Topic file: past findings`}
+  lang="text"
+  title="Agent memory directory structure"
+  caption="MEMORY.md is the entrypoint. Topic files organize knowledge by subject."
+/>
+
+At session start, the first 200 lines or 25KB of memory content is loaded into the agent's context. As memory grows beyond this limit, the agent summarizes and condenses older observations to stay within the budget. More recent and more frequently referenced memories take priority over older, less relevant ones.
 
 <CodeBlock
   code={`---
@@ -341,6 +416,8 @@ By default, subagents run in **foreground** mode, which means the parent session
 
 You can set `background: true` in an AGENT.md frontmatter to make an agent always run in the background. Or, if a foreground subagent is taking longer than expected, just press **Ctrl+B** to send it to the background mid execution.
 
+When a subagent runs in the background, permissions are handled differently. Any tools that were pre-approved upfront (through the agent's `permissionMode` or explicit tool list) run normally. But if the agent encounters a tool call that would normally require human approval, it's automatically denied since there's no human watching to approve it. Design your background agents with appropriate permission modes so they can complete their work autonomously.
+
 <CodeBlock
   code={`---
 name: test-runner
@@ -361,39 +438,53 @@ Run the complete test suite and report results. Include:
 
 When a background subagent completes, Claude Code notifies you with a summary of the results. From there, you can review the output and decide how to proceed.
 
+If you need to disable background execution entirely, for instance on a shared machine or in a resource constrained environment, set the `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` environment variable:
+
+<CodeBlock
+  code={`export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`}
+  lang="bash"
+  title="Disabling background tasks"
+  caption="When set, all subagents run in the foreground regardless of their background setting."
+/>
+
 A common pattern is running multiple background subagents in parallel, say one running tests, one performing a security review, and one checking documentation coverage, while you keep working on implementation in the foreground.
 
 ## Managing Subagents with /agents
 
-The `/agents` command opens an interactive menu for managing your subagents. From here you can:
+The `/agents` command opens an interactive menu for managing your subagents. The menu is organized into two tabs:
 
-- Browse all available agents (built in, project, user, and plugin)
-- Create new agents with guided prompts
+**Running** shows all currently active subagents with their status, whether they're executing in the foreground or background. From here you can monitor progress, send a foreground agent to the background, or review results from completed background agents.
+
+**Library** shows all available agents from every source: built in agents, project agents from `.claude/agents/`, user agents from `~/.claude/agents/`, and agents provided by installed [plugins](/guides/claude-code/plugins/). From the Library tab you can:
+
+- Browse all available agents with their descriptions
+- Create new agents with guided prompts, or use **Generate with Claude** for AI-assisted agent creation
 - Edit existing agent configurations
+- Customize agent colors for visual identification
 - Delete agents you no longer need
-
-If you've used the `/hooks` command for managing lifecycle hooks (covered in the [Hooks chapter](/guides/claude-code/hooks/)), this will feel familiar.
 
 <CodeBlock
   code={`/agents`}
   lang="text"
   title="Opening the agent management menu"
-  caption="Lists all agents across all scopes with their descriptions."
+  caption="The Running tab shows active agents. The Library tab shows all available agents across all scopes."
 />
 
 ## Permission Modes
 
-Each subagent operates under one of five permission modes that control how it handles prompts for file edits and command execution.
+Each subagent operates under one of six permission modes that control how it handles prompts for file edits and command execution.
 
 **default**: The subagent follows the same permission rules as the parent session. It'll prompt you for approval before writing files or running commands, just like Claude Code normally does. This is the safest mode and the best starting point for new agents.
 
 **acceptEdits**: The subagent automatically accepts file edits (creating, modifying, and deleting files) without prompting, but still asks before running shell commands. A good middle ground for agents you trust with code changes but want to keep an eye on when it comes to command execution.
 
+**plan**: The subagent operates in read only mode. It can't write files or execute commands, only read, search, and analyze. This is the permission mode used by the built in Plan subagent, and it's ideal for review and analysis agents that should never modify code.
+
+**auto**: A classifier-based mode where safe actions proceed automatically and destructive or suspicious actions are blocked. This provides intelligent permission management without manual approvals. See the [Security chapter](/guides/claude-code/security/) for full details on auto mode behavior.
+
 **dontAsk**: The subagent automatically accepts all operations, including file edits and shell commands, without prompting. Use this for trusted agents performing well-scoped, predictable tasks.
 
 **bypassPermissions**: The subagent skips all permission checks entirely. This is the most permissive mode and should only be used for agents you fully trust in controlled environments.
-
-**plan**: The subagent operates in read only mode. It can't write files or execute commands, only read, search, and analyze. This is the permission mode used by the built in Plan subagent, and it's ideal for review and analysis agents that should never modify code.
 
 Start with `default` for new agents. As you build trust in an agent's behavior, graduate to `acceptEdits`. Reserve `dontAsk` and `bypassPermissions` for mature, well tested agents performing predictable operations.
 
@@ -402,12 +493,17 @@ Start with `default` for new agents. As you build trust in an agent's behavior, 
 plan             → Read only analysis (safest)
 default          → Same prompts as parent session
 acceptEdits      → Auto-accept file changes, prompt for commands
+auto             → Classifier-based safe/block decisions
 dontAsk          → Auto-accept everything
 bypassPermissions → Skip all checks (most permissive)`}
   lang="text"
   title="Permission mode spectrum"
   caption="Move from left to right as you build confidence in an agent's behavior."
 />
+
+## Building Agents Programmatically
+
+For production workflows and CI/CD pipelines, you can create and manage agents programmatically using the [Agent SDK](/guides/claude-code/agent-sdk/). The SDK exposes `AgentDefinition` objects for defining agents in Python or TypeScript, with the same capabilities as AGENT.md files but controlled through code. This is particularly useful when agent configurations need to be dynamic or generated at runtime.
 
 ## Best Practices
 
@@ -424,6 +520,8 @@ bypassPermissions → Skip all checks (most permissive)`}
 - **Keep system prompts focused.** An agent with a single, well-defined purpose will consistently outperform one with a broad mandate. Create multiple specialized agents rather than one general-purpose agent that tries to do everything.
 
 - **Run multiple background agents for parallel work.** Combine `background: true` with `isolation: worktree` to have several agents working concurrently on different tasks. Review and merge their results when they're done.
+
+- **Use sparsePaths in monorepos.** If your subagents only need a subset of the repository, configure `worktree.sparsePaths` to keep worktrees lean and creation fast.
 
 ## Further Reading
 
