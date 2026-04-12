@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" width="1200" height="690">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f23"/>
+    </radialGradient>
+    <linearGradient id="amber-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="soft-shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="amber-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="690" fill="url(#bg-glow)"/>
+
+  <!-- Decorative corner accents -->
+  <line x1="30" y1="30" x2="80" y2="30" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="30" x2="30" y2="80" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="30" x2="1120" y2="30" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="30" x2="1170" y2="80" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="660" x2="80" y2="660" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="30" y1="660" x2="30" y2="610" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="660" x2="1120" y2="660" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="1170" y1="660" x2="1170" y2="610" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+
+  <!-- TOP: Title in small caps -->
+  <text x="600" y="100" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="white" fill-opacity="0.9" text-anchor="middle" letter-spacing="6" font-weight="bold">CLAUDE CODE GUIDE</text>
+
+  <!-- Subtitle in italic serif -->
+  <text x="600" y="132" font-family="Georgia,'Times New Roman',serif" font-size="14" fill="#D97706" fill-opacity="0.8" text-anchor="middle" font-style="italic">What changed in the April 2026 refresh</text>
+
+  <!-- =======================================
+       DECORATIVE: FROM 11 arrow on left
+       ======================================= -->
+  <text x="280" y="350" font-family="Helvetica,Arial,sans-serif" font-size="13" fill="white" fill-opacity="0.4" text-anchor="middle" letter-spacing="2">FROM 11</text>
+  <!-- Dashed arrow pointing right -->
+  <line x1="320" y1="345" x2="430" y2="345" stroke="#D97706" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="430,345 422,340 422,350" fill="#D97706" fill-opacity="0.5"/>
+
+  <!-- =======================================
+       DECORATIVE: TO 14 arrow on right
+       ======================================= -->
+  <!-- Dashed arrow pointing left -->
+  <line x1="880" y1="345" x2="770" y2="345" stroke="#D97706" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <polygon points="770,345 778,340 778,350" fill="#D97706" fill-opacity="0.5"/>
+  <text x="920" y="350" font-family="Helvetica,Arial,sans-serif" font-size="13" fill="white" fill-opacity="0.4" text-anchor="middle" letter-spacing="2">TO 14</text>
+
+  <!-- =======================================
+       CENTER: Three stacked amber-bordered cards
+       ======================================= -->
+
+  <!-- Card 1: 3 New Chapters -->
+  <g filter="url(#amber-glow)">
+    <rect x="450" y="240" width="300" height="50" rx="6" fill="#0f0f23" fill-opacity="0.9" stroke="#D97706" stroke-opacity="0.7" stroke-width="1.5"/>
+  </g>
+  <text x="600" y="271" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white" fill-opacity="0.95" text-anchor="middle" letter-spacing="1" font-weight="bold">3 New Chapters</text>
+
+  <!-- Card 2: 5 Major Rewrites -->
+  <g filter="url(#amber-glow)">
+    <rect x="450" y="310" width="300" height="50" rx="6" fill="#0f0f23" fill-opacity="0.9" stroke="#D97706" stroke-opacity="0.7" stroke-width="1.5"/>
+  </g>
+  <text x="600" y="341" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white" fill-opacity="0.95" text-anchor="middle" letter-spacing="1" font-weight="bold">5 Major Rewrites</text>
+
+  <!-- Card 3: Updated Cheatsheet -->
+  <g filter="url(#amber-glow)">
+    <rect x="450" y="380" width="300" height="50" rx="6" fill="#0f0f23" fill-opacity="0.9" stroke="#D97706" stroke-opacity="0.7" stroke-width="1.5"/>
+  </g>
+  <text x="600" y="411" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="white" fill-opacity="0.95" text-anchor="middle" letter-spacing="1" font-weight="bold">Updated Cheatsheet</text>
+
+  <!-- =======================================
+       BELOW CARDS: Chapter count
+       ======================================= -->
+  <text x="600" y="490" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.5" text-anchor="middle" letter-spacing="3">14 CHAPTERS | ZERO TO HERO</text>
+
+  <!-- =======================================
+       BOTTOM: Amber accent line + attribution
+       ======================================= -->
+  <line x1="400" y1="580" x2="800" y2="580" stroke="#D97706" stroke-opacity="0.3" stroke-width="1"/>
+
+  <!-- Attribution -->
+  <text x="600" y="615" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.85" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/guides/claude-code</text>
+</svg>
