@@ -3,7 +3,7 @@
     "id": "claude-code",
     "title": "Claude Code Guide: From First Session to Multi-Agent Orchestration",
     "shortTitle": "Claude Code Guide",
-    "description": "The definitive zero-to-hero guide for Claude Code, Anthropic's agentic coding tool. Master CLAUDE.md, MCP integrations, custom skills, hooks, worktrees, and agent teams across 11 practitioner-driven chapters.",
+    "description": "The definitive zero-to-hero guide for Claude Code, Anthropic's agentic coding tool. Master CLAUDE.md, MCP integrations, custom skills, hooks, worktrees, agent teams, plugins, the Agent SDK, and computer use across 14 practitioner-driven chapters.",
     "slug": "claude-code",
     "accentColor": "#D97706",
     "publishedDate": "2026-03-15",
@@ -22,7 +22,10 @@
       { "slug": "hooks", "title": "Hooks & Lifecycle Automation", "description": "Automate quality enforcement with 24 lifecycle events, conditional if-field filtering, the PermissionDenied event for auto mode integration, and defer decisions for SDK workflows." },
       { "slug": "worktrees", "title": "Git Worktrees & Subagent Delegation", "description": "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions." },
       { "slug": "agent-teams", "title": "Agent Teams & Advanced Orchestration", "description": "Coordinate multiple Claude Code instances on shared task lists with dependency tracking and peer-to-peer communication (research preview)." },
-      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Deploy Claude Code at organizational scale with Auto Mode governance, 6 permission modes, managed-settings.d/ policies, sandbox enforcement, Bash hardening, and audit compliance." }
+      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Deploy Claude Code at organizational scale with Auto Mode governance, 6 permission modes, managed-settings.d/ policies, sandbox enforcement, Bash hardening, and audit compliance." },
+      { "slug": "plugins", "title": "Plugins", "description": "Build shareable plugin packages with manifests, bin/ executables, userConfig, hooks, and marketplace publishing for distribution across teams and the community." },
+      { "slug": "agent-sdk", "title": "Agent SDK", "description": "Use the Python and TypeScript SDKs to embed Claude Code's agent loop, tools, and context management into production applications and CI/CD pipelines." },
+      { "slug": "computer-use", "title": "Computer Use", "description": "Control native desktop applications through Claude Code with per-app approval, safety-first design, and CLI or Desktop GUI setup on macOS and Windows." }
     ]
   }
 ]
