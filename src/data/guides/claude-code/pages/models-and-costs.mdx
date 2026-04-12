@@ -1,11 +1,11 @@
 ---
 title: "Models, Cost Economics & Permissions"
-description: "Choose between Sonnet, Opus, and Haiku for cost-effective AI coding. Configure effort levels, track spending, and set up the deny/ask/allow permission system."
+description: "Choose between Sonnet, Opus, and Haiku for cost-effective AI coding. Configure effort levels with /effort, track spending, and set up the deny/ask/allow permission system across 6 permission modes including Auto Mode."
 order: 2
 slug: "models-and-costs"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code cost", "sonnet vs opus", "claude code pricing", "permission system", "effort levels", "ai coding cost", "model selection"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code cost", "sonnet vs opus", "claude code pricing", "permission system", "effort levels", "ai coding cost", "model selection", "auto mode", "permission classifier", "/effort"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import PermissionModelDiagram from '../../../../components/guide/PermissionModelDiagram.astro';
@@ -13,7 +13,7 @@ import PermissionFlowExplorer from '../../../../components/guide/PermissionFlowE
 
 ## What You'll Learn
 
-Every time you fire up Claude Code, you're making decisions about models, costs, and permissions, whether you realize it or not. This chapter walks you through all three. You'll learn how to pick the right model for each task, dial reasoning depth up or down with effort levels, keep an eye on spending, and set up the permission system so Claude Code does exactly what you want on your machine (and nothing you don't). By the end, you'll be making confident tradeoffs between speed, quality, cost, and safety.
+Every time you fire up Claude Code, you're making decisions about models, costs, and permissions, whether you realize it or not. This chapter walks you through all three. You'll learn how to pick the right model for each task, dial reasoning depth up or down with effort levels (including the `/effort` command for quick mid-session adjustments), keep an eye on spending, and set up the permission system so Claude Code does exactly what you want on your machine. You'll also learn about Auto Mode, which uses a background classifier to intelligently automate permission decisions so you can work with fewer interruptions while maintaining safety guardrails. By the end, you'll be making confident tradeoffs between speed, quality, cost, and safety.
 
 ---
 
@@ -23,11 +23,11 @@ Claude Code gives you several model aliases, each mapping to a member of the Cla
 
 **Sonnet** is the default, and for good reason. It strikes a great balance of speed, quality, and cost, making it the workhorse for everyday coding. Most developers live here: writing features, debugging, refactoring, navigating codebases.
 
-**Opus** is the heavy hitter. It reasons more deeply and produces more thorough analysis, but it's slower and pricier. Reach for Opus when you need careful architectural decisions, complex multi-file refactoring, or nuanced code review where depth matters more than speed.
+**Opus** is the heavy hitter. It reasons more deeply and produces more thorough analysis, but it's slower and pricier. Opus comes with a 1M token context window, making it the go-to choice for tasks that require holding many files in memory at once. Reach for Opus when you need careful architectural decisions, complex multi-file refactoring, or nuanced code review where depth matters more than speed.
 
 **Haiku** is the fastest and cheapest option. It shines on simple queries, quick lookups, and straightforward tasks that don't need deep reasoning. Want a fast answer to a factual question or just need to check something real quick? Haiku's your model.
 
-**Opusplan** is a hybrid: Opus generates the plan, Sonnet executes it. You get Opus level strategic thinking paired with Sonnet level execution speed for the bulk of the work.
+**Opusplan** is a hybrid: Opus generates the plan, Sonnet executes it. You get Opus-level strategic thinking paired with Sonnet-level execution speed for the bulk of the work.
 
 The alias `default` maps to Sonnet. You can also tack on model suffixes like `sonnet[1m]` to access extended context windows (see the Extended Context section below).
 
@@ -43,6 +43,7 @@ The right model depends on what you're doing, not personal preference. Here's a 
 | Multi-file refactoring | Opus or Opusplan | Architectural thinking benefits from deeper reasoning |
 | Answering a factual question | Haiku | Simple retrieval doesn't need heavyweight models |
 | Planning a large change | Opusplan | Opus plans the strategy, Sonnet handles execution |
+| Large codebase analysis | Opus | 1M token context window holds entire system context |
 
 In practice, Sonnet covers 80-90% of most developers' work. The trick is recognizing that 10-20% of tasks where switching models saves you either time or money.
 
@@ -91,14 +92,27 @@ Effort levels let you control how much reasoning Claude Code puts into each resp
 
 ### Setting Effort Level
 
-You can set the effort level via an environment variable or your settings file.
+You can change the effort level in three ways: the `/effort` slash command for quick mid-session changes, an environment variable, or your settings file.
+
+**In-session command:** Use `/effort` to change the effort level without leaving your current conversation. This is the fastest way to bump effort up for a tricky problem or dial it down for a quick lookup.
 
 <CodeBlock
-  code={`export CLAUDE_CODE_EFFORT_LEVEL=high`}
+  code={`> /effort high
+Effort level set to high for this session`}
+  lang="text"
+  caption="Use /effort to quickly adjust reasoning depth mid-session"
+/>
+
+**Environment variable:** Set `CLAUDE_CODE_EFFORT` in your shell profile to change the default for all sessions.
+
+<CodeBlock
+  code={`export CLAUDE_CODE_EFFORT=high`}
   lang="bash"
   title="~/.zshrc"
   caption="Set high effort for all sessions via environment variable"
 />
+
+**Settings file:** Set the effort level in your settings file for persistent configuration.
 
 <CodeBlock
   code={`{
@@ -111,7 +125,7 @@ You can set the effort level via an environment variable or your settings file.
   caption="Set effort level in project settings"
 />
 
-Most developers leave effort at the default (medium) and only bump it up for specific tasks. If you find yourself repeatedly cranking effort to high, that's probably a sign you should switch to Opus instead.
+Most developers leave effort at the default (medium) and only bump it up for specific tasks. The `/effort` command makes this easy: set it to high before a complex debugging session, then drop it back to medium when you're done. If you find yourself repeatedly cranking effort to high, that's probably a sign you should switch to Opus instead.
 
 ### When Effort Level Matters
 
@@ -121,19 +135,23 @@ Think of it as a two-dimensional choice: the model sets the quality ceiling, and
 
 ## Extended Context
 
-The standard context window is 200K tokens. If you're working with a large codebase or tackling tasks that require holding many files in memory at once, Claude Code offers a 1M token extended context window via the `[1m]` model suffix.
+The standard context window is 200K tokens. For tasks that require holding many files in memory at once, Claude Code offers extended context windows via the `[1m]` model suffix.
+
+**Opus** comes with a 1M token context window by default. When you select Opus as your model, you get the full 1M context without any special configuration. This makes Opus the natural choice for large-scale codebase analysis, comprehensive security audits, and complex migrations where Claude needs to hold the full picture of a system in memory.
+
+**Sonnet** can also access a 1M context window via the `sonnet[1m]` variant. This gives you Sonnet's speed and cost profile with a much larger context window.
 
 <CodeBlock
   code={`claude --model sonnet[1m]`}
   lang="bash"
-  caption="Start a session with 1M extended context (beta)"
+  caption="Start a session with Sonnet using the 1M extended context window"
 />
 
-Extended context is currently in beta, and pricing differs from the standard context window. Check the <a href="https://code.claude.com/docs/en/model-config" target="_blank" rel="noopener noreferrer">official model configuration docs</a> for current pricing details.
+Extended context pricing differs from the standard context window. Check the <a href="https://code.claude.com/docs/en/model-config" target="_blank" rel="noopener noreferrer">official model configuration docs</a> for current pricing details.
 
 You'll want extended context when you need to analyze a large chunk of a codebase all at once, such as tracing a data flow across dozens of files or untangling a complex dependency graph. For most daily tasks, the standard 200K window is more than enough.
 
-Where extended context really shines is large scale migrations, comprehensive security audits, and situations where Claude needs to hold the full picture of a system in memory. The tradeoff is higher cost per session, so use it deliberately rather than as a default.
+Where extended context really shines is large-scale migrations, comprehensive security audits, and situations where Claude needs to hold the full picture of a system in memory. The tradeoff is higher cost per session, so use it deliberately rather than as a default.
 
 ---
 
@@ -170,7 +188,7 @@ Cost management isn't about restricting usage; it's about using the right tool f
 
 - **Delegate subtasks to subagents.** When Claude spawns a subagent for a specific subtask, the subagent gets its own smaller context window. That's more token efficient than having the main agent hold everything.
 
-- **Use low effort for quick lookups.** If you just need to find a file, check a type signature, or answer a simple factual question, low effort gets you a fast answer at minimal cost.
+- **Use low effort for quick lookups.** If you just need to find a file, check a type signature, or answer a simple factual question, low effort gets you a fast answer at minimal cost. Use `/effort low` before quick queries and `/effort medium` when you're done.
 
 - **Review costs periodically.** Run `/cost` at natural breakpoints in your workflow. If costs are climbing faster than expected, check whether you're using the right model and effort level for what you're doing.
 
@@ -186,7 +204,7 @@ Tools are organized into three tiers based on their potential impact:
 
 **Bash commands** require permission by default. Claude will show you the exact command it wants to run and wait for your approval before executing it. This covers package installations, build scripts, test runners, and any other shell command.
 
-**File modifications** also require permission by default. Claude shows you the proposed changes as a diff and waits for your go ahead before writing to disk. This applies to creating new files, editing existing ones, and deleting files.
+**File modifications** also require permission by default. Claude shows you the proposed changes as a diff and waits for your go-ahead before writing to disk. This applies to creating new files, editing existing ones, and deleting files.
 
 The diagram below shows how Claude Code evaluates permission rules when a tool is invoked. Rules are checked in strict order: deny rules first, then ask rules, then allow rules.
 
@@ -232,7 +250,7 @@ The evaluation order is **deny, then ask, then allow**. Deny rules always win, n
 
 In this example, `curl` and `wget` are always blocked (deny). Docker and git push commands always prompt for approval (ask). npm scripts, git staging, git commits, file reads, and writes to `src/` are all auto-approved (allow). Anything not matching these rules falls through to the default behavior, which is to ask.
 
-Permission rules use glob style pattern matching. `Bash(npm run *)` matches any `npm run` command, and `Write(src/**)` matches writes to any file under the `src/` directory tree.
+Permission rules use glob-style pattern matching. `Bash(npm run *)` matches any `npm run` command, and `Write(src/**)` matches writes to any file under the `src/` directory tree.
 
 ### Rule Specificity
 
@@ -259,39 +277,122 @@ A common pattern is to allow a broad category of commands and then deny the spec
 
 ## Permission Modes
 
-Claude Code supports five permission modes that control the overall permission behavior. These set the baseline, and your deny, ask, and allow rules still apply on top of whichever mode you choose.
+Claude Code supports six permission modes that control the overall permission behavior. These set the baseline, and your deny, ask, and allow rules still apply on top of whichever mode you choose.
 
 **default.** The standard mode. Claude asks for permission before potentially dangerous actions (bash commands and file modifications). This is the safest starting point for any project.
 
-**acceptEdits.** Auto-approves file edits without prompting, but still asks for bash commands. Use this when you trust Claude's file modifications but want to review shell commands before they run.
+**plan.** Claude explains what it would do without actually executing anything. When the plan is ready, Claude presents five options: approve and switch to auto mode, approve and switch to acceptEdits mode, approve and continue with manual review, keep planning for more detail, or refine the plan with deeper analysis. This makes plan mode a natural starting point for complex tasks where you want to review the approach before committing to execution.
 
-**plan.** Claude explains what it would do without actually executing anything. Useful for reviewing proposed changes before committing to them, especially handy for understanding complex refactoring plans.
+**acceptEdits.** Auto-approves file edits and common filesystem commands (`mkdir`, `touch`, `rm`, `mv`, `cp`, `sed` within the working directory) without prompting, but still asks for other bash commands. Use this when you trust Claude's file modifications but want to review shell commands before they run.
 
-**dontAsk.** Auto-approves everything that falls within your allow rules. Claude still respects deny rules. Use this when you've got well-defined permission rules and want an uninterrupted workflow.
+**auto.** A classifier-based permission mode that intelligently decides which actions are safe to proceed and which need review. Auto mode uses a background classifier model to evaluate each tool call before execution. Safe actions like editing local files, installing declared dependencies, and running tests proceed without interruption. Destructive or suspicious actions like production deploys, mass deletions, and data exfiltration attempts are blocked. This gives you a productive uninterrupted workflow while maintaining meaningful safety guardrails. See the dedicated Auto Mode section below for full details on how the classifier works, what it blocks and allows, and how to configure it.
+
+**dontAsk.** Auto-approves everything that falls within your allow rules and auto-denies everything else. Claude never prompts for permission. This mode is designed for CI/CD pipelines and automated workflows where there's no human to answer prompts. If an action isn't explicitly allowed, it's denied rather than queued for approval.
 
 **bypassPermissions.** Skips all permission checks entirely. This is dangerous and not recommended for general use. It removes all safety guardrails and should only be used in fully isolated environments (like ephemeral CI containers) where you accept all risk.
 
-These five modes form a spectrum from most restrictive (`plan`) to least restrictive (`bypassPermissions`). Most developers start in `default` mode and graduate to `acceptEdits` or `dontAsk` as they build confidence in their permission rules.
+These six modes form a spectrum from most restrictive (`plan`) to least restrictive (`bypassPermissions`). Most developers start in `default` mode and graduate to `acceptEdits` or `auto` as they build confidence in their permission rules and Claude's judgment.
 
-You can set the permission mode via a CLI flag:
+You can cycle through permission modes during a session by pressing `Shift+Tab`, set one via a CLI flag, or configure it in your settings file:
 
 <CodeBlock
-  code={`claude --permission-mode acceptEdits`}
+  code={`claude --permission-mode auto`}
   lang="bash"
-  caption="Start a session that auto-approves file edits"
+  caption="Start a session in auto mode"
 />
-
-Or in your settings file:
 
 <CodeBlock
   code={`{
     "permissions": {
-      "mode": "acceptEdits"
+      "defaultMode": "auto"
     }
 }`}
   lang="json"
   title=".claude/settings.json"
+  caption="Set auto mode as the default permission mode for all sessions"
 />
+
+## Auto Mode
+
+Auto mode is the most significant addition to the permission system. Instead of requiring you to approve every bash command and file edit, a background classifier model evaluates each tool call and makes an intelligent allow-or-block decision. The result is a workflow where safe, routine actions proceed without interruption while genuinely risky operations get flagged.
+
+### How the Classifier Works
+
+The classifier runs on Sonnet 4.6, regardless of which model you're using for your main session. It sees your messages, the proposed tool call, and your CLAUDE.md project context, but it does not see tool results. A separate server-side probe scans tool results for hostile content independently.
+
+For subagents, the classifier evaluates actions at three points: when the subagent spawns (checking the task description), during execution (each tool call), and when the subagent returns (reviewing the full action history).
+
+### What Auto Mode Blocks
+
+The classifier blocks actions that are destructive, suspicious, or outside the expected scope of development work:
+
+- Piping downloads to execution (`curl | bash`)
+- Sending sensitive data to external endpoints
+- Production deploys and database migrations
+- Mass cloud storage deletion
+- IAM permission grants and repository access changes
+- Force-pushing or pushing to main/master
+- Destroying pre-existing files outside the working directory
+
+### What Auto Mode Allows
+
+Routine development actions proceed without interruption:
+
+- Local file operations within the working directory
+- Installing declared dependencies
+- Reading `.env` and sending credentials to their matching API endpoints
+- Read-only HTTP requests
+- Pushing to the current branch or a branch Claude created
+- Sandbox network access
+- Running tests, builds, and linters
+
+### Fallback Behavior
+
+Auto mode has a built-in safety valve. If the classifier blocks 3 consecutive actions or 20 total actions in a session, auto mode pauses and falls back to standard prompting. Approving the next prompted action resumes auto mode. In non-interactive mode (`-p`), repeated blocks abort the session instead of prompting.
+
+### Availability
+
+Auto mode requires all of the following:
+
+- A Team, Enterprise, or API plan (not available on Pro or Max plans)
+- Sonnet 4.6 or Opus 4.6 as the session model
+- Anthropic API as the provider (not available through Bedrock or Vertex)
+- Admin enablement on Team and Enterprise plans
+
+### Configuring Auto Mode
+
+Enterprise administrators can disable auto mode via managed settings:
+
+<CodeBlock
+  code={`{
+    "permissions": {
+      "disableAutoMode": "disable"
+    }
+}`}
+  lang="json"
+  title="managed-settings.json"
+  caption="Disable auto mode across the organization"
+/>
+
+You can also configure trusted environments for the classifier:
+
+<CodeBlock
+  code={`{
+    "autoMode": {
+      "environment": {
+        "trustedRepos": ["github.com/myorg/*"],
+        "trustedServices": ["api.mycompany.com"]
+      }
+    }
+}`}
+  lang="json"
+  title=".claude/settings.json"
+  caption="Configure trusted repos and services for the auto mode classifier"
+/>
+
+For the full list of classifier rules, run `claude auto-mode defaults` in your terminal.
+
+For more on how auto mode interacts with enterprise security governance, see [Security & Enterprise Governance](/guides/claude-code/security/). For details on the PermissionDenied hook event that fires when auto mode blocks an action, see [Hooks & Lifecycle Automation](/guides/claude-code/hooks/).
 
 ## Interactive Permission Explorer
 
@@ -299,25 +400,26 @@ Want to see the permission evaluation logic in action? Explore the decision tree
 
 <PermissionFlowExplorer client:visible />
 
-The explorer shows the full decision tree that Claude Code follows when evaluating a tool call. Click on any decision node to see what happens at that step, review example configurations, and understand how different rule combinations affect the final outcome. It's the same evaluation logic described in the Permission Evaluation Order section above, just presented as a navigable tree.
+The explorer shows the full decision tree that Claude Code follows when evaluating a tool call. Click on any decision node to see what happens at that step, review example configurations, and understand how different rule combinations affect the final outcome. It's the same evaluation logic described in the Permission Evaluation Order section above, just presented as a navigable tree. Note that this tree applies to all permission modes: auto mode uses the classifier to decide which tool calls reach this evaluation chain, but once a tool call enters evaluation, the deny/ask/allow rules are applied identically.
 
 ## Settings Precedence
 
 Permission rules and all other settings follow a strict precedence hierarchy. When the same setting is defined at multiple levels, the higher priority level wins.
 
-1. **Managed** (`~/.claude/managed-settings.json`): set by enterprise administrators. Highest priority. Nothing can override these.
+1. **Managed** (`~/.claude/managed-settings.json` and `managed-settings.d/`): set by enterprise administrators. Highest priority. Nothing can override these.
 2. **CLI arguments:** flags passed when starting Claude Code (e.g., `--model`, `--permission-mode`).
 3. **Local** (`.claude/settings.local.json`): personal overrides for the current project. Not committed to git.
 4. **Project** (`.claude/settings.json`): shared team settings committed to the repository.
 5. **User** (`~/.claude/settings.json`): personal preferences that apply across all projects. Lowest priority.
 
-What this means in practice: a project level deny rule can't be overridden by a user level allow rule. If your team's `.claude/settings.json` denies `Bash(curl *)`, your personal `~/.claude/settings.json` can't undo that. Deny rules from higher precedence levels are absolute.
+What this means in practice: a project-level deny rule can't be overridden by a user-level allow rule. If your team's `.claude/settings.json` denies `Bash(curl *)`, your personal `~/.claude/settings.json` can't undo that. Deny rules from higher precedence levels are absolute.
 
-This is especially important for teams. Your project level settings file (`.claude/settings.json`) should define the team's security baseline: the deny rules everyone must follow and the allow rules for standard development commands. Individual developers can add personal overrides in `.claude/settings.local.json` (not committed to git) for their own workflow preferences, but they can't weaken the team's security rules.
+This is especially important for teams. Your project-level settings file (`.claude/settings.json`) should define the team's security baseline: the deny rules everyone must follow and the allow rules for standard development commands. Individual developers can add personal overrides in `.claude/settings.local.json` (not committed to git) for their own workflow preferences, but they can't weaken the team's security rules.
 
 <CodeBlock
   code={`# Precedence order (highest to lowest):
 # 1. managed-settings.json    (enterprise admin)
+#    managed-settings.d/       (layered policy fragments)
 # 2. CLI flags                (--model, --permission-mode)
 # 3. settings.local.json      (personal project overrides)
 # 4. settings.json             (team project settings)
@@ -330,24 +432,29 @@ This is especially important for teams. Your project level settings file (`.clau
 
 - **Start with the default permission mode.** It gives you a good balance of safety and productivity. Only relax permissions after you understand what Claude needs for your specific workflow.
 
+- **Graduate to auto mode when you're comfortable.** Once you trust your deny rules and understand Claude's behavior in your codebase, auto mode dramatically reduces interruptions without sacrificing safety. The classifier is conservative by default, so the risk is low.
+
 - **Add allow rules incrementally.** When you catch yourself approving the same command over and over, add it to your allow rules. Build up trust gradually rather than starting with broad permissions.
 
-- **Use deny rules as hard guardrails.** Block dangerous patterns like `curl` to untrusted URLs, `rm -rf` on paths outside your project, and any command that could exfiltrate data. Deny rules are your safety net, and they override everything else.
+- **Use deny rules as hard guardrails.** Block dangerous patterns like `curl` to untrusted URLs, `rm -rf` on paths outside your project, and any command that could exfiltrate data. Deny rules are your safety net, and they override everything else -- including auto mode's classifier.
 
 - **Commit project settings, gitignore local settings.** Put `.claude/settings.json` in version control so your team shares the same permission baseline. Keep `.claude/settings.local.json` in `.gitignore` for personal overrides that shouldn't affect teammates.
+
+- **Use `/effort` to match reasoning to task complexity.** Default (medium) effort handles most work. Use `/effort high` before a complex debugging session and `/effort low` for quick lookups. Save high effort for complex debugging and architecture reviews.
 
 - **Review `/cost` at natural breakpoints.** Check costs when switching tasks, before and after complex operations, and at the end of each day. This builds awareness of which workflows are expensive.
 
 - **Use Haiku for prototyping and exploration.** When you're exploring approaches, asking quick questions, or working through early iterations, Haiku gives you fast answers at a fraction of the cost.
 
-- **Match effort level to task complexity.** Default (medium) effort handles most work. Save high effort for complex debugging and architecture reviews. Use low effort for simple lookups and factual questions.
-
 - **Separate cost-sensitive and quality-sensitive workflows.** Prototyping? Use Haiku at low effort. Shipping to production? Sonnet or Opus at medium or high effort. The best cost management strategy is conscious model switching at workflow boundaries.
+
+- **Use dontAsk mode for CI/CD pipelines.** In automated environments, dontAsk mode ensures Claude never stalls waiting for a human to approve an action. Combine it with well-defined allow rules so the pipeline can do its work, and everything else is safely denied.
 
 ## Further Reading
 
 - <a href="https://code.claude.com/docs/en/model-config" target="_blank" rel="noopener noreferrer">Model Configuration</a>: official docs on model aliases, effort levels, and extended context
 - <a href="https://code.claude.com/docs/en/costs" target="_blank" rel="noopener noreferrer">Costs</a>: official pricing information, cost tracking, and reduction strategies
 - <a href="https://code.claude.com/docs/en/permissions" target="_blank" rel="noopener noreferrer">Permissions</a>: official docs on permission modes, rule syntax, and evaluation order
+- <a href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener noreferrer">Permission Modes</a>: official docs on all six permission modes including auto mode
 - <a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener noreferrer">Settings</a>: official docs on configuration scopes and settings file format
 - [Environment Sandboxing & Customization](/guides/claude-code/environment/): configuration scopes, sandbox modes, and workspace customization (next chapter)
