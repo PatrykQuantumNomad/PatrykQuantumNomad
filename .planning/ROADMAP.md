@@ -5,6 +5,7 @@
 - v1.0 through v1.16: Shipped (see MILESTONES.md)
 - v1.17 EDA Jupyter Notebooks: Shipped (Phases 96-101)
 - v1.18 AI Landscape Explorer: Shipped (Phases 102-110)
+- v1.19 Claude Code Guide Refresh: Phases 111-116 (in progress)
 
 ## Phases
 
@@ -38,3 +39,101 @@
 - [x] **Phase 110: Site Integration** - Header nav, homepage callout, sitemap, LLMs.txt, companion blog post, and landing OG image (completed 2026-03-27)
 
 </details>
+
+### v1.19 Claude Code Guide Refresh (In Progress)
+
+**Milestone Goal:** Update the existing 11-chapter Claude Code guide with 6+ months of new features, add 3 new chapters (Plugins, Agent SDK, Computer Use), publish dedicated cheatsheet page with updated SVGs, write companion blog post, and update site integration
+
+- [ ] **Phase 111: High-Impact Chapter Rewrites** - Rewrite Ch3, Ch4, Ch7, Ch8, Ch11 with major feature additions plus deprecation sweep
+- [ ] **Phase 112: New Chapters** - Author Plugins, Agent SDK, and Computer Use chapters with guide.json registration and OG images
+- [ ] **Phase 113: Lower-Impact Chapter Updates** - Update Ch1, Ch2, Ch5, Ch6, Ch9, Ch10 with incremental feature additions
+- [ ] **Phase 114: Cheatsheet** - Update both SVG cheatsheets and build dedicated cheatsheet page with downloads
+- [ ] **Phase 115: Blog Post** - New companion blog post covering guide updates plus callout banner on old post
+- [ ] **Phase 116: Site Integration** - LLMs.txt, guide landing page, sitemap, cross-reference audit, lastVerified bumps, Lighthouse
+
+## Phase Details
+
+### Phase 111: High-Impact Chapter Rewrites
+**Goal**: Readers of the five most-changed chapters see accurate, current content reflecting 6+ months of Claude Code evolution
+**Depends on**: Nothing (first phase)
+**Requirements**: UPD-03, UPD-04, UPD-07, UPD-08, UPD-11, UPD-13
+**Success Criteria** (what must be TRUE):
+  1. Ch3 (Models & Costs) documents 1M Opus context, restructured effort levels, and the /effort command
+  2. Ch4 (Environment) documents new env vars, managed-settings.d/ directory, --bare flag, and NO_FLICKER
+  3. Ch7 (Skills) documents paths frontmatter, lifecycle/compaction behavior, and relationship to the new Plugins system
+  4. Ch8 (Hooks) documents all 26 hook events (was 18), the conditional `if` field, PermissionDenied event, and defer behavior
+  5. Ch11 (Security) documents Auto Mode, all 6 permission modes, and Bash hardening improvements
+**Plans**: TBD
+
+### Phase 112: New Chapters
+**Goal**: Three new guide chapters cover Plugins, Agent SDK, and Computer Use as complete, self-contained learning resources integrated into the guide structure
+**Depends on**: Phase 111 (new chapters cross-reference updated content in Ch7 Skills, Ch8 Hooks, Ch11 Security)
+**Requirements**: NEW-01, NEW-02, NEW-03, NEW-04, NEW-05
+**Success Criteria** (what must be TRUE):
+  1. Plugins chapter covers manifest format, marketplace, bin/ executables, userConfig, and lifecycle with working code examples
+  2. Agent SDK chapter covers both Python and TypeScript APIs and explains the rename from Claude Code SDK
+  3. Computer Use chapter covers CLI and Desktop GUI control, per-app approval flow, and the safety model
+  4. All three chapters appear in guide.json with proper slugs, descriptions, and ordering
+  5. All three chapters have build-time OG images following the existing guide pattern
+**Plans**: TBD
+
+### Phase 113: Lower-Impact Chapter Updates
+**Goal**: The remaining six chapters reflect current Claude Code behavior with all incremental feature additions documented
+**Depends on**: Phase 111 (deprecation sweep in Phase 111 informs cross-references in these chapters)
+**Requirements**: UPD-01, UPD-02, UPD-05, UPD-06, UPD-09, UPD-10
+**Success Criteria** (what must be TRUE):
+  1. Ch1 (Introduction) documents Desktop App, web surfaces, /powerup command, and current install methods
+  2. Ch2 (Context Management) documents autoMemoryDirectory and PostCompact hook
+  3. Ch5 (Remote & Headless) documents Remote Control server mode, Channels, --bare flag, and scheduled tasks
+  4. Ch6 (MCP) documents elicitation and per-tool result-size caps
+  5. Ch9 (Worktrees & Subagents) documents memory, background mode, initialPrompt, and sparsePaths
+**Plans**: TBD
+
+### Phase 114: Cheatsheet
+**Goal**: Users can view, download, and share updated Claude Code cheatsheets from a dedicated page on the site
+**Depends on**: Phase 113 (cheatsheet content must reflect finalized chapter content including all commands and shortcuts)
+**Requirements**: CS-01, CS-02, CS-03, CS-04, CS-05, CS-06
+**Success Criteria** (what must be TRUE):
+  1. Both SVG cheatsheets (interactive and print versions) include Auto Mode, /agents, new hook events, and all other new commands/shortcuts
+  2. Dedicated cheatsheet page renders both SVGs inline at /guides/claude-code/cheatsheet/
+  3. Download buttons serve both SVG files directly
+  4. Cheatsheet page has OG image, JSON-LD structured data, and is linked from the guide landing page Resources section
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 115: Blog Post
+**Goal**: A new blog post announces the guide refresh and drives traffic from search and existing readers to the updated content
+**Depends on**: Phase 114 (blog post cross-links to finalized chapters and cheatsheet URL)
+**Requirements**: BLOG-01, BLOG-02, BLOG-03, BLOG-04
+**Success Criteria** (what must be TRUE):
+  1. New blog post covers What's New highlights from the guide refresh with specific feature callouts
+  2. New blog post includes cross-links to updated guide chapters and the cheatsheet page
+  3. Old blog post "The Context Window Is the Product" displays an update callout banner linking to the new post
+  4. New blog post has a branded OG image
+**Plans**: TBD
+
+### Phase 116: Site Integration
+**Goal**: All new and updated pages are discoverable, indexed, cross-referenced, and pass quality gates
+**Depends on**: Phase 115 (all content must be finalized before integration sweep)
+**Requirements**: UPD-12, UPD-14, SITE-01, SITE-02, SITE-03, SITE-04, SITE-05
+**Success Criteria** (what must be TRUE):
+  1. LLMs.txt entries exist for the cheatsheet page and all three new chapters
+  2. guide.json metadata reflects the updated chapter count (14) and descriptions
+  3. Guide landing page shows the new chapter count and includes the cheatsheet link
+  4. All new pages appear in the sitemap and all 30+ cross-references across 14 chapters are verified intact
+  5. Lighthouse scores 90+ on all updated and new pages
+**Plans**: TBD
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 111. High-Impact Chapter Rewrites | 0/TBD | Not started | - |
+| 112. New Chapters | 0/TBD | Not started | - |
+| 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
+| 114. Cheatsheet | 0/TBD | Not started | - |
+| 115. Blog Post | 0/TBD | Not started | - |
+| 116. Site Integration | 0/TBD | Not started | - |

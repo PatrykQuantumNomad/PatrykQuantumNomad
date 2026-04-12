@@ -81,46 +81,46 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UPD-01 | — | Pending |
-| UPD-02 | — | Pending |
-| UPD-03 | — | Pending |
-| UPD-04 | — | Pending |
-| UPD-05 | — | Pending |
-| UPD-06 | — | Pending |
-| UPD-07 | — | Pending |
-| UPD-08 | — | Pending |
-| UPD-09 | — | Pending |
-| UPD-10 | — | Pending |
-| UPD-11 | — | Pending |
-| UPD-12 | — | Pending |
-| UPD-13 | — | Pending |
-| UPD-14 | — | Pending |
-| NEW-01 | — | Pending |
-| NEW-02 | — | Pending |
-| NEW-03 | — | Pending |
-| NEW-04 | — | Pending |
-| NEW-05 | — | Pending |
-| CS-01 | — | Pending |
-| CS-02 | — | Pending |
-| CS-03 | — | Pending |
-| CS-04 | — | Pending |
-| CS-05 | — | Pending |
-| CS-06 | — | Pending |
-| BLOG-01 | — | Pending |
-| BLOG-02 | — | Pending |
-| BLOG-03 | — | Pending |
-| BLOG-04 | — | Pending |
-| SITE-01 | — | Pending |
-| SITE-02 | — | Pending |
-| SITE-03 | — | Pending |
-| SITE-04 | — | Pending |
-| SITE-05 | — | Pending |
+| UPD-01 | Phase 113 | Pending |
+| UPD-02 | Phase 113 | Pending |
+| UPD-03 | Phase 111 | Pending |
+| UPD-04 | Phase 111 | Pending |
+| UPD-05 | Phase 113 | Pending |
+| UPD-06 | Phase 113 | Pending |
+| UPD-07 | Phase 111 | Pending |
+| UPD-08 | Phase 111 | Pending |
+| UPD-09 | Phase 113 | Pending |
+| UPD-10 | Phase 113 | Pending |
+| UPD-11 | Phase 111 | Pending |
+| UPD-12 | Phase 116 | Pending |
+| UPD-13 | Phase 111 | Pending |
+| UPD-14 | Phase 116 | Pending |
+| NEW-01 | Phase 112 | Pending |
+| NEW-02 | Phase 112 | Pending |
+| NEW-03 | Phase 112 | Pending |
+| NEW-04 | Phase 112 | Pending |
+| NEW-05 | Phase 112 | Pending |
+| CS-01 | Phase 114 | Pending |
+| CS-02 | Phase 114 | Pending |
+| CS-03 | Phase 114 | Pending |
+| CS-04 | Phase 114 | Pending |
+| CS-05 | Phase 114 | Pending |
+| CS-06 | Phase 114 | Pending |
+| BLOG-01 | Phase 115 | Pending |
+| BLOG-02 | Phase 115 | Pending |
+| BLOG-03 | Phase 115 | Pending |
+| BLOG-04 | Phase 115 | Pending |
+| SITE-01 | Phase 116 | Pending |
+| SITE-02 | Phase 116 | Pending |
+| SITE-03 | Phase 116 | Pending |
+| SITE-04 | Phase 116 | Pending |
+| SITE-05 | Phase 116 | Pending |
 
 **Coverage:**
 - v1.19 requirements: 34 total
-- Mapped to phases: 0
-- Unmapped: 34
+- Mapped to phases: 34
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation*
