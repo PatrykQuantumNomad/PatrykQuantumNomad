@@ -14,15 +14,15 @@
     "chapters": [
       { "slug": "introduction", "title": "Introduction & Getting Started", "description": "Learn how Claude Code's agentic loop works, install on macOS/Linux/Windows, explore the core tool set, and complete your first AI-assisted coding session." },
       { "slug": "context-management", "title": "Project Context & Memory", "description": "Master the CLAUDE.md hierarchy, auto-memory system, path-specific rules, and context window management to get dramatically better results from Claude Code." },
-      { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Choose between Sonnet, Opus, and Haiku for cost-effective AI coding. Configure effort levels, track spending, and set up the deny/ask/allow permission system." },
-      { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configure Claude Code's four-tier settings hierarchy, enable macOS Seatbelt or Linux sandbox isolation, and customize the terminal status line." },
+      { "slug": "models-and-costs", "title": "Models, Cost Economics & Permissions", "description": "Choose between Sonnet, Opus, and Haiku models with 1M extended context. Configure effort levels with /effort, track spending, and set up the 6-mode permission system including Auto Mode." },
+      { "slug": "environment", "title": "Environment Sandboxing & Customization", "description": "Configure Claude Code's four-tier settings hierarchy with managed-settings.d/ policy fragments, enable sandbox isolation, and customize the terminal display with --bare mode and flicker-free rendering." },
       { "slug": "remote-and-headless", "title": "Remote Control & Headless Automation", "description": "Run Claude Code from any device via remote control, automate with headless mode in CI/CD pipelines, and schedule recurring tasks with cron." },
       { "slug": "mcp", "title": "Model Context Protocol", "description": "Connect Claude Code to external tools — databases, APIs, ticketing systems — using the Model Context Protocol with stdio, HTTP, and OAuth authentication." },
       { "slug": "custom-skills", "title": "Custom Skills", "description": "Build reusable SKILL.md files with conditional path-based activation, content lifecycle management across compaction, and distribution through the Plugins system." },
       { "slug": "hooks", "title": "Hooks & Lifecycle Automation", "description": "Automate quality enforcement with 26 lifecycle events, conditional if-field filtering, the PermissionDenied event for auto mode integration, and defer decisions for SDK workflows." },
       { "slug": "worktrees", "title": "Git Worktrees & Subagent Delegation", "description": "Parallelize development across isolated git worktree branches using built-in and custom subagents with AGENT.md persona definitions." },
       { "slug": "agent-teams", "title": "Agent Teams & Advanced Orchestration", "description": "Coordinate multiple Claude Code instances on shared task lists with dependency tracking and peer-to-peer communication (research preview)." },
-      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Deploy Claude Code at organizational scale with managed settings, permission governance, sandbox enforcement, and OpenTelemetry audit compliance." }
+      { "slug": "security", "title": "Security & Enterprise Administration", "description": "Deploy Claude Code at organizational scale with Auto Mode governance, 6 permission modes, managed-settings.d/ policies, sandbox enforcement, Bash hardening, and audit compliance." }
     ]
   }
 ]
