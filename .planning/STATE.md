@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: executing
-stopped_at: Completed 111-05-PLAN.md (Ch11 Security rewrite)
-last_updated: "2026-04-12T12:47:00.409Z"
+stopped_at: Completed 111-04-PLAN.md
+last_updated: "2026-04-12T12:50:34.017Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 111 of 116 (High-Impact Chapter Rewrites)
-Plan: 5 of 6 (Ch4 Environment Rewrite) -- COMPLETE
+Plan: 6 of 6 (Ch4 Environment Rewrite) -- COMPLETE
 Status: Ready to execute
 Last activity: 2026-04-12
 
@@ -50,6 +50,7 @@ Progress: [██░░░░░░░░] 17%
 | Phase 111 P01 | 5m 36s | 2 tasks | 1 files |
 | Phase 111 P03 | 5min | 2 tasks | 2 files |
 | Phase 111 P05 | 5min | 2 tasks | 1 files |
+| Phase 111 P04 | 9m | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 111]: Ch7 Skills: guide.json description synced to prevent stale landing page metadata
 - [Phase 111]: Ch11 Auto Mode Governance placed after Permission Governance and before Hook Governance as standalone section
 - [Phase 111]: Ch11 added standalone Skill Governance section for disableSkillShellExecution (new section not in original)
+- [Phase 111]: Ch8 restructured around full 26-event reference table with conditional if field and defer decision
 
 ### Pending Todos
 
@@ -87,7 +89,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T12:47:00.407Z
-Stopped at: Completed 111-05-PLAN.md (Ch11 Security rewrite)
+Last session: 2026-04-12T12:50:34.014Z
+Stopped at: Completed 111-04-PLAN.md
 Resume file: None
 Next: Execute 111-03-PLAN.md (Ch7 Skills rewrite)
