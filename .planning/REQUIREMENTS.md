@@ -11,17 +11,17 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 
 - [ ] **UPD-01**: Ch1 Introduction updated with new surfaces (Desktop App, web), /powerup, install methods
 - [ ] **UPD-02**: Ch2 Context Management updated with autoMemoryDirectory, PostCompact hook
-- [ ] **UPD-03**: Ch3 Models & Costs updated with 1M Opus context, effort level restructure, /effort command
+- [x] **UPD-03**: Ch3 Models & Costs updated with 1M Opus context, effort level restructure, /effort command
 - [x] **UPD-04**: Ch4 Environment updated with new env vars, managed-settings.d/, --bare, NO_FLICKER
 - [ ] **UPD-05**: Ch5 Remote & Headless updated with Remote Control server mode, Channels, --bare, scheduled tasks
 - [ ] **UPD-06**: Ch6 MCP updated with elicitation, per-tool result-size caps
-- [ ] **UPD-07**: Ch7 Skills updated with paths frontmatter, lifecycle/compaction, Plugins relationship
-- [ ] **UPD-08**: Ch8 Hooks updated with 26 events (was 18), conditional `if` field, PermissionDenied, defer
+- [x] **UPD-07**: Ch7 Skills updated with paths frontmatter, lifecycle/compaction, Plugins relationship
+- [x] **UPD-08**: Ch8 Hooks updated with 26 events (was 18), conditional `if` field, PermissionDenied, defer
 - [ ] **UPD-09**: Ch9 Worktrees & Subagents updated with memory, background, initialPrompt, sparsePaths
 - [ ] **UPD-10**: Ch10 Agent Teams updated with /agents UI, initialPrompt, dynamic agents
-- [ ] **UPD-11**: Ch11 Security updated with Auto Mode, 6 permission modes, Bash hardening
+- [x] **UPD-11**: Ch11 Security updated with Auto Mode, 6 permission modes, Bash hardening
 - [ ] **UPD-12**: All updated chapters have bumped `lastVerified` and `updatedDate` frontmatter
-- [ ] **UPD-13**: Deprecations reflected across all chapters (/tag removed, /vim removed, effort default changed, thinking summaries default)
+- [x] **UPD-13**: Deprecations reflected across all chapters (/tag removed, /vim removed, effort default changed, thinking summaries default)
 - [ ] **UPD-14**: Cross-references verified across all 11 chapters (30+ bidirectional links intact)
 
 ### New Chapters
@@ -83,17 +83,17 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 |-------------|-------|--------|
 | UPD-01 | Phase 113 | Pending |
 | UPD-02 | Phase 113 | Pending |
-| UPD-03 | Phase 111 | Pending |
+| UPD-03 | Phase 111 | Complete |
 | UPD-04 | Phase 111 | Complete |
 | UPD-05 | Phase 113 | Pending |
 | UPD-06 | Phase 113 | Pending |
-| UPD-07 | Phase 111 | Pending |
-| UPD-08 | Phase 111 | Pending |
+| UPD-07 | Phase 111 | Complete |
+| UPD-08 | Phase 111 | Complete |
 | UPD-09 | Phase 113 | Pending |
 | UPD-10 | Phase 113 | Pending |
-| UPD-11 | Phase 111 | Pending |
+| UPD-11 | Phase 111 | Complete |
 | UPD-12 | Phase 116 | Pending |
-| UPD-13 | Phase 111 | Pending |
+| UPD-13 | Phase 111 | Complete |
 | UPD-14 | Phase 116 | Pending |
 | NEW-01 | Phase 112 | Pending |
 | NEW-02 | Phase 112 | Pending |
