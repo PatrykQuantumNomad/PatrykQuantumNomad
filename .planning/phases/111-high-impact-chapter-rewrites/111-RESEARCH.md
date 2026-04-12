@@ -415,27 +415,30 @@ Rationale: Forward references to not-yet-written chapters use text-only mentions
 - Old hook `decision`/`reason` top-level fields: replaced by `hookSpecificOutput`
 - Thinking summaries on by default: now off by default in interactive sessions
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **HookLifecycleDiagram SVG update scope**
+1. **HookLifecycleDiagram SVG update scope** -- RESOLVED
    - What we know: The SVG diagram generator in `src/lib/guides/svg-diagrams/hook-lifecycle.ts` was built for 18 events. Now there are 26.
    - What's unclear: Whether the SVG needs a complete regeneration or can accommodate 8 more nodes without layout breakage.
    - Recommendation: Include a diagram update task in the Ch8 plan. Read the generator source, assess whether adding nodes is straightforward or requires layout restructuring. If complex, defer diagram update to a separate plan and update only the prose event table in this phase.
+   - **Resolution:** Plan 04 Task 1 reads the SVG generator source and assesses layout feasibility. Task 2 updates the generator. The read-first/assess approach handles both outcomes (simple add vs. layout restructure).
 
-2. **HookEventVisualizer React component data**
+2. **HookEventVisualizer React component data** -- RESOLVED
    - What we know: The interactive component has hard-coded event data for the original 18 events.
    - What's unclear: The exact data structure inside the component and how much work adding 8 events requires.
    - Recommendation: The Ch8 plan must include updating this component's data. Read the component source as the first task in the plan.
+   - **Resolution:** Plan 04 Task 1 reads the component source to discover the data structure. Task 2 updates the component data for all 26 events. Both tasks are planned.
 
-3. **PermissionFlowExplorer Auto Mode integration**
+3. **PermissionFlowExplorer Auto Mode integration** -- RESOLVED
    - What we know: The interactive permission flow explorer in Ch3 currently shows the deny/ask/allow evaluation chain.
    - What's unclear: Whether Auto Mode should appear as a new path in this explorer or is orthogonal to it.
    - Recommendation: Auto Mode is a permission *mode*, not a permission *rule*. The explorer shows rule evaluation, which is the same in auto mode. Auto mode just changes which tool calls reach the rule evaluator vs. which are auto-decided by the classifier. The explorer likely does not need updating, but verify by reading the component source.
+   - **Resolution:** Plan 01 Task 1 reads the PermissionFlowExplorer source and confirms whether Auto Mode affects it. Auto Mode is orthogonal to rule evaluation, so the component likely needs no changes -- but the read-first step verifies this.
 
-4. **Exact effort default current value**
-   - What we know: The feature research mentions "effort default changed" (UPD-13) but does not specify the new default.
+4. **Exact effort default current value** -- RESOLVED
+   - What we know: The feature research mentions "effort default changed" (UPD-13) but does not specify the new default. The feature research file does not contain this information.
    - What's unclear: Whether medium is still the default or something else.
-   - Recommendation: The executor should verify the current default by checking official docs before writing the effort section. Flag as needing verification during execution.
+   - **Resolution:** The executor must verify the current default by checking the official Claude Code docs at https://code.claude.com/docs/en/model-config before writing the effort section. If the official docs page cannot be fetched, test locally by running `claude --help` or checking `claude /effort` output. Do NOT assume medium is still the default without verification. Plan 01 Task 2 action includes an explicit instruction to verify the current default.
 
 ## Sources
 
