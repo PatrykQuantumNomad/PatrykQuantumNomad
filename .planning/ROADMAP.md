@@ -63,7 +63,14 @@
   3. Ch7 (Skills) documents paths frontmatter, lifecycle/compaction behavior, and relationship to the new Plugins system
   4. Ch8 (Hooks) documents all 26 hook events (was 18), the conditional `if` field, PermissionDenied event, and defer behavior
   5. Ch11 (Security) documents Auto Mode, all 6 permission modes, and Bash hardening improvements
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 111-01-PLAN.md -- Ch3 Models & Costs rewrite (Auto Mode, 1M context, /effort, 6 permission modes)
+- [ ] 111-02-PLAN.md -- Ch4 Environment rewrite (managed-settings.d/, --bare, NO_FLICKER)
+- [ ] 111-03-PLAN.md -- Ch7 Skills rewrite (paths/shell frontmatter, lifecycle, Plugins mention)
+- [ ] 111-04-PLAN.md -- Ch8 Hooks rewrite + component updates (26 events, if field, defer, PermissionDenied)
+- [ ] 111-05-PLAN.md -- Ch11 Security rewrite (Auto Mode governance, Bash hardening, protected paths)
+- [ ] 111-06-PLAN.md -- guide.json updates + cross-chapter deprecation sweep
 
 ### Phase 112: New Chapters
 **Goal**: Three new guide chapters cover Plugins, Agent SDK, and Computer Use as complete, self-contained learning resources integrated into the guide structure
