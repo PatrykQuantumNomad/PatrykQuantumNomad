@@ -240,6 +240,7 @@ export async function GET(context: APIContext) {
     ...claudeCodePagesList
       .sort((a, b) => a.data.order - b.data.order)
       .map(p => `- [${p.data.title}](https://patrykgolabek.dev${guidePageUrl(claudeCodeMeta.data.slug, p.data.slug)}): ${p.data.description}`),
+    '- [Claude Code Cheatsheet](https://patrykgolabek.dev/guides/claude-code/cheatsheet/): Every keyboard shortcut, slash command, and mode toggle for Claude Code. Downloadable SVG cheatsheets for interactive and print use.',
     '',
     '## AI Landscape Explorer',
     '',

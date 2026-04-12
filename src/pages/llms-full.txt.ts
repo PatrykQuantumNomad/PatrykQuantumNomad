@@ -400,6 +400,9 @@ export async function GET(context: APIContext) {
     lines.push(`  URL: https://patrykgolabek.dev${guidePageUrl(claudeCodeMeta.data.slug, page.data.slug)}`);
     lines.push(`  Description: ${page.data.description}`);
   }
+  lines.push('- Claude Code Cheatsheet');
+  lines.push('  URL: https://patrykgolabek.dev/guides/claude-code/cheatsheet/');
+  lines.push('  Description: Every keyboard shortcut, slash command, and mode toggle for Claude Code interactive sessions. Download printable SVG cheatsheets for interactive (dark) and print-friendly (light) versions.');
   lines.push('');
 
   // AI Landscape Explorer section
