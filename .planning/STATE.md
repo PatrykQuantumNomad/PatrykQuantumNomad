@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: verifying
-stopped_at: Phase 112 complete — verification passed (human_needed)
-last_updated: "2026-04-12T14:34:21.316Z"
+stopped_at: Phase 113 complete — all 7 plans executed
+last_updated: "2026-04-12T17:40:00.000Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 3
+  total_plans: 18
+  completed_plans: 18
   percent: 100
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 112 of 116 (New Chapters) -- COMPLETE
-Plan: 4 of 4 (Guide Registration) -- COMPLETE
-Status: Phase complete — verification passed (human_needed for 5 items)
+Phase: 113 of 116 (Lower-Impact Chapter Updates) -- COMPLETE
+Plan: 7 of 7 (guide.json + verification sweep) -- COMPLETE
+Status: Phase complete — all plans executed, verification pending
 Last activity: 2026-04-12
 
-Progress: [███░░░░░░░] 33%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -57,6 +57,13 @@ Progress: [███░░░░░░░] 33%
 | Phase 112 P02 | 3min | 2 tasks | 1 files |
 | Phase 112 P03 | 3m 15s | 2 tasks | 1 files |
 | Phase 112 P04 | 2m 29s | 2 tasks | 4 files |
+| Phase 113 P01 | 3min | 2 tasks | 1 files |
+| Phase 113 P02 | 3min | 2 tasks | 1 files |
+| Phase 113 P03 | 4min | 2 tasks | 1 files |
+| Phase 113 P04 | 3min | 2 tasks | 1 files |
+| Phase 113 P05 | 4min | 2 tasks | 1 files |
+| Phase 113 P06 | 4min | 2 tasks | 1 files |
+| Phase 113 P07 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +89,12 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 112]: Ch14 Computer Use: safety-first chapter ordering with Callout.astro component (first guide chapter to use it)
 - [Phase 112]: Blog post left at '11 chapters' intentionally -- Phase 115 scope
 - [Phase 112]: guide.json description expanded with plugins, Agent SDK, computer use keywords for SEO
+- [Phase 113]: All 6 chapters use ADDITIVE approach — existing structure preserved, new content inserted into natural locations
+- [Phase 113]: Ch5 Channels section kept to 68 lines with Research Preview blockquote (matching Ch10 pattern)
+- [Phase 113]: Ch5 scheduled task expiry corrected from 3 to 7 days per current docs (auto-fix Rule 1)
+- [Phase 113]: Ch9 memory section expanded with storage paths, MEMORY.md entrypoint, topic files, 200-line/25KB limit
+- [Phase 113]: guide.json descriptions updated for Ch5 (Channels, server mode) and Ch9 (memory, sparsePaths) — Ch1/Ch2/Ch6/Ch10 verified adequate
+- [Phase 113]: Cross-chapter sweep verified all Ch12-14 references are real hyperlinks across all 6 chapters
 
 ### Pending Todos
 
@@ -101,7 +114,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T14:34:21.313Z
-Stopped at: Phase 112 complete (all 4 plans executed, verification passed with human_needed)
+Last session: 2026-04-12T17:40:00.000Z
+Stopped at: Phase 113 complete (all 7 plans executed, verification pending)
 Resume file: None
-Next: Phase 113 (Lower-Impact Chapter Updates)
+Next: Phase 113 verification, then Phase 114 (Cheatsheet)
