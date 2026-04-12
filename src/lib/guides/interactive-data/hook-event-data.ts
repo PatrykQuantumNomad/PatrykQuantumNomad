@@ -1,7 +1,7 @@
 /**
  * Hook event data for the interactive Hook Event Visualizer (INTV-02).
  *
- * Defines 18 hook events across 3 categories (Session, Loop, Standalone Async)
+ * Defines 26 hook events across 3 categories (Session, Loop, Standalone Async)
  * with node/edge definitions for React Flow and detail content for the
  * click-to-reveal panel.
  *
@@ -47,13 +47,13 @@ export const rawNodes: Node[] = [
     id: 'loop-events',
     type: 'category',
     position: pos,
-    data: { label: 'Loop Events', count: 12 },
+    data: { label: 'Loop Events', count: 17 },
   },
   {
     id: 'standalone-events',
     type: 'category',
     position: pos,
-    data: { label: 'Standalone Async Events', count: 4 },
+    data: { label: 'Standalone Async Events', count: 7 },
   },
 
   // Session Events (2)
@@ -143,8 +143,26 @@ export const rawNodes: Node[] = [
     position: pos,
     data: { label: 'PreCompact', category: 'loop' },
   },
+  {
+    id: 'PermissionDenied',
+    type: 'event',
+    position: pos,
+    data: { label: 'PermissionDenied', category: 'loop' },
+  },
+  {
+    id: 'Elicitation',
+    type: 'event',
+    position: pos,
+    data: { label: 'Elicitation', category: 'loop' },
+  },
+  {
+    id: 'ElicitationResult',
+    type: 'event',
+    position: pos,
+    data: { label: 'ElicitationResult', category: 'loop' },
+  },
 
-  // Standalone Async Events (4)
+  // Standalone Async Events (7)
   {
     id: 'InstructionsLoaded',
     type: 'event',
@@ -168,6 +186,24 @@ export const rawNodes: Node[] = [
     type: 'event',
     position: pos,
     data: { label: 'WorktreeRemove', category: 'standalone' },
+  },
+  {
+    id: 'CwdChanged',
+    type: 'event',
+    position: pos,
+    data: { label: 'CwdChanged', category: 'standalone' },
+  },
+  {
+    id: 'FileChanged',
+    type: 'event',
+    position: pos,
+    data: { label: 'FileChanged', category: 'standalone' },
+  },
+  {
+    id: 'PermissionDeniedAsync',
+    type: 'event',
+    position: pos,
+    data: { label: 'PermissionDenied', category: 'standalone' },
   },
 ];
 
@@ -194,18 +230,24 @@ export const rawEdges: Edge[] = [
   { id: 'e-loop-9-10', source: 'Stop', target: 'TeammateIdle', markerEnd, style: edgeStyle },
   { id: 'e-loop-10-11', source: 'TeammateIdle', target: 'TaskCompleted', markerEnd, style: edgeStyle },
   { id: 'e-loop-11-12', source: 'TaskCompleted', target: 'PreCompact', markerEnd, style: edgeStyle },
+  { id: 'e-loop-12-13', source: 'PreCompact', target: 'PermissionDenied', markerEnd, style: edgeStyle },
+  { id: 'e-loop-13-14', source: 'PermissionDenied', target: 'Elicitation', markerEnd, style: edgeStyle },
+  { id: 'e-loop-14-15', source: 'Elicitation', target: 'ElicitationResult', markerEnd, style: edgeStyle },
 
-  // Standalone Events: category -> sequential flow through all 4
+  // Standalone Events: category -> sequential flow through all 7
   { id: 'e-standalone-start', source: 'standalone-events', target: 'InstructionsLoaded', markerEnd, style: edgeStyle },
   { id: 'e-standalone-1-2', source: 'InstructionsLoaded', target: 'ConfigChange', markerEnd, style: edgeStyle },
   { id: 'e-standalone-2-3', source: 'ConfigChange', target: 'WorktreeCreate', markerEnd, style: edgeStyle },
   { id: 'e-standalone-3-4', source: 'WorktreeCreate', target: 'WorktreeRemove', markerEnd, style: edgeStyle },
+  { id: 'e-standalone-4-5', source: 'WorktreeRemove', target: 'CwdChanged', markerEnd, style: edgeStyle },
+  { id: 'e-standalone-5-6', source: 'CwdChanged', target: 'FileChanged', markerEnd, style: edgeStyle },
+  { id: 'e-standalone-6-7', source: 'FileChanged', target: 'PermissionDeniedAsync', markerEnd, style: edgeStyle },
 ];
 
 // ---- Detail Content ----
 
 /**
- * Detail content for each of the 18 hook events.
+ * Detail content for each of the 26 hook events.
  * Shown in the HookDetailPanel when an event node is clicked.
  *
  * All events receive session context (session_id, session_type, transcript_path).
@@ -693,6 +735,173 @@ export const detailContent: Record<string, EventDetail> = {
             {
               hooks: [
                 { type: 'command', command: 'echo \"Worktree removed: $WORKTREE_PATH ($BRANCH)\"' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  PermissionDenied: {
+    title: 'PermissionDenied',
+    description:
+      'Fires when a tool call is denied by the permission system, including auto mode classifier denials. Use this hook to log denied actions, alert administrators, or implement retry logic for auto mode sessions.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'tool_name', value: 'Name of the tool that was denied' },
+      { key: 'tool_input', value: 'The input/arguments that were blocked' },
+      { key: 'deny_reason', value: 'Explanation of why the action was denied' },
+      { key: 'permission_mode', value: 'Active permission mode (e.g., auto, default)' },
+      { key: 'retry', value: 'Whether the action can be retried (true in auto mode)' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          PermissionDenied: [
+            {
+              hooks: [
+                { type: 'command', command: '.claude/hooks/log-denied-actions.sh' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  Elicitation: {
+    title: 'Elicitation',
+    description:
+      'Fires before an MCP elicitation prompt is shown to the user. Use this hook to log elicitation requests, auto-fill known values, or validate the elicitation schema before presenting it.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'server_name', value: 'Name of the MCP server requesting elicitation' },
+      { key: 'message', value: 'Elicitation prompt message' },
+      { key: 'schema', value: 'JSON Schema describing the expected response format' },
+      { key: 'session_id', value: 'Current session identifier' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          Elicitation: [
+            {
+              hooks: [
+                { type: 'command', command: 'echo \"Elicitation from: $SERVER_NAME\" >> ~/.claude/elicitations.log' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  ElicitationResult: {
+    title: 'ElicitationResult',
+    description:
+      'Fires after the user responds to an MCP elicitation prompt. Use this hook to log user responses, validate answers, or trigger follow-up workflows based on the elicitation outcome.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'server_name', value: 'Name of the MCP server that requested elicitation' },
+      { key: 'action', value: 'User action (submit, cancel, dismiss)' },
+      { key: 'response', value: 'User response data matching the elicitation schema' },
+      { key: 'session_id', value: 'Current session identifier' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          ElicitationResult: [
+            {
+              hooks: [
+                { type: 'command', command: 'echo \"Elicitation result: $ACTION\" >> ~/.claude/elicitations.log' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  CwdChanged: {
+    title: 'CwdChanged',
+    description:
+      'Fires when the working directory changes during a session. Use this hook to update environment variables, reload project-specific configuration, or log directory transitions.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'old_cwd', value: 'Previous working directory path' },
+      { key: 'new_cwd', value: 'New working directory path' },
+      { key: 'session_id', value: 'Current session identifier' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          CwdChanged: [
+            {
+              hooks: [
+                { type: 'command', command: 'echo \"Directory changed: $OLD_CWD -> $NEW_CWD\"' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  FileChanged: {
+    title: 'FileChanged',
+    description:
+      'Fires when file system changes are detected in the project. Use this hook to trigger rebuilds, update caches, or notify external systems about file modifications.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'file_path', value: 'Path to the changed file' },
+      { key: 'change_type', value: 'Type of change (created, modified, deleted)' },
+      { key: 'session_id', value: 'Current session identifier' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          FileChanged: [
+            {
+              hooks: [
+                { type: 'command', command: 'echo \"File changed: $FILE_PATH ($CHANGE_TYPE)\"' },
+              ],
+            },
+          ],
+        },
+      },
+      null,
+      2,
+    ),
+  },
+
+  PermissionDeniedAsync: {
+    title: 'PermissionDenied',
+    description:
+      'Fires asynchronously when a tool call is denied by the permission system. This standalone variant allows external integrations to track denied actions without blocking the main loop.',
+    handlerTypes: ['command', 'HTTP'],
+    fields: [
+      { key: 'tool_name', value: 'Name of the tool that was denied' },
+      { key: 'tool_input', value: 'The input/arguments that were blocked' },
+      { key: 'deny_reason', value: 'Explanation of why the action was denied' },
+      { key: 'permission_mode', value: 'Active permission mode (e.g., auto, default)' },
+    ],
+    configExample: JSON.stringify(
+      {
+        hooks: {
+          PermissionDenied: [
+            {
+              hooks: [
+                { type: 'http', url: 'https://audit.example.com/denied-actions' },
               ],
             },
           ],

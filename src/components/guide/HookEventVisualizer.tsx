@@ -1,7 +1,7 @@
 /**
  * Interactive hook event visualizer using React Flow with dagre layout.
  *
- * Renders 18 hook events across 3 categories (Session, Loop, Standalone Async)
+ * Renders 26 hook events across 3 categories (Session, Loop, Standalone Async)
  * with click-to-reveal detail panel showing handler types, payload fields,
  * and configuration examples. PreToolUse is visually distinguished with a
  * CAN BLOCK badge (INTV-02).

@@ -1,9 +1,9 @@
 /**
  * DIAG-02: Hook Lifecycle Event Flow
  *
- * Generates a build-time SVG showing all 18 hook lifecycle events
- * grouped into three categories: Session Events (2), Loop Events (12),
- * and Standalone Async Events (4). PreToolUse is highlighted with a
+ * Generates a build-time SVG showing all 26 hook lifecycle events
+ * grouped into three categories: Session Events (2), Loop Events (17),
+ * and Standalone Async Events (7). PreToolUse is highlighted with a
  * "CAN BLOCK" indicator.
  */
 
@@ -60,12 +60,12 @@ function eventBox(
 
 /** Generate the Hook Lifecycle event flow SVG diagram */
 export function generateHookLifecycle(): string {
-  const config: DiagramConfig = { width: 720, height: 820, fontFamily: "'DM Sans', sans-serif" };
+  const config: DiagramConfig = { width: 720, height: 1020, fontFamily: "'DM Sans', sans-serif" };
 
   const parts: string[] = [];
 
   // SVG open
-  parts.push(diagramSvgOpen(config, 'Hook lifecycle: 18 event types across session, loop, and async categories'));
+  parts.push(diagramSvgOpen(config, 'Hook lifecycle: 26 event types across session, loop, and async categories'));
 
   // Arrow marker
   parts.push(arrowMarkerDef(MARKER_ID));
@@ -99,6 +99,7 @@ export function generateHookLifecycle(): string {
     { name: 'UserPromptSubmit', highlight: false },
     { name: 'PreToolUse', highlight: true },
     { name: 'PermissionRequest', highlight: false },
+    { name: 'PermissionDenied', highlight: false },
     { name: 'PostToolUse', highlight: false },
     { name: 'PostToolUseFailure', highlight: false },
     { name: 'Notification', highlight: false },
@@ -108,6 +109,8 @@ export function generateHookLifecycle(): string {
     { name: 'TeammateIdle', highlight: false },
     { name: 'TaskCompleted', highlight: false },
     { name: 'PreCompact', highlight: false },
+    { name: 'Elicitation', highlight: false },
+    { name: 'ElicitationResult', highlight: false },
   ];
 
   const loopBoxH = loopEvents.length * eventSpacing + 40;
@@ -163,6 +166,9 @@ export function generateHookLifecycle(): string {
     'ConfigChange',
     'WorktreeCreate',
     'WorktreeRemove',
+    'CwdChanged',
+    'FileChanged',
+    'PermissionDenied',
   ];
 
   const asyncBoxH = asyncEvents.length * eventSpacing + 40;
