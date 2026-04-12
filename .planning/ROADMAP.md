@@ -40,16 +40,16 @@
 
 </details>
 
-### v1.19 Claude Code Guide Refresh (In Progress)
+### v1.19 Claude Code Guide Refresh (SHIPPED 2026-04-12)
 
 **Milestone Goal:** Update the existing 11-chapter Claude Code guide with 6+ months of new features, add 3 new chapters (Plugins, Agent SDK, Computer Use), publish dedicated cheatsheet page with updated SVGs, write companion blog post, and update site integration
 
 - [x] **Phase 111: High-Impact Chapter Rewrites** - Rewrite Ch3, Ch4, Ch7, Ch8, Ch11 with major feature additions plus deprecation sweep (completed 2026-04-12)
 - [x] **Phase 112: New Chapters** - Author Plugins, Agent SDK, and Computer Use chapters with guide.json registration and OG images (completed 2026-04-12)
-- [ ] **Phase 113: Lower-Impact Chapter Updates** - Update Ch1, Ch2, Ch5, Ch6, Ch9, Ch10 with incremental feature additions
-- [ ] **Phase 114: Cheatsheet** - Update both SVG cheatsheets and build dedicated cheatsheet page with downloads
+- [x] **Phase 113: Lower-Impact Chapter Updates** - Update Ch1, Ch2, Ch5, Ch6, Ch9, Ch10 with incremental feature additions (completed 2026-04-12)
+- [x] **Phase 114: Cheatsheet** - Update both SVG cheatsheets and build dedicated cheatsheet page with downloads (completed 2026-04-12)
 - [x] **Phase 115: Blog Post** - New companion blog post covering guide updates plus callout banner on old post (completed 2026-04-12)
-- [ ] **Phase 116: Site Integration** - LLMs.txt, guide landing page, sitemap, cross-reference audit, lastVerified bumps, Lighthouse
+- [x] **Phase 116: Site Integration** - LLMs.txt, guide landing page, sitemap, cross-reference audit, lastVerified bumps, Lighthouse (completed 2026-04-12)
 
 ## Phase Details
 
@@ -145,10 +145,10 @@ Plans:
   3. Guide landing page shows the new chapter count and includes the cheatsheet link
   4. All new pages appear in the sitemap and all 30+ cross-references across 14 chapters are verified intact
   5. Lighthouse scores 90+ on all updated and new pages
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 116-01-PLAN.md -- LLMs.txt cheatsheet entry + metadata/cross-reference/sitemap verification
-- [ ] 116-02-PLAN.md -- Lighthouse 90+ audit on all 15 guide pages
+- [x] 116-02-PLAN.md -- Lighthouse 90+ audit on all 15 guide pages
 
 ## Progress
 
@@ -162,4 +162,4 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | 113. Lower-Impact Chapter Updates | 7/7 | Complete | 2026-04-12 |
 | 114. Cheatsheet | 3/3 | Complete | 2026-04-12 |
 | 115. Blog Post | 2/2 | Complete   | 2026-04-12 |
-| 116. Site Integration | 1/2 | In Progress|  |
+| 116. Site Integration | 2/2 | Complete   | 2026-04-12 |

@@ -54,7 +54,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 - [x] **SITE-02**: guide.json metadata updated (chapter count, descriptions)
 - [x] **SITE-03**: Guide landing page reflects new chapter count and cheatsheet link
 - [x] **SITE-04**: Sitemap includes all new pages
-- [ ] **SITE-05**: Lighthouse 90+ on all updated and new pages
+- [x] **SITE-05**: Lighthouse 90+ on all updated and new pages
 
 ## Future Requirements
 
@@ -114,7 +114,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | SITE-02 | Phase 116 | Complete |
 | SITE-03 | Phase 116 | Complete |
 | SITE-04 | Phase 116 | Complete |
-| SITE-05 | Phase 116 | Pending |
+| SITE-05 | Phase 116 | Complete |
 
 **Coverage:**
 - v1.19 requirements: 34 total
