@@ -95,7 +95,15 @@ Plans:
   3. Ch5 (Remote & Headless) documents Remote Control server mode, Channels, --bare flag, and scheduled tasks
   4. Ch6 (MCP) documents elicitation and per-tool result-size caps
   5. Ch9 (Worktrees & Subagents) documents memory, background mode, initialPrompt, and sparsePaths
-**Plans**: TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 113-01-PLAN.md -- Ch1 Introduction update (Desktop App, /powerup, web surfaces)
+- [ ] 113-02-PLAN.md -- Ch2 Context Management update (autoMemoryDirectory, PostCompact)
+- [ ] 113-03-PLAN.md -- Ch5 Remote & Headless update (server mode, Channels, --bare)
+- [ ] 113-04-PLAN.md -- Ch6 MCP update (elicitation, per-tool result-size caps)
+- [ ] 113-05-PLAN.md -- Ch9 Worktrees update (memory, initialPrompt, sparsePaths, /agents UI)
+- [ ] 113-06-PLAN.md -- Ch10 Agent Teams update (/agents UI, initialPrompt, dynamic agents)
+- [ ] 113-07-PLAN.md -- guide.json description updates + cross-chapter verification sweep
 
 ### Phase 114: Cheatsheet
 **Goal**: Users can view, download, and share updated Claude Code cheatsheets from a dedicated page on the site
@@ -141,7 +149,7 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 |-------|----------------|--------|-----------|
 | 111. High-Impact Chapter Rewrites | 7/7 | Complete | 2026-04-12 |
 | 112. New Chapters | 4/4 | Complete   | 2026-04-12 |
-| 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
+| 113. Lower-Impact Chapter Updates | 0/7 | Not started | - |
 | 114. Cheatsheet | 0/TBD | Not started | - |
 | 115. Blog Post | 0/TBD | Not started | - |
 | 116. Site Integration | 0/TBD | Not started | - |
