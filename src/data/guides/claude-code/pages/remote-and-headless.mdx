@@ -1,18 +1,18 @@
 ---
 title: "Remote Control & Headless Automation"
-description: "Run Claude Code from any device via remote control, automate with headless mode in CI/CD pipelines, and schedule recurring tasks with cron."
+description: "Run Claude Code from any device via remote control with multi-session server mode, automate with headless mode in CI/CD pipelines, interact through Telegram/Discord/iMessage channels, and schedule recurring tasks."
 order: 4
 slug: "remote-and-headless"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code headless", "ci cd automation", "remote control", "cron scheduling", "github actions claude code", "programmatic api", "json output"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code headless", "ci cd automation", "remote control", "cron scheduling", "github actions claude code", "programmatic api", "json output", "channels", "server mode", "bare flag", "teleport"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import TerminalRecording from '../../../../components/guide/TerminalRecording.astro';
 
 ## What You Will Learn
 
-Claude Code doesn't have to live inside your terminal window. This chapter shows you how to access your local session from a phone or browser via remote control, run Claude Code programmatically with the `-p` flag for scripts and CI/CD pipelines, and set up recurring tasks with cron expressions so work happens even when you're not watching.
+Claude Code doesn't have to live inside your terminal window. This chapter shows you how to access your local session from a phone or browser via remote control, run a persistent server that handles multiple concurrent sessions, interact with Claude Code through messaging platforms like Telegram and Discord, run Claude Code programmatically with the `-p` flag for scripts and CI/CD pipelines, and set up recurring tasks with cron expressions so work happens even when you're not watching.
 
 ## Remote Control
 
@@ -39,6 +39,37 @@ Already have an active Claude Code session? You can start remote control from wi
 
 Once you're connected, everything you type in the remote browser gets sent to your local Claude Code instance and responses appear in real time. Claude Code still runs on your machine, reads your local files, and executes commands in your local environment. The remote connection is really just a display and input relay.
 
+### Server Mode
+
+For scenarios where you need a persistent remote control service that handles multiple users or automated connections, server mode turns remote control into a long-running server.
+
+<CodeBlock
+  code={`claude remote-control --spawn worktree --capacity 3`}
+  lang="bash"
+  title="Starting remote control in server mode"
+  caption="Accepts up to 3 concurrent sessions, each in its own git worktree."
+/>
+
+The `--spawn` flag activates server mode and accepts one of three isolation modes that control how sessions share your working directory:
+
+- **`same-dir`** -- All sessions share the same working directory. Simple but sessions can step on each other's changes. Best for sequential use or read-heavy workflows.
+- **`worktree`** -- Each session gets its own git worktree, providing full isolation between concurrent sessions. Changes in one session don't affect another. Best for parallel development work.
+- **`session`** -- Each session gets a separate directory. Similar isolation to worktree mode but without the git integration.
+
+The `--capacity` flag limits how many concurrent sessions the server accepts. The default is 1. Set it higher when you expect multiple users connecting at the same time.
+
+For automated environments where you need predictable session names, the `--remote-control-session-name-prefix` flag adds a prefix to auto-generated session names.
+
+<CodeBlock
+  code={`claude remote-control --spawn worktree --capacity 5 \
+  --remote-control-session-name-prefix "ci-review"`}
+  lang="bash"
+  title="Server mode with custom session naming"
+  caption="Sessions will be named ci-review-1, ci-review-2, etc."
+/>
+
+Server mode is designed for persistent services: a shared development server that team members connect to from their browsers, a CI/CD pipeline that spawns review sessions on demand, or a kiosk setup where multiple users take turns.
+
 ## Remote vs Web Sessions
 
 These two might sound similar, but they're fundamentally different.
@@ -48,6 +79,82 @@ These two might sound similar, but they're fundamentally different.
 **Web sessions** at console.anthropic.com run on Anthropic's cloud infrastructure. Claude operates in a sandboxed cloud environment with no access to your local filesystem. They're useful for quick questions, exploring ideas, or working when you're away from your development machine.
 
 Reach for remote control when you need Claude Code to work with your local project: reviewing code from your phone during a commute, pairing with a colleague by sharing the URL, or picking up a task from a different room. Go with web sessions when you don't need local file access.
+
+If you started something in a web session and want to continue locally, the `--teleport` flag picks up a web session in your local terminal.
+
+<CodeBlock
+  code={`claude --teleport`}
+  lang="bash"
+  title="Resuming a web session locally"
+  caption="Opens a session selector to pick up where you left off on the web."
+/>
+
+## Channels
+
+> **Research Preview:** Channels are experimental and disabled by default. The setup flow, supported platforms, and security model may change. This section documents the feature as of April 2026.
+
+Channels let you push messages from external messaging platforms into a running Claude Code session. Instead of opening a browser or terminal, you send a Telegram message, a Discord message, or an iMessage, and it arrives in your Claude Code session as an event. Claude reads the message, processes it, and replies back through the same channel.
+
+This turns Claude Code into something you can interact with from anywhere your phone has signal. Ask Claude to check on a deployment from Telegram while you're out, get a code review summary in Discord, or send a quick task from iMessage. The session keeps running on your machine with full access to your local files and tools.
+
+### Setting Up Channels
+
+Channels are installed as plugins from the official marketplace. Each messaging platform has its own plugin.
+
+<CodeBlock
+  code={`# Install a channel plugin
+claude plugin install telegram@claude-plugins-official
+
+# Start a session with channels enabled
+claude --channels`}
+  lang="bash"
+  title="Installing and enabling a channel plugin"
+  caption="The --channels flag activates installed channel plugins for the session."
+/>
+
+You can also specify which channel plugin to activate directly.
+
+<CodeBlock
+  code={`claude --channels plugin:telegram@claude-plugins-official`}
+  lang="bash"
+  title="Activating a specific channel"
+/>
+
+For installation details and marketplace browsing, see [Plugins](/guides/claude-code/plugins/).
+
+### Supported Platforms
+
+Three messaging platforms are currently supported:
+
+- **Telegram** -- Uses a BotFather bot. Pair with a code sent to the bot.
+- **Discord** -- Uses a Discord bot. Pair with a code sent in a DM.
+- **iMessage** -- Reads the Messages database and replies via AppleScript. macOS only. Pair by per-handle access.
+
+Each platform has its own setup flow for creating the bot or granting access, but the pattern is the same: install the plugin, configure credentials, and pair the sender.
+
+### Security Model
+
+Channels use a sender allowlist to control who can push messages into your session. When you set up a channel, you go through a pairing process that generates a pairing code. Only senders you've explicitly paired can send messages that reach your Claude Code session.
+
+This means a random Telegram user can't send commands to your session just because they find your bot. The pairing code handshake establishes trust before any messages flow.
+
+For remote tool approval, channels support a permission relay capability. If Claude needs approval for an action while you're away from your terminal, the approval request can be forwarded through the channel so you can approve or deny from your phone.
+
+### Enterprise Controls
+
+Organizations can control channel availability through managed settings. The `channelsEnabled` setting acts as a master switch, and `allowedChannelPlugins` restricts which specific channel plugins can be used.
+
+<CodeBlock
+  code={`{
+  "channelsEnabled": true,
+  "allowedChannelPlugins": ["telegram@claude-plugins-official"]
+}`}
+  lang="json"
+  title="Managed settings for channel control"
+  caption="Restricts channels to Telegram only across the organization."
+/>
+
+For the full set of enterprise managed settings, see [Security](/guides/claude-code/security/).
 
 ## Programmatic Usage with -p
 
@@ -114,6 +221,25 @@ The JSON format gives you a structured response with the result text, token usag
 />
 
 With `stream-json`, you get one JSON object per line as Claude Code processes the prompt. Each line represents an event, such as an assistant message, a tool call, or a tool result. It's great for real-time monitoring in pipelines where you'd rather see progress as it happens instead of waiting for the final result.
+
+### The --bare Flag
+
+When running Claude Code in scripts or CI where you don't need project-specific configuration, the `--bare` flag skips auto-discovery of hooks, LSP servers, plugins, MCP servers, auto-memory, and CLAUDE.md files. This gives you a clean, fast invocation without any project-specific configuration loading.
+
+<CodeBlock
+  code={`claude -p "Summarize this diff" --bare < changes.diff`}
+  lang="bash"
+  title="Running with --bare for a clean invocation"
+  caption="Skips all auto-discovery for faster startup in scripted contexts."
+/>
+
+Reach for `--bare` when you want Claude Code to behave as a pure language model interface without any of the project-aware features. It's particularly useful in CI pipelines where the overhead of discovering project configuration adds latency and the configuration isn't relevant to the task.
+
+For building production automation beyond simple `-p` invocations, the [Agent SDK](/guides/claude-code/agent-sdk/) provides a full programmatic interface with streaming, hooks as callbacks, and session management.
+
+### Deep Links
+
+External tools can launch Claude Code with pre-filled prompts using the `claude-cli://` protocol. Multi-line prompts use `%0A` encoding for newlines. This is useful for editor integrations and custom tooling that need to hand off tasks to Claude Code.
 
 ## Structured Output with --json-schema
 
@@ -280,6 +406,10 @@ Here's `--continue` in action. The second prompt picks up context from the first
 
 Session continuation preserves the full conversation history, including which files Claude Code read, what changes it made, and any context it accumulated. This keeps multi-step workflows coherent without you having to repeat instructions.
 
+## Web-Based Workflows
+
+Claude Code's web sessions at console.anthropic.com support automated workflows that run entirely in the cloud. PR Auto-Fix watches your CI pipeline and automatically fixes failures, handles reviewer nits, and pushes commits until the build is green. Toggle it on from the CI panel in a web session when you want Claude to keep a pull request moving forward without manual intervention.
+
 ## Scheduled Tasks
 
 Claude Code can run tasks on a recurring schedule. The `/loop` skill lets you create scheduled tasks conversationally. Just describe what you want to happen and when, and Claude Code sets up the automation for you.
@@ -332,13 +462,13 @@ Scheduled tasks use standard 5 field cron expressions: minute, hour, day of mont
 
 Scheduled tasks run in your **local timezone**, not UTC. This is an important detail when you're scheduling tasks around your work hours.
 
-**Critical limitation: tasks expire after 3 days.** If Claude Code Desktop isn't running for 3 days, scheduled tasks created through the CLI expire and won't resume automatically. This is by design; CLI created cron tasks are meant for short-lived automation, not permanent infrastructure. For something more durable, see the alternatives below.
+**Critical limitation: tasks expire after 7 days.** If Claude Code Desktop isn't running for 7 days, scheduled tasks created through the CLI expire and won't resume automatically. This is by design; CLI created cron tasks are meant for short-lived automation, not permanent infrastructure. For something more durable, see the alternatives below.
 
 ## Durable Scheduling Alternatives
 
 When you need scheduled tasks that survive restarts, machine reboots, or extended offline periods, reach for one of these alternatives instead of CLI cron tasks.
 
-**Claude Code Desktop scheduled tasks** are persistent. Tasks created through the Desktop app survive restarts and don't have the 3 day expiry limitation. If your automation needs to keep running reliably for weeks or months, create the schedule through the Desktop app.
+**Claude Code Desktop scheduled tasks** are persistent. Tasks created through the Desktop app survive restarts and don't have the 7 day expiry limitation. If your automation needs to keep running reliably for weeks or months, create the schedule through the Desktop app.
 
 **GitHub Actions with schedule trigger** moves the automation entirely to CI. The task runs on GitHub's infrastructure regardless of whether your local machine is on.
 
@@ -375,6 +505,8 @@ So which do you pick? CLI cron works well for quick, temporary automation (check
 
 - **Use `-p` for CI/CD integration.** It's the entry point for every automated Claude Code workflow. Pair it with `--output-format json` for machine readable output and `--allowedTools` for unattended execution.
 
+- **Use `--bare` in CI pipelines.** Skip project configuration loading when it's not relevant to the task. Faster startup, cleaner execution, no side effects from project-specific hooks or plugins.
+
 - **Prefer `--append-system-prompt` over `--system-prompt`.** The default system prompt has safety and formatting instructions you almost always want to keep. Append project-specific rules rather than replacing everything.
 
 - **Always specify `--allowedTools` in scripts.** Without explicit tool permissions, Claude Code exits with an error on any action that requires approval. Specify the minimum set of tools your script actually needs.
@@ -383,14 +515,17 @@ So which do you pick? CLI cron works well for quick, temporary automation (check
 
 - **Test cron schedules with short intervals first.** Before setting up a daily cron, try `*/5 * * * *` (every 5 minutes) to verify the task works as expected, then switch to the production schedule.
 
-- **Prefer Desktop scheduled tasks or GitHub Actions over CLI cron for anything durable.** CLI cron tasks expire after 3 days. If the automation matters, use a scheduling mechanism that persists.
+- **Prefer Desktop scheduled tasks or GitHub Actions over CLI cron for anything durable.** CLI cron tasks expire after 7 days. If the automation matters, use a scheduling mechanism that persists.
 
 - **Use `--continue` for multi-step pipelines.** Break complex automated workflows into sequential steps that build on each other's context, rather than cramming everything into one massive prompt.
+
+- **Keep Channels for trusted environments.** The sender allowlist and pairing codes provide security, but treat channel access like terminal access. Only pair devices and accounts you trust completely.
 
 ## Further Reading
 
 - <a href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener noreferrer">Remote Control</a>: official documentation on remote access setup and security
 - <a href="https://code.claude.com/docs/en/headless" target="_blank" rel="noopener noreferrer">Running Claude Code Programmatically</a>: the `-p` flag, output formats, and system prompt customization
 - <a href="https://code.claude.com/docs/en/scheduled-tasks" target="_blank" rel="noopener noreferrer">Scheduled Tasks</a>: cron expressions, task management, and limitations
+- <a href="https://code.claude.com/docs/en/channels" target="_blank" rel="noopener noreferrer">Channels</a>: Telegram, Discord, and iMessage integration
 
 Up next, learn how to extend Claude Code with external tools and data sources in [Model Context Protocol](/guides/claude-code/mcp/).
