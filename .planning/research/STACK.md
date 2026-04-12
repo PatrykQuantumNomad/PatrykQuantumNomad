@@ -1,320 +1,517 @@
-# Stack Research: Claude Code Guide Content Features
+# Stack Research: Claude Code Feature Inventory (Feb-Apr 2026)
 
-**Domain:** Multi-chapter technical guide (10-12 chapters) on Claude Code for an existing Astro 5 portfolio site, requiring build-time SVG architecture diagrams, interactive React components, and code snippets
-**Researched:** 2026-03-10
+**Domain:** Claude Code guide content refresh -- new features, changes, and deprecations
+**Researched:** 2026-04-12
+**Confidence:** HIGH (sourced from official docs and changelog at code.claude.com)
+
+## Purpose
+
+Complete inventory of Claude Code features released between the guide's publication (2026-03-15) and today (2026-04-12), plus features from the Feb-Mar window that may have been in-flight during original authoring. This informs which guide chapters need updates and whether new chapters are needed.
+
+---
+
+## Existing Guide Chapters (published 2026-03-15)
+
+| # | Chapter | Topics Covered |
+|---|---------|----------------|
+| 1 | Introduction | What Claude Code is, installation, first session |
+| 2 | Context Management | CLAUDE.md, auto memory, context window |
+| 3 | Models & Costs | Model selection, effort levels, token costs |
+| 4 | Environment | Settings, env vars, configuration |
+| 5 | Remote & Headless | Non-interactive mode, CI/CD, headless |
+| 6 | MCP | Model Context Protocol servers |
+| 7 | Custom Skills | Slash commands, skills, custom commands |
+| 8 | Hooks | PreToolUse, PostToolUse, lifecycle hooks |
+| 9 | Worktrees | Git worktrees, parallel sessions |
+| 10 | Agent Teams | Subagents, multi-agent orchestration |
+| 11 | Security & Enterprise | Permissions, sandboxing, managed settings |
+
+---
+
+## MAJOR NEW FEATURES (Require New Content or Significant Rewrites)
+
+### 1. Computer Use (Research Preview)
+
+**Released:** Week 13 (Mar 23-27) Desktop, Week 14 (Mar 30-Apr 3) CLI
+**Versions:** v2.1.83+ (Desktop), v2.1.85+ (CLI)
+**Status:** Research preview, Pro/Max plans only
 **Confidence:** HIGH
 
-## Verdict: One Infrastructure Change, Zero New npm Dependencies
+Claude can control the native desktop: open apps, click, type, screenshot, and verify GUI changes. Available in both Desktop app (macOS + Windows) and CLI (macOS only).
 
-The Claude Code Guide requires **no new npm packages**. Every content feature maps to an existing pattern in the codebase. The only structural change is generalizing the content collection system from single-guide to multi-guide support.
+**Key details:**
+- Enable via `/mcp` menu, toggle `computer-use` MCP server
+- Requires macOS Accessibility + Screen Recording permissions
+- Per-app approval per session; apps categorized by trust tier
+- Machine-wide lock (one session at a time)
+- Not available in `-p` mode, not on Team/Enterprise
+- Not on Bedrock/Vertex/Foundry -- requires claude.ai auth
+- Fallback hierarchy: MCP > Bash > Chrome > Computer Use
 
-### What's Reusable As-Is
+**Guide impact:** NEW SECTION needed. Could be standalone chapter or added to an existing chapter (MCP or a new "Browser & Desktop Automation" chapter). Significant feature with detailed safety model.
 
-| Existing Asset | Location | Reuse for Claude Code Guide |
-|---------------|----------|----------------------------|
-| GuideLayout.astro | `src/layouts/GuideLayout.astro` | Direct reuse. Sticky sidebar, breadcrumbs, prev/next nav all work for any guide. Remove the hardcoded FastAPI companion blog link (make it a prop or slot). |
-| CodeFromRepo.astro | `src/components/guide/CodeFromRepo.astro` | Direct reuse. The `templateRepo` and `versionTag` props already support arbitrary repos. Point to a Claude Code config repo or use inline code only. |
-| diagram-base.ts | `src/lib/guides/svg-diagrams/diagram-base.ts` | Direct reuse. `diagramSvgOpen`, `roundedRect`, `arrowLine`, `arrowMarkerDef`, `textLabel` are generic SVG primitives. |
-| PlotFigure.astro | `src/components/eda/PlotFigure.astro` | Direct reuse. SVG + caption wrapper, theme-aware background. |
-| og-cache.ts | `src/lib/guides/og-cache.ts` | Direct reuse. Hash-based OG image caching is guide-agnostic. |
-| guide schema | `src/lib/guides/schema.ts` | Direct reuse. `guidePageSchema` and `guideMetaSchema` are not FastAPI-specific. |
-| @xyflow/react + dagre | Already installed (v12.10.1 + v2.0.4) | Reuse for interactive diagrams (permission flow explorer, hook event visualizer). Pattern proven in DeploymentTopology.tsx. |
-| astro-expressive-code | Already installed (v0.41.6) | Direct reuse. Handles TOML, JSON, YAML, Bash, TypeScript, JavaScript syntax highlighting. All languages needed for Claude Code config examples. |
-| ec.config.mjs | `ec.config.mjs` | No changes needed. `github-dark` theme works for Claude Code config snippets. |
+---
 
-### What's Genuinely New (But Uses Existing Patterns)
+### 2. Auto Mode (Research Preview)
 
-| New Component | Pattern Source | What's New |
-|--------------|---------------|------------|
-| 3 build-time SVG diagram generators | `middleware-stack.ts`, `jwt-auth-flow.ts`, `builder-pattern.ts` | New diagram logic for agentic loop, hook lifecycle, MCP architecture. Same `diagram-base.ts` primitives. |
-| 3 Astro wrapper components for diagrams | `MiddlewareStackDiagram.astro`, etc. | Thin wrappers calling generators and rendering via PlotFigure. Identical pattern. |
-| Permission Flow Explorer (React) | `DeploymentTopology.tsx` | New interactive React Flow component. Nodes = tools/permissions, edges = allow/deny/escalate paths. Uses same dagre layout pattern. |
-| Hook Event Visualizer (React) | `DeploymentTopology.tsx` | New interactive React Flow component. Nodes = lifecycle events, edges = execution flow. Same pattern but more nodes. |
-| Multi-guide content collection | `content.config.ts` | Widen glob from `fastapi-production/pages` to `*/pages`. Add `guideId` to page schema. |
-| Guide route pages | `src/pages/guides/fastapi-production/[slug].astro` | New route directory at `src/pages/guides/claude-code/`. Follows same structure. |
-| OG image route | `src/pages/open-graph/guides/fastapi-production/[slug].png.ts` | New route at `src/pages/open-graph/guides/claude-code/[slug].png.ts`. Same pattern. |
-| guide.json | `src/data/guides/fastapi-production/guide.json` | New guide metadata at `src/data/guides/claude-code/guide.json`. Same schema. |
+**Released:** Week 13 (Mar 23-27, 2026)
+**Versions:** v2.1.83+
+**Status:** Research preview
+**Confidence:** HIGH
 
-## Recommended Stack
+A classifier-based permission mode. Safe actions auto-approved; destructive/suspicious ones blocked. Middle ground between manual approval and `--dangerously-skip-permissions`.
 
-### Core Technologies (Already Installed -- No Changes)
+**Key details:**
+- Requires: Team, Enterprise, or API plan + Sonnet 4.6 or Opus 4.6 + Anthropic API
+- NOT available on Pro/Max, NOT on Bedrock/Vertex/Foundry
+- Classifier runs on Sonnet 4.6 regardless of session model (adds cost)
+- Admin must enable in Claude Code admin settings
+- Blocks: curl|bash, production deploys, force push, IAM changes, mass deletion
+- Allows: local file ops, dependency installs, read-only HTTP, branch push
+- Falls back after 3 consecutive or 20 total blocks
+- `claude auto-mode defaults` prints full rule list
+- `--enable-auto-mode` flag, `defaultMode: "auto"` in settings
+- `PermissionDenied` hook fires on classifier denials (v2.1.89)
 
-| Technology | Installed Version | Purpose | Status |
-|------------|------------------|---------|--------|
-| Astro | 5.17.1 | Static site generator, MDX rendering, content collections | Current. No update needed. |
-| @astrojs/mdx | 4.3.13 | MDX support for guide chapter pages | Current. No update needed. |
-| @astrojs/react | 4.4.2 | React island hydration for interactive components | Current. No update needed. |
-| React | 19.2.4 | Interactive diagram components (permission explorer, hook visualizer) | Current. No update needed. |
-| TypeScript | 5.9.3 | Type safety for diagram generators, schemas, components | Current. No update needed. |
-| Tailwind CSS | 3.4.19 | Styling for guide layout and components | Current. No update needed. |
-| @tailwindcss/typography | 0.5.19 | Prose styling for chapter content | Current. No update needed. |
-| astro-expressive-code | 0.41.6 | Syntax highlighting for code blocks | Current. Supports all needed languages (JSON, TOML, YAML, Bash, TypeScript, JavaScript). |
-| @xyflow/react | 12.10.1 | Interactive node-graph diagrams | Current. Latest in v12 line. |
-| @dagrejs/dagre | 2.0.4 | Automatic graph layout for React Flow diagrams | Current. No update needed. |
-| satori + sharp | 0.19.2 + 0.34.5 | OG image generation | Current. No update needed. |
-| Zod (via astro:content) | Built into Astro 5 | Content collection schema validation | Built-in. No separate install. |
+**Guide impact:** MAJOR UPDATE to Security & Enterprise chapter (Ch 11). Auto mode is a new permission mode that sits alongside the existing `default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`. The permission modes section needs restructuring.
 
-### Supporting Libraries (Already Installed -- No Changes)
+---
 
-| Library | Version | Purpose | Used For |
-|---------|---------|---------|----------|
-| nanostores + @nanostores/react | 1.1.0 + 1.0.0 | Client state management | NOT needed for guide components. Interactive diagrams use local React state (same as DeploymentTopology). Only use if adding cross-component state (unlikely). |
-| gsap | 3.14.2 | Animations | NOT needed for guide diagrams. SVG diagrams use CSS animations (`:hover`, `stroke-dashoffset`). GSAP is for hero/landing page animations only. |
+### 3. Channels (Research Preview)
 
-### Build-Time SVG Diagram Generators (New Files, Existing Pattern)
+**Released:** v2.1.80 (Mar 19, 2026) initial, v2.1.81+ expanded
+**Status:** Research preview, requires claude.ai login
+**Confidence:** HIGH
 
-These are TypeScript functions that return SVG strings at build time. Zero client-side JavaScript.
+MCP servers that push events INTO a running session. Two-way communication: Claude reads events and replies back through the same channel. Supported: Telegram, Discord, iMessage, custom webhook.
 
-| Diagram | File | Complexity | Description |
-|---------|------|-----------|-------------|
-| Agentic Loop | `src/lib/guides/svg-diagrams/claude-code/agentic-loop.ts` | Medium | Cyclic flow: Prompt -> Gather Context -> Take Action -> Verify Results -> (loop or complete). Similar complexity to `jwt-auth-flow.ts` (branching paths). |
-| Hook Lifecycle | `src/lib/guides/svg-diagrams/claude-code/hook-lifecycle.ts` | Medium-High | Vertical flow: SessionStart -> UserPromptSubmit -> PreToolUse -> PostToolUse -> Stop -> SessionEnd, with branch-off events (SubagentStart/Stop, Notification, etc). Most complex SVG of the three. |
-| MCP Architecture | `src/lib/guides/svg-diagrams/claude-code/mcp-architecture.ts` | Medium | Three-column layout: Claude Code (client) <-> MCP Protocol <-> MCP Servers (filesystem, GitHub, databases). Similar to builder-pattern.ts (multi-box with connections). |
+**Key details:**
+- Install as plugins from `claude-plugins-official` marketplace
+- `--channels plugin:telegram@claude-plugins-official` flag
+- Sender allowlist security model with pairing codes
+- Enterprise: `channelsEnabled` and `allowedChannelPlugins` managed settings
+- Permission relay capability for remote tool approval
+- Each channel plugin requires Bun runtime
+- Events only arrive while session is open
 
-All three import from the existing `diagram-base.ts` and use `DIAGRAM_PALETTE` CSS variables for dark/light theme support.
+**Guide impact:** NEW SECTION needed. This is a significant integration feature. Could be part of Remote & Headless chapter (Ch 5) or warrant its own section. Connects to Plugins ecosystem.
 
-### Interactive React Components (New Files, Existing Pattern)
+---
 
-These are React components using @xyflow/react, loaded with `client:visible` for lazy hydration.
+### 4. Plugins System (Mature)
 
-| Component | File | Node Count | Description |
-|-----------|------|-----------|-------------|
-| Permission Flow Explorer | `src/components/guide/claude-code/PermissionFlowExplorer.tsx` | ~8-10 | Interactive flowchart showing tool request -> PreToolUse hook -> permission check -> allow/deny/escalate decision tree. Users click nodes to see JSON payloads. |
-| Hook Event Visualizer | `src/components/guide/claude-code/HookEventVisualizer.tsx` | ~12-15 | Interactive timeline/graph of all 17 hook events. Click an event to see its matcher patterns, input schema, and example hook config. |
+**Released:** Matured significantly Mar-Apr 2026
+**Status:** GA (marketplace, install, create, share)
+**Confidence:** HIGH
 
-Both follow the `DeploymentTopology.tsx` pattern exactly:
-- Define nodes and edges as static data
-- Use dagre for automatic layout
-- Export a default function component
-- Use `client:visible` in MDX for lazy loading
+Full plugin ecosystem with marketplace, skills, agents, hooks, MCP servers, LSP servers, and `bin/` executables.
 
-### Content Infrastructure Changes
+**Key details:**
+- `.claude-plugin/plugin.json` manifest
+- Namespaced skills: `/plugin-name:skill-name`
+- `claude plugin install name@marketplace`, `/reload-plugins`
+- `userConfig` for settings at enable time, keychain-backed secrets (v2.1.85)
+- `bin/` directory executables on Bash PATH (v2.1.91)
+- `settings.json` for default plugin settings including `agent` key
+- LSP server support (`.lsp.json`)
+- Plugin marketplace creation and distribution
+- `--plugin-dir` for local development
+- `disableSkillShellExecution` setting (v2.1.91)
+- `claude plugin validate` for frontmatter checking (v2.1.77)
 
-#### 1. Multi-Guide Content Collection (Required)
+**Guide impact:** NEW CHAPTER likely needed. The existing Custom Skills chapter (Ch 7) covers standalone skills but not the full plugin system. Plugins are now the distribution mechanism for skills, agents, hooks, and MCP servers combined.
 
-The current `content.config.ts` hardcodes `fastapi-production`:
+---
 
-```typescript
-// CURRENT (single guide)
-const guidePages = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides/fastapi-production/pages' }),
-  schema: guidePageSchema,
-});
-const guides = defineCollection({
-  loader: file('src/data/guides/fastapi-production/guide.json'),
-  schema: guideMetaSchema,
-});
-```
+### 5. Scheduled Tasks and /loop
 
-Change to support any guide:
+**Released:** v2.1.71 (Mar 7, 2026) `/loop` + cron tools, cloud/desktop tasks matured
+**Status:** GA
+**Confidence:** HIGH
 
-```typescript
-// NEW (multi-guide)
-const guidePages = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/data/guides' }),
-  schema: guidePageSchema,
-});
-const guides = defineCollection({
-  loader: glob({ pattern: '**/guide.json', base: './src/data/guides' }),
-  schema: guideMetaSchema,
-});
-```
+Three-tier scheduling system: `/loop` (session-scoped), Desktop scheduled tasks, Cloud scheduled tasks.
 
-**Schema change needed:** Add `guideId` to `guidePageSchema` so pages can be filtered per guide:
+**Key details:**
+- `/loop 5m check the deploy` -- fixed interval
+- `/loop check the deploy` -- Claude chooses interval dynamically
+- `/loop` bare -- built-in maintenance prompt or custom `loop.md`
+- `CronCreate`, `CronList`, `CronDelete` tools
+- 7-day auto-expiry for recurring tasks
+- Monitor tool for streaming background script events
+- Cloud tasks via `/schedule` -- survive machine off
+- Desktop tasks -- local files, configurable permissions
+- `CLAUDE_CODE_DISABLE_CRON=1` to disable
 
-```typescript
-export const guidePageSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  order: z.number().int().min(0),
-  slug: z.string(),
-  guideId: z.string(),  // NEW: "fastapi-production" or "claude-code"
-});
-```
+**Guide impact:** NEW SECTION needed. This is a significant workflow feature not covered in any existing chapter. Could be added to Remote & Headless (Ch 5) or a new "Automation & Scheduling" section.
 
-This requires adding `guideId` to every existing FastAPI page's frontmatter and all new Claude Code page frontmatter. The `[slug].astro` route filters by `guideId` when calling `getCollection('guidePages')`.
+---
 
-#### 2. GuideLayout Companion Link (Minor Refactor)
+### 6. Chrome Browser Integration (Beta)
 
-The current GuideLayout has a hardcoded FastAPI companion blog link:
+**Released:** Pre-dates guide but significantly evolved
+**Status:** Beta
+**Confidence:** HIGH
 
-```html
-<aside class="mt-10 pt-6 border-t border-[var(--color-border)]">
-  <p class="text-sm text-[var(--color-text-secondary)]">
-    For a high-level overview of all 13 production concerns, read the companion blog post:
-    <a href="/blog/fastapi-production-guide/">...</a>
-  </p>
-</aside>
-```
+Claude controls Chrome/Edge browser tabs: navigate, click, type, read console, record GIFs. Uses Claude in Chrome extension with native messaging.
 
-Refactor to accept via props or slot:
+**Key details:**
+- `claude --chrome` or `/chrome` to enable
+- Requires Claude in Chrome extension v1.0.36+
+- Inherits browser login state
+- Capabilities: live debugging, design verification, form filling, data extraction
+- Session recording as GIFs
+- Site-level permissions from Chrome extension
+- Not available via Bedrock/Vertex/Foundry
 
-```typescript
-interface Props {
-  // ... existing props
-  companionLink?: { href: string; text: string };
-}
-```
+**Guide impact:** NEW SECTION needed. Works alongside Computer Use (Computer Use is for native apps when Chrome can't reach them).
 
-#### 3. astro.config.mjs Sitemap (Minor Update)
+---
 
-The `buildContentDateMap()` function hardcodes `fastapi-production`. Generalize to scan all `src/data/guides/*/guide.json` files.
+### 7. Remote Control (Evolved Significantly)
 
-### Code Snippet Languages
+**Released:** Pre-dates guide but major additions in Mar-Apr 2026
+**Versions:** v2.1.51+ base, significant improvements through v2.1.101
+**Confidence:** HIGH
 
-astro-expressive-code (via Shiki) already supports all languages needed for the Claude Code Guide:
+Continue local CLI sessions from phone/browser/mobile app. Session runs locally; web/mobile are just windows into it.
 
-| Language | File Extension | Used For |
-|----------|---------------|----------|
-| `json` | `.json` | Claude Code settings, hooks config, MCP config |
-| `jsonc` | `.jsonc` | Settings files with comments |
-| `toml` | `.toml` | CLAUDE.md frontmatter blocks (if any) |
-| `yaml` | `.yaml` | GitHub Actions CI config examples |
-| `bash` / `shell` | `.sh` | Hook scripts, CLI commands |
-| `typescript` | `.ts` | Hook handlers in TypeScript |
-| `javascript` | `.js` | Hook handlers in JavaScript |
-| `markdown` | `.md` | CLAUDE.md content examples |
-| `python` | `.py` | Example hook scripts |
+**Key additions since guide publication:**
+- Server mode with `--spawn` (same-dir, worktree, session), `--capacity N`
+- `--remote-control-session-name-prefix` for auto-naming
+- VS Code `/remote-control` command (v2.1.79)
+- QR code display for mobile pairing
+- Enable for all sessions via `/config`
+- Improved session titles, connection resilience
 
-No new Shiki grammars or expressive-code plugins are needed.
+**Guide impact:** UPDATE Remote & Headless chapter (Ch 5). Remote Control has matured significantly with server mode and multi-session support.
 
-## Installation
+---
 
-```bash
-# No new packages to install.
-# The Claude Code Guide uses only existing dependencies.
-```
+### 8. Desktop App (New Surface)
 
-## Alternatives Considered
+**Released:** Mar 2026, evolved rapidly
+**Status:** GA
+**Confidence:** HIGH
 
-| Category | Decision | Alternative | Why Not |
-|----------|----------|-------------|---------|
-| SVG diagrams | Build-time TypeScript generators | Mermaid.js | Already rejected for FastAPI guide. Adds ~2.8MB bundle or Playwright headless browser for build-time rendering. Site has zero Mermaid usage. See STACK-fastapi-guide.md for full analysis. |
-| SVG diagrams | Build-time TypeScript generators | D3.js force layout | Overkill for static architecture diagrams. D3 force layout is for data-driven visualizations (already used in EDA section), not hand-crafted labeled box-and-arrow diagrams. |
-| Interactive diagrams | @xyflow/react + dagre | Mermaid interactive mode | Mermaid click callbacks require `securityLevel: 'loose'` (XSS risk) and can't do hover-to-reveal detail panels. |
-| Interactive diagrams | @xyflow/react + dagre | vis.js / cytoscape.js | Would introduce a new graph library when React Flow is already installed, proven, and has the exact node/edge customization we need. |
-| Interactive diagrams | @xyflow/react + dagre | Pure SVG with JavaScript event handlers | Possible but recreates what React Flow already provides (pan, zoom, drag, custom nodes). Not worth the effort. |
-| Content collections | Widen glob pattern | Separate collection per guide | Separate collections (`claudeCodeGuidePages`, `fastApiGuidePages`) would bloat `content.config.ts` and not scale. A single `guidePages` collection with `guideId` filter is cleaner. |
-| State management | Local React state (useState) | Nanostores | Interactive guide diagrams are self-contained islands. No cross-component state needed. Using nanostores would add unnecessary coupling. |
-| Syntax highlighting | astro-expressive-code (existing) | Prism.js or highlight.js | Expressive code is already configured, integrated with Astro MDX, and handles all needed languages. Switching would break all existing code blocks site-wide. |
+Standalone app with Code tab (local coding), Cowork tab (cloud VM agent), Chat tab. Key features beyond CLI:
+- Visual diff review with inline comments
+- Live app preview with dev server
+- PR monitoring with auto-merge and auto-fix (Web, v2.1.83)
+- Dispatch (message tasks from mobile app)
+- Computer Use integration
+- Scheduled tasks UI
+- SSH session support
 
-## What NOT to Add
+**Guide impact:** The existing guide focuses on CLI. Desktop app may warrant a mention/section in the Introduction chapter or a dedicated section for Desktop-specific workflows.
 
-| Avoid | Why | What to Do Instead |
-|-------|-----|-------------------|
-| **Mermaid.js** (`mermaid`, `@mermaid-js/tiny`, `rehype-mermaid`) | 2.8MB client bundle or Playwright build dependency. Already rejected for FastAPI guide. | Build-time SVG generators using `diagram-base.ts` |
-| **New syntax highlighting library** (Prism, highlight.js, shiki standalone) | astro-expressive-code already handles everything. Adding another creates conflicting styles. | Use existing `astro-expressive-code` and `CodeFromRepo` |
-| **Framer Motion** | Interactive diagrams use React Flow (which handles its own animations). Page animations use GSAP. Adding a third animation library fragments the approach. | CSS transitions on SVG elements, React Flow built-in transitions |
-| **MDX plugins for diagrams** (remark-mermaid, rehype-diagrams) | These are Mermaid wrappers with the same problems. | Import diagram Astro components directly in MDX |
-| **Headless CMS** (Contentful, Sanity, Strapi) | Content is MDX files in the repo. Astro content collections with Zod validation already provide type-safe content management. Adding a CMS adds deployment complexity and network dependencies for zero benefit. | Astro content collections with MDX |
-| **@codemirror packages for guide content** | CodeMirror is used in the validator tools for live editing. Guide code snippets are read-only and should use expressive-code's static rendering. | astro-expressive-code `<Code>` component |
-| **New React Flow node packages** (@xyflow/react already includes everything) | Custom nodes are simple React components. No need for pre-built node libraries. | Custom `TopologyNode`-style components |
-| **GSAP for diagram animations** | GSAP is ~30KB and designed for complex timeline animations. SVG hover effects and `stroke-dashoffset` flow animations are pure CSS. | CSS animations and transitions on SVG elements |
+---
 
-## Stack Patterns by Variant
+### 9. Slack Integration
 
-**If the diagram is static (no user interaction beyond hover):**
-- Use build-time SVG generator (TypeScript function returning SVG string)
-- Wrap in Astro component that calls generator at build time
-- Render via `PlotFigure.astro`
-- Add CSS hover effects if needed (zero client JS)
-- Examples: Agentic loop, hook lifecycle overview, MCP architecture
+**Released:** Mar 2026
+**Status:** GA
+**Confidence:** HIGH
 
-**If the diagram needs pan/zoom/click interaction:**
-- Use @xyflow/react with dagre layout
-- Create a React component with static node/edge data
-- Load with `client:visible` in MDX for lazy hydration
-- Examples: Permission flow explorer, hook event visualizer
+Mention `@Claude` in Slack channels for coding tasks. Auto-detects coding intent, creates Claude Code web session, posts updates to thread.
 
-**If showing a code snippet from a repo:**
-- Use `CodeFromRepo.astro` with custom `templateRepo` and `versionTag`
-- Example: Hook script from a Claude Code configuration repo
+**Key details:**
+- Code only or Code + Chat routing modes
+- Context gathering from threads/channels
+- Repository auto-selection
+- Action buttons: View Session, Create PR, Retry as Code, Change Repo
+- Requires Claude Code on the web access + GitHub
 
-**If showing inline code examples:**
-- Use astro-expressive-code fenced code blocks in MDX (triple backtick with language)
-- No component import needed -- MDX handles this natively via the expressive-code integration
+**Guide impact:** NEW SECTION possible. Could fit in Remote & Headless (Ch 5) or a new integrations overview.
 
-## Version Compatibility
+---
 
-| Package | Compatible With | Notes |
-|---------|----------------|-------|
-| astro@5.17.1 | @astrojs/mdx@4.3.13, @astrojs/react@4.4.2 | All Astro packages are on compatible v5 versions. |
-| react@19.2.4 | @xyflow/react@12.10.1, @nanostores/react@1.0.0 | React 19 is supported by React Flow v12. |
-| astro-expressive-code@0.41.6 | astro@5.17.1 | Expressive Code 0.41.x supports Astro 5. |
-| @xyflow/react@12.10.1 | @dagrejs/dagre@2.0.4 | Used together in DeploymentTopology.tsx, proven compatible. |
+## SIGNIFICANT UPDATES TO EXISTING FEATURES
 
-## File Structure for New Guide
+### 10. Permission Modes Restructured
 
-```
-src/
-  data/
-    guides/
-      claude-code/
-        guide.json                    # Guide metadata (chapters, slug, dates)
-        pages/
-          introduction.mdx            # Chapter 1
-          agentic-loop.mdx            # Chapter 2
-          tools-and-capabilities.mdx  # Chapter 3
-          permissions.mdx             # Chapter 4
-          claude-md.mdx               # Chapter 5
-          hooks.mdx                   # Chapter 6
-          mcp.mdx                     # Chapter 7
-          skills.mdx                  # Chapter 8
-          subagents.mdx               # Chapter 9
-          workflows.mdx               # Chapter 10
-          ci-cd.mdx                   # Chapter 11
-          conclusion.mdx              # Chapter 12
-  lib/
-    guides/
-      svg-diagrams/
-        claude-code/                  # NEW subdirectory
-          agentic-loop.ts             # Agentic loop SVG generator
-          hook-lifecycle.ts           # Hook lifecycle SVG generator
-          mcp-architecture.ts         # MCP architecture SVG generator
-          index.ts                    # Barrel export
-  components/
-    guide/
-      claude-code/                    # NEW subdirectory
-        AgenticLoopDiagram.astro      # Build-time SVG wrapper
-        HookLifecycleDiagram.astro    # Build-time SVG wrapper
-        McpArchitectureDiagram.astro  # Build-time SVG wrapper
-        PermissionFlowExplorer.tsx    # Interactive React Flow component
-        HookEventVisualizer.tsx       # Interactive React Flow component
-  pages/
-    guides/
-      claude-code/
-        index.astro                   # Guide landing page
-        [slug].astro                  # Chapter page route
-        faq.astro                     # FAQ page (optional)
-    open-graph/
-      guides/
-        claude-code/
-          [slug].png.ts               # OG image generation
-```
+**Versions:** v2.1.83+
+**Confidence:** HIGH
 
-## Migration Checklist
+Full permission mode system now documented as first-class concept:
+- `default` -- reads only auto-approved
+- `acceptEdits` -- reads + file edits + safe filesystem commands auto-approved
+- `plan` -- research and propose, no edits
+- `auto` -- classifier-based (NEW, see #2 above)
+- `dontAsk` -- only pre-approved tools
+- `bypassPermissions` -- everything except protected paths
+- `Shift+Tab` cycling with configurable mode set
+- Protected paths list (`.git`, `.vscode`, `.idea`, `.husky`, `.claude` partial)
 
-These changes touch existing files (not just new files):
+**Guide impact:** UPDATE Security & Enterprise chapter (Ch 11). Major restructuring of permissions content.
 
-1. **`src/content.config.ts`** -- Widen `guidePages` glob to `./src/data/guides/*/pages` or `./src/data/guides` recursive. Switch `guides` loader from `file()` to `glob()` for `**/guide.json`.
-2. **`src/lib/guides/schema.ts`** -- Add `guideId: z.string()` to `guidePageSchema`.
-3. **`src/data/guides/fastapi-production/pages/*.mdx`** -- Add `guideId: "fastapi-production"` to all 14 existing page frontmatters.
-4. **`src/data/guides/fastapi-production/guide.json`** -- Potentially restructure if switching from `file()` loader to `glob()` loader (the file currently wraps data in an array `[{...}]`; a glob loader may expect a single object).
-5. **`src/layouts/GuideLayout.astro`** -- Extract hardcoded FastAPI companion blog link into a prop or optional slot.
-6. **`src/pages/guides/fastapi-production/[slug].astro`** -- Filter `getCollection('guidePages')` by `guideId === 'fastapi-production'`.
-7. **`astro.config.mjs`** -- Generalize `buildContentDateMap()` to scan all `src/data/guides/*/guide.json` files instead of hardcoded path.
-8. **`src/lib/guides/svg-diagrams/index.ts`** -- Add exports for new Claude Code diagram generators.
+---
+
+### 11. Hooks System Updates
+
+**Versions:** v2.1.69-v2.1.101
+**Confidence:** HIGH
+
+New hook events and capabilities:
+- `if` conditional field using permission rule syntax (v2.1.85)
+- `PermissionDenied` hook on auto mode denials (v2.1.89)
+- `defer` permission decision for headless sessions (v2.1.89)
+- `CwdChanged` and `FileChanged` hook events (v2.1.83)
+- `TaskCreated` hook (v2.1.84)
+- `WorktreeCreate` hook HTTP support (v2.1.84)
+- `StopFailure` hook on API error turn end (v2.1.78)
+- `InstructionsLoaded` hook (v2.1.69)
+- `Elicitation` and `ElicitationResult` hooks (v2.1.76)
+- `PostCompact` hook (v2.1.76)
+- `TeammateIdle`, `TaskCreated`, `TaskCompleted` hooks for agent teams
+- Hook output >50K saved to disk with path + preview (v2.1.89)
+- Hook source display in permission prompts (v2.1.75)
+- `agent_id` and `agent_type` added to hook events (v2.1.69)
+
+**Guide impact:** UPDATE Hooks chapter (Ch 8). Significant new hook events and the `if` conditional feature.
+
+---
+
+### 12. MCP Updates
+
+**Versions:** v2.1.76-v2.1.101
+**Confidence:** HIGH
+
+- MCP elicitation support -- interactive dialog for structured input (v2.1.76)
+- Per-tool result-size override via `_meta["anthropic/maxResultSizeChars"]` up to 500K (v2.1.91)
+- MCP OAuth following RFC 9728 Protected Resource Metadata (v2.1.85)
+- OAuth Client ID Metadata Document support (v2.1.81)
+- MCP tool/server instructions capped at 2KB (v2.1.84)
+- MCP servers deduplicated, local config wins (v2.1.84)
+- `CLAUDE_CODE_MCP_SERVER_NAME` and `CLAUDE_CODE_MCP_SERVER_URL` env vars (v2.1.85)
+- `MCP_CONNECTION_NONBLOCKING=true` for `-p` mode (v2.1.89)
+
+**Guide impact:** UPDATE MCP chapter (Ch 6). Elicitation and per-tool result-size are notable additions.
+
+---
+
+### 13. Agent System Updates
+
+**Versions:** v2.1.69-v2.1.101
+**Confidence:** HIGH
+
+- `/agents` tabbed layout with Running tab and Library tab (v2.1.98)
+- `initialPrompt` frontmatter for auto-submit on agent start (v2.1.83)
+- Named subagents in `@` mention typeahead (v2.1.89)
+- Agent `model` parameter restored for per-invocation overrides (v2.1.72)
+- `effort`, `maxTurns`, `disallowedTools` frontmatter for plugin agents (v2.1.78)
+- `--agents` flag for dynamic JSON-defined subagents (CLI reference)
+- `--teammate-mode` flag: auto, in-process, tmux
+
+**Guide impact:** UPDATE Agent Teams chapter (Ch 10). New frontmatter fields, `/agents` UI, dynamic agent creation.
+
+---
+
+### 14. Models & Effort Level Changes
+
+**Versions:** v2.1.72-v2.1.101
+**Confidence:** HIGH
+
+- 1M context for Opus 4.6 by default for Max, Team, Enterprise (v2.1.75)
+- Increased default max output tokens: Opus 4.6 64k, upper bound 128k (v2.1.77)
+- Default effort level changed from medium to high for API/Bedrock/Vertex/Team/Enterprise (v2.1.94)
+- Simplified effort levels: low/medium/high (removed max, except Opus 4.6) (v2.1.72)
+- `/effort` slash command (v2.1.76)
+- `--effort` CLI flag (session-scoped, does not persist) -- low/medium/high/max(Opus only)
+- `--fallback-model` for automatic fallback on overload (print mode)
+- Thinking summaries off by default (set `showThinkingSummaries: true` to restore)
+- Per-model and cache-hit breakdown in `/cost` for subscription users (v2.1.92)
+
+**Guide impact:** UPDATE Models & Costs chapter (Ch 3). Significant changes to effort levels and context sizes.
+
+---
+
+### 15. Environment & Settings Updates
+
+**Versions:** v2.1.69-v2.1.101
+**Confidence:** HIGH
+
+New settings and env vars:
+- `managed-settings.d/` drop-in directory for layered policy fragments (v2.1.83)
+- `autoMemoryDirectory` for custom auto-memory storage (v2.1.74)
+- `modelOverrides` for custom model picker entries (v2.1.73)
+- `disableSkillShellExecution` to block inline shell in skills (v2.1.91)
+- `forceRemoteSettingsRefresh` for fail-closed managed settings (v2.1.92)
+- `CLAUDE_CODE_NO_FLICKER=1` for flicker-free alt-screen rendering (v2.1.89)
+- `CLAUDE_CODE_PERFORCE_MODE` for p4 edit hints (v2.1.98)
+- `CLAUDE_CODE_USE_POWERSHELL_TOOL` for Windows PowerShell (v2.1.84)
+- `CLAUDE_CODE_USE_MANTLE=1` for Bedrock via Mantle (v2.1.94)
+- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` to strip credentials from subprocesses (v2.1.83)
+- `CLAUDE_CODE_DISABLE_CRON=1` to disable scheduler (v2.1.72)
+- `--exclude-dynamic-system-prompt-sections` for cross-user prompt caching (v2.1.98)
+- `--setting-sources` to control which setting sources load (v2.1.98)
+- `--bare` mode for faster scripted calls (v2.1.81)
+
+**Guide impact:** UPDATE Environment chapter (Ch 4). Many new env vars and settings.
+
+---
+
+### 16. Headless & SDK Updates
+
+**Versions:** v2.1.69-v2.1.101
+**Confidence:** HIGH
+
+- `--bare` flag skips auto-discovery of hooks, LSP, plugins, MCP, auto memory, CLAUDE.md (v2.1.81)
+- `defer` permission decision for PreToolUse hooks in headless sessions (v2.1.89)
+- `--no-session-persistence` for ephemeral sessions (print mode)
+- `--json-schema` for structured outputs after agent workflow (print mode)
+- `--from-pr` to resume sessions linked to GitHub PR (CLI reference)
+- `--teleport` to resume web session in local terminal
+- `--remote` to create web session from CLI
+- `claude setup-token` for long-lived OAuth tokens in CI
+- Monitor tool for streaming background script events (v2.1.98)
+
+**Guide impact:** UPDATE Remote & Headless chapter (Ch 5). New `--bare` mode and structured outputs are significant.
+
+---
+
+### 17. Worktree & Session Updates
+
+**Versions:** v2.1.72-v2.1.101
+**Confidence:** HIGH
+
+- `worktree.sparsePaths` setting for sparse-checkout in monorepos (v2.1.76)
+- `ExitWorktree` tool (v2.1.72)
+- `--fork-session` flag for resume without reusing session ID
+- `/rename` for mid-session name changes
+- `/fork` renamed to `/branch` (v2.1.77)
+- `--resume` improvements: accept session titles from `/rename`, PR-linked sessions
+- Session names displayed on prompt bar
+
+**Guide impact:** UPDATE Worktrees chapter (Ch 9). Sparse paths and ExitWorktree are notable additions.
+
+---
+
+## NEW COMMANDS AND SLASH COMMANDS
+
+| Command | Version | Description |
+|---------|---------|-------------|
+| `/powerup` | v2.1.90 | Interactive lessons with animated demos |
+| `/loop` | v2.1.71 | Run prompts repeatedly on schedule |
+| `/effort` | v2.1.76 | Set effort level mid-session |
+| `/color` | v2.1.75 | Customize prompt color for all users |
+| `/context` | v2.1.74 | Actionable context-window suggestions |
+| `/release-notes` | v2.1.92 | Interactive version picker for release notes |
+| `/team-onboarding` | v2.1.91 | Generate teammate ramp-up guide |
+| `/claude-api` | v2.1.69 | Skill for Claude API/Anthropic SDK apps |
+| `/schedule` | - | Create cloud scheduled tasks |
+| `/chrome` | - | Toggle Chrome browser integration |
+| `/mobile` | - | QR code to download Claude mobile app |
+| `/insights` | - | Session insights report |
+
+**Removed commands:**
+- `/tag` -- removed (v2.1.92)
+- `/vim` -- removed, toggle via `/config` (v2.1.92)
+- `/output-style` -- deprecated, fixed at session start (v2.1.73)
+
+---
+
+## DEPRECATIONS AND BREAKING CHANGES
+
+| Item | Version | Details |
+|------|---------|---------|
+| `/tag` command | v2.1.92 | Removed |
+| `/vim` command | v2.1.92 | Removed; use `/config` > Editor mode |
+| `/output-style` | v2.1.73 | Deprecated; fixed at session start for prompt caching |
+| `TaskOutput` tool | v2.1.83 | Deprecated in favor of Read on output file path |
+| Windows managed settings fallback | v2.1.75 | Removed `C:\ProgramData\ClaudeCode\managed-settings.json` |
+| Agent tool `resume` parameter | v2.1.77 | No longer accepted |
+| Thinking summaries | v2.1.89 | Off by default; set `showThinkingSummaries: true` to restore |
+| Default effort level | v2.1.94 | Changed from medium to high for API/Bedrock/Vertex/Team/Enterprise |
+| `cleanupPeriodDays: 0` | v2.1.89 | Now rejected with validation error |
+| `Ctrl+F` for stop background agents | v2.1.83 | Changed to `Ctrl+X Ctrl+K` |
+
+---
+
+## SECURITY HARDENING (Significant since guide publication)
+
+**Versions:** v2.1.78-v2.1.101
+**Confidence:** HIGH
+
+Extensive Bash tool permission security fixes:
+- Backslash-escaped flag bypass fixed (v2.1.98)
+- Compound command forced-prompt bypass fixed (v2.1.98)
+- Env-var prefix read-only commands now prompt unless known-safe (v2.1.98)
+- `/dev/tcp` and `/dev/udp` redirect prompting (v2.1.98)
+- PowerShell trailing `&`, `-ErrorAction Break`, archive TOCTOU hardening (v2.1.90)
+- Command injection in POSIX `which` fallback for LSP detection fixed (v2.1.101)
+- Nested skill discovery loading from gitignored directories fixed (v2.1.69)
+- Trust dialog per-server MCP approval (v2.1.69)
+- `sandbox.failIfUnavailable` setting (v2.1.83)
+- Subprocess sandboxing with PID namespace isolation on Linux (v2.1.98)
+
+**Guide impact:** UPDATE Security & Enterprise chapter (Ch 11). Security posture has improved significantly.
+
+---
+
+## NEW PLATFORM SUPPORT
+
+| Platform/Surface | Details |
+|-----------------|---------|
+| PowerShell tool (Windows) | Opt-in preview via `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` (v2.1.84) |
+| Desktop App (macOS + Windows) | Full GUI surface with Code/Cowork/Chat tabs |
+| Slack integration | @Claude mention routing to Claude Code web sessions |
+| Vertex AI setup wizard | Interactive setup from login screen (v2.1.98) |
+| Bedrock setup wizard | Interactive setup from login screen (v2.1.92) |
+| Bedrock via Mantle | `CLAUDE_CODE_USE_MANTLE=1` (v2.1.94) |
+| Homebrew stable/latest casks | `claude-code` (stable) vs `claude-code@latest` (latest) |
+| WinGet install | `winget install Anthropic.ClaudeCode` |
+| Native install scripts | `curl -fsSL https://claude.ai/install.sh \| bash` and PowerShell/CMD equivalents |
+| Voice mode improvements | 10 new STT languages (20 total), push-to-talk improvements (v2.1.69+) |
+
+---
+
+## GUIDE CHAPTER IMPACT MATRIX
+
+| Chapter | Impact Level | Key Changes |
+|---------|-------------|-------------|
+| Ch 1: Introduction | MODERATE | New surfaces (Desktop, Web, Slack), new install methods, /powerup |
+| Ch 2: Context Management | LOW | `autoMemoryDirectory` setting, `PostCompact` hook, MEMORY.md index truncating |
+| Ch 3: Models & Costs | HIGH | 1M context Opus, effort level changes, default effort high, /effort command |
+| Ch 4: Environment | HIGH | Many new env vars, settings, `--bare`, NO_FLICKER, managed-settings.d/ |
+| Ch 5: Remote & Headless | HIGH | Remote Control server mode, Channels, Scheduled Tasks, Slack, --bare, --teleport |
+| Ch 6: MCP | MODERATE | Elicitation, per-tool result-size, OAuth improvements, computer-use MCP |
+| Ch 7: Custom Skills | HIGH | Full Plugins system, marketplace, LSP, bin/, plugin conversion |
+| Ch 8: Hooks | HIGH | Conditional `if`, PermissionDenied, CwdChanged, FileChanged, 6+ new events |
+| Ch 9: Worktrees | LOW | sparsePaths, ExitWorktree, /branch rename |
+| Ch 10: Agent Teams | MODERATE | /agents UI, initialPrompt, dynamic agents, agent frontmatter fields |
+| Ch 11: Security & Enterprise | HIGH | Auto mode, permission modes restructured, extensive Bash hardening |
+
+### Potential New Chapters/Sections
+
+| Topic | Rationale |
+|-------|-----------|
+| Plugins | Too large for the existing Skills chapter. Full ecosystem with marketplace, distribution, multi-component packages |
+| Browser & Desktop Automation | Chrome integration + Computer Use form a coherent "GUI automation" story |
+| Scheduling & Automation | /loop, cron tools, cloud/desktop scheduled tasks, Monitor tool |
+| Desktop App & Surfaces | Desktop app, Web, Slack, Remote Control server mode -- the "surfaces" story |
+| Cheatsheet Page | Standalone reference page (not a chapter) |
+
+---
 
 ## Sources
 
-- Astro 5 content collections: Verified against installed astro@5.17.1 and existing `content.config.ts` patterns
-- @xyflow/react v12.10.1: Verified installed version matches latest on [npm](https://www.npmjs.com/package/@xyflow/react)
-- astro-expressive-code v0.41.6: Verified installed version, language support confirmed via [expressive-code.com](https://expressive-code.com/)
-- Claude Code hooks reference: [code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks) -- 17 lifecycle events documented
-- Claude Code architecture: [code.claude.com/docs/en/how-claude-code-works](https://code.claude.com/docs/en/how-claude-code-works) -- Agentic loop, tools, permissions documented
-- Existing codebase patterns: `diagram-base.ts`, `DeploymentTopology.tsx`, `GuideLayout.astro`, `CodeFromRepo.astro`, `content.config.ts`, `og-cache.ts` -- all read and verified
-- Previous research: `.planning/research/STACK-fastapi-guide.md` -- Mermaid rejection rationale still applies
+- https://code.claude.com/docs/en/whats-new -- Weekly digests (Weeks 13-14)
+- https://code.claude.com/docs/en/whats-new/2026-w14 -- Week 14 full digest
+- https://code.claude.com/docs/en/whats-new/2026-w13 -- Week 13 full digest
+- https://code.claude.com/docs/en/changelog -- Full changelog v2.1.69 through v2.1.101
+- https://code.claude.com/docs/en/overview -- Product overview
+- https://code.claude.com/docs/en/cli-reference -- Complete CLI flags and commands
+- https://code.claude.com/docs/en/computer-use -- Computer Use documentation
+- https://code.claude.com/docs/en/permission-modes -- Permission modes including Auto mode
+- https://code.claude.com/docs/en/channels -- Channels documentation
+- https://code.claude.com/docs/en/plugins -- Plugins creation guide
+- https://code.claude.com/docs/en/scheduled-tasks -- /loop and cron scheduling
+- https://code.claude.com/docs/en/remote-control -- Remote Control documentation
+- https://code.claude.com/docs/en/agent-teams -- Agent Teams documentation
+- https://code.claude.com/docs/en/chrome -- Chrome browser integration
+- https://code.claude.com/docs/en/slack -- Slack integration
+- https://code.claude.com/docs/en/desktop-quickstart -- Desktop app guide
 
 ---
-*Stack research for: Claude Code Guide content features*
-*Researched: 2026-03-10*
+*Stack research for: Claude Code guide content refresh*
+*Researched: 2026-04-12*

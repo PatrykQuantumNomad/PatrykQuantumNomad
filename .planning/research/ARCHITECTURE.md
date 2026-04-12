@@ -1,777 +1,334 @@
-# Architecture Patterns: Jupyter Notebook Downloads for EDA Case Studies
+# Architecture Research: Claude Code Guide Refresh Integration
 
-**Domain:** Downloadable Jupyter notebooks for Astro 5 static site
-**Researched:** 2026-03-14
-**Overall confidence:** HIGH
+**Domain:** Astro 5 guide infrastructure -- cheatsheet page, chapter updates, blog post integration
+**Researched:** 2026-04-12
+**Confidence:** HIGH (based on direct codebase analysis, no external dependencies)
 
-## Recommended Architecture
+## Executive Summary
 
-### Overview
+The Claude Code guide lives within a well-established multi-guide infrastructure on patrykgolabek.dev. The guide system uses Astro content collections (JSON metadata + MDX pages), a shared `GuideLayout.astro` for chapter pages, build-time OG image generation with content-hash caching, and centralized LLMs.txt generation. Three new deliverables -- a cheatsheet page, updated guide chapters, and a companion blog post -- each integrate differently with this architecture. The cheatsheet page is a **standalone Astro page** (not a content collection chapter), the chapter updates are in-place MDX edits, and the blog post follows the existing blog collection pattern with guide cross-linking.
 
-Generate `.ipynb` notebooks and `.zip` download bundles at **Astro build time** using the same pattern the codebase already uses for OG images: TypeScript API route endpoints with `getStaticPaths()` that return binary `Response` objects. No new build scripts, no pre-built files committed to the repo -- everything flows through Astro's existing static output pipeline.
+## System Overview: Existing Guide Architecture
 
 ```
-handbook/datasets/*.DAT        (source data, already in repo)
-         |
-src/lib/eda/notebooks/         (NEW: notebook builder + templates)
-         |
-         v
-src/pages/eda/notebooks/
-  |- index.astro                (NEW: landing page at /eda/notebooks/)
-  |- [slug].zip.ts              (NEW: build-time endpoint -> /eda/notebooks/{slug}.zip)
-  |- [slug].ipynb.ts            (NEW: build-time endpoint -> /eda/notebooks/{slug}.ipynb)
-         |
-         v
-dist/eda/notebooks/
-  |- index.html
-  |- ceramic-strength.zip       (notebook + .DAT file)
-  |- ceramic-strength.ipynb     (standalone notebook)
-  |- ...10 case studies
+                           CONTENT LAYER
+  ┌──────────────────────────────────────────────────────┐
+  │  src/data/guides/claude-code/                        │
+  │  ├── guide.json           (chapters[], metadata)     │
+  │  └── pages/*.mdx          (11 chapter files)         │
+  │                                                      │
+  │  src/data/blog/                                      │
+  │  └── claude-code-guide.mdx (companion blog post)     │
+  ├──────────────────────────────────────────────────────┤
+                           SCHEMA LAYER
+  │  src/lib/guides/schema.ts                            │
+  │  ├── guidePageSchema      (title, description,       │
+  │  │                         order, slug, keywords)    │
+  │  └── guideMetaSchema      (chapters[], accentColor,  │
+  │                            publishedDate, etc.)      │
+  │                                                      │
+  │  src/content.config.ts                               │
+  │  ├── claudeCodePages      (glob MDX loader)          │
+  │  └── claudeCodeGuide      (file JSON loader)         │
+  ├──────────────────────────────────────────────────────┤
+                           PAGE LAYER
+  │  src/pages/guides/claude-code/                       │
+  │  ├── index.astro          (/guides/claude-code/)     │
+  │  ├── [slug].astro         (/guides/claude-code/X/)   │
+  │  └── [NEW] cheatsheet.astro (/guides/.../cheatsheet/)│
+  ├──────────────────────────────────────────────────────┤
+                           LAYOUT LAYER
+  │  src/layouts/                                        │
+  │  ├── Layout.astro         (base layout, all pages)   │
+  │  └── GuideLayout.astro    (sidebar + breadcrumb +    │
+  │                            chapter nav + JSON-LD)    │
+  ├──────────────────────────────────────────────────────┤
+                           OG IMAGE LAYER
+  │  src/pages/open-graph/guides/claude-code/            │
+  │  ├── [slug].png.ts        (per-chapter OG images)    │
+  │  └── [NEW] needs OG for cheatsheet                   │
+  │  src/pages/open-graph/guides/                        │
+  │  └── claude-code.png.ts   (landing page OG image)    │
+  ├──────────────────────────────────────────────────────┤
+                           SEO LAYER
+  │  src/pages/llms.txt.ts                               │
+  │  src/pages/llms-full.txt.ts                          │
+  │  (both iterate claudeCodePages collection)           │
+  └──────────────────────────────────────────────────────┘
 ```
 
-### Component Boundaries
+## Key Architecture Decision: Cheatsheet Page Type
 
-| Component | Responsibility | Communicates With | Status |
-|-----------|---------------|-------------------|--------|
-| `src/lib/eda/notebooks/builder.ts` | Constructs nbformat v4.5 JSON for a given case study | datasets.ts, DATASET_SOURCES, handbook/datasets/ | **NEW** |
-| `src/lib/eda/notebooks/templates.ts` | Per-case-study cell definitions (markdown narrative + Python code cells) | builder.ts | **NEW** |
-| `src/lib/eda/notebooks/zip.ts` | Assembles .zip buffer (notebook + .DAT data file) | builder.ts, Node.js fs for .DAT files | **NEW** |
-| `src/lib/eda/notebooks/registry.ts` | Maps case study slugs to notebook metadata (title, .DAT filename, description) | DATASET_SOURCES from datasets.ts | **NEW** |
-| `src/lib/eda/notebooks/types.ts` | TypeScript interfaces for nbformat v4.5 structures | None | **NEW** |
-| `src/pages/eda/notebooks/[slug].zip.ts` | Astro API route endpoint: getStaticPaths + GET -> binary zip Response | zip.ts, registry.ts | **NEW** |
-| `src/pages/eda/notebooks/[slug].ipynb.ts` | Astro API route endpoint: getStaticPaths + GET -> .ipynb JSON Response | builder.ts, registry.ts | **NEW** |
-| `src/pages/eda/notebooks/index.astro` | Landing page listing all 10 notebooks with download links | registry.ts, EDALayout | **NEW** |
-| `src/components/eda/NotebookDownload.astro` | Download button/card for embedding in existing case study pages | registry.ts | **NEW** |
-| `src/lib/eda/routes.ts` | Add `notebookUrl()`, `notebookZipUrl()`, and `notebooks` route | Existing, **MODIFY** |
-| `src/pages/eda/index.astro` | Add "Notebooks" to the SECTIONS array and NAV_ITEMS | Existing, **MODIFY** |
-| `src/pages/eda/case-studies/[...slug].astro` | Import and render NotebookDownload component | Existing, **MODIFY** |
-| `src/data/eda/datasets.ts` | Reference only -- no changes needed (DATASET_SOURCES already maps slug to .DAT name) | Existing, **NO CHANGE** |
-| `handbook/datasets/*.DAT` | Source .DAT files read at build time by zip.ts | Existing, **NO CHANGE** |
+### Decision: Standalone Astro page, NOT a content collection chapter
+
+**Rationale based on codebase evidence:**
+
+1. **guide.json chapters array drives the content collection.** The `claudeCodePages` collection uses `glob({ pattern: '**/*.mdx', base: './src/data/guides/claude-code/pages' })`. Adding a cheatsheet MDX file here would require it to have `guidePageSchema` frontmatter (title, description, order, slug, keywords) and would make it appear in the `[slug].astro` dynamic route, rendered through `GuideLayout` with full article prose treatment. This is wrong for a cheatsheet -- it is a visual reference, not a chapter to read.
+
+2. **guide.json chapters array controls sidebar navigation and prev/next links.** `GuideChapterNav` uses `currentIndex` within the chapters array for prev/next navigation. A cheatsheet has no logical prev/next relationship with chapters. Adding it to the chapters array would create a jarring navigation flow (e.g., "Security" -> next -> "Cheatsheet" instead of being the terminal chapter).
+
+3. **Precedent: FastAPI faq.astro.** The FastAPI guide has a standalone `faq.astro` page at `/guides/fastapi-production/faq/` that lives outside the content collection. It uses `Layout.astro` directly (not `GuideLayout`), has its own breadcrumb markup, and manages its own JSON-LD. This is the exact pattern for the cheatsheet.
+
+4. **The cheatsheet is a reference artifact, not prose.** It renders two pre-built SVG files with download buttons. The `GuideLayout` sidebar + article prose + reading-time pattern does not fit.
+
+**Implementation:** Create `src/pages/guides/claude-code/cheatsheet.astro` as a standalone page using `Layout.astro` directly, mirroring the `faq.astro` precedent.
+
+## Component Analysis: New vs Modified
+
+### NEW Components to Create
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| Cheatsheet page | `src/pages/guides/claude-code/cheatsheet.astro` | Standalone page rendering 2 SVGs with download buttons |
+| Cheatsheet OG image | `src/pages/open-graph/guides/claude-code/cheatsheet.png.ts` | Build-time OG image for cheatsheet page |
+| Companion blog post | `src/data/blog/claude-code-guide-refresh.mdx` | New blog post announcing the guide refresh |
+
+### MODIFIED Components (In-Place Edits)
+
+| Component | Path | Change |
+|-----------|------|--------|
+| Guide chapters | `src/data/guides/claude-code/pages/*.mdx` | Content updates to all 11 chapters |
+| guide.json | `src/data/guides/claude-code/guide.json` | Update descriptions if chapters changed substantially |
+| Landing page | `src/pages/guides/claude-code/index.astro` | Add cheatsheet card/link below the chapter grid |
+| llms.txt | `src/pages/llms.txt.ts` | Add cheatsheet URL entry |
+| llms-full.txt | `src/pages/llms-full.txt.ts` | Add cheatsheet URL entry |
+| Blog slug template | `src/pages/blog/[slug].astro` | Add FAQ JSON-LD block for the new blog post (if applicable) |
+
+### UNCHANGED Components (No Modification Needed)
+
+| Component | Path | Why Unchanged |
+|-----------|------|---------------|
+| GuideLayout.astro | `src/layouts/GuideLayout.astro` | Cheatsheet uses Layout.astro directly |
+| GuideSidebar.astro | `src/components/guide/GuideSidebar.astro` | Driven by guide.json chapters, cheatsheet is standalone |
+| GuideChapterNav.astro | `src/components/guide/GuideChapterNav.astro` | Same -- cheatsheet is outside nav flow |
+| GuideBreadcrumb.astro | `src/components/guide/GuideBreadcrumb.astro` | Cheatsheet page builds its own breadcrumb |
+| content.config.ts | `src/content.config.ts` | No new collections needed |
+| guide schema | `src/lib/guides/schema.ts` | No schema changes needed |
+| guide routes | `src/lib/guides/routes.ts` | Cheatsheet URL is hardcoded, not dynamic |
+| OG cache utility | `src/lib/guides/og-cache.ts` | Reused as-is by new OG endpoint |
+| OG image generator | `src/lib/og-image.ts` | Reused as-is -- `generateGuideOgImage()` works for cheatsheet |
+
+## Detailed Architecture: Cheatsheet Page
 
 ### Data Flow
 
-**Build-time flow (no runtime computation):**
-
-1. Astro calls `getStaticPaths()` in `[slug].zip.ts` / `[slug].ipynb.ts`
-2. Registry provides 10 case study entries (slug, title, .DAT filename, description)
-3. For each slug, `builder.ts` constructs nbformat v4.5 JSON:
-   - Markdown cells: title, background, dataset description, analysis steps
-   - Code cells: pandas import, data loading, EDA plots (matplotlib/seaborn), statistical summaries
-4. `zip.ts` reads the corresponding `.DAT` file from `handbook/datasets/` using Node.js `fs`
-5. `zip.ts` combines `.ipynb` JSON + `.DAT` file into a zip buffer using JSZip
-6. Endpoint returns `new Response(zipBuffer, { headers: { 'Content-Type': 'application/zip' } })`
-7. Astro writes the response to `dist/eda/notebooks/{slug}.zip`
-
-**User-facing flow:**
-
-1. User visits `/eda/notebooks/` landing page or a case study page
-2. Clicks "Download Notebook" button
-3. Browser downloads static `.zip` file from GitHub Pages CDN (no server needed)
-
-## Key Design Decisions
-
-### Decision 1: Build-Time Generation (not pre-committed .ipynb files)
-
-**Rationale:** The codebase already generates OG images, SVG plots, and CSV downloads at build time. Pre-committing 10+ binary .ipynb/.zip files to git bloats the repo and creates maintenance drift. Build-time generation ensures notebooks stay synchronized with DATASET_SOURCES and case study content.
-
-**Pattern precedent:** `src/pages/open-graph/eda/[...slug].png.ts` uses `getStaticPaths()` from content collections, generates PNG in the `GET` handler, and returns a binary Response. The notebook endpoint follows the exact same pattern.
-
-### Decision 2: Dual Download Format (.zip primary, .ipynb secondary)
-
-**Rationale:** The `.zip` bundles the notebook with its `.DAT` data file, so the user can `jupyter notebook ceramic-strength.ipynb` immediately without hunting for the dataset. The standalone `.ipynb` endpoint exists for users who already have the data or want to inspect the notebook without downloading a zip.
-
-**Structure inside each zip:**
 ```
-ceramic-strength/
-  ceramic-strength.ipynb
-  JAHANMI2.DAT
-  README.txt           (1-paragraph attribution + instructions)
+public/images/cheatsheet/
+  ├── claude-code-cheatsheet.svg       (dark theme, 1600x1000, ~56KB)
+  └── claude-code-cheatsheet-print.svg (light/print theme, 1600x1000, ~56KB)
+        │
+        ▼
+src/pages/guides/claude-code/cheatsheet.astro
+  │   Renders:
+  │   1. Breadcrumb (Home > Guides > Claude Code Guide > Cheatsheet)
+  │   2. Hero section (title, description)
+  │   3. Dark-theme SVG via <img> tag
+  │   4. Print-theme SVG via <img> tag
+  │   5. Download buttons (link to /images/cheatsheet/*.svg with download attr)
+  │   6. Cross-link to guide landing page
+  │   7. BreadcrumbJsonLd + page-level JSON-LD
+  │
+  ├── Uses Layout.astro (NOT GuideLayout.astro)
+  ├── OG image from /open-graph/guides/claude-code/cheatsheet.png
+  └── URL: /guides/claude-code/cheatsheet/
 ```
 
-### Decision 3: nbformat v4 JSON Construction in Pure TypeScript
+### SVG Rendering Approach
 
-**Rationale:** The .ipynb format is just JSON with a specific schema. No Python tooling or nbconvert is needed. Building the JSON in TypeScript keeps the build pipeline simple (no Python dependency in CI). The schema is stable (nbformat v4 has been the standard since 2015, current minor is v4.5).
+The two SVGs are pre-built static assets in `public/images/cheatsheet/`. They are NOT build-time generated diagram components (unlike `AgenticLoopDiagram.astro` etc.). They use external Google Font imports and have fixed 1600x1000 viewBox dimensions.
 
-**Minimal valid notebook structure:**
-```typescript
-interface NotebookV4 {
-  nbformat: 4;
-  nbformat_minor: 5;
-  metadata: {
-    kernelspec: { display_name: string; language: string; name: string };
-    language_info: { name: string; version: string };
-  };
-  cells: Array<MarkdownCell | CodeCell>;
-}
+**Recommended rendering:** Use `<img>` tags with explicit width/height and responsive CSS. Reasons:
+- External font `@import` in SVG `<defs><style>` works in `<img>` tags in modern browsers
+- `<img>` prevents SVG from accessing page DOM (security benefit)
+- `<img>` is simpler, more cacheable, and SEO-friendly with alt text
+- The SVGs already have fixed dimensions and self-contained styling
 
-interface MarkdownCell {
-  cell_type: 'markdown';
-  id: string;
-  metadata: Record<string, unknown>;
-  source: string;
-}
+**Important detail:** The dark-theme SVG has a dark background (`#0c0c14` gradient) which will look good in both site themes. The print SVG has a white background. The page should present both with labels and download buttons.
 
-interface CodeCell {
-  cell_type: 'code';
-  id: string;
-  metadata: Record<string, unknown>;
-  source: string;
-  execution_count: null;
-  outputs: [];
-}
-```
+### Download Buttons
 
-Notebooks ship with `execution_count: null` and empty `outputs` -- users execute cells themselves. Each cell requires a unique `id` field (alphanumeric, 1-64 characters) per the nbformat v4.5 spec.
+Use HTML5 download attribute pointing to the static `public/` assets. No server-side generation needed. The files are already in `public/` and served as static assets by Astro.
 
-### Decision 4: JSZip for In-Memory Zip Creation
+## Detailed Architecture: OG Image for Cheatsheet
 
-**Rationale:** JSZip works entirely in memory (no temp files), has zero native dependencies (pure JS), works identically on macOS dev and Ubuntu CI, and handles the simple case (2-3 files per archive) without streaming complexity. `archiver` is overkill for 3 files totaling less than 500KB. The existing GitHub Actions CI (`withastro/action@v3`) needs no changes.
+### Pattern to Follow
 
-### Decision 5: Python 3 + pandas + matplotlib as Notebook Target
+The existing `[slug].png.ts` generates OG images by iterating over the `claudeCodePages` collection. Since the cheatsheet is NOT in the collection, it needs its own static OG endpoint.
 
-**Rationale:** This is the standard data science stack that the target audience (engineers reading the NIST handbook) will have. The notebooks import `pandas`, `matplotlib.pyplot`, and `scipy.stats` -- nothing exotic. Each notebook loads the `.DAT` file relative to its own directory with `pd.read_csv()` or `pd.read_fwf()` depending on the file format.
+**Create:** `src/pages/open-graph/guides/claude-code/cheatsheet.png.ts`
 
-### Decision 6: Landing Page at /eda/notebooks/ (New Section)
+This follows the pattern of `claude-code.png.ts` (the landing page OG image) -- a non-dynamic endpoint that calls `generateGuideOgImage()` with static title/description strings, wrapped in `getOrGenerateOgImage()` for content-hash caching. Zero changes to existing utility functions.
 
-**Rationale:** Follows the existing EDA section pattern. The EDA index already has a `SECTIONS` array with `foundations`, `graphical`, `quantitative`, `distributions`, `case-studies`, `reference`. Adding `notebooks` as a 7th section maintains the established information architecture. URL `/eda/notebooks/` is consistent with `/eda/case-studies/`, `/eda/distributions/`, etc.
+## Detailed Architecture: Blog Post Integration
 
-### Decision 7: Registry Array (not Content Collection)
+### Existing Pattern
 
-**Rationale:** Notebooks are 1:1 with case studies, not independent content. Adding a new Astro content collection in `src/content.config.ts` would create unnecessary schema overhead and require keeping two collections in sync. A simple TypeScript `NOTEBOOK_REGISTRY` array in `src/lib/eda/notebooks/registry.ts` is sufficient for 10 entries and can be validated at build time.
+The current companion blog post `src/data/blog/claude-code-guide.mdx` follows the standard blog collection schema:
+- Frontmatter: title, description, publishedDate, tags, coverImage, draft
+- Content: prose with links to guide chapters via absolute paths (`/guides/claude-code/introduction/`)
+- Referenced in `src/pages/blog/[slug].astro` with special-case FAQ JSON-LD and `aboutDataset` linking to the guide
 
-## Component Details
+### New Blog Post
 
-### NEW: `src/lib/eda/notebooks/types.ts`
+Create `src/data/blog/claude-code-guide-refresh.mdx` following the same pattern:
+- Tags should overlap with the existing post tags for related-post discovery (the blog template auto-computes related posts by tag overlap)
+- Include links to updated chapters AND the new cheatsheet page
+- The `[slug].astro` template may need a new `isClaudeCodeRefreshPost` flag if FAQ JSON-LD is desired
 
-Defines the nbformat v4.5 TypeScript interfaces:
-
-```typescript
-export interface NotebookV4 {
-  nbformat: 4;
-  nbformat_minor: 5;
-  metadata: NotebookMetadata;
-  cells: NotebookCell[];
-}
-
-export interface NotebookMetadata {
-  kernelspec: {
-    display_name: string;
-    language: string;
-    name: string;
-  };
-  language_info: {
-    name: string;
-    version: string;
-  };
-}
-
-export type NotebookCell = MarkdownCell | CodeCell;
-
-export interface MarkdownCell {
-  cell_type: 'markdown';
-  id: string;
-  metadata: Record<string, unknown>;
-  source: string;
-}
-
-export interface CodeCell {
-  cell_type: 'code';
-  id: string;
-  metadata: Record<string, unknown>;
-  source: string;
-  execution_count: null;
-  outputs: [];
-}
-```
-
-### NEW: `src/lib/eda/notebooks/registry.ts`
-
-Single source of truth mapping case study slugs to notebook metadata. Derives from existing `DATASET_SOURCES` and `CASE_STUDY_MAP`:
-
-```typescript
-export interface NotebookEntry {
-  slug: string;
-  title: string;
-  description: string;
-  datFilename: string;
-  datLoadMethod: 'csv' | 'fwf';    // how pandas should read the .DAT file
-  nistSection: string;
-  responseVariable: string;
-}
-
-export const NOTEBOOK_REGISTRY: NotebookEntry[] = [
-  {
-    slug: 'normal-random-numbers',
-    title: 'Normal Random Numbers',
-    description: 'EDA of 500 standard normal random numbers from the Rand Corporation',
-    datFilename: 'RANDN.DAT',
-    datLoadMethod: 'fwf',
-    nistSection: '1.4.2.1',
-    responseVariable: 'value',
-  },
-  {
-    slug: 'uniform-random-numbers',
-    title: 'Uniform Random Numbers',
-    description: 'EDA of 500 uniform U(0,1) random numbers from the Rand Corporation',
-    datFilename: 'RANDU.DAT',
-    datLoadMethod: 'fwf',
-    nistSection: '1.4.2.2',
-    responseVariable: 'value',
-  },
-  // ... all 10 case studies
-];
-```
-
-The full registry maps to the 10 case study slugs already defined in `CaseStudyDataset.astro`:
-1. `normal-random-numbers` -> `RANDN.DAT`
-2. `uniform-random-numbers` -> `RANDU.DAT`
-3. `random-walk` -> `RANDWALK.DAT`
-4. `cryothermometry` -> `SOULEN.DAT`
-5. `beam-deflections` -> `LEW.DAT`
-6. `filter-transmittance` -> `MAVRO.DAT`
-7. `heat-flow-meter` -> `ZARR13.DAT`
-8. `fatigue-life` -> `BIRNSAUN.DAT`
-9. `ceramic-strength` -> `JAHANMI2.DAT`
-10. `standard-resistor` -> `DZIUBA1.DAT`
-
-### NEW: `src/lib/eda/notebooks/builder.ts`
-
-Core function that constructs a notebook for a given case study:
-
-```typescript
-import type { NotebookV4, NotebookCell } from './types';
-import { getTemplate } from './templates';
-
-export function buildNotebook(slug: string): NotebookV4 {
-  const template = getTemplate(slug);
-  return {
-    nbformat: 4,
-    nbformat_minor: 5,
-    metadata: {
-      kernelspec: {
-        display_name: 'Python 3',
-        language: 'python',
-        name: 'python3',
-      },
-      language_info: {
-        name: 'python',
-        version: '3.10.0',
-      },
-    },
-    cells: template.cells,
-  };
-}
-```
-
-### NEW: `src/lib/eda/notebooks/templates.ts`
-
-Contains the cell content for each case study. Each template returns an array of markdown and code cells that mirror the analysis on the web page. Helper functions (`md()`, `code()`) create properly shaped cell objects with unique IDs:
-
-```typescript
-function md(id: string, source: string): MarkdownCell {
-  return { cell_type: 'markdown', id, metadata: {}, source };
-}
-
-function code(id: string, source: string): CodeCell {
-  return { cell_type: 'code', id, metadata: {}, source, execution_count: null, outputs: [] };
-}
-
-export function getTemplate(slug: string): { cells: NotebookCell[] } {
-  const templateFn = TEMPLATES[slug];
-  if (!templateFn) throw new Error(`No notebook template for slug: ${slug}`);
-  return templateFn();
-}
-
-const TEMPLATES: Record<string, () => { cells: NotebookCell[] }> = {
-  'normal-random-numbers': normalRandomTemplate,
-  'uniform-random-numbers': uniformRandomTemplate,
-  'random-walk': randomWalkTemplate,
-  'cryothermometry': cryothermometryTemplate,
-  'beam-deflections': beamDeflectionsTemplate,
-  'filter-transmittance': filterTransmittanceTemplate,
-  'heat-flow-meter': heatFlowMeterTemplate,
-  'fatigue-life': fatigueLifeTemplate,
-  'ceramic-strength': ceramicStrengthTemplate,
-  'standard-resistor': standardResistorTemplate,
-};
-```
-
-Each template function builds cells like:
-```typescript
-function normalRandomTemplate(): { cells: NotebookCell[] } {
-  return {
-    cells: [
-      md('nrn-01', [
-        '# Normal Random Numbers -- EDA Case Study',
-        '',
-        'NIST/SEMATECH Section 1.4.2.1',
-        '',
-        '500 standard normal N(0,1) random numbers from the Rand Corporation.',
-        'This notebook applies the full 4-plot EDA diagnostic.',
-      ].join('\n')),
-      code('nrn-02', [
-        'import pandas as pd',
-        'import numpy as np',
-        'import matplotlib.pyplot as plt',
-        'from scipy import stats',
-        '',
-        '# Load the dataset',
-        "df = pd.read_fwf('RANDN.DAT', header=None, names=['value'])",
-        "print(f'Observations: {len(df)}')",
-        'df.head(10)',
-      ].join('\n')),
-      md('nrn-03', '## 4-Plot Diagnostic'),
-      code('nrn-04', [
-        'fig, axes = plt.subplots(2, 2, figsize=(12, 8))',
-        '# ... run sequence, lag plot, histogram, probability plot',
-      ].join('\n')),
-      // ... additional analysis cells
-    ],
-  };
-}
-```
-
-### NEW: `src/lib/eda/notebooks/zip.ts`
-
-```typescript
-import JSZip from 'jszip';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import type { NotebookV4 } from './types';
-
-export async function buildZipBuffer(
-  slug: string,
-  notebook: NotebookV4,
-  datFilename: string,
-): Promise<Buffer> {
-  const zip = new JSZip();
-  const folder = zip.folder(slug)!;
-
-  // Add notebook JSON
-  folder.file(`${slug}.ipynb`, JSON.stringify(notebook, null, 1));
-
-  // Add .DAT file from handbook/datasets/
-  const datPath = join(process.cwd(), 'handbook', 'datasets', datFilename);
-  folder.file(datFilename, readFileSync(datPath));
-
-  // Add README with attribution
-  folder.file('README.txt', buildReadme(slug, datFilename));
-
-  return Buffer.from(await zip.generateAsync({ type: 'uint8array' }));
-}
-
-function buildReadme(slug: string, datFilename: string): string {
-  return [
-    `${slug} -- EDA Case Study Notebook`,
-    '',
-    'Source: NIST/SEMATECH e-Handbook of Statistical Methods',
-    `Dataset: ${datFilename}`,
-    '',
-    'To run:',
-    '  1. Install Python 3 with pandas, matplotlib, scipy',
-    '  2. jupyter notebook ' + slug + '.ipynb',
-    '',
-    'Generated by https://patrykgolabek.dev/eda/notebooks/',
-    '',
-  ].join('\n');
-}
-```
-
-### NEW: `src/pages/eda/notebooks/[slug].zip.ts`
-
-Follows the OG image endpoint pattern exactly:
-
-```typescript
-import type { APIRoute } from 'astro';
-import { NOTEBOOK_REGISTRY, type NotebookEntry } from '../../../lib/eda/notebooks/registry';
-import { buildNotebook } from '../../../lib/eda/notebooks/builder';
-import { buildZipBuffer } from '../../../lib/eda/notebooks/zip';
-
-export function getStaticPaths() {
-  return NOTEBOOK_REGISTRY.map((entry) => ({
-    params: { slug: entry.slug },
-    props: entry,
-  }));
-}
-
-export const GET: APIRoute = async ({ props }) => {
-  const { slug, datFilename } = props as NotebookEntry;
-  const notebook = buildNotebook(slug);
-  const zipBuffer = await buildZipBuffer(slug, notebook, datFilename);
-
-  return new Response(zipBuffer, {
-    headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${slug}.zip"`,
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    },
-  });
-};
-```
-
-### NEW: `src/pages/eda/notebooks/[slug].ipynb.ts`
-
-Standalone notebook download (no zip):
-
-```typescript
-import type { APIRoute } from 'astro';
-import { NOTEBOOK_REGISTRY, type NotebookEntry } from '../../../lib/eda/notebooks/registry';
-import { buildNotebook } from '../../../lib/eda/notebooks/builder';
-
-export function getStaticPaths() {
-  return NOTEBOOK_REGISTRY.map((entry) => ({
-    params: { slug: entry.slug },
-    props: entry,
-  }));
-}
-
-export const GET: APIRoute = async ({ props }) => {
-  const { slug } = props as NotebookEntry;
-  const notebook = buildNotebook(slug);
-
-  return new Response(JSON.stringify(notebook, null, 1), {
-    headers: {
-      'Content-Type': 'application/x-ipynb+json',
-      'Content-Disposition': `attachment; filename="${slug}.ipynb"`,
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    },
-  });
-};
-```
-
-### NEW: `src/pages/eda/notebooks/index.astro`
-
-Landing page following the same pattern as `src/pages/eda/case-studies/index.astro`:
-
-- Uses `EDALayout` wrapper
-- `BreadcrumbJsonLd` with crumbs: Home > EDA > Notebooks
-- `EDAJsonLd` for structured data
-- `EdaBreadcrumb` component
-- Card grid showing all 10 notebooks with download buttons
-- Each card shows: title, description, NIST section, .DAT filename, download links (.zip + .ipynb)
-
-### NEW: `src/components/eda/NotebookDownload.astro`
-
-Compact download card for embedding in case study pages (below the existing `CaseStudyDataset` component):
-
-```astro
----
-import { NOTEBOOK_REGISTRY } from '../../lib/eda/notebooks/registry';
-
-interface Props {
-  slug: string;
-}
-
-const { slug } = Astro.props;
-const entry = NOTEBOOK_REGISTRY.find(e => e.slug === slug);
-if (!entry) return;
----
-<section class="mt-6 rounded-lg border border-[var(--color-border)] p-5">
-  <div class="flex items-center gap-3 mb-3">
-    <svg><!-- notebook icon --></svg>
-    <h2 class="text-lg font-heading font-bold">Jupyter Notebook</h2>
-  </div>
-  <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-    Download a ready-to-run Python notebook for this case study,
-    bundled with the {entry.datFilename} dataset.
-  </p>
-  <div class="flex flex-wrap gap-3">
-    <a href={`/eda/notebooks/${slug}.zip`} download
-       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
-              bg-[var(--color-accent)] !text-white hover:opacity-90 transition-opacity !no-underline">
-      Download .zip (notebook + data)
-    </a>
-    <a href={`/eda/notebooks/${slug}.ipynb`} download
-       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded
-              border border-[var(--color-border)] !text-[var(--color-text-secondary)]
-              hover:!text-[var(--color-accent)] hover:border-[var(--color-accent)]
-              transition-colors !no-underline">
-      Download .ipynb only
-    </a>
-  </div>
-</section>
-```
-
-### MODIFY: `src/lib/eda/routes.ts`
-
-Add notebook route constants and URL helpers:
-
-```typescript
-export const EDA_ROUTES = {
-  // ... existing routes unchanged
-  notebooks: '/eda/notebooks/',     // NEW
-} as const;
-
-/** Map a case study slug to its notebook zip download URL */
-export function notebookZipUrl(slug: string): string {
-  return `${EDA_ROUTES.notebooks}${slug}.zip`;
-}
-
-/** Map a case study slug to its standalone notebook download URL */
-export function notebookUrl(slug: string): string {
-  return `${EDA_ROUTES.notebooks}${slug}.ipynb`;
-}
-```
-
-### MODIFY: `src/pages/eda/index.astro`
-
-Add "Notebooks" section to the landing page. Two arrays need entries:
-
-```typescript
-// In SECTIONS array (around line 112-119):
-{ id: 'notebooks', heading: 'Jupyter Notebooks', category: 'notebooks', indexHref: '/eda/notebooks/' },
-
-// In NAV_ITEMS array (around line 138-145):
-{ label: 'Notebooks', href: '#notebooks', indexHref: '/eda/notebooks/' },
-```
-
-The notebook cards on the landing page link to the landing page (not direct downloads) to provide context before download. The notebook section will not use the `getCards()` function since notebooks are not from a content collection -- it will render a custom section that imports `NOTEBOOK_REGISTRY` directly.
-
-### MODIFY: `src/pages/eda/case-studies/[...slug].astro`
-
-Add `NotebookDownload` component after the `<Content />` render:
-
-```astro
----
-// Add import (line ~6):
-import NotebookDownload from '../../../components/eda/NotebookDownload.astro';
----
-<!-- After <Content /> inside the prose-foundations div, before closing </article>: -->
-<NotebookDownload slug={slug} />
-```
-
-This is a 2-line change to the existing file.
-
-### NO CHANGE: `astro.config.mjs`
-
-The new `/eda/notebooks/` pages will automatically be picked up by the existing sitemap integration since they match the `/eda/` URL pattern already handled with `priority: 0.5` and `changefreq: 'monthly'`. No config modifications needed.
-
-### NO CHANGE: `.github/workflows/deploy.yml`
-
-JSZip is a pure JavaScript dependency -- no native binaries, no Python runtime. The `withastro/action@v3` handles `npm install` and `astro build` unchanged.
-
-## Patterns to Follow
-
-### Pattern 1: Static API Route for Binary Assets
-
-**What:** Use Astro's `[param].ext.ts` endpoint pattern with `getStaticPaths()` to generate binary files at build time.
-
-**When:** Any time you need to produce downloadable files (zip, ipynb, pdf, etc.) that are deterministic from source data.
-
-**Why this over alternatives:**
-- A `prebuild` script would work but creates a parallel build system outside Astro's awareness
-- Committing built artifacts to git causes repo bloat and maintenance drift
-- The API route pattern is already proven in this codebase (20+ OG image endpoints use it)
-
-**Example from existing codebase:**
-```typescript
-// src/pages/open-graph/eda/case-studies.png.ts
-export const GET: APIRoute = async () => {
-  const png = await getOrGenerateOgImage('Case Studies', '...', () => generateEdaSectionOgImage(...));
-  return new Response(png, {
-    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' },
-  });
-};
-```
-
-### Pattern 2: Registry-Driven Content
-
-**What:** A single TypeScript module (`registry.ts`) maps slugs to metadata, used by both the endpoint `getStaticPaths()` and the landing page template.
-
-**When:** Multiple pages/endpoints need the same list of entries.
-
-**Why:** Prevents the slug list from diverging between the endpoint, the landing page, and the download buttons. This is the same pattern used by `DATASET_SOURCES` in `datasets.ts` and the technique/distribution JSON collections.
-
-### Pattern 3: Notebook-as-Data (not Notebook-as-File)
-
-**What:** Notebooks are defined as TypeScript data structures (arrays of cell objects), not as `.ipynb` files checked into the repo.
-
-**When:** The notebook content is derived from existing data (datasets, analysis steps) rather than being hand-authored in Jupyter.
-
-**Why:** Keeps the single source of truth in TypeScript. If a dataset changes or the analysis narrative is improved, the notebook regenerates automatically on next build.
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Pre-Built Notebooks in `public/`
-
-**What:** Committing `.ipynb` and `.zip` files to `public/downloads/` or similar.
-
-**Why bad:** Binary files in git cause repo bloat (10 zips x ~100KB = 1MB per change, accumulating across commits). The notebooks will drift from the actual datasets/analysis. No build-time validation. Every data correction requires manually rebuilding notebooks.
-
-**Instead:** Generate at build time via API route endpoints.
-
-### Anti-Pattern 2: Python Build Step for Notebook Generation
-
-**What:** Adding a Python script to `scripts/` that uses `nbformat` or `nbconvert` to create notebooks, run as a `prebuild` step.
-
-**Why bad:** Introduces a Python runtime dependency into the CI pipeline (currently Node.js only). The `withastro/action@v3` GitHub Action does not include Python. The `.ipynb` format is just JSON -- TypeScript handles it directly without any external tooling.
-
-**Instead:** Build nbformat v4 JSON in TypeScript.
-
-### Anti-Pattern 3: Client-Side Zip Generation
-
-**What:** Using JSZip in the browser to assemble zips on-demand when the user clicks download.
-
-**Why bad:** Requires shipping JSZip (~100KB) to the client. Requires fetching the .DAT file and .ipynb separately before zipping. Violates the "zero client-side JS" philosophy of the EDA section (all plots are build-time SVG). Fails for users with JS disabled.
-
-**Instead:** Pre-build the zip at build time, serve as a static file.
-
-### Anti-Pattern 4: Separate Content Collection for Notebooks
-
-**What:** Creating a new Astro content collection in `src/content.config.ts` for notebook metadata.
-
-**Why bad:** Notebooks are 1:1 with case studies, not independent content. Adding a collection creates unnecessary schema overhead (Zod schema, loader config, type exports) and requires keeping two collections in sync. A simple TypeScript registry array is sufficient for 10 entries.
-
-**Instead:** Use a plain `NOTEBOOK_REGISTRY` array in `src/lib/eda/notebooks/registry.ts`.
-
-### Anti-Pattern 5: Overloading CaseStudyDataset Component
-
-**What:** Adding notebook download buttons directly into the existing `CaseStudyDataset.astro` component.
-
-**Why bad:** `CaseStudyDataset` already has a clear responsibility: dataset preview + CSV download + NIST source link. Adding notebook downloads would violate single-responsibility and make the component harder to maintain. The component is already 320 lines long.
-
-**Instead:** Create a separate `NotebookDownload.astro` component placed after `CaseStudyDataset` in the case study page template.
-
-## File Structure Summary
+### Cross-Linking Architecture
 
 ```
-NEW files:
-  src/lib/eda/notebooks/
-    types.ts                  - NotebookV4 interface, Cell types
-    builder.ts                - buildNotebook(slug) -> NotebookV4
-    templates.ts              - Per-case-study cell definitions (10 template functions)
-    zip.ts                    - buildZipBuffer() using JSZip
-    registry.ts               - NOTEBOOK_REGISTRY array (10 entries)
-  src/pages/eda/notebooks/
-    index.astro               - Landing page at /eda/notebooks/
-    [slug].zip.ts             - Build-time zip endpoint (10 files generated)
-    [slug].ipynb.ts           - Build-time ipynb endpoint (10 files generated)
-  src/components/eda/
-    NotebookDownload.astro    - Download button for case study pages
-
-MODIFIED files:
-  src/lib/eda/routes.ts       - Add notebooks route + 2 URL helpers
-  src/pages/eda/index.astro   - Add Notebooks to SECTIONS + NAV_ITEMS arrays
-  src/pages/eda/case-studies/[...slug].astro  - Import + render NotebookDownload
-
-UNCHANGED files:
-  src/data/eda/datasets.ts          - Read-only reference for DATASET_SOURCES
-  handbook/datasets/*.DAT           - Read-only reference for .DAT file contents
-  astro.config.mjs                  - Sitemap auto-picks up /eda/ pages
-  .github/workflows/deploy.yml     - JSZip is pure JS, no CI changes
-  src/content.config.ts             - No new content collections needed
-  src/layouts/EDALayout.astro       - Reused as-is by notebooks landing page
-  src/components/eda/EdaBreadcrumb.astro  - Reused as-is
-  src/components/BreadcrumbJsonLd.astro   - Reused as-is
+Blog Post (new)                    Guide Chapters (updated)
+  │                                  │
+  ├── links to /guides/claude-code/  ├── companionLink in [slug].astro
+  ├── links to cheatsheet page       │   currently points to existing
+  └── links to updated chapters      │   blog post -- may update to
+                                     │   new post or keep existing
+Cheatsheet Page (new)
+  │
+  ├── links to /guides/claude-code/ (landing)
+  └── cross-linked FROM landing page index.astro
 ```
 
-## Integration Points with Existing Architecture
+**Decision point for the roadmap:** The `companionLink` in `[slug].astro` currently hardcodes `href: "/blog/claude-code-guide/"` with text "The Context Window Is the Product". If the new blog post replaces it as the primary companion, update the href/text/label. If both posts should coexist, decide which one the companion link should reference.
 
-| Existing System | Integration Point | Change Type |
-|----------------|-------------------|-------------|
-| `EDALayout.astro` | Used by notebooks/index.astro | No change to layout |
-| `EdaBreadcrumb.astro` | Used by notebooks/index.astro | No change to component |
-| `BreadcrumbJsonLd.astro` | Used by notebooks/index.astro | No change to component |
-| `EDAJsonLd.astro` | Used by notebooks/index.astro, may need `pageType` variant | Minor: add `'notebook'` to `pageType` union |
-| `src/lib/eda/routes.ts` | Add `notebooks` route + 2 helpers | 3 additive lines |
-| `DATASET_SOURCES` in datasets.ts | Read `.name` field for .DAT filenames | Read-only reference |
-| `handbook/datasets/*.DAT` | Read at build time by zip.ts | Read-only reference |
-| `src/pages/eda/index.astro` | Add notebooks to SECTIONS + NAV_ITEMS | 2 array entries |
-| `src/pages/eda/case-studies/[...slug].astro` | Import + render NotebookDownload | 2-line change |
-| Sitemap integration | Auto-picks up /eda/notebooks/ | No config change |
-| GitHub Actions CI | JSZip is pure JS | No CI change |
-| OG images | May add notebooks OG image endpoint | Optional future enhancement |
+## Detailed Architecture: Landing Page Integration
+
+The cheatsheet should be surfaced from the guide landing page (`index.astro`) but NOT as a numbered chapter card.
+
+**Recommended: Add a "Resources" section below the chapter grid.** This mirrors how the FastAPI guide's FAQ is discoverable but not numbered as a chapter. The Resources section would contain a card linking to `/guides/claude-code/cheatsheet/` with a brief description.
+
+## Detailed Architecture: LLMs.txt Integration
+
+Both `llms.txt.ts` and `llms-full.txt.ts` iterate `claudeCodePagesList` to generate guide chapter entries. Since the cheatsheet is NOT in the collection, it must be added manually after the chapter loop in both files.
+
+For `llms.txt.ts`: Add a single line entry with URL and description.
+For `llms-full.txt.ts`: Add a multi-line entry with URL, description, and additional metadata about the dark/print versions.
 
 ## Suggested Build Order
 
-The build order respects dependencies -- each phase only uses components from prior phases:
+Build order is driven by data dependencies and testability at each step.
 
-### Phase 1: Types + Registry (no dependencies)
-- `src/lib/eda/notebooks/types.ts` -- nbformat v4.5 TypeScript interfaces
-- `src/lib/eda/notebooks/registry.ts` -- NOTEBOOK_REGISTRY array with all 10 entries
-- **Test gate:** TypeScript compiles. Registry entries match DATASET_SOURCES .DAT filenames.
+### Phase 1: Chapter Content Updates (no architecture changes)
 
-### Phase 2: Notebook Builder (depends on Phase 1)
-- `src/lib/eda/notebooks/builder.ts` -- buildNotebook() function
-- `src/lib/eda/notebooks/templates.ts` -- Start with 1-2 templates (normal-random-numbers, ceramic-strength) for validation
-- **Test gate:** `buildNotebook('normal-random-numbers')` returns valid nbformat v4.5 JSON. JSON validates against nbformat schema.
+Update existing MDX files in `src/data/guides/claude-code/pages/`. This is pure content work with zero architecture impact -- the files already exist, the schema already validates them, and all rendering pipelines already handle them.
 
-### Phase 3: Zip Assembler (depends on Phase 1 + 2)
-- `npm install jszip` (add to dependencies)
-- `src/lib/eda/notebooks/zip.ts` -- buildZipBuffer() function
-- **Test gate:** Generated zip can be opened. Contains .ipynb, .DAT, README.txt in a named subfolder.
+**Depends on:** Nothing
+**Validates:** `npm run build` succeeds, reading times update on landing page
 
-### Phase 4: API Route Endpoints (depends on Phase 1 + 2 + 3)
-- `src/pages/eda/notebooks/[slug].zip.ts`
-- `src/pages/eda/notebooks/[slug].ipynb.ts`
-- **Test gate:** `astro build` succeeds. `dist/eda/notebooks/normal-random-numbers.zip` exists and is a valid zip. `dist/eda/notebooks/normal-random-numbers.ipynb` exists and is valid JSON.
+### Phase 2: Cheatsheet Page + OG Image (new standalone page)
 
-### Phase 5: Routes Update (no dependencies on Phases 1-4)
-- Modify `src/lib/eda/routes.ts` -- add `notebooks` route + URL helpers
-- **Test gate:** TypeScript compiles. `notebookZipUrl('foo')` returns `/eda/notebooks/foo.zip`.
+1. Create `src/pages/guides/claude-code/cheatsheet.astro`
+2. Create `src/pages/open-graph/guides/claude-code/cheatsheet.png.ts`
 
-### Phase 6: NotebookDownload Component (depends on Phase 1 + 5)
-- `src/components/eda/NotebookDownload.astro`
-- **Test gate:** Component renders download buttons with correct URLs.
+**Depends on:** Existing SVG assets in `public/images/cheatsheet/` (already present)
+**Validates:** `/guides/claude-code/cheatsheet/` renders, OG image generates, breadcrumbs work
 
-### Phase 7: Landing Page (depends on Phase 1 + 5)
-- `src/pages/eda/notebooks/index.astro`
-- **Test gate:** `/eda/notebooks/` renders card grid with all 10 notebooks. Breadcrumbs correct. JSON-LD validates.
+### Phase 3: Landing Page Integration (wire cheatsheet into discovery)
 
-### Phase 8: Case Study Integration (depends on Phase 6)
-- Modify `src/pages/eda/case-studies/[...slug].astro` -- add NotebookDownload import + render
-- **Test gate:** Each case study page shows notebook download section below the dataset panel.
+Modify `src/pages/guides/claude-code/index.astro` to add a Resources section with cheatsheet card.
 
-### Phase 9: EDA Index Update (depends on Phase 7)
-- Modify `src/pages/eda/index.astro` -- add Notebooks to SECTIONS + NAV_ITEMS
-- **Test gate:** `/eda/` shows Notebooks section with link to `/eda/notebooks/`.
+**Depends on:** Phase 2 (cheatsheet page must exist to link to)
+**Validates:** Landing page shows cheatsheet card, link works
 
-### Phase 10: Remaining Templates (depends on Phase 2)
-- Complete all 10 template functions in `templates.ts`
-- **Test gate:** All 10 notebooks generate. All 10 zips contain correct .DAT files.
+### Phase 4: LLMs.txt Updates (SEO plumbing)
 
-## .DAT File Format Handling
+Modify both `src/pages/llms.txt.ts` and `src/pages/llms-full.txt.ts` to add cheatsheet entries.
 
-Each NIST .DAT file has a different format. The notebook templates must use the correct `pandas` loading method:
+**Depends on:** Phase 2 (cheatsheet URL must be decided)
+**Validates:** `curl localhost:4321/llms.txt` includes cheatsheet entry
 
-| Case Study | .DAT File | Format | pandas Method |
-|-----------|-----------|--------|---------------|
-| Normal Random Numbers | RANDN.DAT | Fixed-width, 10 values/line | `pd.read_fwf()` with widths |
-| Uniform Random Numbers | RANDU.DAT | Fixed-width, 10 values/line | `pd.read_fwf()` with widths |
-| Random Walk | RANDWALK.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Cryothermometry | SOULEN.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Beam Deflections | LEW.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Filter Transmittance | MAVRO.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Heat Flow Meter | ZARR13.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Fatigue Life | BIRNSAUN.DAT | Fixed-width, single column | `pd.read_fwf()` |
-| Ceramic Strength | JAHANMI2.DAT | Fixed-width, multi-column (15 vars) | `pd.read_fwf()` with column names |
-| Standard Resistor | DZIUBA1.DAT | Fixed-width, single column | `pd.read_fwf()` |
+### Phase 5: Blog Post (new content, cross-linking)
 
-This mapping is stored in the `datLoadMethod` field of each `NotebookEntry` in the registry.
+1. Create `src/data/blog/claude-code-guide-refresh.mdx`
+2. Optionally update `companionLink` in `[slug].astro`
+3. Optionally add FAQ JSON-LD in `[slug].astro` for new post
 
-## Scalability Considerations
+**Depends on:** Phases 1-3 (needs finalized chapter content and cheatsheet URL to link to)
+**Validates:** Blog post renders, related posts compute correctly, companion link works
 
-| Concern | At 10 notebooks | At 50 notebooks | At 200 notebooks |
-|---------|-----------------|-----------------|-------------------|
-| Build time | Negligible (<2s added) | ~5-10s | Consider parallel generation or caching |
-| Repo size | No impact (generated at build) | No impact | No impact |
-| Deploy size | ~1MB total (10 zips) | ~5MB total | May need CDN for large datasets |
-| Template maintenance | 10 template functions | Extract shared cell patterns | Auto-generate from structured analysis metadata |
+### Phase 6: guide.json Metadata Update (descriptions, dates)
+
+Update chapter descriptions and publishedDate in `guide.json` if chapters changed significantly.
+
+**Depends on:** Phase 1 (need to know final chapter content)
+**Can run parallel with:** Phases 2-4
+
+## Architectural Patterns
+
+### Pattern 1: Standalone Guide Supplementary Page
+
+**What:** A page within a guide's URL space that is NOT part of the content collection or chapter navigation flow.
+**When to use:** Reference pages (FAQ, cheatsheet, appendix) that complement a guide but are not sequential chapters.
+**Trade-offs:** Requires manual breadcrumb/JSON-LD (not from GuideLayout), requires manual LLMs.txt entry, but avoids polluting the chapter navigation flow.
+**Precedent:** `src/pages/guides/fastapi-production/faq.astro`
+
+### Pattern 2: Static Asset OG Image Endpoint
+
+**What:** A non-dynamic `.png.ts` endpoint that generates a single OG image for a page not in a content collection.
+**When to use:** Standalone pages that need OG images but are not part of a dynamic `[slug]` route.
+**Precedent:** `src/pages/open-graph/guides/claude-code.png.ts` (landing page OG)
+
+### Pattern 3: Blog-Guide Cross-Linking
+
+**What:** A blog post that references guide chapters with in-text links, and guide chapters that link back to the blog via `companionLink`.
+**When to use:** Every guide should have at least one companion blog post for SEO (blog posts rank differently than guide pages in search).
+**Precedent:** `claude-code-guide.mdx` linking to all 11 chapters, `[slug].astro` having `companionLink` pointing back.
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Adding Cheatsheet to guide.json Chapters Array
+
+**What people do:** Add `{ "slug": "cheatsheet", "title": "Cheatsheet" }` to the chapters array in guide.json and create a corresponding `cheatsheet.mdx` in the pages directory.
+**Why it is wrong:** The cheatsheet would appear in the sidebar as Chapter 12, get prev/next navigation linking it to Chapter 11 (Security), receive article prose rendering treatment (reading time, ToC), and be counted as a guide chapter in analytics. None of this is appropriate for a visual reference sheet.
+**Do this instead:** Create a standalone `.astro` page file following the `faq.astro` precedent.
+
+### Anti-Pattern 2: Inline SVG for Cheatsheets
+
+**What people do:** Read the SVG file contents and embed them directly in the page markup.
+**Why it is wrong:** At ~56KB each, inline SVGs bloat the HTML document by 112KB, they include `@import url()` font references that may behave differently when inlined (CORS), and they pollute the page CSS scope with SVG-internal styles. The SVGs also use `bx:export` namespace attributes from Boxy SVG editor that are irrelevant in an inline context.
+**Do this instead:** Use `<img>` tags pointing to the static assets in `public/images/cheatsheet/`.
+
+### Anti-Pattern 3: Modifying GuideLayout for Non-Chapter Pages
+
+**What people do:** Add conditional logic to GuideLayout.astro (e.g., `{!isCheatsheet && <GuideSidebar />}`) to handle non-chapter pages.
+**Why it is wrong:** GuideLayout's single responsibility is rendering guide chapters with sidebar, breadcrumb, and chapter nav. Adding conditionals creates a god-layout that serves multiple purposes. The FastAPI FAQ already established the correct precedent: use Layout.astro directly for supplementary pages.
+**Do this instead:** Use Layout.astro and build page-specific markup inline.
+
+## Integration Points
+
+### External Services
+
+None. All components are build-time static. No runtime services, APIs, or databases involved.
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| Cheatsheet page to SVG assets | Static file reference via `<img src>` | Assets already in `public/`, no build step needed |
+| Cheatsheet page to OG image | URL reference in Layout ogImage prop | OG endpoint must exist before build validates |
+| Landing page to Cheatsheet page | Hyperlink in Resources section | One-way link, cheatsheet page has its own back-link |
+| Blog post to Guide chapters | In-text hyperlinks | Standard markdown links to chapter URLs |
+| LLMs.txt to Cheatsheet | Manually added entry | Not auto-discovered from collection |
+| Guide chapters to Blog post | `companionLink` prop in `[slug].astro` | Hardcoded, requires manual update if blog post changes |
 
 ## Sources
 
-- [nbformat v4.5 JSON Schema](https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.5.schema.json) -- Official notebook format schema (HIGH confidence)
-- [The Notebook file format -- nbformat 5.10 documentation](https://nbformat.readthedocs.io/en/latest/format_description.html) -- Notebook format specification (HIGH confidence)
-- [Astro Endpoints documentation](https://docs.astro.build/en/guides/endpoints/) -- Static file endpoint patterns with getStaticPaths (HIGH confidence)
-- [JSZip npm package](https://www.npmjs.com/package/jszip) -- In-memory zip creation, pure JS (HIGH confidence)
-- [ADM-ZIP](https://github.com/cthackers/adm-zip) -- Alternative considered, heavier API surface (HIGH confidence)
-- Existing codebase patterns verified by direct code inspection (HIGH confidence):
-  - `src/pages/open-graph/eda/[...slug].png.ts` -- Binary asset endpoint pattern
-  - `src/pages/open-graph/eda/case-studies.png.ts` -- Static OG image endpoint
-  - `src/components/eda/CaseStudyDataset.astro` -- Dataset panel with CSV download
-  - `src/data/eda/datasets.ts` -- DATASET_SOURCES with .DAT file mappings
-  - `src/lib/eda/routes.ts` -- EDA_ROUTES constant pattern
-  - `src/pages/eda/case-studies/index.astro` -- Landing page card grid pattern
-  - `src/pages/eda/index.astro` -- SECTIONS/NAV_ITEMS pattern
-  - `astro.config.mjs` -- Static output mode, sitemap /eda/ handling
-  - `.github/workflows/deploy.yml` -- withastro/action@v3 CI pipeline
+- Direct codebase analysis of `/Users/patrykattc/work/git/PatrykQuantumNomad/` (HIGH confidence)
+- `src/content.config.ts` -- collection definitions
+- `src/data/guides/claude-code/guide.json` -- chapter registry
+- `src/lib/guides/schema.ts` -- Zod schemas for guide pages and metadata
+- `src/pages/guides/claude-code/[slug].astro` -- chapter page template
+- `src/pages/guides/claude-code/index.astro` -- landing page template
+- `src/layouts/GuideLayout.astro` -- guide chapter layout
+- `src/pages/guides/fastapi-production/faq.astro` -- standalone guide page precedent
+- `src/pages/open-graph/guides/claude-code/[slug].png.ts` -- OG image generation pattern
+- `src/pages/open-graph/guides/claude-code.png.ts` -- static OG endpoint pattern
+- `src/pages/llms.txt.ts` and `src/pages/llms-full.txt.ts` -- LLMs.txt generation
+- `src/data/blog/claude-code-guide.mdx` -- companion blog post pattern
+- `src/pages/blog/[slug].astro` -- blog template with guide-specific JSON-LD
+- `public/images/cheatsheet/*.svg` -- cheatsheet assets (1600x1000, ~56KB each)
+
+---
+*Architecture research for: Claude Code Guide Refresh Integration*
+*Researched: 2026-04-12*
