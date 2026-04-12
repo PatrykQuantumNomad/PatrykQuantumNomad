@@ -145,7 +145,10 @@ Plans:
   3. Guide landing page shows the new chapter count and includes the cheatsheet link
   4. All new pages appear in the sitemap and all 30+ cross-references across 14 chapters are verified intact
   5. Lighthouse scores 90+ on all updated and new pages
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 116-01-PLAN.md -- LLMs.txt cheatsheet entry + metadata/cross-reference/sitemap verification
+- [ ] 116-02-PLAN.md -- Lighthouse 90+ audit on all 15 guide pages
 
 ## Progress
 
@@ -159,4 +162,4 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | 113. Lower-Impact Chapter Updates | 7/7 | Complete | 2026-04-12 |
 | 114. Cheatsheet | 3/3 | Complete | 2026-04-12 |
 | 115. Blog Post | 2/2 | Complete   | 2026-04-12 |
-| 116. Site Integration | 0/TBD | Not started | - |
+| 116. Site Integration | 0/2 | Not started | - |
