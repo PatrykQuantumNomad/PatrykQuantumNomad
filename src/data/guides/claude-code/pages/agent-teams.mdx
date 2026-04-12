@@ -3,20 +3,20 @@ title: "Agent Teams & Advanced Orchestration"
 description: "Coordinate multiple Claude Code instances on shared task lists with dependency tracking and peer-to-peer communication (research preview)."
 order: 9
 slug: "agent-teams"
-lastVerified: 2026-03-10
-updatedDate: 2026-03-13
-keywords: ["claude code agent teams", "multi-agent orchestration", "task coordination", "parallel agents", "team architecture", "dependency tracking"]
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code agent teams", "multi-agent orchestration", "task coordination", "parallel agents", "team architecture", "dependency tracking", "initialPrompt", "dynamic agents", "teammate mode"]
 ---
 import CodeBlock from '../../../../components/guide/CodeBlock.astro';
 import AgentTeamsDiagram from '../../../../components/guide/AgentTeamsDiagram.astro';
 
 ## What You'll Learn
 
-This chapter walks you through agent teams, an experimental feature that lets multiple Claude Code instances work together on a shared task list, communicating directly with each other. We'll cover the team architecture (lead, teammates, shared task list, mailbox), how to enable the feature, display modes for monitoring team activity, task management with dependency tracking, teammate communication patterns, how agent teams differ from subagents, and the known limitations worth keeping in mind.
+This chapter walks you through agent teams, an experimental feature that lets multiple Claude Code instances work together on a shared task list, communicating directly with each other. We'll cover the team architecture (lead, teammates, shared task list, mailbox), how to enable the feature, the `/agents` management interface, display modes and the `--teammate-mode` flag, task management with dependency tracking, teammate communication patterns, how to use `initialPrompt` and dynamic agents for teams, how agent teams differ from subagents, and the known limitations worth keeping in mind.
 
 By the end, you'll know when and how to coordinate multiple Claude Code instances for parallel work on large tasks.
 
-> **Research Preview:** Agent teams are experimental and disabled by default. You'll need to set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your environment or settings.json to use them. The API surface, behavior, and limitations may change. This chapter documents the feature as of March 2026.
+> **Research Preview:** Agent teams are experimental and disabled by default. You'll need to set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your environment or settings.json to use them. The API surface, behavior, and limitations may change. This chapter documents the feature as of April 2026.
 
 ## What Are Agent Teams?
 
@@ -81,7 +81,7 @@ An agent team has four components that work together.
 
 **Lead.** This is the original Claude Code session that creates and manages the team. It's always the session you started. The lead breaks work into tasks, spawns teammates, monitors progress, and produces the final result. You can't change the lead mid session; whichever Claude Code instance creates the team stays in charge for the entire session.
 
-**Teammates.** Independent Claude Code instances spawned by the lead. Each teammate has its own context window, its own set of tools, and its own permissions. They're full Claude Code sessions that can do anything a normal session can. Teammates claim tasks from the shared task list and work on them independently.
+**Teammates.** Independent Claude Code instances spawned by the lead. Each teammate has its own context window, its own set of tools, and its own permissions. They're full Claude Code sessions that can do anything a normal session can. Teammates claim tasks from the shared task list and work on them independently. Teammates can be defined through AGENT.md files, plugin agents, or dynamically at launch (see "Dynamic Agents" below).
 
 **Shared task list.** A central list of tasks that the lead creates and teammates claim. Each task has a state (pending, in progress, completed) and can depend on other tasks. A file lock mechanism prevents two teammates from grabbing the same task at once.
 
@@ -124,48 +124,146 @@ The UI depends on both being complete.`}
 
 Either way, whether you provide structure or let the lead figure it out, the result is the same: a set of tasks with dependencies on the shared task list, with teammates claiming and working on them in parallel.
 
-## Display Modes
+### The /agents Interface
 
-Agent teams support two display modes for keeping tabs on teammate activity.
+The `/agents` command provides a tabbed interface for managing agents in your session.
 
-**In process** is the default. All teammates share your terminal, and you see the lead's output by default. Press **Shift+Down** to cycle through teammate views and see what each one is working on. Hit **Shift+Down** again to move to the next teammate, and eventually you'll cycle back to the lead.
+**Running tab** shows all currently active teammates with their status. You can see which task each teammate is working on, whether it's actively processing or idle, and how long it has been running. This gives you a real-time dashboard of team activity without needing to cycle through individual teammate views.
 
-In process mode works well for quick team sessions where you just want to check progress without leaving your terminal. The tradeoff is that you can only see one teammate at a time.
+**Library tab** shows all available agents from your AGENT.md files and installed [plugins](/guides/claude-code/plugins/). From here you can browse agent descriptions, see their configured capabilities, and spawn them as teammates. Plugin agents that are designed for team participation appear alongside your custom agents.
 
-**Split pane** mode gives each teammate its own terminal pane. You'll need tmux or iTerm2 installed on your system. Each teammate's output shows up in a separate pane, so you can watch all of them working simultaneously.
+The `/agents` interface complements the display modes described below. Use `/agents` to manage the team roster and display modes to monitor what each teammate is doing. For more detail on individual agent management and the full `/agents` interface, see [Worktrees & Subagent Delegation](/guides/claude-code/worktrees/).
+
+### Using initialPrompt for Auto-Starting Teammates
+
+Agents with an `initialPrompt` field in their AGENT.md frontmatter automatically submit their first turn when spawned as a teammate. This means the agent starts working immediately on a predefined task without waiting for manual prompting from the lead.
 
 <CodeBlock
-  code={`# In process mode (default)
-# Use Shift+Down to cycle between teammate views
+  code={`---
+name: test-runner
+description: Runs the full test suite and reports failures
+initialPrompt: "Run the complete test suite with npm test. Report any failures with file paths and error messages. If all tests pass, confirm the count."
+---
+# Test Runner Agent
 
-# Split pane mode requires tmux or iTerm2
-# Configure in settings.json:
-{
-    "agentTeams": {
-      "displayMode": "split-pane"
-    }
-}`}
-  lang="json"
-  title="Configuring display mode"
-  caption="Split-pane provides simultaneous visibility into all teammates."
+You are a test execution specialist. Run tests thoroughly and report results clearly.`}
+  lang="yaml"
+  title="AGENT.md with initialPrompt for team use"
+  caption="When spawned as a teammate, this agent immediately runs the test suite without waiting for instructions."
 />
 
-Split pane mode is ideal for longer team sessions or when you need to watch multiple teammates work in real time. You get a complete picture of team activity, though it does eat into your screen real estate.
+This is particularly useful for assembling teams where each teammate has a well-defined role. The lead can spawn multiple agents with `initialPrompt` and they all start working in parallel from the moment they're created.
+
+For the full `initialPrompt` documentation including how it interacts with commands and skills, see [Worktrees & Subagent Delegation](/guides/claude-code/worktrees/).
+
+### Dynamic Agents with --agents
+
+Instead of requiring AGENT.md files on disk, you can define agents inline as JSON when launching Claude Code using the `--agents` flag.
 
 <CodeBlock
-  code={`# In process keyboard shortcuts
+  code={`claude --agents '[
+  {
+    "name": "api-builder",
+    "description": "Builds REST API endpoints",
+    "initialPrompt": "Create the /users CRUD endpoints"
+  },
+  {
+    "name": "test-writer",
+    "description": "Writes integration tests",
+    "initialPrompt": "Write tests for the /users endpoints once they exist"
+  }
+]'`}
+  lang="bash"
+  title="Launching with dynamically defined agents"
+  caption="Agent definitions are session-only and not persisted to disk."
+/>
+
+Dynamic agents are session-scoped. Their definitions exist only for the duration of the current session and are not saved to disk. This is useful for one-off team compositions, automation scripts, or quick experimentation without creating permanent AGENT.md files.
+
+For the full `--agents` flag documentation, see [Worktrees & Subagent Delegation](/guides/claude-code/worktrees/).
+
+## Display Modes and --teammate-mode
+
+Agent teams support multiple display modes for keeping tabs on teammate activity. You can control the display mode using the `--teammate-mode` flag when launching Claude Code.
+
+<CodeBlock
+  code={`# Auto-select based on terminal capabilities (default)
+claude --teammate-mode auto
+
+# Force in-process mode
+claude --teammate-mode in-process
+
+# Force tmux pane mode
+claude --teammate-mode tmux`}
+  lang="bash"
+  title="Setting the teammate display mode"
+  caption="Auto mode picks the best option for your terminal environment."
+/>
+
+**Auto** is the default. Claude Code detects your terminal capabilities and picks the best display mode automatically. If tmux is available, it uses tmux panes. Otherwise, it falls back to in-process mode.
+
+**In-process** runs all teammates within your terminal session. You see the lead's output by default. Press **Shift+Down** to cycle through teammate views and see what each one is working on. Hit **Shift+Down** again to move to the next teammate, and eventually you'll cycle back to the lead. In-process mode works well for quick team sessions where you just want to check progress without leaving your terminal. The tradeoff is that you can only see one teammate at a time.
+
+**Tmux** gives each teammate its own terminal pane. You'll need tmux installed on your system. Each teammate's output shows up in a separate pane, so you can watch all of them working simultaneously. Tmux mode is ideal for longer team sessions or when you need to watch multiple teammates work in real time. You get a complete picture of team activity, though it does eat into your screen real estate.
+
+<CodeBlock
+  code={`# In-process keyboard shortcuts
 Shift+Down    → Switch to next teammate's view
 Shift+Up      → Switch to previous teammate's view
 
-# Split pane requirements
-# macOS: tmux or iTerm2 must be installed
+# tmux requirements
+# macOS: tmux must be installed
 # Linux: tmux must be installed
 brew install tmux    # macOS
 apt install tmux     # Ubuntu/Debian`}
   lang="bash"
   title="Display mode navigation"
-  caption="In process mode works everywhere. Split pane requires tmux or iTerm2."
+  caption="In-process mode works everywhere. Tmux mode requires tmux to be installed."
 />
+
+You can also configure the default display mode persistently in settings.json if you prefer a specific mode for all team sessions.
+
+<CodeBlock
+  code={`{
+    "agentTeams": {
+      "displayMode": "tmux"
+    }
+}`}
+  lang="json"
+  title="settings.json"
+  caption="Set a default display mode for all team sessions."
+/>
+
+## Agent Frontmatter for Teams
+
+When teammates use AGENT.md files, several frontmatter fields let you control their behavior within the team. These fields are documented in detail in [Worktrees & Subagent Delegation](/guides/claude-code/worktrees/), but here's a quick reference for the fields most relevant to team coordination.
+
+<CodeBlock
+  code={`---
+name: careful-reviewer
+description: Reviews code changes with strict limits
+effort: high
+maxTurns: 15
+disallowedTools:
+  - Write
+  - Bash
+initialPrompt: "Review the staged changes in this repo. Focus on correctness, edge cases, and test coverage."
+---
+# Careful Reviewer
+
+You are a code review specialist. Read files and provide detailed feedback but do not make changes directly.`}
+  lang="yaml"
+  title="AGENT.md with team-relevant frontmatter fields"
+  caption="Constrain teammate behavior with effort, maxTurns, and disallowedTools."
+/>
+
+**`effort`** sets the effort level for the teammate, controlling how much computation it uses per turn. Useful for giving quick-scan teammates a lower effort level while review-focused teammates get a higher level.
+
+**`maxTurns`** limits how many agentic loop iterations the teammate can take before stopping. This prevents runaway teammates from consuming excessive tokens on a single task.
+
+**`disallowedTools`** restricts which tools the teammate can use. In the example above, the reviewer can read and search code but cannot write files or run commands, keeping it in a read-only review role.
+
+These fields work the same way whether the agent is used as a standalone subagent or as a team member. The team coordination layer (shared task list, mailbox, dependency tracking) operates on top of the individual agent configuration.
 
 ## Task Management
 
@@ -244,6 +342,8 @@ Both features enable parallelism, but they solve different problems. Here's a co
 
 **Use agent teams when:** you have a large task that naturally breaks into multiple independent subtasks, need teammates to talk to each other, want dependency tracking between tasks, or need true multi session parallelism for a complex project.
 
+Plugin agents from installed [plugins](/guides/claude-code/plugins/) can participate as teammates too. If you have a plugin that provides a specialized agent (for example, a database migration agent or a test coverage agent), it appears in the `/agents` Library tab and can be spawned as a teammate alongside your custom AGENT.md agents.
+
 ## Token Cost Considerations
 
 Agent teams consume significantly more tokens than single session work. Each teammate maintains its own independent context window, so total token usage scales roughly linearly with team size. A team of 4 working on a task uses approximately 4x the tokens of a single session doing the same work sequentially.
@@ -260,6 +360,8 @@ That cost scaling makes team sizing an important decision. Here are some guideli
 
 - **Prefer dependency tracking over large teams.** A team of 3 with clear dependencies often outperforms a team of 6 where everyone starts at once and then needs to coordinate mid flight.
 
+- **Use `maxTurns` to cap teammate token usage.** Setting `maxTurns` in agent frontmatter prevents individual teammates from running away with your token budget.
+
 ## Best Practices
 
 - **Keep teams small.** 3-5 teammates is the sweet spot. Larger teams drive up token costs proportionally and add coordination overhead. A focused team of 3 will outperform a team of 8 with vague responsibilities.
@@ -268,9 +370,11 @@ That cost scaling makes team sizing an important decision. Here are some guideli
 
 - **Use dependency tracking for sequential work.** If task B requires the output of task A, set it as a dependency rather than hoping they finish in the right order. The system enforces ordering automatically.
 
+- **Use `initialPrompt` for well-defined roles.** When each teammate has a clear job, set `initialPrompt` in the AGENT.md so they start working immediately. This reduces setup time and lets the lead focus on coordination rather than issuing individual instructions.
+
 - **Monitor token usage.** Teams burn through tokens fast because each teammate maintains its own full context window. For a team of 4 working for 30 minutes, expect roughly 4x the token cost of a single session. Keep team sessions shorter for cost-sensitive work.
 
-- **Use in process mode for quick coordination.** If you're running a short team session and just want to check progress occasionally, in process mode does the job. Save split pane mode for longer sessions where simultaneous visibility matters.
+- **Use the `/agents` Running tab for oversight.** The Running tab gives you a quick dashboard of all active teammates and their current status, which is faster than cycling through individual views.
 
 - **End team sessions cleanly.** Let all teammates complete their current tasks rather than force quitting. Abrupt termination can leave partial changes that are hard to reconcile.
 
@@ -284,9 +388,9 @@ Here's how a typical agent team session flows from start to finish, showing how 
 
 **Step 2: Decomposition.** The lead analyzes your request and creates tasks: (1) define the provider interface and base classes, (2) implement the email provider, (3) implement the SMS provider, (4) implement the push notification provider, (5) update existing code to use the new abstraction, (6) write tests for all providers. Tasks 2-4 depend on task 1. Task 5 depends on tasks 2-4. Task 6 depends on task 5.
 
-**Step 3: Spawning.** The lead spawns 3 teammates and adds all tasks to the shared task list. Teammate-1 immediately claims task 1 (no dependencies). Teammates 2 and 3 wait for it to finish.
+**Step 3: Spawning.** The lead spawns 3 teammates and adds all tasks to the shared task list. Teammate-1 immediately claims task 1 (no dependencies). Teammates 2 and 3 wait for it to finish. If agents have `initialPrompt` configured, they begin their assigned work the moment they're created.
 
-**Step 4: Parallel work.** Once teammate-1 finishes the provider interface, tasks 2-4 become available. Each teammate claims one and works in parallel. They can message each other if they discover shared patterns or need to coordinate on interface details.
+**Step 4: Parallel work.** Once teammate-1 finishes the provider interface, tasks 2-4 become available. Each teammate claims one and works in parallel. They can message each other if they discover shared patterns or need to coordinate on interface details. You can monitor progress through the `/agents` Running tab or by cycling through teammate views.
 
 **Step 5: Convergence.** As provider implementations wrap up, task 5 (updating existing code) becomes available. One teammate claims it. When that's done, task 6 (tests) opens up.
 
@@ -298,7 +402,7 @@ This sequential-then-parallel-then-convergent pattern is the most common team wo
 
 Agent teams are a research preview feature with several known limitations. It's worth knowing about these before relying on teams for critical work.
 
-**No session resumption.** If an in process teammate crashes or gets interrupted, it can't be resumed. Any work it already completed is preserved (committed files, completed tasks), but the teammate's active task may need to be reassigned or restarted.
+**No session resumption.** If an in-process teammate crashes or gets interrupted, it can't be resumed. Any work it already completed is preserved (committed files, completed tasks), but the teammate's active task may need to be reassigned or restarted.
 
 **Task status can lag.** Status updates between teammates aren't instantaneous. There may be a brief delay between when a teammate completes a task and when others see the updated status. It's usually seconds, not minutes, but it can cause brief coordination hiccups.
 
@@ -313,6 +417,8 @@ Agent teams are a research preview feature with several known limitations. It's 
 ## Further Reading
 
 - <a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener noreferrer">Agent Teams</a>, official documentation on team architecture, configuration, and known issues
+- [Worktrees & Subagent Delegation](/guides/claude-code/worktrees/) for subagent management, `/agents` UI, `initialPrompt`, `--agents` flag, and agent frontmatter reference
+- [Plugins](/guides/claude-code/plugins/) for creating and installing plugin agents that can serve as teammates
 
 ---
 
