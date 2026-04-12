@@ -1,0 +1,570 @@
+---
+title: "Agent SDK"
+description: "Use the Python and TypeScript SDKs to embed Claude Code's agent loop, tools, and context management into production applications and CI/CD pipelines."
+order: 12
+slug: "agent-sdk"
+lastVerified: 2026-04-12
+updatedDate: 2026-04-12
+keywords: ["claude code sdk", "agent sdk", "claude agent sdk", "python sdk", "typescript sdk", "query api", "programmatic claude", "ci cd automation", "agent loop"]
+---
+import CodeBlock from '../../../../components/guide/CodeBlock.astro';
+
+## What You Will Learn
+
+The Agent SDK (previously known as the Claude Code SDK) lets you embed Claude Code's full agent loop, built-in tools, and context management into your own applications. This chapter covers both the Python and TypeScript SDKs: installation, the core `query()` API, the ten built-in tools, hooks as native callback functions, subagent creation, MCP server integration, permission modes, session management, and authentication providers.
+
+By the end, you'll be able to write production scripts that programmatically run the same agent loop you use interactively in the CLI, with full control over tool access, hooks, and session lifecycle.
+
+## Quick Start
+
+Run your first SDK agent in under two minutes.
+
+<CodeBlock
+  code={`pip install claude-agent-sdk`}
+  lang="bash"
+  title="Terminal"
+  caption="Install the Python SDK. Requires Python 3.10+."
+/>
+
+<CodeBlock
+  code={`import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def main():
+    async for message in query(
+        prompt="List all Python files in the current directory and count them",
+        options=ClaudeAgentOptions(
+            allowed_tools=["Glob", "Read"],
+            permission_mode="auto",
+        ),
+    ):
+        if message.type == "text":
+            print(message.content)
+
+asyncio.run(main())`}
+  lang="python"
+  title="quick_start.py"
+  caption="A minimal agent that lists Python files using Glob and Read. Run with: python quick_start.py"
+/>
+
+Set your API key before running:
+
+<CodeBlock
+  code={`export ANTHROPIC_API_KEY="sk-ant-..."
+python quick_start.py`}
+  lang="bash"
+  title="Terminal"
+/>
+
+The agent streams messages back as it works. Each message has a `type` field -- `text` for Claude's responses, `tool_use` for tool invocations, and `tool_result` for tool outputs. The Quick Start above filters for text messages, but you can inspect all message types for full visibility into the agent loop.
+
+## What Is the Agent SDK?
+
+The Agent SDK is a library that gives you programmatic access to the same agent loop that powers the Claude Code CLI. When you run `claude` in your terminal, the CLI manages an agent loop that reads prompts, decides which tools to call, executes those tools, and iterates until the task is complete. The SDK exposes this exact loop as a function you call from code.
+
+This means everything you can do interactively in the CLI -- reading files, running shell commands, searching codebases, using MCP servers -- you can also do from a Python script, a TypeScript application, a CI/CD pipeline, or a production service. The SDK handles the same tool dispatch, context management, and permission enforcement that the CLI does.
+
+**When to use the SDK vs the CLI:**
+
+- **Use the CLI** for interactive development sessions where you're typing prompts and reviewing responses in real time. The CLI gives you a rich terminal interface with syntax highlighting, inline diffs, and interactive approval flows.
+- **Use the SDK** when you need to embed Claude Code's capabilities into automated workflows: CI/CD pipelines, production services, batch processing scripts, custom developer tools, or any scenario where a human isn't sitting at the terminal.
+
+The SDK and CLI share the same agent loop, tools, and context management. They differ in how you interact with them: the CLI gives you a terminal UI, while the SDK gives you an async iterator of typed messages.
+
+## Installation
+
+<CodeBlock
+  code={`pip install claude-agent-sdk`}
+  lang="bash"
+  title="Python"
+  caption="Requires Python 3.10+. The package name is claude-agent-sdk."
+/>
+
+<CodeBlock
+  code={`npm install @anthropic-ai/claude-agent-sdk`}
+  lang="bash"
+  title="TypeScript / Node.js"
+  caption="Requires Node.js 18+. The package is @anthropic-ai/claude-agent-sdk."
+/>
+
+Both packages install the SDK library and its dependencies. No separate Claude Code CLI installation is required -- the SDK is a standalone library with the agent loop built in.
+
+## The query() API
+
+The `query()` function is the core of the SDK. You provide a prompt and options, and it returns an async iterator of messages as the agent works through the task.
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions
+
+async for message in query(
+    prompt="Find all TODO comments and create a summary report",
+    options=ClaudeAgentOptions(
+        # Tools the agent is allowed to use
+        allowed_tools=["Read", "Grep", "Glob", "Write"],
+        # Permission mode (see Permission Modes section)
+        permission_mode="auto",
+        # Maximum turns in the agent loop
+        max_turns=50,
+        # Working directory for file operations
+        cwd="/path/to/project",
+        # System prompt appended to default instructions
+        system_prompt="Focus on high-priority TODOs marked with FIXME",
+    ),
+):
+    match message.type:
+        case "text":
+            print(f"Claude: {message.content}")
+        case "tool_use":
+            print(f"Tool call: {message.tool_name}({message.tool_input})")
+        case "tool_result":
+            print(f"Tool result: {message.content[:200]}")
+        case "error":
+            print(f"Error: {message.error}")`}
+  lang="python"
+  title="query_example.py"
+  caption="The query() API with ClaudeAgentOptions. Messages stream as the agent executes."
+/>
+
+The TypeScript API mirrors the Python API:
+
+<CodeBlock
+  code={`import { query, ClaudeAgentOptions } from "@anthropic-ai/claude-agent-sdk";
+
+const options: ClaudeAgentOptions = {
+  allowedTools: ["Read", "Grep", "Glob", "Write"],
+  permissionMode: "auto",
+  maxTurns: 50,
+  cwd: "/path/to/project",
+  systemPrompt: "Focus on high-priority TODOs marked with FIXME",
+};
+
+for await (const message of query("Find all TODO comments and create a summary report", options)) {
+  switch (message.type) {
+    case "text":
+      console.log(\`Claude: \${message.content}\`);
+      break;
+    case "tool_use":
+      console.log(\`Tool call: \${message.toolName}(\${JSON.stringify(message.toolInput)})\`);
+      break;
+    case "tool_result":
+      console.log(\`Tool result: \${message.content?.slice(0, 200)}\`);
+      break;
+    case "error":
+      console.error(\`Error: \${message.error}\`);
+      break;
+  }
+}`}
+  lang="typescript"
+  title="query_example.ts"
+  caption="TypeScript uses camelCase for options (allowedTools, permissionMode) but the API shape is identical."
+/>
+
+### ClaudeAgentOptions Reference
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `allowed_tools` | `list[str]` | Restrict which built-in tools the agent can use |
+| `permission_mode` | `str` | Permission enforcement level (see Permission Modes) |
+| `max_turns` | `int` | Maximum agent loop iterations before stopping |
+| `cwd` | `str` | Working directory for file and shell operations |
+| `system_prompt` | `str` | Additional system instructions appended to defaults |
+| `mcp_servers` | `dict` | MCP server configurations (see MCP Integration) |
+| `hooks` | `dict` | Hook callback functions (see Hooks as Callbacks) |
+| `resume` | `str` | Session ID to resume a previous session |
+| `setting_sources` | `list[str]` | Load skills and memory from these sources (e.g., `["project"]`) |
+| `plugins` | `list[str]` | [Plugin](/guides/claude-code/plugins/) names to enable for this session |
+
+## Built-in Tools
+
+The SDK gives your agent access to ten built-in tools. These are the same tools available in the CLI, and they run in the same sandboxed environment.
+
+| Tool | Purpose | Example Use |
+|------|---------|-------------|
+| **Read** | Read file contents | Inspect source files, configs, logs |
+| **Write** | Create or overwrite files | Generate reports, create new source files |
+| **Edit** | Make targeted edits to existing files | Fix bugs, refactor code, update configs |
+| **Bash** | Execute shell commands | Run tests, install dependencies, git operations |
+| **Monitor** | Watch for output from background processes | Monitor long-running builds, tail log files |
+| **Glob** | Find files by pattern | Discover project structure, find test files |
+| **Grep** | Search file contents with regex | Find function definitions, track imports |
+| **WebSearch** | Search the web | Look up documentation, find solutions |
+| **WebFetch** | Fetch a URL's content | Read web pages, download API responses |
+| **AskUserQuestion** | Prompt the user for input | Confirm destructive actions, request missing info |
+
+By default, the agent has access to all ten tools. Use `allowed_tools` to restrict the agent to only the tools it needs for a given task.
+
+<CodeBlock
+  code={`# Read-only agent: can browse but not modify
+read_only = ClaudeAgentOptions(
+    allowed_tools=["Read", "Glob", "Grep"],
+    permission_mode="auto",
+)
+
+# Full-access agent: can read, write, and execute
+full_access = ClaudeAgentOptions(
+    allowed_tools=["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
+    permission_mode="auto",
+)
+
+# Web-capable agent: can search and fetch from the internet
+web_agent = ClaudeAgentOptions(
+    allowed_tools=["Read", "Glob", "Grep", "WebSearch", "WebFetch"],
+    permission_mode="auto",
+)`}
+  lang="python"
+  title="tool_profiles.py"
+  caption="Define tool profiles for different agent roles. Restricting tools limits blast radius."
+/>
+
+## Hooks as Callbacks
+
+In the CLI, hooks are configured as JSON objects in settings files that trigger shell commands on lifecycle events. See [Hooks & Lifecycle Automation](/guides/claude-code/hooks/) for the full CLI hook system with all 24 lifecycle events.
+
+In the SDK, hooks are **native callback functions** in your application code. Instead of writing a shell script and configuring a JSON matcher, you write a Python function or TypeScript callback and pass it directly to `query()`. The callback receives the same event payload as CLI hooks, but you handle it in-process with full access to your application's state.
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions
+
+def pre_tool_use_hook(event):
+    """Block destructive shell commands."""
+    if event.tool_name == "Bash":
+        command = event.tool_input.get("command", "")
+        if "rm -rf" in command:
+            return {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": "Destructive rm -rf blocked by SDK hook",
+                }
+            }
+    # Allow everything else
+    return None
+
+def post_tool_use_hook(event):
+    """Log every tool execution for audit."""
+    print(f"[AUDIT] {event.tool_name} completed in {event.duration_ms}ms")
+    return None
+
+async for message in query(
+    prompt="Clean up temporary files in the project",
+    options=ClaudeAgentOptions(
+        hooks={
+            "PreToolUse": pre_tool_use_hook,
+            "PostToolUse": post_tool_use_hook,
+        },
+        permission_mode="auto",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="hooks_example.py"
+  caption="SDK hooks are Python functions that receive event payloads and return decisions. Same events as CLI, native code instead of JSON config."
+/>
+
+<CodeBlock
+  code={`import { query, ClaudeAgentOptions, HookEvent } from "@anthropic-ai/claude-agent-sdk";
+
+function preToolUseHook(event: HookEvent) {
+  if (event.toolName === "Bash") {
+    const command = event.toolInput?.command ?? "";
+    if (command.includes("rm -rf")) {
+      return {
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          permissionDecision: "deny" as const,
+          permissionDecisionReason: "Destructive rm -rf blocked by SDK hook",
+        },
+      };
+    }
+  }
+  return null;
+}
+
+const options: ClaudeAgentOptions = {
+  hooks: {
+    PreToolUse: preToolUseHook,
+  },
+  permissionMode: "auto",
+};
+
+for await (const message of query("Clean up temporary files", options)) {
+  if (message.type === "text") console.log(message.content);
+}`}
+  lang="typescript"
+  title="hooks_example.ts"
+  caption="TypeScript hooks are typed callback functions with the same event structure."
+/>
+
+The SDK supports all 24 lifecycle events as hook keys. The most commonly used in SDK workflows are `PreToolUse` (for gating tool calls), `PostToolUse` (for logging), `SessionStart` (for setup), and `Stop` (for cleanup).
+
+## Subagents
+
+The SDK lets you create subagents programmatically using `AgentDefinition` objects. Subagents run in their own context window, execute a specific task, and return results to the parent agent. This is the SDK equivalent of the AGENT.md files used in CLI sessions, but defined in code rather than on disk. See [Git Worktrees & Subagent Delegation](/guides/claude-code/worktrees/) for how subagents work in the CLI.
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions, AgentDefinition
+
+# Define a code review subagent
+code_reviewer = AgentDefinition(
+    name="code-reviewer",
+    description="Reviews code changes for bugs, style issues, and security concerns",
+    instructions="""You are a senior code reviewer. For each file:
+1. Check for logic errors and edge cases
+2. Verify error handling is present
+3. Flag any security concerns
+4. Suggest improvements for readability
+Return a structured review with severity levels.""",
+    allowed_tools=["Read", "Grep", "Glob"],
+    model="sonnet",
+)
+
+# Define a test writer subagent
+test_writer = AgentDefinition(
+    name="test-writer",
+    description="Writes unit tests for changed files",
+    instructions="""You are a test engineer. Given a source file:
+1. Identify all public functions and methods
+2. Write comprehensive unit tests covering happy paths and edge cases
+3. Use the project's existing test framework and patterns""",
+    allowed_tools=["Read", "Write", "Grep", "Glob", "Bash"],
+    model="sonnet",
+)
+
+# Use subagents in the parent query
+async for message in query(
+    prompt="Review the changes in src/auth/ and write tests for any untested functions",
+    options=ClaudeAgentOptions(
+        agents=[code_reviewer, test_writer],
+        permission_mode="auto",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="subagents_example.py"
+  caption="Define subagents as AgentDefinition objects. The parent agent delegates tasks to them automatically."
+/>
+
+Each subagent gets its own context window and tool set, so it can work independently without consuming the parent agent's context. The parent agent decides when to delegate based on the subagent descriptions you provide.
+
+## MCP Integration
+
+The SDK supports MCP servers through the `mcp_servers` option. MCP (Model Context Protocol) servers extend your agent with external tools -- databases, APIs, ticketing systems, and more. See [Model Context Protocol](/guides/claude-code/mcp/) for the full MCP setup guide.
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions
+
+async for message in query(
+    prompt="Check the database for users created in the last 24 hours and summarize",
+    options=ClaudeAgentOptions(
+        mcp_servers={
+            "postgres": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-postgres"],
+                "env": {"DATABASE_URL": "postgresql://localhost/myapp"},
+            },
+        },
+        permission_mode="auto",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="mcp_example.py"
+  caption="Connect an MCP server to your SDK agent. The agent gains the server's tools alongside built-in ones."
+/>
+
+MCP servers added via the SDK option use the stdio transport and run as child processes alongside your agent. For remote MCP servers, specify the HTTP transport instead:
+
+<CodeBlock
+  code={`mcp_servers={
+    "docs": {
+        "transport": "http",
+        "url": "https://mcp.example.com/docs",
+        "headers": {"Authorization": "Bearer your-token"},
+    },
+}`}
+  lang="python"
+  title="Remote MCP server"
+  caption="HTTP transport for remote MCP servers, with authentication headers."
+/>
+
+## Permission Modes
+
+The `permission_mode` option controls how the agent handles tool approval. This maps directly to the same six permission modes available in the CLI. See [Models, Cost Economics & Permissions](/guides/claude-code/models-and-costs/) for detailed mode descriptions.
+
+| Mode | Behavior | Best For |
+|------|----------|----------|
+| `"default"` | Prompt user for each tool call | Interactive SDK apps |
+| `"auto"` | AI classifier approves safe actions, prompts for risky ones | Supervised automation |
+| `"plan"` | Read/search tools auto-approved, write tools require approval | Code review workflows |
+| `"approve-full-auto"` | Approve all tool calls without prompting | Trusted CI/CD pipelines |
+| `"deny-full-auto"` | Auto-approve safe tools, deny risky tools without prompting | Constrained batch jobs |
+| `"bypassPermissions"` | Skip all permission checks (requires managed settings) | Enterprise managed agents |
+
+For CI/CD pipelines, `"auto"` or `"approve-full-auto"` are the most common choices. Use `"auto"` when you want the AI classifier to catch potentially destructive actions, and `"approve-full-auto"` when running in a fully trusted, disposable environment (like a container).
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions
+
+# CI/CD pipeline: auto mode with restricted tools
+async for message in query(
+    prompt="Run the test suite and report any failures",
+    options=ClaudeAgentOptions(
+        allowed_tools=["Read", "Bash", "Grep", "Glob"],
+        permission_mode="auto",
+        cwd="/workspace/project",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="ci_pipeline.py"
+  caption="Auto mode in CI: the classifier gates destructive actions while allowing safe tool use."
+/>
+
+## Session Management
+
+Every `query()` call creates a session with a unique ID. You can resume a previous session to continue a multi-step workflow, or fork a session to branch off from a specific point.
+
+<CodeBlock
+  code={`from claude_agent_sdk import query, ClaudeAgentOptions
+
+# Step 1: Start a session
+session_id = None
+async for message in query(
+    prompt="Analyze the codebase structure and identify the main modules",
+    options=ClaudeAgentOptions(permission_mode="auto"),
+):
+    if message.type == "text":
+        print(message.content)
+    if hasattr(message, "session_id"):
+        session_id = message.session_id
+
+# Step 2: Resume the same session with follow-up work
+async for message in query(
+    prompt="Now write documentation for the three largest modules you found",
+    options=ClaudeAgentOptions(
+        resume=session_id,
+        permission_mode="auto",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="session_resume.py"
+  caption="Resume a session to continue where the agent left off. The resumed session retains full conversation context."
+/>
+
+Resumed sessions retain the full conversation history, tool results, and context from the original run. This enables multi-step workflows where each step builds on the results of the previous one.
+
+Session forking creates a new session that starts with a copy of the original session's context. This is useful for exploring alternative approaches without losing the original session state:
+
+<CodeBlock
+  code={`# Fork from the analysis session to try two different approaches
+async for message in query(
+    prompt="Refactor the auth module using the repository pattern",
+    options=ClaudeAgentOptions(
+        resume=session_id,  # Forks from the analysis context
+        permission_mode="auto",
+    ),
+):
+    if message.type == "text":
+        print(message.content)`}
+  lang="python"
+  title="Session forking"
+  caption="Forking a session branches from the original context, letting you explore alternatives."
+/>
+
+## Authentication
+
+The SDK supports four authentication providers. Set the appropriate environment variable or configuration before calling `query()`.
+
+**Anthropic API (default)**
+
+<CodeBlock
+  code={`export ANTHROPIC_API_KEY="sk-ant-..."
+python my_agent.py`}
+  lang="bash"
+  title="Anthropic API key"
+  caption="The default authentication method. Get your key from console.anthropic.com."
+/>
+
+**Amazon Bedrock**
+
+<CodeBlock
+  code={`export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION="us-east-1"
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+python my_agent.py`}
+  lang="bash"
+  title="Amazon Bedrock"
+  caption="Use Claude through Amazon Bedrock. Standard AWS credentials apply."
+/>
+
+**Google Vertex AI**
+
+<CodeBlock
+  code={`export CLAUDE_CODE_USE_VERTEX=1
+export CLOUD_ML_REGION="us-east5"
+export ANTHROPIC_VERTEX_PROJECT_ID="your-project-id"
+python my_agent.py`}
+  lang="bash"
+  title="Google Vertex AI"
+  caption="Use Claude through Google Cloud Vertex AI."
+/>
+
+**Azure Foundry**
+
+<CodeBlock
+  code={`export CLAUDE_CODE_USE_AZURE=1
+export AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com"
+export AZURE_API_KEY="..."
+python my_agent.py`}
+  lang="bash"
+  title="Azure Foundry"
+  caption="Use Claude through Azure Foundry."
+/>
+
+The SDK auto-detects which provider to use based on which environment variables are set. If multiple providers are configured, the priority order is: Anthropic API, Bedrock, Vertex AI, Azure Foundry.
+
+## SDK vs CLI Comparison
+
+| Capability | CLI | SDK |
+|-----------|-----|-----|
+| Agent loop | Same | Same |
+| Built-in tools (10) | All available | All available |
+| Hooks | JSON config + shell scripts | Native callback functions |
+| Subagents | AGENT.md files on disk | AgentDefinition objects in code |
+| MCP servers | `claude mcp add` command | `mcp_servers` option |
+| Permission modes | All 6 modes | All 6 modes |
+| Session resume | `--resume` flag | `resume` option |
+| Skills | .claude/skills/ on disk | `setting_sources` option |
+| Plugins | Installed from marketplace | `plugins` option |
+| Interactive UI | Full terminal interface | None (async iterator) |
+| Best for | Interactive development | CI/CD, automation, production apps |
+
+The SDK and CLI are two interfaces to the same engine. Everything the CLI can do, the SDK can do programmatically. The key difference is interaction model: the CLI provides a rich terminal UI for humans, while the SDK provides a typed async iterator for applications.
+
+## Best Practices
+
+- **Restrict tools to the minimum needed.** An agent that only needs to read files shouldn't have access to Bash. Use `allowed_tools` to limit the blast radius of every agent.
+
+- **Use `"auto"` permission mode for most automation.** Auto mode's AI classifier catches destructive actions while allowing safe operations. Only use `"approve-full-auto"` in fully trusted, disposable environments.
+
+- **Handle all message types.** Don't just filter for `text` messages. Inspect `tool_use` and `tool_result` messages for debugging, and handle `error` messages to catch failures early.
+
+- **Set `max_turns` to prevent runaway agents.** Without a turn limit, an agent stuck in a loop will consume tokens indefinitely. Set a reasonable ceiling based on task complexity.
+
+- **Use hooks for audit logging.** A `PostToolUse` hook that logs every tool call gives you full visibility into what the agent did, which is essential for production deployments.
+
+- **Define focused subagents.** Rather than giving one agent all tools and a broad prompt, define specialized subagents with restricted tools and clear instructions. A code reviewer that can only read is safer and more effective than a generalist.
+
+- **Load project skills with `setting_sources`.** Set `setting_sources=["project"]` to load SKILL.md files from the project's `.claude/skills/` directory. This gives your SDK agent the same custom skills available in CLI sessions. See [Custom Skills](/guides/claude-code/custom-skills/) for skill authoring.
+
+## Further Reading
+
+- <a href="https://code.claude.com/docs/en/agent-sdk" target="_blank" rel="noopener noreferrer">Agent SDK</a>, the official documentation on the Python and TypeScript SDKs, query() API reference, and advanced configuration
+- Continue the guide with the next chapter on [Computer Use](/guides/claude-code/computer-use/), which covers desktop application control through Claude Code
