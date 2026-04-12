@@ -140,7 +140,7 @@ Phases execute in numeric order: 111 -> 112 -> 113 -> 114 -> 115 -> 116
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 111. High-Impact Chapter Rewrites | 7/7 | Complete | 2026-04-12 |
-| 112. New Chapters | 1/4 | In Progress|  |
+| 112. New Chapters | 2/4 | In Progress|  |
 | 113. Lower-Impact Chapter Updates | 0/TBD | Not started | - |
 | 114. Cheatsheet | 0/TBD | Not started | - |
 | 115. Blog Post | 0/TBD | Not started | - |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.19
 milestone_name: Claude Code Guide Refresh
 status: executing
-stopped_at: Completed 112-01-PLAN.md
-last_updated: "2026-04-12T14:27:26.807Z"
+stopped_at: Completed 112-02-PLAN.md
+last_updated: "2026-04-12T14:28:39.308Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 112 of 116 (New Chapters)
-Plan: 1 of 4 (Plugins Chapter) -- COMPLETE
-Status: Executing Phase 112
+Plan: 2 of 4 (Plugins Chapter) -- COMPLETE
+Status: Ready to execute
 Last activity: 2026-04-12
 
 Progress: [███████░░░] 73%
@@ -54,6 +54,7 @@ Progress: [███████░░░] 73%
 | Phase 111 P06 | 3m | 2 tasks | 1 files |
 | Phase 111 P07 | 3m | 2 tasks | 5 files |
 | Phase 112 P01 | 3min | 2 tasks | 1 files |
+| Phase 112 P02 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 111]: Ch8 restructured around full 24-event reference table with conditional if field and defer decision
 - [Phase 111]: All 5 rewritten chapters verified clean of deprecated terms; guide.json descriptions synced for Ch3/Ch4/Ch11
 - [Phase 112]: Plugins chapter bridges from Ch7 Skills with 'Skills are local, Plugins are shareable' opening; uses markdown-formatter as realistic scenario throughout
+- [Phase 112]: Agent SDK chapter leads with Python, TypeScript for core APIs; rename mention once in intro paragraph
 
 ### Pending Todos
 
@@ -94,7 +96,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-12T14:27:26.804Z
-Stopped at: Completed 112-01-PLAN.md
+Last session: 2026-04-12T14:28:39.304Z
+Stopped at: Completed 112-02-PLAN.md
 Resume file: None
 Next: Phase 112 (New Chapters)

@@ -27,7 +27,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 ### New Chapters
 
 - [ ] **NEW-01**: Plugins chapter covering manifest, marketplace, bin/ executables, userConfig, lifecycle
-- [ ] **NEW-02**: Agent SDK chapter covering Python + TypeScript APIs, renamed from Claude Code SDK
+- [x] **NEW-02**: Agent SDK chapter covering Python + TypeScript APIs, renamed from Claude Code SDK
 - [ ] **NEW-03**: Computer Use chapter covering CLI + Desktop GUI control, per-app approval, safety model
 - [ ] **NEW-04**: New chapters registered in guide.json with proper slugs and descriptions
 - [ ] **NEW-05**: New chapters have build-time OG images following existing pattern
@@ -96,7 +96,7 @@ Requirements for Claude Code Guide Refresh milestone. Each maps to roadmap phase
 | UPD-13 | Phase 111 | Complete |
 | UPD-14 | Phase 116 | Pending |
 | NEW-01 | Phase 112 | Pending |
-| NEW-02 | Phase 112 | Pending |
+| NEW-02 | Phase 112 | Complete |
 | NEW-03 | Phase 112 | Pending |
 | NEW-04 | Phase 112 | Pending |
 | NEW-05 | Phase 112 | Pending |
