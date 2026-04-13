@@ -275,26 +275,26 @@ From the server author's perspective, an elicitation request specifies a JSON Sc
 
 <CodeBlock
   code={`{
-  "method": "elicitation/create",
-  "params": {
-    "message": "Which database environment should this migration run against?",
-    "requestedSchema": {
-      "type": "object",
-      "properties": {
-        "environment": {
-          "type": "string",
-          "enum": ["development", "staging", "production"],
-          "description": "Target database environment"
+    "method": "elicitation/create",
+    "params": {
+      "message": "Which database environment should this migration run against?",
+      "requestedSchema": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": ["development", "staging", "production"],
+            "description": "Target database environment"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Confirm you want to proceed"
+          }
         },
-        "confirm": {
-          "type": "boolean",
-          "description": "Confirm you want to proceed"
-        }
-      },
-      "required": ["environment", "confirm"]
+        "required": ["environment", "confirm"]
+      }
     }
-  }
-}`}
+  }`}
   lang="json"
   title="Elicitation request from an MCP server"
   caption="The server specifies a JSON Schema. Claude Code renders it as an interactive form."
@@ -380,22 +380,22 @@ The key is `anthropic/maxResultSizeChars` inside the tool's `_meta` object. It a
 
 <CodeBlock
   code={`{
-  "tools": [
-    {
-      "name": "search_codebase",
-      "description": "Full-text search across the repository",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "query": { "type": "string" }
+    "tools": [
+      {
+        "name": "search_codebase",
+        "description": "Full-text search across the repository",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string" }
+          }
+        },
+        "_meta": {
+          "anthropic/maxResultSizeChars": 200000
         }
-      },
-      "_meta": {
-        "anthropic/maxResultSizeChars": 200000
       }
-    }
-  ]
-}`}
+    ]
+  }`}
   lang="json"
   title="Per-tool result-size cap in tools/list response"
   caption="Server authors set this in their tools/list response metadata. Users don't need to configure anything."

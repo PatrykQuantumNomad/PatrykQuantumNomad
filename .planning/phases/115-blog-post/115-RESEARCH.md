@@ -300,17 +300,19 @@ const claudeCodeRefreshFAQ = isClaudeCodeRefreshPost ? [
 | A2 | The new post's title should be "Claude Code Guide Refresh: 14 Chapters, 3 New Topics, Updated Cheatsheet" | Code Examples | SEO impact if title is suboptimal. Low risk -- can be changed freely. |
 | A3 | FAQ questions for the new post focus on "what's new" and "cheatsheet location" | Code Examples | Missing SEO opportunity if better questions exist. Low risk -- additional questions can be added. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Blog post writing style: chapter-by-chapter or theme-by-theme?**
    - What we know: The original claude-code-guide.mdx walks through each chapter in order (11 sections). The new post could do the same for all 14 chapters, but that would overlap heavily with the original.
    - What's unclear: Whether the user prefers a "What's New" highlights approach (theme-by-theme: new chapters, major rewrites, cheatsheet) or a comprehensive reintroduction of the full guide.
    - Recommendation: Use a "What's New" approach with 3-4 sections: new chapters, major chapter rewrites, cheatsheet, and a link back to the full guide. This avoids duplicating the original post and is more useful for returning readers.
+   - RESOLVED: Using "What's New" theme-by-theme approach per recommendation. Plan 02 structures post as: new chapters → major rewrites → incremental updates → cheatsheet → reading paths.
 
 2. **How many FAQ questions to register?**
    - What we know: The existing claude-code-guide post has 6 FAQ questions. Other posts have 3-6.
    - What's unclear: Which questions will drive the most search traffic for the refresh post.
    - Recommendation: Start with 2-3 focused on "what changed" and "where to find the cheatsheet" -- expand later if needed.
+   - RESOLVED: Using 2 FAQ questions per recommendation — "What is new in the Claude Code Guide refresh?" and "Where can I find the Claude Code cheatsheet?"
 
 ## Environment Availability
 

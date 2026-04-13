@@ -309,10 +309,10 @@ In large monorepos, checking out the entire repository for each worktree can be 
 
 <CodeBlock
   code={`{
-  "worktree": {
-    "sparsePaths": ["packages/frontend", "packages/shared"]
-  }
-}`}
+    "worktree": {
+      "sparsePaths": ["packages/frontend", "packages/shared"]
+    }
+  }`}
   lang="json"
   title=".claude/settings.json"
   caption="Worktrees only check out the specified directories instead of the full repo."

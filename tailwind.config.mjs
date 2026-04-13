@@ -36,6 +36,8 @@ export default {
             '--tw-prose-hr': 'var(--color-border)',
             '--tw-prose-th-borders': 'var(--color-border)',
             '--tw-prose-td-borders': 'var(--color-border)',
+            'code::before': { content: 'none' },
+            'code::after': { content: 'none' },
           },
         },
       },

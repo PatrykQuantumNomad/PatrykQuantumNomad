@@ -12,7 +12,7 @@ import Callout from '../../../../components/blog/Callout.astro';
 
 ## What You Will Learn
 
-This chapter covers Computer Use, the feature that gives Claude Code direct control over native desktop applications on your machine. We'll start with the safety model and per-app approval flow -- because Computer Use operates outside the sandbox, understanding the security boundaries comes before anything else. From there, we'll walk through the three app control tiers, how to enable Computer Use in both the CLI and Desktop app, how screenshots and Retina displays are handled, and practical examples of GUI automation workflows.
+This chapter covers Computer Use, the feature that gives Claude Code direct control over native desktop applications on your machine. We'll start with the safety model and per-app approval flow, because Computer Use operates outside the sandbox and understanding the security boundaries comes before anything else. From there, we'll walk through the three app control tiers, how to enable Computer Use in both the CLI and Desktop app, how screenshots and Retina displays are handled, and practical examples of GUI automation workflows.
 
 By the end, you'll know how to safely enable Computer Use, what happens when Claude requests access to an application, and how to integrate GUI interactions into your development workflow.
 
@@ -25,7 +25,7 @@ Get Computer Use running in four steps.
 1. Type `/mcp` in an interactive session to open the MCP server manager
 2. Find the `computer-use` server in the list and enable it
 3. Grant macOS Accessibility and Screen Recording permissions when prompted
-4. Ask Claude to interact with a GUI application -- for example, "Open Finder and create a new folder called project-assets on the Desktop"
+4. Ask Claude to interact with a GUI application. For example, "Open Finder and create a new folder called project-assets on the Desktop"
 
 **In the Desktop app (macOS and Windows):**
 
@@ -37,14 +37,14 @@ Get Computer Use running in four steps.
 Claude will request approval for each application it wants to control. You'll see exactly which app and what level of access is needed before anything happens.
 
 <Callout type="warning" title="Safety First: Computer Use Controls Real Applications">
-  Computer Use gives Claude direct control over native desktop applications -- mouse clicks, keyboard input, and screenshots on your actual machine. Unlike the sandboxed Bash tool, Computer Use operates outside the sandbox. Every app requires explicit per-session approval, and you can press <strong>Escape</strong> at any time to abort. Review the full permission model in <a href="/guides/claude-code/security/">Security &amp; Enterprise Administration</a> before enabling Computer Use in any production environment.
+  Computer Use gives Claude direct control over native desktop applications, including mouse clicks, keyboard input, and screenshots on your actual machine. Unlike the sandboxed Bash tool, Computer Use operates outside the sandbox. Every app requires explicit per-session approval, and you can press <strong>Escape</strong> at any time to abort. Review the full permission model in <a href="/guides/claude-code/security/">Security &amp; Enterprise Administration</a> before enabling Computer Use in any production environment.
 </Callout>
 
 ---
 
 ## Safety Model
 
-Computer Use is fundamentally different from other Claude Code tools. The Bash tool runs inside a configurable sandbox with filesystem and network restrictions. Computer Use has no such sandbox -- it interacts with real applications on your actual desktop. That's why the safety model is layered with multiple independent protections.
+Computer Use is fundamentally different from other Claude Code tools. The Bash tool runs inside a configurable sandbox with filesystem and network restrictions. Computer Use has no such sandbox. It interacts with real applications on your actual desktop. That's why the safety model is layered with multiple independent protections.
 
 Here's a summary of every safety mechanism before we walk through each one:
 
@@ -55,7 +55,7 @@ Here's a summary of every safety mechanism before we walk through each one:
 | Escape key abort | Instantly stops any active Computer Use operation | Global hotkey |
 | Terminal exclusion | Terminals excluded from screenshots | Always active |
 | Application hiding | Other apps hidden while Claude controls one | During active control |
-| No sandbox | No filesystem/network sandbox -- other mechanisms compensate | Always |
+| No sandbox | No filesystem/network sandbox; other mechanisms compensate | Always |
 
 ### Per-Session App Approval
 
@@ -67,7 +67,7 @@ Only one Claude Code session can use Computer Use at a time. This prevents multi
 
 ### Escape Key Abort
 
-Pressing the **Escape** key immediately aborts any active Computer Use operation from anywhere on your machine. The keypress is consumed by Claude Code -- it won't be passed through to whatever dialog or application Claude is currently interacting with. This gives you an instant kill switch regardless of what Claude is doing.
+Pressing the **Escape** key immediately aborts any active Computer Use operation from anywhere on your machine. The keypress is consumed by Claude Code and won't be passed through to whatever dialog or application Claude is currently interacting with. This gives you an instant kill switch regardless of what Claude is doing.
 
 ### Terminal Exclusion
 
@@ -79,7 +79,7 @@ While Claude is controlling an application, other applications are hidden from v
 
 ### No Sandbox
 
-Unlike the Bash tool, Computer Use does not operate inside a sandbox. There are no filesystem path restrictions, no network allowlists, and no automatic command blocking. The per-app approval flow and the app control tiers (covered below) are the primary access controls. This is why every other safety mechanism in this section matters -- they compensate for the absence of a sandbox boundary.
+Unlike the Bash tool, Computer Use does not operate inside a sandbox. There are no filesystem path restrictions, no network allowlists, and no automatic command blocking. The per-app approval flow and the app control tiers (covered below) are the primary access controls. This is why every other safety mechanism in this section matters. They compensate for the absence of a sandbox boundary.
 
 ---
 
@@ -92,7 +92,7 @@ When Claude determines it needs to interact with a desktop application, it pause
 The prompt shows three things:
 
 1. **Which application** Claude wants to control (e.g., "Finder", "Safari", "System Settings")
-2. **What level of access** is needed (view-only, click-only, or full control -- see App Control Tiers below)
+2. **What level of access** is needed (view-only, click-only, or full control; see App Control Tiers below)
 3. **A warning tier** specific to the app category, explaining the risks
 
 ### Warning Tiers
@@ -106,11 +106,11 @@ Different applications carry different risks, and the approval prompt reflects t
 | System settings (System Settings, Control Panel) | "Can change system settings" | Access to system preferences can modify security settings, network config, etc. |
 | Other applications | Standard approval | General-purpose access notification |
 
-These warnings are informational -- you still decide whether to approve or deny. But they're designed to make you pause and consider whether Claude genuinely needs access to that particular application for the task at hand.
+These warnings are informational. You still decide whether to approve or deny. But they're designed to make you pause and consider whether Claude genuinely needs access to that particular application for the task at hand.
 
 ### Session Scope
 
-Approval is scoped to the current session. When you approve Finder access, Claude can interact with Finder for the remainder of that session without asking again. But the next time you start a new session, Claude will need to request Finder access from scratch. There's no persistent approval mechanism -- this is intentional. It forces you to actively opt in to Computer Use for each work session.
+Approval is scoped to the current session. When you approve Finder access, Claude can interact with Finder for the remainder of that session without asking again. But the next time you start a new session, Claude will need to request Finder access from scratch. There's no persistent approval mechanism, and that's intentional. It forces you to actively opt in to Computer Use for each work session.
 
 ---
 
@@ -130,13 +130,13 @@ Browsers and trading platforms are restricted to view-only access. Claude can ta
 
 ### Click-Only Tier
 
-Terminals and IDEs allow screenshots and mouse clicks but block keyboard input. This means Claude can click UI elements (buttons, tabs, menus) but cannot type commands or code directly. For terminals specifically, this prevents Claude from executing arbitrary shell commands through the GUI -- which would bypass any Bash tool sandbox restrictions you've configured.
+Terminals and IDEs allow screenshots and mouse clicks but block keyboard input. This means Claude can click UI elements (buttons, tabs, menus) but cannot type commands or code directly. For terminals specifically, this prevents Claude from executing arbitrary shell commands through the GUI, which would bypass any Bash tool sandbox restrictions you've configured.
 
 ### Full Control Tier
 
 All other applications get full control: screenshots, mouse clicks, and keyboard input. This is appropriate for applications like Finder, design tools, spreadsheet editors, and other productivity software where Claude needs complete interaction capability to perform useful work.
 
-The tier assignments are built into Computer Use and cannot be customized. They represent a security boundary -- applications in higher-risk categories automatically get reduced access levels regardless of what you approve in the per-app prompt.
+The tier assignments are built into Computer Use and cannot be customized. They represent a security boundary, so applications in higher-risk categories automatically get reduced access levels regardless of what you approve in the per-app prompt.
 
 ---
 
@@ -165,7 +165,7 @@ The CLI enables Computer Use through the Model Context Protocol (MCP). Computer 
   caption="Computer Use setup in the CLI. The /mcp command opens the interactive MCP server manager."
 />
 
-The macOS Accessibility permission lets Claude Code send mouse clicks and keyboard events to other applications. The Screen Recording permission lets it take screenshots of the desktop. Both are required -- Computer Use won't work with only one of the two.
+The macOS Accessibility permission lets Claude Code send mouse clicks and keyboard events to other applications. The Screen Recording permission lets it take screenshots of the desktop. Both are required. Computer Use won't work with only one of the two.
 
 **Important:** The CLI version of Computer Use is macOS only. It is not available on Linux or Windows through the CLI. Windows users should use the Desktop app instead.
 
@@ -186,7 +186,7 @@ The Desktop app provides a simpler setup path through its settings UI.
   caption="The Desktop app handles Computer Use setup through Settings > General. No MCP configuration needed."
 />
 
-The Desktop app integrates Computer Use natively -- there's no MCP server to enable. Toggle the setting on, grant the system permissions, and you're ready to go.
+The Desktop app integrates Computer Use natively, so there's no MCP server to enable. Toggle the setting on, grant the system permissions, and you're ready to go.
 
 ---
 
@@ -214,13 +214,13 @@ Computer Use relies on screenshots to understand what's on screen. Claude takes 
 
 Modern Retina and HiDPI displays render at 2x or 3x the logical pixel count. A standard MacBook Pro screen might have a physical resolution of 3456 x 2234 pixels, but applications render at the logical resolution of 1728 x 1117. Sending full-resolution Retina screenshots to the model would waste tokens on pixel density that doesn't improve Claude's ability to identify UI elements.
 
-Computer Use automatically downscales screenshots from Retina displays to approximately the logical resolution. A 3456 x 2234 pixel capture becomes roughly 1372 x 887 pixels -- close to the logical display size. This keeps screenshots detailed enough for accurate UI element identification while keeping token usage reasonable.
+Computer Use automatically downscales screenshots from Retina displays to approximately the logical resolution. A 3456 x 2234 pixel capture becomes roughly 1372 x 887 pixels, close to the logical display size. This keeps screenshots detailed enough for accurate UI element identification while keeping token usage reasonable.
 
 You don't need to configure anything for this behavior. It happens automatically whenever Computer Use detects a HiDPI display. On standard (1x) displays, no downscaling occurs.
 
 ### Screenshot Frequency
 
-Claude takes screenshots as needed during a Computer Use interaction -- not continuously. After each action (clicking a button, typing text, opening a menu), Claude takes a new screenshot to verify the result before deciding the next step. This observe-act-observe loop means Claude adapts to what actually happened on screen rather than blindly executing a sequence of actions.
+Claude takes screenshots as needed during a Computer Use interaction, not continuously. After each action (clicking a button, typing text, opening a menu), Claude takes a new screenshot to verify the result before deciding the next step. This observe-act-observe loop means Claude adapts to what actually happened on screen rather than blindly executing a sequence of actions.
 
 If an action produces an unexpected result (a dialog appeared, the wrong menu opened), Claude sees this in the follow-up screenshot and can adjust its approach. This makes Computer Use more resilient to minor UI differences between systems or application versions.
 
@@ -243,7 +243,7 @@ Does the sidebar layout match the design mockup at ./designs/dashboard-v2.png?"`
   caption="Claude opens the browser (view-only tier), takes a screenshot, and compares it against a reference image."
 />
 
-Since browsers are in the view-only tier, Claude can take screenshots and read the page content but cannot click or interact with the web application. This makes it safe for visual verification -- Claude observes but doesn't modify.
+Since browsers are in the view-only tier, Claude can take screenshots and read the page content but cannot click or interact with the web application. This makes it safe for visual verification because Claude observes but doesn't modify.
 
 ### Interacting with Desktop Applications
 
@@ -319,7 +319,7 @@ Computer Use is powerful, but it's not always the right tool. Here's a quick dec
 **Use the Bash tool instead when:**
 - The task can be accomplished entirely through terminal commands
 - You need sandbox protections (filesystem restrictions, network allowlists)
-- Speed matters -- CLI operations are faster than GUI interactions
+- Speed matters because CLI operations are faster than GUI interactions
 - You're working with files, Git, or build tools that have mature CLI interfaces
 
 **Use both together when:**
@@ -331,11 +331,11 @@ Computer Use is powerful, but it's not always the right tool. Here's a quick dec
 
 ## Best Practices
 
-- **Approve only the applications Claude needs.** When the per-app approval prompt appears, consider whether Claude genuinely needs that application for the current task. Deny access to apps that aren't relevant -- you can always approve them later if needed.
+- **Approve only the applications Claude needs.** When the per-app approval prompt appears, consider whether Claude genuinely needs that application for the current task. Deny access to apps that aren't relevant. You can always approve them later if needed.
 
 - **Use Escape as your safety net.** If Claude starts interacting with the wrong application or doing something unexpected, press Escape immediately. It aborts the current operation and returns control to you. Don't wait to see what happens.
 
-- **Prefer CLI tools over GUI when possible.** If a task can be accomplished through the terminal (using the sandboxed Bash tool), that's usually safer and faster than Computer Use. Reserve Computer Use for tasks that genuinely require GUI interaction -- visual verification, desktop applications without CLI equivalents, or workflows that span multiple GUI apps.
+- **Prefer CLI tools over GUI when possible.** If a task can be accomplished through the terminal (using the sandboxed Bash tool), that's usually safer and faster than Computer Use. Reserve Computer Use for tasks that genuinely require GUI interaction, such as visual verification, desktop applications without CLI equivalents, or workflows that span multiple GUI apps.
 
 - **Review warning tiers seriously.** When you see "Equivalent to shell access" for a terminal app, that's telling you Claude could effectively run shell commands through the GUI. Consider whether the Bash tool (which has sandbox protections) would be a better fit for what you're trying to do.
 

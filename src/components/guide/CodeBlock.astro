@@ -30,7 +30,7 @@ const { code, lang, title, caption } = Astro.props;
     </div>
   )}
   <div class:list={[title && '[&_.expressive-code]:!rounded-t-none [&_.expressive-code]:!mt-0 [&_.expressive-code]:!border-t-0']}>
-    <Code code={code} lang={lang} title={title} />
+    <Code code={code} lang={lang} />
   </div>
   {caption && (
     <p class="text-xs text-[var(--color-text-secondary)] mt-2 italic">{caption}</p>

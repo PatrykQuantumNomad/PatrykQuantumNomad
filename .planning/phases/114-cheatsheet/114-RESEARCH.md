@@ -304,7 +304,7 @@ export const GET: APIRoute = async () => {
 | No cheatsheet page | Static SVGs in public/ only | Pre-phase 114 | SVGs exist but have no dedicated page, no SEO, no download UX |
 | Manual SVG editing | Manual SVG editing (unchanged) | N/A | Both SVGs are hand-crafted; this is appropriate for a fixed-format cheatsheet |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Astro trailingSlash and the route**
    - What we know: `trailingSlash: 'always'` in astro.config.mjs. File at `src/pages/guides/claude-code/cheatsheet.astro` will produce `/guides/claude-code/cheatsheet/`

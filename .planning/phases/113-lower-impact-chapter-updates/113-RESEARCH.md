@@ -423,22 +423,22 @@ Source: Used in Ch1, Ch2, Ch5, Ch9. The `transcript` prop provides accessible te
 | A2 | Each chapter should only include features within its clear domain, with cross-references for shared features | Anti-Patterns | If wrong, chapters could overlap significantly. Medium risk -- affects content strategy. |
 | A3 | Channels section in Ch5 should be 60-80 lines, not a full deep dive | Pitfall 6 | If user wants deeper coverage, the plan would undersize the Channels section. Low risk -- easily expanded. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Ch5 Channels scope: section vs. dedicated chapter**
    - What we know: Feature research suggests Channels could be "part of Remote & Headless chapter (Ch 5) or warrant its own section." The roadmap/requirements list it under Ch5 updates (UPD-05).
    - What's unclear: How deep the Channels coverage should go. The feature has its own security model, enterprise controls, and per-platform setup (Telegram vs Discord vs iMessage).
-   - Recommendation: Include as a section within Ch5 (per UPD-05 requirement), covering the concept, setup flow, security basics, and enterprise controls. Cross-ref Ch12 Plugins for installation. Keep it focused -- Channels is research preview and may change.
+   - RESOLVED: Include as a section within Ch5 (per UPD-05 requirement), covering the concept, setup flow, security basics, and enterprise controls. Cross-ref Ch12 Plugins for installation. Keep it focused (60-80 lines) -- Channels is research preview and may change.
 
 2. **guide.json description updates**
    - What we know: Phase 112 already updated guide.json descriptions for some chapters. Phase 113 chapters may need description updates if scope expanded significantly.
    - What's unclear: Which of the 6 chapters need guide.json description changes vs. which current descriptions are still accurate.
-   - Recommendation: Ch5 definitely needs a description update (adding Channels and server mode to its scope). Ch9 may need update (adding sparsePaths). Ch1, Ch2, Ch6, Ch10 current descriptions are likely still adequate. Verify during planning.
+   - RESOLVED: Ch5 definitely needs a description update (adding Channels and server mode to its scope). Ch9 needs update (adding sparsePaths, memory, initialPrompt). Ch1, Ch2, Ch6, Ch10 current descriptions are adequate. Plan 07 handles this.
 
 3. **TerminalRecording .cast files**
    - What we know: Existing chapters reference .cast files in `/recordings/claude-code/`. These are likely static transcript-based recordings (the component has a `transcript` prop for accessible text).
    - What's unclear: Whether new .cast files need to be created for new features (e.g., Channels setup, /powerup demo), or if the transcript prop provides sufficient representation.
-   - Recommendation: Do NOT create new .cast files. Use the `transcript` prop on TerminalRecording for any new terminal demos. This is consistent with the existing pattern and avoids the complexity of recording actual terminal sessions.
+   - RESOLVED: Do NOT create new .cast files. Use the `transcript` prop on TerminalRecording for any new terminal demos. This is consistent with the existing pattern and avoids the complexity of recording actual terminal sessions.
 
 ## Validation Architecture
 
