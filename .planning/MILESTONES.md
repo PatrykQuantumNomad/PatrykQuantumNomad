@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.19 Claude Code Guide Refresh (Shipped: 2026-04-12)
+
+**Delivered:** Major refresh of the Claude Code guide from 11 to 14 chapters with 5 chapter rewrites, 3 new chapters (Plugins, Agent SDK, Computer Use), 6 incremental chapter updates, dedicated cheatsheet page with SVG downloads, companion blog post, and full site integration with LLMs.txt, cross-reference verification, and Lighthouse quality gates
+
+**Phases completed:** 111-116 (25 plans total)
+
+**Key accomplishments:**
+- Rewrote 5 high-impact chapters (Models & Costs, Environment, Skills, Hooks, Security) with Auto Mode, 1M context, managed-settings.d/, 24 hook events, and 6 permission modes
+- Authored 3 new chapters — Plugins (manifest, marketplace, bin/ executables), Agent SDK (Python + TypeScript APIs), and Computer Use (CLI + Desktop GUI, safety model) — expanding guide from 11 to 14 chapters
+- Updated 6 remaining chapters with Desktop App, Channels, elicitation, memory storage, initialPrompt, /agents UI, and dynamic agents
+- Built dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with inline SVGs, download buttons, OG image, and JSON-LD
+- Published companion blog post with theme-by-theme What's New format, FAQ JSON-LD, and update callout banner on existing blog post
+- Full site integration: LLMs.txt entries, 14/14 frontmatter dates, 13 cross-reference slugs verified, 16 sitemap URLs, Lighthouse 90+ on all 15 pages
+
+**Stats:**
+- 1,782 files changed (+334,154 / -13,401 lines)
+- 6 phases, 25 plans, 75 commits
+- 1 day (2026-04-12)
+
+**Git range:** `feat(111-01)` to `docs(phase-116)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.18 AI Landscape Explorer (Shipped: 2026-03-27)
 
 **Delivered:** Interactive AI Landscape Explorer with D3 force-directed graph visualization of 51 AI concepts across 9 clusters, guided tours, side-by-side concept comparisons, 51 concept pages with structured data, 12 VS comparison pages, and full site integration with header nav, homepage callout, sitemap, LLMs.txt, OG images, and companion blog post

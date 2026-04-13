@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (26 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 46 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations). Multi-chapter guides infrastructure supports two published guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (11 chapters with 5 SVG diagrams and 2 interactive React Flow visualizers). AI Landscape Explorer provides an interactive D3 force-directed graph of 51 AI concepts across 9 clusters, with guided tours, side-by-side comparisons, 51 concept pages with structured data, and 12 VS comparison pages.
+A personal portfolio, blog, and interactive tools site for Patryk Golabek, a Cloud-Native Software Architect with 17+ years of experience. Built with Astro 5 and deployed on GitHub Pages at patrykgolabek.dev. Features a custom "Quantum Explorer" dark space theme with particle canvas, view transitions, scroll reveals, and futuristic typography. The projects page showcases 16 GitHub repos in an interactive bento grid with GSAP-animated category filtering. Includes six content pillars: The Beauty Index (26 programming languages ranked across 6 aesthetic dimensions), a Dockerfile Analyzer (browser-based linting tool with 46 expert rules and category-weighted scoring), Database Compass (interactive database model explorer with 12 categories scored across 8 dimensions), Docker Compose Validator (browser-based compose file validation with 52 rules, interactive dependency graph, and category-weighted scoring), Kubernetes Manifest Analyzer (browser-based K8s manifest linter with 67 rules across 5 categories, multi-resource schema validation, security/RBAC analysis, interactive dependency graph, and 67 rule documentation pages), and EDA Visual Encyclopedia (90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with build-time SVG plots, KaTeX formulas, D3.js distribution explorers, Python code examples, and 9 deep-dive case studies with NIST-verified quantitative analysis, hypothesis test batteries, and DOE visualizations). Multi-chapter guides infrastructure supports two published guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and a dedicated cheatsheet page). AI Landscape Explorer provides an interactive D3 force-directed graph of 51 AI concepts across 9 clusters, with guided tours, side-by-side comparisons, 51 concept pages with structured data, and 12 VS comparison pages.
 
 ## Reference Data
 
@@ -275,20 +275,16 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Compare mode with 12 curated VS comparison pages at /ai-landscape/vs/ with structured data and OG images — v1.18
 - ✓ Cluster zoom, GSAP edge pulse animation, and desktop mini-map for graph polish — v1.18
 - ✓ Full AI Landscape site integration: header nav, homepage card, sitemap, LLMs.txt, OG image, companion blog post — v1.18
+- ✓ 5 high-impact chapter rewrites (Ch3 Models, Ch4 Environment, Ch7 Skills, Ch8 Hooks, Ch11 Security) with Auto Mode, 1M context, managed-settings.d/, 24 hook events, 6 permission modes — v1.19
+- ✓ 3 new guide chapters: Plugins (manifest, marketplace, bin/), Agent SDK (Python + TypeScript), Computer Use (CLI + Desktop GUI, safety model) — v1.19
+- ✓ 6 lower-impact chapter updates (Ch1-Ch2, Ch5-Ch6, Ch9-Ch10) with Desktop App, Channels, elicitation, memory, /agents UI — v1.19
+- ✓ Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with inline SVGs, download buttons, OG image, JSON-LD — v1.19
+- ✓ Companion blog post for guide refresh with theme-by-theme What's New, FAQ JSON-LD, update callout on old post — v1.19
+- ✓ Full site integration: LLMs.txt cheatsheet entry, 14/14 frontmatter dates, cross-references verified, sitemap, Lighthouse 90+ — v1.19
 
 ### Active
 
-## Current Milestone: v1.19 Claude Code Guide Refresh
-
-**Goal:** Update the Claude Code guide with ~10 weeks of new features, publish dedicated cheatsheet page, and write a new companion blog post.
-
-**Target features:**
-- Research and integrate new Claude Code features from What's New (Feb-Apr 2026)
-- Update existing guide chapters with new capabilities
-- Add new chapters if major new feature areas warrant them
-- Dedicated cheatsheet page at /guides/claude-code/cheatsheet/ with SVG rendering and downloads
-- New blog post covering Claude Code updates
-- Site integration updates (OG images, LLMs.txt, sitemap)
+(No active milestone — run `/gsd:new-milestone` to start next)
 
 ### Out of Scope
 
@@ -317,14 +313,14 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.18 AI Landscape Explorer on top of 17 previous milestones (v1.0 through v1.17). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (11 chapters with 5 SVG diagrams and 2 interactive React Flow visualizers). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
+Shipped v1.19 Claude Code Guide Refresh on top of 18 previous milestones (v1.0 through v1.18). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
 AI Landscape Explorer: interactive D3 force-directed graph with 51 concepts, guided tours, compare mode, 12 VS pages, and companion blog post.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 requirements delivered (871 total). ~1160+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 requirements delivered (905 total). ~1183+ pages total. Lighthouse 90+ on mobile.
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 25 posts (15 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 26 posts (16 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages, and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 46 rules (34 Hadolint DL codes + 12 custom PG rules), category-weighted scoring, inline annotations, 46 rule documentation pages, PNG badge export, and shareable URL state.
@@ -334,7 +330,7 @@ Kubernetes Manifest Analyzer: browser-based K8s manifest linter with 67 rules (1
 EDA Visual Encyclopedia: 90+ page interactive modernization of NIST/SEMATECH Engineering Statistics Handbook Chapter 1 with 29 graphical technique pages (Tier B variant switching), 18 quantitative technique pages (KaTeX + Python), 19 distribution pages (D3 interactive explorers), 9 case studies at full NIST depth with quantitative test batteries and interpretation sections, 6 foundations, 4 reference pages, filterable landing page, 17 build-time SVG generators, and companion blog post.
 GitHub Actions Workflow Validator: browser-based two-pass linter with actionlint WASM via Web Worker + SchemaStore JSON Schema, 48 rules across 6 categories (10 security, 18 semantic, 8 best practice, 4 style, 8 schema), CodeMirror 6 YAML editor, category-weighted scoring, interactive React Flow workflow graph with dagre layout, 48 rule documentation pages, shareable results, and companion blog post.
 FastAPI Production Guide: 11-chapter guide at /guides/fastapi-production/ with Zod content collections, GuideLayout with sidebar/breadcrumb/prev-next navigation, 3 build-time SVG diagrams, interactive React Flow deployment topology, 50+ CodeFromRepo snippets, AI agent narrative, 12 OG images, JSON-LD, companion blog post, and /guides/ hub page.
-Claude Code Guide: 11-chapter guide at /guides/claude-code/ with multi-guide infrastructure, 5 build-time SVG diagrams (agentic loop, hook lifecycle, permission model, MCP topology, agent teams), 2 interactive React Flow visualizers, CodeBlock component, 12 OG images, JSON-LD, companion blog post "The Context Window Is the Product".
+Claude Code Guide: 14-chapter guide at /guides/claude-code/ with multi-guide infrastructure, 5 build-time SVG diagrams (agentic loop, hook lifecycle, permission model, MCP topology, agent teams), 2 interactive React Flow visualizers, CodeBlock component, 15 OG images, JSON-LD, dedicated cheatsheet page with SVG downloads, companion blog posts "The Context Window Is the Product" and "Claude Code Guide Refresh".
 Hero messaging emphasizes cloud-native architect identity with 17+ years experience.
 
 ## Key Decisions
@@ -428,6 +424,13 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | Condition/restart for Lisp Error Handling | handler-bind + restart-case instead of handler-case alone | ✓ Good — showcases unique CL capability |
 | Lisp after Clojure in data files | Editorial proximity for Lisp-family languages | ✓ Good — logical grouping |
 | Preserve anti-patterns during 25→26 update | RedMonk URL date, C# age, scoring weight are not language counts | ✓ Good — no false positives in count update |
+| ADDITIVE chapter rewrite approach | Preserve existing structure, insert new content into natural locations | ✓ Good — minimal diff, readers keep mental model |
+| 24 hook events (corrected from 26) | Research verified actual event count in official docs | ✓ Good — gap closure plan fixed all references |
+| Plugins chapter bridges from Skills | 'Skills are local, Plugins are shareable' opening | ✓ Good — natural learning progression |
+| Safety-first ordering for Computer Use | Callout.astro component for safety warnings | ✓ Good — responsible coverage of powerful feature |
+| Theme-by-theme blog post format | What's New highlights rather than chapter-by-chapter | ✓ Good — more engaging for readers |
+| Static LLMs.txt entry for cheatsheet | Standalone Astro pages outside content collections need manual entries | ✓ Good — established pattern for future standalone pages |
+| Static HTML audit for Lighthouse | Sandbox blocks Chrome; check equivalent structural criteria | ✓ Good — all 15 pages pass all 4 categories |
 | Guide content as Zod-validated Astro collections | Consistent with existing EDA pattern, type-safe frontmatter | ✓ Good — schema validation catches errors at build time |
 | GuideLayout extends Layout directly (two-column grid) | Guide pages need sidebar + content, different from EDA simple wrapper | ✓ Good — clean separation of layout concerns |
 | CSS position:sticky for sidebar (zero JS) | Sidebar stays visible during scroll without JavaScript overhead | ✓ Good — performant, accessible |
@@ -478,4 +481,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-12 after v1.19 milestone start*
+*Last updated: 2026-04-13 after v1.19 milestone*
