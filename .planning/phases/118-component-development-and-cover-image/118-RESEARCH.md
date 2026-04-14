@@ -382,17 +382,19 @@ None -- these are static Astro components and an SVG file. The existing build pi
 | A2 | Cover SVG should use 1200x630 (not 1200x690) to match the `<img>` dimensions in [slug].astro | Architecture Patterns | Medium -- 1200x690 would render with slight letterboxing; both sizes exist in codebase |
 | A3 | TermDefinition pronunciation guide should use monospace italic | Code Examples | Low -- stylistic choice; could use sans-serif instead |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Cover SVG thematic content: What visual motif represents "dark code"?**
    - What we know: The theme is "dark code" -- code that nobody understands. The essay covers code clones, comprehension decay, refactoring collapse. Existing covers use visual metaphors (falling arrows for "Death by a Thousand Arrows", chapter cards for "Claude Code Guide Refresh").
    - What's unclear: The specific visual metaphor for "dark code" -- could be fading/corrupted code text, a black hole consuming code, a dimming terminal, binary data dissolving, etc.
    - Recommendation: Use a "corrupted/fading code" motif on a dark background -- monospace text fragments at varying opacities, some legible, some nearly invisible, representing code that is drifting from comprehension. This aligns with the essay's central metaphor and the dark-on-dark requirement.
+   - RESOLVED: Plans implement the "corrupted/fading code" motif -- monospace text fragments at opacity 0.03-0.15 scattered across a dark background, with the "DARK CODE" title as the clear focal point. See 118-02-PLAN.md Task 1.
 
 2. **StatHighlight visual weight: Should the component have a background or be borderless?**
    - What we know: The outline specifies it as a "visually distinct callout block." KeyTakeaway uses a background with border; OpeningStatement uses border-y without background. The success criteria say "visually distinct."
    - What's unclear: Whether it should be more like KeyTakeaway (boxed) or OpeningStatement (minimal).
    - Recommendation: Use a minimal style (border-top/bottom with centered text) similar to OpeningStatement but with the large stat number creating the visual distinction through typography rather than boxing. This keeps it lighter than a full card while still breaking the prose flow.
+   - RESOLVED: Plans implement the minimal borderless style -- no background, no border. The large accent-colored stat number (text-4xl/text-5xl) creates visual distinction through typography scale alone, appropriate for the 6+ repeated uses in the essay. See 118-01-PLAN.md Task 1.
 
 ## Sources
 
@@ -416,7 +418,7 @@ None -- these are static Astro components and an SVG file. The existing build pi
 - Standard stack: HIGH -- all libraries already installed and patterns verified in codebase
 - Architecture: HIGH -- 8 existing blog components provide unambiguous patterns to follow
 - Pitfalls: HIGH -- identified from direct codebase analysis (theme system, GSAP animation targeting, SVG font safety)
-- Cover SVG: HIGH for structure/dimensions, MEDIUM for thematic content (Open Question #1)
+- Cover SVG: HIGH for structure/dimensions, HIGH for thematic content (resolved -- corrupted/fading code motif)
 
 **Research date:** 2026-04-14
 **Valid until:** 2026-05-14 (stable -- Astro component patterns unlikely to change within the milestone)
