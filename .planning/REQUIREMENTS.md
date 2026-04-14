@@ -27,14 +27,14 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 
 ### Site Integration
 
-- [ ] **INTG-01**: OG image auto-generated and verified for social sharing
-- [ ] **INTG-02**: JSON-LD BlogPosting schema with articleSection and about fields added to [slug].astro
-- [ ] **INTG-03**: FAQ JSON-LD schema for framework question-answer pairs
+- [x] **INTG-01**: OG image auto-generated and verified for social sharing
+- [x] **INTG-02**: JSON-LD BlogPosting schema with articleSection and about fields added to [slug].astro
+- [x] **INTG-03**: FAQ JSON-LD schema for framework question-answer pairs
 - [x] **INTG-04**: Custom cover image SVG with dark-on-dark motif matching site visual language
 - [x] **INTG-05**: Tags selected from existing taxonomy with overlap for related post discovery
-- [ ] **INTG-06**: LLMs.txt entry with quality description for AI discoverability
+- [x] **INTG-06**: LLMs.txt entry with quality description for AI discoverability
 - [x] **INTG-07**: Internal cross-links to existing blog posts and tools where relevant
-- [ ] **INTG-08**: Sitemap, RSS feed, and blog listing automatically include the new post
+- [x] **INTG-08**: Sitemap, RSS feed, and blog listing automatically include the new post
 
 ### Verification
 
@@ -77,14 +77,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-10 | Phase 117 | Complete |
 | COMP-01 | Phase 118 | Complete |
 | COMP-02 | Phase 118 | Complete |
-| INTG-01 | Phase 120 | Pending |
-| INTG-02 | Phase 120 | Pending |
-| INTG-03 | Phase 120 | Pending |
+| INTG-01 | Phase 120 | Complete |
+| INTG-02 | Phase 120 | Complete |
+| INTG-03 | Phase 120 | Complete |
 | INTG-04 | Phase 118 | Complete |
 | INTG-05 | Phase 119 | Complete |
-| INTG-06 | Phase 120 | Pending |
+| INTG-06 | Phase 120 | Complete |
 | INTG-07 | Phase 119 | Complete |
-| INTG-08 | Phase 120 | Pending |
+| INTG-08 | Phase 120 | Complete |
 | VERF-01 | Phase 121 | Pending |
 | VERF-02 | Phase 121 | Pending |
 | VERF-03 | Phase 121 | Pending |
