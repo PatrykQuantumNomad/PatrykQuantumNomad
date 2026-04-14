@@ -27,8 +27,8 @@
 **Requirements**: CONT-03, CONT-10
 **Success Criteria** (what must be TRUE):
   1. A sources reference file exists with all 48 research URLs verified as reachable, each annotated with the claim it supports and date accessed
-  2. 20-30 sources are pre-selected for inline citation, with the remaining sources tagged as background or further-reading
-  3. A structured outline exists with argument-as-heading section titles and per-section word budgets (Act 1 ~1000w, Act 2 ~1200w, Act 3 ~1000w, Act 4 ~800w)
+  2. 15-20 sources are pre-selected for inline citation, with the remaining sources tagged as background or further-reading
+  3. A structured outline exists with argument-as-heading section titles and per-section word budgets (Act 1 ~1500w, Act 2 ~1200w, Act 3 ~1000w, Act 4 ~800w = ~4500w total)
 **Plans**: 1 plan
 
 Plans:

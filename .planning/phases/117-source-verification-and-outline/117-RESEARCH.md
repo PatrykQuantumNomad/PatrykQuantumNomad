@@ -417,7 +417,7 @@ done < sources-urls.txt
 
 48 total - 3 duplicates - 2 non-citable = **43 unique, verifiable sources** from NotebookLM, plus ~5-8 external sources from existing research = **~48-51 total verifiable sources**.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **YouTube source (#26) lacks a specific URL**
    - What we know: NotebookLM lists it as a YouTube video titled "I Looked At Amazon After They Fired 16,000 Engineers. Their AI Broke Everything."
