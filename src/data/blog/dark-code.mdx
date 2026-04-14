@@ -23,6 +23,85 @@ import TermDefinition from '../../components/blog/TermDefinition.astro';
 
 </TldrSummary>
 
-Every engineering team has a number they track. Velocity. Sprint points. Deployment frequency. But almost no one tracks the one metric that predicts whether the codebase will still be maintainable in two years: how much of it has gone dark[^1].
+Every engineering team has a number they track. Velocity. Sprint points. Deployment frequency. But almost no one tracks the one metric that predicts whether the codebase will still be maintainable in two years: how much of the code has gone dark. Not deleted. Not deprecated. Dark -- executing in production, passing CI, shipping to users, and understood by no one currently on the team.
 
-[^1]: [GitClear: AI Copilot Code Quality 2025](https://www.gitclear.com/ai_assistant_code_quality_2025_research)
+The evidence for what is happening is not ambiguous. It is not a matter of opinion or anecdote. The data, drawn from analyses of hundreds of millions of lines of code, tells a consistent and alarming story: AI coding assistants have dramatically accelerated the rate at which codebases fill with code that is duplicated, unreviewed, insecure, and incomprehensible. And the compounding effects are already measurable.
+
+## Your Codebase Is Rotting Faster Than You Think
+
+### Four Times the Clones, One-Tenth the Refactoring
+
+In early 2023, GitClear published a landmark analysis of over 150 million lines of code, documenting the first measurable signs that AI coding assistants were applying downward pressure on code quality metrics[^1]. The trends were concerning but still emerging. Developers were accepting more AI-generated suggestions, and the ratio of moved and updated code -- the structural maintenance that keeps a codebase healthy -- was beginning to decline. At the time, the shift looked like a trade-off. Teams were moving faster, and if the code was a little rougher around the edges, that seemed like an acceptable price.
+
+Two years later, the picture has become dramatically worse. GitClear's 2025 follow-up, analyzing 211 million lines of code across thousands of repositories, found that the trends did not stabilize. They accelerated[^2]. What looked like a temporary dip in 2023 turned out to be the beginning of a structural collapse in code maintenance practices.
+
+<StatHighlight stat="4x" label="Increase in code clones since AI coding assistants went mainstream" source="GitClear 2025" />
+
+Copy-pasted code rose from 8.3% to 12.3% of all code changes -- a fourfold increase in clone density that coincides precisely with the widespread adoption of AI coding tools[^2]. This is not developers getting lazy. It is the predictable outcome of tools that make generating new code nearly effortless while offering no corresponding assistance for the harder work of integrating, consolidating, and maintaining what already exists.
+
+But the cloning epidemic is only half the story. The other half is what stopped happening.
+
+Refactoring -- the practice of restructuring existing code without changing its behavior -- collapsed from 25% of all code changes to less than 10%[^2]. This is not a minor fluctuation. It represents a fundamental shift in how codebases evolve. Developers are generating more new code than ever before while performing a fraction of the structural maintenance required to keep that code coherent. When it is faster to generate a new function than to find and improve the existing one, the rational choice -- at least in the short term -- is to generate. And so the clones multiply.
+
+<StatHighlight stat="<10%" label="Refactoring as a share of all code changes, down from 25%" source="GitClear 2025" />
+
+The math is straightforward and unforgiving. When you quadruple the rate at which duplicated code enters a codebase while simultaneously cutting structural maintenance by more than half, you are not building software. You are accumulating it. Every cloned function is a future divergence point where a bug fix in one copy will not propagate to the others. Every skipped refactoring is a load-bearing wall you chose not to inspect. The codebase grows, but its coherence does not grow with it -- and eventually, the gap between volume and understanding becomes the defining characteristic of the system.
+
+### One in Four Lines of AI Code Ships with Exploitable Vulnerabilities
+
+If code duplication were the only cost, teams might absorb it. Clones are ugly, but they are not inherently dangerous. The quality crisis, however, extends far beyond structural messiness into something that carries real operational risk: security.
+
+An empirical analysis of AI-assisted code generation found that AI-generated code contains 23.7% more security vulnerabilities than human-written code[^3]. That alone would be a serious finding. What makes it systemic is the human behavior surrounding it: 89% of junior developers accepted AI-generated code without meaningful review, and 76% of all developers surveyed reported bypassing security review entirely when using AI tools[^3]. The code is less secure, and the people receiving it are less likely to notice.
+
+<StatHighlight stat="23.7%" label="More security vulnerabilities in AI-generated code" source="ResearchGate 2024" />
+
+Independent research confirms the scale. AppSec Santa's 2026 analysis found that 25.1% of AI-generated code contains exploitable security vulnerabilities[^4] -- not theoretical weaknesses or lint warnings, but flaws that an attacker can leverage in a running system. One in four lines of AI-assisted code ships with a door left open. And unlike code clones, which degrade maintainability gradually, a single exploitable vulnerability can compromise an entire system overnight.
+
+The window to find and fix these vulnerabilities is shrinking at the same time the volume is growing. Mondoo's 2026 State of Vulnerabilities report documented 48,175 CVEs in 2025 alone, with 192,742 malicious packages detected in the wild[^5]. The time from vulnerability disclosure to active exploitation has collapsed to just five days[^5]. That is not a window for a patch cycle. That is barely enough time to triage, let alone remediate, and it assumes your team even knows the vulnerable code exists.
+
+<StatHighlight stat="5 days" label="Average time from vulnerability disclosure to active exploitation" source="Mondoo 2026" />
+
+The chain is now clear: AI tools generate code with measurably higher vulnerability density. Developers accept it with less scrutiny. Attackers exploit it faster than ever. Each link in this chain reinforces the next, and the weakest link -- human review -- is the one AI tools are most effectively eroding.
+
+### The Comprehension Crisis No One Is Talking About
+
+The damage AI tools inflict on code quality and security is visible -- if you look at the data. But there is a subtler, more corrosive effect that receives almost no attention: AI coding assistants are degrading developers' ability to understand the code they are responsible for.
+
+Anthropic -- the company behind Claude, one of the most capable AI coding assistants available -- published a randomized controlled trial with 52 professional software engineers. The finding was striking: developers who used AI assistance scored 17% lower on code comprehension assessments than those who worked without it[^6]. The AI made them faster. It also made them less capable of understanding what they had built.
+
+<StatHighlight stat="17%" label="Lower comprehension scores for AI-assisted developers" source="Anthropic 2025" />
+
+This is not a theoretical concern. When developers do not understand the code they maintain, every downstream activity suffers. Reviews become superficial. Bug fixes introduce new bugs. Refactoring becomes too risky to attempt. The code does not stop working -- it stops being understood. And that is the moment it goes dark.
+
+Gerard Holzmann's "First Law of Software Development" provides the structural backdrop: codebases grow exponentially regardless of team intent[^7]. More code means more surface area that no one fully understands. AI tools have not changed this law. They have accelerated it, while simultaneously reducing the comprehension capacity of the people responsible for managing the growth.
+
+This is where the concept needs a name.
+
+<TermDefinition term="Dark Code" pronunciation="/dark kohd/">
+
+Code that executes in production but is not understood by any current team member. It compiles, it ships, it runs -- and no one on the team can explain what it does, why it exists, or what breaks if it changes. Dark code is the shadow inventory of every codebase: unmeasured, unowned, and growing with every commit that trades understanding for velocity.
+
+</TermDefinition>
+
+Dark code is not dead code. Dead code can be deleted. Dark code is alive -- it handles requests, processes transactions, enforces business rules. The danger is not that it fails. The danger is that when it eventually does fail, no one will know why, and no one will know how to fix it without breaking something else.
+
+### Technical Debt Is Compounding -- Literally
+
+The accumulation of dark code is not linear. A recent quantification study found that each standard deviation increase in technical debt correlates with a 31% increase in defect density[^8]. Worse, the compounding rate is approximately 14% per quarter when the debt is left unaddressed[^8].
+
+<StatHighlight stat="31%" label="Defect density increase per standard deviation of technical debt" source="American Impact Review 2026" />
+
+This is the mathematics of neglect. A codebase that accumulates dark code today does not simply carry a static cost. It carries a cost that grows -- quarter over quarter, sprint over sprint -- because each uncomprehended module makes the next bug harder to find, each unrefactored clone makes the next feature harder to build safely, and each unreviewed vulnerability makes the next exploit more likely to succeed.
+
+The teams that ignore this compounding are not saving time. They are borrowing it, at a rate that no velocity metric will capture until the bill comes due.
+
+What the data demands, and what almost no team currently has, is a systematic framework for measuring how much of a codebase has gone dark -- and a discipline for illuminating it before the compounding becomes irreversible.
+
+[^1]: [GitClear: Coding on Copilot 2023](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality)
+[^2]: [GitClear: AI Copilot Code Quality 2025](https://www.gitclear.com/ai_assistant_code_quality_2025_research)
+[^3]: [Empirical Analysis of AI-Assisted Code Generation](https://www.researchgate.net/publication/397890586)
+[^4]: [AppSec Santa: Software Vulnerability Statistics 2026](https://appsecsanta.com/research/software-vulnerability-statistics)
+[^5]: [Mondoo: 2026 State of Vulnerabilities](https://mondoo.com/vulnerability-intelligence/state-of-vulnerabilities-2026)
+[^6]: [Anthropic: AI Assistance and Coding Skills](https://www.anthropic.com/research/AI-assistance-coding-skills)
+[^7]: [Holzmann: Code Inflation](https://spinroot.com/gerard/pdf/Code_Inflation.pdf)
+[^8]: [Technical Debt Quantification](https://americanimpactreview.com/article/e2026034)
