@@ -1,346 +1,379 @@
 # Pitfalls Research
 
-**Domain:** Updating an existing 11-chapter Claude Code guide (4,032 lines MDX, 5 SVG diagrams, 2 React Flow visualizers) on an Astro 5 portfolio site with 1160+ pages. Adding cheatsheet page, updating chapters with new features, writing a new blog post.
-**Researched:** 2026-04-12
-**Confidence:** HIGH (grounded in direct analysis of the existing guide codebase, cross-reference graph, content collection configuration, SVG rendering patterns, and OG image pipeline)
+**Domain:** Adding a long-form thought-leadership blog post ("Dark Code") to an existing Astro 5 portfolio site with 26 existing blog posts, 1160+ pages, and established content patterns.
+**Researched:** 2026-04-14
+**Confidence:** HIGH (grounded in direct analysis of the existing blog collection schema, MDX authoring patterns, OG image pipeline, JSON-LD schema components, tag taxonomy, LLMs.txt generators, and cross-link architecture in `[slug].astro`)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Cross-Reference Rot When Updating Chapters Selectively
+### Pitfall 1: Source Hallucination and Dead Citation Links in a Research-Heavy Essay
 
 **What goes wrong:**
-The 11 existing chapters contain 30+ bidirectional cross-references (verified by grep). For example, `introduction.mdx` links to `models-and-costs` three times and `context-management` twice. `security.mdx` references five other chapters. `hooks.mdx` references `custom-skills` twice. When a chapter is updated and its section structure changes (headings renamed, sections moved, content reorganized), every inbound link from other chapters becomes a potential broken anchor. Worse, the companion blog post `claude-code-guide.mdx` links to every chapter URL and summarizes each chapter's content in its own prose. If a chapter's title or scope changes but the blog post is not updated, the blog post becomes inaccurate even though its links still resolve.
+The Dark Code essay draws from 48 research sources (SpinRoot/JPL data, GitClear reports, Anthropic RCT, supply chain studies). When writing a research-backed essay with AI assistance or even by hand at this density, three citation failures occur:
 
-The existing cross-reference graph has three layers:
-1. **Chapter-to-chapter links** (30+ links across 11 MDX files) -- these use relative paths like `/guides/claude-code/models-and-costs/`
-2. **Blog post-to-chapter links** (11 links in `claude-code-guide.mdx`) -- each chapter gets a summary paragraph and a "Read the full X chapter" link
-3. **Chapter-to-blog-post link** (rendered via `companionLink` prop in `[slug].astro`) -- "For a high-level overview of all 11 chapters, read the companion blog post"
+1. **Hallucinated citations:** AI-generated or misremembered source URLs that return 404. A Nature analysis found 2.6% of papers in 2025 had at least one hallucinated citation, up from 0.3% in 2024. Blog posts face the same risk when source URLs are constructed from memory rather than verified.
+2. **Stale URLs:** Research papers, blog posts, and reports move. A URL that worked when the essay was drafted may 404 by publication day or shortly after. JPL technical reports are particularly fragile -- NASA reorganizes its web properties frequently.
+3. **Misattributed statistics:** Citing "GitClear found 4x code clones" without linking to the actual report, or citing a secondary source that paraphrased the original data with distortion. The reader follows the link and finds a different number or a different claim.
 
-Adding a new chapter or renaming a chapter slug would break all three layers simultaneously.
+In a thought-leadership essay, a single dead link or misattributed statistic destroys the authority the entire piece is trying to build. Readers click through citations specifically to validate bold claims.
 
 **Why it happens:**
-When updating individual chapters, the natural workflow is: open the chapter, update its content, move on. There is no automated mechanism to detect that chapter A references content in chapter B that has been restructured. Astro does not validate internal markdown links at build time by default. The build succeeds silently even with broken anchor links.
+Research-backed essays require holding dozens of source URLs in context simultaneously. When drafting at 3000-5000 words, it is natural to "remember" a statistic and insert a plausible URL rather than re-verifying every source. The temptation increases with AI-assisted drafting because the model may confidently produce a URL that does not exist.
 
 **How to avoid:**
-1. Before updating any chapter, grep all MDX files for references to that chapter's slug: `grep -r "/guides/claude-code/SLUG" src/data/`. This reveals every file that links to the chapter being modified.
-2. If adding a new chapter, also search for "next chapter" or "up next" references in adjacent chapters that will need updating.
-3. If a chapter's heading structure changes (e.g., "Permission Evaluation" renamed to "How Permissions Work"), grep for any anchor links pointing to the old heading slug.
-4. After all chapter updates are complete, update the companion blog post's chapter summaries to match the new content.
-5. Consider installing `astro-broken-links-checker` integration for build-time link validation -- it catches dead internal links before deploy.
-6. Create a cross-reference audit step as part of the final phase: run a full-site link check against the build output.
+1. Create a `sources.md` reference file BEFORE writing the essay. Each source gets: actual URL (verified by clicking), exact claim being cited, date accessed. This is the single source of truth for all citations.
+2. Every external link in the final MDX must trace back to an entry in `sources.md`. No link gets added ad-hoc during writing.
+3. After the essay is complete, run a link-checker against all external URLs. Tools: `npx linkinator` or manual verification.
+4. For fragile sources (NASA/JPL, conference proceedings, preprints), include the Wayback Machine URL as a fallback or cite the DOI rather than a direct URL.
+5. Every statistic must include inline attribution: "GitClear's 2024 report found..." not "studies show..." or "research indicates..."
 
 **Warning signs:**
-- Updating a chapter without checking what links TO it
-- Chapter's scope or title changes but adjacent "up next" links still point to old title text
-- Blog post summaries describe features that have been moved to a different chapter
-- Anchor links (`#section-name`) survive a heading rename but now 404 within the page
+- A citation URL looks plausible but was never actually clicked during writing
+- A statistic is cited without naming the specific source (e.g., "research shows 40% of code is never executed")
+- The same source is cited with slightly different numbers in different sections
+- A URL points to a homepage or search results page rather than the specific report
 
 **Phase to address:**
-Every content update phase must include a cross-reference check step. The FINAL phase must include a complete link audit across all 11 chapters + blog post + landing page.
+Research and source verification phase (before content authoring). Must be a separate, completed phase -- not interleaved with writing.
 
 ---
 
-### Pitfall 2: Stale `lastVerified` Dates Creating False Freshness Signals
+### Pitfall 2: Word Count Bloat -- Losing the Reader Before the Framework
 
 **What goes wrong:**
-All 11 chapters currently have `lastVerified: 2026-03-10` in their frontmatter. When some chapters are updated in v1.19 but others are not, the untouched chapters still display "Last verified: March 10, 2026" -- which will be over a month old by the time v1.19 ships. If a reader checks the verified date on a chapter that was NOT updated, they correctly conclude the content might be stale. But if the chapter that WAS updated also keeps the old `lastVerified` date because the author forgot to bump it, the entire verification system is undermined.
+The project context states 3000-5000 words and a three-act arc: wake-up call, framework, practical defense. Previous companion blog posts have had "word count bloat" issues. In a thought-leadership essay, bloat almost always concentrates in Act 1 (the wake-up call) because the writer has 48 sources of alarming data and wants to deploy all of them. The result: the reader gets 2000 words of doom, loses energy, and never reaches the framework or defense sections -- which are the actual value of the piece.
 
-Worse: the `lastVerified` field was specifically added to address content staleness (identified as the #1 pitfall in the original research). If verification dates are not accurately maintained during updates, the field exists but provides no value.
+The existing site demonstrates tight essays: "Death by a Thousand Arrows" is approximately 2500 words with a tight argument arc. "The Beauty Index" runs longer but earns its length with a scoring framework and 26 language evaluations. The Dark Code essay risks becoming a "data dump" -- a term used in thought-leadership writing criticism -- where facts accumulate without narrative progression.
 
 **Why it happens:**
-The `lastVerified` field is an optional date in the `guidePageSchema`. Nothing in the build pipeline validates that `lastVerified` is recent or has been bumped when `updatedDate` changes. A chapter can have `updatedDate: 2026-04-15` and `lastVerified: 2026-03-10` with no build error. The inconsistency is invisible unless someone manually checks frontmatter.
+Research-backed essays create a sunk-cost problem. After gathering 48 sources, the writer feels obligated to cite all of them. Each source adds a sentence or paragraph. The wake-up call section swells because every data point seems important in isolation. The result is an essay that is comprehensive but unreadable.
+
+Additionally, the project targets a broad audience ("not just senior engineers"), which tempts the writer to over-explain foundational concepts like supply chain dependencies or code churn metrics, adding length without advancing the argument.
 
 **How to avoid:**
-1. When updating a chapter's content, always bump both `updatedDate` and `lastVerified` to the current date.
-2. For chapters NOT being updated in v1.19, explicitly re-verify their content against current Claude Code docs and bump `lastVerified` if the content is still accurate. If it is not accurate, update the content.
-3. As a phase-end check: grep all MDX files for `lastVerified` and ensure no date is older than the milestone's content authoring window.
-4. Consider adding a build-time warning (via a remark plugin or Astro integration) that flags chapters where `lastVerified` is more than 90 days old. This is a future improvement, not a v1.19 requirement.
+1. Set a hard word budget per section BEFORE writing:
+   - Wake-up call: maximum 800-1000 words (set the stakes, cite 5-8 best sources, not all 48)
+   - Framework: 1200-1500 words (the core intellectual contribution)
+   - Practical defense: 800-1200 words (actionable, specific)
+   - Opening/closing: 300-400 words total
+2. Apply the "cite the best, reference the rest" rule: the strongest 8-10 sources get inline citations with discussion. The remaining 38 sources can be listed in a "Further Reading" section or footnotes.
+3. Each section must advance the argument, not just present data. The test: "If I remove this paragraph, does the argument still hold?" If yes, remove it.
+4. Use the `<TldrSummary>` component (which the site already has) to give readers a 5-bullet preview. This gives readers who want the conclusion a way to decide whether to invest in the full read.
+5. Compare word count against "Death by a Thousand Arrows" -- if the Dark Code essay is more than 2x the length of that essay, it needs cutting.
 
 **Warning signs:**
-- Some chapters have April 2026 `lastVerified`, others still show March 2026
-- `updatedDate` is more recent than `lastVerified` on the same chapter
-- Claude Code features mentioned in a chapter have been renamed or deprecated since the `lastVerified` date
+- The "wake-up call" section is longer than the "framework" section
+- The essay has more than 10 inline citations in a single section
+- Paragraphs start with "Additionally..." or "Furthermore..." (filler connectors indicating the previous paragraph should have been the last on that point)
+- The reading time estimate exceeds 15 minutes for the target audience
 
 **Phase to address:**
-Every content update phase. The verification date is the simplest thing to forget and the most important signal for reader trust.
+Content authoring phase. The outline must include section word budgets. The editing/review phase must explicitly check section balance.
 
 ---
 
-### Pitfall 3: Cheatsheet SVG Rendering -- External Font Loading and Theme Blindness
+### Pitfall 3: Tag Taxonomy Mismatch Creating Orphaned Tag Pages
 
 **What goes wrong:**
-The existing cheatsheet SVGs (`public/images/cheatsheet/claude-code-cheatsheet.svg` and its print variant) are 56KB/495-line files that use `@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono...')` for font loading. This creates three distinct rendering problems:
+The site generates tag pages dynamically via `src/pages/blog/tags/[tag].astro`. Tags are derived from all blog posts at build time using `getStaticPaths()`. The existing tag taxonomy (extracted from all 50+ blog posts) includes: `ai`, `code-quality`, `software-aesthetics`, `programming-languages`, `devops`, `kubernetes`, `cloud-native`, `security`, `docker`, `python`, `data-science`, `llm`, `platform-engineering`, among others.
 
-1. **Font loading failure in `<img>` tags:** If the cheatsheet is rendered via an HTML `<img>` tag or Astro's `<Image>` component, browsers will NOT load the external CSS import inside the SVG. The SVG renders with fallback system fonts, producing a visually broken layout where text overflows boxes, columns misalign, and the cheatsheet looks unprofessional. This is a well-documented browser security restriction -- SVGs loaded as images are sandboxed from network requests.
-
-2. **No dark mode support:** The existing cheatsheet SVGs use hardcoded colors (verified by the `<style>` block in the SVG header). Unlike the guide's build-time diagram generators (which use `DIAGRAM_PALETTE` CSS variables), the cheatsheet SVGs cannot respond to the site's dark/light theme toggle. On a dark-themed site, a light-background cheatsheet creates a jarring visual discontinuity.
-
-3. **Print variant divergence:** Having two separate SVG files (`claude-code-cheatsheet.svg` and `claude-code-cheatsheet-print.svg`) means content updates must be applied to BOTH files. If a Claude Code feature is added to one but not the other, the print version diverges.
+If the Dark Code essay introduces new tags that do not overlap with the existing taxonomy (e.g., `dark-code`, `technical-debt`, `code-inflation`, `software-maintenance`), three problems occur:
+1. **Orphaned tag pages:** A tag page like `/blog/tags/dark-code/` is generated with only one post. This is a thin page from an SEO perspective and provides no value to readers.
+2. **Missed related-post connections:** The `[slug].astro` layout computes related posts by tag overlap (`relatedPosts` computed in lines 26-35). If the Dark Code essay uses entirely novel tags, it will have zero or minimal overlap with existing posts, and the "Related Articles" section will be empty or weak.
+3. **Inconsistent tag naming:** The existing taxonomy uses lowercase kebab-case (`code-quality`, not `codeQuality`; `ai`, not `AI`). Introducing a tag with different casing or formatting creates a separate tag page for what is conceptually the same topic.
 
 **Why it happens:**
-The cheatsheet SVGs appear to be designed as standalone visual assets (possibly exported from a design tool like Boxy SVG based on the `xmlns:bx` namespace), not integrated into the build-time SVG generation pipeline used by the 5 existing guide diagrams. The guide diagrams use `diagram-base.ts` which generates SVGs with CSS variable colors that respond to the theme -- the cheatsheet SVGs bypass this infrastructure entirely.
+Each blog post defines its own tags in frontmatter with no validation against a central registry. Astro's content collection schema only validates that `tags` is `z.array(z.string()).default([])` -- any string is accepted. There is no build-time warning for novel tags.
 
 **How to avoid:**
-1. Render the cheatsheet as **inline SVG** on the page, not via `<img>` tag. Inline SVG loads external fonts correctly and can use CSS variables for theming. At 56KB, the cheatsheet is within the inline threshold (under 100KB is acceptable per SVG best practices).
-2. Replace hardcoded colors in the SVG with CSS variables from the site's theme system (e.g., `var(--color-text-primary)`, `var(--color-surface)`, `var(--color-border)`). This gives automatic dark/light mode support.
-3. For the downloadable/printable version, generate a static PNG or PDF at build time using the same SVG content but with baked-in colors. This eliminates the dual-SVG maintenance problem -- one source SVG, multiple output formats.
-4. Alternatively, preload the Google Fonts in the page's `<head>` so the fonts are cached before the inline SVG renders. This is simpler than converting font references.
-5. If the SVG must remain as an `<img>` source (e.g., for download), self-host the fonts and embed them as base64 `@font-face` declarations inside the SVG. This eliminates the external dependency.
+1. Review the existing tag taxonomy before selecting tags. Prefer reusing existing tags over creating new ones.
+2. Recommended tags for the Dark Code essay that maximize existing overlap:
+   - `code-quality` (overlaps with "Death by a Thousand Arrows" and "The Beauty Index" -- creates a content cluster)
+   - `ai` (overlaps with 12+ existing posts)
+   - `software-aesthetics` (overlaps with "Death by a Thousand Arrows" and "The Beauty Index")
+   - `security` (overlaps with DevOps/K8s posts -- supply chain dimension connects)
+3. At most ONE new tag is acceptable if it names the essay's core concept (e.g., `dark-code`), but only alongside 3-4 established tags.
+4. Verify tag selection by mentally checking: "Will the Related Articles sidebar show strong results for these tags?"
 
 **Warning signs:**
-- Cheatsheet renders with monospace fallback font instead of JetBrains Mono on the page
-- Light-colored cheatsheet on dark-themed page (no theme adaptation)
-- Print cheatsheet content does not match web cheatsheet content
-- Page load triggers a CORS or network request for Google Fonts from within an SVG
+- More than half of the essay's tags are novel (not used by any existing post)
+- The `relatedPosts` section in the rendered blog post shows fewer than 3 related articles
+- A tag page exists with only the Dark Code essay listed
 
 **Phase to address:**
-Cheatsheet page phase. This must be resolved during the cheatsheet page implementation, not deferred. The rendering approach (inline vs img) determines the entire component architecture.
+Content authoring phase (frontmatter definition). Must be verified in the integration/QA phase by building the site and checking the tag pages and related posts sidebar.
 
 ---
 
-### Pitfall 4: Guide Metadata Drift Between guide.json, Landing Page, Blog Post, and LLMs.txt
+### Pitfall 4: LLMs.txt Not Updated After Publishing
 
 **What goes wrong:**
-The guide's metadata is duplicated across four locations:
-1. `guide.json` -- chapter count (11), descriptions, title
-2. `index.astro` landing page -- hero text, "zero-to-hero guide"
-3. `claude-code-guide.mdx` blog post -- "11 chapters", per-chapter summaries
-4. `llms.txt` and `llms-full.txt` -- guide description, chapter listing
+The site generates `llms.txt` and `llms-full.txt` dynamically via `src/pages/llms.txt.ts` and `src/pages/llms-full.txt.ts`. These files read from `getCollection('blog')` and list all posts. Because the generation is dynamic (reading from the content collection at build time), the new Dark Code blog post WILL automatically appear in `llms.txt` after build.
 
-If v1.19 adds a new chapter (e.g., a dedicated cheatsheet chapter or a "What's New" chapter), the chapter count and descriptions must be updated in ALL four locations. If the blog post says "11 chapters" but guide.json now lists 12, or if llms-full.txt still describes the old chapter set, the inconsistency undermines trust and confuses both human readers and AI crawlers.
-
-Additionally, `guide.json` descriptions are used in the landing page chapter cards (`ch.description`), in the sitemap via `buildContentDateMap()`, and in llms.txt. A description change in one place but not others creates subtle inconsistencies.
+However, the project context notes "LLMs.txt not updated" as a previous issue. The risk is not that the post is missing from the auto-generated list, but that:
+1. **The LLMs.txt generation was last verified on a certain date** -- if the build breaks, the stale `dist/llms.txt` from the previous build remains deployed, and the new post is silently missing.
+2. **The blog post description in LLMs.txt inherits from frontmatter.** If the `description` field is weak, vague, or truncated, LLMs and AI crawlers get a poor summary. For a thought-leadership essay, the LLMs.txt description should clearly convey the essay's thesis, not just its topic.
+3. **Citation guidance in llms.txt** -- the existing `How to Cite` section has examples for tools, guides, and the Beauty Index, but NOT for standalone blog essays. A thought-leadership essay about Dark Code may be cited by LLMs; having a citation example helps.
 
 **Why it happens:**
-The landing page dynamically reads from `guide.json` (good), but the blog post contains hardcoded chapter count and prose summaries (unavoidable -- blog posts are static content). The llms.txt dynamically reads chapter data (good), but the blog post does not. Any change to the chapter structure requires a manual update to the blog post.
+The dynamic generation creates a false sense of safety. Developers assume "it auto-generates, so I don't need to check." But the quality of the auto-generated entry depends entirely on the frontmatter quality, and the generation itself depends on a clean build.
 
 **How to avoid:**
-1. After adding or modifying chapters in `guide.json`, immediately grep for the old chapter count ("11 chapters") across all MDX and Astro files.
-2. Update the blog post's chapter summaries and chapter count whenever the guide structure changes.
-3. Verify llms.txt and llms-full.txt output after the build includes the new/updated chapters.
-4. If adding a cheatsheet as a STANDALONE page (not a numbered chapter), decide explicitly whether it counts as a "chapter" or a supplementary page. The FastAPI guide has a FAQ page that is NOT counted as a chapter -- follow the same pattern.
-5. Update guide.json `description` field if the guide's scope changes materially.
+1. Write the frontmatter `description` as a genuine thesis statement, not a topic summary. Good: "48 research sources reveal that code nobody understands is the industry's fastest-growing vulnerability -- and most teams are making it worse." Bad: "A blog post about dark code in production."
+2. After building the site locally, verify the post appears in `dist/llms.txt` with its correct title and description.
+3. Consider adding a citation example to the `How to Cite` section of `llms.txt.ts` for the Dark Code essay if it introduces a reusable framework.
+4. Deploy and verify the live `llms.txt` URL after publishing.
 
 **Warning signs:**
-- Blog post says "11 chapters" but guide.json lists 12
-- Landing page hero text mentions a chapter count that does not match the card grid
-- llms-full.txt chapter listing has different chapters than the landing page
-- Guide description in one location mentions features not yet covered in the actual chapters
+- The `description` field is generic or topic-oriented rather than thesis-oriented
+- The site builds without errors but `dist/llms.txt` has not been checked
+- The essay introduces a named framework (e.g., "Dark Code Index" or "Dark Code Defense") but LLMs.txt has no citation guidance for it
 
 **Phase to address:**
-Final integration phase. After all content changes are complete, do a metadata consistency audit across all four surfaces.
+Integration and verification phase (post-build QA). Explicitly include "verify llms.txt output" as a checklist item.
 
 ---
 
-### Pitfall 5: Adding Non-Chapter Pages Without Updating Collection Queries
+### Pitfall 5: Missing or Broken OG Image for Social Sharing
 
 **What goes wrong:**
-The cheatsheet page at `/guides/claude-code/cheatsheet/` is a standalone page, not a chapter in the `claudeCodePages` collection. The FastAPI guide has exactly this pattern -- `faq.astro` is a standalone page at `/guides/fastapi-production/faq/` that exists outside the content collection.
+The site has an OG image generation pipeline (`src/pages/open-graph/[...slug].png.ts`) that automatically generates OG images for blog posts using `generateOgImage()`. The blog slug layout (`[slug].astro` line 37) constructs the OG image URL as `/open-graph/blog/POST_ID.png?cb=20260216`. Two failure modes:
 
-The danger is that standalone pages can be forgotten by queries that iterate over "all Claude Code guide content." Specifically:
-1. **llms.txt/llms-full.txt** -- currently lists chapters by iterating `claudeCodePagesList`. The cheatsheet page will NOT appear unless explicitly added, just as the FastAPI FAQ is manually added with a hardcoded line.
-2. **Sitemap** -- `buildContentDateMap()` only iterates `guide.json` chapters for lastmod dates. The cheatsheet page will be in the sitemap (any `.astro` file in `src/pages/` generates a route) but without a proper lastmod.
-3. **OG images** -- the existing `[slug].png.ts` route generates OG images for chapter slugs only. The cheatsheet page needs its own OG image route or a manual addition.
-4. **GuideLayout sidebar** -- if the cheatsheet page uses `GuideLayout`, it will appear in the sidebar's chapter list only if added to guide.json chapters. If it should NOT appear as a numbered chapter (like the FAQ), it needs different sidebar treatment.
+1. **Cache-buster query param is stale:** The URL includes `?cb=20260216` -- a cache-buster tied to February 16, 2026. If the OG image generation changes (fonts, layout, colors) but the cache-buster is not updated, social platforms serve the old cached image. For a NEW post this is less of a concern (no prior cache), but if the post is published and then the title or description changes, the old OG image persists on Twitter/LinkedIn/Slack until the cache-buster is bumped.
+
+2. **Cover image not created:** The OG image generator checks for `coverImage` in frontmatter. 8 of 10 native blog posts have a `coverImage` field pointing to an SVG in `/images/`. If the Dark Code essay does not have a cover image, the OG generator still produces an image (title + description + tags layout), but it will look different from other posts in the feed -- no visual identity. Some of the most impactful posts on the site (Beauty Index, Database Compass, Death by a Thousand Arrows) all have custom SVG covers.
+
+3. **SVG cover image rendering:** The OG image pipeline uses `sharp` to convert SVG covers to PNG for the OG image. SVGs with external CSS imports, complex filters, or browser-dependent rendering may produce unexpected results when rasterized by sharp on the server side. This is the same class of bug identified in the cheatsheet SVG pitfall from the Claude Code Guide refresh research.
 
 **Why it happens:**
-Content collection queries return collection entries, not arbitrary pages. Standalone pages live outside the collection and must be manually wired into every surface that renders guide content. This is by design -- the FAQ page for FastAPI works this way successfully -- but it means every integration point must be checked.
+OG images are invisible during local development. Authors test the blog post in the browser and see a beautiful rendered page, but never check what the post looks like when shared on LinkedIn, Twitter, or Slack. The OG image generation happens at build time and requires visiting `/open-graph/blog/dark-code.png` to verify.
 
 **How to avoid:**
-1. Decide upfront: is the cheatsheet a **numbered chapter** in guide.json or a **standalone supplementary page** like the FAQ? Recommendation: standalone page, matching the FastAPI FAQ pattern.
-2. If standalone, create `src/pages/guides/claude-code/cheatsheet.astro` as a dedicated page file.
-3. Add the cheatsheet to llms.txt and llms-full.txt with a hardcoded line (following the `'- [FAQ](...)...'` pattern already used for the FastAPI FAQ).
-4. Add `buildContentDateMap()` handling or accept that the cheatsheet will use the build date as lastmod (acceptable for a supplementary page).
-5. Create an OG image for the cheatsheet page -- either via the existing `[slug].png.ts` dynamic route (if slug-based) or a dedicated `cheatsheet.png.ts` endpoint.
-6. If using GuideLayout, pass a `showInSidebar: false` type flag or add the cheatsheet as a non-numbered sidebar entry below the chapter list (matching how FAQ pages are typically handled).
+1. Create a cover image SVG for the Dark Code essay (consistent with the site's existing pattern of custom SVG covers for flagship posts).
+2. Verify the OG image renders correctly by visiting the OG endpoint locally: `http://localhost:4321/open-graph/blog/dark-code.png`
+3. After deployment, use a social card debugger (Twitter Card Validator, LinkedIn Post Inspector, opengraph.xyz) to verify the OG image, title, and description display correctly.
+4. If the cover SVG uses external fonts or complex CSS, test rasterization with sharp separately before relying on the build pipeline.
 
 **Warning signs:**
-- Cheatsheet page exists and renders but does not appear in llms.txt
-- Cheatsheet page has no OG image when shared on social media
-- GuideLayout sidebar does not include the cheatsheet or incorrectly numbers it as "Chapter 12"
-- Sitemap includes the cheatsheet URL but with no lastmod date
+- No `coverImage` field in the Dark Code essay's frontmatter
+- The OG image endpoint 404s during local build
+- The post is published and shared on social media without checking the social card preview
 
 **Phase to address:**
-Cheatsheet page phase for the page creation, then final integration phase for wiring into llms.txt, OG images, and sitemap.
+Asset creation phase (cover image) and integration/QA phase (OG image verification). Social card testing should be an explicit step in the publish checklist.
 
 ---
 
-### Pitfall 6: Blog Post Content Becoming Factually Inconsistent with Updated Guide
+### Pitfall 6: JSON-LD Schema Incomplete or Incorrect for Thought-Leadership Content
 
 **What goes wrong:**
-The companion blog post "The Context Window Is the Product" (`src/data/blog/claude-code-guide.mdx`) contains 110 lines of prose that summarize every chapter. Each chapter gets a dedicated section with a detailed description of what the chapter covers. For example, the blog post says the hooks chapter covers "18 lifecycle events" -- if v1.19 updates this to 20 events because Claude Code added new hook types, the blog post becomes factually wrong even though the guide itself is correct.
+The blog post layout (`[slug].astro`) has a sophisticated JSON-LD pipeline. It passes `articleSection`, `wordCount`, and `about` to `BlogPostingJsonLd.astro`. However, the `articleSection` and `about` properties are currently hardcoded for specific post IDs (lines 40-69 in `[slug].astro`):
 
-The blog post also frames specific features in its prose. It says "Agent teams are currently a research preview feature, require an environment flag to enable." If agent teams graduate to GA in Claude Code's March/April 2026 updates, the blog post's characterization is stale even though the guide chapter has been updated.
+```typescript
+const isBeautyIndexPost = post.id === 'the-beauty-index';
+const isK8sPost = post.id === 'kubernetes-manifest-best-practices';
+// ... etc.
+const articleSection = isBeautyIndexPost ? 'Programming Languages' : ...
+const aboutDataset = isBeautyIndexPost ? { type: 'Dataset', ... } : ...
+```
 
-Unlike chapters that have `lastVerified` dates, the blog post has no freshness signal. Its `publishedDate: 2026-03-15` suggests it was written with the original guide and may not have been updated since.
+If no condition matches the Dark Code post's ID, both `articleSection` and `about` will be `undefined`. The JSON-LD output will be valid but incomplete -- missing the `articleSection` and `about` properties that enrich the schema for Google's rich results.
+
+Additionally, many of the existing posts have FAQPageJsonLd entries (Beauty Index has 3 FAQs, K8s has 6, Claude Code Guide has 6). If the Dark Code essay introduces a named framework or answers common questions ("What is dark code?", "How do I find dark code in my codebase?"), missing the FAQ schema means missing Google's FAQ rich result snippet.
 
 **Why it happens:**
-Blog posts are written as narratives, not as dynamically-rendered templates. They cannot import chapter metadata or feature counts from guide.json. The blog post's prose is a snapshot of the guide's content at publication time. Every factual claim in the blog post is a potential staleness vector.
+The `articleSection` and `about` mappings in `[slug].astro` use a pattern of explicit post-ID matching. This is a design that worked when only a few flagship posts needed enriched schema, but it means EVERY new post with enriched schema needs manual additions to this file. The pattern is not self-documenting -- there is no comment saying "add your post here."
 
 **How to avoid:**
-1. After updating guide chapters, review the blog post section by section. Check every factual claim against the updated chapter content.
-2. Specifically check: feature counts (e.g., "18 lifecycle events"), feature status (e.g., "research preview"), chapter scope descriptions (e.g., "covers X, Y, and Z").
-3. If v1.19 writes a NEW blog post, the old blog post still needs to be checked for accuracy. Two blog posts referencing the guide doubles the maintenance surface.
-4. Add `updatedDate` to the blog post frontmatter when its content is revised. The blog post currently has no `updatedDate` field.
-5. Consider whether the new blog post should REPLACE the old one (updated content, same URL for SEO continuity) or be a separate post. Recommendation: separate post, since the old post has been indexed and may have backlinks.
+1. Add the Dark Code post to the `articleSection` and `about` mappings in `[slug].astro`:
+   - `articleSection`: "Software Engineering" or "Code Quality"
+   - `about`: `{ type: 'Article', name: 'Dark Code', url: 'https://patrykgolabek.dev/blog/dark-code/' }` (or `CreativeWork` if more appropriate)
+2. If the essay includes a framework with clear questions and answers, add FAQPageJsonLd entries. Good candidates: "What is dark code?", "How much dark code exists in production?", "How do you find dark code?"
+3. Verify the JSON-LD output by viewing the page source and validating with Google's Rich Results Test (https://search.google.com/test/rich-results).
+4. Consider whether the hardcoded pattern should be replaced with frontmatter-driven schema (a future improvement, not a blocker for this milestone).
 
 **Warning signs:**
-- Blog post mentions a specific number that no longer matches the guide (e.g., chapter count, event count, feature count)
-- Blog post describes a feature as "research preview" that is now GA
-- Blog post links to a chapter URL that has been renamed or reorganized
-- Blog post does not have an `updatedDate` even though guide chapters have been modified
+- The Dark Code essay is published but its JSON-LD output has no `articleSection` or `about` field
+- Google Search Console shows the page is indexed but not eligible for rich results
+- The post ID does not appear anywhere in `[slug].astro`
 
 **Phase to address:**
-Blog post phase must include a full review against updated chapter content. Not just writing new content -- also verifying that all existing claims still hold.
+Integration phase. The JSON-LD additions should be part of the same PR that adds the blog post MDX file.
 
 ---
 
-### Pitfall 7: OG Image Cache Invalidation When Updating Chapter Titles or Descriptions
+### Pitfall 7: Missing Internal Cross-Links That Waste the Content Cluster Opportunity
 
 **What goes wrong:**
-The OG image pipeline (`og-cache.ts`) generates images using content hashes derived from the page's title and description. When a chapter's title or description changes in its MDX frontmatter, the content hash changes, correctly triggering regeneration of that chapter's OG image. However:
+The site has established a strong pattern of internal cross-linking. "Death by a Thousand Arrows" links to "The Beauty Index" blog post and the Beauty Index tool pages. "The Beauty Index" links extensively to individual language pages. The Claude Code Guide blog posts link to guide chapter pages.
 
-1. **Social media caching:** Facebook, Twitter/X, LinkedIn, and Slack all cache OG images aggressively (Facebook: up to 7 days, Twitter: indefinitely until re-scraped). Even after deploying updated OG images, social platforms will continue showing the OLD image until their caches expire or are manually purged.
-2. **Guide.json description vs MDX description:** OG images may use the title from the MDX frontmatter, but the description might come from guide.json (where it is duplicated for the landing page). If the MDX description changes but guide.json does not, or vice versa, the OG image renders with mismatched content.
-3. **Landing page OG image:** The `/guides/claude-code/` landing page has its own OG image (`claude-code.png`). If the guide's overall description or chapter count changes, this OG image should be regenerated. But the landing page OG image is a separate endpoint (`src/pages/open-graph/guides/claude-code.png.ts`) that may use guide.json metadata, not individual chapter metadata.
+The Dark Code essay has natural cross-link opportunities to existing site content:
+- **"Death by a Thousand Arrows"** -- both essays are about code quality deterioration
+- **"The Beauty Index"** -- Dark Code is in some ways the anti-Beauty Index (ugly code that nobody maintains)
+- **AI Landscape Explorer** -- if Dark Code discusses AI copilots (GitClear 4x code clones, Anthropic RCT), it can link to relevant AI concept pages
+- **Claude Code Guide** -- if Dark Code discusses AI-assisted coding tools, it can reference the guide
+
+Missing these cross-links wastes the SEO "topic cluster" benefit and fails to drive readers deeper into the site. The `relatedPosts` sidebar (computed by tag overlap) handles discovery, but in-content cross-links are more powerful for SEO and reader engagement.
 
 **Why it happens:**
-OG image caching is an external platform concern that cannot be controlled from the build pipeline. The content-hash cache in `og-cache.ts` works correctly for build-time invalidation, but social platform caches operate independently.
+Cross-linking requires the writer to know what other content exists on the site. When focused on writing a standalone essay with 48 external sources, it is easy to forget about internal linking opportunities. The existing blog posts were written months apart and may not feel connected during drafting.
 
 **How to avoid:**
-1. After updating chapter titles or descriptions, force social media cache refresh by using the platform debugger tools: Facebook Sharing Debugger, Twitter Card Validator, LinkedIn Post Inspector.
-2. Ensure guide.json descriptions and MDX frontmatter descriptions stay in sync when either is updated.
-3. When adding the cheatsheet page, create its OG image endpoint BEFORE deploying the page. A page without an OG image is worse than no page at all for social sharing.
-4. For the new blog post, verify its OG image renders correctly and includes the correct title/description.
+1. Before writing, create a list of all possible internal links from Dark Code to existing site content. Map each source/theme to an existing page.
+2. During writing, aim for 3-5 natural internal cross-links (not forced). The "Death by a Thousand Arrows" post achieves 2 internal links organically.
+3. After the Dark Code essay is published, update "Death by a Thousand Arrows" to add a reciprocal cross-link to Dark Code (if a natural insertion point exists). Bidirectional cross-links are strongest for topic clustering.
+4. Do NOT add cross-links that feel forced. "For more on JavaScript arrow functions, see..." does not belong in an essay about dark code.
 
 **Warning signs:**
-- Social media preview shows old chapter title after title was updated
-- OG image shows "Introduction & Getting Started" but the page title has been changed
-- Cheatsheet page shared on social media shows a generic site OG image instead of a cheatsheet-specific one
-- Guide.json description says "11 chapters" but OG image says "12 chapters"
+- The final essay has zero internal links to other site content
+- The essay discusses AI coding tools without linking to the Claude Code Guide or AI Landscape Explorer
+- The essay discusses code quality without linking to "Death by a Thousand Arrows" or "The Beauty Index"
 
 **Phase to address:**
-OG image and SEO phase. Include social media cache purge as a deploy checklist item.
+Content authoring phase (outline should identify cross-link targets) and editing/review phase (verify cross-links are present and natural).
+
+---
+
+### Pitfall 8: Essay Reads Like an AI-Generated Literature Review, Not a Human Perspective
+
+**What goes wrong:**
+The Dark Code essay draws from 48 sources and is being written with AI assistance. The highest risk for thought-leadership content in 2026 is producing an essay that sounds like a well-organized literature review rather than a person with 17 years of experience sharing a hard-won perspective. The Animalz content strategy team calls this "assembled vs. considered" content -- audiences can tell the difference.
+
+Symptoms of the literature-review trap:
+- Every paragraph starts by citing a source rather than making a claim
+- The essay presents facts without interpretation ("Source A found X. Source B found Y.")
+- The writer's own experience and judgment are absent
+- The tone is objective and detached rather than opinionated
+- Section headings describe topics rather than arguments ("Code Inflation" vs. "Your Codebase is Growing Faster Than Your Team Can Read It")
+
+The existing thought-leadership posts on the site demonstrate the opposite pattern. "Death by a Thousand Arrows" opens with "Arrow functions are not easier to read or write. There, I said it." and "The Beauty Index" opens with "None of them tell you which one is the most beautiful." Both lead with an opinionated claim, then support it with evidence. They are considered, not assembled.
+
+**Why it happens:**
+When you have 48 sources, the temptation is to let the sources do the arguing. Each source is a crutch that delays the moment when the writer must stake a personal claim. AI-assisted drafting amplifies this because AI defaults to balanced, hedged, neutral prose. The result is an essay that is technically accurate but lacks the voice that makes readers share it.
+
+**How to avoid:**
+1. Write the opening paragraph and thesis statement BEFORE consulting any sources. What does the author actually believe about dark code? Start there.
+2. Every section must make a claim first, then support it with evidence. Never start a section with a citation.
+3. Include at least 2-3 first-person experience observations. "In 17 years of production engineering, I have never seen a team audit dark code proactively." This is what the sources cannot provide.
+4. Use the `<OpeningStatement>` component (already in the site's component library) for a bold, opinionated opening line. This forces the essay to lead with a claim.
+5. During editing, highlight every paragraph that starts with a citation or a hedging phrase ("It should be noted that...", "Research suggests..."). Rewrite those paragraphs to lead with the author's interpretation.
+6. The "framework" section (Act 2) is where the author's original contribution lives. This section should cite fewer external sources and present more original thinking.
+
+**Warning signs:**
+- More than 3 consecutive paragraphs start with source citations
+- The word "suggests" appears more than twice in the essay
+- The essay could have been written by anyone with access to the same 48 sources -- there is no perspective that is unique to a 17-year production engineering veteran
+- The essay has no first-person claims or experience-based observations
+- Section headings are nouns/topics rather than arguments/claims
+
+**Phase to address:**
+Content authoring phase (drafting guidelines must enforce voice) and editing/review phase (explicit check for voice and perspective).
 
 ---
 
 ## Technical Debt Patterns
 
+Shortcuts that seem reasonable but create long-term problems.
+
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Updating only the chapters that mention new features, ignoring others | Faster content delivery, fewer files changed | Cross-references in untouched chapters may become misleading. `lastVerified` dates on untouched chapters become stale. | Never for this milestone. All 11 chapters must be at minimum re-verified, even if not all need content changes. |
-| Keeping cheatsheet SVGs as standalone files in `public/images/` instead of integrating into the build-time SVG pipeline | Zero build system changes, SVGs render immediately | Two maintenance paths for visual content (build-time diagrams vs static SVGs). No theme support. Font loading fragility. | Acceptable for v1.19 MVP IF rendered inline. Convert to build-time pipeline in a future milestone if the cheatsheet needs frequent updates. |
-| Writing the new blog post without reviewing the old blog post for accuracy | Faster blog writing, one less file to review | Two blog posts with potentially contradictory information about the same guide. Readers may find the old post via search. | Never. Old blog post must be reviewed for accuracy whenever guide content changes. |
-| Hardcoding cheatsheet into llms.txt with a manual line instead of adding it to a collection query | Matches existing pattern (FastAPI FAQ is hardcoded too), zero schema changes | Every new standalone guide page requires another hardcoded line. Not scalable beyond 2-3 supplementary pages per guide. | Acceptable for v1.19. Two hardcoded lines (FAQ for FastAPI, cheatsheet for Claude Code) is manageable. |
-| Skipping the OG image for the cheatsheet page | Faster delivery, one less endpoint to create | Social shares of the cheatsheet page show the generic site OG image. Looks unprofessional. | Never. OG images take 15 minutes to set up using the existing pattern. |
+| Skipping cover image SVG | Saves 2-4 hours of design work | Every social share lacks visual identity; post looks second-class compared to existing flagship posts | Never for a flagship thought-leadership essay |
+| Using all 48 sources inline | Demonstrates research depth | Unreadable essay; reader fatigue; "data dump" pattern | Never -- use "cite the best, reference the rest" |
+| Inventing 4+ new tags | More precise topic categorization | Orphaned tag pages; broken related-posts; thin pages for SEO | Acceptable for ONE genuinely new tag alongside 3-4 existing tags |
+| Skipping JSON-LD enrichment | Saves 15 minutes of `[slug].astro` editing | Missing Google rich results; inconsistency with other flagship posts | Never for a post expected to rank for competitive keywords |
+| Not cross-linking to existing posts | Essay is self-contained | Wasted topic cluster SEO benefit; missed reader engagement | Never when natural cross-link opportunities exist |
+| Hardcoding statistics without source links | Faster drafting | Any reader who wants to verify a claim cannot; trust erodes | Never in a research-backed essay |
 
 ## Integration Gotchas
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| `guide.json` chapter array | Adding a chapter entry for the cheatsheet, making it appear as "Chapter 12" in the sidebar and navigation | Keep cheatsheet OUT of the chapters array. Create as standalone `.astro` page, matching the FAQ pattern. |
-| `[slug].astro` dynamic route | Expecting the cheatsheet to be served by the dynamic `[slug].astro` route | The `[slug].astro` route only serves `claudeCodePages` collection entries. Standalone pages need their own `.astro` file (`cheatsheet.astro`). |
-| Blog post `publishedDate` | Not adding `updatedDate` to the blog post when revising its content | Add `updatedDate: 2026-04-XX` to blog post frontmatter whenever its content is revised. This updates the sitemap lastmod and signals freshness to search engines. |
-| Cross-chapter prev/next links | `GuideChapterNav.astro` computes prev/next from the `chapters` array in guide.json | If chapter order changes or chapters are added, prev/next navigation across ALL chapters shifts. Verify the complete navigation chain. |
-| `llms-full.txt` Claude Code section | Forgetting to add cheatsheet URL after the chapter listing | Add a hardcoded line: `- [Cheatsheet](https://patrykgolabek.dev/guides/claude-code/cheatsheet/): Quick reference...` following the FastAPI FAQ pattern at line 345-346. |
-| Inline SVG rendering | Using `<img src="cheatsheet.svg">` which sandboxes external font requests | Use Astro component that reads the SVG file content and renders it inline with `set:html`, or use `Fragment` with raw SVG content. |
-| `buildContentDateMap()` in `astro.config.mjs` | Assumes all guide pages are in guide.json chapters array | Standalone pages like cheatsheet get sitemap entries automatically (any .astro file does) but without explicit lastmod dates. Accept this or add manual lastmod handling. |
+Common mistakes when adding a new blog post to this specific site.
 
-## Performance Traps
-
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Inlining a 56KB cheatsheet SVG on every page load | Page HTML bloats by 56KB (pre-gzip), increasing time-to-first-byte and parse time | Inline only on the dedicated cheatsheet page, never in chapter pages. Use `loading="lazy"` if the SVG is below the fold. For chapter pages that reference the cheatsheet, link to the page -- do not inline. | Immediately noticeable on mobile if inlined on pages that do not need it |
-| Adding code blocks to updated chapters without budget discipline | Build time increases as expressive-code processes each block. Chapters already average 400 lines. | Maintain the existing guideline: max 8 code blocks per chapter, 10-30 lines each. If new features require more examples, use prose descriptions or link to official docs. | When a single chapter exceeds 15 code blocks |
-| Updating guide.json timestamps without rebuilding OG image cache | OG images show stale dates or descriptions even though metadata has changed | After any guide.json change, run a local build to verify OG image regeneration. Check `node_modules/.cache/og-guide/` for updated files. | When guide.json publishedDate or chapter descriptions change but cached images are not invalidated |
-| Font preloading for cheatsheet SVG | If cheatsheet fonts (JetBrains Mono, DM Sans) are preloaded in `<head>` for the cheatsheet page, they load on EVERY page if done globally | Scope font preloading to the cheatsheet page only, not in the global Layout. Use page-level `<link rel="preload">` injection via Astro slots or head content. | Immediately if fonts are added to the global `<head>` |
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Updating code examples with real API keys or tokens from testing | Keys leak into the public repo and indexed content | Continue using obviously fake values: `sk-ant-EXAMPLE-not-a-real-key`. Review all code block changes for real credentials before committing. |
-| Updating permission examples to recommend bypassing sandbox | Readers disable security features based on guide recommendations | Never recommend `dangerouslySkipPermissions` or `dangerouslyDisableSandbox` in examples. If discussing these flags, always include a visible warning callout. |
-| Cheatsheet SVG referencing external resources via `@import` | SVG `@import` opens a network request path. If the Google Fonts CDN is compromised, the cheatsheet could load malicious CSS. | Self-host the fonts or embed as base64 within the SVG. Eliminates the external dependency entirely. |
+| Integration Point | Common Mistake | Correct Approach |
+|-------------------|----------------|------------------|
+| Blog collection schema | Adding fields not in the schema (e.g., `author`, `series`, `footnotes`) causing build failure | Check `src/content.config.ts` -- the blog schema allows: `title`, `description`, `publishedDate`, `updatedDate`, `tags`, `draft`, `coverImage`, `externalUrl`, `source`. Nothing else. |
+| MDX component imports | Using relative paths that break when directory structure changes (e.g., `import X from '../components/...'` instead of the established `../../components/blog/` pattern) | Follow the import pattern from existing posts: `import TldrSummary from '../../components/blog/TldrSummary.astro';` |
+| File naming | Using spaces or uppercase in the MDX filename (e.g., `Dark Code.mdx` or `DarkCode.mdx`) | Use lowercase kebab-case: `dark-code.mdx`. The filename becomes the slug via `post.id`. |
+| External links | Using `[text](url)` for external links without `target="_blank"` and `rel="noopener noreferrer"` | For external links in MDX, use raw HTML: `<a href="url" target="_blank" rel="noopener noreferrer">text</a>`. Internal links use standard Markdown: `[text](/path/)` |
+| Cover image path | Placing the cover image SVG in `src/` instead of `public/` | Cover images must be in `public/images/` and referenced in frontmatter as `/images/dark-code-cover.svg`. The OG image generator reads from `public/`. |
+| Trailing slashes | Linking to `/blog/dark-code` without trailing slash | The site uses trailing slashes consistently: `/blog/dark-code/`. Missing the trailing slash can cause redirect or 404 depending on Astro config. |
 
 ## UX Pitfalls
 
+Common user experience mistakes for long-form thought-leadership content.
+
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Cheatsheet page renders differently from the rest of the guide | Users clicking from a chapter to the cheatsheet experience a jarring visual shift -- different fonts, different colors, no sidebar | Use `GuideLayout` or a consistent layout wrapper for the cheatsheet page. Even if the cheatsheet is not a chapter, it should feel like part of the guide experience. Add sidebar with the cheatsheet highlighted as "Quick Reference" below the chapter list. |
-| Updated chapters do not indicate what changed | Returning readers cannot tell which content is new vs unchanged | Add a brief "Updated in April 2026" note or callout at the top of significantly revised chapters. Use the `updatedDate` frontmatter field to display "Last updated: April 2026" in the chapter header. |
-| New blog post does not reference the existing blog post | Readers find the old blog post via search, do not know a newer one exists | Add a visible "Update" callout at the top of the old blog post linking to the new one. Use the blog post's `updatedDate` field. |
-| Cheatsheet is image-only with no accessible text alternative | Screen reader users cannot access cheatsheet content. Search engines cannot index cheatsheet text. | Provide the cheatsheet content as both inline SVG (visual) and structured HTML/markdown (accessible). At minimum, add comprehensive `alt` text and ARIA labels. Best approach: render cheatsheet content as styled HTML with a "Download as SVG/PDF" option. |
+| No TldrSummary component at the top | Readers cannot assess whether the 15-minute read is worth their time | Use `<TldrSummary>` with 4-5 bullet points summarizing the thesis and key findings, following the pattern of every other flagship post on the site |
+| Wall of statistics without visual breaks | Reader fatigue sets in after 500 words of continuous text | Break up data-heavy sections with `<KeyTakeaway>` callouts, code blocks, or inline figures. The site already uses all three patterns. |
+| Argument headings that are topics, not claims | Reader cannot skim the table of contents to understand the argument arc | Write headings as arguments: "Your Codebase Has a Shadow" not "Dark Code Overview". The table of contents becomes a standalone summary. |
+| No practical takeaways | Reader finishes the essay alarmed but unsure what to do | The "practical defense" section (Act 3) must include numbered, actionable steps -- not just principles |
+| Footnotes or endnotes for key claims | Reader must scroll to the bottom to verify a claim, breaking flow | Use inline hyperlinks for source citations. The site has no footnote rendering system; using Markdown footnotes would produce unstyled or broken output in MDX. |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **All 11 chapters:** Every chapter has `lastVerified` date within 30 days of deploy date -- grep `lastVerified` across all MDX files
-- [ ] **Cross-references:** All 30+ inter-chapter links resolve correctly -- run full-site link check on build output
-- [ ] **Blog post accuracy:** "The Context Window Is the Product" reflects updated chapter content -- compare each section against the corresponding chapter
-- [ ] **Blog post `updatedDate`:** Blog post frontmatter includes `updatedDate` if its content was revised
-- [ ] **Cheatsheet in llms.txt:** `/llms.txt` and `/llms-full.txt` include the cheatsheet URL -- fetch from build output and verify
-- [ ] **Cheatsheet OG image:** `/open-graph/guides/claude-code/cheatsheet.png` exists and renders correctly
-- [ ] **Cheatsheet dark mode:** Cheatsheet renders correctly in both light and dark themes on the cheatsheet page
-- [ ] **Cheatsheet fonts:** JetBrains Mono renders on the cheatsheet page (not falling back to system monospace) -- test in incognito browser with no font cache
-- [ ] **Guide.json consistency:** Chapter count, descriptions, and titles match across guide.json, landing page, blog post, and llms.txt
-- [ ] **Sidebar navigation:** If cheatsheet is in sidebar, it appears correctly without disrupting chapter numbering
-- [ ] **New blog post:** OG image renders, appears in RSS feed, appears on blog listing page
-- [ ] **Old blog post:** Still accurate or has an "Update available" callout linking to new post
-- [ ] **Sitemap:** All new and updated pages appear in `sitemap-0.xml` with correct `lastmod` dates
-- [ ] **Feature verification:** Every Claude Code feature mentioned in updated chapters exists in current official docs
-- [ ] **Lighthouse scores:** All updated guide pages and cheatsheet page score 90+ on Performance, Accessibility, Best Practices, SEO
-- [ ] **Print cheatsheet:** If a downloadable version exists, its content matches the web version
-- [ ] **FastAPI guide regression:** FastAPI guide still builds and renders correctly -- click through 3-4 pages to verify no side effects
+Things that appear complete but are missing critical pieces.
+
+- [ ] **Frontmatter tags:** Often new tags are created without checking existing taxonomy -- verify all tags exist in at least one other post (except at most one new tag)
+- [ ] **Cover image:** Blog post renders fine without one, but social shares look bare -- verify `coverImage` field is set and the SVG exists in `public/images/`
+- [ ] **OG image rendering:** Blog post looks great in browser but OG image was never checked -- visit `/open-graph/blog/dark-code.png` locally
+- [ ] **JSON-LD `articleSection`:** Post renders correctly but has no `articleSection` in JSON-LD -- check `[slug].astro` for the post-ID mapping
+- [ ] **JSON-LD `about`:** Post has no `about` property in its JSON-LD -- check if an `about` mapping was added for the Dark Code post
+- [ ] **FAQPageJsonLd:** Post introduces a framework with answerable questions but has no FAQ schema -- check if FAQ entries were added
+- [ ] **Internal cross-links:** Essay reads as standalone but misses 3-5 natural links to existing site content -- verify cross-links to "Death by a Thousand Arrows", "The Beauty Index", and AI-related content exist
+- [ ] **External link attributes:** All external links have `target="_blank"` and `rel="noopener noreferrer"` -- grep for `http` in the MDX and verify
+- [ ] **LLMs.txt verification:** Blog post appears in `dist/llms.txt` after build with a good description -- build locally and check
+- [ ] **Description field:** Frontmatter `description` is a thesis statement, not a topic summary -- read it standalone and verify it could be a tweet
+- [ ] **Reading time:** Build and check the reading time estimate -- if over 15 minutes, the essay needs cutting
+- [ ] **Related posts sidebar:** Build and check that the "Related Articles" section shows 3-5 relevant posts -- if fewer than 3, reconsider tags
+- [ ] **Source URLs verified:** Every external link in the essay was clicked and verified to resolve to the expected content
 
 ## Recovery Strategies
 
+When pitfalls occur despite prevention, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Cross-reference rot (broken inter-chapter links) | LOW | Grep for the broken URL pattern, update all references. Takes 30-60 minutes if caught before deploy. Takes longer if readers report it post-deploy. |
-| Stale `lastVerified` dates | LOW | Batch update: `grep -l lastVerified src/data/guides/claude-code/pages/*.mdx` and update dates. 15 minutes. |
-| Cheatsheet font rendering failure | MEDIUM | If deployed with broken fonts: either switch to inline rendering (code change + redeploy) or embed fonts as base64 in the SVG (larger file but guaranteed rendering). 1-2 hours. |
-| Guide metadata drift (chapter count mismatch) | LOW | Update the blog post and guide.json. 30 minutes per location. |
-| Non-chapter page missing from llms.txt | LOW | Add a hardcoded line to llms.txt and llms-full.txt. 10 minutes. |
-| Blog post factual inconsistency | MEDIUM | Review and rewrite affected sections. 1-3 hours depending on how much changed. Post-deploy, readers may have already seen the inconsistency. |
-| OG image showing stale content on social media | LOW (for fix) / MEDIUM (for damage) | Regenerate OG images via build, purge social media caches using platform tools. 30 minutes. But stale previews may have already been shared. |
+| Dead citation links discovered post-publish | LOW | Replace with Wayback Machine URLs or updated URLs. Rebuild and redeploy. |
+| Word count bloat (essay exceeds 5000 words) | MEDIUM | Identify the longest section (usually Act 1). Extract 30-40% of citations to a "Further Reading" section. Rewrite topic sentences to maintain flow. |
+| Tag taxonomy mismatch | LOW | Update frontmatter tags, rebuild. Tag pages regenerate automatically. |
+| LLMs.txt missing the post | LOW | Rebuild site. The generation is automatic from the content collection. If the build broke silently, fix the build error. |
+| Missing OG image | LOW | Add `coverImage` to frontmatter, create the SVG, rebuild. Social platform caches clear within 24-48 hours (or use cache-buster param). |
+| JSON-LD incomplete | LOW | Add post-ID mapping to `[slug].astro`, rebuild. Google re-crawls within days. |
+| Essay reads like AI literature review | HIGH | Requires substantive rewrite of opening, section leads, and injection of personal perspective. Cannot be fixed with surface edits. Must be caught in drafting phase. |
+| Missing internal cross-links | LOW | Add cross-links to the MDX, rebuild. Optionally update existing posts to add reciprocal links. |
+| Hallucinated citations | HIGH | Requires re-verification of all 48 sources. Each suspect citation must be traced back to its actual source. If a statistic was misattributed, the surrounding argument may need rewriting. |
 
 ## Pitfall-to-Phase Mapping
 
+How roadmap phases should address these pitfalls.
+
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| P1: Cross-reference rot | Every chapter update phase + final integration | `grep -r "/guides/claude-code/" src/data/` returns no dead links; full link check passes |
-| P2: Stale `lastVerified` dates | Every chapter update phase | All `lastVerified` dates within 30 days of deploy; no `updatedDate` newer than `lastVerified` |
-| P3: Cheatsheet SVG rendering | Cheatsheet page phase | Fonts render in incognito; dark/light theme works; no external network requests from SVG |
-| P4: Metadata drift | Final integration phase | `grep "11 chapters"` returns only correctly-counted instances; guide.json matches landing page |
-| P5: Non-chapter page wiring | Cheatsheet page phase + final integration | Cheatsheet appears in llms.txt, has OG image, has proper sitemap entry |
-| P6: Blog post inconsistency | Blog post phase | Every factual claim in blog post verified against corresponding chapter; `updatedDate` set |
-| P7: OG image cache invalidation | OG/SEO integration phase | Social media debugger tools show correct images after deploy |
+| Source hallucination / dead citations | Research phase (source verification) | All URLs clicked and verified; `sources.md` completed before writing begins |
+| Word count bloat | Content authoring phase (outline with word budgets) | Each section within its word budget; total essay 3000-5000 words |
+| Tag taxonomy mismatch | Content authoring phase (frontmatter) | Build site; check tag pages; verify related posts sidebar shows 3+ posts |
+| LLMs.txt not updated | Integration/QA phase | Build site; check `dist/llms.txt` for post entry with good description |
+| Missing OG image | Asset creation phase + Integration/QA | Cover SVG created; OG endpoint visited locally; social card debugger used post-deploy |
+| JSON-LD incomplete | Integration phase | `[slug].astro` updated; Rich Results Test passes; `articleSection` and `about` present |
+| Missing cross-links | Content authoring + editing phase | 3-5 internal links present; reciprocal link from "Death by a Thousand Arrows" considered |
+| AI literature review voice | Content authoring + editing phase | Opening uses `<OpeningStatement>` with a bold claim; first-person experience present; no 3+ consecutive citation-led paragraphs |
 
 ## Sources
 
-### Primary (HIGH confidence -- direct codebase analysis)
-- `src/data/guides/claude-code/pages/*.mdx` -- 30+ cross-references verified by grep across 11 chapters (4,032 lines total)
-- `src/data/blog/claude-code-guide.mdx` -- 110-line companion blog post with per-chapter summaries and 11 chapter links
-- `src/pages/guides/claude-code/[slug].astro` -- dynamic route serving `claudeCodePages` collection with `companionLink` prop
-- `src/data/guides/claude-code/guide.json` -- 11 chapters, `accentColor: #D97706`, `publishedDate: 2026-03-15`
-- `public/images/cheatsheet/claude-code-cheatsheet.svg` -- 56KB/495-line SVG with external Google Fonts `@import` and Boxy SVG namespace
-- `src/content.config.ts` lines 65-73 -- `claudeCodePages` and `claudeCodeGuide` as separate collections
-- `src/lib/guides/schema.ts` -- `guidePageSchema` with optional `lastVerified`, `updatedDate`, and `keywords` fields
-- `src/pages/llms.txt.ts` lines 234-243 -- Claude Code guide chapter listing via collection iteration, FastAPI FAQ hardcoded at line 232
-- `src/pages/llms-full.txt.ts` lines 389-402 -- Claude Code guide chapter listing, FastAPI FAQ hardcoded at line 344-346
-- `astro.config.mjs` lines 46-65 -- `buildContentDateMap()` dynamically iterates all `src/data/guides/*/guide.json` files
-- `src/pages/guides/index.astro` -- hub page rendering both guides with separate collection queries
-- `src/pages/open-graph/guides/claude-code/[slug].png.ts` -- OG image generation for chapter pages
-
-### Secondary (MEDIUM confidence -- verified web research)
-- [Astro Content Collections Docs](https://docs.astro.build/en/guides/content-collections/) -- Content Layer API, collection queries, glob/file loaders
-- [Inline SVG vs IMG Tag Performance](https://www.svgai.org/blog/inline-svg-vs-img-tag) -- SVG rendering approaches, external resource sandboxing in img context
-- [Astro SVG Components Discussion](https://github.com/withastro/roadmap/discussions/667) -- SVG rendering as Astro components, inline SVG for CSS variable support
-- [SVG for Web Developers 2026](https://www.svggenie.com/blog/svg-for-web-developers-guide) -- Font loading in SVGs, responsive sizing, accessibility
-- [Structured Data SEO 2026](https://www.digitalapplied.com/blog/structured-data-seo-2026-rich-results-guide) -- JSON-LD maintenance, stale metadata detection
-- [Astro Build Speed Optimization](https://www.bitdoze.com/astro-ssg-build-optimization/) -- Large site build optimization, 35-127 pages/second benchmarks
-- [OG Images Build-Time vs Runtime](https://jilles.me/og-images-astro-build-vs-runtime/) -- Satori+Sharp OG generation benchmarks, caching strategies
+- Direct analysis of `src/content.config.ts` (blog schema definition)
+- Direct analysis of `src/pages/blog/[slug].astro` (JSON-LD, related posts, OG image logic)
+- Direct analysis of `src/pages/open-graph/[...slug].png.ts` (OG image generation)
+- Direct analysis of `src/pages/llms.txt.ts` (LLMs.txt auto-generation)
+- Direct analysis of `src/pages/blog/tags/[tag].astro` (tag page generation)
+- Direct analysis of all existing blog post frontmatter (tag taxonomy extraction)
+- Direct analysis of `src/components/BlogPostingJsonLd.astro` (JSON-LD schema)
+- [Hallucinated citations in scientific literature (Nature, 2026)](https://www.nature.com/articles/d41586-026-00969-z)
+- [Thought leadership mistakes (iResearch Services)](https://iresearchservices.com/blog/the-most-common-thought-leadership-mistakes/)
+- [Thought leadership content strategy (Animalz)](https://www.animalz.co/blog/thought-leadership-content)
+- [Thought leadership in 2026 (Articulate Marketing)](https://www.articulatemarketing.com/blog/thought-leadership-that-succeeds)
+- [SEO content length best practices 2026 (WordCount AI)](https://wordcountai.com/blog/how-many-words-for-seo)
+- Prior pitfalls research from Claude Code Guide Refresh (`.planning/research/PITFALLS.md`, 2026-04-12)
 
 ---
-*Pitfalls research for: Updating the Claude Code guide (v1.19 milestone) on patrykgolabek.dev (1160-page Astro 5 site)*
-*Researched: 2026-04-12*
+*Pitfalls research for: Dark Code thought-leadership blog post*
+*Researched: 2026-04-14*
