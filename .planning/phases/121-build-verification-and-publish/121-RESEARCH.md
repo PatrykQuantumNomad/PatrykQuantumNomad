@@ -335,17 +335,13 @@ None -- all verification uses existing CLI tools (curl, astro, lighthouse, grep)
 | A2 | Lighthouse desktop preset gives more stable scores than mobile | Common Pitfalls | Low -- both presets work; desktop is recommended for portfolio sites |
 | A3 | `astro preview` serves on port 4321 by default | Code Examples | Low -- port can be overridden but 4321 is Astro's default |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Lighthouse scores be verified for mobile as well as desktop?**
-   - What we know: VERF-05 says "Lighthouse 90+" without specifying mobile vs desktop. The site is a portfolio/blog site.
-   - What's unclear: Whether the success criterion requires mobile 90+ or desktop 90+.
-   - Recommendation: Run desktop (`--preset=desktop`) as the primary target. Run mobile as informational. Desktop scores are more stable and more relevant for this portfolio site's audience.
+   RESOLVED: Desktop-only per plan. Use `--preset=desktop` as the primary and sole target. Mobile is informational only and not required for VERF-05. Desktop scores are more stable and more relevant for this portfolio site's audience.
 
 2. **Should the post be deployed (pushed to main) as part of this phase?**
-   - What we know: The post is `draft: false` but the commits are not yet pushed. The deploy workflow triggers on push to main.
-   - What's unclear: Whether deployment is in scope for this verification phase or a separate step.
-   - Recommendation: Deployment is the natural conclusion of verification. After all 5 VERF requirements pass locally, pushing to main completes the publish cycle.
+   RESOLVED: Deployment is out of scope for this verification phase. This phase validates all 5 VERF requirements against local build artifacts. Pushing to main/deployment is a separate step after verification passes.
 
 ## Environment Availability
 
