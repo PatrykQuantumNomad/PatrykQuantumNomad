@@ -13,7 +13,7 @@
 - Integer phases (117, 118, ...): Planned milestone work
 - Decimal phases (117.1, 117.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 117: Source Verification and Outline** - Verify all 48 research sources and create structured outline with word budgets
+- [x] **Phase 117: Source Verification and Outline** - Verify all 48 research sources and create structured outline with word budgets (completed 2026-04-14)
 - [ ] **Phase 118: Component Development and Cover Image** - Build StatHighlight and TermDefinition components plus dark-on-dark cover SVG
 - [ ] **Phase 119: Content Authoring** - Write the complete 3000-5000 word Dark Code essay in MDX
 - [ ] **Phase 120: Site Integration and SEO Enrichment** - Wire up JSON-LD, OG image, LLMs.txt, and auto-discovery pipelines
@@ -32,7 +32,7 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 117-01-PLAN.md — Verify all source URLs, build sources reference file, and create structured outline with word budgets
+- [x] 117-01-PLAN.md — Verify all source URLs, build sources reference file, and create structured outline with word budgets
 
 ### Phase 118: Component Development and Cover Image
 **Goal**: Reusable blog components and cover image are ready for the author to use during drafting
@@ -104,7 +104,7 @@ Phases execute in numeric order: 117 -> 117.1 -> 118 -> 119 -> 120 -> 121
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 117. Source Verification and Outline | 0/1 | Not started | - |
+| 117. Source Verification and Outline | 1/1 | Complete   | 2026-04-14 |
 | 118. Component Development and Cover Image | 0/2 | Not started | - |
 | 119. Content Authoring | 0/3 | Not started | - |
 | 120. Site Integration and SEO Enrichment | 0/1 | Not started | - |

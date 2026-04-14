@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.20
-milestone_name: Dark Code Blog Post
-status: active
-stopped_at: Roadmap created
-last_updated: "2026-04-14"
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 117-01-PLAN.md (Source Verification and Outline)
+last_updated: "2026-04-14T15:03:10.169Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 8
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 117 of 121 (Source Verification and Outline)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-04-14 — Roadmap created with 5 phases, 8 plans
+Plan: 1 of 1 in current phase
+Status: Ready to execute
+Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | v1.18 AI Landscape Explorer | 102-110 | 25 | 40 | 2026-03-26 to 2026-03-27 |
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
+| Phase 117 P01 | 10min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -57,6 +58,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - Research: Source verification MUST precede content authoring (hallucinated citations are highest risk)
 - Research: Components built BEFORE writing so they can be used during drafting
 - Research: Cover image SVG can be created in parallel with component development
+- [Phase 117]: 17 inline sources selected using data-first criteria; 3 duplicate pairs resolved with canonical URLs; 4-act outline locked at 4500w with argument-as-heading titles
 
 ### Pending Todos
 
@@ -76,7 +78,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14
-Stopped at: Roadmap created for v1.20 Dark Code Blog Post
+Last session: 2026-04-14T15:03:10.166Z
+Stopped at: Completed 117-01-PLAN.md (Source Verification and Outline)
 Resume file: None
 Next: `/gsd-plan-phase 117`
