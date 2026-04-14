@@ -60,12 +60,12 @@ Plans:
   3. All required components are used in the post: OpeningStatement for bold opening, TldrSummary for summary, StatHighlight for key statistics (4x code clones, 17% mastery drop, refactoring collapse), TermDefinition for the formal Dark Code definition
   4. The post contains a named framework with a memorable 3-5 dimension structure and 20-30 inline citations using GFM footnote syntax with verified URLs from the sources reference file
   5. Internal cross-links to 3-5 existing blog posts and tools are present where relevant
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 119-01: MDX frontmatter, opening, TL;DR, and Act 1 (wake-up call)
-- [ ] 119-02: Act 2 (framework) and Act 3 (defense) with components and citations
-- [ ] 119-03: Act 4 (closing), internal cross-links, and draft quality pass
+- [ ] 119-01-PLAN.md — MDX frontmatter, opening, TL;DR, and Act 1 (wake-up call) with GFM footnote validation
+- [ ] 119-02-PLAN.md — Act 2 (Dark Code Spectrum framework) and Act 3 (defense strategies) with cross-links
+- [ ] 119-03-PLAN.md — Act 4 (closing), remaining cross-links, and draft quality pass
 
 ### Phase 120: Site Integration and SEO Enrichment
 **Goal**: The post is fully wired into all site pipelines with enriched structured data and AI discoverability
