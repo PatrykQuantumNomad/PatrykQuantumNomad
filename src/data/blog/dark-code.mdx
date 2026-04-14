@@ -135,6 +135,38 @@ The empirical data confirms what the scenario illustrates. Studies of bug resolu
 
 I have seen this cycle repeat across seventeen years of building and maintaining production systems. The specifics change -- sometimes it is a payment module, sometimes a deployment pipeline, sometimes a machine learning inference service -- but the pattern is invariant. A departure creates a vacuum. The vacuum degrades comprehension. Degraded comprehension prevents refactoring. The absence of refactoring breeds clones. And clones expand the surface area that no one fully audits for security. Each dimension feeds the next, and the system darkens from the inside out.
 
+## Illumination Is a Practice, Not a Tool Purchase
+
+### Ownership Is the First Line of Defense Against Dark Code
+
+The instinct, when confronted with a problem this systemic, is to reach for a tool. A better linter. A smarter code review bot. An AI-powered vulnerability scanner. And while none of these are harmful, they share a fatal limitation: they operate on code that has already been written. The most effective defense against dark code is not better tooling. It is ensuring that every line of production code has an identifiable owner who understands it and is accountable for its behavior.
+
+The data makes the case bluntly. As noted in the feedback loop analysis above, the original author of a piece of code resolves bugs 1.71 times faster than a developer encountering it for the first time[^11]. That is not a marginal improvement. It is the difference between a two-hour fix and a four-hour investigation that might introduce new defects. Ownership is not a process overhead -- it is the single largest multiplier on remediation speed that any team can deploy.
+
+The counterargument is that AI tools make ownership less important by making everyone equally capable of understanding any code. The evidence does not support this. An evaluation of 50 AI developer tools found that most do not measurably improve team velocity, and some make teams 19% slower[^12]. The tools that fail share a common trait: they are deployed into environments where no one owns the code the tools are operating on. AI assistance without ownership is automation without accountability. The tool generates a fix. No one on the team can verify whether it is correct. The fix ships, and the code grows a little darker.
+
+Ownership means a named individual or team can answer three questions about every module in production: what does it do, why does it exist, and what breaks if it changes. When those questions have answers, reviews are substantive, refactoring is safe, and monitoring is focused. When they do not, every other defense degrades. The same principles that make [Kubernetes manifests secure](/blog/kubernetes-manifest-best-practices/) -- explicit declarations, known ownership, auditable state -- apply with equal force to the application code those manifests deploy.
+
+### Refactor Deliberately or Drown in Clones
+
+If ownership is the first line of defense, disciplined refactoring is the second. Act 1 documented the collapse: refactoring has fallen from 25% to less than 10% of all code changes. But the solution is not simply to do more refactoring. It is to do the right kind.
+
+Research on the bug-proneness of refactored code reveals a counterintuitive finding: single-type refactoring operations -- the kind where a tool renames a variable, extracts a method, or inlines a function in isolation -- are three times more bug-prone than composite refactoring, where multiple interdependent changes are made as a coordinated restructuring[^13]. This is precisely the kind of refactoring that AI tools excel at suggesting: small, isolated, easy to accept with a single click. And it is precisely the kind most likely to introduce new defects.
+
+The implication is uncomfortable. AI-assisted refactoring may be worse than no refactoring at all if it encourages developers to accept piecemeal changes without understanding the broader structural context. Genuine refactoring -- the kind that reduces dark code -- requires understanding the system well enough to make coordinated changes across multiple files and abstractions. It cannot be done by a tool that sees one function at a time.
+
+The urgency is compounded by the economics of delay. Research on bug fix rates shows a negative correlation between the time a bug remains unfixed and the cost of fixing it[^14]. Bugs that sit in unrefactored code do not stay the same size. They accumulate dependencies, become entangled with new features, and eventually reach a state where fixing them is indistinguishable from rewriting the module. The compounding dynamics from Act 1 apply here as well: every quarter of deferred refactoring makes the next quarter's refactoring more expensive and more dangerous.
+
+Teams that treat refactoring as a first-class engineering activity -- with dedicated time, clear goals, and the same rigor applied to feature work -- build codebases that resist darkening. Teams that squeeze refactoring into the gaps between sprints, or outsource it to AI-suggested quick fixes, find themselves drowning in clones. A robust [CI/CD pipeline built on tested patterns](/blog/github-actions-best-practices/) can enforce refactoring discipline by catching structural regressions before they reach production -- but only if the humans behind the pipeline understand what they are protecting.
+
+### Your Supply Chain Is Someone Else's Dark Code
+
+The Dark Code Spectrum does not stop at the boundary of your repository. Every third-party dependency your application imports is someone else's codebase -- with its own ownership vacuums, comprehension gaps, refactoring deficits, and vulnerability surfaces. When you run `npm install` or `pip install`, you are not just adding functionality. You are inheriting the maintenance practices, the review standards, and the security posture of every contributor to that dependency and its transitive dependencies.
+
+The scale of this exposure is growing. Supply chain attack statistics for 2025 show that third-party breaches doubled to 30% of all reported breaches[^15]. Attackers have realized that compromising a single widely-used package is more efficient than targeting individual applications. The dependency graph has become the attack surface, and most teams have no visibility into the dark code they are importing.
+
+This reframes supply chain security as a dark code problem rather than a procurement problem. The question is not whether your vendor passed a security audit. The question is whether anyone -- at any point in the dependency chain -- understands the code that is executing in your production environment. If the answer is no, then your supply chain is dark, and no amount of scanning will illuminate what no human has ever read.
+
 [^1]: [GitClear: Coding on Copilot 2023](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality)
 [^2]: [GitClear: AI Copilot Code Quality 2025](https://www.gitclear.com/ai_assistant_code_quality_2025_research)
 [^3]: [Empirical Analysis of AI-Assisted Code Generation](https://www.researchgate.net/publication/397890586)
@@ -146,3 +178,7 @@ I have seen this cycle repeat across seventeen years of building and maintaining
 [^9]: [Turnover in Open-Source Projects: Core Developers](https://www.researchgate.net/publication/344078871)
 [^10]: [Turnover-Induced Knowledge Loss](https://www.cs.mcgill.ca/~martin/papers/esecfse2021.pdf)
 [^11]: [Bug Resolution Times](https://www.mdpi.com/2076-3417/13/5/3150)
+[^12]: [AutonomyAI: 50 AI Developer Tools Evaluated](https://autonomyai.io/ai/we-evaluated-50-ai-developer-tools-most-dont-make-teams-faster-and-some-make-them-slower/)
+[^13]: [Bug-Proneness of Refactored Code](https://arxiv.org/html/2505.08005v1)
+[^14]: [Empirical Study of Bug Fixing Rate](http://www.mysmu.edu/faculty/davidlo/papers/compsac15-fixrate.pdf)
+[^15]: [DeepStrike: Supply Chain Attack Statistics 2025](https://deepstrike.io/blog/supply-chain-attack-statistics-2025)
