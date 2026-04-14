@@ -64,7 +64,7 @@ Plans:
 
 Plans:
 - [x] 119-01-PLAN.md — MDX frontmatter, opening, TL;DR, and Act 1 (wake-up call) with GFM footnote validation
-- [ ] 119-02-PLAN.md — Act 2 (Dark Code Spectrum framework) and Act 3 (defense strategies) with cross-links
+- [x] 119-02-PLAN.md — Act 2 (Dark Code Spectrum framework) and Act 3 (defense strategies) with cross-links
 - [ ] 119-03-PLAN.md — Act 4 (closing), remaining cross-links, and draft quality pass
 
 ### Phase 120: Site Integration and SEO Enrichment
@@ -106,6 +106,6 @@ Phases execute in numeric order: 117 -> 117.1 -> 118 -> 119 -> 120 -> 121
 |-------|----------------|--------|-----------|
 | 117. Source Verification and Outline | 1/1 | Complete   | 2026-04-14 |
 | 118. Component Development and Cover Image | 2/2 | Complete | 2026-04-14 |
-| 119. Content Authoring | 1/3 | In Progress|  |
+| 119. Content Authoring | 2/3 | In Progress|  |
 | 120. Site Integration and SEO Enrichment | 0/1 | Not started | - |
 | 121. Build Verification and Publish | 0/1 | Not started | - |
