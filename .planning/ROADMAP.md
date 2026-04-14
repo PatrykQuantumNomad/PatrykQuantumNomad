@@ -95,7 +95,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 121-01: Link validation, build verification, and Lighthouse audit
+- [ ] 121-01-PLAN.md — Link validation, build verification, and Lighthouse audit
 
 ## Progress
 
