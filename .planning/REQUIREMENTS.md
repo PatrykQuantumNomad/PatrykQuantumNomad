@@ -65,37 +65,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| CONT-05 | — | Pending |
-| CONT-06 | — | Pending |
-| CONT-07 | — | Pending |
-| CONT-08 | — | Pending |
-| CONT-09 | — | Pending |
-| CONT-10 | — | Pending |
-| COMP-01 | — | Pending |
-| COMP-02 | — | Pending |
-| INTG-01 | — | Pending |
-| INTG-02 | — | Pending |
-| INTG-03 | — | Pending |
-| INTG-04 | — | Pending |
-| INTG-05 | — | Pending |
-| INTG-06 | — | Pending |
-| INTG-07 | — | Pending |
-| INTG-08 | — | Pending |
-| VERF-01 | — | Pending |
-| VERF-02 | — | Pending |
-| VERF-03 | — | Pending |
-| VERF-04 | — | Pending |
-| VERF-05 | — | Pending |
+| CONT-01 | Phase 119 | Pending |
+| CONT-02 | Phase 119 | Pending |
+| CONT-03 | Phase 117 | Pending |
+| CONT-04 | Phase 119 | Pending |
+| CONT-05 | Phase 119 | Pending |
+| CONT-06 | Phase 119 | Pending |
+| CONT-07 | Phase 119 | Pending |
+| CONT-08 | Phase 119 | Pending |
+| CONT-09 | Phase 119 | Pending |
+| CONT-10 | Phase 117 | Pending |
+| COMP-01 | Phase 118 | Pending |
+| COMP-02 | Phase 118 | Pending |
+| INTG-01 | Phase 120 | Pending |
+| INTG-02 | Phase 120 | Pending |
+| INTG-03 | Phase 120 | Pending |
+| INTG-04 | Phase 118 | Pending |
+| INTG-05 | Phase 119 | Pending |
+| INTG-06 | Phase 120 | Pending |
+| INTG-07 | Phase 119 | Pending |
+| INTG-08 | Phase 120 | Pending |
+| VERF-01 | Phase 121 | Pending |
+| VERF-02 | Phase 121 | Pending |
+| VERF-03 | Phase 121 | Pending |
+| VERF-04 | Phase 121 | Pending |
+| VERF-05 | Phase 121 | Pending |
 
 **Coverage:**
 - v1.20 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap creation*
