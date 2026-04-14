@@ -1,0 +1,14 @@
+---
+interface Props {
+  stat: string;
+  label: string;
+  source?: string;
+}
+const { stat, label, source } = Astro.props;
+---
+
+<aside class="not-prose my-8 py-6 text-center" data-stat-highlight>
+  <p class="font-heading font-bold text-4xl sm:text-5xl text-[var(--color-accent)] mb-2">{stat}</p>
+  <p class="text-[var(--color-text-primary)] text-sm font-medium uppercase tracking-wider">{label}</p>
+  {source && <p class="text-[var(--color-text-secondary)] text-xs mt-2 italic">{source}</p>}
+</aside>
