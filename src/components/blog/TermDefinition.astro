@@ -1,0 +1,17 @@
+---
+interface Props {
+  term: string;
+  pronunciation?: string;
+}
+const { term, pronunciation } = Astro.props;
+---
+
+<aside class="not-prose my-8 p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]" data-term-definition>
+  <div class="flex items-baseline gap-3 mb-3">
+    <h3 class="font-heading font-bold text-xl text-[var(--color-text-primary)]">{term}</h3>
+    {pronunciation && <span class="font-mono text-sm italic text-[var(--color-text-secondary)]">{pronunciation}</span>}
+  </div>
+  <div class="text-[var(--color-text-primary)] text-base leading-relaxed [&>p]:mb-2 [&>p:last-child]:mb-0">
+    <slot />
+  </div>
+</aside>
