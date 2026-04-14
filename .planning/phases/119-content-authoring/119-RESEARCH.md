@@ -406,17 +406,17 @@ tags: ["code-quality", "ai-coding-assistant", "technical-debt", "security", "dev
 
 **Mitigation for A1:** Build test in Plan 119-01 before writing significant content. This is the single highest-risk assumption.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Will GFM footnotes render with acceptable styling in the existing Tailwind prose setup?**
    - What we know: No custom footnote CSS exists. Footnotes will inherit default prose link and heading styles.
    - What's unclear: Whether the auto-generated "Footnotes" h2 heading looks good with the existing `.prose h2` border-left styling.
-   - Recommendation: Accept default styling for now. Footnote CSS refinement is a post-publish polish task, not a blocker.
+   - RESOLVED: Accept default Tailwind prose styling for footnotes. Footnote CSS refinement is post-publish polish, not a blocker for Phase 119. Plan 119-01 Task 1 runs a build test immediately with a documented fallback to hyperlinked text if footnotes fail.
 
 2. **Does the outline's 17 unique inline sources produce enough footnote references to meet the 20-30 citation requirement?**
    - What we know: 17 sources x ~1.5 avg. references = ~25 footnote references. Several sources (e.g., #7 GitClear, #25 Anthropic, #28 Bug Resolution) are cited in multiple acts.
    - What's unclear: Exact count depends on how densely citations are woven into prose.
-   - Recommendation: Aim for 20-25 footnotes using the 17 sources. Promote 2-3 Further Reading sources to inline if needed.
+   - RESOLVED: 17 sources at ~1.5 avg references each yields ~25 footnote references. Plan 119-03 Task 2 includes a citation count check with a fallback to promote Further Reading sources if under 20.
 
 ## Sources
 

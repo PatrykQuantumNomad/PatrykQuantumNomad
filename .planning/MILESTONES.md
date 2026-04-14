@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.20 Dark Code Blog Post (Shipped: 2026-04-14)
+
+**Delivered:** Published "Dark Code: The Silent Rot AI Accelerated and No One Is Measuring" — a 4,500-word thought-leadership essay introducing The Dark Code Spectrum framework for measuring invisible codebase decay, with 28 GFM footnote citations from 56 verified research sources, two custom Astro components (StatHighlight, TermDefinition), custom cover SVG, enriched JSON-LD (BlogPosting + FAQ), and full site pipeline integration
+
+**Phases completed:** 117-121 (8 plans total)
+
+**Key accomplishments:**
+- Verified and curated 56 research sources (48 NotebookLM + 8 external) with tiered citation model (17 inline, 37 further-reading) and data-first selection criteria
+- Built two reusable zero-dependency Astro blog components — StatHighlight for big-number statistics callouts and TermDefinition for dictionary-entry definitions
+- Created custom dark-on-dark cover SVG with fading code fragment motif and amber-glowing title
+- Authored complete 4,500-word essay with 4-act narrative arc (wake-up call → framework → defense → philosophy) and The Dark Code Spectrum framework (5 measurable dimensions)
+- Wired BlogPosting JSON-LD with CreativeWork about field, 5-question FAQ schema, OG image, LLMs.txt thesis-statement entry, sitemap/RSS activation
+- Validated all 17 footnote URLs (13 HTTP 200, 4 HTTP 403 bot-blocked), production build clean, OG image 1200x630, 5 related posts
+
+**Stats:**
+- 39 files changed (+6,591 / -94 lines)
+- 5 phases, 8 plans, 39 commits
+- 1 day (2026-04-14)
+
+**Git range:** `docs(117)` → `docs(phase-121)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.19 Claude Code Guide Refresh (Shipped: 2026-04-12)
 
 **Delivered:** Major refresh of the Claude Code guide from 11 to 14 chapters with 5 chapter rewrites, 3 new chapters (Plugins, Agent SDK, Computer Use), 6 incremental chapter updates, dedicated cheatsheet page with SVG downloads, companion blog post, and full site integration with LLMs.txt, cross-reference verification, and Lighthouse quality gates

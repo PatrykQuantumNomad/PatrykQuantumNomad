@@ -273,12 +273,12 @@ None -- existing test infrastructure covers all phase requirements via build ver
 | A2 | FAQ answers under 300 chars display optimally in Google rich results | Common Pitfalls | Low -- longer answers still valid, just may be truncated in SERPs |
 | A3 | `articleSection: 'Code Quality'` is the best category for SEO | Code Examples | Low -- alternatives like 'Software Engineering' or 'Technical Debt' are equally valid |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the Dark Code post have a `dark-code` CSS class like `isBeautyIndexPost` has?**
    - What we know: The Beauty Index post uses a `dark-code` class (confusingly named -- it's for dark-themed code blocks, not the Dark Code concept) on the prose container.
    - What's unclear: Whether the Dark Code blog post needs dark-themed Expressive Code blocks.
-   - Recommendation: Skip this unless specified -- the cover image is already dark-themed SVG and the post doesn't include code samples that need dark mode.
+   - RESOLVED: Skip — the Dark Code post has no code samples requiring dark-themed Expressive Code blocks. The cover image is already dark-themed SVG.
 
 ## Environment Availability
 

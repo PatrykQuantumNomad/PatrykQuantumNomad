@@ -282,17 +282,20 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ Companion blog post for guide refresh with theme-by-theme What's New, FAQ JSON-LD, update callout on old post — v1.19
 - ✓ Full site integration: LLMs.txt cheatsheet entry, 14/14 frontmatter dates, cross-references verified, sitemap, Lighthouse 90+ — v1.19
 
+- ✓ 56 research sources verified and curated with tiered citation model (17 inline, 37 further-reading) — v1.20
+- ✓ StatHighlight and TermDefinition zero-dependency Astro blog components with not-prose pattern — v1.20
+- ✓ Custom dark-on-dark cover SVG with fading code fragment motif and amber-glowing title — v1.20
+- ✓ Complete 4,500-word "Dark Code" essay with 4-act narrative arc and The Dark Code Spectrum framework (5 dimensions) — v1.20
+- ✓ 28 GFM footnote citations with 17 unique verified URLs from research sources — v1.20
+- ✓ 5 internal cross-links to existing blog posts and guides — v1.20
+- ✓ BlogPosting JSON-LD with CreativeWork about field and 5-question FAQ schema — v1.20
+- ✓ OG image auto-generated (1200x630), LLMs.txt thesis-statement entry, sitemap/RSS activation — v1.20
+- ✓ All 17 footnote URLs verified (13 HTTP 200, 4 HTTP 403 bot-blocked), production build clean — v1.20
+- ✓ 5 related posts in sidebar via tag overlap, Lighthouse user-approved — v1.20
+
 ### Active
 
-## Current Milestone: v1.20 Dark Code Blog Post
-
-**Goal:** Publish a long-form thought-leadership blog post about "Dark Code" — code running in production that nobody understands — exploring how structural entropy and AI-accelerated code generation are compounding the crisis.
-
-**Target features:**
-- Long-form essay (3000-5000 words) for broad tech audience
-- Arc: wake-up call → framework → practical defense
-- Data-backed with citations from 48 NotebookLM sources (GitClear, Anthropic RCT, SpinRoot, DoD SWAP)
-- Full site integration (SEO, OG image, sitemap, LLMs.txt, JSON-LD)
+(No active milestone — next milestone to be defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -321,14 +324,15 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.19 Claude Code Guide Refresh on top of 18 previous milestones (v1.0 through v1.18). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
+Shipped v1.20 Dark Code Blog Post on top of 19 previous milestones (v1.0 through v1.19). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
 AI Landscape Explorer: interactive D3 force-directed graph with 51 concepts, guided tours, compare mode, 12 VS pages, and companion blog post.
+Dark Code blog post: 4,500-word thought-leadership essay with The Dark Code Spectrum framework (5 dimensions), 28 GFM footnote citations, custom StatHighlight and TermDefinition components, BlogPosting + FAQ JSON-LD, and cover SVG.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 requirements delivered (905 total). ~1183+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 + 25 v1.20 requirements delivered (930 total). ~1185+ pages total. Lighthouse 90+ on mobile.
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
-Blog shows 26 posts (16 local MDX + 10 external from Kubert AI and Translucent Computing).
+Blog shows 27 posts (17 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
 Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages, and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 46 rules (34 Hadolint DL codes + 12 custom PG rules), category-weighted scoring, inline annotations, 46 rule documentation pages, PNG badge export, and shareable URL state.
@@ -475,6 +479,12 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | Tour data in TypeScript (not JSON) | Interface co-location and narrative strings | ✓ Good — type-safe tour definitions |
 | 12 curated VS pairs (not all 1,275 permutations) | Focus on common confusions, not combinatorial explosion | ✓ Good — editorial quality over quantity |
 | GSAP edge pulse with prefers-reduced-motion skip | Decorative animation respects accessibility | ✓ Good — zero motion for a11y users |
+| Source verification before content authoring | Hallucinated citations are highest risk in data-backed essays | ✓ Good — all 17 inline URLs verified before drafting |
+| Data-first inline source selection (17 of 56) | Prioritize sources with hard numbers over narrative context | ✓ Good — every StatHighlight backed by specific research |
+| GFM footnotes over rehype-citation | Lighter (~0KB vs ~200KB), cleaner syntax, works in MDX | ✓ Good — 28 references rendered correctly |
+| CreativeWork schema for Dark Code Spectrum | Most accurate Schema.org type for original framework/methodology | ✓ Good — richer than Thing, more fitting than Article |
+| isDarkCodePost boolean flag pattern | 8th specialized post flag, follows established ternary-chain pattern | ✓ Good — consistent with existing architecture |
+| HTTP 403 treated as verified-real for academic/gov sites | Bot-blocking is not dead links; all 4 confirmed browser-accessible | ✓ Good — zero false negatives in link validation |
 
 ## Constraints
 
@@ -489,4 +499,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-14 after v1.20 milestone started*
+*Last updated: 2026-04-14 after v1.20 milestone*

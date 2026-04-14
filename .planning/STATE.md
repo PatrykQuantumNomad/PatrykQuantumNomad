@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: complete
-stopped_at: Phase 121 verified — milestone v1.20 complete
-last_updated: "2026-04-14T18:05:26.787Z"
+milestone: v1.20
+milestone_name: Dark Code Blog Post
+status: archived
+stopped_at: v1.20 milestone archived
+last_updated: "2026-04-14T19:30:00.000Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 6
+  total_phases: 5
   completed_phases: 5
   total_plans: 8
   completed_plans: 8
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.20 Dark Code Blog Post — Milestone complete, all 25 requirements verified
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 121 of 121 (Build Verification and Publish)
-Plan: 1 of 1 in current phase
-Status: Milestone complete — all 5 VERF requirements passed
+Phase: No active phase
+Plan: No active plan
+Status: v1.20 milestone archived — ready for next milestone
 Last activity: 2026-04-14
 
-Progress: [██████████] 100% (8/8 plans in Phases 117-121)
+Progress: [██████████] 100% (v1.20 complete — 8/8 plans, 25/25 requirements)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 256 (across 19 milestones)
-- v1.20 plans completed: 7
+- Total plans completed: 289 (across 20 milestones)
+- v1.20 plans completed: 8
 
 **Cumulative Stats:**
 
@@ -47,36 +47,12 @@ Progress: [██████████] 100% (8/8 plans in Phases 117-121)
 | v1.18 AI Landscape Explorer | 102-110 | 25 | 40 | 2026-03-26 to 2026-03-27 |
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
-| Phase 117 P01 | 10min | 2 tasks | 2 files |
-| Phase 118 P01 | 2min | 2 tasks | 2 files |
-| Phase 118 P02 | 5min | 2 tasks | 1 files |
-| Phase 119 P01 | 6min | 2 tasks | 1 files |
-| Phase 119 P02 | 5min | 2 tasks | 1 files |
-| Phase 119 P03 | 4min | 2 tasks | 1 files |
-| Phase 120 P01 | 2min | 2 tasks | 2 files |
-| Phase 121 P01 | 3min | 2 tasks | 0 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
-
-- Research: Source verification MUST precede content authoring (hallucinated citations are highest risk)
-- Research: Components built BEFORE writing so they can be used during drafting
-- Research: Cover image SVG can be created in parallel with component development
-- [Phase 117]: 17 inline sources selected using data-first criteria; 3 duplicate pairs resolved with canonical URLs; 4-act outline locked at 4500w with argument-as-heading titles
-- [Phase 118]: Followed plan exactly for StatHighlight and TermDefinition components - no deviations
-- [Phase 118]: Dark-on-dark cover SVG with fading code fragment motif and amber-glowing title
-- [Phase 119]: GFM footnotes confirmed working in MDX (assumption A1 validated, no fallback needed)
-- [Phase 119]: Used 'architecture' tag instead of 'software-architecture' to match existing taxonomy
-- [Phase 119]: Reused existing footnote numbers for cross-act source citations rather than creating duplicate definitions
-- [Phase 119]: Placed Death by a Thousand Arrows cross-link in Act 2 framework section for stronger thematic alignment
-- [Phase 119]: Placed The Beauty Index cross-link in Act 4 first-person section for thematic alignment
-- [Phase 119]: Closing line: Choosing not to measure is choosing darkness
-- [Phase 120]: Used CreativeWork schema type for The Dark Code Spectrum (most accurate for original framework/methodology)
-- [Phase 121]: HTTP 403 from academic/gov sites treated as verified-real (bot-blocking, not dead links)
-- [Phase 121]: Lighthouse audit approved by user (sandbox prevented automated run; scores confirmed manually)
 
 ### Pending Todos
 
@@ -96,7 +72,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:05:26.785Z
-Stopped at: Phase 121 verified — milestone v1.20 complete
+Last session: 2026-04-14T19:30:00.000Z
+Stopped at: v1.20 milestone archived
 Resume file: None
-Next: /gsd:complete-milestone
+Next: /gsd:new-milestone
