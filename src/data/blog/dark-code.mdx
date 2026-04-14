@@ -167,6 +167,34 @@ The scale of this exposure is growing. Supply chain attack statistics for 2025 s
 
 This reframes supply chain security as a dark code problem rather than a procurement problem. The question is not whether your vendor passed a security audit. The question is whether anyone -- at any point in the dependency chain -- understands the code that is executing in your production environment. If the answer is no, then your supply chain is dark, and no amount of scanning will illuminate what no human has ever read.
 
+## Software Was Never Meant to Be Disposable
+
+### AI Did Not Create Dark Code -- It Removed the Guardrails
+
+There is a tempting narrative that frames AI coding assistants as the villain of the dark code story. It is wrong. Dark code existed decades before the first language model generated a line of Python. Every codebase older than its current team has dark code in it -- modules written by people who left, integrations built for requirements no one remembers, error handling paths that were never tested because no one could reproduce the conditions they guard against. The problem is not new. What is new is the pace.
+
+The Defense Innovation Board's landmark report to the United States Congress carried a title that should be etched into every engineering team's dashboard: "Software Is Never Done."[^16] The report argued that software must be treated as a living system requiring continuous maintenance, not as a deliverable that ships once and is forgotten. Refactoring is not rework. Maintenance is not waste. The moment an organization treats software as complete, that software begins to die -- not by crashing, but by becoming incomprehensible to the people who will inevitably need to change it.
+
+AI tools did not violate this principle. They removed the natural friction that once enforced it. Before AI coding assistants, writing code was slow. That slowness was costly, but it was also a forcing function: if generating a new module took a full afternoon, you had a strong incentive to search for an existing one first, to understand what was already there, to refactor rather than duplicate. The time cost of writing code was, in retrospect, a guardrail against the overproduction of code no one understood. AI removed that guardrail entirely. The speed is genuine. The comprehension it displaces is the cost no one is accounting for.
+
+I have spent seventeen years building and maintaining production systems -- Kubernetes clusters since before the project had a stable API, distributed architectures that span cloud providers and continents, machine learning pipelines that ingest data from sources their original authors never anticipated. The pattern I have seen more than any other is not the dramatic failure. It is the quiet inheritance: you take ownership of a system where the documentation is the code itself, the original authors are three companies removed, and the only thing keeping it running is inertia and the fact that no one has been brave enough to change it. Those systems are not broken. They are dark. And every team I have worked with has at least one of them. If you have read [The Beauty Index](/blog/the-beauty-index/), you know I believe code should be written to be read, not merely to be executed. Dark code is the antithesis of that conviction -- code written to run, with no consideration for the human who will one day need to understand it.
+
+The acceleration that AI provides is real, and rejecting it entirely is not the answer. But using it without discipline -- without measurement, without ownership, without the deliberate practice of comprehension -- is how a codebase goes from productive to dark in a single quarter. AI is the most powerful accelerant software engineering has ever produced. Like every accelerant, it amplifies whatever process it is applied to. Apply it to a well-maintained codebase with strong ownership, and it amplifies productivity. Apply it to a codebase that is already fraying, and it amplifies the rot.
+
+### Measure It, Own It, Illuminate It
+
+At enterprise scale, the majority of control flows in microservice architectures are what researchers describe as "mostly dark" -- paths that execute in production but are never explicitly tested, monitored, or understood by any current team member[^17]. This is not a failure of any one team. It is the natural consequence of systems that grow faster than the organizations responsible for them. The question is not whether your codebase has dark code. It does. The question is whether you are measuring how much, and whether that measurement is driving action.
+
+The Dark Code Spectrum provides the diagnostic. The three imperatives that follow provide the discipline.
+
+**Measure it.** Apply the five dimensions -- Clone Density, Ownership Vacuum, Comprehension Decay, Refactoring Deficit, Vulnerability Surface -- to your codebase. Not once, not as a quarterly exercise, but as a continuous signal integrated into the same dashboards where you track velocity and deployment frequency. The metrics you ignore are the metrics that will define your next incident. A [responsible approach to AI-assisted development](/guides/claude-code/) includes measuring its downstream effects, not just its upstream speed.
+
+**Own it.** Every module in production should have a named owner who can answer the three questions: what does it do, why does it exist, and what breaks if it changes. When those answers live in someone's head rather than in documentation, they are one resignation away from disappearing. Ownership is not bureaucracy. It is the difference between code that can be maintained and code that can only be replaced.
+
+**Illuminate it.** Make the invisible visible. Instrument the code paths no one monitors. Review the modules no one has touched in twelve months. Test the error handling that was written for conditions no one has reproduced. Illumination is not a one-time audit. It is a practice -- a continuous, deliberate effort to push back against the natural tendency of complex systems to accumulate darkness.
+
+The data in this essay is not ambiguous. Code clones are multiplying. Refactoring is collapsing. Comprehension is declining. Vulnerabilities are compounding. Every one of these trends is measurable, and every one of them is reversible -- but only if you choose to measure, choose to own, and choose to illuminate. The codebase does not go dark by accident. It goes dark by default, one unread module at a time, one skipped review at a time, one accepted suggestion at a time. Choosing not to measure is choosing darkness.
+
 [^1]: [GitClear: Coding on Copilot 2023](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality)
 [^2]: [GitClear: AI Copilot Code Quality 2025](https://www.gitclear.com/ai_assistant_code_quality_2025_research)
 [^3]: [Empirical Analysis of AI-Assisted Code Generation](https://www.researchgate.net/publication/397890586)
@@ -182,3 +210,5 @@ This reframes supply chain security as a dark code problem rather than a procure
 [^13]: [Bug-Proneness of Refactored Code](https://arxiv.org/html/2505.08005v1)
 [^14]: [Empirical Study of Bug Fixing Rate](http://www.mysmu.edu/faculty/davidlo/papers/compsac15-fixrate.pdf)
 [^15]: [DeepStrike: Supply Chain Attack Statistics 2025](https://deepstrike.io/blog/supply-chain-attack-statistics-2025)
+[^16]: [DIB SWAP Report: Software Is Never Done](https://media.defense.gov/2019/apr/30/2002124828/-1/-1/0/softwareisneverdone_refactoringtheacquisitioncodeforcompetitiveadvantage_final.swap.report.pdf)
+[^17]: [Enterprise-scale Computation Imaging](https://cse.hkust.edu.hk/event/RTF2022/charlesz.pdf)
