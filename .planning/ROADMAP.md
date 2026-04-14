@@ -29,10 +29,10 @@
   1. A sources reference file exists with all 48 research URLs verified as reachable, each annotated with the claim it supports and date accessed
   2. 20-30 sources are pre-selected for inline citation, with the remaining sources tagged as background or further-reading
   3. A structured outline exists with argument-as-heading section titles and per-section word budgets (Act 1 ~1000w, Act 2 ~1200w, Act 3 ~1000w, Act 4 ~800w)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 117-01: Source verification and structured outline
+- [ ] 117-01-PLAN.md — Verify all source URLs, build sources reference file, and create structured outline with word budgets
 
 ### Phase 118: Component Development and Cover Image
 **Goal**: Reusable blog components and cover image are ready for the author to use during drafting
