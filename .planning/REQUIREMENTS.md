@@ -42,7 +42,7 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 - [x] **VERF-02**: Production build passes cleanly with no errors
 - [x] **VERF-03**: OG image and social card render correctly in preview
 - [x] **VERF-04**: Related posts sidebar shows relevant articles via tag overlap
-- [ ] **VERF-05**: Lighthouse 90+ on the new blog post page
+- [x] **VERF-05**: Lighthouse 90+ on the new blog post page
 
 ## Future Requirements
 

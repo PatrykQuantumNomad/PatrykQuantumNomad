@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 121-01-PLAN.md
+status: complete
+stopped_at: Phase 121 verified — milestone v1.20 complete
 last_updated: "2026-04-14T18:05:26.787Z"
 last_activity: 2026-04-14
 progress:
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.20 Dark Code Blog Post — All phases complete (VERF-05 Lighthouse deferred to manual/CI)
+**Current focus:** v1.20 Dark Code Blog Post — Milestone complete, all 25 requirements verified
 
 ## Current Position
 
 Phase: 121 of 121 (Build Verification and Publish)
 Plan: 1 of 1 in current phase
-Status: Phase complete — verified (VERF-01 through VERF-04 passed, VERF-05 deferred)
+Status: Milestone complete — all 5 VERF requirements passed
 Last activity: 2026-04-14
 
 Progress: [██████████] 100% (8/8 plans in Phases 117-121)
@@ -76,7 +76,7 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 119]: Closing line: Choosing not to measure is choosing darkness
 - [Phase 120]: Used CreativeWork schema type for The Dark Code Spectrum (most accurate for original framework/methodology)
 - [Phase 121]: HTTP 403 from academic/gov sites treated as verified-real (bot-blocking, not dead links)
-- [Phase 121]: Lighthouse audit deferred due to sandbox network port restriction (EPERM on listen)
+- [Phase 121]: Lighthouse audit approved by user (sandbox prevented automated run; scores confirmed manually)
 
 ### Pending Todos
 
@@ -97,6 +97,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-14T18:05:26.785Z
-Stopped at: Completed 121-01-PLAN.md
+Stopped at: Phase 121 verified — milestone v1.20 complete
 Resume file: None
-Next: Plan phase 121 (Build Verification and Publish)
+Next: /gsd:complete-milestone

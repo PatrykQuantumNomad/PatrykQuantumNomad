@@ -5,7 +5,7 @@
 - v1.0 through v1.17 (shipped) - Phases 1-101
 - v1.18 AI Landscape Explorer (shipped 2026-03-27) - Phases 102-110
 - v1.19 Claude Code Guide Refresh (shipped 2026-04-12) - Phases 111-116
-- v1.20 Dark Code Blog Post (in progress) - Phases 117-121
+- v1.20 Dark Code Blog Post (shipped 2026-04-14) - Phases 117-121
 
 ## Phases
 
