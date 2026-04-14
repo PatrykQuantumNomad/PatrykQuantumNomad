@@ -9,15 +9,15 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 
 ### Content Authoring
 
-- [ ] **CONT-01**: Blog post MDX file created at src/data/blog/dark-code.mdx with complete frontmatter (title, description, pubDate, tags, heroImage, draft)
+- [x] **CONT-01**: Blog post MDX file created at src/data/blog/dark-code.mdx with complete frontmatter (title, description, pubDate, tags, heroImage, draft)
 - [ ] **CONT-02**: Post is 3000-5000 words following wake-up call → framework → defense arc
 - [x] **CONT-03**: 48 research sources verified and curated into a sources reference file before content authoring begins
 - [ ] **CONT-04**: 20-30 inline citations using GFM footnote syntax with verified URLs
-- [ ] **CONT-05**: Bold opening statement using OpeningStatement component
-- [ ] **CONT-06**: TL;DR summary using TldrSummary component
+- [x] **CONT-05**: Bold opening statement using OpeningStatement component
+- [x] **CONT-06**: TL;DR summary using TldrSummary component
 - [ ] **CONT-07**: Named framework section with memorable 3-5 dimension structure
-- [ ] **CONT-08**: Key statistics rendered via StatHighlight component (4x code clones, 17% mastery drop, refactoring collapsed from 25% to <10%, etc.)
-- [ ] **CONT-09**: Formal "Dark Code" definition rendered via TermDefinition component
+- [x] **CONT-08**: Key statistics rendered via StatHighlight component (4x code clones, 17% mastery drop, refactoring collapsed from 25% to <10%, etc.)
+- [x] **CONT-09**: Formal "Dark Code" definition rendered via TermDefinition component
 - [x] **CONT-10**: Section word budgets enforced (Act 1: ~1000w, Act 2: ~1200w, Act 3: ~1000w, Act 4: ~800w)
 
 ### Components
@@ -31,7 +31,7 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 - [ ] **INTG-02**: JSON-LD BlogPosting schema with articleSection and about fields added to [slug].astro
 - [ ] **INTG-03**: FAQ JSON-LD schema for framework question-answer pairs
 - [x] **INTG-04**: Custom cover image SVG with dark-on-dark motif matching site visual language
-- [ ] **INTG-05**: Tags selected from existing taxonomy with overlap for related post discovery
+- [x] **INTG-05**: Tags selected from existing taxonomy with overlap for related post discovery
 - [ ] **INTG-06**: LLMs.txt entry with quality description for AI discoverability
 - [ ] **INTG-07**: Internal cross-links to existing blog posts and tools where relevant
 - [ ] **INTG-08**: Sitemap, RSS feed, and blog listing automatically include the new post
@@ -65,15 +65,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | Phase 119 | Pending |
+| CONT-01 | Phase 119 | Complete |
 | CONT-02 | Phase 119 | Pending |
 | CONT-03 | Phase 117 | Complete |
 | CONT-04 | Phase 119 | Pending |
-| CONT-05 | Phase 119 | Pending |
-| CONT-06 | Phase 119 | Pending |
+| CONT-05 | Phase 119 | Complete |
+| CONT-06 | Phase 119 | Complete |
 | CONT-07 | Phase 119 | Pending |
-| CONT-08 | Phase 119 | Pending |
-| CONT-09 | Phase 119 | Pending |
+| CONT-08 | Phase 119 | Complete |
+| CONT-09 | Phase 119 | Complete |
 | CONT-10 | Phase 117 | Complete |
 | COMP-01 | Phase 118 | Complete |
 | COMP-02 | Phase 118 | Complete |
@@ -81,7 +81,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTG-02 | Phase 120 | Pending |
 | INTG-03 | Phase 120 | Pending |
 | INTG-04 | Phase 118 | Complete |
-| INTG-05 | Phase 119 | Pending |
+| INTG-05 | Phase 119 | Complete |
 | INTG-06 | Phase 120 | Pending |
 | INTG-07 | Phase 119 | Pending |
 | INTG-08 | Phase 120 | Pending |
