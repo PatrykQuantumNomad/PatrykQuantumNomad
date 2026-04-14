@@ -97,6 +97,44 @@ The teams that ignore this compounding are not saving time. They are borrowing i
 
 What the data demands, and what almost no team currently has, is a systematic framework for measuring how much of a codebase has gone dark -- and a discipline for illuminating it before the compounding becomes irreversible.
 
+## The Dark Code Spectrum -- A Framework for What You Cannot See
+
+### Naming the Dimensions of Darkness
+
+Dark code is not a single problem. It is five overlapping failures that reinforce each other, and measuring only one dimension gives a false sense of safety. A team that tracks code duplication but ignores ownership is measuring the shadow while missing the object casting it. A team that monitors vulnerabilities but not comprehension is patching holes in a wall it cannot see.
+
+What follows is a diagnostic framework -- The Dark Code Spectrum -- built from the same research cited throughout this essay. Each dimension is measurable, each has severity signals drawn from empirical data, and each interacts with the others in ways that make isolated remediation almost impossible.
+
+| Dimension | What It Measures | Indicator | Severity Signal |
+|---|---|---|---|
+| **Clone Density** | Proportion of codebase that is duplicated or copy-pasted, creating parallel paths that diverge silently | Copy/paste ratio in code changes; clone-to-unique ratio | Copy-pasted code rose from 8.3% to 12.3% -- 4x growth since AI assistants went mainstream[^2] |
+| **Ownership Vacuum** | Code with no identifiable author who currently understands it and is accountable for its production behavior | Files with no active committer in 12 months; core developer turnover rate | 59.7% of open-source projects experience 30%+ annual core developer turnover[^9] |
+| **Comprehension Decay** | Declining ability of current team members to read, explain, and debug the code they are responsible for | Comprehension assessment scores; time-to-understand for new team members | AI-assisted developers score 17% lower on comprehension assessments[^6] |
+| **Refactoring Deficit** | Structural maintenance falling behind new code generation, leaving architecture brittle and resistant to change | Refactoring-to-new-code ratio; percentage of changes that are structural improvements | Refactoring collapsed from 25% to less than 10% of all code changes[^2] |
+| **Vulnerability Surface** | Security exposure from code never properly reviewed, including AI-generated code accepted without analysis | Vulnerability density per KLOC; CVE-to-code-change ratio; time-to-exploit | 23.7% more vulnerabilities in AI code[^3]; 48,175 CVEs in 2025 with a 5-day exploit window[^5] |
+
+The framework is not meant to be exhaustive. There are other signals of codebase health -- test coverage, documentation currency, build stability. But these five dimensions share a property that makes them uniquely dangerous: they are invisible to the metrics most teams actually track. Velocity goes up. Sprint points get burned. Features ship. And behind the dashboard, the code goes dark along every one of these axes simultaneously.
+
+The critical insight is that these five dimensions are not independent problems that can be addressed in isolation. They form a reinforcing system where each failure amplifies the others. Clone Density feeds Ownership Vacuum because duplicated code spreads responsibility across more files than any single developer can monitor. Ownership Vacuum drives Comprehension Decay because code without an active owner is code that no one is incentivized to understand. Comprehension Decay deepens the Refactoring Deficit because developers will not restructure code they cannot explain. And the Refactoring Deficit expands the Vulnerability Surface because unrefactored code accumulates the kind of structural debt that hides security flaws.
+
+This is the pattern I have written about before in a different register. What I described in [Death by a Thousand Arrows](/blog/death-by-a-thousand-arrows/) as the compounding cost of small syntactic choices applies with even greater force at the architectural level. Each duplicated function, each orphaned module, each skipped review is an arrow. At the Dark Code Spectrum level, those arrows are not just stylistic -- they are structural, and they are multiplying faster than any team can count.
+
+### Why Every Dimension Feeds the Others
+
+The reinforcing nature of these five dimensions is easiest to see through a concrete scenario.
+
+Consider a payment processing module written eighteen months ago by a senior engineer who has since left the company. The module works. It passes every test. It processes thousands of transactions daily without incident. But the developer who understood its concurrency model, its retry logic, and its edge cases around partial refunds is gone. This is the Ownership Vacuum -- not a theoretical risk but a specific, measurable gap in the team's ability to maintain a critical system.
+
+The replacement team inherits the module. They need to add support for a new payment provider. Before they can extend the code, they must first understand it -- reverse-engineering the original author's design decisions from the code itself. Research on turnover-induced knowledge loss documents exactly this pattern: remaining developers face significant productivity costs reconstructing departed colleagues' mental models from source code alone[^10]. The time this reverse-engineering consumes is Comprehension Decay in action.
+
+Faced with a module they partially understand and a deadline that does not accommodate a full rewrite, the team makes the rational short-term decision: they do not refactor the existing code. They copy the payment integration pattern, modify it for the new provider, and ship it alongside the original. This is the Refactoring Deficit becoming Clone Density -- the code duplicates not because the team is careless, but because refactoring code you do not fully understand carries unacceptable risk.
+
+Now there are two parallel implementations of payment processing logic. When a vulnerability is discovered in the shared pattern -- say, an insufficient validation of webhook signatures -- the fix must be applied in both places. But the team only knows about one, because the clone was never registered in any tracking system. The Vulnerability Surface has expanded, silently, and it will remain expanded until someone discovers the duplicate by accident or by breach.
+
+The empirical data confirms what the scenario illustrates. Studies of bug resolution times show that the original author of a piece of code resolves bugs 1.71 times faster than a developer encountering it for the first time[^11]. Ownership is not merely a management abstraction. It is a measurable predictor of how quickly and safely defects are resolved. When ownership is lost, every other dimension of the Dark Code Spectrum deteriorates.
+
+I have seen this cycle repeat across seventeen years of building and maintaining production systems. The specifics change -- sometimes it is a payment module, sometimes a deployment pipeline, sometimes a machine learning inference service -- but the pattern is invariant. A departure creates a vacuum. The vacuum degrades comprehension. Degraded comprehension prevents refactoring. The absence of refactoring breeds clones. And clones expand the surface area that no one fully audits for security. Each dimension feeds the next, and the system darkens from the inside out.
+
 [^1]: [GitClear: Coding on Copilot 2023](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality)
 [^2]: [GitClear: AI Copilot Code Quality 2025](https://www.gitclear.com/ai_assistant_code_quality_2025_research)
 [^3]: [Empirical Analysis of AI-Assisted Code Generation](https://www.researchgate.net/publication/397890586)
@@ -105,3 +143,6 @@ What the data demands, and what almost no team currently has, is a systematic fr
 [^6]: [Anthropic: AI Assistance and Coding Skills](https://www.anthropic.com/research/AI-assistance-coding-skills)
 [^7]: [Holzmann: Code Inflation](https://spinroot.com/gerard/pdf/Code_Inflation.pdf)
 [^8]: [Technical Debt Quantification](https://americanimpactreview.com/article/e2026034)
+[^9]: [Turnover in Open-Source Projects: Core Developers](https://www.researchgate.net/publication/344078871)
+[^10]: [Turnover-Induced Knowledge Loss](https://www.cs.mcgill.ca/~martin/papers/esecfse2021.pdf)
+[^11]: [Bug Resolution Times](https://www.mdpi.com/2076-3417/13/5/3150)
