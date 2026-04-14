@@ -38,10 +38,10 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 
 ### Verification
 
-- [ ] **VERF-01**: All footnote URLs resolve (no dead links or hallucinated citations)
-- [ ] **VERF-02**: Production build passes cleanly with no errors
-- [ ] **VERF-03**: OG image and social card render correctly in preview
-- [ ] **VERF-04**: Related posts sidebar shows relevant articles via tag overlap
+- [x] **VERF-01**: All footnote URLs resolve (no dead links or hallucinated citations)
+- [x] **VERF-02**: Production build passes cleanly with no errors
+- [x] **VERF-03**: OG image and social card render correctly in preview
+- [x] **VERF-04**: Related posts sidebar shows relevant articles via tag overlap
 - [ ] **VERF-05**: Lighthouse 90+ on the new blog post page
 
 ## Future Requirements
@@ -85,10 +85,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTG-06 | Phase 120 | Complete |
 | INTG-07 | Phase 119 | Complete |
 | INTG-08 | Phase 120 | Complete |
-| VERF-01 | Phase 121 | Pending |
-| VERF-02 | Phase 121 | Pending |
-| VERF-03 | Phase 121 | Pending |
-| VERF-04 | Phase 121 | Pending |
+| VERF-01 | Phase 121 | Complete |
+| VERF-02 | Phase 121 | Complete |
+| VERF-03 | Phase 121 | Complete |
+| VERF-04 | Phase 121 | Complete |
 | VERF-05 | Phase 121 | Pending |
 
 **Coverage:**

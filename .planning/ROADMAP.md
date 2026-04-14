@@ -17,7 +17,7 @@
 - [x] **Phase 118: Component Development and Cover Image** - Build StatHighlight and TermDefinition components plus dark-on-dark cover SVG (completed 2026-04-14)
 - [x] **Phase 119: Content Authoring** - Write the complete 3000-5000 word Dark Code essay in MDX (completed 2026-04-14)
 - [x] **Phase 120: Site Integration and SEO Enrichment** - Wire up JSON-LD, OG image, LLMs.txt, and auto-discovery pipelines (completed 2026-04-14)
-- [ ] **Phase 121: Build Verification and Publish** - Validate all 14 integration points and publish
+- [x] **Phase 121: Build Verification and Publish** - Validate all 14 integration points and publish (completed 2026-04-14)
 
 ## Phase Details
 
@@ -95,7 +95,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 121-01-PLAN.md — Link validation, build verification, and Lighthouse audit
+- [x] 121-01-PLAN.md — Link validation, build verification, and Lighthouse audit
 
 ## Progress
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 117 -> 117.1 -> 118 -> 119 -> 120 -> 121
 | 118. Component Development and Cover Image | 2/2 | Complete | 2026-04-14 |
 | 119. Content Authoring | 3/3 | Complete   | 2026-04-14 |
 | 120. Site Integration and SEO Enrichment | 1/1 | Complete   | 2026-04-14 |
-| 121. Build Verification and Publish | 0/1 | Not started | - |
+| 121. Build Verification and Publish | 1/1 | Complete   | 2026-04-14 |

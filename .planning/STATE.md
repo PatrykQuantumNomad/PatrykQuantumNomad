@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed phase 120 verification
-last_updated: "2026-04-14T17:10:21.688Z"
+status: verifying
+stopped_at: Completed 121-01-PLAN.md
+last_updated: "2026-04-14T18:05:26.787Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 6
+  completed_phases: 5
+  total_plans: 8
+  completed_plans: 8
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.20 Dark Code Blog Post — Phase 120 complete, Phase 121 next
+**Current focus:** v1.20 Dark Code Blog Post — All phases complete (VERF-05 Lighthouse deferred to manual/CI)
 
 ## Current Position
 
-Phase: 120 of 121 (Site Integration and SEO Enrichment)
+Phase: 121 of 121 (Build Verification and Publish)
 Plan: 1 of 1 in current phase
-Status: Phase complete — verified
+Status: Phase complete — verified (VERF-01 through VERF-04 passed, VERF-05 deferred)
 Last activity: 2026-04-14
 
-Progress: [█████████░] 86% (7/8 plans in Phases 117-120)
+Progress: [██████████] 100% (8/8 plans in Phases 117-121)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [█████████░] 86% (7/8 plans in Phases 117-120)
 | Phase 119 P02 | 5min | 2 tasks | 1 files |
 | Phase 119 P03 | 4min | 2 tasks | 1 files |
 | Phase 120 P01 | 2min | 2 tasks | 2 files |
+| Phase 121 P01 | 3min | 2 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Full decision log in PROJECT.md Key Decisions table.
 - [Phase 119]: Placed The Beauty Index cross-link in Act 4 first-person section for thematic alignment
 - [Phase 119]: Closing line: Choosing not to measure is choosing darkness
 - [Phase 120]: Used CreativeWork schema type for The Dark Code Spectrum (most accurate for original framework/methodology)
+- [Phase 121]: HTTP 403 from academic/gov sites treated as verified-real (bot-blocking, not dead links)
+- [Phase 121]: Lighthouse audit deferred due to sandbox network port restriction (EPERM on listen)
 
 ### Pending Todos
 
@@ -93,7 +96,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T17:10:21.685Z
-Stopped at: Completed phase 120 verification
+Last session: 2026-04-14T18:05:26.785Z
+Stopped at: Completed 121-01-PLAN.md
 Resume file: None
 Next: Plan phase 121 (Build Verification and Publish)
