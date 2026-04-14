@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.19
-milestone_name: Claude Code Guide Refresh
-status: complete
-stopped_at: Milestone v1.19 archived
-last_updated: "2026-04-13"
-last_activity: 2026-04-13
+milestone: v1.20
+milestone_name: Dark Code Blog Post
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-04-14"
+last_activity: 2026-04-14
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 25
-  completed_plans: 25
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-13)
+See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.20 Dark Code Blog Post
 
 ## Current Position
 
-Phase: None active
-Plan: Not started
-Status: v1.19 milestone complete and archived
-Last activity: 2026-04-13 -- v1.19 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-14 — Milestone v1.20 started
 
-Progress: [██████████] 100% (v1.19 complete)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 

@@ -284,7 +284,15 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start next)
+## Current Milestone: v1.20 Dark Code Blog Post
+
+**Goal:** Publish a long-form thought-leadership blog post about "Dark Code" — code running in production that nobody understands — exploring how structural entropy and AI-accelerated code generation are compounding the crisis.
+
+**Target features:**
+- Long-form essay (3000-5000 words) for broad tech audience
+- Arc: wake-up call → framework → practical defense
+- Data-backed with citations from 48 NotebookLM sources (GitClear, Anthropic RCT, SpinRoot, DoD SWAP)
+- Full site integration (SEO, OG image, sitemap, LLMs.txt, JSON-LD)
 
 ### Out of Scope
 
@@ -481,4 +489,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-13 after v1.19 milestone*
+*Last updated: 2026-04-14 after v1.20 milestone started*
