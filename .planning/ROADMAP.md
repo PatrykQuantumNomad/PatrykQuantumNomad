@@ -77,10 +77,10 @@ Plans:
   3. OG image auto-generates correctly from frontmatter (verifiable at /open-graph/blog/dark-code.png)
   4. LLMs.txt entry includes a quality thesis-statement description for AI discoverability
   5. Draft flag is set to false and the post appears in sitemap, RSS feed, and blog listing page
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 120-01: JSON-LD enrichment, LLMs.txt, and publish activation
+- [ ] 120-01-PLAN.md — JSON-LD enrichment, FAQ schema, and publish activation
 
 ### Phase 121: Build Verification and Publish
 **Goal**: Every integration point is verified, all links resolve, and the post is production-ready
@@ -92,7 +92,7 @@ Plans:
   3. OG image and social card render correctly in preview tools (Twitter Card Validator, LinkedIn Post Inspector patterns)
   4. Related posts sidebar shows relevant articles via tag overlap (3+ related posts visible)
   5. Lighthouse scores 90+ on the published blog post page
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
 - [ ] 121-01: Link validation, build verification, and Lighthouse audit
