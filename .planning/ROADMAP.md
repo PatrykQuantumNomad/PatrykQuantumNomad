@@ -43,12 +43,12 @@ Plans:
   2. TermDefinition component renders a dictionary-entry styled definition block with term, pronunciation guide, and definition text
   3. Both components use zero dependencies, Tailwind styling, CSS custom properties for theme compatibility, and the not-prose escape pattern
   4. A custom cover SVG exists at public/images/dark-code-cover.svg with a dark-on-dark motif that matches the site's visual language
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 118-01: StatHighlight and TermDefinition Astro components
-- [ ] 118-02: Dark Code cover image SVG
+- [ ] 118-01-PLAN.md — StatHighlight and TermDefinition Astro components
+- [ ] 118-02-PLAN.md — Dark Code cover image SVG
 
 ### Phase 119: Content Authoring
 **Goal**: The complete Dark Code essay exists as a draft MDX file with all components used, all citations inline, and all structural requirements met
