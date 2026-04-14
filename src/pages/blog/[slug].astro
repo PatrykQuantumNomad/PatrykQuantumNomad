@@ -44,6 +44,7 @@ const isDockerfilePost = post.id === 'dockerfile-best-practices';
 const isGhaPost = post.id === 'github-actions-best-practices';
 const isClaudeCodeGuidePost = post.id === 'claude-code-guide';
 const isClaudeCodeRefreshPost = post.id === 'claude-code-guide-refresh';
+const isDarkCodePost = post.id === 'dark-code';
 const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isK8sPost ? 'Kubernetes Security'
   : isComposePost ? 'Docker Best Practices'
@@ -51,6 +52,7 @@ const articleSection = isBeautyIndexPost ? 'Programming Languages'
   : isGhaPost ? 'GitHub Actions Security'
   : isClaudeCodeGuidePost ? 'AI Developer Tools'
   : isClaudeCodeRefreshPost ? 'AI Developer Tools'
+  : isDarkCodePost ? 'Code Quality'
   : undefined;
 const aboutDataset = isBeautyIndexPost
   ? { type: 'Dataset', name: 'The Beauty Index', url: 'https://patrykgolabek.dev/beauty-index/' }
@@ -66,6 +68,8 @@ const aboutDataset = isBeautyIndexPost
     ? { type: 'WebPage', name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' }
   : isClaudeCodeRefreshPost
     ? { type: 'WebPage', name: 'Claude Code Guide', url: 'https://patrykgolabek.dev/guides/claude-code/' }
+  : isDarkCodePost
+    ? { type: 'CreativeWork', name: 'The Dark Code Spectrum', url: 'https://patrykgolabek.dev/blog/dark-code/' }
     : undefined;
 
 const beautyIndexFAQ = isBeautyIndexPost ? [
@@ -193,6 +197,29 @@ const claudeCodeRefreshFAQ = isClaudeCodeRefreshPost ? [
   },
 ] : [];
 
+const darkCodeFAQ = isDarkCodePost ? [
+  {
+    question: 'What is dark code?',
+    answer: 'Dark code is code executing in production that no one on the current team understands, no one owns, and no one can safely change. It passes CI, ships to users, and silently accumulates risk until it fails.',
+  },
+  {
+    question: 'What is the Dark Code Spectrum?',
+    answer: 'The Dark Code Spectrum is a 5-dimension diagnostic framework for measuring invisible codebase decay: Clone Density, Ownership Vacuum, Comprehension Decay, Refactoring Deficit, and Vulnerability Surface.',
+  },
+  {
+    question: 'How do AI coding assistants accelerate dark code?',
+    answer: 'AI assistants increase code output without proportional increases in comprehension or ownership. Studies show a 4x increase in code clones, refactoring collapsing from 25% to under 10%, and AI-assisted developers scoring 17% lower on code comprehension.',
+  },
+  {
+    question: 'How do you measure dark code in a codebase?',
+    answer: 'Measure each Dark Code Spectrum dimension: clone-to-unique ratio for Clone Density, files with no active committer for Ownership Vacuum, comprehension assessments for Comprehension Decay, refactoring-to-new-code ratio for Refactoring Deficit, and vulnerability density per KLOC for Vulnerability Surface.',
+  },
+  {
+    question: 'Can dark code be prevented?',
+    answer: 'Dark code cannot be eliminated but can be managed through deliberate illumination: mandatory comprehension reviews, ownership registries with accountable maintainers, enforced refactoring budgets, and continuous vulnerability scanning with ownership-aware triage.',
+  },
+] : [];
+
 // Shorten title tag for SEO (Google truncates ~60 chars)
 const suffix = ' — Patryk Golabek';
 const titleTag = (title.length + suffix.length > 65)
@@ -274,6 +301,7 @@ const titleTag = (title.length + suffix.length > 65)
     {ghaFAQ.length > 0 && <FAQPageJsonLd items={ghaFAQ} />}
     {claudeCodeGuideFAQ.length > 0 && <FAQPageJsonLd items={claudeCodeGuideFAQ} />}
     {claudeCodeRefreshFAQ.length > 0 && <FAQPageJsonLd items={claudeCodeRefreshFAQ} />}
+    {darkCodeFAQ.length > 0 && <FAQPageJsonLd items={darkCodeFAQ} />}
     <BreadcrumbJsonLd crumbs={[
       { name: 'Home', url: 'https://patrykgolabek.dev/' },
       { name: 'Blog', url: 'https://patrykgolabek.dev/blog/' },
