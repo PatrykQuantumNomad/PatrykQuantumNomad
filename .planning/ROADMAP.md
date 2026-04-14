@@ -47,7 +47,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 118-01-PLAN.md — StatHighlight and TermDefinition Astro components
+- [x] 118-01-PLAN.md — StatHighlight and TermDefinition Astro components
 - [ ] 118-02-PLAN.md — Dark Code cover image SVG
 
 ### Phase 119: Content Authoring
@@ -105,7 +105,7 @@ Phases execute in numeric order: 117 -> 117.1 -> 118 -> 119 -> 120 -> 121
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 117. Source Verification and Outline | 1/1 | Complete   | 2026-04-14 |
-| 118. Component Development and Cover Image | 0/2 | Not started | - |
+| 118. Component Development and Cover Image | 1/2 | In Progress|  |
 | 119. Content Authoring | 0/3 | Not started | - |
 | 120. Site Integration and SEO Enrichment | 0/1 | Not started | - |
 | 121. Build Verification and Publish | 0/1 | Not started | - |

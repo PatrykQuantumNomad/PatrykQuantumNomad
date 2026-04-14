@@ -22,8 +22,8 @@ Requirements for the Dark Code Blog Post milestone. Each maps to roadmap phases.
 
 ### Components
 
-- [ ] **COMP-01**: StatHighlight Astro component for big-number statistics callouts (zero dependencies, Tailwind-styled)
-- [ ] **COMP-02**: TermDefinition Astro component for dictionary-entry styled definitions (zero dependencies, Tailwind-styled)
+- [x] **COMP-01**: StatHighlight Astro component for big-number statistics callouts (zero dependencies, Tailwind-styled)
+- [x] **COMP-02**: TermDefinition Astro component for dictionary-entry styled definitions (zero dependencies, Tailwind-styled)
 
 ### Site Integration
 
@@ -75,8 +75,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-08 | Phase 119 | Pending |
 | CONT-09 | Phase 119 | Pending |
 | CONT-10 | Phase 117 | Complete |
-| COMP-01 | Phase 118 | Pending |
-| COMP-02 | Phase 118 | Pending |
+| COMP-01 | Phase 118 | Complete |
+| COMP-02 | Phase 118 | Complete |
 | INTG-01 | Phase 120 | Pending |
 | INTG-02 | Phase 120 | Pending |
 | INTG-03 | Phase 120 | Pending |
