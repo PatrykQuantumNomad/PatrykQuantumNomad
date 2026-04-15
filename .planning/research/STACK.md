@@ -1,517 +1,311 @@
-# Stack Research: Claude Code Feature Inventory (Feb-Apr 2026)
+# Stack Research: v1.21 SEO Audit Fixes
 
-**Domain:** Claude Code guide content refresh -- new features, changes, and deprecations
-**Researched:** 2026-04-12
-**Confidence:** HIGH (sourced from official docs and changelog at code.claude.com)
-
-## Purpose
-
-Complete inventory of Claude Code features released between the guide's publication (2026-03-15) and today (2026-04-12), plus features from the Feb-Mar window that may have been in-flight during original authoring. This informs which guide chapters need updates and whether new chapters are needed.
-
----
-
-## Existing Guide Chapters (published 2026-03-15)
-
-| # | Chapter | Topics Covered |
-|---|---------|----------------|
-| 1 | Introduction | What Claude Code is, installation, first session |
-| 2 | Context Management | CLAUDE.md, auto memory, context window |
-| 3 | Models & Costs | Model selection, effort levels, token costs |
-| 4 | Environment | Settings, env vars, configuration |
-| 5 | Remote & Headless | Non-interactive mode, CI/CD, headless |
-| 6 | MCP | Model Context Protocol servers |
-| 7 | Custom Skills | Slash commands, skills, custom commands |
-| 8 | Hooks | PreToolUse, PostToolUse, lifecycle hooks |
-| 9 | Worktrees | Git worktrees, parallel sessions |
-| 10 | Agent Teams | Subagents, multi-agent orchestration |
-| 11 | Security & Enterprise | Permissions, sandboxing, managed settings |
-
----
-
-## MAJOR NEW FEATURES (Require New Content or Significant Rewrites)
-
-### 1. Computer Use (Research Preview)
-
-**Released:** Week 13 (Mar 23-27) Desktop, Week 14 (Mar 30-Apr 3) CLI
-**Versions:** v2.1.83+ (Desktop), v2.1.85+ (CLI)
-**Status:** Research preview, Pro/Max plans only
+**Domain:** SEO audit fixes for Astro 5 portfolio site (self-hosted fonts, sitemap lastmod, VS page enrichment, CSS investigation)
+**Researched:** 2026-04-15
 **Confidence:** HIGH
 
-Claude can control the native desktop: open apps, click, type, screenshot, and verify GUI changes. Available in both Desktop app (macOS + Windows) and CLI (macOS only).
+---
 
-**Key details:**
-- Enable via `/mcp` menu, toggle `computer-use` MCP server
-- Requires macOS Accessibility + Screen Recording permissions
-- Per-app approval per session; apps categorized by trust tier
-- Machine-wide lock (one session at a time)
-- Not available in `-p` mode, not on Team/Enterprise
-- Not on Bedrock/Vertex/Foundry -- requires claude.ai auth
-- Fallback hierarchy: MCP > Bash > Chrome > Computer Use
+## Recommended Stack Additions
 
-**Guide impact:** NEW SECTION needed. Could be standalone chapter or added to an existing chapter (MCP or a new "Browser & Desktop Automation" chapter). Significant feature with detailed safety model.
+### 1. Self-Hosted Fonts via @fontsource
+
+Use **static** @fontsource packages (not variable, not Astro's experimental Fonts API) to replace the Google Fonts CDN `<link>` tags.
+
+| Package | Version | Purpose | Why |
+|---------|---------|---------|-----|
+| `@fontsource/bricolage-grotesque` | 5.2.10 | Heading font (700, 800 weights) | Eliminates DNS/TLS round-trip to fonts.googleapis.com + fonts.gstatic.com. Static packages produce per-weight CSS files that tree-shake cleanly. |
+| `@fontsource/dm-sans` | 5.2.8 | Body font (400, 500, 700 weights) | Same CDN elimination. DM Sans is the primary body typeface used across the entire site. |
+| `@fontsource/fira-code` | 5.2.7 | Monospace font (400 weight) | Used in `.meta-mono` class and code contexts. Only weight 400 needed. |
+| `@fontsource/noto-sans` | 5.2.10 | Greek character fallback (400, 700 weights) | Used exclusively for Greek glyphs (U+0370-03FF) in Beauty Index dimension symbols. Default import includes unicode-range subsetting automatically. |
+
+**Why static packages over @fontsource-variable:**
+
+Variable font packages change the CSS `font-family` name to `"[Font] Variable"` (e.g., `"DM Sans Variable"`, `"Bricolage Grotesque Variable"`). This would require updating:
+- `tailwind.config.mjs` font-family definitions
+- `src/styles/global.css` fallback `@font-face` declarations
+- `src/styles/global.css` `.meta-mono` class
+- Any component with hardcoded font-family references
+
+Static packages use the **exact same font-family names** already in the codebase (`"DM Sans"`, `"Bricolage Grotesque"`, `"Fira Code"`, `"Noto Sans"`). Zero CSS changes needed beyond removing the Google Fonts `<link>` tags and adding imports.
+
+Variable fonts also ship unused weight ranges (DM Sans Variable includes weights 100-900 when we only use 400/500/700), adding ~30-50KB of unused font data per family.
+
+**Why NOT Astro's experimental Fonts API:**
+
+Astro's `experimental.fonts` was introduced in Astro 5.7 and is available on the project's installed Astro 5.17.1. However:
+- Still experimental with breaking changes between 5.16.x and 5.17.0 (PR #15213 redesigned the config format)
+- Open bugs: fallback font stacks not outputting correctly (#16127), too-many-builds issue (#16007), dev server creating spurious `dist_astro/fonts` directory (#15091)
+- Requires wrapping font config in `astro.config.mjs` experimental block + learning a new API
+- The direct `@fontsource` import approach is battle-tested, simpler, and produces identical results
+
+The Fonts API became stable in Astro 6.0.0 (not installed). When the project upgrades to Astro 6, migrating to the built-in provider would be appropriate.
+
+### 2. Sitemap lastmod Enhancement
+
+**No new packages needed.** The existing `@astrojs/sitemap` v3.7.0 (latest: 3.7.2) already has the `serialize` hook with full `lastmod` support. The project already uses `serialize()` in `astro.config.mjs` for blog and guide pages.
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `@astrojs/sitemap` | 3.7.0 (installed) | Sitemap generation with serialize hook | Already handles blog + guide lastmod. Needs extension, not replacement. |
+
+**What needs to change (code, not dependencies):**
+
+The existing `buildContentDateMap()` function in `astro.config.mjs` only populates dates for:
+- Blog posts (from frontmatter `publishedDate`/`updatedDate`)
+- Guide pages (from `guide.json` metadata)
+
+To cover all 1,184 pages, extend `buildContentDateMap()` to include:
+
+1. **Beauty Index pages (~678 pages):** All are generated from `languages.json` which has no dates. Use a single hardcoded date (the date the Beauty Index was published or last updated). This applies to `/beauty-index/`, `/beauty-index/[lang]/`, `/beauty-index/vs/[a]-vs-[b]/`, `/beauty-index/justifications/`, and `/beauty-index/code/`.
+
+2. **DB Compass pages:** Similar static data, use hardcoded publish date.
+
+3. **EDA pages:** Similar static data, use hardcoded publish date. Notebooks have `publishedDate` in frontmatter.
+
+4. **AI Landscape pages (~12 VS pages + hub):** Use hardcoded publish date.
+
+5. **Tools pages:** Use hardcoded publish date.
+
+6. **Static pages (home, about, projects, etc.):** Use build date or a manually maintained date.
+
+**Serialize hook API reference (confirmed v3.7.2):**
+
+```typescript
+serialize?: (item: SitemapItem) => SitemapItem | Promise<SitemapItem | undefined> | undefined
+
+interface SitemapItem {
+  url: string;                         // required, absolute URL
+  lastmod?: string | undefined;        // ISO formatted date string
+  changefreq?: ChangeFreqEnum | undefined;
+  priority?: number | undefined;
+  links?: LinkItem[] | undefined;
+}
+```
+
+The existing serialize function already sets `changefreq` and `priority` by URL pattern. Adding lastmod fallbacks is a matter of extending the `else` branch (line 85 in current config) to set a date instead of `undefined`.
+
+### 3. VS Comparison Page Content Enrichment
+
+**No new libraries needed.** The enrichment is a build-time template enhancement, not a runtime feature.
+
+| Approach | What | Why |
+|----------|------|-----|
+| Build-time data derivation | Compute comparative analysis from existing `Language` data at build time in `[slug].astro` | All 26 languages already have: year, paradigm, characterSketch, 6 dimension scores, tier. Enough data to generate 500+ unique words per pairing. |
+
+**Content enrichment strategy (no new packages):**
+
+The existing VS page template (`src/pages/beauty-index/vs/[slug].astro`) currently renders:
+- Header with scores (1 sentence)
+- Radar chart (visual only)
+- Verdict (1 sentence)
+- Dimension breakdown table (structured data)
+- Character sketches (2 paragraphs, copied from single-language pages)
+
+To reach 500+ unique words, add these **computed sections** using existing data:
+
+1. **Strengths & Weaknesses Analysis** (~150 words): For each language, compute which dimensions are above/below the tier average. Generate sentences like "Python's highest-scoring dimension is Practitioner Happiness (10/10), which exceeds the Beautiful tier average of 8.5."
+
+2. **Dimension Deep-Dives** (~200 words): For each of the 6 dimensions, generate a comparison paragraph. The dimension metadata (`DIMENSIONS[].description`) plus the delta computation already in the template provides the raw material: "In Aesthetic Geometry, Python scores 9/10 compared to Ruby's 9/10 -- a tie. Both languages prioritize visual cleanliness and grid-based order."
+
+3. **Paradigm & Era Context** (~100 words): Both languages have `year` and `paradigm` fields. Generate: "Python (1991, multi-paradigm) predates Ruby (1995, object-oriented) by 4 years. Despite emerging in the same decade, they evolved different aesthetic philosophies."
+
+4. **Related Comparisons** (~50 words): Link to reverse comparison and other popular pairings involving the same languages. Internal linking that also adds word count.
+
+**Key insight:** Every comparison is mathematically unique because no two language pairs have identical score vectors. The 6 dimension scores, 2 paradigms, 2 years, 2 tiers, and 2 character sketches create sufficient entropy for 650 genuinely unique pages.
+
+### 4. CSS Code-Splitting Investigation
+
+**No new production packages needed.** Investigation tooling only.
+
+| Tool | Version | Purpose | When to Use |
+|------|---------|---------|-------------|
+| `rollup-plugin-visualizer` | 7.0.0 (already installed as devDep) | Bundle size analysis | Run `npx vite-bundle-visualizer` after build to identify CSS chunk sizes |
+| `astro-purgecss` | 6.0.1 | Remove unused CSS from final HTML | **Evaluate only** -- Tailwind v3 already JIT-compiles only used utilities, but non-Tailwind CSS (global.css custom rules, component `<style>` blocks) may have dead rules |
+
+**Built-in Astro CSS handling (no package needed):**
+
+Astro already:
+- Minifies and combines CSS into per-page chunks at build time
+- Splits shared CSS into reusable chunks across pages
+- Inlines CSS under 4KB as `<style>` tags, links CSS over 4KB as `<link rel="stylesheet">`
+- Configurable via `build.inlineStylesheets` (`'auto'` | `'always'` | `'never'`) and `build.assetsInlineLimit`
+
+**Investigation approach for the 132KB homepage CSS:**
+
+1. Build the site and inspect the output CSS files in `dist/`
+2. Use the already-installed `rollup-plugin-visualizer` to see which CSS chunks are large
+3. Check if Tailwind utility classes from non-homepage components are leaking into the shared chunk
+4. Evaluate whether `astro-purgecss` removes meaningful dead CSS (test build size before/after)
+5. Consider moving heavy component styles from global scope to component-scoped `<style>` tags
+
+**What NOT to do:** Do not set `vite.build.cssCodeSplit = false` -- this was confirmed as breaking all CSS in Astro builds (GitHub issue #4413).
 
 ---
 
-### 2. Auto Mode (Research Preview)
+## Installation
 
-**Released:** Week 13 (Mar 23-27, 2026)
-**Versions:** v2.1.83+
-**Status:** Research preview
-**Confidence:** HIGH
+```bash
+# Font self-hosting (production dependencies -- CSS is imported at build time)
+npm install @fontsource/bricolage-grotesque @fontsource/dm-sans @fontsource/fira-code @fontsource/noto-sans
 
-A classifier-based permission mode. Safe actions auto-approved; destructive/suspicious ones blocked. Middle ground between manual approval and `--dangerously-skip-permissions`.
-
-**Key details:**
-- Requires: Team, Enterprise, or API plan + Sonnet 4.6 or Opus 4.6 + Anthropic API
-- NOT available on Pro/Max, NOT on Bedrock/Vertex/Foundry
-- Classifier runs on Sonnet 4.6 regardless of session model (adds cost)
-- Admin must enable in Claude Code admin settings
-- Blocks: curl|bash, production deploys, force push, IAM changes, mass deletion
-- Allows: local file ops, dependency installs, read-only HTTP, branch push
-- Falls back after 3 consecutive or 20 total blocks
-- `claude auto-mode defaults` prints full rule list
-- `--enable-auto-mode` flag, `defaultMode: "auto"` in settings
-- `PermissionDenied` hook fires on classifier denials (v2.1.89)
-
-**Guide impact:** MAJOR UPDATE to Security & Enterprise chapter (Ch 11). Auto mode is a new permission mode that sits alongside the existing `default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`. The permission modes section needs restructuring.
+# CSS investigation (dev dependency, evaluate then remove if not useful)
+npm install -D astro-purgecss
+```
 
 ---
 
-### 3. Channels (Research Preview)
+## Integration Points
 
-**Released:** v2.1.80 (Mar 19, 2026) initial, v2.1.81+ expanded
-**Status:** Research preview, requires claude.ai login
-**Confidence:** HIGH
+### Font Integration
 
-MCP servers that push events INTO a running session. Two-way communication: Claude reads events and replies back through the same channel. Supported: Telegram, Discord, iMessage, custom webhook.
+**In `src/layouts/Layout.astro`:**
 
-**Key details:**
-- Install as plugins from `claude-plugins-official` marketplace
-- `--channels plugin:telegram@claude-plugins-official` flag
-- Sender allowlist security model with pairing codes
-- Enterprise: `channelsEnabled` and `allowedChannelPlugins` managed settings
-- Permission relay capability for remote tool approval
-- Each channel plugin requires Bun runtime
-- Events only arrive while session is open
+Remove these lines (116-128):
+```html
+<!-- DELETE: Google Fonts CDN -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" href="https://fonts.googleapis.com/css2?..." as="style" ... />
+<noscript><link href="https://fonts.googleapis.com/css2?..." rel="stylesheet" /></noscript>
+```
 
-**Guide impact:** NEW SECTION needed. This is a significant integration feature. Could be part of Remote & Headless chapter (Ch 5) or warrant its own section. Connects to Plugins ecosystem.
+Add imports in the frontmatter section:
+```typescript
+// Self-hosted fonts (replaces Google Fonts CDN)
+import '@fontsource/bricolage-grotesque/700.css';
+import '@fontsource/bricolage-grotesque/800.css';
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/500.css';
+import '@fontsource/dm-sans/700.css';
+import '@fontsource/fira-code/400.css';
+import '@fontsource/noto-sans/400.css';
+import '@fontsource/noto-sans/700.css';
+```
 
----
+**In `src/layouts/Layout.astro` CSP meta tag (line 78):**
 
-### 4. Plugins System (Mature)
+Remove `https://fonts.googleapis.com` from `style-src` and `connect-src`.
+Remove `https://fonts.gstatic.com` from `font-src` and `connect-src`.
+Add `'self'` to `font-src` (fonts now served from same origin).
 
-**Released:** Matured significantly Mar-Apr 2026
-**Status:** GA (marketplace, install, create, share)
-**Confidence:** HIGH
+Updated CSP directives:
+```
+style-src 'self' 'unsafe-inline';
+font-src 'self';
+connect-src 'self' blob: https://www.google-analytics.com https://www.googletagmanager.com;
+```
 
-Full plugin ecosystem with marketplace, skills, agents, hooks, MCP servers, LSP servers, and `bin/` executables.
+**In `tailwind.config.mjs`:** No changes needed. Font-family names remain identical.
 
-**Key details:**
-- `.claude-plugin/plugin.json` manifest
-- Namespaced skills: `/plugin-name:skill-name`
-- `claude plugin install name@marketplace`, `/reload-plugins`
-- `userConfig` for settings at enable time, keychain-backed secrets (v2.1.85)
-- `bin/` directory executables on Bash PATH (v2.1.91)
-- `settings.json` for default plugin settings including `agent` key
-- LSP server support (`.lsp.json`)
-- Plugin marketplace creation and distribution
-- `--plugin-dir` for local development
-- `disableSkillShellExecution` setting (v2.1.91)
-- `claude plugin validate` for frontmatter checking (v2.1.77)
+**In `src/styles/global.css`:** No changes needed. Fallback `@font-face` declarations and font-family references remain valid.
 
-**Guide impact:** NEW CHAPTER likely needed. The existing Custom Skills chapter (Ch 7) covers standalone skills but not the full plugin system. Plugins are now the distribution mechanism for skills, agents, hooks, and MCP servers combined.
+**Noto Sans unicode-range:** The `@fontsource/noto-sans` default CSS import already includes `unicode-range` definitions for automatic subset loading. The existing `@font-face` declarations in `global.css` for `'Greek Fallback'` (lines 60-75) that reference `local('Noto Sans')` will now resolve to the self-hosted font files instead of requiring the browser to find a system-installed Noto Sans. This is an improvement in reliability.
 
----
+### Sitemap Integration
 
-### 5. Scheduled Tasks and /loop
+**In `astro.config.mjs` `buildContentDateMap()` function:**
 
-**Released:** v2.1.71 (Mar 7, 2026) `/loop` + cron tools, cloud/desktop tasks matured
-**Status:** GA
-**Confidence:** HIGH
+Extend to cover all content types. For pages without frontmatter dates, use section-level publication dates. Example approach:
 
-Three-tier scheduling system: `/loop` (session-scoped), Desktop scheduled tasks, Cloud scheduled tasks.
+```typescript
+// Section-level dates for content without per-page dates
+const SECTION_DATES: Record<string, string> = {
+  '/beauty-index/': '2025-10-15',     // Beauty Index launch date
+  '/db-compass/':   '2025-08-20',     // DB Compass launch date
+  '/eda/':          '2025-11-10',     // EDA launch date
+  '/ai-landscape/': '2026-01-15',    // AI Landscape launch date
+  '/tools/':        '2025-07-01',     // Tools section launch date
+};
+```
 
-**Key details:**
-- `/loop 5m check the deploy` -- fixed interval
-- `/loop check the deploy` -- Claude chooses interval dynamically
-- `/loop` bare -- built-in maintenance prompt or custom `loop.md`
-- `CronCreate`, `CronList`, `CronDelete` tools
-- 7-day auto-expiry for recurring tasks
-- Monitor tool for streaming background script events
-- Cloud tasks via `/schedule` -- survive machine off
-- Desktop tasks -- local files, configurable permissions
-- `CLAUDE_CODE_DISABLE_CRON=1` to disable
+Then in `serialize()`, after the existing `contentDates.get()` check, fall back to section dates:
 
-**Guide impact:** NEW SECTION needed. This is a significant workflow feature not covered in any existing chapter. Could be added to Remote & Headless (Ch 5) or a new "Automation & Scheduling" section.
-
----
-
-### 6. Chrome Browser Integration (Beta)
-
-**Released:** Pre-dates guide but significantly evolved
-**Status:** Beta
-**Confidence:** HIGH
-
-Claude controls Chrome/Edge browser tabs: navigate, click, type, read console, record GIFs. Uses Claude in Chrome extension with native messaging.
-
-**Key details:**
-- `claude --chrome` or `/chrome` to enable
-- Requires Claude in Chrome extension v1.0.36+
-- Inherits browser login state
-- Capabilities: live debugging, design verification, form filling, data extraction
-- Session recording as GIFs
-- Site-level permissions from Chrome extension
-- Not available via Bedrock/Vertex/Foundry
-
-**Guide impact:** NEW SECTION needed. Works alongside Computer Use (Computer Use is for native apps when Chrome can't reach them).
+```typescript
+if (knownDate) {
+  item.lastmod = knownDate;
+} else {
+  // Fall back to section-level dates
+  const sectionDate = Object.entries(SECTION_DATES)
+    .find(([prefix]) => item.url.includes(prefix))?.[1];
+  if (sectionDate) {
+    item.lastmod = new Date(sectionDate).toISOString();
+  }
+  // Pages with no date still omit lastmod (better than a fake date)
+}
+```
 
 ---
 
-### 7. Remote Control (Evolved Significantly)
+## Alternatives Considered
 
-**Released:** Pre-dates guide but major additions in Mar-Apr 2026
-**Versions:** v2.1.51+ base, significant improvements through v2.1.101
-**Confidence:** HIGH
-
-Continue local CLI sessions from phone/browser/mobile app. Session runs locally; web/mobile are just windows into it.
-
-**Key additions since guide publication:**
-- Server mode with `--spawn` (same-dir, worktree, session), `--capacity N`
-- `--remote-control-session-name-prefix` for auto-naming
-- VS Code `/remote-control` command (v2.1.79)
-- QR code display for mobile pairing
-- Enable for all sessions via `/config`
-- Improved session titles, connection resilience
-
-**Guide impact:** UPDATE Remote & Headless chapter (Ch 5). Remote Control has matured significantly with server mode and multi-session support.
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|------------------------|
+| `@fontsource/[font]` static packages | `@fontsource-variable/[font]` variable packages | When you need arbitrary weights (e.g., weight 350, 450). The project uses only fixed weights (400, 500, 700, 800) so variable fonts add unnecessary bytes and require CSS changes. |
+| `@fontsource/[font]` static packages | Astro `experimental.fonts` API | When the project upgrades to Astro 6.0.0 where the API is stable. Not now -- still experimental on Astro 5.x with known bugs. |
+| `@fontsource/[font]` static packages | `astro-font` npm package | When you want a single integration that handles preloading and fallback font generation. However, it adds another abstraction layer over what is fundamentally 8 CSS import statements. |
+| `@fontsource/[font]` static packages | Manual font file download (woff2 files) | When you need absolute control over font files or fontsource packages are unavailable. More maintenance burden with no benefit. |
+| Extend `buildContentDateMap()` | `astro-sitemap` (community fork) | When you need features beyond what `@astrojs/sitemap` provides (e.g., i18n sitemap). Not needed here -- the official integration's `serialize` hook is sufficient. |
+| Build-time computed sections in `[slug].astro` | External CMS or AI-generated content | When programmatic content derivation from structured data is insufficient. Here, the data model is rich enough (6 scores + year + paradigm + tier + characterSketch per language) to generate genuinely unique 500+ word comparisons. |
 
 ---
 
-### 8. Desktop App (New Surface)
+## What NOT to Add
 
-**Released:** Mar 2026, evolved rapidly
-**Status:** GA
-**Confidence:** HIGH
-
-Standalone app with Code tab (local coding), Cowork tab (cloud VM agent), Chat tab. Key features beyond CLI:
-- Visual diff review with inline comments
-- Live app preview with dev server
-- PR monitoring with auto-merge and auto-fix (Web, v2.1.83)
-- Dispatch (message tasks from mobile app)
-- Computer Use integration
-- Scheduled tasks UI
-- SSH session support
-
-**Guide impact:** The existing guide focuses on CLI. Desktop app may warrant a mention/section in the Introduction chapter or a dedicated section for Desktop-specific workflows.
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `@fontsource-variable/*` packages | Changes font-family CSS names, ships unused weight data, requires updating tailwind.config + global.css | `@fontsource/*` static packages (same font-family names) |
+| `astro experimental.fonts` | Breaking changes between minor versions, 7+ open bugs, requires Astro 6 for stability | Direct `@fontsource` CSS imports |
+| `vite.build.cssCodeSplit = false` | Confirmed to break all CSS in Astro (issue #4413) | Astro's default CSS splitting + investigation |
+| AI/LLM content generation libraries | Adds build-time API dependency, cost, non-determinism for content that can be computed deterministically | Pure TypeScript build-time computation from existing Language data |
+| `google-webfonts-helper` | Deprecated project, last updated 2023. Fontsource supersedes it. | `@fontsource/*` packages |
+| Additional content/CMS libraries for VS enrichment | Overengineers what is fundamentally string interpolation with structured data | Template-level Astro component logic |
 
 ---
 
-### 9. Slack Integration
+## Version Compatibility
 
-**Released:** Mar 2026
-**Status:** GA
-**Confidence:** HIGH
-
-Mention `@Claude` in Slack channels for coding tasks. Auto-detects coding intent, creates Claude Code web session, posts updates to thread.
-
-**Key details:**
-- Code only or Code + Chat routing modes
-- Context gathering from threads/channels
-- Repository auto-selection
-- Action buttons: View Session, Create PR, Retry as Code, Change Repo
-- Requires Claude Code on the web access + GitHub
-
-**Guide impact:** NEW SECTION possible. Could fit in Remote & Headless (Ch 5) or a new integrations overview.
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `@fontsource/bricolage-grotesque@5.2.10` | Astro 5.x, Vite 6.x | CSS imports handled by Vite at build time. No runtime dependency. |
+| `@fontsource/dm-sans@5.2.8` | Astro 5.x, Vite 6.x | Same as above. |
+| `@fontsource/fira-code@5.2.7` | Astro 5.x, Vite 6.x | Same as above. |
+| `@fontsource/noto-sans@5.2.10` | Astro 5.x, Vite 6.x | Same as above. |
+| `@astrojs/sitemap@3.7.0` | Astro 5.x | Already installed. `serialize` hook stable since v1.0. |
+| `astro-purgecss@6.0.1` | Astro 5.x | Dev-only. Test compatibility with Tailwind v3 JIT output. |
 
 ---
 
-## SIGNIFICANT UPDATES TO EXISTING FEATURES
+## Build Impact Assessment
 
-### 10. Permission Modes Restructured
+| Change | Build Time Impact | Output Size Impact |
+|--------|-------------------|-------------------|
+| Font self-hosting | Negligible (CSS imports resolved at build) | +~120KB of woff2 font files in `dist/` (offset by removing 2 external DNS lookups + TLS handshakes + render-blocking CSS download) |
+| Sitemap lastmod extension | Negligible (string interpolation in serialize hook) | +~20KB in sitemap XML (1,184 `<lastmod>` elements) |
+| VS page enrichment | Moderate (650 pages x additional string computation) | +~300KB total across 650 pages (~500 words x 650 pages) |
+| CSS investigation | Zero (dev-only analysis) | Potential 10-50KB reduction if dead CSS found |
 
-**Versions:** v2.1.83+
-**Confidence:** HIGH
-
-Full permission mode system now documented as first-class concept:
-- `default` -- reads only auto-approved
-- `acceptEdits` -- reads + file edits + safe filesystem commands auto-approved
-- `plan` -- research and propose, no edits
-- `auto` -- classifier-based (NEW, see #2 above)
-- `dontAsk` -- only pre-approved tools
-- `bypassPermissions` -- everything except protected paths
-- `Shift+Tab` cycling with configurable mode set
-- Protected paths list (`.git`, `.vscode`, `.idea`, `.husky`, `.claude` partial)
-
-**Guide impact:** UPDATE Security & Enterprise chapter (Ch 11). Major restructuring of permissions content.
-
----
-
-### 11. Hooks System Updates
-
-**Versions:** v2.1.69-v2.1.101
-**Confidence:** HIGH
-
-New hook events and capabilities:
-- `if` conditional field using permission rule syntax (v2.1.85)
-- `PermissionDenied` hook on auto mode denials (v2.1.89)
-- `defer` permission decision for headless sessions (v2.1.89)
-- `CwdChanged` and `FileChanged` hook events (v2.1.83)
-- `TaskCreated` hook (v2.1.84)
-- `WorktreeCreate` hook HTTP support (v2.1.84)
-- `StopFailure` hook on API error turn end (v2.1.78)
-- `InstructionsLoaded` hook (v2.1.69)
-- `Elicitation` and `ElicitationResult` hooks (v2.1.76)
-- `PostCompact` hook (v2.1.76)
-- `TeammateIdle`, `TaskCreated`, `TaskCompleted` hooks for agent teams
-- Hook output >50K saved to disk with path + preview (v2.1.89)
-- Hook source display in permission prompts (v2.1.75)
-- `agent_id` and `agent_type` added to hook events (v2.1.69)
-
-**Guide impact:** UPDATE Hooks chapter (Ch 8). Significant new hook events and the `if` conditional feature.
-
----
-
-### 12. MCP Updates
-
-**Versions:** v2.1.76-v2.1.101
-**Confidence:** HIGH
-
-- MCP elicitation support -- interactive dialog for structured input (v2.1.76)
-- Per-tool result-size override via `_meta["anthropic/maxResultSizeChars"]` up to 500K (v2.1.91)
-- MCP OAuth following RFC 9728 Protected Resource Metadata (v2.1.85)
-- OAuth Client ID Metadata Document support (v2.1.81)
-- MCP tool/server instructions capped at 2KB (v2.1.84)
-- MCP servers deduplicated, local config wins (v2.1.84)
-- `CLAUDE_CODE_MCP_SERVER_NAME` and `CLAUDE_CODE_MCP_SERVER_URL` env vars (v2.1.85)
-- `MCP_CONNECTION_NONBLOCKING=true` for `-p` mode (v2.1.89)
-
-**Guide impact:** UPDATE MCP chapter (Ch 6). Elicitation and per-tool result-size are notable additions.
-
----
-
-### 13. Agent System Updates
-
-**Versions:** v2.1.69-v2.1.101
-**Confidence:** HIGH
-
-- `/agents` tabbed layout with Running tab and Library tab (v2.1.98)
-- `initialPrompt` frontmatter for auto-submit on agent start (v2.1.83)
-- Named subagents in `@` mention typeahead (v2.1.89)
-- Agent `model` parameter restored for per-invocation overrides (v2.1.72)
-- `effort`, `maxTurns`, `disallowedTools` frontmatter for plugin agents (v2.1.78)
-- `--agents` flag for dynamic JSON-defined subagents (CLI reference)
-- `--teammate-mode` flag: auto, in-process, tmux
-
-**Guide impact:** UPDATE Agent Teams chapter (Ch 10). New frontmatter fields, `/agents` UI, dynamic agent creation.
-
----
-
-### 14. Models & Effort Level Changes
-
-**Versions:** v2.1.72-v2.1.101
-**Confidence:** HIGH
-
-- 1M context for Opus 4.6 by default for Max, Team, Enterprise (v2.1.75)
-- Increased default max output tokens: Opus 4.6 64k, upper bound 128k (v2.1.77)
-- Default effort level changed from medium to high for API/Bedrock/Vertex/Team/Enterprise (v2.1.94)
-- Simplified effort levels: low/medium/high (removed max, except Opus 4.6) (v2.1.72)
-- `/effort` slash command (v2.1.76)
-- `--effort` CLI flag (session-scoped, does not persist) -- low/medium/high/max(Opus only)
-- `--fallback-model` for automatic fallback on overload (print mode)
-- Thinking summaries off by default (set `showThinkingSummaries: true` to restore)
-- Per-model and cache-hit breakdown in `/cost` for subscription users (v2.1.92)
-
-**Guide impact:** UPDATE Models & Costs chapter (Ch 3). Significant changes to effort levels and context sizes.
-
----
-
-### 15. Environment & Settings Updates
-
-**Versions:** v2.1.69-v2.1.101
-**Confidence:** HIGH
-
-New settings and env vars:
-- `managed-settings.d/` drop-in directory for layered policy fragments (v2.1.83)
-- `autoMemoryDirectory` for custom auto-memory storage (v2.1.74)
-- `modelOverrides` for custom model picker entries (v2.1.73)
-- `disableSkillShellExecution` to block inline shell in skills (v2.1.91)
-- `forceRemoteSettingsRefresh` for fail-closed managed settings (v2.1.92)
-- `CLAUDE_CODE_NO_FLICKER=1` for flicker-free alt-screen rendering (v2.1.89)
-- `CLAUDE_CODE_PERFORCE_MODE` for p4 edit hints (v2.1.98)
-- `CLAUDE_CODE_USE_POWERSHELL_TOOL` for Windows PowerShell (v2.1.84)
-- `CLAUDE_CODE_USE_MANTLE=1` for Bedrock via Mantle (v2.1.94)
-- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` to strip credentials from subprocesses (v2.1.83)
-- `CLAUDE_CODE_DISABLE_CRON=1` to disable scheduler (v2.1.72)
-- `--exclude-dynamic-system-prompt-sections` for cross-user prompt caching (v2.1.98)
-- `--setting-sources` to control which setting sources load (v2.1.98)
-- `--bare` mode for faster scripted calls (v2.1.81)
-
-**Guide impact:** UPDATE Environment chapter (Ch 4). Many new env vars and settings.
-
----
-
-### 16. Headless & SDK Updates
-
-**Versions:** v2.1.69-v2.1.101
-**Confidence:** HIGH
-
-- `--bare` flag skips auto-discovery of hooks, LSP, plugins, MCP, auto memory, CLAUDE.md (v2.1.81)
-- `defer` permission decision for PreToolUse hooks in headless sessions (v2.1.89)
-- `--no-session-persistence` for ephemeral sessions (print mode)
-- `--json-schema` for structured outputs after agent workflow (print mode)
-- `--from-pr` to resume sessions linked to GitHub PR (CLI reference)
-- `--teleport` to resume web session in local terminal
-- `--remote` to create web session from CLI
-- `claude setup-token` for long-lived OAuth tokens in CI
-- Monitor tool for streaming background script events (v2.1.98)
-
-**Guide impact:** UPDATE Remote & Headless chapter (Ch 5). New `--bare` mode and structured outputs are significant.
-
----
-
-### 17. Worktree & Session Updates
-
-**Versions:** v2.1.72-v2.1.101
-**Confidence:** HIGH
-
-- `worktree.sparsePaths` setting for sparse-checkout in monorepos (v2.1.76)
-- `ExitWorktree` tool (v2.1.72)
-- `--fork-session` flag for resume without reusing session ID
-- `/rename` for mid-session name changes
-- `/fork` renamed to `/branch` (v2.1.77)
-- `--resume` improvements: accept session titles from `/rename`, PR-linked sessions
-- Session names displayed on prompt bar
-
-**Guide impact:** UPDATE Worktrees chapter (Ch 9). Sparse paths and ExitWorktree are notable additions.
-
----
-
-## NEW COMMANDS AND SLASH COMMANDS
-
-| Command | Version | Description |
-|---------|---------|-------------|
-| `/powerup` | v2.1.90 | Interactive lessons with animated demos |
-| `/loop` | v2.1.71 | Run prompts repeatedly on schedule |
-| `/effort` | v2.1.76 | Set effort level mid-session |
-| `/color` | v2.1.75 | Customize prompt color for all users |
-| `/context` | v2.1.74 | Actionable context-window suggestions |
-| `/release-notes` | v2.1.92 | Interactive version picker for release notes |
-| `/team-onboarding` | v2.1.91 | Generate teammate ramp-up guide |
-| `/claude-api` | v2.1.69 | Skill for Claude API/Anthropic SDK apps |
-| `/schedule` | - | Create cloud scheduled tasks |
-| `/chrome` | - | Toggle Chrome browser integration |
-| `/mobile` | - | QR code to download Claude mobile app |
-| `/insights` | - | Session insights report |
-
-**Removed commands:**
-- `/tag` -- removed (v2.1.92)
-- `/vim` -- removed, toggle via `/config` (v2.1.92)
-- `/output-style` -- deprecated, fixed at session start (v2.1.73)
-
----
-
-## DEPRECATIONS AND BREAKING CHANGES
-
-| Item | Version | Details |
-|------|---------|---------|
-| `/tag` command | v2.1.92 | Removed |
-| `/vim` command | v2.1.92 | Removed; use `/config` > Editor mode |
-| `/output-style` | v2.1.73 | Deprecated; fixed at session start for prompt caching |
-| `TaskOutput` tool | v2.1.83 | Deprecated in favor of Read on output file path |
-| Windows managed settings fallback | v2.1.75 | Removed `C:\ProgramData\ClaudeCode\managed-settings.json` |
-| Agent tool `resume` parameter | v2.1.77 | No longer accepted |
-| Thinking summaries | v2.1.89 | Off by default; set `showThinkingSummaries: true` to restore |
-| Default effort level | v2.1.94 | Changed from medium to high for API/Bedrock/Vertex/Team/Enterprise |
-| `cleanupPeriodDays: 0` | v2.1.89 | Now rejected with validation error |
-| `Ctrl+F` for stop background agents | v2.1.83 | Changed to `Ctrl+X Ctrl+K` |
-
----
-
-## SECURITY HARDENING (Significant since guide publication)
-
-**Versions:** v2.1.78-v2.1.101
-**Confidence:** HIGH
-
-Extensive Bash tool permission security fixes:
-- Backslash-escaped flag bypass fixed (v2.1.98)
-- Compound command forced-prompt bypass fixed (v2.1.98)
-- Env-var prefix read-only commands now prompt unless known-safe (v2.1.98)
-- `/dev/tcp` and `/dev/udp` redirect prompting (v2.1.98)
-- PowerShell trailing `&`, `-ErrorAction Break`, archive TOCTOU hardening (v2.1.90)
-- Command injection in POSIX `which` fallback for LSP detection fixed (v2.1.101)
-- Nested skill discovery loading from gitignored directories fixed (v2.1.69)
-- Trust dialog per-server MCP approval (v2.1.69)
-- `sandbox.failIfUnavailable` setting (v2.1.83)
-- Subprocess sandboxing with PID namespace isolation on Linux (v2.1.98)
-
-**Guide impact:** UPDATE Security & Enterprise chapter (Ch 11). Security posture has improved significantly.
-
----
-
-## NEW PLATFORM SUPPORT
-
-| Platform/Surface | Details |
-|-----------------|---------|
-| PowerShell tool (Windows) | Opt-in preview via `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` (v2.1.84) |
-| Desktop App (macOS + Windows) | Full GUI surface with Code/Cowork/Chat tabs |
-| Slack integration | @Claude mention routing to Claude Code web sessions |
-| Vertex AI setup wizard | Interactive setup from login screen (v2.1.98) |
-| Bedrock setup wizard | Interactive setup from login screen (v2.1.92) |
-| Bedrock via Mantle | `CLAUDE_CODE_USE_MANTLE=1` (v2.1.94) |
-| Homebrew stable/latest casks | `claude-code` (stable) vs `claude-code@latest` (latest) |
-| WinGet install | `winget install Anthropic.ClaudeCode` |
-| Native install scripts | `curl -fsSL https://claude.ai/install.sh \| bash` and PowerShell/CMD equivalents |
-| Voice mode improvements | 10 new STT languages (20 total), push-to-talk improvements (v2.1.69+) |
-
----
-
-## GUIDE CHAPTER IMPACT MATRIX
-
-| Chapter | Impact Level | Key Changes |
-|---------|-------------|-------------|
-| Ch 1: Introduction | MODERATE | New surfaces (Desktop, Web, Slack), new install methods, /powerup |
-| Ch 2: Context Management | LOW | `autoMemoryDirectory` setting, `PostCompact` hook, MEMORY.md index truncating |
-| Ch 3: Models & Costs | HIGH | 1M context Opus, effort level changes, default effort high, /effort command |
-| Ch 4: Environment | HIGH | Many new env vars, settings, `--bare`, NO_FLICKER, managed-settings.d/ |
-| Ch 5: Remote & Headless | HIGH | Remote Control server mode, Channels, Scheduled Tasks, Slack, --bare, --teleport |
-| Ch 6: MCP | MODERATE | Elicitation, per-tool result-size, OAuth improvements, computer-use MCP |
-| Ch 7: Custom Skills | HIGH | Full Plugins system, marketplace, LSP, bin/, plugin conversion |
-| Ch 8: Hooks | HIGH | Conditional `if`, PermissionDenied, CwdChanged, FileChanged, 6+ new events |
-| Ch 9: Worktrees | LOW | sparsePaths, ExitWorktree, /branch rename |
-| Ch 10: Agent Teams | MODERATE | /agents UI, initialPrompt, dynamic agents, agent frontmatter fields |
-| Ch 11: Security & Enterprise | HIGH | Auto mode, permission modes restructured, extensive Bash hardening |
-
-### Potential New Chapters/Sections
-
-| Topic | Rationale |
-|-------|-----------|
-| Plugins | Too large for the existing Skills chapter. Full ecosystem with marketplace, distribution, multi-component packages |
-| Browser & Desktop Automation | Chrome integration + Computer Use form a coherent "GUI automation" story |
-| Scheduling & Automation | /loop, cron tools, cloud/desktop scheduled tasks, Monitor tool |
-| Desktop App & Surfaces | Desktop app, Web, Slack, Remote Control server mode -- the "surfaces" story |
-| Cheatsheet Page | Standalone reference page (not a chapter) |
+**Net performance impact:** Positive. Removing 2 external domain connections (fonts.googleapis.com + fonts.gstatic.com) eliminates 2 DNS lookups, 2 TLS handshakes, and 1 render-blocking CSS download. Font files served from same origin benefit from existing HTTP/2 connection.
 
 ---
 
 ## Sources
 
-- https://code.claude.com/docs/en/whats-new -- Weekly digests (Weeks 13-14)
-- https://code.claude.com/docs/en/whats-new/2026-w14 -- Week 14 full digest
-- https://code.claude.com/docs/en/whats-new/2026-w13 -- Week 13 full digest
-- https://code.claude.com/docs/en/changelog -- Full changelog v2.1.69 through v2.1.101
-- https://code.claude.com/docs/en/overview -- Product overview
-- https://code.claude.com/docs/en/cli-reference -- Complete CLI flags and commands
-- https://code.claude.com/docs/en/computer-use -- Computer Use documentation
-- https://code.claude.com/docs/en/permission-modes -- Permission modes including Auto mode
-- https://code.claude.com/docs/en/channels -- Channels documentation
-- https://code.claude.com/docs/en/plugins -- Plugins creation guide
-- https://code.claude.com/docs/en/scheduled-tasks -- /loop and cron scheduling
-- https://code.claude.com/docs/en/remote-control -- Remote Control documentation
-- https://code.claude.com/docs/en/agent-teams -- Agent Teams documentation
-- https://code.claude.com/docs/en/chrome -- Chrome browser integration
-- https://code.claude.com/docs/en/slack -- Slack integration
-- https://code.claude.com/docs/en/desktop-quickstart -- Desktop app guide
+- [Fontsource: Bricolage Grotesque Install](https://fontsource.org/fonts/bricolage-grotesque/install) -- package names, weights, import syntax (HIGH confidence)
+- [Fontsource: DM Sans Install](https://fontsource.org/fonts/dm-sans/install) -- package names, static vs variable (HIGH confidence)
+- [Fontsource: Fira Code Install](https://fontsource.org/fonts/fira-code/install) -- package names, version (HIGH confidence)
+- [Fontsource: Noto Sans Install](https://fontsource.org/fonts/noto-sans/install) -- subsets, unicode-range (HIGH confidence)
+- [Fontsource: Individual Subsets](https://fontsource.org/docs/getting-started/subsets) -- default unicode-range behavior, explicit subset imports (HIGH confidence)
+- [Fontsource: Variable Fonts](https://fontsource.org/docs/getting-started/variable) -- font-family name changes for variable packages (HIGH confidence)
+- [npm registry](https://registry.npmjs.org) -- version verification via `npm view` (HIGH confidence)
+- [@astrojs/sitemap docs](https://docs.astro.build/en/guides/integrations-guide/sitemap/) -- serialize hook API, SitemapItem type, v3.7.2 (HIGH confidence)
+- [Astro Styling docs](https://docs.astro.build/en/guides/styling/) -- CSS code splitting, 4KB threshold, inlineStylesheets config (HIGH confidence)
+- [Astro Experimental Fonts API](https://docs.astro.build/en/reference/experimental-flags/fonts/) -- added in Astro 5.7, stable in 6.0.0 (HIGH confidence)
+- [Astro Font Provider Reference](https://docs.astro.build/en/reference/font-provider-reference/) -- provider API requires Astro 6.0.0 (HIGH confidence)
+- [GitHub issue #15515](https://github.com/withastro/astro/issues/15515) -- experimental fonts API breaking changes 5.16->5.17 (HIGH confidence)
+- [GitHub issue #4413](https://github.com/withastro/astro/issues/4413) -- cssCodeSplit=false breaks Astro (HIGH confidence)
+- [astro-purgecss npm](https://www.npmjs.com/package/astro-purgecss) -- v6.0.1 for unused CSS removal (MEDIUM confidence)
 
 ---
-*Stack research for: Claude Code guide content refresh*
-*Researched: 2026-04-12*
+*Stack research for: v1.21 SEO Audit Fixes*
+*Researched: 2026-04-15*
