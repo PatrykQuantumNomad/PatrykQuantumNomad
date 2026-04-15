@@ -8,6 +8,7 @@ import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkReadingTime } from './remark-reading-time.mjs';
+import { rehypeExternalLinks } from './rehype-external-links.mjs';
 import indexNow from './src/integrations/indexnow';
 import notebookPackager from './src/integrations/notebook-packager';
 
@@ -116,6 +117,6 @@ export default defineConfig({
   }), indexNow(), notebookPackager(), react()],
   markdown: {
     remarkPlugins: [remarkReadingTime, remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [rehypeKatex, rehypeExternalLinks],
   },
 });

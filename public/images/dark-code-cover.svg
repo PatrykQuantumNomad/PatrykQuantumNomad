@@ -95,15 +95,15 @@
        TITLE: "DARK CODE"
        Clear focal point with amber glow
        ======================================= -->
-  <text x="600" y="300" font-family="Helvetica,Arial,sans-serif" font-size="56" fill="white" fill-opacity="0.95" text-anchor="middle" letter-spacing="14" font-weight="bold" filter="url(#amber-glow)">DARK CODE</text>
+  <text x="600" y="300" font-family="Helvetica,Arial,sans-serif" font-size="56" fill="white" fill-opacity="0.95" text-anchor="middle" letter-spacing="14" font-weight="bold">DARK CODE</text>
 
   <!-- =======================================
        SUBTITLE
        ======================================= -->
-  <text x="600" y="350" font-family="Georgia,'Times New Roman',serif" font-size="17" fill="#D97706" fill-opacity="0.8" text-anchor="middle" font-style="italic">The Silent Rot AI Accelerated</text>
+  <text x="600" y="350" font-family="Georgia,'Times New Roman',serif" font-size="20" fill="#F59E0B" fill-opacity="1" text-anchor="middle" font-style="italic">The Silent Rot AI Accelerated</text>
 
   <!-- =======================================
        ATTRIBUTION
        ======================================= -->
-  <text x="600" y="590" font-family="Helvetica,Arial,sans-serif" font-size="11" fill="white" fill-opacity="0.4" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/blog/dark-code</text>
+  <text x="600" y="590" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="white" fill-opacity="0.6" text-anchor="middle" letter-spacing="2">patrykgolabek.dev/blog/dark-code</text>
 </svg>
