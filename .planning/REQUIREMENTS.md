@@ -80,33 +80,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VS-01 | TBD | Pending |
-| VS-02 | TBD | Pending |
-| VS-03 | TBD | Pending |
-| VS-04 | TBD | Pending |
-| VS-05 | TBD | Pending |
-| VS-06 | TBD | Pending |
-| VS-07 | TBD | Pending |
-| TSEO-01 | TBD | Pending |
-| TSEO-02 | TBD | Pending |
-| TSEO-03 | TBD | Pending |
-| TSEO-04 | TBD | Pending |
-| TSEO-05 | TBD | Pending |
-| OPSEO-01 | TBD | Pending |
-| OPSEO-02 | TBD | Pending |
-| OPSEO-03 | TBD | Pending |
-| OPSEO-04 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| PERF-04 | TBD | Pending |
-| PERF-05 | TBD | Pending |
+| VS-01 | Phase 122 | Pending |
+| VS-02 | Phase 122 | Pending |
+| VS-03 | Phase 122 | Pending |
+| VS-04 | Phase 122 | Pending |
+| VS-05 | Phase 122 | Pending |
+| VS-06 | Phase 122 | Pending |
+| VS-07 | Phase 122 | Pending |
+| TSEO-01 | Phase 123 | Pending |
+| TSEO-02 | Phase 125 | Pending |
+| TSEO-03 | Phase 125 | Pending |
+| TSEO-04 | Phase 125 | Pending |
+| TSEO-05 | Phase 125 | Pending |
+| OPSEO-01 | Phase 125 | Pending |
+| OPSEO-02 | Phase 125 | Pending |
+| OPSEO-03 | Phase 125 | Pending |
+| OPSEO-04 | Phase 125 | Pending |
+| PERF-01 | Phase 124 | Pending |
+| PERF-02 | Phase 124 | Pending |
+| PERF-03 | Phase 124 | Pending |
+| PERF-04 | Phase 126 | Pending |
+| PERF-05 | Phase 126 | Pending |
 
 **Coverage:**
 - v1.21 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-15 after initial definition*
+*Last updated: 2026-04-15 after roadmap creation*
