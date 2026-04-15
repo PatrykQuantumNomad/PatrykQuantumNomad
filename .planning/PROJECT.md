@@ -295,7 +295,19 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(No active milestone — next milestone to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.21 SEO Audit Fixes
+
+**Goal:** Apply all actionable findings from the April 15, 2026 SEO audit — technical SEO fixes, content quality improvements (including enriching 650 Beauty Index VS comparison pages), and performance optimizations.
+
+**Target features:**
+- Fix blog post title/description SEO issues (dark-code title too short, description too long)
+- Add `<lastmod>` dates to all 1,184 sitemap entries
+- Fix truncated Beauty Index single-language meta descriptions
+- Add `noindex, follow` to blog pagination pages 2-6 and thin tag pages
+- Add `/feed.xml` alias for `/rss.xml`
+- Enrich all 650 Beauty Index VS comparison pages with 500+ unique words of analysis (Strategy A)
+- Investigate and fix homepage CSS bundle bloat (132 KB of route-specific CSS)
+- Self-host Google Fonts via @fontsource (remove external DNS/TLS round-trip)
 
 ### Out of Scope
 
@@ -499,4 +511,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-14 after v1.20 milestone*
+*Last updated: 2026-04-15 after v1.21 milestone started*
