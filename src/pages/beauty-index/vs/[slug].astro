@@ -1,18 +1,39 @@
 ---
 /**
  * [slug].astro — Versus comparison page for two Beauty Index languages.
- * Generates 650 static pages (26 × 25 ordered pairs) at /beauty-index/vs/{langA}-vs-{langB}/.
- * Both directions are supported: python-vs-ruby and ruby-vs-python are separate pages.
+ *
+ * Generates 650 static pages (26 × 25 ordered pairs) at
+ * /beauty-index/vs/{langA}-vs-{langB}/. Both directions are supported: the
+ * reverse pair (e.g., ruby-vs-python) is a separate page.
+ *
+ * This template is a THIN RENDERER — all content assembly (verdict, dimension
+ * prose, code-feature selection, FAQ copy, cross-link selection) lives in
+ * `src/lib/beauty-index/vs-content.ts` so the page body stays small and the
+ * assembly logic stays unit-testable.
+ *
+ * Section order is fixed across all 650 pages (CONTEXT locked decision):
+ *   1. Hero — breadcrumb, title, tier badges, radar overlay, verdict, inline
+ *      cross-links ("See also:")
+ *   2. TOC — anchor-linked jump row (Dimensions · Code · FAQ)
+ *   3. Dimensions — 6 `<article>` blocks, sorted by |delta| desc in the lib
+ *   4. Code — 2-3 side-by-side `<Code>` comparisons (Shiki via
+ *      astro-expressive-code), both snippets in initial DOM
+ *   5. FAQ — accessible `<dl>` list + FAQPage JSON-LD
+ *   6. Related — footer cross-links
+ *
+ * Zero client-side JS added. Both languages' code snippets are server-rendered
+ * into the initial DOM (no tab island, no client:*).
  */
 import { getCollection } from 'astro:content';
+import { Code } from 'astro-expressive-code/components';
 import Layout from '../../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
 import VsJsonLd from '../../../components/beauty-index/VsJsonLd.astro';
+import VsFaqJsonLd from '../../../components/beauty-index/VsFaqJsonLd.astro';
 import OverlayRadarChart, { VS_COLOR_A, VS_COLOR_B } from '../../../components/beauty-index/OverlayRadarChart.astro';
 import TierBadge from '../../../components/beauty-index/TierBadge.astro';
-import { DIMENSIONS } from '../../../lib/beauty-index/dimensions';
-import { DIMENSION_COLORS } from '../../../lib/beauty-index/tiers';
 import { totalScore, type Language } from '../../../lib/beauty-index/schema';
+import { buildVsContent } from '../../../lib/beauty-index/vs-content';
 
 export async function getStaticPaths() {
   const languages = await getCollection('languages');
@@ -35,6 +56,10 @@ export async function getStaticPaths() {
 
 const { langA, langB } = Astro.props;
 
+// Load all languages once — required by buildVsContent for cross-link selection.
+const allLangs = (await getCollection('languages')).map((e) => e.data);
+const content = buildVsContent(langA, langB, allLangs);
+
 const totalA = totalScore(langA);
 const totalB = totalScore(langB);
 const tierLabelA = langA.tier.charAt(0).toUpperCase() + langA.tier.slice(1);
@@ -44,38 +69,9 @@ const ogImageURL = new URL(`/open-graph/beauty-index/vs/${langA.id}-vs-${langB.i
 const pageTitle = `${langA.name} vs ${langB.name} — Beauty Index | Patryk Golabek`;
 const metaDescription = `${langA.name} (${totalA}/60, ${tierLabelA}) vs ${langB.name} (${totalB}/60, ${tierLabelB}) — side-by-side Beauty Index comparison across 6 aesthetic dimensions.`;
 
-// Dimension comparison data
-const dimensions = DIMENSIONS.map((dim) => {
-  const scoreA = langA[dim.key] as number;
-  const scoreB = langB[dim.key] as number;
-  const delta = scoreA - scoreB;
-  const color = DIMENSION_COLORS[dim.key];
-  return { dim, scoreA, scoreB, delta, color };
-});
-
-// Compute verdict sentence for LLM extractability
-const totalDelta = totalA - totalB;
-const winsA = dimensions.filter((d) => d.delta > 0).map((d) => d.dim.shortName);
-const winsB = dimensions.filter((d) => d.delta < 0).map((d) => d.dim.shortName);
-const ties = dimensions.filter((d) => d.delta === 0).map((d) => d.dim.shortName);
-
-let verdict: string;
-if (totalDelta === 0) {
-  if (winsA.length === 0) {
-    verdict = `${langA.name} and ${langB.name} are perfectly matched at ${totalA}/60, tying in all 6 dimensions.`;
-  } else {
-    verdict = `${langA.name} and ${langB.name} tie at ${totalA}/60 overall. ${langA.name} leads in ${winsA.join(' and ')}; ${langB.name} leads in ${winsB.join(' and ')}.`;
-  }
-} else {
-  const leader = totalDelta > 0 ? langA.name : langB.name;
-  const leaderWins = totalDelta > 0 ? winsA : winsB;
-  const diff = Math.abs(totalDelta);
-  if (leaderWins.length === 6) {
-    verdict = `${leader} scores ${diff} points higher than ${totalDelta > 0 ? langB.name : langA.name} overall, leading in all 6 dimensions.`;
-  } else {
-    verdict = `${leader} scores ${diff} points higher overall (${totalDelta > 0 ? totalA : totalB}/60 vs ${totalDelta > 0 ? totalB : totalA}/60), leading in ${leaderWins.join(', ')}.`;
-  }
-}
+// Partition cross-links by placement (determinism: buildVsContent is pure).
+const inlineLinks = content.crossLinks.filter((l) => l.placement === 'inline');
+const footerLinks = content.crossLinks.filter((l) => l.placement === 'footer');
 ---
 
 <Layout
@@ -102,7 +98,7 @@ if (totalDelta === 0) {
       <span aria-hidden="true">&larr;</span> Back to Beauty Index
     </a>
 
-    {/* Header */}
+    {/* ─── 1. Hero ─────────────────────────────────────────────────────── */}
     <header class="text-center">
       <h1 class="text-3xl sm:text-4xl font-heading font-bold">
         {langA.name} <span class="text-[var(--color-text-secondary)] font-normal">vs</span> {langB.name}
@@ -120,7 +116,7 @@ if (totalDelta === 0) {
       </div>
     </header>
 
-    {/* Overlay Radar Chart */}
+    {/* Overlay Radar Chart (hero chrome — preserved from pre-enrichment template) */}
     <div class="flex flex-col items-center mt-10">
       <OverlayRadarChart langA={langA} langB={langB} size={360} />
       {/* Legend */}
@@ -147,95 +143,118 @@ if (totalDelta === 0) {
       </a>
     </div>
 
-    {/* Verdict */}
-    <p class="text-center text-[var(--color-text-secondary)] mt-8 text-sm leading-relaxed max-w-2xl mx-auto">
-      {verdict}
-    </p>
-
-    {/* Dimension Comparison Table */}
-    <section class="mt-8">
-      <h2 class="text-xl font-heading font-bold mb-4">Dimension Breakdown</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-[var(--color-border)]">
-              <th class="text-left py-2 pr-4 font-medium text-[var(--color-text-secondary)]">Dimension</th>
-              <th class="text-center py-2 px-2 font-medium">{langA.name}</th>
-              <th class="text-center py-2 px-2 font-medium">{langB.name}</th>
-              <th class="text-center py-2 pl-2 font-medium text-[var(--color-text-secondary)]">Delta</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dimensions.map((row) => (
-              <tr class="border-b border-[var(--color-border)]/50">
-                <td class="py-3 pr-4">
-                  <span class="font-bold mr-1.5" style={`color: ${row.color};`}>{row.dim.symbol}</span>
-                  <span class="text-[var(--color-text-secondary)]">{row.dim.shortName}</span>
-                </td>
-                <td class="text-center py-3 px-2">
-                  <div class="flex items-center justify-center gap-2">
-                    <div class="w-16 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
-                      <div class="h-full rounded-full" style={`width: ${row.scoreA * 10}%; background-color: ${row.color};`} />
-                    </div>
-                    <span class="font-medium w-5 text-right">{row.scoreA}</span>
-                  </div>
-                </td>
-                <td class="text-center py-3 px-2">
-                  <div class="flex items-center justify-center gap-2">
-                    <div class="w-16 h-2 bg-[var(--color-surface-alt)] rounded-full overflow-hidden">
-                      <div class="h-full rounded-full" style={`width: ${row.scoreB * 10}%; background-color: ${row.color};`} />
-                    </div>
-                    <span class="font-medium w-5 text-right">{row.scoreB}</span>
-                  </div>
-                </td>
-                <td class="text-center py-3 pl-2">
-                  {row.delta > 0 ? (
-                    <span class="text-green-600 font-medium">+{row.delta}</span>
-                  ) : row.delta < 0 ? (
-                    <span class="text-red-500 font-medium">{row.delta}</span>
-                  ) : (
-                    <span class="text-[var(--color-text-secondary)]">=</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {/* Total row */}
-            <tr class="border-t-2 border-[var(--color-border)]">
-              <td class="py-3 pr-4 font-bold">Total</td>
-              <td class="text-center py-3 px-2 font-bold text-lg">{totalA}</td>
-              <td class="text-center py-3 px-2 font-bold text-lg">{totalB}</td>
-              <td class="text-center py-3 pl-2">
-                {totalA - totalB > 0 ? (
-                  <span class="text-green-600 font-bold">+{totalA - totalB}</span>
-                ) : totalA - totalB < 0 ? (
-                  <span class="text-red-500 font-bold">{totalA - totalB}</span>
-                ) : (
-                  <span class="text-[var(--color-text-secondary)] font-bold">=</span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    {/* Character Sketches */}
-    <section class="mt-12">
-      <h2 class="text-xl font-heading font-bold mb-4">Character Sketches</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    {/* Character Sketches (hero chrome — short language-framing paragraphs) */}
+    <section class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
       <div>
-        <h3 class="font-heading font-bold text-lg mb-2">
+        <h2 class="font-heading font-bold text-lg mb-2">
           <a href={`/beauty-index/${langA.id}/`} class="text-[var(--color-accent)] hover:underline">{langA.name}</a>
-        </h3>
+        </h2>
         <p class="text-[var(--color-text-secondary)] leading-relaxed">{langA.characterSketch}</p>
       </div>
       <div>
-        <h3 class="font-heading font-bold text-lg mb-2">
+        <h2 class="font-heading font-bold text-lg mb-2">
           <a href={`/beauty-index/${langB.id}/`} class="text-[var(--color-accent)] hover:underline">{langB.name}</a>
-        </h3>
+        </h2>
         <p class="text-[var(--color-text-secondary)] leading-relaxed">{langB.characterSketch}</p>
       </div>
-      </div>
+    </section>
+
+    {/* Verdict — 2-3 sentence expanded verdict from buildVsContent */}
+    <p class="mt-8 text-base leading-relaxed max-w-2xl mx-auto">
+      {content.verdict}
+    </p>
+
+    {/* Inline cross-links ("See also:") — comparison-name-only anchors */}
+    {inlineLinks.length > 0 && (
+      <p class="text-sm text-[var(--color-text-secondary)] mt-4 max-w-2xl mx-auto">
+        See also:
+        {inlineLinks.map((l, i) => (
+          <>
+            {i === 0 ? ' ' : ', '}
+            <a href={l.href} class="text-[var(--color-accent)] hover:underline">{l.label}</a>
+          </>
+        ))}
+        .
+      </p>
+    )}
+
+    {/* ─── 2. TOC ──────────────────────────────────────────────────────── */}
+    <nav class="flex flex-wrap gap-4 text-sm mt-6 mb-8 max-w-2xl mx-auto" aria-label="Page sections">
+      <span class="text-[var(--color-text-secondary)]">Jump to:</span>
+      <a href="#dimensions" class="text-[var(--color-accent)] hover:underline">Dimensions</a>
+      <span aria-hidden="true" class="text-[var(--color-text-secondary)]">·</span>
+      <a href="#code" class="text-[var(--color-accent)] hover:underline">Code</a>
+      <span aria-hidden="true" class="text-[var(--color-text-secondary)]">·</span>
+      <a href="#faq" class="text-[var(--color-accent)] hover:underline">FAQ</a>
+    </nav>
+
+    {/* ─── 3. Dimensions ───────────────────────────────────────────────── */}
+    <section id="dimensions" class="mt-12">
+      <h2 class="text-2xl font-heading font-bold mb-6">Dimension-by-dimension analysis</h2>
+      {content.dimensions.map((d) => (
+        <article class="mb-10">
+          <header class="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+            <h3 class="text-xl font-heading font-semibold">
+              <span class="font-bold mr-1.5" style={`color: ${d.color};`}>{d.dim.symbol}</span>
+              {d.dim.name}
+            </h3>
+            <div class="text-sm tabular-nums text-[var(--color-text-secondary)]">
+              {langA.name} {d.scoreA} · {langB.name} {d.scoreB}
+            </div>
+          </header>
+          <div class="prose prose-neutral dark:prose-invert max-w-none" set:html={d.prose} />
+        </article>
+      ))}
+    </section>
+
+    {/* ─── 4. Code ─────────────────────────────────────────────────────── */}
+    <section id="code" class="mt-12">
+      <h2 class="text-2xl font-heading font-bold mb-6">Code comparison</h2>
+      {content.codeFeatures.map((cf) => (
+        <div class="mb-8">
+          <h3 class="text-sm font-medium text-[var(--color-text-secondary)] mb-2">{cf.caption}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
+              <div class="px-4 py-2 bg-[var(--color-surface-alt)] border-b border-[var(--color-border)]">
+                <a href={`/beauty-index/${langA.id}/`} class="text-sm font-medium text-[var(--color-accent)] hover:underline">{langA.name}</a>
+              </div>
+              <Code code={cf.snippetA.code} lang={cf.snippetA.lang} />
+            </div>
+            <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
+              <div class="px-4 py-2 bg-[var(--color-surface-alt)] border-b border-[var(--color-border)]">
+                <a href={`/beauty-index/${langB.id}/`} class="text-sm font-medium text-[var(--color-accent)] hover:underline">{langB.name}</a>
+              </div>
+              <Code code={cf.snippetB.code} lang={cf.snippetB.lang} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    {/* ─── 5. FAQ ──────────────────────────────────────────────────────── */}
+    <section id="faq" class="mt-12">
+      <h2 class="text-2xl font-heading font-bold mb-6">Frequently asked questions</h2>
+      <dl class="space-y-6">
+        {content.faq.map((f) => (
+          <div>
+            <dt class="text-lg font-semibold mb-2">{f.question}</dt>
+            <dd class="text-[var(--color-text-secondary)] leading-relaxed">{f.answer}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+    <VsFaqJsonLd faq={content.faq} />
+
+    {/* ─── 6. Related comparisons ──────────────────────────────────────── */}
+    <section class="related-comparisons mt-12 pt-8 border-t border-[var(--color-border)]">
+      <h2 class="text-xl font-heading font-bold mb-4">Related comparisons</h2>
+      <ul class="space-y-2">
+        {footerLinks.map((l) => (
+          <li>
+            <a href={l.href} class="text-[var(--color-accent)] hover:underline">{l.label}</a>
+          </li>
+        ))}
+      </ul>
     </section>
 
     <p class="text-sm text-[var(--color-text-secondary)] mt-10 text-center">
