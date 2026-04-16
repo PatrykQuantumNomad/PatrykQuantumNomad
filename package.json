@@ -6,10 +6,11 @@
     "dev": "astro dev",
     "prebuild": "node scripts/download-actionlint-wasm.mjs && node scripts/generate-layout.mjs && node scripts/copy-preload-fonts.mjs",
     "generate-layout": "node scripts/generate-layout.mjs",
-    "build": "astro build && node scripts/verify-vs-wordcount.mjs && node scripts/verify-vs-overlap.mjs && node scripts/verify-sitemap-determinism.mjs",
+    "build": "astro build && node scripts/verify-vs-wordcount.mjs && node scripts/verify-vs-overlap.mjs && node scripts/verify-sitemap-determinism.mjs && node scripts/verify-no-google-fonts.mjs",
     "verify:vs-wordcount": "node scripts/verify-vs-wordcount.mjs",
     "verify:vs-overlap": "node scripts/verify-vs-overlap.mjs",
     "verify:sitemap-determinism": "node scripts/verify-sitemap-determinism.mjs",
+    "verify:no-google-fonts": "node scripts/verify-no-google-fonts.mjs",
     "preview": "astro preview"
   },
   "dependencies": {
