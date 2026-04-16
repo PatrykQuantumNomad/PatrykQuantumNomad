@@ -82,6 +82,7 @@ const collectionSchema = {
 <Layout
   title={pageTitle}
   description={pageDescription}
+  canonicalURL={new URL(page.currentPage === 1 ? '/blog/' : `/blog/${page.currentPage}/`, Astro.site)}
 >
   {page.url.prev && <link slot="head" rel="prev" href={new URL(page.url.prev, Astro.site).toString()} />}
   {page.url.next && <link slot="head" rel="next" href={new URL(page.url.next, Astro.site).toString()} />}
