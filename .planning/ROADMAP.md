@@ -57,7 +57,9 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   2. CSP meta tag no longer whitelists googleapis.com or gstatic.com domains
   3. Critical fonts have preload link hints with crossorigin attribute in the document head
   4. All four font families render correctly in both light and dark modes
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 124-01-PLAN.md — Self-host @fontsource packages + rewrite Layout.astro head (CSP + preload hints + remove Google Fonts block) + hand-written @font-face rules for LCP-critical weights
+- [ ] 124-02-PLAN.md — Build-time verifier (scripts/verify-no-google-fonts.mjs with FastAPI MDX allowlist + 4-assertion enforcement) wired into npm run build + human smoke test of 4 families in light/dark modes
 
 ### Phase 125: Blog, Pagination, and On-Page SEO Fixes
 **Goal**: All low-complexity metadata and routing issues from the SEO audit are resolved in a single batch
