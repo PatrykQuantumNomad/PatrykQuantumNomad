@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
-status: planning
-stopped_at: Completed 122-03-PLAN.md (VS build-time verifiers + editorial approval; Phase 122 complete, 3/3 plans shipped)
-last_updated: "2026-04-16T11:48:00.000Z"
-last_activity: 2026-04-16 — Phase 122 complete; VS-06 + VS-07 gates live in npm run build
+status: verifying
+stopped_at: Completed 123-01-PLAN.md (sitemap scaffolding + guide bug fix; 1026/1184 URLs with lastmod; determinism preserved)
+last_updated: "2026-04-16T13:06:08.047Z"
+last_activity: 2026-04-16 — Phase 123 Plan 01 complete; sitemap lastmod coverage 1026/1184 URLs; Claude Code guide-chapter bug fixed
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 122 — VS Page Content Enrichment
+**Current focus:** Phase 123 — Sitemap Lastmod
 
 ## Current Position
 
-Phase: 122 of 126 (VS Page Content Enrichment) — **COMPLETE**
-Plan: 3/3 complete — Phase 122 ready for phase-level verification
-Status: Phase 122 complete; ready for `gsd-verifier` goal verification then transition to Phase 123
-Last activity: 2026-04-16 — Phase 122 complete; VS-06 + VS-07 build-time gates live
+Phase: 123 of 126 (Sitemap Lastmod) — **IN PROGRESS**
+Plan: 1/3 complete — scaffolding + guide bug fix shipped (Plan 01)
+Status: Plan 01 complete; next is Plan 02 (EDA subpages + blog listing/pagination/tag aggregation)
+Last activity: 2026-04-16 — Phase 123 Plan 01 complete; sitemap lastmod coverage jumped 45→1026/1184 URLs
 
-Progress: [██████████] 100% (3/3 plans in Phase 122)
+Progress: [███░░░░░░░] 33% (1/3 plans in Phase 123)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 292 (across 20 milestones)
-- v1.21 plans completed: 3 (Phase 122: 3/3)
+- Total plans completed: 293 (across 20 milestones)
+- v1.21 plans completed: 4 (Phase 122: 3/3; Phase 123: 1/3)
 
 **Cumulative Stats:**
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100% (3/3 plans in Phase 122)
 | Phase 122 P01 | 4m | 2 tasks | 2 files |
 | Phase 122 P02 | 5 | 2 tasks | 2 files |
 | Phase 122 P03 | 4m | 2 tasks | 3 files |
+| Phase 123-sitemap-lastmod P01 | 34m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,7 @@ Recent decisions affecting current work:
 - [Phase 122]: VS content assembly uses three-seam prose (justification + connective + verdict/closer) with deterministic FNV-1a hash pool selection. All pools module-level const, ≥3 options per key. Observed max Jaccard 0.2119 against <0.40 threshold.
 - [Phase 122]: [Phase 122 P02] VS template is a thin renderer consuming buildVsContent. Character sketches placed inside Hero (not removed) to honour preserve directive without violating 6-section locked order. Zero client-side JS added — both languages' code snippets server-rendered via astro-expressive-code <Code>.
 - [Phase 122]: [Phase 122 P03] VS-06 and VS-07 enforced at build time via zero-dep ESM verifiers chained after `astro build`. Deterministic mulberry32 SEED=20260416; shared-chrome stripping (nav/header/footer/svg + known shared heading strings) before Jaccard to avoid false inflation. Reports written to `.planning/reports/` (not `dist/`) to preserve Phase 123 sitemap-lastmod determinism. Observed max Jaccard 0.2519 (37% under 0.40 ceiling); min wordcount 1217 (717 words above the 500 floor). 5-page editorial human review passed.
+- [Phase 123-sitemap-lastmod]: Sitemap date logic owned by src/lib/sitemap/; astro.config.mjs is a thin consumer importing buildContentDateMap + resolvePrefixLastmod. Registry split: per-URL in STATIC_PAGE_DATES, collection-wide in COLLECTION_SHIP_DATES, per-tool in TOOL_RULES_DATES. Prefix fallback handles route families whose internals aren't easily enumerated at config load (ai-landscape VS, tool rules). Coverage jumped 45→1026/1184 URLs; Claude Code chapter lastmod bug fixed (now per-chapter updatedDate).
 
 ### Pending Todos
 
@@ -86,7 +88,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T11:48:00.000Z
-Stopped at: Completed 122-03-PLAN.md (VS build-time verifiers + editorial approval; Phase 122 complete, 3/3 plans shipped)
+Last session: 2026-04-16T13:06:08.044Z
+Stopped at: Completed 123-01-PLAN.md (sitemap scaffolding + guide bug fix; 1026/1184 URLs with lastmod; determinism preserved)
 Resume file: None
-Next: /gsd-verifier to verify Phase 122 goals, then /gsd-plan-phase 123 (Sitemap Lastmod)
+Next: /gsd-execute-phase 123 Plan 02 (EDA subpages + blog listing/pagination/tag aggregation — closes remaining 158 URLs)
