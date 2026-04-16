@@ -73,7 +73,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   5. The dark-code post title is 55-60 characters, its description is under 160 characters, Beauty Index single-language descriptions are 140-160 characters without mid-word truncation, and the Dockerfile Analyzer description is under 160 characters
 **Plans**: 3 plans
 - [x] 125-01-PLAN.md — TSEO fixes: blog pagination self-canonicals, `/feed.xml` alias, sitemap filter excluding pagination + sparse tag pages, LOC_FLOOR decrement 1184→1137
-- [ ] 125-02-PLAN.md — OPSEO content edits: dark-code title/description, Beauty Index clause-boundary truncator, Dockerfile Analyzer description
+- [x] 125-02-PLAN.md — OPSEO content edits: dark-code title/description, Beauty Index clause-boundary truncator, Dockerfile Analyzer description
 - [ ] 125-03-PLAN.md — New `scripts/verify-on-page-seo.mjs` asserting 6 invariants, wired into `npm run build` after verify-no-google-fonts
 
 ### Phase 126: CSS Investigation and Remediation
@@ -97,5 +97,5 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
 | 124. Font Self-Hosting | 2/2 | Complete   | 2026-04-16 |
-| 125. Blog, Pagination, and On-Page SEO Fixes | 1/3 | In Progress|  |
+| 125. Blog, Pagination, and On-Page SEO Fixes | 2/3 | In Progress|  |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |
