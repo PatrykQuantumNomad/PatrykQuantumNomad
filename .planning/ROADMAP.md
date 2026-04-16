@@ -29,7 +29,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   4. A random 20-page sample shows less than 40% content overlap between any two pages
   5. Each VS page reaches 500+ unique words (verified by word count check)
 **Plans**: 3 plans
-- [ ] 122-01-PLAN.md — Build pure `src/lib/beauty-index/vs-content.ts` content-assembly lib + vitest suite covering VS-01 through VS-06 at lib level
+- [x] 122-01-PLAN.md — Build pure `src/lib/beauty-index/vs-content.ts` content-assembly lib + vitest suite covering VS-01 through VS-06 at lib level
 - [ ] 122-02-PLAN.md — Rewrite `[slug].astro` as thin renderer + add `VsFaqJsonLd.astro` component for FAQPage JSON-LD
 - [ ] 122-03-PLAN.md — Build-time verification scripts (`verify-vs-wordcount.mjs` enforcing VS-07, `verify-vs-overlap.mjs` enforcing VS-06) wired into `npm run build`, plus 5-page editorial sample review checkpoint
 **UI hint**: yes
@@ -86,7 +86,7 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 122. VS Page Content Enrichment | 0/3 | Not started | - |
+| 122. VS Page Content Enrichment | 1/3 | In Progress|  |
 | 123. Sitemap Lastmod | 0/TBD | Not started | - |
 | 124. Font Self-Hosting | 0/TBD | Not started | - |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
