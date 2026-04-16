@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, basename, extname } from 'node:path';
 import { defineConfig } from 'astro/config';
 import expressiveCode from 'astro-expressive-code';
 import mdx from '@astrojs/mdx';
@@ -11,63 +9,16 @@ import { remarkReadingTime } from './remark-reading-time.mjs';
 import { rehypeExternalLinks } from './rehype-external-links.mjs';
 import indexNow from './src/integrations/indexnow';
 import notebookPackager from './src/integrations/notebook-packager';
+import { buildContentDateMap, resolvePrefixLastmod } from './src/lib/sitemap/content-dates';
 
 import react from '@astrojs/react';
 
 /* ------------------------------------------------------------------ */
-/*  Build a URL → lastmod map from blog post frontmatter at config    */
-/*  load time so the sitemap uses real content dates, not build dates. */
+/*  Content date map — URL → ISO lastmod, built at config load time   */
+/*  from src/lib/sitemap/content-dates.ts. Every value is deterministic*/
+/*  (no new Date()/Date.now()/statSync). See that module for details. */
 /* ------------------------------------------------------------------ */
 const SITE = 'https://patrykgolabek.dev';
-const DATE_RE = /(?:updatedDate|publishedDate):\s*["']?(\d{4}-\d{2}-\d{2})["']?/g;
-
-function buildContentDateMap() {
-  /** @type {Map<string, string>} URL → ISO date */
-  const map = new Map();
-
-  // Blog posts: prefer updatedDate, fall back to publishedDate
-  try {
-    const blogDir = './src/data/blog';
-    for (const file of readdirSync(blogDir)) {
-      if (!file.endsWith('.md') && !file.endsWith('.mdx')) continue;
-      const raw = readFileSync(join(blogDir, file), 'utf-8');
-      const slug = basename(file, extname(file));
-
-      let published = '';
-      let updated = '';
-      for (const m of raw.matchAll(DATE_RE)) {
-        if (m[0].startsWith('updated')) updated = m[1];
-        else published = m[1];
-      }
-      const date = updated || published;
-      if (date) map.set(`${SITE}/blog/${slug}/`, new Date(date).toISOString());
-    }
-  } catch { /* non-fatal — pages will omit lastmod */ }
-
-  // Guide pages: iterate all guide directories dynamically
-  try {
-    const guidesDir = './src/data/guides';
-    for (const entry of readdirSync(guidesDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const jsonPath = `${guidesDir}/${entry.name}/guide.json`;
-      try {
-        const meta = JSON.parse(readFileSync(jsonPath, 'utf-8'));
-        const guideDate = meta[0]?.publishedDate;
-        const guideSlug = meta[0]?.slug;
-        if (guideDate && guideSlug) {
-          const iso = new Date(guideDate).toISOString();
-          map.set(`${SITE}/guides/${guideSlug}/`, iso);
-          for (const ch of meta[0].chapters ?? []) {
-            map.set(`${SITE}/guides/${guideSlug}/${ch.slug}/`, iso);
-          }
-        }
-      } catch { /* non-fatal -- guide.json may not parse */ }
-    }
-  } catch { /* non-fatal */ }
-
-  return map;
-}
-
 const contentDates = buildContentDateMap();
 
 export default defineConfig({
@@ -77,11 +28,15 @@ export default defineConfig({
   integrations: [expressiveCode(), mdx(), tailwind(), sitemap({
     filter: (page) => !page.includes('/404'),
     serialize(item) {
-      // --- lastmod: use real content dates, omit when unknown -----------
-      const knownDate = contentDates.get(item.url);
+      // --- lastmod: direct map, then prefix fallback, else undefined -----
+      const knownDate = contentDates.get(item.url) ?? resolvePrefixLastmod(item.url);
       if (knownDate) {
         item.lastmod = knownDate;
       } else {
+        // In dev, surface any category whose URLs aren't yet covered so
+        // gaps show up during local authoring. Prod stays silent to keep
+        // CI logs clean.
+        if (!import.meta.env.PROD) console.warn(`[sitemap] no lastmod for ${item.url}`);
         item.lastmod = undefined;
       }
 
