@@ -12,7 +12,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 
 - [x] **Phase 122: VS Page Content Enrichment** - Enrich 650 Beauty Index VS comparison pages with per-dimension analysis, code snippets, FAQ schema, and cross-links to reach 500+ unique words with structural variation (completed 2026-04-16; 3/3 plans; VS-06 max Jaccard 0.2519, VS-07 min wordcount 1217)
 - [x] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections (completed 2026-04-16)
-- [ ] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints
+- [x] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints (completed 2026-04-16; 2/2 plans; 5 fix-forward commits on Layout.astro/global.css resolved browser console warnings discovered at human-verify checkpoint)
 - [ ] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections
 - [ ] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted
 
@@ -59,7 +59,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   4. All four font families render correctly in both light and dark modes
 **Plans**: 2 plans
 - [x] 124-01-PLAN.md — Self-host @fontsource packages + rewrite Layout.astro head (CSP + preload hints + remove Google Fonts block) + hand-written @font-face rules for LCP-critical weights
-- [ ] 124-02-PLAN.md — Build-time verifier (scripts/verify-no-google-fonts.mjs with FastAPI MDX allowlist + 4-assertion enforcement) wired into npm run build + human smoke test of 4 families in light/dark modes
+- [x] 124-02-PLAN.md — Build-time verifier (scripts/verify-no-google-fonts.mjs with FastAPI MDX allowlist + 4-assertion enforcement) wired into npm run build + human smoke test of 4 families in light/dark modes
 
 ### Phase 125: Blog, Pagination, and On-Page SEO Fixes
 **Goal**: All low-complexity metadata and routing issues from the SEO audit are resolved in a single batch
@@ -93,6 +93,6 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 |-------|----------------|--------|-----------|
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
-| 124. Font Self-Hosting | 1/2 | In Progress|  |
+| 124. Font Self-Hosting | 2/2 | Complete   | 2026-04-16 |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |

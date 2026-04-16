@@ -109,4 +109,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-15 after roadmap creation*
+*Last updated: 2026-04-16 — Phase 124 Font Self-Hosting COMPLETE; PERF-01/02/03 locked in by scripts/verify-no-google-fonts.mjs build-time gate (4 assertions, 4/4 negative tests PASS) + 8/8 human smoke-test cells*
