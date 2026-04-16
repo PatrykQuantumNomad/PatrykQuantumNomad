@@ -18,6 +18,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, basename, extname } from 'node:path';
 import { STATIC_PAGE_DATES, TOOL_RULES_DATES, COLLECTION_SHIP_DATES } from './static-dates';
+import { gitLogDate } from './git-dates';
 
 const SITE = 'https://patrykgolabek.dev';
 const DATE_RE = /(?:updatedDate|publishedDate|lastVerified):\s*["']?(\d{4}-\d{2}-\d{2})["']?/g;
@@ -138,6 +139,136 @@ export function buildContentDateMap(): Map<string, string> {
   if (guideRoots.length) {
     guideRoots.sort();
     map.set(`${SITE}/guides/`, guideRoots[guideRoots.length - 1]);
+  }
+
+  // ─── EDA subpages (Plan 02) ──────────────────────────────────────────
+  //
+  // Six URL categories per RESEARCH.md § URL Category Enumeration rows 26–31:
+  //   MDX-backed:  /eda/foundations/{slug}/, /eda/case-studies/{slug}/, /eda/reference/{slug}/
+  //   JSON-backed: /eda/techniques/{slug}/, /eda/distributions/{slug}/, /eda/quantitative/{slug}/
+  //
+  // Per-file precedence (MDX path):
+  //   1. frontmatter updatedDate/lastVerified/publishedDate (via extractFrontmatterDate)
+  //   2. git log committer date (gitLogDate) — FALLBACK, emits console.warn
+  //      so shallow-clone breakage is visible in build logs
+  //   3. COLLECTION_SHIP_DATES.eda — final safety net, also warns
+  //
+  // JSON path: batch date = gitLogDate(jsonFile) ?? COLLECTION_SHIP_DATES.eda.
+  // Per-entry JSON dates were deferred per RESEARCH.md open-question #5
+  // recommendation — Phase 123 Plan 02 scope is coverage, not per-entry
+  // granularity for JSON-sourced EDA content.
+  //
+  // Category index pages (/eda/{category}/) get aggregate-max of their
+  // subpages at the end of this block.
+  const edaCategoryDates: Record<string, string[]> = {
+    foundations: [],
+    'case-studies': [],
+    reference: [],
+    techniques: [],
+    distributions: [],
+    quantitative: [],
+  };
+
+  for (const cat of ['foundations', 'case-studies', 'reference'] as const) {
+    const catDir = `./src/data/eda/pages/${cat}`;
+    let files: string[];
+    try {
+      files = readdirSync(catDir);
+    } catch {
+      continue;
+    }
+    for (const file of files) {
+      if (!file.endsWith('.mdx')) continue;
+      const slug = basename(file, '.mdx');
+      const rel = `src/data/eda/pages/${cat}/${file}`;
+      let iso: string | undefined;
+      try {
+        const raw = readFileSync(join(catDir, file), 'utf-8');
+        const fm = extractFrontmatterDate(raw);
+        if (fm) iso = isoFromYmd(fm);
+      } catch {
+        /* read failed — fall through to git log / collection date */
+      }
+      if (!iso) {
+        const git = gitLogDate(rel);
+        if (git) {
+          iso = git;
+          console.warn(
+            `[sitemap] ${cat}/${slug}: frontmatter date absent, using git log (${git})`
+          );
+        }
+      }
+      if (!iso) {
+        iso = COLLECTION_SHIP_DATES.eda;
+        console.warn(
+          `[sitemap] ${cat}/${slug}: no frontmatter, no git log — using EDA collection date`
+        );
+      }
+      map.set(`${SITE}/eda/${cat}/${slug}/`, iso);
+      edaCategoryDates[cat].push(iso);
+    }
+  }
+
+  // JSON-backed EDA collections: techniques & distributions. The JSONs have
+  // no per-entry date field, so every entry inherits the same batch date =
+  // gitLogDate(jsonFile) || COLLECTION_SHIP_DATES.eda.
+  for (const jsonFile of [
+    { path: 'src/data/eda/techniques.json', urlCategory: 'techniques' as const },
+    { path: 'src/data/eda/distributions.json', urlCategory: 'distributions' as const },
+  ] as const) {
+    let entries: Array<{ slug?: string; id?: string; category?: string }> = [];
+    try {
+      entries = JSON.parse(readFileSync(`./${jsonFile.path}`, 'utf-8'));
+    } catch {
+      continue;
+    }
+    const gitDate = gitLogDate(jsonFile.path);
+    const batchDate = gitDate ?? COLLECTION_SHIP_DATES.eda;
+    if (!gitDate) {
+      console.warn(
+        `[sitemap] ${jsonFile.path}: git log unavailable, using EDA collection date`
+      );
+    }
+    for (const e of entries) {
+      const slug = e?.slug ?? e?.id;
+      if (!slug) continue;
+      map.set(`${SITE}/eda/${jsonFile.urlCategory}/${slug}/`, batchDate);
+      edaCategoryDates[jsonFile.urlCategory].push(batchDate);
+    }
+  }
+
+  // Quantitative — mirror the route's filter exactly.
+  //   src/pages/eda/quantitative/[slug].astro → getCollection('edaTechniques')
+  //   then filters category === 'quantitative'. The edaTechniques collection
+  //   is loaded from src/data/eda/techniques.json, so iterating the same
+  //   JSON with the same filter produces byte-identical slug coverage (18
+  //   URLs at plan time). If techniques.json grows/shrinks, this loop tracks
+  //   the route output automatically.
+  {
+    const quantGitDate = gitLogDate('src/data/eda/techniques.json');
+    const quantitativeBatchDate = quantGitDate ?? COLLECTION_SHIP_DATES.eda;
+    let techniques: Array<{ slug?: string; id?: string; category?: string }> = [];
+    try {
+      techniques = JSON.parse(readFileSync('./src/data/eda/techniques.json', 'utf-8'));
+    } catch {
+      /* non-fatal — no quantitative URLs added, and /eda/quantitative/
+         index will be omitted from edaCategoryDates */
+    }
+    const quantitative = techniques.filter((t) => t?.category === 'quantitative');
+    for (const t of quantitative) {
+      const slug = t?.slug ?? t?.id;
+      if (!slug) continue;
+      map.set(`${SITE}/eda/quantitative/${slug}/`, quantitativeBatchDate);
+      edaCategoryDates.quantitative.push(quantitativeBatchDate);
+    }
+  }
+
+  // Category index pages: /eda/{cat}/ = max(subpage dates). Do NOT override
+  // /eda/ itself — that's the registry ship date from Plan 01.
+  for (const [cat, dates] of Object.entries(edaCategoryDates)) {
+    if (!dates.length) continue;
+    const sorted = [...dates].sort();
+    map.set(`${SITE}/eda/${cat}/`, sorted[sorted.length - 1]);
   }
 
   // 4. Beauty Index language pages (26 at time of writing) —
