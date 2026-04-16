@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-04-16T23:00:19.642Z",
+  "invariants": {
+    "paginationCanonicals": {
+      "pass": true,
+      "details": [
+        {
+          "page": 2,
+          "ok": true
+        },
+        {
+          "page": 3,
+          "ok": true
+        },
+        {
+          "page": 4,
+          "ok": true
+        },
+        {
+          "page": 5,
+          "ok": true
+        },
+        {
+          "page": 6,
+          "ok": true
+        }
+      ]
+    },
+    "darkCodeTitle": {
+      "pass": true,
+      "length": 57,
+      "title": "Dark Code: The Silent Rot AI Accelerated — Patryk Golabek"
+    },
+    "darkCodeDescription": {
+      "pass": true,
+      "length": 152,
+      "description": "AI coding assistants accelerate dark code: codebases filled with code no one understands, owns, or can safely change. A framework for measuring the rot."
+    },
+    "beautyIndexDescriptions": {
+      "pass": true,
+      "failed": [],
+      "total": 26
+    },
+    "dockerfileDescription": {
+      "pass": true,
+      "length": 156,
+      "description": "Free browser-based Dockerfile linter by a Kubernetes architect. 46 rules for security, efficiency, and maintainability — your code never leaves your device."
+    },
+    "feedRssIdentical": {
+      "pass": true,
+      "feedSha": "b747317f64468e90982e67e2b06abd60237a3dda36536f9ca0c40c9d714d75e8",
+      "rssSha": "b747317f64468e90982e67e2b06abd60237a3dda36536f9ca0c40c9d714d75e8",
+      "feedBytes": 26340,
+      "rssBytes": 26340
+    }
+  },
+  "overallPass": true
+}
