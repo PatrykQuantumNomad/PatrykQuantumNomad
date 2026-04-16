@@ -78,9 +78,28 @@ const total = totalScore(language);
 const ogImageURL = new URL(`/open-graph/beauty-index/${language.id}.png`, Astro.site).toString();
 const tierLabel = language.tier.charAt(0).toUpperCase() + language.tier.slice(1);
 const fullDescription = `${language.name} scores ${total}/60 in the Beauty Index, ranking #${rank} among 26 programming languages (${tierLabel} tier). ${language.characterSketch}`;
-const metaDescription = fullDescription.length <= 155
-  ? fullDescription
-  : fullDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';
+
+/**
+ * Bounded truncator: prefers sentence/clause boundary in the [targetMin,
+ * targetMax] window; falls back to word boundary; never truncates mid-word.
+ * Guarantees result.length ≤ targetMax + 2 (for trailing ' …' or '…').
+ * Always returns the original string unchanged if it already fits.
+ */
+function truncateDescription(full: string, targetMin = 140, targetMax = 157): string {
+  if (full.length <= targetMax) return full;
+  const slice = full.slice(0, targetMax);
+  // Prefer the last clause/sentence boundary inside the target window.
+  const boundary = Math.max(
+    slice.lastIndexOf('. '),
+    slice.lastIndexOf('; '),
+    slice.lastIndexOf(', '),
+  );
+  if (boundary >= targetMin) return slice.slice(0, boundary + 1) + ' …';
+  // Fall back to whitespace boundary.
+  const wordEnd = slice.lastIndexOf(' ');
+  return (wordEnd >= targetMin ? slice.slice(0, wordEnd) : slice.replace(/\s+\S*$/, '')) + '…';
+}
+const metaDescription = truncateDescription(fullDescription);
 
 const languageSchema = {
   "@context": "https://schema.org",
