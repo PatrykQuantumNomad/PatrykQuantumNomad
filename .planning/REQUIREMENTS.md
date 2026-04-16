@@ -27,10 +27,10 @@ Requirements for SEO Audit Fixes milestone. Each maps to roadmap phases.
 
 ### On-Page SEO
 
-- [ ] **OPSEO-01**: `/blog/dark-code/` title tag expanded to keyword-rich 55-60 characters
-- [ ] **OPSEO-02**: `/blog/dark-code/` meta description trimmed to ≤160 characters with keywords front-loaded
-- [ ] **OPSEO-03**: Beauty Index single-language page descriptions fixed (no mid-word truncation, 140-160 chars)
-- [ ] **OPSEO-04**: `/tools/dockerfile-analyzer/` meta description trimmed to ≤160 characters
+- [x] **OPSEO-01**: `/blog/dark-code/` title tag expanded to keyword-rich 55-60 characters
+- [x] **OPSEO-02**: `/blog/dark-code/` meta description trimmed to ≤160 characters with keywords front-loaded
+- [x] **OPSEO-03**: Beauty Index single-language page descriptions fixed (no mid-word truncation, 140-160 chars)
+- [x] **OPSEO-04**: `/tools/dockerfile-analyzer/` meta description trimmed to ≤160 characters
 
 ### Performance
 
@@ -92,10 +92,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TSEO-03 | Phase 125 | Complete |
 | TSEO-04 | Phase 125 | Complete |
 | TSEO-05 | Phase 125 | Complete |
-| OPSEO-01 | Phase 125 | Pending |
-| OPSEO-02 | Phase 125 | Pending |
-| OPSEO-03 | Phase 125 | Pending |
-| OPSEO-04 | Phase 125 | Pending |
+| OPSEO-01 | Phase 125 | Complete |
+| OPSEO-02 | Phase 125 | Complete |
+| OPSEO-03 | Phase 125 | Complete |
+| OPSEO-04 | Phase 125 | Complete |
 | PERF-01 | Phase 124 | Complete |
 | PERF-02 | Phase 124 | Complete |
 | PERF-03 | Phase 124 | Complete |
