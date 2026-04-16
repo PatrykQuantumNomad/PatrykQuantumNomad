@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 123-01-PLAN.md (sitemap scaffolding + guide bug fix; 1026/1184 URLs with lastmod; determinism preserved)
-last_updated: "2026-04-16T13:06:08.047Z"
-last_activity: 2026-04-16 — Phase 123 Plan 01 complete; sitemap lastmod coverage 1026/1184 URLs; Claude Code guide-chapter bug fixed
+stopped_at: Completed 123-02-PLAN.md (EDA + blog aggregate passes; 1184/1184 URLs with lastmod; byte-identical back-to-back builds)
+last_updated: "2026-04-16T13:18:00.000Z"
+last_activity: 2026-04-16 — Phase 123 Plan 02 complete; sitemap lastmod coverage 1184/1184 (100%); determinism preserved
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 ## Current Position
 
 Phase: 123 of 126 (Sitemap Lastmod) — **IN PROGRESS**
-Plan: 1/3 complete — scaffolding + guide bug fix shipped (Plan 01)
-Status: Plan 01 complete; next is Plan 02 (EDA subpages + blog listing/pagination/tag aggregation)
-Last activity: 2026-04-16 — Phase 123 Plan 01 complete; sitemap lastmod coverage jumped 45→1026/1184 URLs
+Plan: 2/3 complete — scaffolding (Plan 01) + EDA/blog aggregate coverage (Plan 02) shipped
+Status: Plan 02 complete; next is Plan 03 (build-time determinism + coverage verifier)
+Last activity: 2026-04-16 — Phase 123 Plan 02 complete; sitemap lastmod coverage 1026→1184/1184 URLs (100%)
 
-Progress: [███░░░░░░░] 33% (1/3 plans in Phase 123)
+Progress: [██████░░░░] 67% (2/3 plans in Phase 123)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 293 (across 20 milestones)
-- v1.21 plans completed: 4 (Phase 122: 3/3; Phase 123: 1/3)
+- Total plans completed: 294 (across 20 milestones)
+- v1.21 plans completed: 5 (Phase 122: 3/3; Phase 123: 2/3)
 
 **Cumulative Stats:**
 
@@ -52,6 +52,7 @@ Progress: [███░░░░░░░] 33% (1/3 plans in Phase 123)
 | Phase 122 P02 | 5 | 2 tasks | 2 files |
 | Phase 122 P03 | 4m | 2 tasks | 3 files |
 | Phase 123-sitemap-lastmod P01 | 34m | 2 tasks | 4 files |
+| Phase 123-sitemap-lastmod P02 | 20m | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - [Phase 122]: [Phase 122 P02] VS template is a thin renderer consuming buildVsContent. Character sketches placed inside Hero (not removed) to honour preserve directive without violating 6-section locked order. Zero client-side JS added — both languages' code snippets server-rendered via astro-expressive-code <Code>.
 - [Phase 122]: [Phase 122 P03] VS-06 and VS-07 enforced at build time via zero-dep ESM verifiers chained after `astro build`. Deterministic mulberry32 SEED=20260416; shared-chrome stripping (nav/header/footer/svg + known shared heading strings) before Jaccard to avoid false inflation. Reports written to `.planning/reports/` (not `dist/`) to preserve Phase 123 sitemap-lastmod determinism. Observed max Jaccard 0.2519 (37% under 0.40 ceiling); min wordcount 1217 (717 words above the 500 floor). 5-page editorial human review passed.
 - [Phase 123-sitemap-lastmod]: Sitemap date logic owned by src/lib/sitemap/; astro.config.mjs is a thin consumer importing buildContentDateMap + resolvePrefixLastmod. Registry split: per-URL in STATIC_PAGE_DATES, collection-wide in COLLECTION_SHIP_DATES, per-tool in TOOL_RULES_DATES. Prefix fallback handles route families whose internals aren't easily enumerated at config load (ai-landscape VS, tool rules). Coverage jumped 45→1026/1184 URLs; Claude Code chapter lastmod bug fixed (now per-chapter updatedDate).
+- [Phase 123 P02]: Full 1184/1184 coverage. EDA subpages follow frontmatter -> gitLogDate -> COLLECTION_SHIP_DATES.eda ladder with loud warnings; quantitative URLs derived by filtering techniques.json by category === 'quantitative' to mirror the [slug].astro route exactly (18 URLs). Blog aggregate pool = ALL non-draft posts (internal + external) because pagination/tag routes don't filter externalUrl; per-slug lastmod stays internal-only. PAGE_SIZE=10 preflight assertion reads the route source and throws on any drift. Synthetic guide routes (cheatsheet, faq) added inside content-dates.ts via gitLogDate on the .astro file. Back-to-back builds byte-identical (sha256 dcbc444...965e2).
 
 ### Pending Todos
 
@@ -88,7 +90,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T13:06:08.044Z
-Stopped at: Completed 123-01-PLAN.md (sitemap scaffolding + guide bug fix; 1026/1184 URLs with lastmod; determinism preserved)
+Last session: 2026-04-16T13:18:00.000Z
+Stopped at: Completed 123-02-PLAN.md (EDA + blog aggregate passes; 1184/1184 URLs with lastmod; byte-identical back-to-back builds)
 Resume file: None
-Next: /gsd-execute-phase 123 Plan 02 (EDA subpages + blog listing/pagination/tag aggregation — closes remaining 158 URLs)
+Next: /gsd-execute-phase 123 Plan 03 (build-time determinism + coverage verifier wired after Phase 122 VS verifiers)

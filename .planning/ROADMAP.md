@@ -45,7 +45,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   4. Two consecutive builds without content changes produce identical sitemaps
 **Plans**: 3 plans
 - [x] 123-01-PLAN.md — Extract `buildContentDateMap` into `src/lib/sitemap/` with `static-dates.ts` + `git-dates.ts` + `content-dates.ts`; cover static/blog/guide/beauty-index/ai-landscape/db-compass/tool URLs; fix Claude Code guide-chapter lastmod bug
-- [ ] 123-02-PLAN.md — Extend `content-dates.ts` with EDA subpages (frontmatter + git log fallback) and blog index/pagination/tag aggregate-max passes so coverage reaches 1184/1184
+- [x] 123-02-PLAN.md — Extend `content-dates.ts` with EDA subpages (frontmatter + git log fallback), quantitative route-parity filter, blog index/pagination/tag aggregate-max, and synthetic guide routes; coverage 1184/1184
 - [ ] 123-03-PLAN.md — Build-time determinism + coverage verifier (`scripts/verify-sitemap-determinism.mjs`) wired into `npm run build` after the Phase 122 VS verifiers
 
 ### Phase 124: Font Self-Hosting
@@ -90,7 +90,7 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
-| 123. Sitemap Lastmod | 1/3 | In Progress|  |
+| 123. Sitemap Lastmod | 2/3 | In Progress|  |
 | 124. Font Self-Hosting | 0/TBD | Not started | - |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |
