@@ -1,0 +1,38 @@
+---
+/**
+ * VsFaqJsonLd.astro — FAQPage schema injection for VS comparison pages.
+ *
+ * Sibling to VsJsonLd.astro (which emits the WebPage schema). Renders a single
+ * `<script type="application/ld+json">` tag containing a FAQPage structured-data
+ * payload derived from the pair's score-driven FAQ entries.
+ *
+ * Answer text is expected to be plain text — the upstream `buildVsContent()` in
+ * `src/lib/beauty-index/vs-content.ts` runs `stripHtml` on every answer, so we
+ * do not re-sanitize here (that would double-escape entities). Trust the contract.
+ *
+ * Rationale: Google's April 2026 FAQ rich-result rules narrowed SERP eligibility
+ * to gov/health domains, but the schema still provides AI-search citation value
+ * (Perplexity, ChatGPT Search) and featured-snippet eligibility. See
+ * `.planning/phases/122-vs-page-content-enrichment/122-RESEARCH.md` Pattern 4.
+ */
+interface Props {
+  faq: { question: string; answer: string }[];
+}
+
+const { faq } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faq.map((f) => ({
+    "@type": "Question",
+    "name": f.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": f.answer,
+    },
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
