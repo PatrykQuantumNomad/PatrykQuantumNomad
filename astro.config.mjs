@@ -9,7 +9,7 @@ import { remarkReadingTime } from './remark-reading-time.mjs';
 import { rehypeExternalLinks } from './rehype-external-links.mjs';
 import indexNow from './src/integrations/indexnow';
 import notebookPackager from './src/integrations/notebook-packager';
-import { buildContentDateMap, resolvePrefixLastmod } from './src/lib/sitemap/content-dates';
+import { buildContentDateMap, resolvePrefixLastmod, buildSparseTagSet } from './src/lib/sitemap/content-dates';
 
 import react from '@astrojs/react';
 
@@ -20,13 +20,20 @@ import react from '@astrojs/react';
 /* ------------------------------------------------------------------ */
 const SITE = 'https://patrykgolabek.dev';
 const contentDates = buildContentDateMap();
+const sparseTags = buildSparseTagSet(3); // tags with < 3 posts → excluded from sitemap (TSEO-05)
 
 export default defineConfig({
   site: SITE,
   output: 'static',
   trailingSlash: 'always',
   integrations: [expressiveCode(), mdx(), tailwind(), sitemap({
-    filter: (page) => !page.includes('/404'),
+    filter: (page) => {
+      if (page.includes('/404')) return false;
+      if (/\/blog\/\d+\/?$/.test(page)) return false; // TSEO-03: exclude /blog/{N}/ pagination
+      const tagMatch = page.match(/\/blog\/tags\/([^/]+)\/?$/); // TSEO-05: exclude sparse tags
+      if (tagMatch && sparseTags.has(tagMatch[1])) return false;
+      return true;
+    },
     serialize(item) {
       // --- lastmod: direct map, then prefix fallback, else undefined -----
       const knownDate = contentDates.get(item.url) ?? resolvePrefixLastmod(item.url);

@@ -468,3 +468,33 @@ export function resolvePrefixLastmod(url: string): string | undefined {
   }
   return undefined;
 }
+
+/**
+ * Build a set of tag slugs that appear on fewer than `minPosts` non-draft
+ * blog posts. Consumed by `astro.config.mjs`'s sitemap filter to exclude
+ * thin tag pages (TSEO-05). Mirrors the same draft filter used by
+ * `src/pages/blog/[...page].astro` and `src/pages/blog/tags/[tag].astro`
+ * (prod-only draft exclusion) to avoid drift.
+ *
+ * Uses the SAME slug normalization as buildContentDateMap(): tag.toLowerCase()
+ * .replace(/\s+/g, '-'). All tags in the blog data are already kebab-case
+ * lowercase, so this is a no-op for today's corpus — kept for defensiveness.
+ */
+export function buildSparseTagSet(minPosts: number): Set<string> {
+  const counts = new Map<string, number>();
+  const blogDir = './src/data/blog';
+  try {
+    for (const file of readdirSync(blogDir)) {
+      if (!/\.(md|mdx)$/.test(file)) continue;
+      const raw = readFileSync(join(blogDir, file), 'utf-8');
+      if (/^draft:\s*true/m.test(raw)) continue;
+      for (const tag of extractTags(raw)) {
+        const slug = tag.toLowerCase().replace(/\s+/g, '-');
+        counts.set(slug, (counts.get(slug) ?? 0) + 1);
+      }
+    }
+  } catch { /* non-fatal — blog dir empty */ }
+  const sparse = new Set<string>();
+  for (const [slug, n] of counts) if (n < minPosts) sparse.add(slug);
+  return sparse;
+}

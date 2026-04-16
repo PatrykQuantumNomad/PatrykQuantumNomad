@@ -37,7 +37,10 @@ const SITEMAP_INDEX = resolve(DIST, 'sitemap-index.xml');
 // When Phase 125 ships (TSEO-03 pagination removal + TSEO-05 sparse tag
 // removal), update this constant DOWNWARD to the new expected total — and
 // cite the Phase 125 PR URL in the comment so the drop is auditable.
-const LOC_FLOOR = 1184;
+// Phase 125 decremented this from 1184 → 1137 after TSEO-03 dropped 5 blog
+// pagination URLs (/blog/2/ through /blog/6/) and TSEO-05 dropped 42 sparse
+// tag URLs (tags with < 3 posts). See Phase 125 PR for audit trail.
+const LOC_FLOOR = 1137;
 //
 // LASTMOD_COVERAGE_FLOOR: defensive lower bound on the number of URLs that
 // have a lastmod. Phase 125 will legitimately remove ~64 URLs (pagination +
