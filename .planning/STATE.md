@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 123-03-PLAN.md — Phase 123 sitemap-lastmod COMPLETE (coverage + determinism gate live in npm run build)
-last_updated: "2026-04-16T13:49:44.098Z"
-last_activity: 2026-04-16 — Phase 123 COMPLETE (P03: sitemap coverage + determinism build-time gate; 4/4 negative tests caught their target failure modes; npm run build chains VS verifiers → sitemap-determinism)
+status: completed
+stopped_at: "Completed 124-01-PLAN.md (P01: font self-hosting migration — Google Fonts CDN replaced with @fontsource/* static packages + preload hints, CSP shrunk, determinism gate intact)"
+last_updated: "2026-04-16T15:06:50.670Z"
+last_activity: 2026-04-16 — Phase 123 P03 landed build-time gate; 4/4 negative tests validated failure paths; baseline sha256 dcbc444b...965e2 committed
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_plans: 8
+  completed_plans: 7
+  percent: 88
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 123 — Sitemap Lastmod
+**Current focus:** Phase 124 — Font Self-Hosting
 
 ## Current Position
 
-Phase: 123 of 126 (Sitemap Lastmod) — **COMPLETE**
-Plan: 3/3 complete — scaffolding (Plan 01) + EDA/blog aggregate coverage (Plan 02) + coverage/determinism verifier (Plan 03) shipped
-Status: Phase 123 complete. Next: Phase 124 (TBD per v1.21 roadmap).
-Last activity: 2026-04-16 — Phase 123 P03 landed build-time gate; 4/4 negative tests validated failure paths; baseline sha256 dcbc444b...965e2 committed
+Phase: 124 of 126 (Font Self-Hosting) — **IN PROGRESS**
+Plan: 1/2 complete — P01 shipped font migration (Google Fonts CDN → @fontsource/* static packages, CSP shrunk, 2 preload hints). P02 pending (verifier/guardrails).
+Status: Phase 124 P01 complete. Next: Phase 124 P02 (build-time font-self-hosting verifier chained after sitemap-determinism).
+Last activity: 2026-04-16 — Phase 124 P01 migrated all four font families to first-party origin; rendered dist/ has zero googleapis/gstatic refs; Phase 122+123 gates still pass
 
-Progress: [██████████] 100% (3/3 plans in Phase 123)
+Progress: [█████░░░░░] 50% (1/2 plans in Phase 124)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 295 (across 20 milestones)
-- v1.21 plans completed: 6 (Phase 122: 3/3; Phase 123: 3/3)
+- Total plans completed: 296 (across 20 milestones)
+- v1.21 plans completed: 7 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 1/2)
 
 **Cumulative Stats:**
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100% (3/3 plans in Phase 123)
 | Phase 123-sitemap-lastmod P02 | 20m | 2 tasks | 1 file |
 | Phase 123-sitemap-lastmod P03 | 22m | 1 task | 4 files |
 | Phase 123 P03 | 22m | 1 tasks | 5 files |
+| Phase 124 P01 | 5m | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - [Phase 123-sitemap-lastmod]: Sitemap date logic owned by src/lib/sitemap/; astro.config.mjs is a thin consumer importing buildContentDateMap + resolvePrefixLastmod. Registry split: per-URL in STATIC_PAGE_DATES, collection-wide in COLLECTION_SHIP_DATES, per-tool in TOOL_RULES_DATES. Prefix fallback handles route families whose internals aren't easily enumerated at config load (ai-landscape VS, tool rules). Coverage jumped 45→1026/1184 URLs; Claude Code chapter lastmod bug fixed (now per-chapter updatedDate).
 - [Phase 123 P02]: Full 1184/1184 coverage. EDA subpages follow frontmatter -> gitLogDate -> COLLECTION_SHIP_DATES.eda ladder with loud warnings; quantitative URLs derived by filtering techniques.json by category === 'quantitative' to mirror the [slug].astro route exactly (18 URLs). Blog aggregate pool = ALL non-draft posts (internal + external) because pagination/tag routes don't filter externalUrl; per-slug lastmod stays internal-only. PAGE_SIZE=10 preflight assertion reads the route source and throws on any drift. Synthetic guide routes (cheatsheet, faq) added inside content-dates.ts via gitLogDate on the .astro file. Back-to-back builds byte-identical (sha256 dcbc444...965e2).
 - [Phase 123]: [Phase 123 P03] Build-time coverage + determinism gate shipped. Verifier enforces three independent invariants: (a) locCount >= LOC_FLOOR=1184 (catches URL regressions the old combined check would silently pass), (b) lastmodCount === locCount (per-URL coverage), (c) lastmodCount >= LASTMOD_COVERAGE_FLOOR=1120 (defensive broad-collapse floor); plus byte-identical sha256 compare of dist/sitemap-0.xml + dist/sitemap-index.xml across two consecutive astro build invocations. Verifier uses npx astro build directly to avoid npm-run-build recursion; reports land in .planning/reports/ never dist/. 4/4 negative tests passed: determinism injection caught (first-diff offset + surround emitted); LOC_FLOOR regression caught (survived URLs all had lastmods but hard floor fired); per-URL mismatch caught (new page without date source); broad collapse caught (both per-URL and LASTMOD_COVERAGE_FLOOR flipped). Phase 123 gate: COMPLETE.
+- [Phase 124]: Phase 124 P01: Self-hosted fonts via @fontsource/* 5.x static packages (NOT variable, preserves Tailwind stacks). 6 per-weight CSS @imports + 2 hand-written @font-face rules for preload-critical DM Sans 400 and Bricolage 800 matching stable /fonts/*.woff2 paths byte-for-byte (avoids double-download, RESEARCH Pitfall 1). CSP shrunk: drops googleapis/gstatic from style-src/font-src/connect-src, GA entries preserved verbatim. npm run build passes including Phase 122 VS verifiers + Phase 123 sitemap determinism (1184 URLs byte-identical across rebuilds).
 
 ### Pending Todos
 
@@ -93,7 +95,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T13:49:33.447Z
-Stopped at: Completed 123-03-PLAN.md — Phase 123 sitemap-lastmod COMPLETE (coverage + determinism gate live in npm run build)
+Last session: 2026-04-16T15:06:50.667Z
+Stopped at: Completed 124-01-PLAN.md (P01: font self-hosting migration — Google Fonts CDN replaced with @fontsource/* static packages + preload hints, CSP shrunk, determinism gate intact)
 Resume file: None
-Next: /gsd-execute-phase 123 Plan 03 (build-time determinism + coverage verifier wired after Phase 122 VS verifiers)
+Next: /gsd-execute-phase 124 Plan 02 (build-time font-self-hosting verifier: assert no googleapis/gstatic in dist/, assert CSP shape, assert preload hint presence)

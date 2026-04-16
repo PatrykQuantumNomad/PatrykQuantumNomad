@@ -58,7 +58,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   3. Critical fonts have preload link hints with crossorigin attribute in the document head
   4. All four font families render correctly in both light and dark modes
 **Plans**: 2 plans
-- [ ] 124-01-PLAN.md — Self-host @fontsource packages + rewrite Layout.astro head (CSP + preload hints + remove Google Fonts block) + hand-written @font-face rules for LCP-critical weights
+- [x] 124-01-PLAN.md — Self-host @fontsource packages + rewrite Layout.astro head (CSP + preload hints + remove Google Fonts block) + hand-written @font-face rules for LCP-critical weights
 - [ ] 124-02-PLAN.md — Build-time verifier (scripts/verify-no-google-fonts.mjs with FastAPI MDX allowlist + 4-assertion enforcement) wired into npm run build + human smoke test of 4 families in light/dark modes
 
 ### Phase 125: Blog, Pagination, and On-Page SEO Fixes
@@ -93,6 +93,6 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 |-------|----------------|--------|-----------|
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
-| 124. Font Self-Hosting | 0/TBD | Not started | - |
+| 124. Font Self-Hosting | 1/2 | In Progress|  |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |

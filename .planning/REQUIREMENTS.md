@@ -34,9 +34,9 @@ Requirements for SEO Audit Fixes milestone. Each maps to roadmap phases.
 
 ### Performance
 
-- [ ] **PERF-01**: Google Fonts CDN replaced with self-hosted @fontsource static packages (4 families)
-- [ ] **PERF-02**: CSP meta tag updated to remove googleapis.com and gstatic.com domains
-- [ ] **PERF-03**: Critical fonts have `<link rel="preload">` hints with `crossorigin` attribute
+- [x] **PERF-01**: Google Fonts CDN replaced with self-hosted @fontsource static packages (4 families)
+- [x] **PERF-02**: CSP meta tag updated to remove googleapis.com and gstatic.com domains
+- [x] **PERF-03**: Critical fonts have `<link rel="preload">` hints with `crossorigin` attribute
 - [ ] **PERF-04**: Homepage CSS bundle diagnosed with rollup-plugin-visualizer
 - [ ] **PERF-05**: Homepage CSS bloat remediated if diagnosis shows unnecessary cross-route CSS loading
 
@@ -96,9 +96,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPSEO-02 | Phase 125 | Pending |
 | OPSEO-03 | Phase 125 | Pending |
 | OPSEO-04 | Phase 125 | Pending |
-| PERF-01 | Phase 124 | Pending |
-| PERF-02 | Phase 124 | Pending |
-| PERF-03 | Phase 124 | Pending |
+| PERF-01 | Phase 124 | Complete |
+| PERF-02 | Phase 124 | Complete |
+| PERF-03 | Phase 124 | Complete |
 | PERF-04 | Phase 126 | Pending |
 | PERF-05 | Phase 126 | Pending |
 
