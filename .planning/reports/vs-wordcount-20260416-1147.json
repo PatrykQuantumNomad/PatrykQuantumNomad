@@ -1,0 +1,326 @@
+{
+  "generatedAt": "2026-04-16T11:47:36.627Z",
+  "floor": 500,
+  "total": 650,
+  "min": 1217,
+  "max": 1724,
+  "mean": 1393.44,
+  "median": 1382.5,
+  "histogram": {
+    "<500": 0,
+    "500-599": 0,
+    "600-699": 0,
+    "700-799": 0,
+    "800-899": 0,
+    "900-999": 0,
+    "1000-1099": 0,
+    "1100-1199": 0,
+    "1200-1299": 66,
+    "1300-1399": 325,
+    "1400-1499": 184,
+    "1500+": 75
+  },
+  "failures": [],
+  "warnings": [
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/c-vs-lisp/index.html",
+      "wordCount": 1551
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/c-vs-rust/index.html",
+      "wordCount": 1512
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/clojure-vs-lisp/index.html",
+      "wordCount": 1525
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-csharp/index.html",
+      "wordCount": 1558
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-elixir/index.html",
+      "wordCount": 1558
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-fsharp/index.html",
+      "wordCount": 1525
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-go/index.html",
+      "wordCount": 1502
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-haskell/index.html",
+      "wordCount": 1558
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-java/index.html",
+      "wordCount": 1537
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-javascript/index.html",
+      "wordCount": 1515
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-lisp/index.html",
+      "wordCount": 1724
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-ocaml/index.html",
+      "wordCount": 1583
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-php/index.html",
+      "wordCount": 1600
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-rust/index.html",
+      "wordCount": 1627
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-scala/index.html",
+      "wordCount": 1550
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-typescript/index.html",
+      "wordCount": 1534
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/cpp-vs-zig/index.html",
+      "wordCount": 1506
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/csharp-vs-cpp/index.html",
+      "wordCount": 1582
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/csharp-vs-lisp/index.html",
+      "wordCount": 1581
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/csharp-vs-rust/index.html",
+      "wordCount": 1527
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/elixir-vs-cpp/index.html",
+      "wordCount": 1539
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/elixir-vs-lisp/index.html",
+      "wordCount": 1536
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/fsharp-vs-scala/index.html",
+      "wordCount": 1516
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/gleam-vs-lisp/index.html",
+      "wordCount": 1545
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/go-vs-lisp/index.html",
+      "wordCount": 1614
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/haskell-vs-cpp/index.html",
+      "wordCount": 1576
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/haskell-vs-lisp/index.html",
+      "wordCount": 1611
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/java-vs-cpp/index.html",
+      "wordCount": 1543
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/java-vs-lisp/index.html",
+      "wordCount": 1568
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/javascript-vs-cpp/index.html",
+      "wordCount": 1522
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/javascript-vs-lisp/index.html",
+      "wordCount": 1585
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/julia-vs-lisp/index.html",
+      "wordCount": 1541
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/kotlin-vs-lisp/index.html",
+      "wordCount": 1520
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-c/index.html",
+      "wordCount": 1527
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-clojure/index.html",
+      "wordCount": 1511
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-cpp/index.html",
+      "wordCount": 1697
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-csharp/index.html",
+      "wordCount": 1586
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-elixir/index.html",
+      "wordCount": 1548
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-gleam/index.html",
+      "wordCount": 1524
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-go/index.html",
+      "wordCount": 1609
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-haskell/index.html",
+      "wordCount": 1625
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-java/index.html",
+      "wordCount": 1550
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-javascript/index.html",
+      "wordCount": 1595
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-julia/index.html",
+      "wordCount": 1561
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-lua/index.html",
+      "wordCount": 1572
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-ocaml/index.html",
+      "wordCount": 1503
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-php/index.html",
+      "wordCount": 1604
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-python/index.html",
+      "wordCount": 1554
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-r/index.html",
+      "wordCount": 1512
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-ruby/index.html",
+      "wordCount": 1515
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-rust/index.html",
+      "wordCount": 1591
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-scala/index.html",
+      "wordCount": 1649
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-swift/index.html",
+      "wordCount": 1558
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-typescript/index.html",
+      "wordCount": 1589
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-zig/index.html",
+      "wordCount": 1529
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lua-vs-lisp/index.html",
+      "wordCount": 1582
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-cpp/index.html",
+      "wordCount": 1585
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-cpp/index.html",
+      "wordCount": 1602
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-lisp/index.html",
+      "wordCount": 1621
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-cpp/index.html",
+      "wordCount": 1501
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-lisp/index.html",
+      "wordCount": 1562
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/r-vs-lisp/index.html",
+      "wordCount": 1516
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-lisp/index.html",
+      "wordCount": 1505
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/rust-vs-cpp/index.html",
+      "wordCount": 1640
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/rust-vs-csharp/index.html",
+      "wordCount": 1518
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/rust-vs-lisp/index.html",
+      "wordCount": 1586
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-cpp/index.html",
+      "wordCount": 1551
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-fsharp/index.html",
+      "wordCount": 1504
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-lisp/index.html",
+      "wordCount": 1637
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-lisp/index.html",
+      "wordCount": 1550
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/typescript-vs-cpp/index.html",
+      "wordCount": 1537
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/typescript-vs-lisp/index.html",
+      "wordCount": 1577
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/typescript-vs-rust/index.html",
+      "wordCount": 1501
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/zig-vs-cpp/index.html",
+      "wordCount": 1516
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/zig-vs-lisp/index.html",
+      "wordCount": 1543
+    }
+  ]
+}

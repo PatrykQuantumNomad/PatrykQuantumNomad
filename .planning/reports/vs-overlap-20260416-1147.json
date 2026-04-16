@@ -1,0 +1,166 @@
+{
+  "generatedAt": "2026-04-16T11:47:36.715Z",
+  "seed": 20260416,
+  "sampleSize": 20,
+  "shingleK": 5,
+  "threshold": 0.4,
+  "sampledFiles": [
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-scala/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-c/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-cpp/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lua-vs-java/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/java-vs-haskell/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-javascript/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/go-vs-c/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-haskell/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-swift/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/c-vs-lua/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-python/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-fsharp/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-fsharp/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/javascript-vs-scala/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-java/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/fsharp-vs-cpp/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-clojure/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-swift/index.html",
+    "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/typescript-vs-zig/index.html"
+  ],
+  "tokenCounts": [
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-scala/index.html",
+      "tokenCount": 1399
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-c/index.html",
+      "tokenCount": 1286
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-cpp/index.html",
+      "tokenCount": 1426
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lua-vs-java/index.html",
+      "tokenCount": 1314
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/java-vs-haskell/index.html",
+      "tokenCount": 1314
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/lisp-vs-javascript/index.html",
+      "tokenCount": 1520
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/go-vs-c/index.html",
+      "tokenCount": 1292
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-haskell/index.html",
+      "tokenCount": 1298
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-swift/index.html",
+      "tokenCount": 1313
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/c-vs-lua/index.html",
+      "tokenCount": 1323
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+      "tokenCount": 1320
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-python/index.html",
+      "tokenCount": 1322
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-fsharp/index.html",
+      "tokenCount": 1296
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-fsharp/index.html",
+      "tokenCount": 1387
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/javascript-vs-scala/index.html",
+      "tokenCount": 1323
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/php-vs-java/index.html",
+      "tokenCount": 1323
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/fsharp-vs-cpp/index.html",
+      "tokenCount": 1415
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-clojure/index.html",
+      "tokenCount": 1273
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-swift/index.html",
+      "tokenCount": 1279
+    },
+    {
+      "path": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/typescript-vs-zig/index.html",
+      "tokenCount": 1347
+    }
+  ],
+  "max": 0.2519,
+  "mean": 0.0559,
+  "p95": 0.2051,
+  "topCollisions": [
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-swift/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-fsharp/index.html",
+      "jaccard": 0.2519
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+      "jaccard": 0.2401
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-clojure/index.html",
+      "jaccard": 0.2363
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-swift/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-swift/index.html",
+      "jaccard": 0.2278
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/python-vs-cpp/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/fsharp-vs-cpp/index.html",
+      "jaccard": 0.2234
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-fsharp/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-swift/index.html",
+      "jaccard": 0.2201
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-fsharp/index.html",
+      "jaccard": 0.2116
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/swift-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ruby-vs-swift/index.html",
+      "jaccard": 0.2112
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/scala-vs-clojure/index.html",
+      "jaccard": 0.2067
+    },
+    {
+      "pathA": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/ocaml-vs-scala/index.html",
+      "pathB": "/Users/patrykattc/work/git/PatrykQuantumNomad/dist/beauty-index/vs/javascript-vs-scala/index.html",
+      "jaccard": 0.2051
+    }
+  ]
+}
