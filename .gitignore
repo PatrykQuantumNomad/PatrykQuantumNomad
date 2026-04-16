@@ -18,3 +18,12 @@ skills-lock.json
 recordings-workspace/sample-project/
 
 .ipynb_checkpoints
+
+# Per-build verifier reports. One representative green-state report per
+# plan is committed alongside the verifier (see Phase 122 P03, Phase 123
+# P03). Subsequent local `npm run build` runs emit fresh-timestamped
+# copies that should stay untracked — gitignoring the pattern does NOT
+# untrack the already-committed baselines.
+.planning/reports/sitemap-determinism-*.json
+.planning/reports/vs-overlap-*.json
+.planning/reports/vs-wordcount-*.json

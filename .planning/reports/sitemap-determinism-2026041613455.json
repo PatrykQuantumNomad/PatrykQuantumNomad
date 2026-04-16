@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-04-16T13:45:53.730Z",
+  "sitemap0": {
+    "firstHash": "dcbc444bf6a6744178c05e939c055ba9cdd7d65ee1a17c5bdf54eff9bd1965e2",
+    "secondHash": "dcbc444bf6a6744178c05e939c055ba9cdd7d65ee1a17c5bdf54eff9bd1965e2",
+    "deterministic": true,
+    "sizeBytes": 210526,
+    "locCount": 1184,
+    "lastmodCount": 1184,
+    "locFloor": 1184,
+    "lastmodCoverageFloor": 1120,
+    "locFloorOk": true,
+    "lastmodPerUrlOk": true,
+    "lastmodFloorOk": true,
+    "coverageOk": true
+  },
+  "sitemapIndex": {
+    "firstHash": "3708774f05f4c28c0332cbc534c5e11b4409ddd379dc88ee43d1cb9cbdcf96f8",
+    "secondHash": "3708774f05f4c28c0332cbc534c5e11b4409ddd379dc88ee43d1cb9cbdcf96f8",
+    "deterministic": true
+  }
+}
