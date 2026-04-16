@@ -52,6 +52,30 @@ function isExternalBlog(raw: string): boolean {
   return /^externalUrl:/m.test(raw);
 }
 
+/**
+ * Extract the `tags` array from a blog post's YAML frontmatter. Handles
+ * both inline form (`tags: ["a", "b"]`) and block-list form (`tags:\n  - a`).
+ * Returns an empty array when no tag field is present — matches the schema
+ * default of `z.array(z.string()).default([])`.
+ */
+const TAGS_RE = /^tags:\s*(\[[^\]]*\]|(?:\n\s*-\s*.+)+)/m;
+function extractTags(raw: string): string[] {
+  const m = raw.match(TAGS_RE);
+  if (!m) return [];
+  const body = m[1];
+  if (body.startsWith('[')) {
+    return body
+      .slice(1, -1)
+      .split(',')
+      .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+      .filter(Boolean);
+  }
+  return body
+    .split('\n')
+    .map((l) => l.replace(/^\s*-\s*/, '').trim().replace(/^["']|["']$/g, ''))
+    .filter(Boolean);
+}
+
 interface GuideMeta {
   slug?: string;
   publishedDate?: string;
@@ -65,19 +89,101 @@ export function buildContentDateMap(): Map<string, string> {
   for (const [url, date] of Object.entries(STATIC_PAGE_DATES)) map.set(url, date);
 
   // 2. Blog posts — per-post frontmatter (updatedDate || publishedDate).
-  //    External-URL posts do NOT generate /blog/{slug}/ routes, so skip them.
-  //    (Plan 02 handles blog index / pagination / tag aggregation.)
+  //    Two different populations matter here:
+  //      • Internal posts (no externalUrl) — get /blog/{slug}/ lastmods.
+  //      • ALL non-draft posts (internal + external) — feed aggregate lastmods
+  //        for /blog/, /blog/{N}/, and /blog/tags/{tag}/. The pagination and
+  //        tag routes (src/pages/blog/[...page].astro, blog/tags/[tag].astro)
+  //        both call getCollection('blog') with only the draft filter, so
+  //        external-URL posts still contribute to those URL counts and tag
+  //        lists — the pagination pages show them as cards with outbound
+  //        links, and the tag pages list them under their tags.
+  //    Drafts are excluded in PROD; at plan time none exist, but the filter
+  //    below matches the route's `import.meta.env.PROD ? draft !== true : true`
+  //    behaviour by skipping posts with `draft: true` at build time (sitemap
+  //    is generated during PROD build).
   const blogDir = './src/data/blog';
+  const blogPosts: Array<{ slug: string; date: string; tags: string[] }> = [];
   try {
     for (const file of readdirSync(blogDir)) {
       if (!/\.(md|mdx)$/.test(file)) continue;
       const raw = readFileSync(join(blogDir, file), 'utf-8');
-      if (isExternalBlog(raw)) continue;
+      if (/^draft:\s*true/m.test(raw)) continue;
       const slug = basename(file, extname(file));
       const date = extractFrontmatterDate(raw);
-      if (date) map.set(`${SITE}/blog/${slug}/`, isoFromYmd(date));
+      if (!date) continue;
+      const iso = isoFromYmd(date);
+      const external = isExternalBlog(raw);
+      if (!external) {
+        map.set(`${SITE}/blog/${slug}/`, iso);
+      }
+      // Aggregate pool: all non-draft posts, external or not.
+      blogPosts.push({ slug, date: iso, tags: extractTags(raw) });
     }
   } catch { /* non-fatal — blog dir may be empty in some states */ }
+
+  // Blog aggregate pass: index (/blog/), pagination (/blog/{N}/), and tag
+  // pages (/blog/tags/{tag}/). All derived from blogPosts; no runtime clock
+  // usage. Ordering: sort descending by date with slug tiebreak so back-to-
+  // back builds produce byte-identical maps.
+  const blogSorted = [...blogPosts].sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    return a.slug < b.slug ? -1 : 1;
+  });
+
+  // Blog index = max(post dates)
+  if (blogSorted.length) {
+    map.set(`${SITE}/blog/`, blogSorted[0].date);
+  }
+
+  // Pagination: Astro's paginate() with pageSize=10 emits /blog/ for page 1
+  // and /blog/{N}/ for N >= 2. PAGE_SIZE MUST equal the route's pageSize;
+  // preflight assertion below throws on drift so silent mismatch can't ship.
+  const PAGE_SIZE = 10;
+  try {
+    const routeSrc = readFileSync('./src/pages/blog/[...page].astro', 'utf-8');
+    const m = routeSrc.match(/pageSize:\s*(\d+)/);
+    if (!m) {
+      throw new Error(
+        '[sitemap] blog pagination route has no pageSize literal — refactor changed the contract'
+      );
+    }
+    if (parseInt(m[1], 10) !== PAGE_SIZE) {
+      throw new Error(
+        `[sitemap] blog pagination pageSize mismatch: route=${m[1]}, sitemap PAGE_SIZE=${PAGE_SIZE}`
+      );
+    }
+  } catch (err) {
+    // Rethrow — we do NOT want silent drift between route and sitemap.
+    throw err;
+  }
+  const pageCount = Math.ceil(blogSorted.length / PAGE_SIZE);
+  for (let p = 2; p <= pageCount; p++) {
+    const slice = blogSorted.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+    if (slice.length) {
+      // slice is a prefix of already-sorted-desc blogSorted, so slice[0]
+      // is the max date for this page.
+      map.set(`${SITE}/blog/${p}/`, slice[0].date);
+    }
+  }
+
+  // Tag pages: src/pages/blog/tags/[tag].astro uses the raw tag string as
+  // the route param with no normalization, and all tags in the blog data
+  // are already kebab-case lowercase (no whitespace). Tag slug == raw tag.
+  // A defensive lowercase + whitespace-collapse is applied anyway so any
+  // future non-kebab tag still lands at a valid URL slug; must match the
+  // route's slugification if that ever changes.
+  const tagToMaxDate = new Map<string, string>();
+  for (const post of blogSorted) {
+    for (const tag of post.tags) {
+      const cur = tagToMaxDate.get(tag);
+      if (!cur || post.date > cur) tagToMaxDate.set(tag, post.date);
+    }
+  }
+  for (const [tag, date] of tagToMaxDate) {
+    const slug = tag.toLowerCase().replace(/\s+/g, '-');
+    map.set(`${SITE}/blog/tags/${slug}/`, date);
+  }
 
   // 3. Guides — per-chapter MDX frontmatter with guide-JSON fallback.
   //
@@ -129,6 +235,20 @@ export function buildContentDateMap(): Map<string, string> {
       }
     }
   } catch { /* non-fatal — guides dir may not exist in some contexts */ }
+
+  // Synthetic guide routes — standalone .astro pages under src/pages/guides/
+  // that are NOT registered as chapters in any guide.json. Use gitLogDate
+  // on the route file as the authoritative lastmod (these pages are rarely
+  // edited and their ship date is the Plan 01 handoff's recommended
+  // published date; git log picks up the actual last edit which is at
+  // least as recent as that ship date).
+  for (const synthetic of [
+    { url: `${SITE}/guides/claude-code/cheatsheet/`, route: 'src/pages/guides/claude-code/cheatsheet.astro', fallbackYmd: '2026-04-12' },
+    { url: `${SITE}/guides/fastapi-production/faq/`, route: 'src/pages/guides/fastapi-production/faq.astro', fallbackYmd: '2026-03-08' },
+  ]) {
+    const iso = gitLogDate(synthetic.route) ?? isoFromYmd(synthetic.fallbackYmd);
+    map.set(synthetic.url, iso);
+  }
 
   // /guides/ landing = max of guide roots.
   const guideRoots: string[] = [];
