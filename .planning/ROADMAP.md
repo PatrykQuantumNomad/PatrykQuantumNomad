@@ -11,7 +11,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 ## Phases
 
 - [x] **Phase 122: VS Page Content Enrichment** - Enrich 650 Beauty Index VS comparison pages with per-dimension analysis, code snippets, FAQ schema, and cross-links to reach 500+ unique words with structural variation (completed 2026-04-16; 3/3 plans; VS-06 max Jaccard 0.2519, VS-07 min wordcount 1217)
-- [ ] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections
+- [x] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections (completed 2026-04-16)
 - [ ] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints
 - [ ] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections
 - [ ] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted
@@ -46,7 +46,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 **Plans**: 3 plans
 - [x] 123-01-PLAN.md — Extract `buildContentDateMap` into `src/lib/sitemap/` with `static-dates.ts` + `git-dates.ts` + `content-dates.ts`; cover static/blog/guide/beauty-index/ai-landscape/db-compass/tool URLs; fix Claude Code guide-chapter lastmod bug
 - [x] 123-02-PLAN.md — Extend `content-dates.ts` with EDA subpages (frontmatter + git log fallback), quantitative route-parity filter, blog index/pagination/tag aggregate-max, and synthetic guide routes; coverage 1184/1184
-- [ ] 123-03-PLAN.md — Build-time determinism + coverage verifier (`scripts/verify-sitemap-determinism.mjs`) wired into `npm run build` after the Phase 122 VS verifiers
+- [x] 123-03-PLAN.md — Build-time determinism + coverage verifier (`scripts/verify-sitemap-determinism.mjs`) wired into `npm run build` after the Phase 122 VS verifiers
 
 ### Phase 124: Font Self-Hosting
 **Goal**: All fonts load from the same origin as the site, eliminating external DNS lookups and TLS handshakes for faster LCP
@@ -90,7 +90,7 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
-| 123. Sitemap Lastmod | 2/3 | In Progress|  |
+| 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
 | 124. Font Self-Hosting | 0/TBD | Not started | - |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |
