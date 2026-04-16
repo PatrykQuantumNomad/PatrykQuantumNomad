@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
 status: in-progress
-stopped_at: "Completed 125-02-PLAN.md — OPSEO-01/02/03/04 shipped: dark-code title 64→40 chars (renders 57, was 26 via fallback), dark-code description 219→152, Beauty Index regex truncator replaced with clause-boundary truncateDescription() helper (all 26 langs in [143,158]), Dockerfile Analyzer description 196→156. npm run build green with all 4 verifiers. Commits: ee3acc5 (Task 1), ad27920 (Task 2), 8ade8ff (Task 3). No deviations."
-last_updated: "2026-04-16T22:54:51Z"
-last_activity: 2026-04-16 — Phase 125 P02 shipped (OPSEO-01/02/03/04). dark-code title 57 chars, dark-code desc 152, Beauty Index 26/26 in [143,158] no mid-word truncation, dockerfile-analyzer desc 156. All within SEO spec.
+stopped_at: "Completed 125-03-PLAN.md — verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants: /blog/{2..6}/ self-canonicals, dark-code title in [55,60], dark-code desc ≤160, 26 Beauty Index desc in [140,160] with no mid-word truncation, dockerfile-analyzer desc ≤160, feed.xml===rss.xml byte-wise. Wired into npm run build as LAST gate after verify-no-google-fonts. rm -rf dist && npm run build green with all 5 verifiers. Commits: bfc68dc (Task 1), 2ee1023 (Task 2). Phase 125 COMPLETE (3/3 plans)."
+last_updated: "2026-04-16T23:04:02Z"
+last_activity: 2026-04-16 — Phase 125 COMPLETE. P03 shipped the on-page SEO verifier asserting all 6 Phase 125 invariants at build time. Milestone v1.21 at 11/11 plans (100%). Next: Phase 126 CSS investigation OR milestone close-out.
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -25,19 +25,19 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 125 of 126 (Blog/Pagination/On-Page SEO Batch) — **IN PROGRESS**
-Plan: 2/3 complete — P01 shipped the 4 TSEO routing/config fixes; P02 shipped the 4 OPSEO on-page content edits (dark-code title/desc, Beauty Index clause-boundary truncator, dockerfile-analyzer desc). P03 (verify-on-page-seo.mjs) next — Wave 2 verifier that asserts the P02 invariants at build time.
-Status: Phase 125 P02 COMPLETE. Next: Plan 03 (verify-on-page-seo.mjs asserting 6 invariants, wired into npm run build after verify-no-google-fonts).
-Last activity: 2026-04-16 — Phase 125 P02 shipped OPSEO-01..04. dark-code <title> 57 chars, <meta desc> 152; all 26 Beauty Index descs in [143,158] with no mid-word truncation; dockerfile-analyzer desc 156.
+Phase: 125 of 126 (Blog/Pagination/On-Page SEO Batch) — **COMPLETE**
+Plan: 3/3 complete — P01 shipped the 4 TSEO routing/config fixes; P02 shipped the 4 OPSEO on-page content edits; P03 shipped the zero-dep ESM verifier (scripts/verify-on-page-seo.mjs) asserting all 6 Phase 125 invariants at build time, wired into npm run build as the LAST gate after verify-no-google-fonts.
+Status: Phase 125 COMPLETE. Next: Phase 126 (CSS investigation with rollup-plugin-visualizer) OR close milestone v1.21.
+Last activity: 2026-04-16 — Phase 125 P03 shipped. All 5 verifiers green on rm -rf dist && npm run build: verify-vs-wordcount, verify-vs-overlap, verify-sitemap-determinism, verify-no-google-fonts, verify-on-page-seo.
 
-Progress: [█████████░] 91% (10/11 plans in milestone v1.21)
+Progress: [██████████] 100% (11/11 plans in milestone v1.21 — Phase 126 plans TBD)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 298 (across 20 milestones)
-- v1.21 plans completed: 10 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 2/3)
+- Total plans completed: 299 (across 20 milestones)
+- v1.21 plans completed: 11 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 0/TBD)
 
 **Cumulative Stats:**
 
@@ -47,7 +47,7 @@ Progress: [█████████░] 91% (10/11 plans in milestone v1.21)
 | v1.18 AI Landscape Explorer | 102-110 | 25 | 40 | 2026-03-26 to 2026-03-27 |
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
-| v1.21 SEO Audit Fixes | 122-126 | 10 (so far) | 25 | 2026-04-15 (in progress) |
+| v1.21 SEO Audit Fixes | 122-126 | 11 (so far) | 25 | 2026-04-15 (in progress) |
 | Phase 122 P01 | 4m | 2 tasks | 2 files |
 | Phase 122 P02 | 5 | 2 tasks | 2 files |
 | Phase 122 P03 | 4m | 2 tasks | 3 files |
@@ -59,6 +59,7 @@ Progress: [█████████░] 91% (10/11 plans in milestone v1.21)
 | Phase 124 P02 | 82m | 2 tasks | 6 files |
 | Phase 125 P01 | 5m | 2 tasks | 5 files |
 | Phase 125 P02 | 6m | 3 tasks | 3 files |
+| Phase 125 P03 | 4m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,7 @@ Recent decisions affecting current work:
 - [Phase 125]: Phase 125 P01: /feed.xml alias implemented as re-export ('export { GET } from ./rss.xml'), NOT redirect — GitHub Pages can't serve 301 with XML Content-Type; both endpoints ship byte-identical bytes, future RSS edits propagate automatically.
 - [Phase 125]: Phase 125 P01: Sitemap filter drops 47 URLs (5 pagination + 42 sparse tags <3 posts) reaching exactly 1137 URLs on first build. buildSparseTagSet(minPosts) parameterized for future threshold bumps. LOC_FLOOR 1184→1137; LASTMOD_COVERAGE_FLOOR unchanged (Phase 123 pre-allocated 64-URL headroom).
 - [Phase 125]: Phase 125 P02: On-page SEO content fixes shipped OPSEO-01..04. OPSEO-01 fix was to shorten the dark-code frontmatter title from 64→40 chars so title+' — Patryk Golabek' (17-char suffix) sums to 57, bypassing the 65-char fallback branch in blog/[slug].astro:224-227 — the pre-fix rendered <title> was 'Dark Code — Patryk Golabek' (26 chars, split-at-colon) because the unshortened 81-char sum triggered the truncation branch. Fix target = input (frontmatter) not fallback logic (shared across all blog posts, unknown blast radius). OPSEO-03 replaced regex slice+replace with truncateDescription(full, targetMin=140, targetMax=157) helper that prefers last '. ', '; ', ', ' boundary in window, falls back to word boundary, never mid-word. All 26 Beauty Index language pages in [143, 158]; short fullDescription (≤157) returns verbatim. OPSEO-04 prefers concrete '46 rules' count over 'Dozens of rules' — specificity as minor ranking signal; 46 sourced from blog/[slug].astro:139 authoritative tool rules reference.
+- [Phase 125]: Phase 125 P03: scripts/verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants at build time: (1) /blog/{2..6}/ self-canonicals, (2) dark-code <title> in [55,60], (3) dark-code <meta description> ≤160, (4) 26 Beauty Index language descs in [140,160] with no mid-word truncation, (5) dockerfile-analyzer <meta description> ≤160, (6) feed.xml === rss.xml byte-wise via sha256. Two-pass meta extraction (find tag, then content=) avoids Astro attribute-order fragility. Skips dist/beauty-index/{vs,code,justifications}/ — vs is Phase 122's 650-page comparison corpus covered by separate verifiers, code and justifications are aggregate landing pages with intentionally shorter descriptions; filter yields exactly 26 language slugs. Mid-word truncation detection uses Unicode property classes (/[\\p{L}\\p{N}]/u) — future-proof for non-English language slugs. Ellipsis is word-complete iff preceded by alphanumeric OR terminal punctuation OR whitespace; rejects "Python'…" (apostrophe) and "C#…" (hash) canonical failures. Wired into npm run build as LAST gate after verify-no-google-fonts. Reports land in .planning/reports/on-page-seo-{stamp}.json (NOT dist/ — preserves Phase 123 sitemap determinism). Gitignore pattern-ignores timestamped reports + force-adds one representative green-state baseline (on-page-seo-2026041623001.json) — matches Phase 122/123 convention. rm -rf dist && npm run build green with all 5 verifiers.
 
 ### Pending Todos
 
@@ -102,7 +104,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:54:51Z
-Stopped at: Completed 125-02-PLAN.md — OPSEO-01/02/03/04 shipped. dark-code <title> 57 chars (was 26 via fallback), <meta desc> 152 chars; Beauty Index 26/26 descs in [143,158] with clause-boundary truncateDescription helper; dockerfile-analyzer desc 156 chars with concrete '46 rules'. npm run build green with all 4 verifiers. Commits: ee3acc5 (Task 1 — OPSEO-01/02), ad27920 (Task 2 — OPSEO-03), 8ade8ff (Task 3 — OPSEO-04). No deviations.
+Last session: 2026-04-16T23:04:02Z
+Stopped at: Completed 125-03-PLAN.md — scripts/verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants; wired into npm run build as LAST gate after verify-no-google-fonts. Full clean build (rm -rf dist && npm run build) green with all 5 verifiers. Commits: bfc68dc (Task 1 — verifier + gitignore + representative report baseline), 2ee1023 (Task 2 — build chain wiring). Phase 125 COMPLETE (3/3 plans). Milestone v1.21 at 11/11 plans (100%, excluding Phase 126 which is TBD).
 Resume file: None
-Next: /gsd-execute-phase 125 P03 — Wave 2 verifier (scripts/verify-on-page-seo.mjs asserting 6 invariants, wired into npm run build after verify-no-google-fonts). After P03, Phase 125 complete; Phase 126 (CSS investigation) becomes next candidate.
+Next: /gsd-plan-phase 126 — CSS investigation and remediation with rollup-plugin-visualizer (PERF-04, PERF-05). OR /gsd-complete-milestone to close out v1.21 if Phase 126 is deferred.

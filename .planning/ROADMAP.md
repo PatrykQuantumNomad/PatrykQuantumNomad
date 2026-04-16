@@ -13,7 +13,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 - [x] **Phase 122: VS Page Content Enrichment** - Enrich 650 Beauty Index VS comparison pages with per-dimension analysis, code snippets, FAQ schema, and cross-links to reach 500+ unique words with structural variation (completed 2026-04-16; 3/3 plans; VS-06 max Jaccard 0.2519, VS-07 min wordcount 1217)
 - [x] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections (completed 2026-04-16)
 - [x] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints (completed 2026-04-16; 2/2 plans; 5 fix-forward commits on Layout.astro/global.css resolved browser console warnings discovered at human-verify checkpoint)
-- [ ] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections
+- [x] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections (completed 2026-04-16; 3/3 plans; all 6 invariants asserted at build time via verify-on-page-seo.mjs)
 - [ ] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted
 
 ## Phase Details
@@ -74,7 +74,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 **Plans**: 3 plans
 - [x] 125-01-PLAN.md — TSEO fixes: blog pagination self-canonicals, `/feed.xml` alias, sitemap filter excluding pagination + sparse tag pages, LOC_FLOOR decrement 1184→1137
 - [x] 125-02-PLAN.md — OPSEO content edits: dark-code title/description, Beauty Index clause-boundary truncator, Dockerfile Analyzer description
-- [ ] 125-03-PLAN.md — New `scripts/verify-on-page-seo.mjs` asserting 6 invariants, wired into `npm run build` after verify-no-google-fonts
+- [x] 125-03-PLAN.md — New `scripts/verify-on-page-seo.mjs` asserting 6 invariants, wired into `npm run build` after verify-no-google-fonts
 
 ### Phase 126: CSS Investigation and Remediation
 **Goal**: The homepage CSS bundle is understood and remediated if diagnosis reveals unnecessary cross-route CSS loading
@@ -97,5 +97,5 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
 | 124. Font Self-Hosting | 2/2 | Complete   | 2026-04-16 |
-| 125. Blog, Pagination, and On-Page SEO Fixes | 2/3 | In Progress|  |
+| 125. Blog, Pagination, and On-Page SEO Fixes | 3/3 | Complete | 2026-04-16 |
 | 126. CSS Investigation and Remediation | 0/TBD | Not started | - |
