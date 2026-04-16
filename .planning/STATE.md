@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
 status: planning
-stopped_at: Completed 122-01-PLAN.md (vs-content.ts lib + vitest suite)
-last_updated: "2026-04-16T11:32:06.711Z"
+stopped_at: Completed 122-02-PLAN.md (VS template rewrite + VsFaqJsonLd; 650 pages build clean, avg 69.7KB)
+last_updated: "2026-04-16T11:41:30.090Z"
 last_activity: 2026-04-15 — Roadmap created for v1.21
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
 | v1.21 SEO Audit Fixes | 122-126 | TBD | 21 | 2026-04-15 (in progress) |
 | Phase 122 P01 | 4m | 2 tasks | 2 files |
+| Phase 122 P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,7 @@ Recent decisions affecting current work:
 - Font self-hosting uses @fontsource static packages (NOT @fontsource-variable, NOT experimental.fonts)
 - CSS investigation is measurement-first: diagnose before fixing
 - [Phase 122]: VS content assembly uses three-seam prose (justification + connective + verdict/closer) with deterministic FNV-1a hash pool selection. All pools module-level const, ≥3 options per key. Observed max Jaccard 0.2119 against <0.40 threshold.
+- [Phase 122]: [Phase 122 P02] VS template is a thin renderer consuming buildVsContent. Character sketches placed inside Hero (not removed) to honour preserve directive without violating 6-section locked order. Zero client-side JS added — both languages' code snippets server-rendered via astro-expressive-code <Code>.
 
 ### Pending Todos
 
@@ -82,7 +84,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T11:32:06.708Z
-Stopped at: Completed 122-01-PLAN.md (vs-content.ts lib + vitest suite)
+Last session: 2026-04-16T11:41:30.087Z
+Stopped at: Completed 122-02-PLAN.md (VS template rewrite + VsFaqJsonLd; 650 pages build clean, avg 69.7KB)
 Resume file: None
 Next: /gsd-plan-phase 122
