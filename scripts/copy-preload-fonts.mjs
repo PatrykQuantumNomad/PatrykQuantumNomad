@@ -17,8 +17,8 @@ const COPIES = [
     to: 'public/fonts/dm-sans-400.woff2',
   },
   {
-    from: 'node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff2',
-    to: 'public/fonts/bricolage-800.woff2',
+    from: 'node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2',
+    to: 'public/fonts/bricolage-700.woff2',
   },
 ];
 

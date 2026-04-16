@@ -11,7 +11,7 @@ public/wasm/
 # Font files copied from @fontsource/* by scripts/copy-preload-fonts.mjs
 # (regenerated on every prebuild — see .planning/phases/124-font-self-hosting/)
 public/fonts/dm-sans-400.woff2
-public/fonts/bricolage-800.woff2
+public/fonts/bricolage-700.woff2
 
 # skills CLI install artifacts (created by npx skills add)
 .agents/
