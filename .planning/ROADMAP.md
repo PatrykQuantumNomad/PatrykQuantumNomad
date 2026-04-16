@@ -10,7 +10,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 
 ## Phases
 
-- [ ] **Phase 122: VS Page Content Enrichment** - Enrich 650 Beauty Index VS comparison pages with per-dimension analysis, code snippets, FAQ schema, and cross-links to reach 500+ unique words with structural variation
+- [x] **Phase 122: VS Page Content Enrichment** - Enrich 650 Beauty Index VS comparison pages with per-dimension analysis, code snippets, FAQ schema, and cross-links to reach 500+ unique words with structural variation (completed 2026-04-16; 3/3 plans; VS-06 max Jaccard 0.2519, VS-07 min wordcount 1217)
 - [ ] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections
 - [ ] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints
 - [ ] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections
@@ -31,7 +31,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 **Plans**: 3 plans
 - [x] 122-01-PLAN.md — Build pure `src/lib/beauty-index/vs-content.ts` content-assembly lib + vitest suite covering VS-01 through VS-06 at lib level
 - [x] 122-02-PLAN.md — Rewrite `[slug].astro` as thin renderer + add `VsFaqJsonLd.astro` component for FAQPage JSON-LD
-- [ ] 122-03-PLAN.md — Build-time verification scripts (`verify-vs-wordcount.mjs` enforcing VS-07, `verify-vs-overlap.mjs` enforcing VS-06) wired into `npm run build`, plus 5-page editorial sample review checkpoint
+- [x] 122-03-PLAN.md — Build-time verification scripts (`verify-vs-wordcount.mjs` enforcing VS-07, `verify-vs-overlap.mjs` enforcing VS-06) wired into `npm run build`, plus 5-page editorial sample review checkpoint
 **UI hint**: yes
 
 ### Phase 123: Sitemap Lastmod
@@ -86,7 +86,7 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 122. VS Page Content Enrichment | 2/3 | In Progress|  |
+| 122. VS Page Content Enrichment | 3/3 | Complete | 2026-04-16 |
 | 123. Sitemap Lastmod | 0/TBD | Not started | - |
 | 124. Font Self-Hosting | 0/TBD | Not started | - |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 0/TBD | Not started | - |
