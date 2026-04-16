@@ -20,10 +20,10 @@ Requirements for SEO Audit Fixes milestone. Each maps to roadmap phases.
 ### Technical SEO
 
 - [ ] **TSEO-01**: All 1,184 sitemap URLs include accurate `<lastmod>` dates (blog from frontmatter, sections from hardcoded publication dates)
-- [ ] **TSEO-02**: Blog pagination pages 2-6 have self-referencing canonical tags (NOT noindex)
-- [ ] **TSEO-03**: Blog pagination pages excluded from sitemap generation
-- [ ] **TSEO-04**: `/feed.xml` serves as alias for `/rss.xml`
-- [ ] **TSEO-05**: Tag pages with fewer than 3 posts excluded from sitemap
+- [x] **TSEO-02**: Blog pagination pages 2-6 have self-referencing canonical tags (NOT noindex)
+- [x] **TSEO-03**: Blog pagination pages excluded from sitemap generation
+- [x] **TSEO-04**: `/feed.xml` serves as alias for `/rss.xml`
+- [x] **TSEO-05**: Tag pages with fewer than 3 posts excluded from sitemap
 
 ### On-Page SEO
 
@@ -88,10 +88,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VS-06 | Phase 122 | Pending |
 | VS-07 | Phase 122 | Pending |
 | TSEO-01 | Phase 123 | Pending |
-| TSEO-02 | Phase 125 | Pending |
-| TSEO-03 | Phase 125 | Pending |
-| TSEO-04 | Phase 125 | Pending |
-| TSEO-05 | Phase 125 | Pending |
+| TSEO-02 | Phase 125 | Complete |
+| TSEO-03 | Phase 125 | Complete |
+| TSEO-04 | Phase 125 | Complete |
+| TSEO-05 | Phase 125 | Complete |
 | OPSEO-01 | Phase 125 | Pending |
 | OPSEO-02 | Phase 125 | Pending |
 | OPSEO-03 | Phase 125 | Pending |
