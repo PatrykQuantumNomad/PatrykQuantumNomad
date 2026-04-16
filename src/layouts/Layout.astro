@@ -112,17 +112,18 @@ const websiteSchema = {
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
     <link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM-friendly full site content" />
 
-    <!-- Self-hosted fonts: preload the two LCP-critical weights.
-         Source: https://web.dev/articles/preload-critical-assets
+    <!-- Self-hosted fonts: register @font-face + font-family BEFORE the preload hints.
+         Source: https://web.dev/articles/preload-critical-assets + https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link#using-link-to-preload-fonts
+         Order matters: the browser parser must see the @font-face rules (and an
+         element with matching font-family) BEFORE the preload fetch completes, so
+         the completed preload can be associated with a registered consumer. Without
+         this ordering, Chrome's "preloaded but not used within a few seconds"
+         heuristic fires on routes where Tailwind's external CSS — which carries the
+         `body { @apply font-sans }` + `h1..h6 { @apply font-heading font-bold }`
+         cascade — arrives slightly later than the preload.
          - crossorigin is REQUIRED for fonts (defaults to anonymous); omitting it causes browser to discard the preload
-         - @font-face rules are inlined BELOW the preload hints so the browser's CSS parser sees
-           them before the preload download completes. Without this, the matching @font-face rule
-           lives in a per-page CSS chunk that loads AFTER the preload window closes, causing Chrome
-           to flag "preloaded but not used within a few seconds". Duplicates the rules in
-           src/styles/global.css intentionally — browsers merge identical declarations.
-         - hrefs MUST match @font-face src URLs exactly (Pitfall 1) -->
-    <link rel="preload" href="/fonts/dm-sans-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/bricolage-700.woff2" as="font" type="font/woff2" crossorigin />
+         - Duplicates the @font-face rules in src/styles/global.css intentionally — browsers merge identical declarations
+         - Inline font-family rules let external Tailwind CSS still win the cascade once loaded (same specificity, later in order), so Fallback + Greek Fallback stacks remain intact -->
     <style is:inline>
       @font-face {
         font-family: 'DM Sans';
@@ -140,15 +141,7 @@ const websiteSchema = {
         src: url('/fonts/bricolage-700.woff2') format('woff2');
         unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
       }
-      /* Apply font-family on html/headings immediately so the preloaded @font-face
-         rules above are consumed at first paint, BEFORE the external Tailwind CSS
-         chunk loads. Without this, the body defaults to the browser's system font
-         until Tailwind's `body { @apply font-sans }` base-layer rule parses, and
-         Chrome fires "preloaded but not used within a few seconds" warnings even
-         though the font eventually renders. The Tailwind base-layer rule in
-         src/styles/global.css still wins the cascade once external CSS loads,
-         so Fallback + Greek Fallback font stacks remain intact. */
-      html {
+      html, body {
         font-family: 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif;
       }
       h1, h2, h3, h4, h5, h6 {
@@ -156,6 +149,8 @@ const websiteSchema = {
         font-weight: 700;
       }
     </style>
+    <link rel="preload" href="/fonts/dm-sans-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/bricolage-700.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Google Analytics -->
     <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-Z0PWW9KH5R"></script>
