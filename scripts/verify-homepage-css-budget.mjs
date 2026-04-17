@@ -42,7 +42,7 @@
  *
  * Zero external dependencies — uses only node:fs, node:path, node:zlib.
  */
-import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
