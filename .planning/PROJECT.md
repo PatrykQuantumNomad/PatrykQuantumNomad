@@ -293,21 +293,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 - ✓ All 17 footnote URLs verified (13 HTTP 200, 4 HTTP 403 bot-blocked), production build clean — v1.20
 - ✓ 5 related posts in sidebar via tag overlap, Lighthouse user-approved — v1.20
 
+- ✓ 650 VS comparison pages enriched to 1200+ words with per-dimension analysis, code snippets, FAQ JSON-LD (max Jaccard 0.2519) — v1.21
+- ✓ 1184/1184 sitemap lastmod coverage with deterministic date sources and byte-identical rebuild verification — v1.21
+- ✓ Google Fonts CDN replaced with self-hosted @fontsource (4 families), CSP shrunk, LCP preload hints with inline priming — v1.21
+- ✓ Blog pagination self-canonicals, /feed.xml alias, sparse-tag sitemap exclusions — v1.21
+- ✓ Dark-code title/description, Beauty Index clause-boundary truncator, Dockerfile Analyzer description — v1.21
+- ✓ Homepage CSS budget verifier locking 2 shared chunks at 148KB raw / 30KB gzip — v1.21
+- ✓ 6-verifier build chain: VS wordcount, VS overlap, sitemap determinism, font self-hosting, on-page SEO, CSS budget — v1.21
+
 ### Active
 
-## Current Milestone: v1.21 SEO Audit Fixes
-
-**Goal:** Apply all actionable findings from the April 15, 2026 SEO audit — technical SEO fixes, content quality improvements (including enriching 650 Beauty Index VS comparison pages), and performance optimizations.
-
-**Target features:**
-- Fix blog post title/description SEO issues (dark-code title too short, description too long)
-- Add `<lastmod>` dates to all 1,184 sitemap entries
-- Fix truncated Beauty Index single-language meta descriptions
-- Add `noindex, follow` to blog pagination pages 2-6 and thin tag pages
-- Add `/feed.xml` alias for `/rss.xml`
-- Enrich all 650 Beauty Index VS comparison pages with 500+ unique words of analysis (Strategy A)
-- Investigate and fix homepage CSS bundle bloat (132 KB of route-specific CSS)
-- Self-host Google Fonts via @fontsource (remove external DNS/TLS round-trip)
+(Next milestone requirements to be defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -336,17 +332,18 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.20 Dark Code Blog Post on top of 19 previous milestones (v1.0 through v1.19). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
+Shipped v1.21 SEO Audit Fixes on top of 20 previous milestones (v1.0 through v1.20). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
 AI Landscape Explorer: interactive D3 force-directed graph with 51 concepts, guided tours, compare mode, 12 VS pages, and companion blog post.
 Dark Code blog post: 4,500-word thought-leadership essay with The Dark Code Spectrum framework (5 dimensions), 28 GFM footnote citations, custom StatHighlight and TermDefinition components, BlogPosting + FAQ JSON-LD, and cover SVG.
-Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, Vitest for testing.
+Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, @fontsource for self-hosted fonts, rollup-plugin-visualizer for CSS analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
-All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 + 25 v1.20 requirements delivered (930 total). ~1185+ pages total. Lighthouse 90+ on mobile.
+All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 + 25 v1.20 + 21 v1.21 requirements delivered (951 total). ~1185+ pages total. Lighthouse 90+ on mobile.
+6-verifier build chain gates every npm run build: VS wordcount (Phase 122), VS overlap (Phase 122), sitemap determinism (Phase 123), font self-hosting (Phase 124), on-page SEO (Phase 125), CSS budget (Phase 126).
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
 Blog shows 27 posts (17 local MDX + 10 external from Kubert AI and Translucent Computing).
 Projects page features interactive bento grid with GSAP Flip filtering, mouse-tracking glow, and floating orbs.
-Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages, and companion blog essay.
+Beauty Index content pillar: 26 languages (including Lisp added in v1.11) ranked across 6 aesthetic dimensions, with overview page, 26 detail pages, code comparison explorer (260 code blocks), 650 VS comparison pages (enriched in v1.21 to 1200+ words with structural variation), and companion blog essay.
 Dockerfile Analyzer: browser-based linting tool with CodeMirror 6 editor, 46 rules (34 Hadolint DL codes + 12 custom PG rules), category-weighted scoring, inline annotations, 46 rule documentation pages, PNG badge export, and shareable URL state.
 Database Compass: interactive database model explorer with 12 categories scored across 8 dimensions, complexity spectrum, octagonal radar charts, sortable scoring table, use-case filtering, share controls, 13 OG images, and companion blog post.
 Docker Compose Validator: browser-based compose file validation with 52 rules (8 schema + 44 custom), CodeMirror 6 YAML editor, React Flow dependency graph, category-weighted scoring, 52 rule documentation pages, PNG badge export, shareable URL state, and companion blog post.
@@ -497,6 +494,16 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 | CreativeWork schema for Dark Code Spectrum | Most accurate Schema.org type for original framework/methodology | ✓ Good — richer than Thing, more fitting than Article |
 | isDarkCodePost boolean flag pattern | 8th specialized post flag, follows established ternary-chain pattern | ✓ Good — consistent with existing architecture |
 | HTTP 403 treated as verified-real for academic/gov sites | Bot-blocking is not dead links; all 4 confirmed browser-accessible | ✓ Good — zero false negatives in link validation |
+| Three-seam prose assembly for VS pages | Justification + connective + verdict/closer with deterministic FNV-1a hash pool selection | ✓ Good — max Jaccard 0.2519 vs 0.40 ceiling |
+| Build-time VS verifiers (wordcount + overlap) | npm run build gates enforce VS-07 (>=500 words) and VS-06 (<0.40 Jaccard) | ✓ Good — regression-proof content quality |
+| Sitemap module boundary (src/lib/sitemap/) | Centralized date logic, astro.config.mjs as thin consumer | ✓ Good — 1184/1184 coverage, byte-identical rebuilds |
+| @fontsource static packages over @fontsource-variable | Preserves existing Tailwind font-family stacks without config changes | ✓ Good — zero breaking changes |
+| Inline @font-face + font-family priming in head | Closes Chrome preload-usage race window for LCP fonts | ✓ Good — preloads consumed at first paint |
+| Blog pagination self-canonicals (NOT noindex) | Google docs confirm noindex severs crawl paths | ✓ Good — preserves link equity |
+| /feed.xml as re-export alias (NOT redirect) | GitHub Pages can't serve 301 with XML Content-Type | ✓ Good — byte-identical RSS output |
+| Clause-boundary meta description truncator | Prefers sentence/clause boundaries in [140,157] window | ✓ Good — readable Beauty Index descriptions |
+| CSS Option A: close with rationale | 30KB gzip is textbook Tailwind+Astro shared-chunk behavior | ✓ Good — avoids multi-day remediation for 0.2% page weight |
+| 6-verifier build chain | Each zero-dep ESM, exits 1 on failure with actionable hints | ✓ Good — regression-proof quality gates |
 
 ## Constraints
 
@@ -511,4 +518,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-15 after v1.21 milestone started*
+*Last updated: 2026-04-17 after v1.21 milestone complete*

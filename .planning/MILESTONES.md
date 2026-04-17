@@ -1,5 +1,30 @@
 # Project Milestones: patrykgolabek.dev
 
+## v1.21 SEO Audit Fixes (Shipped: 2026-04-17)
+
+**Delivered:** Applied all actionable findings from the April 2026 SEO audit — enriched 650 Beauty Index VS comparison pages to 1200+ words with structural variation, achieved 1184/1184 sitemap lastmod coverage, self-hosted all fonts via @fontsource, fixed pagination canonicals and on-page metadata, and established a 6-verifier build chain gating every production build
+
+**Phases completed:** 122-126 (13 plans total)
+
+**Key accomplishments:**
+- Enriched 650 VS comparison pages with per-dimension analysis, code snippets, FAQ JSON-LD, and cross-links (min 1217 words, max Jaccard 0.2519 vs 0.40 ceiling)
+- Achieved 1184/1184 sitemap lastmod coverage with deterministic date sources and byte-identical rebuild verification
+- Self-hosted 4 font families via @fontsource, eliminated Google Fonts CDN, shrunk CSP, added inline @font-face priming for preload consumption
+- Fixed pagination canonicals, /feed.xml alias, sparse-tag sitemap exclusions, dark-code title/description, Beauty Index description truncation, Dockerfile Analyzer description
+- Diagnosed homepage CSS as correct shared-chunk behavior (148KB raw / 30KB gzip / 2 chunks across 1184 routes), locked baseline with budget verifier
+- Established 6-verifier build chain: VS wordcount, VS overlap, sitemap determinism, font self-hosting, on-page SEO, CSS budget
+
+**Stats:**
+- 71 files changed (+22,390 / -265 lines)
+- 5 phases, 13 plans, 50 commits
+- 2 days (2026-04-16 → 2026-04-17)
+
+**Git range:** `docs(122)` → `docs(phase-126)`
+
+**What's next:** TBD -- next milestone to be defined via `/gsd:new-milestone`
+
+---
+
 ## v1.20 Dark Code Blog Post (Shipped: 2026-04-14)
 
 **Delivered:** Published "Dark Code: The Silent Rot AI Accelerated and No One Is Measuring" — a 4,500-word thought-leadership essay introducing The Dark Code Spectrum framework for measuring invisible codebase decay, with 28 GFM footnote citations from 56 verified research sources, two custom Astro components (StatHighlight, TermDefinition), custom cover SVG, enriched JSON-LD (BlogPosting + FAQ), and full site pipeline integration
