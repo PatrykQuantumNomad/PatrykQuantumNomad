@@ -13,6 +13,16 @@ import { buildContentDateMap, resolvePrefixLastmod, buildSparseTagSet } from './
 
 import react from '@astrojs/react';
 
+// Phase 126 — CSS bundle analyzer, gated by ANALYZE=1 env var.
+// When set, rollup-plugin-visualizer emits two reports to
+// .planning/reports/ (NOT dist/ — would break Phase 123 sitemap
+// determinism). Default builds never load the plugin.
+const ANALYZE = process.env.ANALYZE === '1';
+
+// Single timestamp reused across both visualizer outputs so the treemap
+// HTML and raw-data JSON from the same analyze run share a suffix.
+const ANALYZE_STAMP = new Date().toISOString().replace(/\D/g, '').slice(0, 13);
+
 /* ------------------------------------------------------------------ */
 /*  Content date map — URL → ISO lastmod, built at config load time   */
 /*  from src/lib/sitemap/content-dates.ts. Every value is deterministic*/
@@ -81,4 +91,34 @@ export default defineConfig({
     remarkPlugins: [remarkReadingTime, remarkMath],
     rehypePlugins: [rehypeKatex, rehypeExternalLinks],
   },
+  vite: ANALYZE
+    ? {
+        plugins: [
+          // Dynamic import so the module is ONLY loaded when ANALYZE=1 —
+          // keeps default builds deterministic (Phase 123 invariant).
+          // Top-level await works here because astro.config.mjs is ESM
+          // and Astro 5 + Node 22+ supports it.
+          // emitFile: false — do NOT route through Rollup's asset
+          // emission (would land in dist/_astro/stats.html and pollute
+          // the deploy artefact). Write the file directly to
+          // .planning/reports/ via plain filesystem write.
+          (await import('rollup-plugin-visualizer')).visualizer({
+            emitFile: false,
+            filename: `.planning/reports/css-visualizer-${ANALYZE_STAMP}.html`,
+            template: 'treemap',
+            title: 'Homepage CSS bundle — Phase 126',
+            gzipSize: true,
+            brotliSize: true,
+            sourcemap: false,
+          }),
+          (await import('rollup-plugin-visualizer')).visualizer({
+            emitFile: false,
+            filename: `.planning/reports/css-visualizer-${ANALYZE_STAMP}.json`,
+            template: 'raw-data',
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ],
+      }
+    : {},
 });

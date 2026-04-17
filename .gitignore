@@ -33,3 +33,6 @@ recordings-workspace/sample-project/
 .planning/reports/vs-overlap-*.json
 .planning/reports/vs-wordcount-*.json
 .planning/reports/on-page-seo-*.json
+.planning/reports/css-visualizer-*.html
+.planning/reports/css-visualizer-*.json
+.planning/reports/homepage-css-*.json
