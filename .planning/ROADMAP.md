@@ -14,7 +14,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 - [x] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections (completed 2026-04-16)
 - [x] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints (completed 2026-04-16; 2/2 plans; 5 fix-forward commits on Layout.astro/global.css resolved browser console warnings discovered at human-verify checkpoint)
 - [x] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections (completed 2026-04-16; 3/3 plans; all 6 invariants asserted at build time via verify-on-page-seo.mjs)
-- [ ] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted
+- [x] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted (completed 2026-04-17)
 
 ## Phase Details
 
@@ -86,7 +86,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   3. If 132KB is correct shared-chunk behavior, the investigation closes with documented rationale
 **Plans**: 2 plans
 - [x] 126-01-PLAN.md — Diagnosis: env-gated rollup-plugin-visualizer + zero-dep diagnose-homepage-css.mjs supplement + 126-DIAGNOSIS.md synthesis with D1-D7 decision log; ends with human checkpoint (remediate vs close)
-- [ ] 126-02-PLAN.md — Lock-in: conditional on Plan 01 checkpoint — either implement chosen lever + re-measure (Option B) or retain baseline (Option A); both paths add scripts/verify-homepage-css-budget.mjs as the LAST gate in npm run build
+- [x] 126-02-PLAN.md — Lock-in: conditional on Plan 01 checkpoint — either implement chosen lever + re-measure (Option B) or retain baseline (Option A); both paths add scripts/verify-homepage-css-budget.mjs as the LAST gate in npm run build
 
 ## Progress
 
@@ -100,4 +100,4 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
 | 124. Font Self-Hosting | 2/2 | Complete   | 2026-04-16 |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 3/3 | Complete | 2026-04-16 |
-| 126. CSS Investigation and Remediation | 1/2 | In Progress|  |
+| 126. CSS Investigation and Remediation | 2/2 | Complete   | 2026-04-17 |

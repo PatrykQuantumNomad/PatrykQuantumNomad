@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
-status: in-progress
-stopped_at: "Completed 126-01-PLAN.md (CSS diagnosis) — BLOCKING checkpoint:decision reached. Operator must choose option-a (close with rationale) vs option-b lever=<N> (remediate) before Plan 02 can start. Evidence: homepage loads 2 shared chunks / 148840 raw / 30287 gzip / 25307 brotli bytes across all 1184 routes. 126-DIAGNOSIS.md § 7 recommends Option A. Force-added baseline: .planning/reports/homepage-css-2026041700200.json. Commits: b743bfa (Task 1 — visualizer wiring + diagnose script + baseline), 86842ad (Task 2 — 126-DIAGNOSIS.md). Phase 126: 1/2 plans done, Plan 02 GATED by operator decision."
-last_updated: "2026-04-17T00:24:00Z"
-last_activity: "2026-04-17 — Phase 126 P01 CSS diagnosis shipped. rollup-plugin-visualizer wired env-gated (ANALYZE=1), scripts/diagnose-homepage-css.mjs emits homepage-css-*.json baseline, 126-DIAGNOSIS.md recommends Option A (close with rationale). Checkpoint awaits operator decision."
+status: completed
+stopped_at: Completed 126-02-PLAN.md (CSS budget verifier). Phase 126 COMPLETE (2/2 plans). Milestone v1.21 COMPLETE (13/13 plans across Phases 122-126). 6-verifier build chain fully wired.
+last_updated: "2026-04-17T11:12:09.606Z"
+last_activity: "2026-04-17 — Phase 126 P01 diagnosis shipped. Homepage loads 2 shared chunks (about.*.css + _slug_.*.css) totaling 148840 raw / 30287 gzip / 25307 brotli bytes across all 1184 routes. Recommendation: Option A."
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 13
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.21 Phase 125 in progress — P01 + P02 COMPLETE (TSEO-02/03/04/05 + OPSEO-01/02/03/04 shipped); P03 verifier next
+**Current focus:** v1.21 COMPLETE — all 13 plans across Phases 122-126 shipped. 6-verifier build chain fully wired.
 
 ## Current Position
 
-Phase: 126 of 126 (CSS Investigation and Remediation) — **Plan 01 COMPLETE, checkpoint reached**
-Plan: 1/2 complete — P01 shipped the measurement artefacts (env-gated rollup-plugin-visualizer in astro.config.mjs, zero-dep scripts/diagnose-homepage-css.mjs supplement, force-added homepage-css-2026041700200.json baseline, 126-DIAGNOSIS.md with 6-lever evaluation and Option A recommendation). P02 BLOCKED on operator decision-checkpoint: reply with option-a (close with rationale) or option-b lever=<N> (remediate).
-Status: Phase 126 Plan 01 DONE; Plan 02 GATED by operator decision.
-Last activity: 2026-04-17 — Phase 126 P01 diagnosis shipped. Homepage loads 2 shared chunks (about.*.css + _slug_.*.css) totaling 148840 raw / 30287 gzip / 25307 brotli bytes across all 1184 routes. Recommendation: Option A.
+Phase: 126 of 126 (CSS Investigation and Remediation) — **COMPLETE (2/2 plans)**
+Plan: 2/2 complete — P01 shipped measurement artefacts + diagnosis; P02 shipped homepage CSS budget verifier (Option A path, no source remediation).
+Status: Milestone v1.21 COMPLETE. All phases (122-126) done.
+Last activity: 2026-04-17 — Phase 126 P02 shipped scripts/verify-homepage-css-budget.mjs (299 lines, zero-dep ESM, 4 invariants, 4/4 negative tests). Wired as 6th and last gate in npm run build. Option A chosen: budget locks baseline at 148840 raw / 30287 gzip / 2 chunks.
 
-Progress: [█████████░] 92% (12/13 plans in milestone v1.21)
+Progress: [██████████] 100% (13/13 plans in milestone v1.21)
 
 ## Performance Metrics
 
 **Velocity:**
 
 - Total plans completed: 300 (across 20 milestones)
-- v1.21 plans completed: 12 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 1/2 + checkpoint)
+- v1.21 plans completed: 13 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 2/2)
 
 **Cumulative Stats:**
 
@@ -47,7 +47,7 @@ Progress: [█████████░] 92% (12/13 plans in milestone v1.21)
 | v1.18 AI Landscape Explorer | 102-110 | 25 | 40 | 2026-03-26 to 2026-03-27 |
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
-| v1.21 SEO Audit Fixes | 122-126 | 12 (so far) | 25 | 2026-04-15 (in progress) |
+| v1.21 SEO Audit Fixes | 122-126 | 13 | 25 | 2026-04-15 to 2026-04-17 |
 | Phase 122 P01 | 4m | 2 tasks | 2 files |
 | Phase 122 P02 | 5 | 2 tasks | 2 files |
 | Phase 122 P03 | 4m | 2 tasks | 3 files |
@@ -61,6 +61,7 @@ Progress: [█████████░] 92% (12/13 plans in milestone v1.21)
 | Phase 125 P02 | 6m | 3 tasks | 3 files |
 | Phase 125 P03 | 4m | 2 tasks | 4 files |
 | Phase 126 P01 | ~25m | 2 tasks (+ blocking checkpoint) | 6 files |
+| Phase 126 P02 | 12m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Recent decisions affecting current work:
 - [Phase 126]: [Phase 126 P01] D1 env-gated visualizer via `ANALYZE=1` + top-level `await import('rollup-plugin-visualizer')` in astro.config.mjs preserves Phase 123 byte-identical rebuild invariant (default builds plugin-free; sha `8a3d1496b2b51f1af0d3122fbeb5acee07cc6a955b7c9c6bbad9913ed7251b8e` identical across default/default and default/analyze pairs). D2 emit both treemap HTML and raw-data JSON for human + programmatic review. D3 shipped zero-dep scripts/diagnose-homepage-css.mjs (290 lines) walking dist/**/index.html to build route→chunks map, measuring per-chunk raw/gzip/brotli + sha256 + leading/trailing samples + scoped-selector + @font-face counts + cross-route frequency — covers rollup-plugin-visualizer CSS gap bug #203. emitFile: false on both visualizer() calls forces filesystem write to .planning/reports/ outside Rollup's asset pipeline (never lands in dist/). D7 force-added baseline homepage-css-2026041700200.json as the permanent reference Plan 02's verifier will diff against.
 - [Phase 126]: [Phase 126 P01 measurement] Homepage loads 2 CSS chunks — about.C49NBCVn.css (62,243 raw / 10,881 gzip / 9,103 brotli; 0 scoped; 0 @font-face; Tailwind utility sheet signature `*,:before,:after{--tw-*`) and _slug_.CIgCJX9d.css (86,597 raw / 19,406 gzip / 16,204 brotli; 1 scoped; 22 @font-face; ClientRouter announcer + View Transitions keyframes + @fontsource + global.css). Both appear on all 1184 routes (filesystem dist/**/index.html count; 1137 is the sitemap-included subset after Phase 125 TSEO-03/05 exclusions). Filenames are misleading — Astro's first-alphabetical-consumer shared-chunk naming makes about.*.css the Tailwind bundle (not /about/'s CSS) and _slug_.*.css the Layout bundle (not any [slug] route's CSS). Full site has 5 unique CSS chunks total — the other 3 are ec.*.css (astro-expressive-code, 756 routes with code blocks), style.*.css (6 routes), asciinema-player.*.css (5 routes).
 - [Phase 126]: [Phase 126 P01 verdict] Option A recommended. 30KB gzip across 1184 cached-immutably routes is textbook Tailwind+Astro shared-chunk behavior. 6-lever evaluation: Levers 3 (inlineStylesheets) and 4 (split View Transitions) are strict REJECT — Lever 3 explodes HTML budget by ~175MB (1184 pages × 148KB), Lever 4 trades 100-200B gzip for site-wide ClientRouter regression. Levers 1/2/5/6 combined best-case yield only 3-5KB gzip (~15% CSS, 0.2% page weight once images+JS are counted) at the cost of multi-day config archaeology + visual regression on ≥5 routes + Phase 123 invariant re-verification. The PERF-04 audit's "132KB" figure was closest to raw uncompressed total; actual on-wire cost (~30KB gzip) was never separately reported. If operator overrides to Option B, Lever 2 (@fontsource weight audit, 22 @font-face blocks) is the only defensible lever on measured evidence.
+- [Phase 126]: Option A chosen: no CSS source remediation; budget verifier locks current baseline (148840 raw / 30287 gzip / 2 chunks) with 2% per-chunk and 5% total headroom
 
 ### Pending Todos
 
@@ -96,8 +98,7 @@ None.
 ### Blockers/Concerns
 
 - VS page quality is highest risk: 650 pages must show structural variation to avoid scaled content abuse detection
-- CSS investigation may close as no-op if 132KB is correct shared-chunk behavior
-- **ACTIVE BLOCKER (Phase 126 P02):** operator decision-checkpoint — reply `option-a` (close with rationale) or `option-b lever=<N>` (remediate lever N from 126-DIAGNOSIS.md § 5). Plan 02 does not start until this is resolved. Recommended path: `option-a`. See .planning/phases/126-css-investigation-and-remediation/126-DIAGNOSIS.md § 7 for the rationale.
+- CSS investigation closed as no-op (Option A): 132KB raw / 30KB gzip is correct shared-chunk behavior, locked by budget verifier
 
 ### Quick Tasks Completed
 
@@ -109,7 +110,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-17T00:24:00Z
-Stopped at: Completed 126-01-PLAN.md (CSS diagnosis) — BLOCKING checkpoint:decision reached at Task 3. Plan 02 does not start autonomously; operator must choose option-a (close with rationale) vs option-b lever=<N> (remediate). Commits: b743bfa (Task 1 — env-gated rollup-plugin-visualizer + scripts/diagnose-homepage-css.mjs + force-added homepage-css-2026041700200.json baseline), 86842ad (Task 2 — 126-DIAGNOSIS.md with 8 sections, 163 lines, Option A recommendation based on 6-lever evaluation). Measurement: homepage loads 2 shared chunks totaling 148840 raw / 30287 gzip / 25307 brotli across all 1184 routes. Phase 126: 1/2 plans done.
-Resume file: .planning/phases/126-css-investigation-and-remediation/126-01-SUMMARY.md (also see 126-DIAGNOSIS.md for evidence + verdict)
-Next: awaiting operator checkpoint decision. Reply `option-a` → Plan 02 adds scripts/verify-homepage-css-budget.mjs build-time ceiling. Reply `option-b lever=<N>` → Plan 02 implements lever N with re-measurement. Recommended: option-a.
+Last session: 2026-04-17T11:12:09.602Z
+Stopped at: Completed 126-02-PLAN.md (CSS budget verifier). Phase 126 COMPLETE (2/2 plans). Milestone v1.21 COMPLETE (13/13 plans across Phases 122-126). 6-verifier build chain fully wired.
+Resume file: None
+Next: Milestone v1.21 complete. No pending work.
