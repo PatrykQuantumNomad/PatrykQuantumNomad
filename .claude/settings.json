@@ -100,12 +100,19 @@
     "excludedCommands": [
       "node"
     ],
-    "permissions": {
-      "network": {
-        "allow": [
-          "registry.npmjs.org"
-        ]
-      }
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "*.npmjs.org",
+        "registry.yarnpkg.com"
+      ]
+    },
+    "filesystem": {
+      "allowWrite": [
+        "~/.npm",
+        "~/.cache/gsd",
+        "~/.claude/cache"
+      ]
     }
   }
 }

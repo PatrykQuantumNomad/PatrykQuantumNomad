@@ -103,7 +103,9 @@ const child = spawn(process.execPath, ['-e', `
         for (const hookFile of hookFiles) {
           try {
             const content = fs.readFileSync(path.join(hooksDir, hookFile), 'utf8');
-            const versionMatch = content.match(/\\/\\/ gsd-hook-version:\\s*(.+)/);
+            // JS hooks use // gsd-hook-version; shell hooks use # gsd-hook-version (same line as bash comments).
+            const versionMatch = content.match(/\\/\\/\\s*gsd-hook-version:\\s*(.+)/)
+              || content.match(/^\\s*#\\s*gsd-hook-version:\\s*(.+)/m);
             if (versionMatch) {
               const hookVersion = versionMatch[1].trim();
               if (isNewer(installed, hookVersion) && !hookVersion.includes('{{')) {
