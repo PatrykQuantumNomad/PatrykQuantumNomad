@@ -36,7 +36,7 @@
  *
  * Zero external dependencies.
  */
-import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { gzipSync, brotliCompressSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { resolve, join, relative } from 'node:path';
