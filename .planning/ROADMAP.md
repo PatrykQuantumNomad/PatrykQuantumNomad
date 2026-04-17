@@ -84,7 +84,9 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
   1. A rollup-plugin-visualizer report exists showing CSS chunk composition for the homepage
   2. If cross-route CSS was loading unnecessarily, the fix reduces homepage CSS below the pre-investigation baseline
   3. If 132KB is correct shared-chunk behavior, the investigation closes with documented rationale
-**Plans**: TBD
+**Plans**: 2 plans
+- [x] 126-01-PLAN.md — Diagnosis: env-gated rollup-plugin-visualizer + zero-dep diagnose-homepage-css.mjs supplement + 126-DIAGNOSIS.md synthesis with D1-D7 decision log; ends with human checkpoint (remediate vs close)
+- [ ] 126-02-PLAN.md — Lock-in: conditional on Plan 01 checkpoint — either implement chosen lever + re-measure (Option B) or retain baseline (Option A); both paths add scripts/verify-homepage-css-budget.mjs as the LAST gate in npm run build
 
 ## Progress
 
@@ -98,4 +100,4 @@ Note: Phases 124 and 125 are independent of each other and of 122/123. They coul
 | 123. Sitemap Lastmod | 3/3 | Complete   | 2026-04-16 |
 | 124. Font Self-Hosting | 2/2 | Complete   | 2026-04-16 |
 | 125. Blog, Pagination, and On-Page SEO Fixes | 3/3 | Complete | 2026-04-16 |
-| 126. CSS Investigation and Remediation | 0/TBD | Not started | - |
+| 126. CSS Investigation and Remediation | 1/2 | In Progress|  |

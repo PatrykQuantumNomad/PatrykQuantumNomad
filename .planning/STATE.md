@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.21
 milestone_name: milestone
 status: in-progress
-stopped_at: "Completed 125-03-PLAN.md — verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants: /blog/{2..6}/ self-canonicals, dark-code title in [55,60], dark-code desc ≤160, 26 Beauty Index desc in [140,160] with no mid-word truncation, dockerfile-analyzer desc ≤160, feed.xml===rss.xml byte-wise. Wired into npm run build as LAST gate after verify-no-google-fonts. rm -rf dist && npm run build green with all 5 verifiers. Commits: bfc68dc (Task 1), 2ee1023 (Task 2). Phase 125 COMPLETE (3/3 plans)."
-last_updated: "2026-04-16T23:04:02Z"
-last_activity: 2026-04-16 — Phase 125 COMPLETE. P03 shipped the on-page SEO verifier asserting all 6 Phase 125 invariants at build time. Milestone v1.21 at 11/11 plans (100%). Next: Phase 126 CSS investigation OR milestone close-out.
+stopped_at: "Completed 126-01-PLAN.md (CSS diagnosis) — BLOCKING checkpoint:decision reached. Operator must choose option-a (close with rationale) vs option-b lever=<N> (remediate) before Plan 02 can start. Evidence: homepage loads 2 shared chunks / 148840 raw / 30287 gzip / 25307 brotli bytes across all 1184 routes. 126-DIAGNOSIS.md § 7 recommends Option A. Force-added baseline: .planning/reports/homepage-css-2026041700200.json. Commits: b743bfa (Task 1 — visualizer wiring + diagnose script + baseline), 86842ad (Task 2 — 126-DIAGNOSIS.md). Phase 126: 1/2 plans done, Plan 02 GATED by operator decision."
+last_updated: "2026-04-17T00:24:00Z"
+last_activity: "2026-04-17 — Phase 126 P01 CSS diagnosis shipped. rollup-plugin-visualizer wired env-gated (ANALYZE=1), scripts/diagnose-homepage-css.mjs emits homepage-css-*.json baseline, 126-DIAGNOSIS.md recommends Option A (close with rationale). Checkpoint awaits operator decision."
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -25,19 +25,19 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 125 of 126 (Blog/Pagination/On-Page SEO Batch) — **COMPLETE**
-Plan: 3/3 complete — P01 shipped the 4 TSEO routing/config fixes; P02 shipped the 4 OPSEO on-page content edits; P03 shipped the zero-dep ESM verifier (scripts/verify-on-page-seo.mjs) asserting all 6 Phase 125 invariants at build time, wired into npm run build as the LAST gate after verify-no-google-fonts.
-Status: Phase 125 COMPLETE. Next: Phase 126 (CSS investigation with rollup-plugin-visualizer) OR close milestone v1.21.
-Last activity: 2026-04-16 — Phase 125 P03 shipped. All 5 verifiers green on rm -rf dist && npm run build: verify-vs-wordcount, verify-vs-overlap, verify-sitemap-determinism, verify-no-google-fonts, verify-on-page-seo.
+Phase: 126 of 126 (CSS Investigation and Remediation) — **Plan 01 COMPLETE, checkpoint reached**
+Plan: 1/2 complete — P01 shipped the measurement artefacts (env-gated rollup-plugin-visualizer in astro.config.mjs, zero-dep scripts/diagnose-homepage-css.mjs supplement, force-added homepage-css-2026041700200.json baseline, 126-DIAGNOSIS.md with 6-lever evaluation and Option A recommendation). P02 BLOCKED on operator decision-checkpoint: reply with option-a (close with rationale) or option-b lever=<N> (remediate).
+Status: Phase 126 Plan 01 DONE; Plan 02 GATED by operator decision.
+Last activity: 2026-04-17 — Phase 126 P01 diagnosis shipped. Homepage loads 2 shared chunks (about.*.css + _slug_.*.css) totaling 148840 raw / 30287 gzip / 25307 brotli bytes across all 1184 routes. Recommendation: Option A.
 
-Progress: [██████████] 100% (11/11 plans in milestone v1.21 — Phase 126 plans TBD)
+Progress: [█████████░] 92% (12/13 plans in milestone v1.21)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 299 (across 20 milestones)
-- v1.21 plans completed: 11 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 0/TBD)
+- Total plans completed: 300 (across 20 milestones)
+- v1.21 plans completed: 12 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 1/2 + checkpoint)
 
 **Cumulative Stats:**
 
@@ -47,7 +47,7 @@ Progress: [██████████] 100% (11/11 plans in milestone v1.21 
 | v1.18 AI Landscape Explorer | 102-110 | 25 | 40 | 2026-03-26 to 2026-03-27 |
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
-| v1.21 SEO Audit Fixes | 122-126 | 11 (so far) | 25 | 2026-04-15 (in progress) |
+| v1.21 SEO Audit Fixes | 122-126 | 12 (so far) | 25 | 2026-04-15 (in progress) |
 | Phase 122 P01 | 4m | 2 tasks | 2 files |
 | Phase 122 P02 | 5 | 2 tasks | 2 files |
 | Phase 122 P03 | 4m | 2 tasks | 3 files |
@@ -60,6 +60,7 @@ Progress: [██████████] 100% (11/11 plans in milestone v1.21 
 | Phase 125 P01 | 5m | 2 tasks | 5 files |
 | Phase 125 P02 | 6m | 3 tasks | 3 files |
 | Phase 125 P03 | 4m | 2 tasks | 4 files |
+| Phase 126 P01 | ~25m | 2 tasks (+ blocking checkpoint) | 6 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 125]: Phase 125 P01: Sitemap filter drops 47 URLs (5 pagination + 42 sparse tags <3 posts) reaching exactly 1137 URLs on first build. buildSparseTagSet(minPosts) parameterized for future threshold bumps. LOC_FLOOR 1184→1137; LASTMOD_COVERAGE_FLOOR unchanged (Phase 123 pre-allocated 64-URL headroom).
 - [Phase 125]: Phase 125 P02: On-page SEO content fixes shipped OPSEO-01..04. OPSEO-01 fix was to shorten the dark-code frontmatter title from 64→40 chars so title+' — Patryk Golabek' (17-char suffix) sums to 57, bypassing the 65-char fallback branch in blog/[slug].astro:224-227 — the pre-fix rendered <title> was 'Dark Code — Patryk Golabek' (26 chars, split-at-colon) because the unshortened 81-char sum triggered the truncation branch. Fix target = input (frontmatter) not fallback logic (shared across all blog posts, unknown blast radius). OPSEO-03 replaced regex slice+replace with truncateDescription(full, targetMin=140, targetMax=157) helper that prefers last '. ', '; ', ', ' boundary in window, falls back to word boundary, never mid-word. All 26 Beauty Index language pages in [143, 158]; short fullDescription (≤157) returns verbatim. OPSEO-04 prefers concrete '46 rules' count over 'Dozens of rules' — specificity as minor ranking signal; 46 sourced from blog/[slug].astro:139 authoritative tool rules reference.
 - [Phase 125]: Phase 125 P03: scripts/verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants at build time: (1) /blog/{2..6}/ self-canonicals, (2) dark-code <title> in [55,60], (3) dark-code <meta description> ≤160, (4) 26 Beauty Index language descs in [140,160] with no mid-word truncation, (5) dockerfile-analyzer <meta description> ≤160, (6) feed.xml === rss.xml byte-wise via sha256. Two-pass meta extraction (find tag, then content=) avoids Astro attribute-order fragility. Skips dist/beauty-index/{vs,code,justifications}/ — vs is Phase 122's 650-page comparison corpus covered by separate verifiers, code and justifications are aggregate landing pages with intentionally shorter descriptions; filter yields exactly 26 language slugs. Mid-word truncation detection uses Unicode property classes (/[\\p{L}\\p{N}]/u) — future-proof for non-English language slugs. Ellipsis is word-complete iff preceded by alphanumeric OR terminal punctuation OR whitespace; rejects "Python'…" (apostrophe) and "C#…" (hash) canonical failures. Wired into npm run build as LAST gate after verify-no-google-fonts. Reports land in .planning/reports/on-page-seo-{stamp}.json (NOT dist/ — preserves Phase 123 sitemap determinism). Gitignore pattern-ignores timestamped reports + force-adds one representative green-state baseline (on-page-seo-2026041623001.json) — matches Phase 122/123 convention. rm -rf dist && npm run build green with all 5 verifiers.
+- [Phase 126]: [Phase 126 P01] D1 env-gated visualizer via `ANALYZE=1` + top-level `await import('rollup-plugin-visualizer')` in astro.config.mjs preserves Phase 123 byte-identical rebuild invariant (default builds plugin-free; sha `8a3d1496b2b51f1af0d3122fbeb5acee07cc6a955b7c9c6bbad9913ed7251b8e` identical across default/default and default/analyze pairs). D2 emit both treemap HTML and raw-data JSON for human + programmatic review. D3 shipped zero-dep scripts/diagnose-homepage-css.mjs (290 lines) walking dist/**/index.html to build route→chunks map, measuring per-chunk raw/gzip/brotli + sha256 + leading/trailing samples + scoped-selector + @font-face counts + cross-route frequency — covers rollup-plugin-visualizer CSS gap bug #203. emitFile: false on both visualizer() calls forces filesystem write to .planning/reports/ outside Rollup's asset pipeline (never lands in dist/). D7 force-added baseline homepage-css-2026041700200.json as the permanent reference Plan 02's verifier will diff against.
+- [Phase 126]: [Phase 126 P01 measurement] Homepage loads 2 CSS chunks — about.C49NBCVn.css (62,243 raw / 10,881 gzip / 9,103 brotli; 0 scoped; 0 @font-face; Tailwind utility sheet signature `*,:before,:after{--tw-*`) and _slug_.CIgCJX9d.css (86,597 raw / 19,406 gzip / 16,204 brotli; 1 scoped; 22 @font-face; ClientRouter announcer + View Transitions keyframes + @fontsource + global.css). Both appear on all 1184 routes (filesystem dist/**/index.html count; 1137 is the sitemap-included subset after Phase 125 TSEO-03/05 exclusions). Filenames are misleading — Astro's first-alphabetical-consumer shared-chunk naming makes about.*.css the Tailwind bundle (not /about/'s CSS) and _slug_.*.css the Layout bundle (not any [slug] route's CSS). Full site has 5 unique CSS chunks total — the other 3 are ec.*.css (astro-expressive-code, 756 routes with code blocks), style.*.css (6 routes), asciinema-player.*.css (5 routes).
+- [Phase 126]: [Phase 126 P01 verdict] Option A recommended. 30KB gzip across 1184 cached-immutably routes is textbook Tailwind+Astro shared-chunk behavior. 6-lever evaluation: Levers 3 (inlineStylesheets) and 4 (split View Transitions) are strict REJECT — Lever 3 explodes HTML budget by ~175MB (1184 pages × 148KB), Lever 4 trades 100-200B gzip for site-wide ClientRouter regression. Levers 1/2/5/6 combined best-case yield only 3-5KB gzip (~15% CSS, 0.2% page weight once images+JS are counted) at the cost of multi-day config archaeology + visual regression on ≥5 routes + Phase 123 invariant re-verification. The PERF-04 audit's "132KB" figure was closest to raw uncompressed total; actual on-wire cost (~30KB gzip) was never separately reported. If operator overrides to Option B, Lever 2 (@fontsource weight audit, 22 @font-face blocks) is the only defensible lever on measured evidence.
 
 ### Pending Todos
 
@@ -93,6 +97,7 @@ None.
 
 - VS page quality is highest risk: 650 pages must show structural variation to avoid scaled content abuse detection
 - CSS investigation may close as no-op if 132KB is correct shared-chunk behavior
+- **ACTIVE BLOCKER (Phase 126 P02):** operator decision-checkpoint — reply `option-a` (close with rationale) or `option-b lever=<N>` (remediate lever N from 126-DIAGNOSIS.md § 5). Plan 02 does not start until this is resolved. Recommended path: `option-a`. See .planning/phases/126-css-investigation-and-remediation/126-DIAGNOSIS.md § 7 for the rationale.
 
 ### Quick Tasks Completed
 
@@ -104,7 +109,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T23:04:02Z
-Stopped at: Completed 125-03-PLAN.md — scripts/verify-on-page-seo.mjs (283 lines, zero-dep ESM) asserts all 6 Phase 125 invariants; wired into npm run build as LAST gate after verify-no-google-fonts. Full clean build (rm -rf dist && npm run build) green with all 5 verifiers. Commits: bfc68dc (Task 1 — verifier + gitignore + representative report baseline), 2ee1023 (Task 2 — build chain wiring). Phase 125 COMPLETE (3/3 plans). Milestone v1.21 at 11/11 plans (100%, excluding Phase 126 which is TBD).
-Resume file: None
-Next: /gsd-plan-phase 126 — CSS investigation and remediation with rollup-plugin-visualizer (PERF-04, PERF-05). OR /gsd-complete-milestone to close out v1.21 if Phase 126 is deferred.
+Last session: 2026-04-17T00:24:00Z
+Stopped at: Completed 126-01-PLAN.md (CSS diagnosis) — BLOCKING checkpoint:decision reached at Task 3. Plan 02 does not start autonomously; operator must choose option-a (close with rationale) vs option-b lever=<N> (remediate). Commits: b743bfa (Task 1 — env-gated rollup-plugin-visualizer + scripts/diagnose-homepage-css.mjs + force-added homepage-css-2026041700200.json baseline), 86842ad (Task 2 — 126-DIAGNOSIS.md with 8 sections, 163 lines, Option A recommendation based on 6-lever evaluation). Measurement: homepage loads 2 shared chunks totaling 148840 raw / 30287 gzip / 25307 brotli across all 1184 routes. Phase 126: 1/2 plans done.
+Resume file: .planning/phases/126-css-investigation-and-remediation/126-01-SUMMARY.md (also see 126-DIAGNOSIS.md for evidence + verdict)
+Next: awaiting operator checkpoint decision. Reply `option-a` → Plan 02 adds scripts/verify-homepage-css-budget.mjs build-time ceiling. Reply `option-b lever=<N>` → Plan 02 implements lever N with re-measurement. Recommended: option-a.
