@@ -1,8 +1,8 @@
 # Milestone v1.21: SEO Audit Fixes
 
-**Status:** Not started
+**Status:** Complete
 **Phases:** 122-126
-**Total Plans:** TBD
+**Total Plans:** 13
 
 ## Overview
 
@@ -14,7 +14,7 @@ Apply all actionable findings from the April 15, 2026 SEO audit. The highest-imp
 - [x] **Phase 123: Sitemap Lastmod** - Add accurate lastmod dates to all 1,184 sitemap URLs using frontmatter dates for blog and hardcoded publication dates for content sections (completed 2026-04-16)
 - [x] **Phase 124: Font Self-Hosting** - Replace Google Fonts CDN with @fontsource static packages, update CSP, and add preload hints (completed 2026-04-16; 2/2 plans; 5 fix-forward commits on Layout.astro/global.css resolved browser console warnings discovered at human-verify checkpoint)
 - [x] **Phase 125: Blog, Pagination, and On-Page SEO Fixes** - Batch all low-complexity metadata fixes: pagination canonicals, sitemap exclusions, feed alias, and frontmatter description/title corrections (completed 2026-04-16; 3/3 plans; all 6 invariants asserted at build time via verify-on-page-seo.mjs)
-- [x] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted (completed 2026-04-17)
+- [x] **Phase 126: CSS Investigation and Remediation** - Diagnose homepage CSS bundle bloat with rollup-plugin-visualizer and remediate if warranted (completed 2026-04-17; 2/2 plans; Option A chosen — 148840 raw / 30287 gzip across 2 shared chunks is correct behavior; budget verifier locks baseline as 6th build gate)
 
 ## Phase Details
 
