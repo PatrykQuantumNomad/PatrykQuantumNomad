@@ -69,7 +69,7 @@ See MILESTONES.md for completed milestone details.
 Plans:
 - [x] 127-01-PLAN.md — Repo creation + git-lfs + Python project skeleton + per-tier requirements.txt + .env.example
 - [x] 127-02-PLAN.md — Shared utilities (config/pricing/llm/embeddings/loader/display/cost_tracker) + smoke test scaffolding
-- [ ] 127-03-PLAN.md — Curation scripts (curate_corpus.py + extract_figures.py + cut_video_clips.py + seed lists)
+- [x] 127-03-PLAN.md — Curation scripts (curate_corpus.py + extract_figures.py + cut_video_clips.py + seed lists)
 - [ ] 127-04-PLAN.md — Run corpus curation: download ~100 arXiv PDFs as RAG citation cluster (LFS commit)
 - [ ] 127-05-PLAN.md — Run figure extraction + video clip cutting + manifests with verified CC licenses
 - [ ] 127-06-PLAN.md — Author 30 golden Q&A + metadata.json + final live smoke + README finalization

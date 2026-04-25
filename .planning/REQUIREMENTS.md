@@ -94,7 +94,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | REPO-01 | Phase 127 | Complete (Plan 02 — test_repo_metadata.py automated trace) |
-| REPO-02 | Phase 127 | In progress (Plan 02 — test_dataset.py conditional trace landed; full data lands in Plans 04/05) |
+| REPO-02 | Phase 127 | In progress (Plan 02 — test_dataset.py conditional trace; Plan 03 — curation scripts authored; full data lands in Plans 04/05) |
 | REPO-03 | Phase 127 | Complete (Plan 02 — 7 shared/ modules + smoke test) |
 | REPO-04 | Phase 127 | Complete (Plan 01 + Plan 02 — test_tier_requirements.py automated trace) |
 | REPO-05 | Phase 130 | Pending |

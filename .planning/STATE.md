@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: executing
-stopped_at: "Plan 127-02 complete (3 commits pushed to companion repo: a00aaf9 shared.config+pricing+cost_tracker, d766773 shared.llm+embeddings+loader+display, 859c8da smoke test + REPO-01/02/04/06 trace tests). 35 unit tests pass; 4 @live tests deferred to Plan 06."
-last_updated: "2026-04-25T18:27:02.146Z"
-last_activity: 2026-04-25
+status: Active — Plans 127-02 + 127-03 complete (parallel-wave 2 done); next wave is 127-04 (corpus download)
+stopped_at: "Plan 127-03 complete (3 commits pushed to companion repo: 4dc09a3, 6bd771e, 5dea1e9)"
+last_updated: "2026-04-25T18:27:12.388Z"
+last_activity: 2026-04-25 — Plan 127-03 complete; 3 curation scripts + 2 seed JSONs + scripts/README.md landed
 progress:
   total_phases: 8
   completed_phases: 0
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
 Plan: 3 of 6 in current phase complete
-Status: Ready to execute
-Last activity: 2026-04-25
+Status: Active — Plans 127-02 + 127-03 complete (parallel-wave 2 done); next wave is 127-04 (corpus download)
+Last activity: 2026-04-25 — Plan 127-03 complete; 3 curation scripts + 2 seed JSONs + scripts/README.md landed
 
 Progress: [█████░░░░░] 50%
 
@@ -50,6 +50,7 @@ Progress: [█████░░░░░] 50%
 | v1.22 RAG Architecture Patterns | 127-134 | TBD | 31 | in progress |
 | Phase 127 P01 | 219 | 3 tasks | 18 files |
 | Phase 127 P02 | ~10min | 3 tasks | 14 files (1252 LOC across shared/ + tests/) |
+| Phase 127 P03 | 7m 19s | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Plan 127-02 added:
 - Conditional `pytest.skip` pattern for staged-dataset trace tests — `tests/test_dataset.py` lands once and passes at empty/partial/full wave boundaries; Plan 06 extends in place
 - T-127-08 lockfile guard added to `tests/test_tier_requirements.py` — fails if `google-generativeai` (deprecated) ever returns to `uv.lock`
 - Live smoke test deferred to Plan 06 — `.env` was absent in Plan 02 auto-mode run, so 3 `@live` tests committed but unrun; Plan 06 has the canonical live-smoke checkpoint
+- Plan 127-03: arxiv.Client(delay_seconds=3.0) and semanticscholar wrapper baked into curate_corpus.py — never custom requests loops (Pitfall 2/3)
+- Plan 127-03: cut_video_clips.py refuses TBD/ND licenses at the safety gate (D-12, Pitfall 8); exits 1 on any refusal
+- Plan 127-03: pyproject [build-system] + [tool.setuptools] packages=[shared,scripts] required for flat-layout editable install (Rule 3 fix)
 
 ### Pending Todos
 
@@ -96,7 +100,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25
-Stopped at: Plan 127-02 complete (3 commits pushed to companion repo: a00aaf9 shared.config+pricing+cost_tracker, d766773 shared.llm+embeddings+loader+display, 859c8da smoke test + REPO-01/02/04/06 trace tests). 35 unit tests pass; 4 @live tests deferred to Plan 06.
+Last session: 2026-04-25T18:27:12.383Z
+Stopped at: Plan 127-03 complete (3 commits pushed to companion repo: 4dc09a3, 6bd771e, 5dea1e9)
 Resume file: None
 Next: Execute Plan 127-04 (Corpus curation, Wave 3) once Plan 127-03 (Curation scripts) commits its remaining work. Plans 04+ depend on `scripts/*.py` from Plan 03.
