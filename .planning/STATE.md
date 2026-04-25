@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: Active — Plan 02 (Shared utilities) and Plan 03 (Curation scripts) READY (parallel-safe)
-stopped_at: "Plan 127-01 complete (companion repo PatrykQuantumNomad/rag-architecture-patterns bootstrapped, 3 commits pushed: f01f1e6, 8ac2d3e, 0cb0dbf)"
-last_updated: "2026-04-25T18:13:36.654Z"
-last_activity: 2026-04-25 — Plan 127-01 complete; companion repo bootstrapped at /Users/patrykattc/work/git/rag-architecture-patterns
+status: executing
+stopped_at: "Plan 127-02 complete (3 commits pushed to companion repo: a00aaf9 shared.config+pricing+cost_tracker, d766773 shared.llm+embeddings+loader+display, 859c8da smoke test + REPO-01/02/04/06 trace tests). 35 unit tests pass; 4 @live tests deferred to Plan 06."
+last_updated: "2026-04-25T18:27:02.146Z"
+last_activity: 2026-04-25
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
-  completed_plans: 1
-  percent: 17
+  completed_plans: 3
+  percent: 50
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 1 of 6 in current phase complete
-Status: Active — Plan 02 (Shared utilities) and Plan 03 (Curation scripts) READY (parallel-safe)
-Last activity: 2026-04-25 — Plan 127-01 complete; companion repo bootstrapped at /Users/patrykattc/work/git/rag-architecture-patterns
+Plan: 3 of 6 in current phase complete
+Status: Ready to execute
+Last activity: 2026-04-25
 
-Progress: [█░░░░░░░░░] 17%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [█░░░░░░░░░] 17%
 | v1.21 SEO Audit Fixes | 122-126 | 13 | 21 | 2026-04-16 to 2026-04-17 |
 | v1.22 RAG Architecture Patterns | 127-134 | TBD | 31 | in progress |
 | Phase 127 P01 | 219 | 3 tasks | 18 files |
+| Phase 127 P02 | ~10min | 3 tasks | 14 files (1252 LOC across shared/ + tests/) |
 
 ## Accumulated Context
 
@@ -63,6 +64,16 @@ Plan 127-01 added:
 - `google-genai` pinned (NOT deprecated `google-generativeai` EOL 2025-08-31)
 - LFS lock-verify disabled per-remote due to sandbox TLS limitation; LFS object storage unaffected
 - GitHub API access uses `curl + Authorization: token $(gh auth token)` because `gh` subcommands fail in sandbox
+
+Plan 127-02 added:
+
+- Lazy `get_settings()` factory pattern (lru_cache) — `Settings()` is NEVER instantiated at module import; `Field(..., alias="GEMINI_API_KEY")` stays REQUIRED (Pattern 5) but ValidationError only raised when callers actually need keys (preserves "validation contract" without weakening to `default=SecretStr("")`)
+- `DatasetLoader` deliberately decoupled from `get_settings()` — defaults to `Path("dataset")` so contributors can inspect manifests offline without a Gemini key
+- Construction-time timestamp captured in `CostTracker.__init__` so repeated `persist()` calls overwrite the same `{tier}-{timestamp}.json` file (idempotent per-run artifact)
+- `uv sync --extra ... --group ...` chosen over `uv pip install --group ...` — uv 0.6.3 doesn't accept `--group` on `pip install`
+- Conditional `pytest.skip` pattern for staged-dataset trace tests — `tests/test_dataset.py` lands once and passes at empty/partial/full wave boundaries; Plan 06 extends in place
+- T-127-08 lockfile guard added to `tests/test_tier_requirements.py` — fails if `google-generativeai` (deprecated) ever returns to `uv.lock`
+- Live smoke test deferred to Plan 06 — `.env` was absent in Plan 02 auto-mode run, so 3 `@live` tests committed but unrun; Plan 06 has the canonical live-smoke checkpoint
 
 ### Pending Todos
 
@@ -86,6 +97,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-25
-Stopped at: Plan 127-01 complete (companion repo PatrykQuantumNomad/rag-architecture-patterns bootstrapped, 3 commits pushed: f01f1e6, 8ac2d3e, 0cb0dbf)
+Stopped at: Plan 127-02 complete (3 commits pushed to companion repo: a00aaf9 shared.config+pricing+cost_tracker, d766773 shared.llm+embeddings+loader+display, 859c8da smoke test + REPO-01/02/04/06 trace tests). 35 unit tests pass; 4 @live tests deferred to Plan 06.
 Resume file: None
-Next: Execute Plan 127-02 (Shared utilities) and/or Plan 127-03 (Curation scripts) — both wave-2 parallel-safe
+Next: Execute Plan 127-04 (Corpus curation, Wave 3) once Plan 127-03 (Curation scripts) commits its remaining work. Plans 04+ depend on `scripts/*.py` from Plan 03.

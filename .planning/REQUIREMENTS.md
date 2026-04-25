@@ -12,7 +12,7 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 - [x] **REPO-01
 **: Companion repo exists at PatrykQuantumNomad/rag-architecture-patterns with README linking to blog post
 - [ ] **REPO-02**: Synthetic enterprise knowledge base dataset with text docs, PDFs, and at least one image, designed with cross-document relationships to showcase Graph RAG advantage
-- [ ] **REPO-03**: Shared utilities (embeddings, output formatting, cost tracking) reused across tiers
+- [x] **REPO-03**: Shared utilities (embeddings, output formatting, cost tracking) reused across tiers
 - [x] **REPO-04
 **: Per-tier requirements.txt files for isolated dependency installation
 - [ ] **REPO-05**: Docker support for Tiers 3-5 where dependency complexity requires it
@@ -93,12 +93,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPO-01 | Phase 127 | Pending |
-| REPO-02 | Phase 127 | Pending |
-| REPO-03 | Phase 127 | Pending |
-| REPO-04 | Phase 127 | Pending |
+| REPO-01 | Phase 127 | Complete (Plan 02 — test_repo_metadata.py automated trace) |
+| REPO-02 | Phase 127 | In progress (Plan 02 — test_dataset.py conditional trace landed; full data lands in Plans 04/05) |
+| REPO-03 | Phase 127 | Complete (Plan 02 — 7 shared/ modules + smoke test) |
+| REPO-04 | Phase 127 | Complete (Plan 01 + Plan 02 — test_tier_requirements.py automated trace) |
 | REPO-05 | Phase 130 | Pending |
-| REPO-06 | Phase 127 | Pending |
+| REPO-06 | Phase 127 | Complete (Plan 01 + Plan 02 — test_env_example.py automated trace) |
 | TIER-01 | Phase 128 | Pending |
 | TIER-02 | Phase 129 | Pending |
 | TIER-03 | Phase 129 | Pending |
