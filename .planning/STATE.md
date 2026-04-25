@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: active
-stopped_at: Roadmap created
-last_updated: "2026-04-17T00:00:00.000Z"
-last_activity: "2026-04-17 — Roadmap created with 8 phases (127-134)"
+status: Active — Plan 02 (Shared utilities) and Plan 03 (Curation scripts) READY (parallel-safe)
+stopped_at: "Plan 127-01 complete (companion repo PatrykQuantumNomad/rag-architecture-patterns bootstrapped, 3 commits pushed: f01f1e6, 8ac2d3e, 0cb0dbf)"
+last_updated: "2026-04-25T18:13:36.654Z"
+last_activity: 2026-04-25 — Plan 127-01 complete; companion repo bootstrapped at /Users/patrykattc/work/git/rag-architecture-patterns
 progress:
   total_phases: 8
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 6
+  completed_plans: 1
+  percent: 17
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-04-17 — Roadmap created with 8 phases (127-134)
+Plan: 1 of 6 in current phase complete
+Status: Active — Plan 02 (Shared utilities) and Plan 03 (Curation scripts) READY (parallel-safe)
+Last activity: 2026-04-25 — Plan 127-01 complete; companion repo bootstrapped at /Users/patrykattc/work/git/rag-architecture-patterns
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 17%
 
 ## Performance Metrics
 
@@ -48,12 +48,21 @@ Progress: [░░░░░░░░░░] 0%
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
 | v1.21 SEO Audit Fixes | 122-126 | 13 | 21 | 2026-04-16 to 2026-04-17 |
 | v1.22 RAG Architecture Patterns | 127-134 | TBD | 31 | in progress |
+| Phase 127 P01 | 219 | 3 tasks | 18 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 Full decision log in PROJECT.md Key Decisions table.
+
+Plan 127-01 added:
+
+- Tier-N pyproject extras stub as `[shared]` only; concrete tier deps land in Phases 128-130
+- `tier-N/requirements.txt` mirrors parent extras via `-e ..[tier-N]` (single source of truth in pyproject)
+- `google-genai` pinned (NOT deprecated `google-generativeai` EOL 2025-08-31)
+- LFS lock-verify disabled per-remote due to sandbox TLS limitation; LFS object storage unaffected
+- GitHub API access uses `curl + Authorization: token $(gh auth token)` because `gh` subcommands fail in sandbox
 
 ### Pending Todos
 
@@ -64,6 +73,7 @@ None.
 - Phase 129 (Tier 3 LightRAG): Verify Python API against lightrag-hku v1.4.15 before implementation
 - Phase 130 (Tier 4 RAG-Anything): Verify MinerU/LibreOffice requirements for PDF-only datasets
 - Phase 130 (Tier 5 Agentic): Verify FileSearchTool + @function_tool coexistence in OpenAI Agents SDK
+- Phase 127 (Plans 04/05): GitHub LFS quota for free tier still unverified — check `https://github.com/settings/billing` before bulk PDF push
 
 ### Quick Tasks Completed
 
@@ -75,7 +85,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-17
-Stopped at: Roadmap created for v1.22 RAG Architecture Patterns (8 phases, 127-134)
+Last session: 2026-04-25
+Stopped at: Plan 127-01 complete (companion repo PatrykQuantumNomad/rag-architecture-patterns bootstrapped, 3 commits pushed: f01f1e6, 8ac2d3e, 0cb0dbf)
 Resume file: None
-Next: `/gsd-plan-phase 127`
+Next: Execute Plan 127-02 (Shared utilities) and/or Plan 127-03 (Curation scripts) — both wave-2 parallel-safe

@@ -9,12 +9,15 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 
 ### Companion Repository
 
-- [ ] **REPO-01**: Companion repo exists at PatrykQuantumNomad/rag-architecture-patterns with README linking to blog post
+- [x] **REPO-01
+**: Companion repo exists at PatrykQuantumNomad/rag-architecture-patterns with README linking to blog post
 - [ ] **REPO-02**: Synthetic enterprise knowledge base dataset with text docs, PDFs, and at least one image, designed with cross-document relationships to showcase Graph RAG advantage
 - [ ] **REPO-03**: Shared utilities (embeddings, output formatting, cost tracking) reused across tiers
-- [ ] **REPO-04**: Per-tier requirements.txt files for isolated dependency installation
+- [x] **REPO-04
+**: Per-tier requirements.txt files for isolated dependency installation
 - [ ] **REPO-05**: Docker support for Tiers 3-5 where dependency complexity requires it
-- [ ] **REPO-06**: .env.example documenting all required API keys per tier
+- [x] **REPO-06
+**: .env.example documenting all required API keys per tier
 
 ### Tier Implementations
 

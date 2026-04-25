@@ -67,7 +67,7 @@ See MILESTONES.md for completed milestone details.
 **Plans**: 6 plans across 5 waves
 
 Plans:
-- [ ] 127-01-PLAN.md — Repo creation + git-lfs + Python project skeleton + per-tier requirements.txt + .env.example
+- [x] 127-01-PLAN.md — Repo creation + git-lfs + Python project skeleton + per-tier requirements.txt + .env.example
 - [ ] 127-02-PLAN.md — Shared utilities (config/pricing/llm/embeddings/loader/display/cost_tracker) + smoke test scaffolding
 - [ ] 127-03-PLAN.md — Curation scripts (curate_corpus.py + extract_figures.py + cut_video_clips.py + seed lists)
 - [ ] 127-04-PLAN.md — Run corpus curation: download ~100 arXiv PDFs as RAG citation cluster (LFS commit)
@@ -158,7 +158,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 0/6 | Not started | - |
+| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 1/6 | In progress | - |
 | 128. Tier 1 Naive RAG | v1.22 | 0/TBD | Not started | - |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/TBD | Not started | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
