@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plan 127-05 complete (companion repo commit daf4978 pushed to origin/main with 545 LFS objects added; 581 figures + figures.json with 8 captions); video clip portion deferred per documented escape hatch
-last_updated: "2026-04-25T19:21:32.947Z"
+stopped_at: Plan 127-06 offline portion complete (companion repo commits 92ec4b5/1df1821/9eea8e0 pushed to origin/main — golden_qa.json with 30 entries, metadata.json with 100p/581f/0v/290MB stats, finalized README with blog link); LIVE SMOKE TEST PENDING — GEMINI_API_KEY not in executor env; user runs locally to close REPO-03 gate
+last_updated: "2026-04-25T19:31:25Z"
 last_activity: 2026-04-25
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 5 of 6 in current phase complete
-Status: Ready to execute
+Plan: 6 of 6 in current phase complete (offline portion); live smoke gate pending user
+Status: Awaiting live smoke test (REPO-03)
 Last activity: 2026-04-25
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [████████░░] 83%
 | Phase 127 P03 | 7m 19s | 3 tasks | 9 files |
 | Phase 127 P04 | 14m | 3 tasks | 101 files |
 | Phase 127 P05 | 17m | 3 tasks | 582 files |
+| Phase 127 P06 | 14m | 3 tasks | 6 files (golden_qa.json + metadata.json + 2 tests + 1 script + README) |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Plan 127-02 added:
 - Plan 127-05: Video clip cut DEFERRED — sandbox cannot verify slideslive.com CC license; cut_video_clips.py safety gate correctly refused TBD entry. REPO-02 satisfied via 581-image set; videos remain tier-4 bonus
 - Plan 127-05: dataset/manifests/videos.json deliberately ABSENT (not empty []) — preserves test_videos_manifest_conditional skip path; shared.loader treats absent file as empty list
 - Plan 127-05: 39 of 100 papers contributed zero raster figures (vector-graphics-only PDFs that PyMuPDF cannot rasterize) — Self-RAG, FLARE, CRAG, Step-Back among them; informs Plan 06 to target the 61 papers WITH figures for multimodal Q&A
+- Plan 127-06: D-04 LOCKED 10/10/7/3 split adapted to shipped 10/10/10/0 — 3 video Q&A slots substituted with 3 multimodal extras (Sleeper Agents, Mixed Precision, Marcus 'Next Decade'); Plan-06-authored captions inline in question text; documented prominently in README + test_golden_qa.py + 127-06-SUMMARY.md
+- Plan 127-06: build_metadata.py treats absent videos.json as [] (mirrors shared.loader semantics) so the aggregator stays wave-tolerant
+- Plan 127-06: Live smoke test (REPO-03 gate) DEFERRED to user — GEMINI_API_KEY not in executor environment; smoke test code committed and verified (test_imports passes); 3 live tests skip gracefully via live_keys_ok fixture
 
 ### Pending Todos
 
@@ -109,7 +113,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25T19:21:32.942Z
-Stopped at: Plan 127-05 complete (companion repo commit daf4978 pushed to origin/main with 545 LFS objects added; 581 figures + figures.json with 8 captions); video clip portion deferred per documented escape hatch
-Resume file: None
-Next: Execute Plan 127-04 (Corpus curation, Wave 3) once Plan 127-03 (Curation scripts) commits its remaining work. Plans 04+ depend on `scripts/*.py` from Plan 03.
+Last session: 2026-04-25T19:31:25Z
+Stopped at: Plan 127-06 offline portion complete (companion repo HEAD at 9eea8e0 — golden_qa.json + metadata.json + finalized README pushed to origin/main); LIVE SMOKE TEST PENDING (REPO-03 gate)
+Resume file: .planning/phases/127-repository-skeleton-enterprise-dataset/127-06-SUMMARY.md
+Next: User runs `pytest tests/smoke_test.py -m live` in the companion repo with GEMINI_API_KEY set. Expected: <5s wall time, ~$0.0001 cost, 3 live tests pass. Then run `/gsd:verify-phase 127` to formally close Phase 127. Plans 04+ depend on `scripts/*.py` from Plan 03 (already complete).
