@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: Active — Plans 127-02 + 127-03 complete (parallel-wave 2 done); next wave is 127-04 (corpus download)
-stopped_at: "Plan 127-03 complete (3 commits pushed to companion repo: 4dc09a3, 6bd771e, 5dea1e9)"
-last_updated: "2026-04-25T18:27:12.388Z"
-last_activity: 2026-04-25 — Plan 127-03 complete; 3 curation scripts + 2 seed JSONs + scripts/README.md landed
+status: executing
+stopped_at: Plan 127-04 complete (companion repo commit 2171d25 pushed to origin/main with 100 LFS objects)
+last_updated: "2026-04-25T19:09:56.882Z"
+last_activity: 2026-04-25
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
-  completed_plans: 3
-  percent: 50
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 3 of 6 in current phase complete
-Status: Active — Plans 127-02 + 127-03 complete (parallel-wave 2 done); next wave is 127-04 (corpus download)
-Last activity: 2026-04-25 — Plan 127-03 complete; 3 curation scripts + 2 seed JSONs + scripts/README.md landed
+Plan: 4 of 6 in current phase complete
+Status: Ready to execute
+Last activity: 2026-04-25
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [█████░░░░░] 50%
 | Phase 127 P01 | 219 | 3 tasks | 18 files |
 | Phase 127 P02 | ~10min | 3 tasks | 14 files (1252 LOC across shared/ + tests/) |
 | Phase 127 P03 | 7m 19s | 3 tasks | 9 files |
+| Phase 127 P04 | 14m | 3 tasks | 101 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Plan 127-02 added:
 - Plan 127-03: arxiv.Client(delay_seconds=3.0) and semanticscholar wrapper baked into curate_corpus.py — never custom requests loops (Pitfall 2/3)
 - Plan 127-03: cut_video_clips.py refuses TBD/ND licenses at the safety gate (D-12, Pitfall 8); exits 1 on any refusal
 - Plan 127-03: pyproject [build-system] + [tool.setuptools] packages=[shared,scripts] required for flat-layout editable install (Rule 3 fix)
+- Plan 127-04: GIT_SSL_CAINFO=/etc/ssl/cert.pem persisted as http.sslCAInfo local-config — sandbox keychain access blocked git-lfs Go runtime cert resolution; CA-bundle redirect preserves TLS verification (no weakening)
+- Plan 127-04: Curator approved 100-paper cluster as-previewed (no swaps); Sleeper Agents (2401.05566) explicitly retained per off-topic-but-approved decision
 
 ### Pending Todos
 
@@ -100,7 +103,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25T18:27:12.383Z
-Stopped at: Plan 127-03 complete (3 commits pushed to companion repo: 4dc09a3, 6bd771e, 5dea1e9)
+Last session: 2026-04-25T19:09:56.878Z
+Stopped at: Plan 127-04 complete (companion repo commit 2171d25 pushed to origin/main with 100 LFS objects)
 Resume file: None
 Next: Execute Plan 127-04 (Corpus curation, Wave 3) once Plan 127-03 (Curation scripts) commits its remaining work. Plans 04+ depend on `scripts/*.py` from Plan 03.

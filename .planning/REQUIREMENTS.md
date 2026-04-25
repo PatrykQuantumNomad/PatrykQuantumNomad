@@ -11,7 +11,8 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 
 - [x] **REPO-01
 **: Companion repo exists at PatrykQuantumNomad/rag-architecture-patterns with README linking to blog post
-- [ ] **REPO-02**: Synthetic enterprise knowledge base dataset with text docs, PDFs, and at least one image, designed with cross-document relationships to showcase Graph RAG advantage
+- [x] **REPO-02
+**: Synthetic enterprise knowledge base dataset with text docs, PDFs, and at least one image, designed with cross-document relationships to showcase Graph RAG advantage
 - [x] **REPO-03**: Shared utilities (embeddings, output formatting, cost tracking) reused across tiers
 - [x] **REPO-04
 **: Per-tier requirements.txt files for isolated dependency installation
