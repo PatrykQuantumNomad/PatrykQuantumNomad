@@ -39,7 +39,7 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 ### Blog Post
 
 - [ ] **BLOG-01**: ~4,500-word thought-leadership essay with thesis "RAG is an architecture decision, not an implementation detail"
-- [ ] **BLOG-02**: 5-section progression narrative (Naive → Managed → Graph → Multimodal → Agentic) with opinion-led analysis
+- [ ] **BLOG-02**: 5-section progression narrative (Naive -> Managed -> Graph -> Multimodal -> Agentic) with opinion-led analysis
 - [ ] **BLOG-03**: StatHighlight components for key statistics (cost/accuracy data from evaluation results)
 - [ ] **BLOG-04**: TermDefinition components for RAG-specific terminology
 - [ ] **BLOG-05**: GFM footnote citations with verified URLs from curated sources
@@ -90,43 +90,43 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPO-01 | TBD | Pending |
-| REPO-02 | TBD | Pending |
-| REPO-03 | TBD | Pending |
-| REPO-04 | TBD | Pending |
-| REPO-05 | TBD | Pending |
-| REPO-06 | TBD | Pending |
-| TIER-01 | TBD | Pending |
-| TIER-02 | TBD | Pending |
-| TIER-03 | TBD | Pending |
-| TIER-04 | TBD | Pending |
-| TIER-05 | TBD | Pending |
-| EVAL-01 | TBD | Pending |
-| EVAL-02 | TBD | Pending |
-| EVAL-03 | TBD | Pending |
-| EVAL-04 | TBD | Pending |
-| SRCS-01 | TBD | Pending |
-| SRCS-02 | TBD | Pending |
-| BLOG-01 | TBD | Pending |
-| BLOG-02 | TBD | Pending |
-| BLOG-03 | TBD | Pending |
-| BLOG-04 | TBD | Pending |
-| BLOG-05 | TBD | Pending |
-| BLOG-06 | TBD | Pending |
-| BLOG-07 | TBD | Pending |
-| DIAG-01 | TBD | Pending |
-| DIAG-02 | TBD | Pending |
-| SITE-01 | TBD | Pending |
-| SITE-02 | TBD | Pending |
-| SITE-03 | TBD | Pending |
-| SITE-04 | TBD | Pending |
-| SITE-05 | TBD | Pending |
+| REPO-01 | Phase 127 | Pending |
+| REPO-02 | Phase 127 | Pending |
+| REPO-03 | Phase 127 | Pending |
+| REPO-04 | Phase 127 | Pending |
+| REPO-05 | Phase 130 | Pending |
+| REPO-06 | Phase 127 | Pending |
+| TIER-01 | Phase 128 | Pending |
+| TIER-02 | Phase 129 | Pending |
+| TIER-03 | Phase 129 | Pending |
+| TIER-04 | Phase 130 | Pending |
+| TIER-05 | Phase 130 | Pending |
+| EVAL-01 | Phase 131 | Pending |
+| EVAL-02 | Phase 131 | Pending |
+| EVAL-03 | Phase 131 | Pending |
+| EVAL-04 | Phase 131 | Pending |
+| SRCS-01 | Phase 132 | Pending |
+| SRCS-02 | Phase 132 | Pending |
+| BLOG-01 | Phase 133 | Pending |
+| BLOG-02 | Phase 133 | Pending |
+| BLOG-03 | Phase 133 | Pending |
+| BLOG-04 | Phase 133 | Pending |
+| BLOG-05 | Phase 133 | Pending |
+| BLOG-06 | Phase 133 | Pending |
+| BLOG-07 | Phase 133 | Pending |
+| DIAG-01 | Phase 132 | Pending |
+| DIAG-02 | Phase 132 | Pending |
+| SITE-01 | Phase 134 | Pending |
+| SITE-02 | Phase 134 | Pending |
+| SITE-03 | Phase 134 | Pending |
+| SITE-04 | Phase 134 | Pending |
+| SITE-05 | Phase 134 | Pending |
 
 **Coverage:**
 - v1.22 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31/31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-25*
-*Last updated: 2026-04-25 after initial definition*
+*Last updated: 2026-04-17 after roadmap creation*

@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: active
-stopped_at: Defining requirements
-last_updated: "2026-04-25T00:00:00.000Z"
-last_activity: "2026-04-25 — v1.22 milestone started"
+stopped_at: Roadmap created
+last_updated: "2026-04-17T00:00:00.000Z"
+last_activity: "2026-04-17 — Roadmap created with 8 phases (127-134)"
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** v1.22 RAG Architecture Patterns
+**Current focus:** Phase 127 - Repository Skeleton + Enterprise Dataset
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-25 — Milestone v1.22 started
+Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-04-17 — Roadmap created with 8 phases (127-134)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | v1.19 Claude Code Guide Refresh | 111-116 | 25 | 34 | 2026-04-12 |
 | v1.20 Dark Code Blog Post | 117-121 | 8 | 25 | 2026-04-14 |
 | v1.21 SEO Audit Fixes | 122-126 | 13 | 21 | 2026-04-16 to 2026-04-17 |
+| v1.22 RAG Architecture Patterns | 127-134 | TBD | 31 | in progress |
 
 ## Accumulated Context
 
@@ -60,7 +61,9 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- Phase 129 (Tier 3 LightRAG): Verify Python API against lightrag-hku v1.4.15 before implementation
+- Phase 130 (Tier 4 RAG-Anything): Verify MinerU/LibreOffice requirements for PDF-only datasets
+- Phase 130 (Tier 5 Agentic): Verify FileSearchTool + @function_tool coexistence in OpenAI Agents SDK
 
 ### Quick Tasks Completed
 
@@ -72,7 +75,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25
-Stopped at: Defining requirements for v1.22 RAG Architecture Patterns
+Last session: 2026-04-17
+Stopped at: Roadmap created for v1.22 RAG Architecture Patterns (8 phases, 127-134)
 Resume file: None
-Next: Define requirements and create roadmap
+Next: `/gsd-plan-phase 127`
