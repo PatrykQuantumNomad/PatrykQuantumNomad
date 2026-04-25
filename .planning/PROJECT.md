@@ -303,7 +303,17 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ### Active
 
-(Next milestone requirements to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.22 RAG Architecture Patterns
+
+**Goal:** Publish a ~4,500-word research-heavy thought-leadership blog post on RAG architecture progression (Naive → Managed → Graph → Multimodal → Agentic) with a companion GitHub repo containing runnable examples for all 5 tiers against an enterprise knowledge base scenario.
+
+**Target features:**
+- Research-heavy blog post (~4,500 words) with 5-tier RAG architecture progression narrative
+- Companion GitHub repo (rag-architecture-patterns) with runnable examples for all 5 tiers
+- Same enterprise knowledge base dataset across all tiers to show clear progression
+- NotebookLM-sourced research (105+ references) with verified citations and footnotes
+- StatHighlight/TermDefinition components, custom cover SVG, JSON-LD, OG image
+- Full site integration (LLMs.txt, sitemap, RSS, homepage callout)
 
 ### Out of Scope
 
@@ -332,12 +342,13 @@ The site must be fast, fully SEO-optimized, and visually distinctive — a portf
 
 ## Context
 
-Shipped v1.21 SEO Audit Fixes on top of 20 previous milestones (v1.0 through v1.20). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
+Building v1.22 RAG Architecture Patterns on top of 21 previous milestones (v1.0 through v1.21). Two published multi-chapter guides: FastAPI Production Guide (11 chapters) and Claude Code Guide (14 chapters with 5 SVG diagrams, 2 interactive React Flow visualizers, and dedicated cheatsheet page). 10 downloadable Jupyter Notebooks for EDA case studies with Colab integration.
 AI Landscape Explorer: interactive D3 force-directed graph with 51 concepts, guided tours, compare mode, 12 VS pages, and companion blog post.
 Dark Code blog post: 4,500-word thought-leadership essay with The Dark Code Spectrum framework (5 dimensions), 28 GFM footnote citations, custom StatHighlight and TermDefinition components, BlogPosting + FAQ JSON-LD, and cover SVG.
 Tech stack: Astro 5, Tailwind CSS, TypeScript, MDX, Satori + Sharp for OG images, GSAP for animations, Nanostores for client state, CodeMirror 6 for code editing, dockerfile-ast for Dockerfile parsing, yaml (eemeli) for YAML AST parsing, ajv + ajv-formats for JSON Schema validation, @xyflow/react + @dagrejs/dagre for dependency graphs, KaTeX (remark-math + rehype-katex) for formula rendering, D3.js micro-bundle (~17KB gzipped) for distribution explorers, actionlint WASM via Web Worker for GitHub Actions deep analysis, @fontsource for self-hosted fonts, rollup-plugin-visualizer for CSS analysis, Vitest for testing.
 Site live at patrykgolabek.dev via GitHub Pages with custom domain.
 All 36 v1.0 + 18 v1.1 + 23 v1.2 + 37 v1.3 + 38 v1.4 + 28 v1.5 + 100 v1.6 + 123 v1.7 + 145 v1.8 + 41 v1.9 + 20 v1.10 + 21 v1.11 + 11 v1.12 + 80 v1.13 + 16 v1.14 + 36 v1.15 + 33 v1.16 + 25 v1.17 + 40 v1.18 + 34 v1.19 + 25 v1.20 + 21 v1.21 requirements delivered (951 total). ~1185+ pages total. Lighthouse 90+ on mobile.
+v1.22 in progress: RAG Architecture Patterns blog post + companion GitHub repo.
 6-verifier build chain gates every npm run build: VS wordcount (Phase 122), VS overlap (Phase 122), sitemap determinism (Phase 123), font self-hosting (Phase 124), on-page SEO (Phase 125), CSS budget (Phase 126).
 Skills published: 4 DevOps validator skills at skills.sh/PatrykQuantumNomad/PatrykQuantumNomad (Dockerfile Analyzer, Docker Compose Validator, Kubernetes Manifest Analyzer, GitHub Actions Workflow Validator).
 Custom "Quantum Explorer" theme is distinctive and fully accessible.
@@ -518,4 +529,4 @@ Hero messaging emphasizes cloud-native architect identity with 17+ years experie
 - **No base path:** User-level GitHub Pages site
 
 ---
-*Last updated: 2026-04-17 after v1.21 milestone complete*
+*Last updated: 2026-04-25 after v1.22 milestone started*

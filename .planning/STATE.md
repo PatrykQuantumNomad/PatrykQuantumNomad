@@ -1,43 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.21
-milestone_name: SEO Audit Fixes
-status: archived
-stopped_at: Milestone v1.21 archived. All 13/13 plans across Phases 122-126 shipped and verified.
-last_updated: "2026-04-17T16:00:00.000Z"
-last_activity: "2026-04-17 — v1.21 milestone archived. 6-verifier build chain fully wired."
+milestone: v1.22
+milestone_name: RAG Architecture Patterns
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-04-25T00:00:00.000Z"
+last_activity: "2026-04-25 — v1.22 milestone started"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-17)
+See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Planning next milestone
+**Current focus:** v1.22 RAG Architecture Patterns
 
 ## Current Position
 
-Phase: N/A — between milestones
-Plan: N/A
-Status: Ready to plan next milestone
-Last activity: 2026-04-17 — v1.21 SEO Audit Fixes milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-25 — Milestone v1.22 started
 
-Progress: [██████████] 100% (v1.21 complete — 13/13 plans)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
 - Total plans completed: 300 (across 21 milestones)
-- v1.21 plans completed: 13 (Phase 122: 3/3; Phase 123: 3/3; Phase 124: 2/2; Phase 125: 3/3; Phase 126: 2/2)
 
 **Cumulative Stats:**
 
@@ -61,7 +60,7 @@ None.
 
 ### Blockers/Concerns
 
-None — milestone complete.
+None.
 
 ### Quick Tasks Completed
 
@@ -73,7 +72,7 @@ None — milestone complete.
 
 ## Session Continuity
 
-Last session: 2026-04-17
-Stopped at: Milestone v1.21 archived. Ready for next milestone.
+Last session: 2026-04-25
+Stopped at: Defining requirements for v1.22 RAG Architecture Patterns
 Resume file: None
-Next: `/gsd:new-milestone` to start next milestone cycle.
+Next: Define requirements and create roadmap
