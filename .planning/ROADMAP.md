@@ -64,7 +64,15 @@ See MILESTONES.md for completed milestone details.
   2. Enterprise KB dataset contains text docs, PDFs, and at least one image with cross-document relationships that require multi-hop reasoning
   3. Shared utilities (embeddings, output formatting, cost tracking) import cleanly and a smoke test passes
   4. Each tier directory has its own requirements.txt and .env.example documents all required API keys
-**Plans**: TBD
+**Plans**: 6 plans across 5 waves
+
+Plans:
+- [ ] 127-01-PLAN.md — Repo creation + git-lfs + Python project skeleton + per-tier requirements.txt + .env.example
+- [ ] 127-02-PLAN.md — Shared utilities (config/pricing/llm/embeddings/loader/display/cost_tracker) + smoke test scaffolding
+- [ ] 127-03-PLAN.md — Curation scripts (curate_corpus.py + extract_figures.py + cut_video_clips.py + seed lists)
+- [ ] 127-04-PLAN.md — Run corpus curation: download ~100 arXiv PDFs as RAG citation cluster (LFS commit)
+- [ ] 127-05-PLAN.md — Run figure extraction + video clip cutting + manifests with verified CC licenses
+- [ ] 127-06-PLAN.md — Author 30 golden Q&A + metadata.json + final live smoke + README finalization
 
 ### Phase 128: Tier 1 Naive RAG
 **Goal**: Users can run a baseline RAG pipeline that chunks, embeds, and retrieves from the enterprise KB using raw ChromaDB + OpenAI
@@ -142,7 +150,6 @@ See MILESTONES.md for completed milestone details.
   3. LLMs.txt entry with thesis statement, sitemap activation, and RSS feed include the new post
   4. Internal cross-links to AI Landscape Explorer and Claude Code Guide are functional
   5. Production build passes with all 6 existing verifiers clean
-**Plans**: TBD
 
 ## Progress
 
@@ -151,7 +158,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 0/TBD | Not started | - |
+| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 0/6 | Not started | - |
 | 128. Tier 1 Naive RAG | v1.22 | 0/TBD | Not started | - |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/TBD | Not started | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
