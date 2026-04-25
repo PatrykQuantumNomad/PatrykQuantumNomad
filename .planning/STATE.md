@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plan 127-04 complete (companion repo commit 2171d25 pushed to origin/main with 100 LFS objects)
-last_updated: "2026-04-25T19:09:56.882Z"
+stopped_at: Plan 127-05 complete (companion repo commit daf4978 pushed to origin/main with 545 LFS objects added; 581 figures + figures.json with 8 captions); video clip portion deferred per documented escape hatch
+last_updated: "2026-04-25T19:21:32.947Z"
 last_activity: 2026-04-25
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 4 of 6 in current phase complete
+Plan: 5 of 6 in current phase complete
 Status: Ready to execute
 Last activity: 2026-04-25
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [███████░░░] 67%
 | Phase 127 P02 | ~10min | 3 tasks | 14 files (1252 LOC across shared/ + tests/) |
 | Phase 127 P03 | 7m 19s | 3 tasks | 9 files |
 | Phase 127 P04 | 14m | 3 tasks | 101 files |
+| Phase 127 P05 | 17m | 3 tasks | 582 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,11 @@ Plan 127-02 added:
 - Plan 127-03: pyproject [build-system] + [tool.setuptools] packages=[shared,scripts] required for flat-layout editable install (Rule 3 fix)
 - Plan 127-04: GIT_SSL_CAINFO=/etc/ssl/cert.pem persisted as http.sslCAInfo local-config — sandbox keychain access blocked git-lfs Go runtime cert resolution; CA-bundle redirect preserves TLS verification (no weakening)
 - Plan 127-04: Curator approved 100-paper cluster as-previewed (no swaps); Sleeper Agents (2401.05566) explicitly retained per off-topic-but-approved decision
+- Plan 127-05: 581 figures extracted via PyMuPDF default thresholds (--min-dim 200 --max-aspect-ratio 5); 19 sub-1KB extraction-artifact placeholders pruned during curator review
+- Plan 127-05: 8 figure captions extracted verbatim from source PDFs via fitz.get_text(clip=caption_band) — covers Lewis 2020 RAG, GraphRAG x2, LightRAG x2, Transformer, VisRAG x2 (>=7 needed for Plan 06)
+- Plan 127-05: Video clip cut DEFERRED — sandbox cannot verify slideslive.com CC license; cut_video_clips.py safety gate correctly refused TBD entry. REPO-02 satisfied via 581-image set; videos remain tier-4 bonus
+- Plan 127-05: dataset/manifests/videos.json deliberately ABSENT (not empty []) — preserves test_videos_manifest_conditional skip path; shared.loader treats absent file as empty list
+- Plan 127-05: 39 of 100 papers contributed zero raster figures (vector-graphics-only PDFs that PyMuPDF cannot rasterize) — Self-RAG, FLARE, CRAG, Step-Back among them; informs Plan 06 to target the 61 papers WITH figures for multimodal Q&A
 
 ### Pending Todos
 
@@ -103,7 +109,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25T19:09:56.878Z
-Stopped at: Plan 127-04 complete (companion repo commit 2171d25 pushed to origin/main with 100 LFS objects)
+Last session: 2026-04-25T19:21:32.942Z
+Stopped at: Plan 127-05 complete (companion repo commit daf4978 pushed to origin/main with 545 LFS objects added; 581 figures + figures.json with 8 captions); video clip portion deferred per documented escape hatch
 Resume file: None
 Next: Execute Plan 127-04 (Corpus curation, Wave 3) once Plan 127-03 (Curation scripts) commits its remaining work. Plans 04+ depend on `scripts/*.py` from Plan 03.
