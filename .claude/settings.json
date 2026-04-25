@@ -41,6 +41,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-read-injection-scanner.js",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -104,14 +114,20 @@
       "allowedDomains": [
         "registry.npmjs.org",
         "*.npmjs.org",
-        "registry.yarnpkg.com"
+        "registry.yarnpkg.com",
+        "github.com",
+        "api.github.com",
+        "*.api.github.com",
+        "*.github.com"
       ]
     },
     "filesystem": {
       "allowWrite": [
         "~/.npm",
         "~/.cache/gsd",
-        "~/.claude/cache"
+        "~/.claude/cache",
+        "~/.config/gh",
+        "/Users/patrykattc/work/git/rag-architecture-patterns"
       ]
     }
   }
