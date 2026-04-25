@@ -1,311 +1,424 @@
-# Stack Research: v1.21 SEO Audit Fixes
+# Stack Research: RAG Architecture Patterns Companion Repo
 
-**Domain:** SEO audit fixes for Astro 5 portfolio site (self-hosted fonts, sitemap lastmod, VS page enrichment, CSS investigation)
-**Researched:** 2026-04-15
+**Domain:** Python RAG companion repository (5-tier progressive examples)
+**Researched:** 2026-04-17
 **Confidence:** HIGH
 
----
+## Recommended Stack
 
-## Recommended Stack Additions
+### Runtime & Package Management
 
-### 1. Self-Hosted Fonts via @fontsource
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Python | 3.10+ | Runtime | Minimum for google-genai, python-dotenv, sentence-transformers. 3.10 is the highest common floor across all tier dependencies. |
+| uv | latest | Package manager | 10-100x faster than pip, lockfile reproducibility, manages venvs and Python versions. Industry standard for new Python projects in 2026. Provide `requirements.txt` fallback for pip users. |
 
-Use **static** @fontsource packages (not variable, not Astro's experimental Fonts API) to replace the Google Fonts CDN `<link>` tags.
+### Shared Dependencies (All Tiers)
 
-| Package | Version | Purpose | Why |
-|---------|---------|---------|-----|
-| `@fontsource/bricolage-grotesque` | 5.2.10 | Heading font (700, 800 weights) | Eliminates DNS/TLS round-trip to fonts.googleapis.com + fonts.gstatic.com. Static packages produce per-weight CSS files that tree-shake cleanly. |
-| `@fontsource/dm-sans` | 5.2.8 | Body font (400, 500, 700 weights) | Same CDN elimination. DM Sans is the primary body typeface used across the entire site. |
-| `@fontsource/fira-code` | 5.2.7 | Monospace font (400 weight) | Used in `.meta-mono` class and code contexts. Only weight 400 needed. |
-| `@fontsource/noto-sans` | 5.2.10 | Greek character fallback (400, 700 weights) | Used exclusively for Greek glyphs (U+0370-03FF) in Beauty Index dimension symbols. Default import includes unicode-range subsetting automatically. |
+| Library | Version | Purpose | Why Recommended |
+|---------|---------|---------|-----------------|
+| openai | >=2.32.0 | LLM API client | Used by Tiers 1, 3, 4, 5. Provides embeddings (text-embedding-3-small) and chat completions (gpt-4o-mini). Async + sync clients, type-safe. |
+| python-dotenv | >=1.2.2 | Environment config | Loads API keys from `.env`. Every tier needs at least one API key. Python >=3.10 required. |
+| rich | >=15.0.0 | Terminal output | Pretty-prints retrieval results, progress bars during indexing, syntax-highlighted code in responses. Makes demos visually compelling without a UI. |
+| tiktoken | >=0.12.0 | Token counting | Counts tokens for chunking logic (Tier 1) and cost estimation across all tiers. Fast BPE tokenizer from OpenAI. |
 
-**Why static packages over @fontsource-variable:**
+### Tier 1: Naive RAG (Basic Vector Similarity)
 
-Variable font packages change the CSS `font-family` name to `"[Font] Variable"` (e.g., `"DM Sans Variable"`, `"Bricolage Grotesque Variable"`). This would require updating:
-- `tailwind.config.mjs` font-family definitions
-- `src/styles/global.css` fallback `@font-face` declarations
-- `src/styles/global.css` `.meta-mono` class
-- Any component with hardcoded font-family references
+| Library | Version | Purpose | Why This Library |
+|---------|---------|---------|------------------|
+| chromadb | >=1.5.8 | Vector database | Zero-config embedded vector DB. No server needed -- runs in-process with persistent local storage. Perfect for "build RAG from scratch" demo. |
+| pypdf | >=6.10.2 | PDF text extraction | Pure Python, no system dependencies. Extracts text from digitally-born PDFs. Lightweight for the "naive" tier. |
 
-Static packages use the **exact same font-family names** already in the codebase (`"DM Sans"`, `"Bricolage Grotesque"`, `"Fira Code"`, `"Noto Sans"`). Zero CSS changes needed beyond removing the Google Fonts `<link>` tags and adding imports.
+**What Tier 1 demonstrates:** Manual chunking, embedding with `text-embedding-3-small`, vector similarity search with ChromaDB, prompt assembly with retrieved context. No framework abstractions -- raw OpenAI API + ChromaDB.
 
-Variable fonts also ship unused weight ranges (DM Sans Variable includes weights 100-900 when we only use 400/500/700), adding ~30-50KB of unused font data per family.
+**API keys required:** `OPENAI_API_KEY`
 
-**Why NOT Astro's experimental Fonts API:**
+### Tier 2: Google Managed RAG (Gemini File Search)
 
-Astro's `experimental.fonts` was introduced in Astro 5.7 and is available on the project's installed Astro 5.17.1. However:
-- Still experimental with breaking changes between 5.16.x and 5.17.0 (PR #15213 redesigned the config format)
-- Open bugs: fallback font stacks not outputting correctly (#16127), too-many-builds issue (#16007), dev server creating spurious `dist_astro/fonts` directory (#15091)
-- Requires wrapping font config in `astro.config.mjs` experimental block + learning a new API
-- The direct `@fontsource` import approach is battle-tested, simpler, and produces identical results
+| Library | Version | Purpose | Why This Library |
+|---------|---------|---------|------------------|
+| google-genai | >=1.73.1 | Gemini API client | Official unified SDK for Gemini Developer API. File Search is a first-class tool. Python >=3.10 required. |
 
-The Fonts API became stable in Astro 6.0.0 (not installed). When the project upgrades to Astro 6, migrating to the built-in provider would be appropriate.
+**What Tier 2 demonstrates:** Zero-infrastructure RAG. Google handles chunking, embedding, storage, and retrieval. Developer uploads files to a `FileSearchStore`, then queries with `generate_content()` using the `FileSearch` tool. Automatic citations in responses.
 
-### 2. Sitemap lastmod Enhancement
+**API pattern:**
+```python
+from google import genai
+from google.genai import types
 
-**No new packages needed.** The existing `@astrojs/sitemap` v3.7.0 (latest: 3.7.2) already has the `serialize` hook with full `lastmod` support. The project already uses `serialize()` in `astro.config.mjs` for blog and guide pages.
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `@astrojs/sitemap` | 3.7.0 (installed) | Sitemap generation with serialize hook | Already handles blog + guide lastmod. Needs extension, not replacement. |
-
-**What needs to change (code, not dependencies):**
-
-The existing `buildContentDateMap()` function in `astro.config.mjs` only populates dates for:
-- Blog posts (from frontmatter `publishedDate`/`updatedDate`)
-- Guide pages (from `guide.json` metadata)
-
-To cover all 1,184 pages, extend `buildContentDateMap()` to include:
-
-1. **Beauty Index pages (~678 pages):** All are generated from `languages.json` which has no dates. Use a single hardcoded date (the date the Beauty Index was published or last updated). This applies to `/beauty-index/`, `/beauty-index/[lang]/`, `/beauty-index/vs/[a]-vs-[b]/`, `/beauty-index/justifications/`, and `/beauty-index/code/`.
-
-2. **DB Compass pages:** Similar static data, use hardcoded publish date.
-
-3. **EDA pages:** Similar static data, use hardcoded publish date. Notebooks have `publishedDate` in frontmatter.
-
-4. **AI Landscape pages (~12 VS pages + hub):** Use hardcoded publish date.
-
-5. **Tools pages:** Use hardcoded publish date.
-
-6. **Static pages (home, about, projects, etc.):** Use build date or a manually maintained date.
-
-**Serialize hook API reference (confirmed v3.7.2):**
-
-```typescript
-serialize?: (item: SitemapItem) => SitemapItem | Promise<SitemapItem | undefined> | undefined
-
-interface SitemapItem {
-  url: string;                         // required, absolute URL
-  lastmod?: string | undefined;        // ISO formatted date string
-  changefreq?: ChangeFreqEnum | undefined;
-  priority?: number | undefined;
-  links?: LinkItem[] | undefined;
-}
+# 1. Create store + upload file (one-time)
+store = client.file_search_stores.create(config={"display_name": "enterprise-kb"})
+op = client.file_search_stores.upload_to_file_search_store(
+    file="knowledge-base.pdf",
+    file_search_store_name=store.name,
+    config={"display_name": "kb-doc"}
+)
+# 2. Query with File Search tool
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="What is the company policy on remote work?",
+    config=types.GenerateContentConfig(
+        tools=[types.Tool(file_search=types.FileSearch(
+            file_search_store_names=[store.name]
+        ))]
+    )
+)
 ```
 
-The existing serialize function already sets `changefreq` and `priority` by URL pattern. Adding lastmod fallbacks is a matter of extending the `else` branch (line 85 in current config) to set a date instead of `undefined`.
+**API keys required:** `GEMINI_API_KEY` (free tier available; storage + embedding at query time are free, indexing costs $0.15/M tokens)
 
-### 3. VS Comparison Page Content Enrichment
+**Pricing advantage:** Cheapest managed RAG option. No vector DB costs, no embedding API costs at query time.
 
-**No new libraries needed.** The enrichment is a build-time template enhancement, not a runtime feature.
+### Tier 3: Graph RAG (LightRAG)
 
-| Approach | What | Why |
-|----------|------|-----|
-| Build-time data derivation | Compute comparative analysis from existing `Language` data at build time in `[slug].astro` | All 26 languages already have: year, paradigm, characterSketch, 6 dimension scores, tier. Enough data to generate 500+ unique words per pairing. |
+| Library | Version | Purpose | Why This Library |
+|---------|---------|---------|------------------|
+| lightrag-hku | >=1.4.15 | Graph-based RAG | EMNLP2025 paper implementation. Builds knowledge graphs from documents automatically. Dual-level retrieval (entity-level + community-level). Outperforms naive RAG, HyDE, and Microsoft GraphRAG on benchmarks. |
 
-**Content enrichment strategy (no new packages):**
+**What Tier 3 demonstrates:** Knowledge graph construction from unstructured text, entity/relationship extraction, graph-augmented retrieval that captures connections across documents that vector similarity misses.
 
-The existing VS page template (`src/pages/beauty-index/vs/[slug].astro`) currently renders:
-- Header with scores (1 sentence)
-- Radar chart (visual only)
-- Verdict (1 sentence)
-- Dimension breakdown table (structured data)
-- Character sketches (2 paragraphs, copied from single-language pages)
+**Key configuration:**
+```python
+from lightrag import LightRAG, QueryParam
 
-To reach 500+ unique words, add these **computed sections** using existing data:
+rag = LightRAG(
+    working_dir="./lightrag_workdir",
+    llm_model_func=...,  # OpenAI-compatible function
+    embedding_func=...,  # Embedding function
+)
 
-1. **Strengths & Weaknesses Analysis** (~150 words): For each language, compute which dimensions are above/below the tier average. Generate sentences like "Python's highest-scoring dimension is Practitioner Happiness (10/10), which exceeds the Beautiful tier average of 8.5."
+# Insert documents
+await rag.ainsert(document_text)
 
-2. **Dimension Deep-Dives** (~200 words): For each of the 6 dimensions, generate a comparison paragraph. The dimension metadata (`DIMENSIONS[].description`) plus the delta computation already in the template provides the raw material: "In Aesthetic Geometry, Python scores 9/10 compared to Ruby's 9/10 -- a tie. Both languages prioritize visual cleanliness and grid-based order."
+# Query with different modes
+result = await rag.aquery("What are the key relationships?",
+    param=QueryParam(mode="hybrid"))  # naive | local | global | hybrid
+```
 
-3. **Paradigm & Era Context** (~100 words): Both languages have `year` and `paradigm` fields. Generate: "Python (1991, multi-paradigm) predates Ruby (1995, object-oriented) by 4 years. Despite emerging in the same decade, they evolved different aesthetic philosophies."
+**Storage backends:** JSON (default, good for demos), PostgreSQL, MongoDB, Neo4j, OpenSearch (production).
 
-4. **Related Comparisons** (~50 words): Link to reverse comparison and other popular pairings involving the same languages. Internal linking that also adds word count.
+**API keys required:** `OPENAI_API_KEY` (for LLM extraction + embeddings)
 
-**Key insight:** Every comparison is mathematically unique because no two language pairs have identical score vectors. The 6 dimension scores, 2 paradigms, 2 years, 2 tiers, and 2 character sketches create sufficient entropy for 650 genuinely unique pages.
+**Important:** LightRAG uses LLM calls during indexing (entity/relationship extraction). Budget ~3-5x more tokens for indexing vs. naive RAG. This is a feature, not a bug -- it's what builds the knowledge graph.
 
-### 4. CSS Code-Splitting Investigation
+### Tier 4: Multimodal RAG (RAG-Anything)
 
-**No new production packages needed.** Investigation tooling only.
+| Library | Version | Purpose | Why This Library |
+|---------|---------|---------|------------------|
+| raganything[all] | >=1.2.10 | Multimodal document processing | Built on LightRAG. Processes PDFs with interleaved text, images, tables, and equations through one pipeline. VLM-enhanced query mode. Same team (HKUDS) as LightRAG, so architecturally coherent progression. |
 
-| Tool | Version | Purpose | When to Use |
-|------|---------|---------|-------------|
-| `rollup-plugin-visualizer` | 7.0.0 (already installed as devDep) | Bundle size analysis | Run `npx vite-bundle-visualizer` after build to identify CSS chunk sizes |
-| `astro-purgecss` | 6.0.1 | Remove unused CSS from final HTML | **Evaluate only** -- Tailwind v3 already JIT-compiles only used utilities, but non-Tailwind CSS (global.css custom rules, component `<style>` blocks) may have dead rules |
+**What Tier 4 demonstrates:** Processing documents where text-only RAG fails -- technical docs with diagrams, financial reports with charts, manuals with annotated images. Shows how vision-language models integrate with RAG retrieval.
 
-**Built-in Astro CSS handling (no package needed):**
+**Key configuration:**
+```python
+from raganything import RAGAnything, RAGAnythingConfig
 
-Astro already:
-- Minifies and combines CSS into per-page chunks at build time
-- Splits shared CSS into reusable chunks across pages
-- Inlines CSS under 4KB as `<style>` tags, links CSS over 4KB as `<link rel="stylesheet">`
-- Configurable via `build.inlineStylesheets` (`'auto'` | `'always'` | `'never'`) and `build.assetsInlineLimit`
+config = RAGAnythingConfig(
+    working_dir="./raganything_workdir",
+    parser_type="mineru",  # Document parser
+)
 
-**Investigation approach for the 132KB homepage CSS:**
+rag = RAGAnything(config=config, llm_model_func=..., vlm_model_func=...)
 
-1. Build the site and inspect the output CSS files in `dist/`
-2. Use the already-installed `rollup-plugin-visualizer` to see which CSS chunks are large
-3. Check if Tailwind utility classes from non-homepage components are leaking into the shared chunk
-4. Evaluate whether `astro-purgecss` removes meaningful dead CSS (test build size before/after)
-5. Consider moving heavy component styles from global scope to component-scoped `<style>` tags
+# Process multimodal document
+await rag.process_document_complete("technical-manual.pdf")
 
-**What NOT to do:** Do not set `vite.build.cssCodeSplit = false` -- this was confirmed as breaking all CSS in Astro builds (GitHub issue #4413).
+# Text-only query
+result = await rag.aquery("What does the architecture diagram show?")
 
----
+# Multimodal query (includes images in response)
+result = await rag.aquery_with_multimodal("Explain the system diagram")
+```
+
+**System dependencies:** MinerU (document parser, installed via pip). Optional: LibreOffice for .doc/.ppt/.xls files.
+
+**API keys required:** `OPENAI_API_KEY` (for LLM + VLM via gpt-4o or gpt-4o-mini)
+
+**Note:** RAG-Anything extends LightRAG, so Tier 4 code builds naturally on Tier 3 concepts. This makes the progression pedagogically clean.
+
+### Tier 5: Agentic RAG (OpenAI Agents SDK)
+
+| Library | Version | Purpose | Why This Library |
+|---------|---------|---------|------------------|
+| openai-agents | >=0.14.5 | Agent framework | Lightweight, minimal abstractions, built-in FileSearchTool for managed vector stores. Provider-agnostic (100+ LLMs). No heavy framework overhead like LangGraph. Better for a companion repo because the code reads like plain Python, not framework DSL. |
+
+**Why OpenAI Agents SDK over LangGraph:**
+- LangGraph (v1.1.0) is powerful but adds significant abstraction overhead (StateGraph, conditional edges, reducer patterns). For a blog companion repo, readers want to understand the concepts, not debug a framework.
+- OpenAI Agents SDK uses plain Python functions as tools, explicit agent handoffs, and minimal boilerplate. The agentic pattern is visible in the code, not buried in framework conventions.
+- Built-in `FileSearchTool` provides managed RAG without infrastructure. Built-in `WebSearchTool` adds real-time grounding.
+- Tracing is built in for debugging.
+
+**What Tier 5 demonstrates:** An agent that decides WHEN to retrieve, WHAT to retrieve from, and WHETHER the retrieved context is sufficient. Implements query planning, retrieval, self-evaluation, and re-retrieval loops.
+
+**Key configuration:**
+```python
+from agents import Agent, FileSearchTool, WebSearchTool, Runner, function_tool
+
+@function_tool
+def search_knowledge_base(query: str) -> str:
+    """Search the enterprise knowledge base for relevant information."""
+    # Custom retrieval logic using ChromaDB from Tier 1
+    ...
+
+agent = Agent(
+    name="Enterprise KB Assistant",
+    instructions="You are an enterprise knowledge assistant. Search the knowledge base "
+                 "before answering. If results are insufficient, reformulate and search again.",
+    tools=[
+        FileSearchTool(
+            vector_store_ids=["vs_..."],
+            max_num_results=5,
+        ),
+        search_knowledge_base,
+    ],
+)
+
+result = await Runner.run(agent, "Compare our remote work policy with industry standards")
+```
+
+**API keys required:** `OPENAI_API_KEY`
+
+## Enterprise Knowledge Base Dataset
+
+### Recommended Format
+
+Use a synthetic "Acme Corp" enterprise knowledge base with documents in multiple formats to exercise each tier's capabilities:
+
+| Document | Format | Purpose | Exercises |
+|----------|--------|---------|-----------|
+| Company Handbook | Markdown (.md) | HR policies, org structure | All tiers (text baseline) |
+| Technical Architecture | PDF with diagrams | System architecture docs | Tiers 1-5 (text), Tier 4 (images) |
+| Quarterly Report | PDF with tables/charts | Financial data | Tiers 1-5 (text), Tier 4 (tables/charts) |
+| Product Roadmap | Markdown (.md) | Feature plans, timelines | Cross-document queries (Tier 3 graph) |
+| Engineering Standards | PDF | Coding standards, processes | Entity extraction (Tier 3) |
+| Meeting Notes | Plain text (.txt) | Decision records | Relationship extraction (Tier 3) |
+
+**Total size:** ~50-100 pages across 6-8 documents. Small enough to index quickly in demos, large enough to show meaningful retrieval differences between tiers.
+
+**Why synthetic, not real:** No licensing issues, no PII concerns, can be version-controlled in the repo, can be designed to highlight each tier's strengths (e.g., documents with deliberate cross-references for graph RAG, documents with diagrams for multimodal RAG).
+
+### Dataset Directory Structure
+
+```
+data/
+  enterprise-kb/
+    handbook.md           # HR policies, benefits, org chart
+    architecture.pdf      # System diagrams, component descriptions
+    quarterly-report.pdf  # Tables, charts, financial summaries
+    roadmap.md           # Product plans with cross-refs to architecture
+    standards.pdf        # Engineering standards
+    meeting-notes/
+      2024-q4-planning.txt
+      2025-q1-review.txt
+```
+
+## Embedding Model
+
+| Model | Dimensions | Cost | When to Use |
+|-------|------------|------|-------------|
+| text-embedding-3-small | 1,536 | $0.02/M tokens | Tier 1 (Naive RAG), Tier 3 (LightRAG), Tier 5 (Agentic). Best cost/quality ratio for demos. |
+| Gemini built-in | N/A (managed) | Free at query time | Tier 2 only. Embedding is handled by File Search internally. |
+| text-embedding-3-small via LightRAG | 1,536 | $0.02/M tokens | Tier 4 (RAG-Anything inherits from LightRAG). |
+
+**Why not text-embedding-3-large?** For a companion repo, the cost savings of -small matter (readers will run this with their own API keys). Quality difference is negligible for a 50-100 page demo corpus.
+
+## LLM Model
+
+| Model | Context | Cost (input/output) | When to Use |
+|-------|---------|---------------------|-------------|
+| gpt-4o-mini | 128K | $0.15/$0.60 per M tokens | Default for all tiers. Cheap enough for readers to experiment. Smart enough for entity extraction and RAG generation. |
+| gpt-4o | 128K | $2.50/$10.00 per M tokens | Tier 4 VLM queries (image understanding). Optional upgrade for any tier. |
+| gemini-2.5-flash | 1M | Pay-per-use | Tier 2 only. Used via google-genai SDK. |
 
 ## Installation
 
 ```bash
-# Font self-hosting (production dependencies -- CSS is imported at build time)
-npm install @fontsource/bricolage-grotesque @fontsource/dm-sans @fontsource/fira-code @fontsource/noto-sans
+# Option 1: uv (recommended)
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 
-# CSS investigation (dev dependency, evaluate then remove if not useful)
-npm install -D astro-purgecss
+# Option 2: pip
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
----
+### requirements.txt (all tiers)
 
-## Integration Points
+```
+# Shared
+openai>=2.32.0
+python-dotenv>=1.2.2
+rich>=15.0.0
+tiktoken>=0.12.0
 
-### Font Integration
+# Tier 1: Naive RAG
+chromadb>=1.5.8
+pypdf>=6.10.2
 
-**In `src/layouts/Layout.astro`:**
+# Tier 2: Google Managed RAG
+google-genai>=1.73.1
 
-Remove these lines (116-128):
-```html
-<!-- DELETE: Google Fonts CDN -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preload" href="https://fonts.googleapis.com/css2?..." as="style" ... />
-<noscript><link href="https://fonts.googleapis.com/css2?..." rel="stylesheet" /></noscript>
+# Tier 3: Graph RAG
+lightrag-hku>=1.4.15
+
+# Tier 4: Multimodal RAG
+raganything[all]>=1.2.10
+
+# Tier 5: Agentic RAG
+openai-agents>=0.14.5
 ```
 
-Add imports in the frontmatter section:
-```typescript
-// Self-hosted fonts (replaces Google Fonts CDN)
-import '@fontsource/bricolage-grotesque/700.css';
-import '@fontsource/bricolage-grotesque/800.css';
-import '@fontsource/dm-sans/400.css';
-import '@fontsource/dm-sans/500.css';
-import '@fontsource/dm-sans/700.css';
-import '@fontsource/fira-code/400.css';
-import '@fontsource/noto-sans/400.css';
-import '@fontsource/noto-sans/700.css';
+### Per-tier requirements (for readers who want to run individual tiers)
+
+```
+# tier1-requirements.txt
+openai>=2.32.0
+python-dotenv>=1.2.2
+rich>=15.0.0
+tiktoken>=0.12.0
+chromadb>=1.5.8
+pypdf>=6.10.2
+
+# tier2-requirements.txt
+google-genai>=1.73.1
+python-dotenv>=1.2.2
+rich>=15.0.0
+
+# tier3-requirements.txt
+openai>=2.32.0
+python-dotenv>=1.2.2
+rich>=15.0.0
+lightrag-hku>=1.4.15
+
+# tier4-requirements.txt
+openai>=2.32.0
+python-dotenv>=1.2.2
+rich>=15.0.0
+raganything[all]>=1.2.10
+
+# tier5-requirements.txt
+openai>=2.32.0
+python-dotenv>=1.2.2
+rich>=15.0.0
+chromadb>=1.5.8
+openai-agents>=0.14.5
 ```
 
-**In `src/layouts/Layout.astro` CSP meta tag (line 78):**
+### Environment Variables (.env.example)
 
-Remove `https://fonts.googleapis.com` from `style-src` and `connect-src`.
-Remove `https://fonts.gstatic.com` from `font-src` and `connect-src`.
-Add `'self'` to `font-src` (fonts now served from same origin).
+```bash
+# Required for Tiers 1, 3, 4, 5
+OPENAI_API_KEY=sk-...
 
-Updated CSP directives:
+# Required for Tier 2
+GEMINI_API_KEY=AI...
+
+# Optional: Override default models
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+GEMINI_MODEL=gemini-2.5-flash
 ```
-style-src 'self' 'unsafe-inline';
-font-src 'self';
-connect-src 'self' blob: https://www.google-analytics.com https://www.googletagmanager.com;
-```
-
-**In `tailwind.config.mjs`:** No changes needed. Font-family names remain identical.
-
-**In `src/styles/global.css`:** No changes needed. Fallback `@font-face` declarations and font-family references remain valid.
-
-**Noto Sans unicode-range:** The `@fontsource/noto-sans` default CSS import already includes `unicode-range` definitions for automatic subset loading. The existing `@font-face` declarations in `global.css` for `'Greek Fallback'` (lines 60-75) that reference `local('Noto Sans')` will now resolve to the self-hosted font files instead of requiring the browser to find a system-installed Noto Sans. This is an improvement in reliability.
-
-### Sitemap Integration
-
-**In `astro.config.mjs` `buildContentDateMap()` function:**
-
-Extend to cover all content types. For pages without frontmatter dates, use section-level publication dates. Example approach:
-
-```typescript
-// Section-level dates for content without per-page dates
-const SECTION_DATES: Record<string, string> = {
-  '/beauty-index/': '2025-10-15',     // Beauty Index launch date
-  '/db-compass/':   '2025-08-20',     // DB Compass launch date
-  '/eda/':          '2025-11-10',     // EDA launch date
-  '/ai-landscape/': '2026-01-15',    // AI Landscape launch date
-  '/tools/':        '2025-07-01',     // Tools section launch date
-};
-```
-
-Then in `serialize()`, after the existing `contentDates.get()` check, fall back to section dates:
-
-```typescript
-if (knownDate) {
-  item.lastmod = knownDate;
-} else {
-  // Fall back to section-level dates
-  const sectionDate = Object.entries(SECTION_DATES)
-    .find(([prefix]) => item.url.includes(prefix))?.[1];
-  if (sectionDate) {
-    item.lastmod = new Date(sectionDate).toISOString();
-  }
-  // Pages with no date still omit lastmod (better than a fake date)
-}
-```
-
----
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|------------------------|
-| `@fontsource/[font]` static packages | `@fontsource-variable/[font]` variable packages | When you need arbitrary weights (e.g., weight 350, 450). The project uses only fixed weights (400, 500, 700, 800) so variable fonts add unnecessary bytes and require CSS changes. |
-| `@fontsource/[font]` static packages | Astro `experimental.fonts` API | When the project upgrades to Astro 6.0.0 where the API is stable. Not now -- still experimental on Astro 5.x with known bugs. |
-| `@fontsource/[font]` static packages | `astro-font` npm package | When you want a single integration that handles preloading and fallback font generation. However, it adds another abstraction layer over what is fundamentally 8 CSS import statements. |
-| `@fontsource/[font]` static packages | Manual font file download (woff2 files) | When you need absolute control over font files or fontsource packages are unavailable. More maintenance burden with no benefit. |
-| Extend `buildContentDateMap()` | `astro-sitemap` (community fork) | When you need features beyond what `@astrojs/sitemap` provides (e.g., i18n sitemap). Not needed here -- the official integration's `serialize` hook is sufficient. |
-| Build-time computed sections in `[slug].astro` | External CMS or AI-generated content | When programmatic content derivation from structured data is insufficient. Here, the data model is rich enough (6 scores + year + paradigm + tier + characterSketch per language) to generate genuinely unique 500+ word comparisons. |
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| chromadb (Tier 1) | FAISS | ChromaDB has simpler API, built-in persistence, metadata filtering. FAISS requires numpy array management. For a teaching repo, DX matters more than raw speed. |
+| chromadb (Tier 1) | Qdrant, Weaviate, Pinecone | All require running a server or cloud account. ChromaDB runs embedded -- zero infrastructure for readers. |
+| google-genai (Tier 2) | OpenAI Assistants API (file_search) | Google File Search is free for storage + query-time embeddings. OpenAI charges for vector store storage. Google's approach is newer and less documented in tutorials, making it more interesting content. |
+| lightrag-hku (Tier 3) | Microsoft GraphRAG | LightRAG is simpler (single package), faster, and benchmarks better per the EMNLP2025 paper. GraphRAG requires more configuration and has heavier dependencies. |
+| lightrag-hku (Tier 3) | neo4j + LangChain GraphRAG | Requires running Neo4j server. LightRAG's built-in graph storage (JSON/networkx) works for demos. Same team as Tier 4, so natural progression. |
+| raganything (Tier 4) | Unstructured + LangChain multimodal | RAG-Anything is purpose-built for multimodal RAG, not a general ETL tool. Built on LightRAG so it shares the Tier 3 foundation. One package vs. assembling 5+ libraries. |
+| openai-agents (Tier 5) | LangGraph (v1.1.0) | LangGraph is more powerful but adds StateGraph DSL overhead. For a companion repo, code readability is paramount. OpenAI Agents SDK reads like plain Python. |
+| openai-agents (Tier 5) | CrewAI | CrewAI is multi-agent focused (role-playing agents). Overkill for single-agent RAG. Adds unnecessary abstraction for the demo scope. |
+| text-embedding-3-small | Gemini Embedding 2, voyage-3-large | OpenAI embedding is used by default in LightRAG and RAG-Anything. Using the same embedding model across tiers keeps comparisons fair and reduces API key requirements. |
+| Synthetic dataset | Real company docs | Licensing, PII, can't version control. Synthetic lets you design documents that showcase each tier's strengths. |
 
----
-
-## What NOT to Add
+## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `@fontsource-variable/*` packages | Changes font-family CSS names, ships unused weight data, requires updating tailwind.config + global.css | `@fontsource/*` static packages (same font-family names) |
-| `astro experimental.fonts` | Breaking changes between minor versions, 7+ open bugs, requires Astro 6 for stability | Direct `@fontsource` CSS imports |
-| `vite.build.cssCodeSplit = false` | Confirmed to break all CSS in Astro (issue #4413) | Astro's default CSS splitting + investigation |
-| AI/LLM content generation libraries | Adds build-time API dependency, cost, non-determinism for content that can be computed deterministically | Pure TypeScript build-time computation from existing Language data |
-| `google-webfonts-helper` | Deprecated project, last updated 2023. Fontsource supersedes it. | `@fontsource/*` packages |
-| Additional content/CMS libraries for VS enrichment | Overengineers what is fundamentally string interpolation with structured data | Template-level Astro component logic |
+| LangChain (full framework) | Adds massive dependency tree (200+ transitive deps). Abstracts away the RAG mechanics readers need to learn. Version churn is constant. | Direct OpenAI SDK + ChromaDB for Tier 1. LightRAG/RAG-Anything handle their own orchestration for Tiers 3-4. |
+| llama-index | Same problem as LangChain -- heavy abstraction layer that hides the RAG pipeline. Readers should see the mechanics. | Direct API calls. The whole point of the 5-tier structure is progressive complexity, not framework wrapping. |
+| Pinecone / Weaviate / Milvus | Require cloud accounts or Docker servers. Adds infrastructure friction that blocks readers from running demos. | ChromaDB (embedded, zero-config). |
+| PyPDF2 | Deprecated. Merged into pypdf. Still appears in tutorials but is a dead project. | pypdf (>=6.10.2). |
+| google-generativeai | Legacy SDK. Replaced by google-genai. Still importable but missing File Search support. | google-genai (>=1.73.1). |
+| sentence-transformers | Pulls in PyTorch (~2GB). Overkill when OpenAI API embeddings work fine for demos. Only use if you need local/offline embeddings. | openai (text-embedding-3-small via API). |
+| Docker / docker-compose | Adds deployment complexity that distracts from the RAG concepts. The companion repo should run with `python tier1_naive.py`. | Embedded ChromaDB, JSON storage for LightRAG. |
 
----
+## Stack Patterns by Tier
+
+**Tier 1 (Naive RAG):**
+- Zero framework, zero abstraction. Raw OpenAI API + ChromaDB.
+- Reader sees every step: load PDF, chunk text, embed chunks, store vectors, query, assemble prompt, generate.
+- This is the "understand the fundamentals" tier.
+
+**Tier 2 (Managed RAG):**
+- Zero infrastructure. One API, one SDK (google-genai).
+- Reader sees: upload file, query. That's it. The contrast with Tier 1 is the whole point.
+- Shows what you get (simplicity, citations) and what you lose (control, customization).
+
+**Tier 3 (Graph RAG):**
+- Adds knowledge graph on top of vector retrieval. LightRAG handles graph construction.
+- Reader sees: entities and relationships extracted from documents, graph-augmented retrieval.
+- Key insight: vector similarity misses cross-document connections that graphs capture.
+
+**Tier 4 (Multimodal RAG):**
+- Extends Tier 3 with vision-language model integration. RAG-Anything builds on LightRAG.
+- Reader sees: same documents, but now diagrams/tables/charts are understood.
+- Key insight: text extraction loses information that multimodal processing preserves.
+
+**Tier 5 (Agentic RAG):**
+- Adds decision-making layer. Agent decides when/what/how to retrieve.
+- Reader sees: query planning, retrieval, self-evaluation, re-retrieval loops.
+- Key insight: static retrieval assumes one query is enough. Agents iterate until satisfied.
 
 ## Version Compatibility
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| `@fontsource/bricolage-grotesque@5.2.10` | Astro 5.x, Vite 6.x | CSS imports handled by Vite at build time. No runtime dependency. |
-| `@fontsource/dm-sans@5.2.8` | Astro 5.x, Vite 6.x | Same as above. |
-| `@fontsource/fira-code@5.2.7` | Astro 5.x, Vite 6.x | Same as above. |
-| `@fontsource/noto-sans@5.2.10` | Astro 5.x, Vite 6.x | Same as above. |
-| `@astrojs/sitemap@3.7.0` | Astro 5.x | Already installed. `serialize` hook stable since v1.0. |
-| `astro-purgecss@6.0.1` | Astro 5.x | Dev-only. Test compatibility with Tailwind v3 JIT output. |
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| lightrag-hku >=1.4.15 | openai >=2.32.0 | LightRAG uses OpenAI for LLM + embeddings by default |
+| raganything >=1.2.10 | lightrag-hku >=1.4.15 | RAG-Anything depends on LightRAG as foundation |
+| openai-agents >=0.14.5 | openai >=2.32.0 | Agents SDK uses openai SDK internally |
+| chromadb >=1.5.8 | Python >=3.9 | Lower Python floor, but 3.10 required by other deps |
+| google-genai >=1.73.1 | Python >=3.10 | Strictest Python requirement in the stack |
 
----
+**Python version floor: 3.10** -- driven by google-genai, python-dotenv, and sentence-transformers requirements. All other packages support 3.10+.
 
-## Build Impact Assessment
+## API Cost Estimate (Full Demo Run)
 
-| Change | Build Time Impact | Output Size Impact |
-|--------|-------------------|-------------------|
-| Font self-hosting | Negligible (CSS imports resolved at build) | +~120KB of woff2 font files in `dist/` (offset by removing 2 external DNS lookups + TLS handshakes + render-blocking CSS download) |
-| Sitemap lastmod extension | Negligible (string interpolation in serialize hook) | +~20KB in sitemap XML (1,184 `<lastmod>` elements) |
-| VS page enrichment | Moderate (650 pages x additional string computation) | +~300KB total across 650 pages (~500 words x 650 pages) |
-| CSS investigation | Zero (dev-only analysis) | Potential 10-50KB reduction if dead CSS found |
+| Tier | Indexing Cost | Query Cost (10 queries) | Notes |
+|------|--------------|-------------------------|-------|
+| Tier 1 | ~$0.01 (embeddings) | ~$0.02 (embeddings + gpt-4o-mini) | Cheapest. Local ChromaDB. |
+| Tier 2 | ~$0.01 (Gemini indexing) | Free (query embeddings) + ~$0.01 (generation) | Google's pricing advantage. |
+| Tier 3 | ~$0.10-0.30 (LLM entity extraction + embeddings) | ~$0.02 (retrieval + generation) | Indexing is LLM-heavy -- budget accordingly. |
+| Tier 4 | ~$0.20-0.50 (LLM + VLM extraction) | ~$0.05 (multimodal queries use gpt-4o) | Most expensive due to vision model usage. |
+| Tier 5 | ~$0.01 (if reusing Tier 1 index) | ~$0.05-0.10 (agent may do 2-3 retrieval rounds) | Agent loops increase token usage. |
 
-**Net performance impact:** Positive. Removing 2 external domain connections (fonts.googleapis.com + fonts.gstatic.com) eliminates 2 DNS lookups, 2 TLS handshakes, and 1 render-blocking CSS download. Font files served from same origin benefit from existing HTTP/2 connection.
-
----
+**Total estimated cost for full demo: $1-2.** Readers can run everything for under $5 even with experimentation.
 
 ## Sources
 
-- [Fontsource: Bricolage Grotesque Install](https://fontsource.org/fonts/bricolage-grotesque/install) -- package names, weights, import syntax (HIGH confidence)
-- [Fontsource: DM Sans Install](https://fontsource.org/fonts/dm-sans/install) -- package names, static vs variable (HIGH confidence)
-- [Fontsource: Fira Code Install](https://fontsource.org/fonts/fira-code/install) -- package names, version (HIGH confidence)
-- [Fontsource: Noto Sans Install](https://fontsource.org/fonts/noto-sans/install) -- subsets, unicode-range (HIGH confidence)
-- [Fontsource: Individual Subsets](https://fontsource.org/docs/getting-started/subsets) -- default unicode-range behavior, explicit subset imports (HIGH confidence)
-- [Fontsource: Variable Fonts](https://fontsource.org/docs/getting-started/variable) -- font-family name changes for variable packages (HIGH confidence)
-- [npm registry](https://registry.npmjs.org) -- version verification via `npm view` (HIGH confidence)
-- [@astrojs/sitemap docs](https://docs.astro.build/en/guides/integrations-guide/sitemap/) -- serialize hook API, SitemapItem type, v3.7.2 (HIGH confidence)
-- [Astro Styling docs](https://docs.astro.build/en/guides/styling/) -- CSS code splitting, 4KB threshold, inlineStylesheets config (HIGH confidence)
-- [Astro Experimental Fonts API](https://docs.astro.build/en/reference/experimental-flags/fonts/) -- added in Astro 5.7, stable in 6.0.0 (HIGH confidence)
-- [Astro Font Provider Reference](https://docs.astro.build/en/reference/font-provider-reference/) -- provider API requires Astro 6.0.0 (HIGH confidence)
-- [GitHub issue #15515](https://github.com/withastro/astro/issues/15515) -- experimental fonts API breaking changes 5.16->5.17 (HIGH confidence)
-- [GitHub issue #4413](https://github.com/withastro/astro/issues/4413) -- cssCodeSplit=false breaks Astro (HIGH confidence)
-- [astro-purgecss npm](https://www.npmjs.com/package/astro-purgecss) -- v6.0.1 for unused CSS removal (MEDIUM confidence)
+- [ChromaDB PyPI](https://pypi.org/project/chromadb/) -- version 1.5.8 verified (HIGH confidence)
+- [OpenAI Python SDK PyPI](https://pypi.org/project/openai/) -- version 2.32.0 verified (HIGH confidence)
+- [google-genai PyPI](https://pypi.org/project/google-genai/) -- version 1.73.1 verified (HIGH confidence)
+- [lightrag-hku PyPI](https://pypi.org/project/lightrag-hku/) -- version 1.4.15 verified (HIGH confidence)
+- [raganything PyPI](https://pypi.org/project/raganything/) -- version 1.2.10 verified (HIGH confidence)
+- [openai-agents PyPI](https://pypi.org/project/openai-agents/) -- version 0.14.5 verified (HIGH confidence)
+- [python-dotenv PyPI](https://pypi.org/project/python-dotenv/) -- version 1.2.2 verified (HIGH confidence)
+- [rich PyPI](https://pypi.org/project/rich/) -- version 15.0.0 verified (HIGH confidence)
+- [pypdf PyPI](https://pypi.org/project/pypdf/) -- version 6.10.2 verified (HIGH confidence)
+- [tiktoken PyPI](https://pypi.org/project/tiktoken/) -- version 0.12.0 verified (HIGH confidence)
+- [Gemini File Search API docs](https://ai.google.dev/gemini-api/docs/file-search) -- File Search workflow verified (HIGH confidence)
+- [LightRAG GitHub (HKUDS)](https://github.com/HKUDS/LightRAG) -- architecture and usage patterns verified (HIGH confidence)
+- [RAG-Anything GitHub (HKUDS)](https://github.com/HKUDS/RAG-Anything) -- multimodal workflow verified (HIGH confidence)
+- [OpenAI Agents SDK docs](https://openai.github.io/openai-agents-python/tools/) -- FileSearchTool usage verified (HIGH confidence)
+- [Milvus embedding model comparison](https://milvus.io/blog/choose-embedding-model-rag-2026.md) -- text-embedding-3-small benchmarks (MEDIUM confidence)
 
 ---
-*Stack research for: v1.21 SEO Audit Fixes*
-*Researched: 2026-04-15*
+*Stack research for: RAG Architecture Patterns companion repo (5-tier)*
+*Researched: 2026-04-17*
