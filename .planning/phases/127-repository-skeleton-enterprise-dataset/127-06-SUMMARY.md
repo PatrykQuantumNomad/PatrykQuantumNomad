@@ -35,17 +35,18 @@ decisions:
   - "Auto-mode adaptation: 3 video slots from D-04 LOCKED 10/10/7/3 split substituted with 3 multimodal extras → shipped split is 10/10/10/0. Documented prominently in README.md, evaluation/README.md (existing), test_golden_qa.py, and this SUMMARY. The 8th captioned figure (LightRAG fig_002) is exercised by multimodal-005; the 3 multimodal extras (multimodal-008/009/010) reference uncaptioned figures with Plan-06-authored captions inline in the question text."
   - "build_metadata.py treats absent videos.json as [] rather than erroring → keeps the script wave-tolerant and matches the rest of shared.loader's absent-manifest semantics."
   - "test_videos_manifest_when_present remains conditional (pytest.skip when videos.json absent) so the file tightens automatically once a future phase lands the manifest, with NO test edit required."
-  - "Live smoke test execution DEFERRED — GEMINI_API_KEY not set in the executor's environment; the live tests skip gracefully via the live_keys_ok fixture. Test code itself is committed and unit-tested (test_imports passes). User runs the live smoke locally with GEMINI_API_KEY set; all infrastructure is in place."
+  - "Live smoke test PASSED on 2026-04-26: all 3 @live tests pass in ~6s (~$0.0001 cost). Required two fixes: (1) conftest.py used os.getenv for the GEMINI_API_KEY check but pydantic-settings only loads .env inside Settings() — added module-level load_dotenv() in conftest.py (commit 08dce6a). (2) Sandbox proxy env vars (ALL_PROXY etc.) must be unset before pytest invocation — documented in README setup section already."
 metrics:
-  duration: "~14 min (autonomous; offline portion only — live smoke test deferred to user)"
-  completed: 2026-04-25
+  duration: "~14 min offline + ~5 min live smoke debug/fix (2026-04-26)"
+  completed: 2026-04-26
   tasks_complete: 3
-  files_changed: 6
-  loc_added: ~600
+  files_changed: 7
+  loc_added: ~603
   commits:
     - "92ec4b5 — feat(127-06): hand-author 30-entry golden Q&A corpus"
     - "1df1821 — feat(127-06): build_metadata.py + metadata.json + golden_qa schema tests"
     - "9eea8e0 — docs(127-06): finalize README with corpus stats and complete setup (REPO-01)"
+    - "08dce6a — fix(127-06): load .env in conftest so live smoke fixture sees GEMINI_API_KEY"
 ---
 
 # Phase 127 Plan 06: Golden Q&A + Metadata + README Finalization Summary

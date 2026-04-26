@@ -44,7 +44,7 @@ See MILESTONES.md for completed milestone details.
 
 **Milestone Goal:** Publish a ~4,500-word research-heavy thought-leadership blog post on RAG architecture progression (Naive -> Managed -> Graph -> Multimodal -> Agentic) with a companion GitHub repo containing runnable examples for all 5 tiers against an enterprise knowledge base scenario.
 
-- [ ] **Phase 127: Repository Skeleton + Enterprise Dataset** - Scaffold companion repo with shared utilities and synthetic enterprise knowledge base
+- [x] **Phase 127: Repository Skeleton + Enterprise Dataset** - Scaffold companion repo with shared utilities and synthetic enterprise knowledge base (completed 2026-04-26)
 - [ ] **Phase 128: Tier 1 Naive RAG** - Validate shared layer with baseline ChromaDB + OpenAI vector similarity retrieval
 - [ ] **Phase 129: Tiers 2-3 Managed + Graph RAG** - Build Gemini File Search and LightRAG implementations against the shared dataset
 - [ ] **Phase 130: Tiers 4-5 Multimodal + Agentic RAG** - Build highest-complexity tiers with Docker support and safety limits
@@ -158,7 +158,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 1/6 | In progress | - |
+| 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
 | 128. Tier 1 Naive RAG | v1.22 | 0/TBD | Not started | - |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/TBD | Not started | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |

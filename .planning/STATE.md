@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: executing
-stopped_at: Plan 127-06 offline portion complete (companion repo commits 92ec4b5/1df1821/9eea8e0 pushed to origin/main — golden_qa.json with 30 entries, metadata.json with 100p/581f/0v/290MB stats, finalized README with blog link); LIVE SMOKE TEST PENDING — GEMINI_API_KEY not in executor env; user runs locally to close REPO-03 gate
-last_updated: "2026-04-25T19:31:25Z"
-last_activity: 2026-04-25
+status: phase_complete
+stopped_at: Phase 127 COMPLETE — verifier passed 4/4 must-haves on 2026-04-26. Live smoke gate cleared (3 @live tests pass in ~6s for ~$0.0001). Companion repo HEAD at 08dce6a.
+last_updated: "2026-04-26T00:00:00Z"
+last_activity: 2026-04-26
 progress:
   total_phases: 8
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 6
   completed_plans: 6
   percent: 100
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 127 - Repository Skeleton + Enterprise Dataset
+**Current focus:** Phase 128 - Tier 1 Naive RAG (next)
 
 ## Current Position
 
-Phase: 127 of 134 (Repository Skeleton + Enterprise Dataset)
-Plan: 6 of 6 in current phase complete (offline portion); live smoke gate pending user
-Status: Awaiting live smoke test (REPO-03)
-Last activity: 2026-04-25
+Phase: 127 of 134 COMPLETE (Repository Skeleton + Enterprise Dataset) → ready for Phase 128
+Plan: 6 of 6 complete; live smoke gate cleared 2026-04-26
+Status: Phase 127 verified (4/4 must-haves passed)
+Last activity: 2026-04-26
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (phase 127); 1/8 phases complete in v1.22
 
 ## Performance Metrics
 
@@ -91,6 +91,8 @@ Plan 127-02 added:
 - Plan 127-06: D-04 LOCKED 10/10/7/3 split adapted to shipped 10/10/10/0 — 3 video Q&A slots substituted with 3 multimodal extras (Sleeper Agents, Mixed Precision, Marcus 'Next Decade'); Plan-06-authored captions inline in question text; documented prominently in README + test_golden_qa.py + 127-06-SUMMARY.md
 - Plan 127-06: build_metadata.py treats absent videos.json as [] (mirrors shared.loader semantics) so the aggregator stays wave-tolerant
 - Plan 127-06: Live smoke test (REPO-03 gate) DEFERRED to user — GEMINI_API_KEY not in executor environment; smoke test code committed and verified (test_imports passes); 3 live tests skip gracefully via live_keys_ok fixture
+- Plan 127-06 follow-up (2026-04-26): Live smoke PASSED — 3 @live tests pass in ~6s for ~$0.0001. Required conftest.py patch (commit 08dce6a) adding module-level load_dotenv() because live_keys_ok used os.getenv directly while pydantic-settings only loaded .env inside Settings().
+- Phase 127 verifier: PASSED 4/4 must-haves on 2026-04-26. Video-clip absence acceptable (REPO-02 "at least one image" satisfied 581-fold). Golden Q&A 10/10/10/0 split deviation from D-04 documented; cross-document multi-hop coverage holds.
 
 ### Pending Todos
 
@@ -113,7 +115,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-25T19:31:25Z
-Stopped at: Plan 127-06 offline portion complete (companion repo HEAD at 9eea8e0 — golden_qa.json + metadata.json + finalized README pushed to origin/main); LIVE SMOKE TEST PENDING (REPO-03 gate)
-Resume file: .planning/phases/127-repository-skeleton-enterprise-dataset/127-06-SUMMARY.md
-Next: User runs `pytest tests/smoke_test.py -m live` in the companion repo with GEMINI_API_KEY set. Expected: <5s wall time, ~$0.0001 cost, 3 live tests pass. Then run `/gsd:verify-phase 127` to formally close Phase 127. Plans 04+ depend on `scripts/*.py` from Plan 03 (already complete).
+Last session: 2026-04-26
+Stopped at: Phase 127 COMPLETE — verifier passed 4/4 must-haves; ROADMAP marked complete; companion repo HEAD at 08dce6a
+Resume file: .planning/phases/127-repository-skeleton-enterprise-dataset/127-VERIFICATION.md
+Next: `/gsd:plan-phase 128` (Tier 1 Naive RAG) — `/clear` first for fresh context window.
