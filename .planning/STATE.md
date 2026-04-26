@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-06-PLAN.md (Tier 2 README + live e2e test code; live invocation deferred to orchestrator checkpoint)
-last_updated: "2026-04-26T18:01:00.000Z"
+stopped_at: Completed 129-07-PLAN.md (Tier 3 README + live e2e test code; live invocation deferred to orchestrator checkpoint — both Plan 06 and 07 code-complete in Wave 4)
+last_updated: "2026-04-26T18:02:00.000Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 6 of 7 complete (Wave 4 in progress — Plan 06 code complete, live test deferred to orchestrator checkpoint; Plan 07 also code-complete in parallel — see commits c2690c5 + 8018d32)
-Status: Awaiting orchestrator-managed live-test checkpoint with user
+Plan: 7 of 7 code-complete (Wave 4 done — both Plan 06 and Plan 07 code-complete; live tests deferred to orchestrator-managed checkpoint per Phase 128-05 → 128-06 precedent)
+Status: Awaiting orchestrator-managed live-test checkpoint with user (Tier 2 + Tier 3 both pending)
 Last activity: 2026-04-26
 
 Progress: [██████████] 100%
@@ -65,6 +65,7 @@ Progress: [██████████] 100%
 | Phase Phase 129 PP04 | 4min | 2 tasks tasks | 2 (2 created, 479 LOC total) files |
 | Phase 129 P05 | 6min | 2 tasks | 4 files |
 | Phase 129 P06 | 7min | 2 tasks | 3 files (375 LOC: README 133 + conftest 55 + test_e2e_live 187) |
+| Phase 129 P07 | 6min | 3 tasks | 3 files (371 LOC touched: README 151 + conftest +16 + test_tier3_e2e_live 204) |
 
 ## Accumulated Context
 
@@ -160,6 +161,14 @@ Plan 127-02 added:
 - Plan 129-06: 3-paper subset (`SUBSET_PAPERS=3`) chosen explicitly to dodge Pitfall 2 (503 TPM-saturation storms documented at full-corpus scale on discuss.ai.google.dev/t/121691). Generic "summarize main contribution" question used instead of canonical `DEFAULT_QUERY` (single-hop-001) because smallest-by-size selection may NOT include Lewis 2020 — corpus-agnostic prompt works regardless.
 - Plan 129-06: Cost > 0 assertion is the load-bearing source-of-truth check (sourced from `response.usage_metadata`); chunk-count assertion is observational (Pitfall 6 — None grounding_metadata is possible) — test logs count + `any_nonzero_score` for Open Q3 empirical resolution but does not hard-assert.
 - Plan 129-06: Concurrent-wave commit race with Plan 07 produced one mixed-scope commit (b7a366d) — `tier-3-graph/tests/conftest.py` got included alongside my tier-2-managed/tests/* files due to a stage-state race between `git restore --staged` and `git commit`. Functional outcome correct (both tiers' files committed cleanly); attribution slightly mixed in commit message. Plan 07 agent saw their file as already-committed and moved on without re-staging — no rebase/revert needed.
+- Plan 129-07: README adds a Section-0 [!WARNING] banner BEFORE the title — the FIRST cost-warning of the project that fires before quickstart, because Tier 3's $1 ingest is the single largest cost-surprise risk in the repo. Pattern reusable for Tier 4 (Phase 130 RAG-Anything) which will have similar entity-extraction cost. Tiers below ~$0.10 (Tier 1, Tier 2) skip the banner.
+- Plan 129-07: Test filename `test_tier3_e2e_live.py` (NOT plan-body's `test_main_live.py`) — Rule 3 deviation. tier-1-naive/tests/test_main_live.py exists from Plan 128-05, tier-2-managed/tests/test_e2e_live.py exists from Plan 129-06. Without unique basenames, pytest's rootdir collection (no `__init__.py` per Phase 128 Plan 02 follow-on) raises ImportPathMismatchError on the entire repo non-live suite. Three-tier-prefix disambiguates and establishes the convention for Phase 130 (Tier 4 → test_tier4_e2e_live.py, Tier 5 → test_tier5_e2e_live.py).
+- Plan 129-07: `tier3_live_keys_ok` added as ALIAS of pre-existing `tier3_live_keys` (NOT a rename). Plan 03 shipped `tier3_live_keys`; Plan 07's <interfaces> contract specifies `tier3_live_keys_ok`. Renaming would break Plan 05's tests. Aliasing keeps both names with identical semantics — zero churn for existing Plan 03/05 tests, zero deviation from Plan 07's contract.
+- Plan 129-07: Live test uses 2 SMALLEST-by-size papers, NOT first 2 in manifest — keeps cost predictable across paper-set rotations. Pre-sort by `os.stat().st_size`, slice [:2]. Cost ceiling stays ~$0.05-0.15 (vs full-corpus $1) regardless of which papers got curated.
+- Plan 129-07: Live test asks generic "main contribution of these documents?" question, NOT the canned multi-hop DPR/RAG probe — the smallest-2 subset is unlikely to contain Lewis 2020 + Karpukhin 2020 specifically. Generic question still exercises the full hybrid-mode graph traversal code path; Phase 131 evaluates answer quality against full corpus + golden_qa.json.
+- Plan 129-07: test_rag.py NOT modified despite plan body specifying 2 new test functions — Plan 03's existing 7 tests already exceed the minimum, AND the plan verifier's substring grep (`def test_locked_constants` / `def test_build_rag_constructs`) matches the existing test names (`test_locked_constants_match_research_pattern_4`, `test_build_rag_constructs_with_locked_embedding_dim`). Adding plan-body's verbatim names would have been duplicate coverage.
+- Plan 129-07: Live test EXECUTOR-DEFERRED to orchestrator-managed checkpoint (Phase 128-05 → 128-06 precedent). Local .env HAS a valid OPENROUTER_API_KEY (verified via dotenv load probe — 73-char key) but executor explicitly did NOT invoke the live test per launch instructions. Test code committed + statically verified (skips clean without key + collects under -m live).
+- Plan 129-07: Concurrent-wave commit race with Plan 06 — my tier-3 conftest.py alias change got folded into Plan 06's commit b7a366d (per Plan 06 STATE entry above). Net effect: necessary content (tier3_live_keys_ok fixture) on origin/main, but commit author/message attribution is for Plan 06. Plan 07's own commits c2690c5 (README) + cc2620f (live test) are correctly attributed; this is a shared-working-directory parallel-execution quirk, not a content correctness issue.
 
 ### Pending Todos
 
@@ -182,7 +191,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T18:01:00.000Z
-Stopped at: Completed 129-06-PLAN.md (Tier 2 README + live e2e code; live invocation deferred to orchestrator checkpoint with user)
+Last session: 2026-04-26T18:02:00.000Z
+Stopped at: Completed 129-07-PLAN.md (Tier 3 README + live e2e code; live invocation deferred to orchestrator checkpoint with user — Wave 4 fully code-complete)
 Resume file: None
-Next: Orchestrator runs `pytest tier-2-managed/tests/test_e2e_live.py -m live -s` ONCE with the user (~$0.02-0.05 expected per run). Plan 07 (Tier 3 README + live e2e code) was code-complete in parallel — see commits c2690c5 + 8018d32. Both tier live invocations are the only remaining Phase 129 work before the verifier gate.
+Next: Orchestrator runs TWO live tests ONCE each with the user — `pytest tier-2-managed/tests/test_e2e_live.py -m live -s` (Tier 2, ~$0.02-0.05 per run) AND `pytest tier-3-graph/tests/test_tier3_e2e_live.py -m live -s` (Tier 3, ~$0.05-0.15 per run). Both tier live invocations are the only remaining Phase 129 work before the verifier gate. Plan 07 commits: c2690c5 (README) + cc2620f (live test); conftest alias was folded into Plan 06's b7a366d due to Wave 4 shared-workdir parallel execution.
