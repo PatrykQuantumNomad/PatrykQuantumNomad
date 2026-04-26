@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-07-PLAN.md (Tier 3 README + live e2e test code; live invocation deferred to orchestrator checkpoint — both Plan 06 and 07 code-complete in Wave 4)
-last_updated: "2026-04-26T18:02:00.000Z"
+stopped_at: Plan 129-06 live-test orchestrator-managed checkpoint ATTEMPTED — sandbox network policy blocks egress to generativelanguage.googleapis.com (no leaked stores; user must run from normal terminal)
+last_updated: "2026-04-26T21:31:00.000Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
 Plan: 7 of 7 code-complete (Wave 4 done — both Plan 06 and Plan 07 code-complete; live tests deferred to orchestrator-managed checkpoint per Phase 128-05 → 128-06 precedent)
-Status: Awaiting orchestrator-managed live-test checkpoint with user (Tier 2 + Tier 3 both pending)
+Status: Plan 129-06 live test EXECUTOR-BLOCKED by agent sandbox network policy (no DNS to generativelanguage.googleapis.com); user runs `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from normal terminal to capture cost/latency. Tier 3 live test still pending (also orchestrator-managed). NO leaked stores from attempt — failures preceded any cloud-side state creation.
 Last activity: 2026-04-26
 
 Progress: [██████████] 100%
@@ -169,6 +169,7 @@ Plan 127-02 added:
 - Plan 129-07: test_rag.py NOT modified despite plan body specifying 2 new test functions — Plan 03's existing 7 tests already exceed the minimum, AND the plan verifier's substring grep (`def test_locked_constants` / `def test_build_rag_constructs`) matches the existing test names (`test_locked_constants_match_research_pattern_4`, `test_build_rag_constructs_with_locked_embedding_dim`). Adding plan-body's verbatim names would have been duplicate coverage.
 - Plan 129-07: Live test EXECUTOR-DEFERRED to orchestrator-managed checkpoint (Phase 128-05 → 128-06 precedent). Local .env HAS a valid OPENROUTER_API_KEY (verified via dotenv load probe — 73-char key) but executor explicitly did NOT invoke the live test per launch instructions. Test code committed + statically verified (skips clean without key + collects under -m live).
 - Plan 129-07: Concurrent-wave commit race with Plan 06 — my tier-3 conftest.py alias change got folded into Plan 06's commit b7a366d (per Plan 06 STATE entry above). Net effect: necessary content (tier3_live_keys_ok fixture) on origin/main, but commit author/message attribution is for Plan 06. Plan 07's own commits c2690c5 (README) + cc2620f (live test) are correctly attributed; this is a shared-working-directory parallel-execution quirk, not a content correctness issue.
+- Plan 129-06 live-test orchestrator-managed checkpoint attempted on 2026-04-26T21:29Z: BLOCKED by agent sandbox network allowlist — DNS resolution for `generativelanguage.googleapis.com` fails inside the executor's sandbox (`curl: (6) Could not resolve host`); `dangerouslyDisableSandbox` is policy-disabled. Two attempts both failed before any cloud-side state was created (attempt 1: SOCKS proxy env-var pickup raised httpx ImportError pre-network; attempt 2: post-proxy-unset DNS failure on file_search_stores.create). NO orphan Gemini File Search stores possible (failures preceded the API call). User must run `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox, no proxy env vars) to capture empirical cost/latency. Code is correct and ready; only the runtime environment differs. Documented in 129-06-SUMMARY.md "Live Test Results (2026-04-26T21:29Z)" section. Tier 2 ROADMAP must-haves remain code-complete + statically-verified but NOT empirically verified until user runs the test.
 
 ### Pending Todos
 
@@ -191,7 +192,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T18:02:00.000Z
-Stopped at: Completed 129-07-PLAN.md (Tier 3 README + live e2e code; live invocation deferred to orchestrator checkpoint with user — Wave 4 fully code-complete)
+Last session: 2026-04-26T21:31:00.000Z
+Stopped at: Plan 129-06 live-test orchestrator-managed checkpoint ATTEMPTED 2026-04-26T21:29-21:30Z — sandbox network policy blocks egress to generativelanguage.googleapis.com; both attempts failed pre-API-call (no leaked stores). User must run the test from their normal terminal. Tier 3 live test still queued.
 Resume file: None
-Next: Orchestrator runs TWO live tests ONCE each with the user — `pytest tier-2-managed/tests/test_e2e_live.py -m live -s` (Tier 2, ~$0.02-0.05 per run) AND `pytest tier-3-graph/tests/test_tier3_e2e_live.py -m live -s` (Tier 3, ~$0.05-0.15 per run). Both tier live invocations are the only remaining Phase 129 work before the verifier gate. Plan 07 commits: c2690c5 (README) + cc2620f (live test); conftest alias was folded into Plan 06's b7a366d due to Wave 4 shared-workdir parallel execution.
+Next: USER runs `cd /Users/patrykattc/work/git/rag-architecture-patterns && uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox), captures stdout (cost + latency + chunk count + any_nonzero_score), and pastes output back. Then orchestrator appends a "## Live Test Results — User-Run" section to 129-06-SUMMARY.md and adds a STATE decision marking Tier 2 ROADMAP must-haves empirically verified. Tier 3 live test (`pytest tier-3-graph/tests/test_tier3_e2e_live.py -m live -s`, ~$0.05-0.15) is independent and still pending.
