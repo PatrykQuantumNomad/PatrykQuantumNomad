@@ -22,7 +22,8 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 
 ### Tier Implementations
 
-- [ ] **TIER-01**: Tier 1 (Naive RAG) with ChromaDB + OpenAI embeddings, basic vector similarity retrieval against enterprise KB
+- [x] **TIER-01
+**: Tier 1 (Naive RAG) with ChromaDB + OpenAI embeddings, basic vector similarity retrieval against enterprise KB
 - [ ] **TIER-02**: Tier 2 (Google Managed RAG) with Gemini File Search API, managed indexing and retrieval
 - [ ] **TIER-03**: Tier 3 (Graph RAG) with LightRAG, knowledge graph extraction and entity-relationship retrieval
 - [ ] **TIER-04**: Tier 4 (Multimodal RAG) with RAG-Anything processing images, tables, and text as unified knowledge graph
