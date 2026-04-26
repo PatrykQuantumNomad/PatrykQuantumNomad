@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-04-PLAN.md (Tier 2 CLI + query path)
-last_updated: "2026-04-26T17:45:49.697Z"
+stopped_at: Completed 129-05-PLAN.md (Tier 3 ingest + query + async CLI)
+last_updated: "2026-04-26T17:49:05.130Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 4 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
+Plan: 5 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [█████████░] 89%
 | Phase Phase 129 P03 P03 | 11min | 2 tasks tasks | 8 files (7 created + 1 modified) files |
 | Phase 129 P02 | 14min | 1 tasks | 4 (3 created + 1 modified, 240 LOC) files |
 | Phase Phase 129 PP04 | 4min | 2 tasks tasks | 2 (2 created, 479 LOC total) files |
+| Phase 129 P05 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,11 @@ Plan 127-02 added:
 - Plan 129-04: cl100k_base encode is capped via ('a' * text_len)[:4096] — encoding the full extracted text of a 50-page paper would burn O(seconds) of CPU PER PAPER on every ingest; cap is plenty for a synthetic estimate (Pitfall 7 source-of-truth precise number is the LLM-line cost from response.usage_metadata)
 - Plan 129-04: Tier 2 uses NATIVE google-genai client (gemini-2.5-flash slug, NOT OpenRouter google/gemini-2.5-flash) because file_search_stores is a Gemini-native API not exposed via OpenRouter — shared.pricing.PRICES has both entries with identical rates so cost tracking works on either path
 - Plan 129-04: Concurrent-wave push race with Plan 129-05 handled by clean fast-forward (a626c96 Task1 → b95b5a3 Plan05 → 94b6f97 Task2 → push 332f2d2..a626c96 then b95b5a3..94b6f97). File ownership respected on both sides: Plan 04 only touched tier-2-managed/*, Plan 05 only touched tier-3-graph/* — zero overlap, no manual rebase needed
+- Plan 129-05: CostAdapter constructor mismatch in plan body silently fixed (Rule 1) — plan body shows CostAdapter(tracker, model=args.model) but Plan 03's actual __init__(tracker, llm_model, embed_model) requires both slugs. Adapted to CostAdapter(tracker, llm_model=args.model, embed_model=DEFAULT_EMBED_MODEL); plan body's call would have raised TypeError at runtime.
+- Plan 129-05: First-ingest cost-surprise detection uses graphml file SIZE > 1KB (not bare existence) because LightRAG creates graph_chunk_entity_relation.graphml at constructor-init time as empty NetworkX placeholder; bare-exists check would suppress the gate on every subsequent run, defeating cost-surprise protection on --reset --ingest cycles.
+- Plan 129-05: _confirm_or_abort returns False on EOFError — CI-safe default. Non-interactive shells without --yes MUST ABORT, not silently proceed. Unit-tested via mock.patch('builtins.input', side_effect=EOFError). This is the strongest safety property of the cost-surprise gate; without it, accidentally invoking main.py --ingest from CI without --yes would silently spend ~ every run.
+- Plan 129-05: render_query_result called with chunks=[] for graph queries — LightRAG blends multiple graph sources into the answer; it does not expose per-chunk citations the same way Tier 1 does. Synthesizing fake citations from internal entity references would be dishonest. Renderer prints 'No chunks retrieved.' which accurately conveys the difference.
+- Plan 129-05: NO live --ingest invocation — strictly respected the cost gate. Plan 07 owns the 2-paper subset live test (Phase 128-06 precedent for live deferral). Verified --yes gate via 5 non-live unit tests covering auto-confirm + abort-on-EOF/empty/decline + lowercase-y-proceed paths.
 
 ### Pending Todos
 
@@ -168,7 +174,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T17:45:49.693Z
-Stopped at: Completed 129-04-PLAN.md (Tier 2 CLI + query path)
+Last session: 2026-04-26T17:48:46.267Z
+Stopped at: Completed 129-05-PLAN.md (Tier 3 ingest + query + async CLI)
 Resume file: None
 Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).
