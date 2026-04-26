@@ -83,7 +83,7 @@ Plans:
   2. The ChromaDB index persists to disk and can be reused by Tier 5
   3. Cost and latency are printed for the demo query
 **Plans**: 5 plans
-- [ ] 128-01-PLAN.md — Extend [tier-1] extras (chromadb, openai, pymupdf) + promote OPENAI_API_KEY to REQUIRED in .env.example
+- [x] 128-01-PLAN.md — Extend [tier-1] extras (chromadb, openai, pymupdf) + promote OPENAI_API_KEY to REQUIRED in .env.example
 - [ ] 128-02-PLAN.md — Page-aware PDF extraction + 512/64 chunker (TDD) with non-live unit tests
 - [ ] 128-03-PLAN.md — OpenAI embedding wrapper + ChromaDB store/retrieve helpers + non-live store tests
 - [ ] 128-04-PLAN.md — main.py CLI orchestration (--ingest/--query/--top-k/--reset) + prompt builder
