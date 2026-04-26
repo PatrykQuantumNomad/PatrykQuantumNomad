@@ -24,8 +24,10 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 
 - [x] **TIER-01
 **: Tier 1 (Naive RAG) with ChromaDB + OpenAI embeddings, basic vector similarity retrieval against enterprise KB
-- [ ] **TIER-02**: Tier 2 (Google Managed RAG) with Gemini File Search API, managed indexing and retrieval
-- [ ] **TIER-03**: Tier 3 (Graph RAG) with LightRAG, knowledge graph extraction and entity-relationship retrieval
+- [ ] **TIER-02
+**: Tier 2 (Google Managed RAG) with Gemini File Search API, managed indexing and retrieval
+- [ ] **TIER-03
+**: Tier 3 (Graph RAG) with LightRAG, knowledge graph extraction and entity-relationship retrieval
 - [ ] **TIER-04**: Tier 4 (Multimodal RAG) with RAG-Anything processing images, tables, and text as unified knowledge graph
 - [ ] **TIER-05**: Tier 5 (Agentic RAG) with OpenAI Agents SDK, autonomous multi-tool retrieval with iteration limits
 
@@ -102,8 +104,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-05 | Phase 130 | Pending |
 | REPO-06 | Phase 127 | Complete (Plan 01 + Plan 02 — test_env_example.py automated trace) |
 | TIER-01 | Phase 128 | In progress (Plans 01-04 complete; Plan 05 = live end-to-end test + README) |
-| TIER-02 | Phase 129 | Pending |
-| TIER-03 | Phase 129 | Pending |
+| TIER-02 | Phase 129 | In progress (Plan 01 — [tier-2] extras locked as [shared] stub; full impl in Plans 02/04/06) |
+| TIER-03 | Phase 129 | In progress (Plan 01 — [tier-3] extras concretized w/ lightrag-hku==1.4.15; full impl in Plans 03/05/07) |
 | TIER-04 | Phase 130 | Pending |
 | TIER-05 | Phase 130 | Pending |
 | EVAL-01 | Phase 131 | Pending |

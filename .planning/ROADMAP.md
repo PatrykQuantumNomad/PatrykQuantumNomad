@@ -99,7 +99,7 @@ Plans:
   2. Running Tier 3 extracts a knowledge graph via LightRAG and answers multi-hop queries that Tier 1 cannot
   3. Both tiers print cost and latency alongside their answers
 **Plans**: 7 plans across 4 waves
-- [ ] 129-01-PLAN.md — Extend [tier-3] extras (lightrag-hku==1.4.15, openai, pymupdf); promote OPENROUTER for Tier 3; gitignore .store_id
+- [x] 129-01-PLAN.md — Extend [tier-3] extras (lightrag-hku==1.4.15, openai, pymupdf); promote OPENROUTER for Tier 3; gitignore .store_id
 - [ ] 129-02-PLAN.md — Tier 2 store helpers: FileSearchStore lifecycle (create/upload/poll/list/delete) + 503 backoff + tier_2_managed shim
 - [ ] 129-03-PLAN.md — Tier 3 LightRAG init + cost adapter + token_tracker probe (resolves RESEARCH Open Q1) + tier_3_graph shim
 - [ ] 129-04-PLAN.md — Tier 2 query.py (FileSearch tool + grounding extraction) + main.py CLI (synthetic indexing-cost line)
@@ -173,7 +173,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 |-------|-----------|----------------|--------|-----------|
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
 | 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
-| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/7 | Planned | - |
+| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 1/7 | In progress | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
 | 132. Source Verification + Diagrams | v1.22 | 0/TBD | Not started | - |

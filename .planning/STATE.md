@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: executing
-stopped_at: Plan 128-06 (mid-phase pivot to OpenRouter) — Tier 1 chat + embeddings now route through OpenRouter unified gateway; live e2e test PASSED in 8.04s for ~$0.001 against real OpenRouter API; companion repo HEAD fe06e84
-last_updated: "2026-04-26T16:20:00Z"
+status: verifying
+stopped_at: Completed 129-01-PLAN.md (Tier 2/3 dep contract)
+last_updated: "2026-04-26T17:17:19.765Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 12
-  completed_plans: 12
-  percent: 100
+  total_plans: 18
+  completed_plans: 13
+  percent: 72
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 128 - Tier 1 Naive RAG (in progress; Plans 01-04 complete; Plan 05 = live e2e test + README remaining)
+**Current focus:** Phase 129 - Tiers 2-3 Managed + Graph RAG (in progress; Plan 01 complete — dep contract locked for both tiers; Plans 02-07 across Waves 2-4 remaining)
 
 ## Current Position
 
-Phase: 128 of 134 IN PROGRESS (Tier 1 Naive RAG)
-Plan: 5 of 5 complete (Plans 01-04 done across Waves 1-3); Plan 05 (Wave 4) = live e2e test + README remaining
-Status: Ready to execute
+Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
+Plan: 1 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
+Status: Ready to execute Plans 02 + 03 in parallel (Wave 2)
 Last activity: 2026-04-26
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 72%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 128 P03 | 2.5min | 2 tasks | 4 files |
 | Phase 128 P04 | 5min | 2 tasks | 4 files (3 created + 1 modified, 356 LOC) files |
 | Phase 128 P05 | 7min | 2 tasks | 3 files |
+| Phase 129 P01 | 2m 55s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,11 @@ Plan 127-02 added:
 - Plan 128-06: Pre-existing console-routing bug discovered + fixed during live test — cmd_query was calling render_query_result() WITHOUT console_override, so the "Cost:" line went to shared.display's module-level Console (stdout) instead of the recording console; test missed this in Plan 128-05 because the live test was deferred. Fix: thread console_override=console through cmd_query
 - Plan 128-06 follow-on: tier-1-naive/tests/conftest.py also injects repo-root onto sys.path so `from tier_1_naive import main` resolves in pytest's process (main.py does this at script-startup, but pytest does not replicate it); ChromaDB index dimensions unchanged (1536) because openai/text-embedding-3-small is the same underlying model; on-disk chroma_db/tier-1-naive/ Tier 5 reuse contract intact
 - Plan 128-06 live test PASSED on 2026-04-26 — 1 passed in 8.04s against real OpenRouter API; 42 chunks embedded across 2 papers; query through google/gemini-2.5-flash returned answer with cost $0.001379 (input_tokens=2914, output_tokens=61); all 3 ROADMAP must-haves now empirically verified (not just static-verified)
+- Plan 129-01: [tier-3] extras concretized to lightrag-hku==1.4.15 (EXACT pin per Pitfall 9; releases every 2-7 days), openai>=1.50,<3 (mirror [tier-1]), pymupdf>=1.27,<2 (Tier 3 owns its own per Pitfall 11)
+- Plan 129-01: [tier-2] LEFT UNCHANGED as [shared] stub — google-genai>=1.73 from [shared] already exposes client.file_search_stores.* (added in google-genai SDK v1.49); Tier 2 needs no new top-level deps. Documented in commit message so future readers don't think it was forgotten.
+- Plan 129-01: .env.example OPENROUTER_API_KEY comment block promoted to Tier 1 + Tier 3 explicit — Gemini File Search is Gemini-native (cannot route via OpenRouter), but LightRAG is OpenAI-SDK-compatible so Tier 3 reuses Phase 128's OpenRouter routing for narrative continuity (single OPENROUTER_API_KEY for both tiers)
+- Plan 129-01: tier-2-managed/.store_id added to .gitignore (Pattern 1 store-id caching from 129-RESEARCH.md); lightrag_storage/ already covered by existing lightrag_*/ glob (no duplicate added)
+- Plan 129-01: uv.lock regen committed separately as chore(129-01) per Phase 128-01 precedent; preserves atomic deps commit; uv pip install --dry-run -e ".[tier-3]" resolves 24 new packages incl lightrag-hku==1.4.15 + 23 transitive deps; tests/test_tier_requirements.py 5/5 PASS (T-127-08 lockfile guard intact — no google-generativeai)
 
 ### Pending Todos
 
@@ -144,7 +150,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T12:35:40.350Z
-Stopped at: Completed 128-05-PLAN.md (Phase 128 plans complete; live test deferred for OPENAI_API_KEY)
+Last session: 2026-04-26T17:17:19.760Z
+Stopped at: Completed 129-01-PLAN.md (Tier 2/3 dep contract)
 Resume file: None
-Next: `/gsd:plan-phase 128` (Tier 1 Naive RAG) — `/clear` first for fresh context window.
+Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).
