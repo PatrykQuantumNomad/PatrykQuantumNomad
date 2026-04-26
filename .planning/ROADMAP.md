@@ -46,7 +46,7 @@ See MILESTONES.md for completed milestone details.
 
 - [x] **Phase 127: Repository Skeleton + Enterprise Dataset** - Scaffold companion repo with shared utilities and synthetic enterprise knowledge base (completed 2026-04-26)
 - [ ] **Phase 128: Tier 1 Naive RAG** - Validate shared layer with baseline ChromaDB + OpenAI vector similarity retrieval
-- [ ] **Phase 129: Tiers 2-3 Managed + Graph RAG** - Build Gemini File Search and LightRAG implementations against the shared dataset
+- [x] **Phase 129: Tiers 2-3 Managed + Graph RAG** - Build Gemini File Search and LightRAG implementations against the shared dataset (completed 2026-04-26)
 - [ ] **Phase 130: Tiers 4-5 Multimodal + Agentic RAG** - Build highest-complexity tiers with Docker support and safety limits
 - [ ] **Phase 131: Evaluation Harness** - Run RAGAS metrics and cost/latency tracking across all 5 tiers with comparison output
 - [ ] **Phase 132: Source Verification + Architecture Diagrams** - Verify all citations and create per-tier + overview SVG diagrams
@@ -173,7 +173,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 |-------|-----------|----------------|--------|-----------|
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
 | 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
-| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 4/7 | In progress | - |
+| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 7/7 | ✅ Complete (live tests PASSED 2026-04-26: T2 $0.000239/20s, T3 ~$0.26/787s/652 nodes) | 2026-04-26 |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
 | 132. Source Verification + Diagrams | v1.22 | 0/TBD | Not started | - |
