@@ -649,7 +649,7 @@ These numbers go directly into `tier-1-naive/README.md`'s expected-cost table.
 - Anything LangChain-framework-specific — naive baseline must show direct API calls so Tier 5's complexity stands out.
 - `chromadb < 0.6` — pre-1.0 schema is incompatible with 1.5.8.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `--ingest` print a "this will cost ~$0.01" prompt?**
    - What we know: actual cost is ~$0.011 (one cent). User explicitly values cost transparency.
