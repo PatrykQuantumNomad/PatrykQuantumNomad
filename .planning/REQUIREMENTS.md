@@ -101,7 +101,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-04 | Phase 127 | Complete (Plan 01 + Plan 02 — test_tier_requirements.py automated trace) |
 | REPO-05 | Phase 130 | Pending |
 | REPO-06 | Phase 127 | Complete (Plan 01 + Plan 02 — test_env_example.py automated trace) |
-| TIER-01 | Phase 128 | Pending |
+| TIER-01 | Phase 128 | In progress (Plans 01-04 complete; Plan 05 = live end-to-end test + README) |
 | TIER-02 | Phase 129 | Pending |
 | TIER-03 | Phase 129 | Pending |
 | TIER-04 | Phase 130 | Pending |

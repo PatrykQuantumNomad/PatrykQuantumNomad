@@ -86,7 +86,7 @@ Plans:
 - [x] 128-01-PLAN.md — Extend [tier-1] extras (chromadb, openai, pymupdf) + promote OPENAI_API_KEY to REQUIRED in .env.example
 - [x] 128-02-PLAN.md — Page-aware PDF extraction + 512/64 chunker (TDD) with non-live unit tests
 - [x] 128-03-PLAN.md — OpenAI embedding wrapper + ChromaDB store/retrieve helpers + non-live store tests
-- [ ] 128-04-PLAN.md — main.py CLI orchestration (--ingest/--query/--top-k/--reset) + prompt builder
+- [x] 128-04-PLAN.md — main.py CLI orchestration (--ingest/--query/--top-k/--reset) + prompt builder
 - [ ] 128-05-PLAN.md — Tier 1 README + live end-to-end test (real APIs against 2-paper subset)
 
 ### Phase 129: Tiers 2-3 Managed + Graph RAG
@@ -164,7 +164,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
-| 128. Tier 1 Naive RAG | v1.22 | 3/5 | In progress | - |
+| 128. Tier 1 Naive RAG | v1.22 | 4/5 | In progress | - |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/TBD | Not started | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |

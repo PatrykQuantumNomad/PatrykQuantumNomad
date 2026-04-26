@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 128-03-PLAN.md (5 store tests passing, full non-live suite 61 passed)
-last_updated: "2026-04-26T12:16:28.964Z"
+stopped_at: Completed 128-04-PLAN.md (CLI orchestration + shim package; full non-live suite 61 passed)
+last_updated: "2026-04-26T12:27:37.444Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 128 - Tier 1 Naive RAG (in progress; Plan 01 complete)
+**Current focus:** Phase 128 - Tier 1 Naive RAG (in progress; Plans 01-04 complete; Plan 05 = live e2e test + README remaining)
 
 ## Current Position
 
 Phase: 128 of 134 IN PROGRESS (Tier 1 Naive RAG)
-Plan: 3 of 5 complete (128-01 dep contract locked); Plans 02 and 03 unblocked to run in parallel (Wave 2)
+Plan: 4 of 5 complete (Plans 01-04 done across Waves 1-3); Plan 05 (Wave 4) = live e2e test + README remaining
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 82%
 | Phase 128 P01 | 3min | 2 tasks (+1 lockfile sync follow-on) | 3 files (pyproject.toml, .env.example, uv.lock) |
 | Phase 128 P02 | 4min | 2 tasks tasks | 4 files (177 LOC) files |
 | Phase 128 P03 | 2.5min | 2 tasks | 4 files |
+| Phase 128 P04 | 5min | 2 tasks | 4 files (3 created + 1 modified, 356 LOC) files |
 
 ## Accumulated Context
 
@@ -107,6 +108,10 @@ Plan 127-02 added:
 - Plan 128-03: cosine HNSW configured at first creation only via configuration={hnsw:{space:cosine}} (1.x shape) — reset=True wipes-and-recreates to change index params (Pitfall 4)
 - Plan 128-03: chroma_db/tier-1-naive/ path locked exclusively for Tier 1; Tier 5 (Phase 130) reads from this path but writes to chroma_db/tier-5-agentic/ (Pitfall 8)
 - Plan 128-03: test_store.py uses importlib.util loader pattern (mirrors test_chunker.py from Plan 02) — direct from tier_1_naive.* import * does not work because dir is tier-1-naive (hyphens not valid Python identifiers)
+- Plan 128-04: tier_1_naive importable shim package required because on-disk dir tier-1-naive uses hyphens (invalid Python identifiers); shim uses importlib.util.spec_from_file_location to register tier-1-naive/*.py modules under tier_1_naive.<name> — preserves human-readable directory naming convention while allowing standard dotted imports for main.py and external test code
+- Plan 128-04: OPENAI_API_KEY None guard placed BEFORE CostTracker instantiation and any client construction in main.main() — fast-fail with friendly red error + exit code 2 (Pitfall 10); verified via patched get_settings
+- Plan 128-04: Default flag-less invocation auto-sets args.ingest=True AND args.query=DEFAULT_QUERY — relies on cmd_ingest's idempotency for repeat runs; gets users to a working demo in one command
+- Plan 128-04: Bundled tier_1_naive shim into Task 1's commit (rather than a separate Rule-3 follow-on commit) because Task 1's smoke test depends on it; keeps atomic unit coherent
 
 ### Pending Todos
 
@@ -129,7 +134,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T12:16:28.959Z
-Stopped at: Completed 128-03-PLAN.md (5 store tests passing, full non-live suite 61 passed)
+Last session: 2026-04-26T12:27:37.439Z
+Stopped at: Completed 128-04-PLAN.md (CLI orchestration + shim package; full non-live suite 61 passed)
 Resume file: None
 Next: `/gsd:plan-phase 128` (Tier 1 Naive RAG) — `/clear` first for fresh context window.
