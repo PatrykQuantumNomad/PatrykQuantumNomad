@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plans 129-06 + 129-07 BOTH live-test PASSED in-sandbox — Phase 129 Tiers 2+3 ROADMAP must-haves empirically verified against real APIs. Plan 06 (Tier 2 / Gemini File Search): cost $0.000239, latency 20.25s, 5 grounding chunks, store cleanup verified (0 leaks). Plan 07 (Tier 3 / OpenRouter LightRAG): cost ~$0.26, latency 786.96s, 652 nodes / 633 edges. Both tiers used the SOCKS5+socksio sandbox workaround established in Phase 128-06.
-last_updated: "2026-04-26T22:30:00.000Z"
+stopped_at: Plan 130-01 COMPLETE — [tier-4] + [tier-5] extras concretized (raganything==1.2.10, openai-agents[litellm]==0.14.6, lightrag-hku==1.4.15, chromadb>=1.5.8,<2, openai>=1.50,<3, Pillow>=10,<12). uv.lock regenerated cleanly (no google-generativeai regression). .gitignore + .env.example updated for Tier 4/Tier 5 runtime. Smoke imports all PASS (raganything 1.2.10, agents 0.14.6, LitellmModel OK, chromadb 1.5.8). Two commits pushed: deps 08a0917 + lockfile chore a081238.
+last_updated: "2026-04-26T23:53:27Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
-  completed_phases: 2
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
+  completed_phases: 3
+  total_plans: 24
+  completed_plans: 19
+  percent: 79
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 129 - Tiers 2-3 Managed + Graph RAG (in progress; Plan 01 complete — dep contract locked for both tiers; Plans 02-07 across Waves 2-4 remaining)
+**Current focus:** Phase 130 - Tiers 4-5 Multimodal + Agentic RAG (in progress; Plan 01 complete — dep contract locked for both tiers; Plans 02-06 remaining)
 
 ## Current Position
 
-Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 7 of 7 code-complete; Plans 129-01 through 129-07 ALL EMPIRICALLY VERIFIED. Plan 129-06 (Tier 2): live test passed 2026-04-26T22:30Z (cost $0.000239, latency 20.25s, 5 grounding chunks, store cleanup verified — 0 leaked stores). Plan 129-07 (Tier 3): live test passed 2026-04-26T22:05Z (cost ~$0.26, latency 786.96s, 652 nodes / 633 edges).
-Status: Phase 129 FULLY VERIFIED — both Tier 2 (Gemini File Search) and Tier 3 (OpenRouter LightRAG) ROADMAP must-haves empirically validated against real APIs. The Plan 06 retry corrected the earlier "executor-blocked" finding: `generativelanguage.googleapis.com` IS reachable via the harness's SOCKS5 proxy (port 61994); the Plan 07 workaround (keep proxy env vars intact + ensure socksio is installable) extends transparently to Gemini API as well. Phase 129 is now ready for the verifier with no outstanding live-test work. Next: Phase 130 (Tier 4 RAG-Anything + Tier 5 Agentic).
+Phase: 130 of 134 IN PROGRESS (Tiers 4-5 Multimodal + Agentic RAG)
+Plan: 1 of 6 complete. Plan 130-01 dependency contract locked: [tier-4] = raganything==1.2.10 + lightrag-hku==1.4.15 + openai>=1.50,<3 + Pillow>=10,<12; [tier-5] = openai-agents[litellm]==0.14.6 + chromadb>=1.5.8,<2 + openai>=1.50,<3. .gitignore covers rag_anything_storage/ + tier-4-multimodal/.cache/ + tier-4-multimodal/output/. .env.example documents OPENROUTER_API_KEY as required for Tier 1 + Tier 3 + Tier 4 + Tier 5.
+Status: Phase 130 Wave 1 foundation landed cleanly — uv pip install --dry-run resolves both extras (156 packages tier-4 / 108 packages tier-5); lockfile guard test 5/5 PASS (no google-generativeai regression via raganything or openai-agents transitives); smoke imports all green (raganything 1.2.10 / agents 0.14.6 / LitellmModel OK / chromadb 1.5.8). Two commits on origin/main: deps 08a0917 + lockfile chore a081238. Phase 129 fully verified previously (both Tier 2 + Tier 3 ROADMAP gates empirically passed). Next: Plan 130-02 Tier 4 RAG-Anything rag.py module.
 Last activity: 2026-04-26
 
-Progress: [██████████] 100%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████████] 100%
 | Phase 129 P05 | 6min | 2 tasks | 4 files |
 | Phase 129 P06 | 7min | 2 tasks | 3 files (375 LOC: README 133 + conftest 55 + test_e2e_live 187) |
 | Phase 129 P07 | 6min | 3 tasks | 3 files (371 LOC touched: README 151 + conftest +16 + test_tier3_e2e_live 204) |
+| Phase 130 P01 | 7min | 2 tasks (+1 lockfile chore follow-on) | 4 files (pyproject.toml, .gitignore, .env.example, uv.lock) |
 
 ## Accumulated Context
 
@@ -172,6 +173,14 @@ Plan 127-02 added:
 - Plan 129-06 live-test orchestrator-managed checkpoint attempted on 2026-04-26T21:29Z: BLOCKED by agent sandbox network allowlist — DNS resolution for `generativelanguage.googleapis.com` fails inside the executor's sandbox (`curl: (6) Could not resolve host`); `dangerouslyDisableSandbox` is policy-disabled. Two attempts both failed before any cloud-side state was created (attempt 1: SOCKS proxy env-var pickup raised httpx ImportError pre-network; attempt 2: post-proxy-unset DNS failure on file_search_stores.create). NO orphan Gemini File Search stores possible (failures preceded the API call). User must run `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox, no proxy env vars) to capture empirical cost/latency. Code is correct and ready; only the runtime environment differs. Documented in 129-06-SUMMARY.md "Live Test Results (2026-04-26T21:29Z)" section. Tier 2 ROADMAP must-haves remain code-complete + statically-verified but NOT empirically verified until user runs the test.
 - Plan 129-06 live-test RETRY 2026-04-26T22:30Z: PASSED in-sandbox via SOCKS5+socksio workaround (Phase 128-06 precedent extended to Gemini API). Earlier "executor-blocked" finding was WRONG about the failure class — Plan 07's parallel agent discovered the correct fix: keep harness's SOCKS5 proxy env vars INTACT (do NOT unset ALL_PROXY) and ensure `socksio` is importable in venv (it already was — `socksio==1.0.0` is a transitive of `httpx[socks]` in [shared] extras). With proxy intact, `generativelanguage.googleapis.com` IS reachable (probe: httpx GET returns 404 from Google's server). Empirical results: 1 passed in 20.25s, cost $0.000239 (14in/94out, gemini-2.5-flash via response.usage_metadata), latency 2.08s, 5 grounding chunks, any_nonzero_score=False (Open Q3 EMPIRICALLY RESOLVED — flash-tier does NOT surface score field; defensive `getattr(ctx,"score",0.0) or 0.0` is load-bearing). Cleanup verified: post-test `client.file_search_stores.list()` returned 0 stores total (0 test-prefix leaks). Tier 2 ROADMAP must-haves now empirically verified against real Gemini File Search API. Documented in 129-06-SUMMARY.md "Live Test Results — Retry (2026-04-26T22:30Z)" section.
 - Plan 129-07 live test PASSED on 2026-04-26T22:05Z — Tier 3 ROADMAP must-haves empirically verified; CostAdapter Outcome A path validated against real OpenRouter (Gemini 2.5 Flash + text-embedding-3-small). Run details: pytest 1 passed in 786.96s, graphml = 616,751 B (602 KB; 601× over 1 KB threshold), final graph 652 nodes / 633 edges across 2-paper subset (1808.04776 + 1510.03055), 36 LLM calls (34 entity-extraction + 1 hybrid-keywords + 1 hybrid-query), estimated cost ~$0.26 (LLM ~$0.064 input + ~$0.198 output + ~$0.001 embed; ~2× the planning estimate but well below the $0.30 alarm threshold — driver was paper 2's 11-chunk count exceeding the assumed 5-6/paper). Hybrid-mode multi-hop query produced a rich answer threading entities from BOTH papers (MMI for 1510.03055 + RetNRef for 1808.04776, both linked through shared "neural conversation models" + "BLEU score" entity nodes). Required ONE sandbox-only fix (`UV_CACHE_DIR=$TMPDIR/uv-cache uv pip install socksio` to support SOCKS5 proxy egress; same workaround Phase 128-06 used; NOT a project-dep change). Plan 06 (Tier 2) live test STILL blocked — Gemini File Search API not reachable from agent sandbox even with `socksio`+SOCKS5 proxy; only OpenRouter is. Documented in 129-07-SUMMARY.md "Live Test Results (2026-04-26)" section.
+- Plan 130-01: [tier-4] extras concretized to raganything==1.2.10 (EXACT pin per Pitfall 2 — RAG-Anything ships dot releases that break APIs every few weeks; mirrors Phase 129's lightrag-hku==1.4.15 decision), lightrag-hku==1.4.15 (composed by RAG-Anything internally; explicit re-pin documents the dep at the Tier 4 contract layer), openai>=1.50,<3 (OpenRouter routing through lightrag.llm.openai), Pillow>=10,<12 (lifted from [curation] into [tier-4] for runtime img_path validation in insert_content_list)
+- Plan 130-01: [tier-5] extras concretized to openai-agents[litellm]==0.14.6 (EXACT pin per Pitfall 2 same risk profile — Agents SDK is pre-1.0 and ships breaking changes in 0.x dot releases), chromadb>=1.5.8,<2 (read-only access to Tier 1's collection from Phase 128), openai>=1.50,<3 (transitive via litellm + Tier 1 reuse)
+- Plan 130-01: .env.example OPENROUTER_API_KEY comment block promoted from "Tier 1 + Tier 3" to "Tier 1 + Tier 3 + Tier 4 + Tier 5" — single key continues to cover all OpenRouter-routable tiers (Tier 2 stays Gemini-native; generativelanguage.googleapis.com is not OpenRouter-proxyable)
+- Plan 130-01: .gitignore additions for Tier 4 runtime — rag_anything_storage/ (RAG-Anything's working_dir), tier-4-multimodal/.cache/ + tier-4-multimodal/output/ (MineRU intermediate dirs); chroma_db/ + lightrag_*/ already covered from Phases 128/129 (verified, not re-added)
+- Plan 130-01: uv.lock regen committed separately as chore(130-01) per Phase 128-01 + 129-01 precedent (deps 08a0917 → lockfile a081238); preserves narrow deps-vs-lockfile diff per GSD git protocol; uv pip install --dry-run -e ".[tier-4]" resolves 156 packages (90 fresh-install) including mineru + torch==2.10.0 + torchvision==0.25.0 + transformers==4.57.6 transitives; uv pip install --dry-run -e ".[tier-5]" resolves 108 packages (58 fresh-install) including litellm + chromadb (re-pinned)
+- Plan 130-01: tests/test_tier_requirements.py 5/5 PASS — T-127-08 lockfile guard intact (no google-generativeai regression). Verified neither raganything 1.2.10 nor openai-agents 0.14.6 pulls the deprecated SDK: raganything's transitive Google access flows through lightrag-hku 1.4.15 → google-genai (unified SDK from Phase 127's pin); openai-agents has no Google deps in its transitive graph at all (LiteLLM proxies all model calls)
+- Plan 130-01: Smoke imports all PASS — raganything 1.2.10 (exact pin holds), agents 0.14.6 (version IS exposed despite plan body's "may print n/a" caveat), `from agents.extensions.models.litellm_model import LitellmModel` succeeds, chromadb 1.5.8. LiteLLM emits a benign sandbox-only warning about httpx[socks]/socksio when fetching its remote model-cost-map JSON (Phase 128-06 / 129-07 precedent — fallback to local backup is documented LiteLLM behavior; not a deps issue)
+- Plan 130-01: shared/embeddings.py + shared/llm.py + shared/pricing.py NOT modified — Phase 127/128/129 contracts preserved; existing pricing slugs (openai/text-embedding-3-small, google/gemini-2.5-flash, anthropic/claude-{haiku,sonnet}-4.5, openai/gpt-4o-{mini}) cover all Phase 130 model usage; Tier 4 + Tier 5 will reuse the OpenRouter unified-gateway pattern from Phase 128-06
 
 ### Pending Todos
 
@@ -194,7 +203,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T22:30:00.000Z
-Stopped at: Plans 129-06 + 129-07 BOTH live-test PASSED in-sandbox 2026-04-26T22:30Z. Phase 129 fully verified (Tier 2 + Tier 3 ROADMAP must-haves empirically validated against real Gemini File Search + OpenRouter APIs). Plan 06 retry corrected an earlier wrong "sandbox-blocked" finding — `generativelanguage.googleapis.com` IS reachable via the harness's SOCKS5 proxy when env vars are kept intact + `socksio` is in the venv (which it already was via `httpx[socks]` transitive in [shared]). Total Phase 129 live-test cost: ~$0.26 + $0.000239 = ~$0.26 across both tiers.
+Last session: 2026-04-26T23:53:27Z
+Stopped at: Plan 130-01 COMPLETE — Phase 130 dependency contract locked. Two commits pushed to origin/main: deps 08a0917 (pyproject [tier-4] + [tier-5] concretized + .gitignore + .env.example) and chore a081238 (uv.lock regen, +2396 / -16 lines). All 5 must-haves passed: dry-run resolution clean for both extras, lockfile guard 5/5 PASS (no google-generativeai regression), smoke imports all green (raganything 1.2.10 / agents 0.14.6 / LitellmModel OK / chromadb 1.5.8). Phase 129 previously fully verified (~$0.26 total live-test cost). No deviations from plan; no auth gates; no live API calls in Plan 130-01.
 Resume file: None
-Next: Phase 129 ready for verifier (both Tier 2 + Tier 3 gates fire empirically). Next phase = Phase 130 (Tier 4 RAG-Anything + Tier 5 Agentic). User triggers verifier or moves directly to Phase 130 plan creation.
+Next: Plan 130-02 (Wave 1 / autonomous) — Tier 4 RAG-Anything rag.py module: three OpenRouter wrappers (llm_model_func, vision_model_func, embedding_func), WORKING_DIR = "rag_anything_storage/tier-4-multimodal", EMBED_DIMS=1536 hardcoded (Pitfall 4), CostAdapter mirroring Tier 3's pattern. Plan 02 depends only on this plan's [tier-4] extras (already on origin/main).
