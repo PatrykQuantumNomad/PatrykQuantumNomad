@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plan 128-02 complete — Tier 1 chunker shipped (extract_pages + chunk_page + 7 passing unit tests); Plan 128-03 next (embedder + ChromaDB store)
-last_updated: "2026-04-26T12:09:53.762Z"
+stopped_at: Completed 128-03-PLAN.md (5 store tests passing, full non-live suite 61 passed)
+last_updated: "2026-04-26T12:16:28.964Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 128 of 134 IN PROGRESS (Tier 1 Naive RAG)
-Plan: 2 of 5 complete (128-01 dep contract locked); Plans 02 and 03 unblocked to run in parallel (Wave 2)
+Plan: 3 of 5 complete (128-01 dep contract locked); Plans 02 and 03 unblocked to run in parallel (Wave 2)
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [███████░░░] 73%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [███████░░░] 73%
 | Phase 127 P06 | 14m | 3 tasks | 6 files (golden_qa.json + metadata.json + 2 tests + 1 script + README) |
 | Phase 128 P01 | 3min | 2 tasks (+1 lockfile sync follow-on) | 3 files (pyproject.toml, .env.example, uv.lock) |
 | Phase 128 P02 | 4min | 2 tasks tasks | 4 files (177 LOC) files |
+| Phase 128 P03 | 2.5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,10 @@ Plan 127-02 added:
 - Plan 128-02: Tier 1 chunker locks 512/64 token windows via tiktoken cl100k_base; chunk id format {paper_id}_p{page:03d}_c{idx:03d}; ingest.py is library-only (no __main__) — Plan 04 owns the CLI
 - Plan 128-02: test_chunker.py uses importlib.util.spec_from_file_location to load ingest.py because directory tier-1-naive (hyphen) is not importable as tier_1_naive (underscore); avoids setuptools package manipulation
 - Plan 128-02 follow-on (Rule 3): removed tier-1-naive/tests/__init__.py — pytest's rootdir importer raised ImportPathMismatchError when both repo-root tests/__init__.py and tier-local tests/__init__.py registered as the 'tests' package; deletion safe because test_chunker.py uses importlib (no package-relative imports)
+- Plan 128-03: pre-computed OpenAI embeddings with CostTracker.record_embedding hook (NOT OpenAIEmbeddingFunction) — every API call auditable per Pitfall 5
+- Plan 128-03: cosine HNSW configured at first creation only via configuration={hnsw:{space:cosine}} (1.x shape) — reset=True wipes-and-recreates to change index params (Pitfall 4)
+- Plan 128-03: chroma_db/tier-1-naive/ path locked exclusively for Tier 1; Tier 5 (Phase 130) reads from this path but writes to chroma_db/tier-5-agentic/ (Pitfall 8)
+- Plan 128-03: test_store.py uses importlib.util loader pattern (mirrors test_chunker.py from Plan 02) — direct from tier_1_naive.* import * does not work because dir is tier-1-naive (hyphens not valid Python identifiers)
 
 ### Pending Todos
 
@@ -124,7 +129,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T12:09:53.757Z
-Stopped at: Plan 128-02 complete — Tier 1 chunker shipped (extract_pages + chunk_page + 7 passing unit tests); Plan 128-03 next (embedder + ChromaDB store)
+Last session: 2026-04-26T12:16:28.959Z
+Stopped at: Completed 128-03-PLAN.md (5 store tests passing, full non-live suite 61 passed)
 Resume file: None
 Next: `/gsd:plan-phase 128` (Tier 1 Naive RAG) — `/clear` first for fresh context window.
