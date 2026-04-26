@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
-status: verifying
-stopped_at: Completed 129-01-PLAN.md (Tier 2/3 dep contract)
-last_updated: "2026-04-26T17:17:19.765Z"
+status: executing
+stopped_at: Completed 129-03-PLAN.md (Tier 3 LightRAG init + probe-validated CostAdapter)
+last_updated: "2026-04-26T17:31:18.750Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 18
-  completed_plans: 13
-  percent: 72
+  completed_plans: 14
+  percent: 78
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 1 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
-Status: Ready to execute Plans 02 + 03 in parallel (Wave 2)
+Plan: 2 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
+Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [███████░░░] 72%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [███████░░░] 72%
 | Phase 128 P04 | 5min | 2 tasks | 4 files (3 created + 1 modified, 356 LOC) files |
 | Phase 128 P05 | 7min | 2 tasks | 3 files |
 | Phase 129 P01 | 2m 55s | 2 tasks | 4 files |
+| Phase Phase 129 P03 P03 | 11min | 2 tasks tasks | 8 files (7 created + 1 modified) files |
 
 ## Accumulated Context
 
@@ -128,6 +129,11 @@ Plan 127-02 added:
 - Plan 129-01: .env.example OPENROUTER_API_KEY comment block promoted to Tier 1 + Tier 3 explicit — Gemini File Search is Gemini-native (cannot route via OpenRouter), but LightRAG is OpenAI-SDK-compatible so Tier 3 reuses Phase 128's OpenRouter routing for narrative continuity (single OPENROUTER_API_KEY for both tiers)
 - Plan 129-01: tier-2-managed/.store_id added to .gitignore (Pattern 1 store-id caching from 129-RESEARCH.md); lightrag_storage/ already covered by existing lightrag_*/ glob (no duplicate added)
 - Plan 129-01: uv.lock regen committed separately as chore(129-01) per Phase 128-01 precedent; preserves atomic deps commit; uv pip install --dry-run -e ".[tier-3]" resolves 24 new packages incl lightrag-hku==1.4.15 + 23 transitive deps; tests/test_tier_requirements.py 5/5 PASS (T-127-08 lockfile guard intact — no google-generativeai)
+- Plan 129-03: RESEARCH Open Q1 RESOLVED — probe of lightrag-hku==1.4.15 confirmed token_tracker IS supported on BOTH openai_complete_if_cache AND openai_embed (research only hypothesized LLM-side); add_usage protocol receives a dict with prompt_tokens/[completion_tokens]/total_tokens
+- Plan 129-03: CostAdapter dispatches LLM vs embedding on completion_tokens key presence (NOT value); embed payloads omit the key entirely. Single CostAdapter instance threaded through both llm_model_func + embedding_func via build_rag(llm_token_tracker=...) — captures total Tier 3 cost without monkey-patch fallback
+- Plan 129-03: build_rag module imports cleanly without OPENROUTER_API_KEY (closures read env LAZILY at call time); LightRAG constructor creates working_dir + 4 storage files (graph .graphml + 3 vdb_*.json) but makes NO network calls — verified by no-key smoke construct
+- Plan 129-03: EMBED_DIMS=1536 hardcoded at module level (NOT a CLI flag) — Pitfall 4: LightRAG indexes vectors at first ingest; dim change silently corrupts retrieval (HKUDS issue #2119); --reset is the only path to a new dim
+- Plan 129-03: scripts/probe_lightrag_token_tracker.py committed as re-runnable diagnostic — establishes 'probe-before-commit' pattern for high-uncertainty integrations (run script, capture verbatim output in SUMMARY, commit script so future readers can replay decision after dep upgrades)
 
 ### Pending Todos
 
@@ -150,7 +156,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T17:17:19.760Z
-Stopped at: Completed 129-01-PLAN.md (Tier 2/3 dep contract)
+Last session: 2026-04-26T17:31:18.746Z
+Stopped at: Completed 129-03-PLAN.md (Tier 3 LightRAG init + probe-validated CostAdapter)
 Resume file: None
 Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).
