@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 128-04-PLAN.md (CLI orchestration + shim package; full non-live suite 61 passed)
-last_updated: "2026-04-26T12:27:37.444Z"
+stopped_at: Completed 128-05-PLAN.md (Phase 128 plans complete; live test deferred for OPENAI_API_KEY)
+last_updated: "2026-04-26T12:35:40.358Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 128 of 134 IN PROGRESS (Tier 1 Naive RAG)
-Plan: 4 of 5 complete (Plans 01-04 done across Waves 1-3); Plan 05 (Wave 4) = live e2e test + README remaining
+Plan: 5 of 5 complete (Plans 01-04 done across Waves 1-3); Plan 05 (Wave 4) = live e2e test + README remaining
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [█████████░] 91%
 | Phase 128 P02 | 4min | 2 tasks tasks | 4 files (177 LOC) files |
 | Phase 128 P03 | 2.5min | 2 tasks | 4 files |
 | Phase 128 P04 | 5min | 2 tasks | 4 files (3 created + 1 modified, 356 LOC) files |
+| Phase 128 P05 | 7min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Plan 127-02 added:
 - Plan 128-04: OPENAI_API_KEY None guard placed BEFORE CostTracker instantiation and any client construction in main.main() — fast-fail with friendly red error + exit code 2 (Pitfall 10); verified via patched get_settings
 - Plan 128-04: Default flag-less invocation auto-sets args.ingest=True AND args.query=DEFAULT_QUERY — relies on cmd_ingest's idempotency for repeat runs; gets users to a working demo in one command
 - Plan 128-04: Bundled tier_1_naive shim into Task 1's commit (rather than a separate Rule-3 follow-on commit) because Task 1's smoke test depends on it; keeps atomic unit coherent
+- Plan 128-05: Tier 1 README locks the 9-section template (title, quickstart, CLI, cost table, persistence, weaknesses, sample query, architecture, reused-by) for Tiers 2-5 in Phases 129-130; cost numbers verbatim from 128-RESEARCH.md @ 2026-04 vintage
+- Plan 128-05: live end-to-end test deferred to user (OPENAI_API_KEY empty in local .env from Phase 127-era template); test code committed and statically verified (61 non-live passed); fixture skips cleanly per design — Phase 127 Plan 06 precedent (commit 08dce6a follow-on)
+- Plan 128-05: tier1_live_keys fixture requires BOTH OPENAI_API_KEY AND GEMINI_API_KEY (vs repo-root live_keys_ok which checks Gemini only) because Tier 1 needs both providers end-to-end; conftest duplicates load_dotenv() to make -m live invocations from tier subdirectory self-contained
 
 ### Pending Todos
 
@@ -134,7 +138,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T12:27:37.439Z
-Stopped at: Completed 128-04-PLAN.md (CLI orchestration + shim package; full non-live suite 61 passed)
+Last session: 2026-04-26T12:35:40.350Z
+Stopped at: Completed 128-05-PLAN.md (Phase 128 plans complete; live test deferred for OPENAI_API_KEY)
 Resume file: None
 Next: `/gsd:plan-phase 128` (Tier 1 Naive RAG) — `/clear` first for fresh context window.
