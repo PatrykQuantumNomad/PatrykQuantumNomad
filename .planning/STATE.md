@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 128-05-PLAN.md (Phase 128 plans complete; live test deferred for OPENAI_API_KEY)
-last_updated: "2026-04-26T12:35:40.358Z"
+stopped_at: Plan 128-06 (mid-phase pivot to OpenRouter) — Tier 1 chat + embeddings now route through OpenRouter unified gateway; live e2e test PASSED in 8.04s for ~$0.001 against real OpenRouter API; companion repo HEAD fe06e84
+last_updated: "2026-04-26T16:20:00Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 12
+  completed_plans: 12
   percent: 100
 ---
 
@@ -116,6 +116,12 @@ Plan 127-02 added:
 - Plan 128-05: Tier 1 README locks the 9-section template (title, quickstart, CLI, cost table, persistence, weaknesses, sample query, architecture, reused-by) for Tiers 2-5 in Phases 129-130; cost numbers verbatim from 128-RESEARCH.md @ 2026-04 vintage
 - Plan 128-05: live end-to-end test deferred to user (OPENAI_API_KEY empty in local .env from Phase 127-era template); test code committed and statically verified (61 non-live passed); fixture skips cleanly per design — Phase 127 Plan 06 precedent (commit 08dce6a follow-on)
 - Plan 128-05: tier1_live_keys fixture requires BOTH OPENAI_API_KEY AND GEMINI_API_KEY (vs repo-root live_keys_ok which checks Gemini only) because Tier 1 needs both providers end-to-end; conftest duplicates load_dotenv() to make -m live invocations from tier subdirectory self-contained
+- Plan 128-06: Mid-phase architectural pivot — Tier 1 now routes BOTH embeddings and chat through OpenRouter unified gateway (single OPENROUTER_API_KEY). User-supplied OpenRouter key supports embeddings (verified 2026-04 via web search and openrouter.ai/openai/text-embedding-3-small docs); OpenAI Python SDK is fully compatible with base_url="https://openrouter.ai/api/v1" for both /embeddings and /chat/completions endpoints
+- Plan 128-06: Phase 127 contracts preserved — shared/llm.py (Gemini-only) and shared/embeddings.py (Gemini-only) untouched; Tier 1's OpenRouter usage is isolated in tier-1-naive/embed_openai.py (refactored) + tier-1-naive/chat.py (new); shared.config.openrouter_api_key added as optional SecretStr so Phase 127 smoke test still imports cleanly without an OpenRouter key
+- Plan 128-06: --model flag added to main.py (default google/gemini-2.5-flash for narrative continuity); shared/pricing.py extended with OpenRouter slugs (openai/text-embedding-3-small, google/gemini-2.5-flash, anthropic/claude-{haiku,sonnet}-4.5, openai/gpt-4o-mini, openai/gpt-4o); cost tracking unchanged because OpenRouter passes provider rates through 1:1
+- Plan 128-06: Pre-existing console-routing bug discovered + fixed during live test — cmd_query was calling render_query_result() WITHOUT console_override, so the "Cost:" line went to shared.display's module-level Console (stdout) instead of the recording console; test missed this in Plan 128-05 because the live test was deferred. Fix: thread console_override=console through cmd_query
+- Plan 128-06 follow-on: tier-1-naive/tests/conftest.py also injects repo-root onto sys.path so `from tier_1_naive import main` resolves in pytest's process (main.py does this at script-startup, but pytest does not replicate it); ChromaDB index dimensions unchanged (1536) because openai/text-embedding-3-small is the same underlying model; on-disk chroma_db/tier-1-naive/ Tier 5 reuse contract intact
+- Plan 128-06 live test PASSED on 2026-04-26 — 1 passed in 8.04s against real OpenRouter API; 42 chunks embedded across 2 papers; query through google/gemini-2.5-flash returned answer with cost $0.001379 (input_tokens=2914, output_tokens=61); all 3 ROADMAP must-haves now empirically verified (not just static-verified)
 
 ### Pending Todos
 

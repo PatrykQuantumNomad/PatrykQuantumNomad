@@ -82,12 +82,13 @@ Plans:
   1. Running `python tier-1-naive/main.py` ingests the enterprise KB into ChromaDB and answers a sample query with sourced output
   2. The ChromaDB index persists to disk and can be reused by Tier 5
   3. Cost and latency are printed for the demo query
-**Plans**: 5 plans
+**Plans**: 6 plans (5 original + 1 mid-phase OpenRouter pivot)
 - [x] 128-01-PLAN.md — Extend [tier-1] extras (chromadb, openai, pymupdf) + promote OPENAI_API_KEY to REQUIRED in .env.example
 - [x] 128-02-PLAN.md — Page-aware PDF extraction + 512/64 chunker (TDD) with non-live unit tests
 - [x] 128-03-PLAN.md — OpenAI embedding wrapper + ChromaDB store/retrieve helpers + non-live store tests
 - [x] 128-04-PLAN.md — main.py CLI orchestration (--ingest/--query/--top-k/--reset) + prompt builder
-- [x] 128-05-PLAN.md — Tier 1 README + live end-to-end test (real APIs against 2-paper subset)
+- [x] 128-05-PLAN.md — Tier 1 README + live end-to-end test (deferred for OPENAI_API_KEY at the time)
+- [x] 128-06 (mid-phase pivot) — Migrate Tier 1 chat + embeddings to OpenRouter unified gateway; --model flag added; live test PASSED in 8.04s for ~$0.001 (2026-04-26)
 
 ### Phase 129: Tiers 2-3 Managed + Graph RAG
 **Goal**: Users can compare managed-service RAG (zero infrastructure) against knowledge-graph RAG (cross-document reasoning) using the same dataset
@@ -164,7 +165,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
-| 128. Tier 1 Naive RAG | v1.22 | 5/5 | Awaiting verifier | - |
+| 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 0/TBD | Not started | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
