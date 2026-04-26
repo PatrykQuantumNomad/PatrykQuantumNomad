@@ -103,8 +103,8 @@ Plans:
 - [x] 129-02-PLAN.md — Tier 2 store helpers: FileSearchStore lifecycle (create/upload/poll/list/delete) + 503 backoff + tier_2_managed shim
 - [x] 129-03-PLAN.md — Tier 3 LightRAG init + cost adapter + token_tracker probe (resolves RESEARCH Open Q1) + tier_3_graph shim
 - [x] 129-04-PLAN.md — Tier 2 query.py (FileSearch tool + grounding extraction) + main.py CLI (synthetic indexing-cost line)
-- [ ] 129-05-PLAN.md — Tier 3 ingest + query + async main.py CLI (--yes-gated cost-surprise mitigation; 5-mode --mode flag)
-- [ ] 129-06-PLAN.md — Tier 2 README + live e2e test (3-paper subset, store cleanup, cost > 0 assert)
+- [x] 129-05-PLAN.md — Tier 3 ingest + query + async main.py CLI (--yes-gated cost-surprise mitigation; 5-mode --mode flag)
+- [x] 129-06-PLAN.md — Tier 2 README + live e2e test (3-paper subset, store cleanup, cost > 0 assert) [live invocation deferred to orchestrator checkpoint]
 - [ ] 129-07-PLAN.md — Tier 3 README + non-live constants test + live e2e test (2-paper subset, graphml-exists, hybrid-mode)
 
 ### Phase 130: Tiers 4-5 Multimodal + Agentic RAG

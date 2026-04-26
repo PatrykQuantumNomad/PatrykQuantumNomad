@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-05-PLAN.md (Tier 3 ingest + query + async CLI)
-last_updated: "2026-04-26T17:49:05.130Z"
+stopped_at: Completed 129-06-PLAN.md (Tier 2 README + live e2e test code; live invocation deferred to orchestrator checkpoint)
+last_updated: "2026-04-26T18:01:00.000Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 18
-  completed_plans: 17
-  percent: 94
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 5 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
-Status: Ready to execute
+Plan: 6 of 7 complete (Wave 4 in progress — Plan 06 code complete, live test deferred to orchestrator checkpoint; Plan 07 also code-complete in parallel — see commits c2690c5 + 8018d32)
+Status: Awaiting orchestrator-managed live-test checkpoint with user
 Last activity: 2026-04-26
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [█████████░] 94%
 | Phase 129 P02 | 14min | 1 tasks | 4 (3 created + 1 modified, 240 LOC) files |
 | Phase Phase 129 PP04 | 4min | 2 tasks tasks | 2 (2 created, 479 LOC total) files |
 | Phase 129 P05 | 6min | 2 tasks | 4 files |
+| Phase 129 P06 | 7min | 2 tasks | 3 files (375 LOC: README 133 + conftest 55 + test_e2e_live 187) |
 
 ## Accumulated Context
 
@@ -152,6 +153,13 @@ Plan 127-02 added:
 - Plan 129-05: _confirm_or_abort returns False on EOFError — CI-safe default. Non-interactive shells without --yes MUST ABORT, not silently proceed. Unit-tested via mock.patch('builtins.input', side_effect=EOFError). This is the strongest safety property of the cost-surprise gate; without it, accidentally invoking main.py --ingest from CI without --yes would silently spend ~ every run.
 - Plan 129-05: render_query_result called with chunks=[] for graph queries — LightRAG blends multiple graph sources into the answer; it does not expose per-chunk citations the same way Tier 1 does. Synthesizing fake citations from internal entity references would be dishonest. Renderer prints 'No chunks retrieved.' which accurately conveys the difference.
 - Plan 129-05: NO live --ingest invocation — strictly respected the cost gate. Plan 07 owns the 2-paper subset live test (Phase 128-06 precedent for live deferral). Verified --yes gate via 5 non-live unit tests covering auto-confirm + abort-on-EOF/empty/decline + lowercase-y-proceed paths.
+- Plan 129-06: Live test DEFERRED to orchestrator-managed checkpoint (Phase 128 Plan 06 precedent). Test code committed + statically verified — collection clean, skip-on-missing-key clean, 76 non-live tests pass. Orchestrator runs `pytest tier-2-managed/tests/test_e2e_live.py -m live -s` ONCE with the user, captures cost/latency/chunk-count stdout, confirms `delete_store` ran (no orphan stores in user's GAI account).
+- Plan 129-06: Test filename `test_e2e_live.py` (NOT `test_main_live.py` per plan body) — pytest rootdir mode (no `__init__.py` in tier `tests/` dirs per Phase 128 Plan 02 follow-on) requires unique basenames; Tier 1 already owns `test_main_live.py` (Tier 3 also picked a unique name in Plan 07: `test_tier3_e2e_live.py`). Documented inline in test docstring + commit message; preserves Phase 128 Plan 02 follow-on rule that pytest collection ergonomics override per-tier filename consistency.
+- Plan 129-06: `tier-2-managed/tests/__init__.py` NOT added despite orchestrator file ownership listing it — caveat in plan body triggered live: pytest raised `ImportPathMismatchError` between root `tests/__init__.py` and `tier-2-managed/tests/__init__.py` both registering as the `tests` package (parent dir has hyphen, can't be a Python package). Tier 1 baseline omits it; Tier 2 matches.
+- Plan 129-06: Test creates UNIQUE timestamped store (`rag-arch-tier-2-test-{utc-stamp}`), NOT the canonical `rag-arch-patterns-tier-2` — keeps test runs from polluting each other's state. `delete_store` in `finally:` cleans up the unique store; the canonical CLI store remains untouched.
+- Plan 129-06: 3-paper subset (`SUBSET_PAPERS=3`) chosen explicitly to dodge Pitfall 2 (503 TPM-saturation storms documented at full-corpus scale on discuss.ai.google.dev/t/121691). Generic "summarize main contribution" question used instead of canonical `DEFAULT_QUERY` (single-hop-001) because smallest-by-size selection may NOT include Lewis 2020 — corpus-agnostic prompt works regardless.
+- Plan 129-06: Cost > 0 assertion is the load-bearing source-of-truth check (sourced from `response.usage_metadata`); chunk-count assertion is observational (Pitfall 6 — None grounding_metadata is possible) — test logs count + `any_nonzero_score` for Open Q3 empirical resolution but does not hard-assert.
+- Plan 129-06: Concurrent-wave commit race with Plan 07 produced one mixed-scope commit (b7a366d) — `tier-3-graph/tests/conftest.py` got included alongside my tier-2-managed/tests/* files due to a stage-state race between `git restore --staged` and `git commit`. Functional outcome correct (both tiers' files committed cleanly); attribution slightly mixed in commit message. Plan 07 agent saw their file as already-committed and moved on without re-staging — no rebase/revert needed.
 
 ### Pending Todos
 
@@ -174,7 +182,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T17:48:46.267Z
-Stopped at: Completed 129-05-PLAN.md (Tier 3 ingest + query + async CLI)
+Last session: 2026-04-26T18:01:00.000Z
+Stopped at: Completed 129-06-PLAN.md (Tier 2 README + live e2e code; live invocation deferred to orchestrator checkpoint with user)
 Resume file: None
-Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).
+Next: Orchestrator runs `pytest tier-2-managed/tests/test_e2e_live.py -m live -s` ONCE with the user (~$0.02-0.05 expected per run). Plan 07 (Tier 3 README + live e2e code) was code-complete in parallel — see commits c2690c5 + 8018d32. Both tier live invocations are the only remaining Phase 129 work before the verifier gate.
