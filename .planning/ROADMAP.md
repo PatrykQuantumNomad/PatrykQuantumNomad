@@ -116,7 +116,15 @@ Plans:
   2. Tier 5 autonomously selects retrieval tools (including Tier 1 ChromaDB index), iterates with a hard cap of max_iterations=10, and prints cost per query
   3. Docker support exists for Tiers 3-5 where dependency complexity requires it (at minimum Tier 4)
   4. Both tiers include pre-computed expected outputs for users who cannot install all dependencies
-**Plans**: TBD
+**Plans**: 6 plans across 4 waves
+
+Plans:
+- [ ] 130-01-PLAN.md — Concretize [tier-4] + [tier-5] extras (raganything==1.2.10, openai-agents[litellm]==0.14.6) + .gitignore + .env.example
+- [ ] 130-02-PLAN.md — Tier 4 RAG-Anything builder (Pattern 1) + cost adapter + PDF/image ingest + tier_4_multimodal shim + non-live tests
+- [ ] 130-03-PLAN.md — Tier 4 query.py + main.py CLI (async, cost-surprise gate, device autodetect) + multi-stage Dockerfile (REPO-05 mandatory)
+- [ ] 130-04-PLAN.md — Tier 5 tools.py + agent.py (LitellmModel openrouter/) + main.py CLI (max_turns=10, MaxTurnsExceeded handling) + tier_5_agentic shim + non-live tests
+- [ ] 130-05-PLAN.md — Tier 4 README (banner + Docker quickstart) + live e2e test (3 PDFs + 5 images, hybrid mode) + expected_output.md
+- [ ] 130-06-PLAN.md — Tier 5 README (Tier 1 prereq + max_turns explainer) + live e2e test (multi-tool query, cost > 0 assert) + expected_output.md
 
 ### Phase 131: Evaluation Harness
 **Goal**: Objective comparison data exists showing faithfulness, relevance, precision, cost, and latency across all 5 tiers
@@ -174,7 +182,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
 | 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 7/7 | ✅ Complete (live tests PASSED 2026-04-26: T2 $0.000239/20s, T3 ~$0.26/787s/652 nodes) | 2026-04-26 |
-| 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
+| 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/6 | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
 | 132. Source Verification + Diagrams | v1.22 | 0/TBD | Not started | - |
 | 133. Blog Post | v1.22 | 0/TBD | Not started | - |
