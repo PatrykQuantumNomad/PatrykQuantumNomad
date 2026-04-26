@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-02-PLAN.md (Tier 2 store helpers)
-last_updated: "2026-04-26T17:36:44.249Z"
+stopped_at: Completed 129-04-PLAN.md (Tier 2 CLI + query path)
+last_updated: "2026-04-26T17:45:49.697Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 18
-  completed_plans: 15
-  percent: 83
+  completed_plans: 16
+  percent: 89
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 3 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
+Plan: 4 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [████████░░] 83%
 | Phase 129 P01 | 2m 55s | 2 tasks | 4 files |
 | Phase Phase 129 P03 P03 | 11min | 2 tasks tasks | 8 files (7 created + 1 modified) files |
 | Phase 129 P02 | 14min | 1 tasks | 4 (3 created + 1 modified, 240 LOC) files |
+| Phase Phase 129 PP04 | 4min | 2 tasks tasks | 2 (2 created, 479 LOC total) files |
 
 ## Accumulated Context
 
@@ -140,6 +141,11 @@ Plan 127-02 added:
 - Plan 129-02: pyproject.toml [tool.setuptools].packages = [shared, scripts, tier_1_naive, tier_2_managed, tier_3_graph]. Plan 129-03 added tier_3_graph concurrently; this plan added tier_2_managed on the same line (different element). Each agent diff stayed scoped to its own tier; no merge conflict, no rebase needed; clean fast-forward push 720810b..332f2d2.
 - Plan 129-02: NO live API calls during this plan. Smoke test exercises pure import resolution + module-level constant assertions only (STORE_DISPLAY_NAME==rag-arch-patterns-tier-2; STORE_ID_PATH endswith tier-2-managed/.store_id; POLL_INTERVAL_S==2.0). Live store-create/upload deferred to Plan 06 e2e to avoid burning Gemini File Search quota on import-only assertions.
 - Plan 129-02: client.file_search_stores.documents.list() returns google.genai.pagers.Pager[types.Document] (auto-paginates on iteration). For Plan 06 live test loop: a plain for doc in pager: ... covers stores larger than one page without manual next_page() calls.
+- Plan 129-04: cmd_query passes console_override=console to render_query_result (Plan 128-06 retro-fix re-applied to Tier 2) — ensures Cost/Latency/Cost-JSON-written lines all land on the same Rich console; prevents the dual-console bug where output splits across module-level shared.display.console vs the local Console() in main()
+- Plan 129-04: _count_pdf_tokens has THREE graceful fallbacks for [tier-1]-independence (Pitfall 11) — try import fitz first (accurate when [tier-1] also installed), fall back to file_size_bytes//4 if fitz unavailable OR if extraction returns 0 chars (vector-graphics PDFs, 39 of 100 corpus papers per Phase 127-05) OR if fitz raises any exception
+- Plan 129-04: cl100k_base encode is capped via ('a' * text_len)[:4096] — encoding the full extracted text of a 50-page paper would burn O(seconds) of CPU PER PAPER on every ingest; cap is plenty for a synthetic estimate (Pitfall 7 source-of-truth precise number is the LLM-line cost from response.usage_metadata)
+- Plan 129-04: Tier 2 uses NATIVE google-genai client (gemini-2.5-flash slug, NOT OpenRouter google/gemini-2.5-flash) because file_search_stores is a Gemini-native API not exposed via OpenRouter — shared.pricing.PRICES has both entries with identical rates so cost tracking works on either path
+- Plan 129-04: Concurrent-wave push race with Plan 129-05 handled by clean fast-forward (a626c96 Task1 → b95b5a3 Plan05 → 94b6f97 Task2 → push 332f2d2..a626c96 then b95b5a3..94b6f97). File ownership respected on both sides: Plan 04 only touched tier-2-managed/*, Plan 05 only touched tier-3-graph/* — zero overlap, no manual rebase needed
 
 ### Pending Todos
 
@@ -162,7 +168,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T17:36:44.241Z
-Stopped at: Completed 129-02-PLAN.md (Tier 2 store helpers)
+Last session: 2026-04-26T17:45:49.693Z
+Stopped at: Completed 129-04-PLAN.md (Tier 2 CLI + query path)
 Resume file: None
 Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).

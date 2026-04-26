@@ -100,9 +100,9 @@ Plans:
   3. Both tiers print cost and latency alongside their answers
 **Plans**: 7 plans across 4 waves
 - [x] 129-01-PLAN.md — Extend [tier-3] extras (lightrag-hku==1.4.15, openai, pymupdf); promote OPENROUTER for Tier 3; gitignore .store_id
-- [ ] 129-02-PLAN.md — Tier 2 store helpers: FileSearchStore lifecycle (create/upload/poll/list/delete) + 503 backoff + tier_2_managed shim
+- [x] 129-02-PLAN.md — Tier 2 store helpers: FileSearchStore lifecycle (create/upload/poll/list/delete) + 503 backoff + tier_2_managed shim
 - [x] 129-03-PLAN.md — Tier 3 LightRAG init + cost adapter + token_tracker probe (resolves RESEARCH Open Q1) + tier_3_graph shim
-- [ ] 129-04-PLAN.md — Tier 2 query.py (FileSearch tool + grounding extraction) + main.py CLI (synthetic indexing-cost line)
+- [x] 129-04-PLAN.md — Tier 2 query.py (FileSearch tool + grounding extraction) + main.py CLI (synthetic indexing-cost line)
 - [ ] 129-05-PLAN.md — Tier 3 ingest + query + async main.py CLI (--yes-gated cost-surprise mitigation; 5-mode --mode flag)
 - [ ] 129-06-PLAN.md — Tier 2 README + live e2e test (3-paper subset, store cleanup, cost > 0 assert)
 - [ ] 129-07-PLAN.md — Tier 3 README + non-live constants test + live e2e test (2-paper subset, graphml-exists, hybrid-mode)
@@ -173,7 +173,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 |-------|-----------|----------------|--------|-----------|
 | 127. Repo Skeleton + Enterprise Dataset | v1.22 | 6/6 | ✅ Complete | 2026-04-26 |
 | 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
-| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 2/7 | In progress | - |
+| 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 4/7 | In progress | - |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 0/TBD | Not started | - |
 | 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
 | 132. Source Verification + Diagrams | v1.22 | 0/TBD | Not started | - |

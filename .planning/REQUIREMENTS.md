@@ -106,7 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-05 | Phase 130 | Pending |
 | REPO-06 | Phase 127 | Complete (Plan 01 + Plan 02 — test_env_example.py automated trace) |
 | TIER-01 | Phase 128 | In progress (Plans 01-04 complete; Plan 05 = live end-to-end test + README) |
-| TIER-02 | Phase 129 | In progress (Plan 01 — [tier-2] extras locked as [shared] stub; full impl in Plans 02/04/06) |
+| TIER-02 | Phase 129 | In progress (Plans 01-04 complete — store helpers + query.py + main.py CLI shipped; Plan 06 = README + live e2e test) |
 | TIER-03 | Phase 129 | In progress (Plan 01 — [tier-3] extras concretized w/ lightrag-hku==1.4.15; full impl in Plans 03/05/07) |
 | TIER-04 | Phase 130 | Pending |
 | TIER-05 | Phase 130 | Pending |
