@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plan 129-06 live-test orchestrator-managed checkpoint ATTEMPTED — sandbox network policy blocks egress to generativelanguage.googleapis.com (no leaked stores; user must run from normal terminal)
-last_updated: "2026-04-26T21:31:00.000Z"
+stopped_at: Plan 129-07 live test PASSED 2026-04-26T22:05Z — Tier 3 ROADMAP must-haves empirically verified against real OpenRouter (cost ~$0.26, latency 786.96s, 652 nodes / 633 edges, hybrid-mode multi-hop query produced rich answer); Plan 129-06 live test still pending user-terminal run for Gemini API egress
+last_updated: "2026-04-26T22:05:00.000Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 7 of 7 code-complete (Wave 4 done — both Plan 06 and Plan 07 code-complete; live tests deferred to orchestrator-managed checkpoint per Phase 128-05 → 128-06 precedent)
-Status: Plan 129-06 live test EXECUTOR-BLOCKED by agent sandbox network policy (no DNS to generativelanguage.googleapis.com); user runs `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from normal terminal to capture cost/latency. Tier 3 live test still pending (also orchestrator-managed). NO leaked stores from attempt — failures preceded any cloud-side state creation.
+Plan: 7 of 7 code-complete; Plan 129-07 EMPIRICALLY VERIFIED via in-sandbox live test (passed 2026-04-26T22:05Z, ~$0.26, 786.96s, 652 nodes / 633 edges); Plan 129-06 live test still pending user-terminal run (Gemini endpoint NOT egress-allowed even via SOCKS5 proxy)
+Status: Plan 129-07 live test PASSED — Tier 3 ROADMAP must-haves empirically verified against real OpenRouter (CostAdapter Outcome A path validated; hybrid-mode multi-hop query produced rich answer threading entities from BOTH 2-paper subset). Phase 129 ready for verifier on the Tier 3 side. Plan 129-06 (Tier 2) still requires user to run `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal — Gemini File Search API not reachable from agent sandbox even with `socksio`+SOCKS5 (Plan 07 worked because OpenRouter IS reachable via the SOCKS5 proxy).
 Last activity: 2026-04-26
 
 Progress: [██████████] 100%
@@ -170,6 +170,7 @@ Plan 127-02 added:
 - Plan 129-07: Live test EXECUTOR-DEFERRED to orchestrator-managed checkpoint (Phase 128-05 → 128-06 precedent). Local .env HAS a valid OPENROUTER_API_KEY (verified via dotenv load probe — 73-char key) but executor explicitly did NOT invoke the live test per launch instructions. Test code committed + statically verified (skips clean without key + collects under -m live).
 - Plan 129-07: Concurrent-wave commit race with Plan 06 — my tier-3 conftest.py alias change got folded into Plan 06's commit b7a366d (per Plan 06 STATE entry above). Net effect: necessary content (tier3_live_keys_ok fixture) on origin/main, but commit author/message attribution is for Plan 06. Plan 07's own commits c2690c5 (README) + cc2620f (live test) are correctly attributed; this is a shared-working-directory parallel-execution quirk, not a content correctness issue.
 - Plan 129-06 live-test orchestrator-managed checkpoint attempted on 2026-04-26T21:29Z: BLOCKED by agent sandbox network allowlist — DNS resolution for `generativelanguage.googleapis.com` fails inside the executor's sandbox (`curl: (6) Could not resolve host`); `dangerouslyDisableSandbox` is policy-disabled. Two attempts both failed before any cloud-side state was created (attempt 1: SOCKS proxy env-var pickup raised httpx ImportError pre-network; attempt 2: post-proxy-unset DNS failure on file_search_stores.create). NO orphan Gemini File Search stores possible (failures preceded the API call). User must run `uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox, no proxy env vars) to capture empirical cost/latency. Code is correct and ready; only the runtime environment differs. Documented in 129-06-SUMMARY.md "Live Test Results (2026-04-26T21:29Z)" section. Tier 2 ROADMAP must-haves remain code-complete + statically-verified but NOT empirically verified until user runs the test.
+- Plan 129-07 live test PASSED on 2026-04-26T22:05Z — Tier 3 ROADMAP must-haves empirically verified; CostAdapter Outcome A path validated against real OpenRouter (Gemini 2.5 Flash + text-embedding-3-small). Run details: pytest 1 passed in 786.96s, graphml = 616,751 B (602 KB; 601× over 1 KB threshold), final graph 652 nodes / 633 edges across 2-paper subset (1808.04776 + 1510.03055), 36 LLM calls (34 entity-extraction + 1 hybrid-keywords + 1 hybrid-query), estimated cost ~$0.26 (LLM ~$0.064 input + ~$0.198 output + ~$0.001 embed; ~2× the planning estimate but well below the $0.30 alarm threshold — driver was paper 2's 11-chunk count exceeding the assumed 5-6/paper). Hybrid-mode multi-hop query produced a rich answer threading entities from BOTH papers (MMI for 1510.03055 + RetNRef for 1808.04776, both linked through shared "neural conversation models" + "BLEU score" entity nodes). Required ONE sandbox-only fix (`UV_CACHE_DIR=$TMPDIR/uv-cache uv pip install socksio` to support SOCKS5 proxy egress; same workaround Phase 128-06 used; NOT a project-dep change). Plan 06 (Tier 2) live test STILL blocked — Gemini File Search API not reachable from agent sandbox even with `socksio`+SOCKS5 proxy; only OpenRouter is. Documented in 129-07-SUMMARY.md "Live Test Results (2026-04-26)" section.
 
 ### Pending Todos
 
@@ -192,7 +193,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T21:31:00.000Z
-Stopped at: Plan 129-06 live-test orchestrator-managed checkpoint ATTEMPTED 2026-04-26T21:29-21:30Z — sandbox network policy blocks egress to generativelanguage.googleapis.com; both attempts failed pre-API-call (no leaked stores). User must run the test from their normal terminal. Tier 3 live test still queued.
+Last session: 2026-04-26T22:05:00.000Z
+Stopped at: Plan 129-07 live-test orchestrator-managed checkpoint COMPLETE 2026-04-26T22:05Z — Tier 3 ROADMAP must-haves empirically verified (pytest passed in 786.96s, ~$0.26 against real OpenRouter, 652 nodes / 633 edges, hybrid-mode multi-hop query produced rich answer). Plan 129-06 (Tier 2) live test still blocked by sandbox — Gemini File Search API not reachable even via SOCKS5 proxy; user must run from their normal terminal.
 Resume file: None
-Next: USER runs `cd /Users/patrykattc/work/git/rag-architecture-patterns && uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox), captures stdout (cost + latency + chunk count + any_nonzero_score), and pastes output back. Then orchestrator appends a "## Live Test Results — User-Run" section to 129-06-SUMMARY.md and adds a STATE decision marking Tier 2 ROADMAP must-haves empirically verified. Tier 3 live test (`pytest tier-3-graph/tests/test_tier3_e2e_live.py -m live -s`, ~$0.05-0.15) is independent and still pending.
+Next: USER runs `cd /Users/patrykattc/work/git/rag-architecture-patterns && uv run pytest tier-2-managed/tests/test_e2e_live.py -v -m live -s` from their normal terminal (no agent sandbox, no proxy env vars), captures stdout (cost + latency + chunk count + any_nonzero_score), and pastes output back. Orchestrator then appends a "## Live Test Results — User-Run" section to 129-06-SUMMARY.md and adds a STATE decision marking Tier 2 ROADMAP must-haves empirically verified. After that, Phase 129 is fully verified and ready for the verifier; on to Phase 130 (Tier 4 RAG-Anything).
