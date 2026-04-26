@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 129-03-PLAN.md (Tier 3 LightRAG init + probe-validated CostAdapter)
-last_updated: "2026-04-26T17:31:18.750Z"
+stopped_at: Completed 129-02-PLAN.md (Tier 2 store helpers)
+last_updated: "2026-04-26T17:36:44.249Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 18
-  completed_plans: 14
-  percent: 78
+  completed_plans: 15
+  percent: 83
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 129 of 134 IN PROGRESS (Tiers 2-3 Managed + Graph RAG)
-Plan: 2 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
+Plan: 3 of 7 complete (Wave 1 done — [tier-3] concretized w/ lightrag-hku==1.4.15; [tier-2] left as [shared] stub since google-genai already covers file_search_stores)
 Status: Ready to execute
 Last activity: 2026-04-26
 
-Progress: [████████░░] 78%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 78%
 | Phase 128 P05 | 7min | 2 tasks | 3 files |
 | Phase 129 P01 | 2m 55s | 2 tasks | 4 files |
 | Phase Phase 129 P03 P03 | 11min | 2 tasks tasks | 8 files (7 created + 1 modified) files |
+| Phase 129 P02 | 14min | 1 tasks | 4 (3 created + 1 modified, 240 LOC) files |
 
 ## Accumulated Context
 
@@ -134,6 +135,11 @@ Plan 127-02 added:
 - Plan 129-03: build_rag module imports cleanly without OPENROUTER_API_KEY (closures read env LAZILY at call time); LightRAG constructor creates working_dir + 4 storage files (graph .graphml + 3 vdb_*.json) but makes NO network calls — verified by no-key smoke construct
 - Plan 129-03: EMBED_DIMS=1536 hardcoded at module level (NOT a CLI flag) — Pitfall 4: LightRAG indexes vectors at first ingest; dim change silently corrupts retrieval (HKUDS issue #2119); --reset is the only path to a new dim
 - Plan 129-03: scripts/probe_lightrag_token_tracker.py committed as re-runnable diagnostic — establishes 'probe-before-commit' pattern for high-uncertainty integrations (run script, capture verbatim output in SUMMARY, commit script so future readers can replay decision after dep upgrades)
+- Plan 129-02: Used parent= kwarg (NOT file_search_store_name=) for client.file_search_stores.documents.list() — verified against google-genai==1.73.0 SDK source (documents.py L327-354). Plan/research draft used the wrong kwarg; SDK reuses the standard Google API parent= convention for list endpoints while upload/import keep file_search_store_name=. Caught and fixed via Rule 1 before commit.
+- Plan 129-02: tier_2_managed shim is 64 lines vs tier_1_naive 62 — only difference is two extra docstring lines mentioning Plan 129-04 module names (query, main); load loop is structurally identical. Confirms hyphen-dir → underscore-shim is now a stable repo convention across Tiers 1, 2, 3.
+- Plan 129-02: pyproject.toml [tool.setuptools].packages = [shared, scripts, tier_1_naive, tier_2_managed, tier_3_graph]. Plan 129-03 added tier_3_graph concurrently; this plan added tier_2_managed on the same line (different element). Each agent diff stayed scoped to its own tier; no merge conflict, no rebase needed; clean fast-forward push 720810b..332f2d2.
+- Plan 129-02: NO live API calls during this plan. Smoke test exercises pure import resolution + module-level constant assertions only (STORE_DISPLAY_NAME==rag-arch-patterns-tier-2; STORE_ID_PATH endswith tier-2-managed/.store_id; POLL_INTERVAL_S==2.0). Live store-create/upload deferred to Plan 06 e2e to avoid burning Gemini File Search quota on import-only assertions.
+- Plan 129-02: client.file_search_stores.documents.list() returns google.genai.pagers.Pager[types.Document] (auto-paginates on iteration). For Plan 06 live test loop: a plain for doc in pager: ... covers stores larger than one page without manual next_page() calls.
 
 ### Pending Todos
 
@@ -156,7 +162,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T17:31:18.746Z
-Stopped at: Completed 129-03-PLAN.md (Tier 3 LightRAG init + probe-validated CostAdapter)
+Last session: 2026-04-26T17:36:44.241Z
+Stopped at: Completed 129-02-PLAN.md (Tier 2 store helpers)
 Resume file: None
 Next: `/gsd:execute-phase 129` (Tiers 2-3) — Wave 2 plans 02 + 03 ready to run in parallel (file-ownership conflict on pyproject.toml resolved by 129-01).
