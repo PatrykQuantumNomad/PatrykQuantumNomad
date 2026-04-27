@@ -48,7 +48,7 @@ See MILESTONES.md for completed milestone details.
 - [ ] **Phase 128: Tier 1 Naive RAG** - Validate shared layer with baseline ChromaDB + OpenAI vector similarity retrieval
 - [x] **Phase 129: Tiers 2-3 Managed + Graph RAG** - Build Gemini File Search and LightRAG implementations against the shared dataset (completed 2026-04-26)
 - [x] **Phase 130: Tiers 4-5 Multimodal + Agentic RAG** - Build highest-complexity tiers with Docker support and safety limits (completed 2026-04-27; Tier 5 live PASSED in-sandbox; Tier 4 live test code shipped + statically verified, runtime deferred to user due to sandbox kernel-level OMP shmem block)
-- [ ] **Phase 131: Evaluation Harness** - Run RAGAS metrics and cost/latency tracking across all 5 tiers with comparison output
+- [ ] **Phase 131: Evaluation Harness** - Run RAGAS metrics and cost/latency tracking across all 5 tiers with comparison output (1/7 plans complete; Wave 1 foundation landed 2026-04-27)
 - [ ] **Phase 132: Source Verification + Architecture Diagrams** - Verify all citations and create per-tier + overview SVG diagrams
 - [ ] **Phase 133: Blog Post** - Write the thought-leadership essay with evaluation data, diagrams, and repo cross-links
 - [ ] **Phase 134: Site Integration + Polish** - Wire JSON-LD, OG image, LLMs.txt, sitemap, RSS, and cross-links
@@ -135,7 +135,16 @@ Plans:
   2. RAGAS metrics (faithfulness, answer relevance, context precision) are computed and saved per tier
   3. Cost and latency are tracked per tier with a comparison summary
   4. A comparison script generates a tier-by-tier results table usable directly in the blog post
-**Plans**: TBD
+**Plans**: 7 plans across 6 waves
+
+Plans:
+- [x] 131-01-PLAN.md — [evaluation] pyproject extra (ragas + langchain-* + litellm + datasets) + EvalRecord/QueryLog/ScoreRecord schema + conftest fixtures + non-live records test (completed 2026-04-27)
+- [ ] 131-02-PLAN.md — Per-tier adapters (Tiers 1, 2, 3, 5) implementing run_tierN(question) -> EvalRecord
+- [ ] 131-03-PLAN.md — Tier 4 dual-mode adapter (live + cached via read_query_log)
+- [ ] 131-04-PLAN.md — run.py orchestrator (per-tier capture + JSON intermediate writes)
+- [ ] 131-05-PLAN.md — RAGAS scoring pipeline (faithfulness + answer_relevancy + context_precision via OpenRouter LiteLLM judge)
+- [ ] 131-06-PLAN.md — comparison.md generator (tier-by-tier table with cost + latency + RAGAS rollups)
+- [ ] 131-07-PLAN.md — Live smoke test (1-question end-to-end through harness with cost > 0 assert)
 
 ### Phase 132: Source Verification + Architecture Diagrams
 **Goal**: All citations are verified against primary sources and per-tier architecture diagrams visualize the data flow for each RAG approach
@@ -183,7 +192,7 @@ Phases execute in numeric order: 127 -> 128 -> 129 -> 130 -> 131 -> 132 -> 133 -
 | 128. Tier 1 Naive RAG | v1.22 | 6/6 | ✅ Complete (live test passed 2026-04-26 via OpenRouter) | 2026-04-26 |
 | 129. Tiers 2-3 Managed + Graph RAG | v1.22 | 7/7 | ✅ Complete (live tests PASSED 2026-04-26: T2 $0.000239/20s, T3 ~$0.26/787s/652 nodes) | 2026-04-26 |
 | 130. Tiers 4-5 Multimodal + Agentic RAG | v1.22 | 6/6 | ✅ Complete (Tier 5 live PASSED 2026-04-27: $0.000795/11.94s; Tier 4 deferred to user — sandbox OMP shmem block) | 2026-04-27 |
-| 131. Evaluation Harness | v1.22 | 0/TBD | Not started | - |
+| 131. Evaluation Harness | v1.22 | 1/7 | In progress (Wave 1 foundation landed 2026-04-27 — [evaluation] extra + EvalRecord schema + conftest + 6 non-live tests passing) | - |
 | 132. Source Verification + Diagrams | v1.22 | 0/TBD | Not started | - |
 | 133. Blog Post | v1.22 | 0/TBD | Not started | - |
 | 134. Site Integration + Polish | v1.22 | 0/TBD | Not started | - |
