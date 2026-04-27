@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 131-04-PLAN.md
-last_updated: "2026-04-27T11:46:39.000Z"
+stopped_at: Completed 131-05-PLAN.md (Wave 4 done — Stage 2 RAGAS scoring shipped; live drive deferred to Plan 07)
+last_updated: "2026-04-27T11:59:58.393Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 31
-  completed_plans: 29
-  percent: 94
+  completed_plans: 30
+  percent: 97
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 131 - Evaluation Harness (RAGAS + tier comparison). Plan 04 of 7 complete (Wave 3 done — Stage 1 capture loop landed); Plans 05-07 unblocked.
+**Current focus:** Phase 131 - Evaluation Harness (RAGAS + tier comparison). Plan 05 of 7 complete (Wave 4 done — Stage 2 RAGAS scoring shipped); Plans 06-07 unblocked.
 
 ## Current Position
 
 Phase: 131 of 134 IN PROGRESS (Evaluation Harness — RAGAS + tier comparison)
-Plan: 4 of 7 complete (Wave 3 done). Plan 04 ships Stage 1 of the harness: evaluation/harness/run.py (351 LOC) is the per-tier capture loop — 7-flag argparse (`--tiers`, `--limit`, `--tier-4-from-cache`, `--output-dir`, `--yes`, `--mode`, `--tier1-k`); single asyncio.run boundary at top level (Pitfall 5); per-tier serial loops with ONE CostTracker per tier per invocation (Pitfall 11 collision avoidance via distinct tier strings tier-{1,2,3,4,5}-eval); Tier 3 builds ONE LightRAG instance + initialize_storages BEFORE per-question loop (~30s init amortized); Tier 5 builds ONE Agent BEFORE loop; Tier 4 cached-mode pass-through (`--tier-4-from-cache PATH`) with graceful skip-without-cache (yellow notice + return None + amain exit 0); 5-condition fast-fail (missing OPENROUTER for {1,3,5}, GEMINI for 2, chroma_db/tier-1-naive/, tier-2-managed/.store_id, lightrag_storage/tier-3-graph/) → exit 2; cost-surprise gate using Phase 128/129/130 SUMMARY ballparks (COST_PER_Q drift verified < 50% across all 5 tiers). Non-live tests in evaluation/tests/test_eval_run.py (202 LOC): 4 cases (invalid-tier, tier-1 loop persistence with mocked _capture_tier, tier-4 skip via REAL _capture_tier, --help SystemExit(0)) — all pass in 0.06s. Optional live smoke ran (`--tiers 1 --limit 2 --yes` against empty chroma_db) — produced valid QueryLog JSON with `error='tier1_chroma_empty'` (Pitfall 9 honest empty); exit 0; cost $0.00; no real API egress. Full non-live suite 114/4/9 (was 110/4/9 → +4 from this plan). ZERO deviations — verbatim plan source compiled and ran without modification (cleanest Plan in Phase 131). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
-Status: Wave 3 done (Plan 04 complete); ready for Plan 131-05 (RAGAS scoring pipeline — Wave 4)
+Plan: 5 of 7 complete (Wave 4 done). Plan 05 ships Stage 2 of the harness: evaluation/harness/score.py (408 LOC) is the RAGAS scoring entry point — 8-flag argparse (`--queries-dir`, `--output-dir`, `--tiers`, `--judge-model`, `--judge-emb`, `--batch-size`, `--limit`, `--yes`); single asyncio.run boundary; lazy imports of ragas/litellm keep --help responsive (~ms instead of ~3s); _short_circuit_nan covers 4 branches (agent_truncated for Pitfall 8, empty_contexts for Pitfall 2, tier4_unavailable, cached_miss) — all skip the judge call entirely (zero cost paid for known-bad records); evaluate(metrics=[faithfulness, answer_relevancy, context_precision], llm=judge_llm, embeddings=judge_emb, token_usage_parser=get_token_usage_for_openai, batch_size=10, raise_exceptions=False); judge LLM via llm_factory(provider='litellm', client=litellm.completion) with OpenRouter slug 'openrouter/google/gemini-2.5-flash'; judge embedder via embedding_factory('litellm', model='openrouter/openai/text-embedding-3-small'); judge cost via CostTracker(f'ragas-judge-tier-{N}') (Pattern 2 — collision-free vs Plan 04's tier-{N}-eval); D-13 JSON written to evaluation/results/costs/ragas-judge-tier-{N}-{ts}.json; metrics persisted as evaluation/results/metrics/tier-{N}-{ts}.json (timestamp matches source query log so Plan 06's compare.py can join directly). Fast-fails (exit 2): missing OPENROUTER_API_KEY, missing queries_dir, missing golden_qa.json, unsupported tier; cost-surprise gate (~$0.003/q × n_records) bypassed by --yes. Non-live tests in evaluation/tests/test_eval_score.py (222 LOC): 11 cases covering all 4 short-circuit branches + passthrough + helpers (_to_float_or_none, _strip_openrouter_prefix) + persistence schema + full-short-circuit run (PROVES no judge call paid when n_scored=0) + CLI --help — all pass in 4.68s. Live drive deferred to Plan 07 (no tier-1 query log on disk + no OPENROUTER_API_KEY in this executor). Full non-live suite 125/4/9 (was 114/4/9 → +11 from this plan). ZERO deviations — verbatim plan source compiled and ran without modification. Empirical confirmation that ragas.embeddings.base.embedding_factory and ragas.cost.get_token_usage_for_openai both import cleanly in 0.4.3 (matches Plan 01 SUMMARY). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
+Status: Ready to execute
 Last activity: 2026-04-27
 
-Progress: [█████████░] 94%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [█████████░] 94%
 | Phase 131 P02 | 5min | 2 tasks | 5 files |
 | Phase 131 P03 | 4min 14sec | 2 tasks | 4 files (4 created, 473 LOC: tier_4.py 149 + test_eval_tier4.py 156 + scripts/__init__.py 1 + scripts/eval_capture.py 167) |
 | Phase 131 P04 | 4min 22sec | 2 tasks | 2 files (2 created, 553 LOC: harness/run.py 351 + tests/test_eval_run.py 202) |
+| Phase 131-evaluation-harness P05 | 3min 3sec | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -249,6 +250,9 @@ Plan 127-02 added:
 - Plan 131-04: Tier 3 + Tier 5 reuse pattern locked — _capture_tier builds ONE LightRAG (build_rag + initialize_storages) for Tier 3 BEFORE the per-question loop, and ONE Agent (build_agent) for Tier 5 BEFORE its loop. Per-question construction would add ~30s × 30 = ~15min per Tier 3 sweep (storage init dominates) — Plan 02's `rag=` and `agent=` injection points are exercised here for the first time at full scale.
 - Plan 131-04: COST_PER_Q ballparks verified within 50% of Phase 128/129/130 SUMMARY actuals — Tier 1 ($0.0002 vs $0.0002/q from 128-06), Tier 2 ($0.0001 vs $0.00008/q from 129-06), Tier 3 ($0.01 vs $0.01/q from 129-07 — exact match), Tier 4 ($0.0015 matches Plan 03's eval_capture.py gate), Tier 5 ($0.001 vs $0.000795 from 130-06). Cost-surprise gate trustworthy for Plan 06 comparison.md projections.
 - Plan 131-04: Optional live smoke ran (`--tiers 1 --limit 2 --yes` against the empty chroma_db/tier-1-naive/) — produced valid QueryLog JSON at evaluation/results/queries/tier-1-{ts}.json with `error='tier1_chroma_empty'` records (Pitfall 9 honest empty), git_sha=261a4d5 captured live, ISO 8601 timestamp with colons-replaced filename works, exit 0, cost $0.00 (no API egress because Tier 1 short-circuits on empty index). EvalRecord schema flowing through write_query_log verified end-to-end. Cost-bearing API path deferred to Plan 07 (the cheapest live tier × 1 question end-to-end).
+- Plan 131-05: Lazy import of ragas/litellm inside score_query_log + _build_judge keeps --help responsive (~ms instead of ~3s)
+- Plan 131-05: _short_circuit_nan branch order (agent_truncated → empty_contexts → tier4_unavailable → cached_miss); empty contexts checked before tier4 error so empty-contexts-PLUS-tier4-error returns empty_contexts
+- Plan 131-05: Judge cost via CostTracker(f'ragas-judge-tier-{N}') — collision-free vs Plan 04's tier-{N}-eval; D-13 schema reused
 
 ### Pending Todos
 
@@ -271,7 +275,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T11:46:39.000Z
-Stopped at: Completed 131-04-PLAN.md (Wave 3 done — Stage 1 capture loop landed on origin/main)
+Last session: 2026-04-27T11:59:58.387Z
+Stopped at: Completed 131-05-PLAN.md (Wave 4 done — Stage 2 RAGAS scoring shipped; live drive deferred to Plan 07)
 Resume file: None
 Next: Plan 131-05 (Wave 4) — RAGAS scoring pipeline. Reads evaluation/results/queries/tier-{N}-{ts}.json (Plan 04 output shape verified empirically by the live smoke); produces evaluation/results/metrics/tier-{N}-{ts}.json ScoreRecord lists via OpenRouter LiteLLM judge. Open question handed forward: when multiple query log files exist for a tier, pick most-recent by mtime (recommended; mirrors Plan 06's compare.py glob-and-sort) OR add explicit `--query-log PATH` override (composite). Plan 04 unblocks Plan 05 fully; Tier 4's cached-mode contract (CachedTier4Miss subclass + question-id miss EvalRecord) is the same shape Plan 05 will consume.
