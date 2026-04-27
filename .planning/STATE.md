@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 131-02-PLAN.md
-last_updated: "2026-04-27T11:37:53.093Z"
+stopped_at: Completed 131-04-PLAN.md
+last_updated: "2026-04-27T11:46:39.000Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 31
-  completed_plans: 28
-  percent: 90
+  completed_plans: 29
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** A fast, SEO-optimized, visually distinctive portfolio that ranks well in search engines and makes a memorable impression on recruiters, collaborators, and the developer community.
-**Current focus:** Phase 131 - Evaluation Harness (RAGAS + tier comparison). Plan 01 of 7 complete; Wave 1 foundation locked. Plans 02-07 unblocked.
+**Current focus:** Phase 131 - Evaluation Harness (RAGAS + tier comparison). Plan 04 of 7 complete (Wave 3 done — Stage 1 capture loop landed); Plans 05-07 unblocked.
 
 ## Current Position
 
 Phase: 131 of 134 IN PROGRESS (Evaluation Harness — RAGAS + tier comparison)
-Plan: 3 of 7 complete (Wave 2 done). Plans 02 + 03 landed in parallel; full Wave-2 adapter set now on origin/main of companion repo: tier_1.py (Plan 02) + tier_2.py (Plan 02) + tier_3.py (Plan 02) + tier_4.py (Plan 03 — dual-mode: cached primary per Phase 130 SC-1 deferral, library fallback via lazy tier_4_multimodal import; CachedTier4Miss(FileNotFoundError) sentinel for Plan 04 to catch) + tier_5.py (Plan 02) + tier-4-multimodal/scripts/eval_capture.py (Plan 03 — user's local-run helper that produces canonical evaluation/results/queries/tier-4-{ts}.json). Plan 03 specifics: 4 files (149 + 156 + 1 + 167 = 473 LOC); 5 non-live tests in test_eval_tier4.py covering cached-hit, cached-miss-question-id, cached-miss-file (CachedTier4Miss raised), library-import-error (sys.modules eviction necessary because executor venv has [tier-4] installed), library-happy (sys.modules injection). Two deviations auto-fixed: Rule 1 (test bug — wrong __builtins__ shape conditional, fixed via canonical `import builtins`) + Rule 3 (parallel-execution race — Plan 03's Task 2 staged files swept into Plan 02's commit 69267a8; content byte-identical; documented for Phase 131 retro). Full non-live suite 110/4/9 (was 97/4/9 at end of Plan 01 → +13 across Plans 02 + 03). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
-Status: Wave 2 done (Plans 02 + 03 complete); ready for Plan 131-04 (run.py orchestrator — Wave 3)
+Plan: 4 of 7 complete (Wave 3 done). Plan 04 ships Stage 1 of the harness: evaluation/harness/run.py (351 LOC) is the per-tier capture loop — 7-flag argparse (`--tiers`, `--limit`, `--tier-4-from-cache`, `--output-dir`, `--yes`, `--mode`, `--tier1-k`); single asyncio.run boundary at top level (Pitfall 5); per-tier serial loops with ONE CostTracker per tier per invocation (Pitfall 11 collision avoidance via distinct tier strings tier-{1,2,3,4,5}-eval); Tier 3 builds ONE LightRAG instance + initialize_storages BEFORE per-question loop (~30s init amortized); Tier 5 builds ONE Agent BEFORE loop; Tier 4 cached-mode pass-through (`--tier-4-from-cache PATH`) with graceful skip-without-cache (yellow notice + return None + amain exit 0); 5-condition fast-fail (missing OPENROUTER for {1,3,5}, GEMINI for 2, chroma_db/tier-1-naive/, tier-2-managed/.store_id, lightrag_storage/tier-3-graph/) → exit 2; cost-surprise gate using Phase 128/129/130 SUMMARY ballparks (COST_PER_Q drift verified < 50% across all 5 tiers). Non-live tests in evaluation/tests/test_eval_run.py (202 LOC): 4 cases (invalid-tier, tier-1 loop persistence with mocked _capture_tier, tier-4 skip via REAL _capture_tier, --help SystemExit(0)) — all pass in 0.06s. Optional live smoke ran (`--tiers 1 --limit 2 --yes` against empty chroma_db) — produced valid QueryLog JSON with `error='tier1_chroma_empty'` (Pitfall 9 honest empty); exit 0; cost $0.00; no real API egress. Full non-live suite 114/4/9 (was 110/4/9 → +4 from this plan). ZERO deviations — verbatim plan source compiled and ran without modification (cleanest Plan in Phase 131). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
+Status: Wave 3 done (Plan 04 complete); ready for Plan 131-05 (RAGAS scoring pipeline — Wave 4)
 Last activity: 2026-04-27
 
-Progress: [█████████░] 90%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [█████████░] 90%
 | Phase 131 P01 | 4min | 2 tasks | 8 files (3 modified — pyproject.toml, uv.lock, .gitignore; 5 created — evaluation/harness/{__init__.py, records.py, adapters/__init__.py} + evaluation/tests/{conftest.py, test_eval_records.py}; 219 LOC of code) |
 | Phase 131 P02 | 5min | 2 tasks | 5 files |
 | Phase 131 P03 | 4min 14sec | 2 tasks | 4 files (4 created, 473 LOC: tier_4.py 149 + test_eval_tier4.py 156 + scripts/__init__.py 1 + scripts/eval_capture.py 167) |
+| Phase 131 P04 | 4min 22sec | 2 tasks | 2 files (2 created, 553 LOC: harness/run.py 351 + tests/test_eval_run.py 202) |
 
 ## Accumulated Context
 
@@ -242,6 +243,12 @@ Plan 127-02 added:
 - Plan 131-03: Library-mode test required `sys.modules` eviction before patching `builtins.__import__` — the executor venv has `[tier-4]` installed (`raganything==1.2.10`), so without evicting cached `tier_4_multimodal*` modules the patch never fires (Python short-circuits via sys.modules cache). Canonical pattern for forcing a re-import in tests.
 - Plan 131-03: Test code from the plan's verbatim block had a wrong `__builtins__` shape conditional (Rule 1 fix at execution) — pytest sets __builtins__ to dict in test modules, so the dict path was trying attribute access. Replaced with canonical `import builtins; builtins.__import__`. Future test code that needs to patch import should use this idiom.
 - Plan 131-03: Parallel-execution race surfaced (Rule 3 deviation) — Plan 03's Task 2 staged files (tier-4-multimodal/scripts/{__init__,eval_capture}.py) were swept into Plan 02's commit 69267a8 because both executors were staging on `main` concurrently. Content byte-identical; files on origin/main; only attribution is racy. Open question for Phase 131 retro: worktree-per-plan vs mandatory pre-stage rebase vs accept racy attribution. Documented in 131-03-SUMMARY.md.
+- Plan 131-04: ZERO deviations — verbatim plan source from <interfaces> block compiled and ran without modification. Cleanest plan execution in Phase 131 to date. Confirms the planner's "verbatim source + per-tier main.py reference patterns" approach provided sufficient context for the orchestrator without surprise.
+- Plan 131-04: Tier 4 EXCLUDED from _check_prereqs scan because Tier 4's prereq is the --tier-4-from-cache flag (validated inside _capture_tier, not in the prereq sweep). Including Tier 4 in the scan would have required a storage path that doesn't exist for cached-only flows (e.g. `--tiers 4 --tier-4-from-cache PATH`). Tier 4 without --tier-4-from-cache logs a yellow skip notice + returns None (graceful skip; amain exit 0) rather than fast-fail (exit 2) — the user might be running --tiers 1,4 with the flag set; only the missing-PATH variant warrants an error.
+- Plan 131-04: ONE CostTracker per tier per invocation — distinct tier strings (tier-1-eval, tier-2-eval, tier-3-eval, tier-4-eval, tier-5-eval) prevent cost-JSON filename collision when two tiers persist within the same UTC second. Pitfall 11 collision avoidance verified at the architecture-doc level by tier string distinctness (no runtime collision possible); empirically verifiable by running `--tiers 1,2 --limit 1 --yes` and confirming two distinct cost JSONs land.
+- Plan 131-04: Tier 3 + Tier 5 reuse pattern locked — _capture_tier builds ONE LightRAG (build_rag + initialize_storages) for Tier 3 BEFORE the per-question loop, and ONE Agent (build_agent) for Tier 5 BEFORE its loop. Per-question construction would add ~30s × 30 = ~15min per Tier 3 sweep (storage init dominates) — Plan 02's `rag=` and `agent=` injection points are exercised here for the first time at full scale.
+- Plan 131-04: COST_PER_Q ballparks verified within 50% of Phase 128/129/130 SUMMARY actuals — Tier 1 ($0.0002 vs $0.0002/q from 128-06), Tier 2 ($0.0001 vs $0.00008/q from 129-06), Tier 3 ($0.01 vs $0.01/q from 129-07 — exact match), Tier 4 ($0.0015 matches Plan 03's eval_capture.py gate), Tier 5 ($0.001 vs $0.000795 from 130-06). Cost-surprise gate trustworthy for Plan 06 comparison.md projections.
+- Plan 131-04: Optional live smoke ran (`--tiers 1 --limit 2 --yes` against the empty chroma_db/tier-1-naive/) — produced valid QueryLog JSON at evaluation/results/queries/tier-1-{ts}.json with `error='tier1_chroma_empty'` records (Pitfall 9 honest empty), git_sha=261a4d5 captured live, ISO 8601 timestamp with colons-replaced filename works, exit 0, cost $0.00 (no API egress because Tier 1 short-circuits on empty index). EvalRecord schema flowing through write_query_log verified end-to-end. Cost-bearing API path deferred to Plan 07 (the cheapest live tier × 1 question end-to-end).
 
 ### Pending Todos
 
@@ -264,7 +271,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T11:38:00.000Z
-Stopped at: Completed 131-03-PLAN.md (Wave 2 done — Plans 02 + 03 both complete)
+Last session: 2026-04-27T11:46:39.000Z
+Stopped at: Completed 131-04-PLAN.md (Wave 3 done — Stage 1 capture loop landed on origin/main)
 Resume file: None
-Next: Plan 131-04 (Wave 3) — run.py orchestrator. Imports run_tier1/2/3/5 (Plan 02) + run_tier4 + CachedTier4Miss (Plan 03). Loops golden_qa.json across all tiers; for Tier 4 picks most-recent evaluation/results/queries/tier-4-{ts}.json by mtime (or accepts --tier-4-from-cache PATH override); catches CachedTier4Miss and skips Tier 4 with a clear footer note for Plan 06's comparison.md. Plans 02 + 03 unblock 04 fully.
+Next: Plan 131-05 (Wave 4) — RAGAS scoring pipeline. Reads evaluation/results/queries/tier-{N}-{ts}.json (Plan 04 output shape verified empirically by the live smoke); produces evaluation/results/metrics/tier-{N}-{ts}.json ScoreRecord lists via OpenRouter LiteLLM judge. Open question handed forward: when multiple query log files exist for a tier, pick most-recent by mtime (recommended; mirrors Plan 06's compare.py glob-and-sort) OR add explicit `--query-log PATH` override (composite). Plan 04 unblocks Plan 05 fully; Tier 4's cached-mode contract (CachedTier4Miss subclass + question-id miss EvalRecord) is the same shape Plan 05 will consume.
