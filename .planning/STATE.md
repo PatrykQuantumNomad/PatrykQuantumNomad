@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 131 of 134 IN PROGRESS (Evaluation Harness — RAGAS + tier comparison)
-Plan: 2 of 7 complete (Wave 1). Plan 131-01 evaluation harness foundation landed: pyproject [evaluation] extra + uv.lock (regenerated, lockfile guard PASSES post-lock — Pitfall 4 mitigated), evaluation/harness/{__init__,records,adapters/__init__}.py + evaluation/tests/{conftest,test_eval_records}.py + .gitignore (8 files, 219 LOC for code; 2 commits b6210cf + d839d81 on origin/main of companion repo). EvalRecord/QueryLog/ScoreRecord Pydantic v2 schema (Pattern 1) is the load-bearing contract every Wave 2-6 plan imports. ragas==0.4.3 + langchain-openai==0.3.34 + langchain-community==0.4.1 + litellm==1.83.0 + datasets==4.8.4 resolved. Empirical RAGAS import surface confirmed (ragas.llms.llm_factory + ragas.embeddings.base.embedding_factory + ragas.cost.get_token_usage_for_openai all import; deprecation warning for ragas.metrics.* → ragas.metrics.collections.* surfaced for Plan 05 to migrate). NO PRICES edit needed (Pattern 7) — google/gemini-2.5-flash + openai/text-embedding-3-small already in shared/pricing.py from Phase 127/128. evaluation/tests/conftest.py mirrors tier-5-agentic verbatim with two harness-specific fixtures: live_eval_keys_ok (skips on missing OPENROUTER_API_KEY) + tier1_index_present (skips if chroma_db/tier-1-naive/ absent — Plan 07 dep). 6 new non-live tests pass; full suite 97/4/9 (was 91/4/9 → +6). NO deviations — plan executed exactly as written. Sandbox UV cache permission required UV_CACHE_DIR=/tmp/claude/uv-cache redirect (workaround documented for Plans 02-07). Pre-existing dataset/manifests/metadata.json timestamp drift in companion repo left unstaged (out of scope).
-Status: Ready to execute
+Plan: 3 of 7 complete (Wave 2 done). Plans 02 + 03 landed in parallel; full Wave-2 adapter set now on origin/main of companion repo: tier_1.py (Plan 02) + tier_2.py (Plan 02) + tier_3.py (Plan 02) + tier_4.py (Plan 03 — dual-mode: cached primary per Phase 130 SC-1 deferral, library fallback via lazy tier_4_multimodal import; CachedTier4Miss(FileNotFoundError) sentinel for Plan 04 to catch) + tier_5.py (Plan 02) + tier-4-multimodal/scripts/eval_capture.py (Plan 03 — user's local-run helper that produces canonical evaluation/results/queries/tier-4-{ts}.json). Plan 03 specifics: 4 files (149 + 156 + 1 + 167 = 473 LOC); 5 non-live tests in test_eval_tier4.py covering cached-hit, cached-miss-question-id, cached-miss-file (CachedTier4Miss raised), library-import-error (sys.modules eviction necessary because executor venv has [tier-4] installed), library-happy (sys.modules injection). Two deviations auto-fixed: Rule 1 (test bug — wrong __builtins__ shape conditional, fixed via canonical `import builtins`) + Rule 3 (parallel-execution race — Plan 03's Task 2 staged files swept into Plan 02's commit 69267a8; content byte-identical; documented for Phase 131 retro). Full non-live suite 110/4/9 (was 97/4/9 at end of Plan 01 → +13 across Plans 02 + 03). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
+Status: Wave 2 done (Plans 02 + 03 complete); ready for Plan 131-04 (run.py orchestrator — Wave 3)
 Last activity: 2026-04-27
 
 Progress: [█████████░] 90%
@@ -74,6 +74,7 @@ Progress: [█████████░] 90%
 | Phase 130 P06 | 10min | 2 tasks (3 commits — README, test, expected_output capture) | 4 files (~452 LOC: README 167 + expected_output 73 + conftest 82 + test_tier5_e2e_live 130) |
 | Phase 131 P01 | 4min | 2 tasks | 8 files (3 modified — pyproject.toml, uv.lock, .gitignore; 5 created — evaluation/harness/{__init__.py, records.py, adapters/__init__.py} + evaluation/tests/{conftest.py, test_eval_records.py}; 219 LOC of code) |
 | Phase 131 P02 | 5min | 2 tasks | 5 files |
+| Phase 131 P03 | 4min 14sec | 2 tasks | 4 files (4 created, 473 LOC: tier_4.py 149 + test_eval_tier4.py 156 + scripts/__init__.py 1 + scripts/eval_capture.py 167) |
 
 ## Accumulated Context
 
@@ -233,6 +234,14 @@ Plan 127-02 added:
 - Tier 3 _split_context module-level helper for testability without LightRAG init (Phase 131-02)
 - Tier 5 retrieved_contexts unconditionally [] honest empty (Pitfall 9); _strip_openrouter_prefix duplicated to respect frozen-module boundary (Phase 131-02)
 - All 4 in-sandbox adapters fail-soft on KeyError from tracker.record_llm — prevents unknown-model price miss from crashing harness mid-loop (Phase 131-02)
+- Plan 131-03: Tier 4 dual-mode adapter — cached mode is PRIMARY (read pre-captured QueryLog by question_id; raise CachedTier4Miss(FileNotFoundError) on missing file; return EvalRecord with `error='cached_miss_question_id=...'` on missing record so the harness loop continues for the other 29). Library mode is opportunistic fallback — lazy `from tier_4_multimodal...` in try/except ImportError. Plan 04's run.py defaults to from_cache=Path(...); library mode is opt-in by passing rag= or omitting from_cache.
+- Plan 131-03: CachedTier4Miss subclasses FileNotFoundError (not bare Exception) so Plan 04 can catch the specific case and skip Tier 4 cleanly without swallowing unrelated FS errors. Question-ID misses degrade gracefully (no exception, just an EvalRecord with error tag).
+- Plan 131-03: Library-mode latency timed ONLY across the answer call (not the only_need_context probe) — including the probe would inflate per-tier latency by 1-2s and skew Plan 06's comparison.md.
+- Plan 131-03: tier-4-multimodal/scripts/eval_capture.py lives under the tier directory, NOT under evaluation/harness/ — clean architectural seam: harness loop never invokes it; user runs it manually from local env where MineRU works. This keeps evaluation/harness/ free of tier-specific MineRU coupling and makes the Phase 130 SC-1 deferral the user's problem, not the harness's.
+- Plan 131-03: Filename `tier-4-{ts.replace(':', '_')}.json` mirrors existing `tier-4-eval-{ts}.json` D-13 schema; macOS-safe; ISO 8601 'Z' suffix preserved. Open question for Plan 04: when multiple cached files exist, pick most recent by mtime (recommended) OR add `--tier-4-from-cache PATH` CLI override (preferred composite).
+- Plan 131-03: Library-mode test required `sys.modules` eviction before patching `builtins.__import__` — the executor venv has `[tier-4]` installed (`raganything==1.2.10`), so without evicting cached `tier_4_multimodal*` modules the patch never fires (Python short-circuits via sys.modules cache). Canonical pattern for forcing a re-import in tests.
+- Plan 131-03: Test code from the plan's verbatim block had a wrong `__builtins__` shape conditional (Rule 1 fix at execution) — pytest sets __builtins__ to dict in test modules, so the dict path was trying attribute access. Replaced with canonical `import builtins; builtins.__import__`. Future test code that needs to patch import should use this idiom.
+- Plan 131-03: Parallel-execution race surfaced (Rule 3 deviation) — Plan 03's Task 2 staged files (tier-4-multimodal/scripts/{__init__,eval_capture}.py) were swept into Plan 02's commit 69267a8 because both executors were staging on `main` concurrently. Content byte-identical; files on origin/main; only attribution is racy. Open question for Phase 131 retro: worktree-per-plan vs mandatory pre-stage rebase vs accept racy attribution. Documented in 131-03-SUMMARY.md.
 
 ### Pending Todos
 
@@ -255,7 +264,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T11:37:45.604Z
-Stopped at: Completed 131-02-PLAN.md
+Last session: 2026-04-27T11:38:00.000Z
+Stopped at: Completed 131-03-PLAN.md (Wave 2 done — Plans 02 + 03 both complete)
 Resume file: None
-Next: Plan 131-02 (Wave 2) — per-tier adapters for Tiers 1/2/3/5 implementing the uniform run_tierN(question) -> EvalRecord contract. Imports EvalRecord from evaluation.harness.records (this plan's output). Plan 131-03 (Wave 2 parallel) — Tier 4 dual-mode adapter (live + cached via read_query_log). Both unblocked.
+Next: Plan 131-04 (Wave 3) — run.py orchestrator. Imports run_tier1/2/3/5 (Plan 02) + run_tier4 + CachedTier4Miss (Plan 03). Loops golden_qa.json across all tiers; for Tier 4 picks most-recent evaluation/results/queries/tier-4-{ts}.json by mtime (or accepts --tier-4-from-cache PATH override); catches CachedTier4Miss and skips Tier 4 with a clear footer note for Plan 06's comparison.md. Plans 02 + 03 unblock 04 fully.
