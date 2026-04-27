@@ -38,8 +38,10 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 ### Evaluation
 
 - [ ] **EVAL-01**: Golden Q&A test set (30+ questions) covering single-hop, multi-hop, cross-document, and multimodal queries
-- [ ] **EVAL-02**: RAGAS evaluation metrics (faithfulness, answer relevance, context precision) per tier
-- [ ] **EVAL-03**: Cost and latency tracking per tier with comparison summary
+- [x] **EVAL-02
+**: RAGAS evaluation metrics (faithfulness, answer relevance, context precision) per tier
+- [x] **EVAL-03
+**: Cost and latency tracking per tier with comparison summary
 - [ ] **EVAL-04**: Comparison script generating tier-by-tier results table
 
 ### Source Verification

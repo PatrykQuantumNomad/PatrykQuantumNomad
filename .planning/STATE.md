@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Phase 131 Plan 01 COMPLETE — Evaluation harness foundation shipped ([evaluation] pyproject extra + EvalRecord/QueryLog/ScoreRecord Pydantic v2 schema + conftest fixtures). 6 new non-live tests pass. Lockfile guard re-verified post-uv-lock (Pitfall 4 mitigated empirically). 97 passed / 4 skipped / 9 deselected on full non-live suite (was 91/4/9 → +6 new tests). Plans 02-07 unblocked.
-last_updated: "2026-04-27T11:25:00.000Z"
+stopped_at: Completed 131-02-PLAN.md
+last_updated: "2026-04-27T11:37:53.093Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 31
-  completed_plans: 25
-  percent: 81
+  completed_plans: 28
+  percent: 90
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 131 of 134 IN PROGRESS (Evaluation Harness — RAGAS + tier comparison)
-Plan: 1 of 7 complete (Wave 1). Plan 131-01 evaluation harness foundation landed: pyproject [evaluation] extra + uv.lock (regenerated, lockfile guard PASSES post-lock — Pitfall 4 mitigated), evaluation/harness/{__init__,records,adapters/__init__}.py + evaluation/tests/{conftest,test_eval_records}.py + .gitignore (8 files, 219 LOC for code; 2 commits b6210cf + d839d81 on origin/main of companion repo). EvalRecord/QueryLog/ScoreRecord Pydantic v2 schema (Pattern 1) is the load-bearing contract every Wave 2-6 plan imports. ragas==0.4.3 + langchain-openai==0.3.34 + langchain-community==0.4.1 + litellm==1.83.0 + datasets==4.8.4 resolved. Empirical RAGAS import surface confirmed (ragas.llms.llm_factory + ragas.embeddings.base.embedding_factory + ragas.cost.get_token_usage_for_openai all import; deprecation warning for ragas.metrics.* → ragas.metrics.collections.* surfaced for Plan 05 to migrate). NO PRICES edit needed (Pattern 7) — google/gemini-2.5-flash + openai/text-embedding-3-small already in shared/pricing.py from Phase 127/128. evaluation/tests/conftest.py mirrors tier-5-agentic verbatim with two harness-specific fixtures: live_eval_keys_ok (skips on missing OPENROUTER_API_KEY) + tier1_index_present (skips if chroma_db/tier-1-naive/ absent — Plan 07 dep). 6 new non-live tests pass; full suite 97/4/9 (was 91/4/9 → +6). NO deviations — plan executed exactly as written. Sandbox UV cache permission required UV_CACHE_DIR=/tmp/claude/uv-cache redirect (workaround documented for Plans 02-07). Pre-existing dataset/manifests/metadata.json timestamp drift in companion repo left unstaged (out of scope).
-Status: Phase 131 in progress (1 of 7 plans done); ready for Plan 131-02 (Tier 1/2/3/5 adapters)
+Plan: 2 of 7 complete (Wave 1). Plan 131-01 evaluation harness foundation landed: pyproject [evaluation] extra + uv.lock (regenerated, lockfile guard PASSES post-lock — Pitfall 4 mitigated), evaluation/harness/{__init__,records,adapters/__init__}.py + evaluation/tests/{conftest,test_eval_records}.py + .gitignore (8 files, 219 LOC for code; 2 commits b6210cf + d839d81 on origin/main of companion repo). EvalRecord/QueryLog/ScoreRecord Pydantic v2 schema (Pattern 1) is the load-bearing contract every Wave 2-6 plan imports. ragas==0.4.3 + langchain-openai==0.3.34 + langchain-community==0.4.1 + litellm==1.83.0 + datasets==4.8.4 resolved. Empirical RAGAS import surface confirmed (ragas.llms.llm_factory + ragas.embeddings.base.embedding_factory + ragas.cost.get_token_usage_for_openai all import; deprecation warning for ragas.metrics.* → ragas.metrics.collections.* surfaced for Plan 05 to migrate). NO PRICES edit needed (Pattern 7) — google/gemini-2.5-flash + openai/text-embedding-3-small already in shared/pricing.py from Phase 127/128. evaluation/tests/conftest.py mirrors tier-5-agentic verbatim with two harness-specific fixtures: live_eval_keys_ok (skips on missing OPENROUTER_API_KEY) + tier1_index_present (skips if chroma_db/tier-1-naive/ absent — Plan 07 dep). 6 new non-live tests pass; full suite 97/4/9 (was 91/4/9 → +6). NO deviations — plan executed exactly as written. Sandbox UV cache permission required UV_CACHE_DIR=/tmp/claude/uv-cache redirect (workaround documented for Plans 02-07). Pre-existing dataset/manifests/metadata.json timestamp drift in companion repo left unstaged (out of scope).
+Status: Ready to execute
 Last activity: 2026-04-27
 
-Progress: [████████░░] 81%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [████████░░] 81%
 | Phase 130 P05 | 30min | 2 tasks (+1 Rule 1 fix) | 5 files (4 created + 1 modified, 583 LOC: README 202 + expected_output 33 + conftest 54 + test_tier4_e2e_live ~250 + ingest_pdfs.py +6/-1 fix) |
 | Phase 130 P06 | 10min | 2 tasks (3 commits — README, test, expected_output capture) | 4 files (~452 LOC: README 167 + expected_output 73 + conftest 82 + test_tier5_e2e_live 130) |
 | Phase 131 P01 | 4min | 2 tasks | 8 files (3 modified — pyproject.toml, uv.lock, .gitignore; 5 created — evaluation/harness/{__init__.py, records.py, adapters/__init__.py} + evaluation/tests/{conftest.py, test_eval_records.py}; 219 LOC of code) |
+| Phase 131 P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -229,6 +230,9 @@ Plan 127-02 added:
 - Plan 131-01: evaluation/tests/conftest.py mirrors tier-5-agentic verbatim — repo-root sys.path bootstrap (3 levels up: parent.parent.parent because evaluation/tests/conftest.py vs tier-5-agentic/tests/conftest.py at same depth) + load_dotenv(REPO_ROOT/.env, override=False). Two fixtures: live_eval_keys_ok (OPENROUTER_API_KEY) + tier1_index_present (chroma_db/tier-1-naive/ existence). NO evaluation/tests/__init__.py per Phase 128 Plan 02 follow-on rule.
 - Plan 131-01: .gitignore additions — evaluation/results/queries/ + evaluation/results/metrics/ (regenerable intermediates from Plans 04+05). evaluation/results/comparison.md (Plan 06 output) + evaluation/results/costs/ (Phase 128 D-13 freeze) remain TRACKED — Phase 133 BLOG-04 imports comparison.md verbatim. Open Q5 in 131-RESEARCH RESOLVED in favor of "track comparison.md, ignore queries+metrics".
 - Plan 131-01: Sandbox UV cache permission denied (`/Users/patrykattc/.cache/uv/sdists-v8/.git`); workaround `UV_CACHE_DIR=/tmp/claude/uv-cache uv lock` succeeds. NOT a project bug; sandbox-level permission shape that recurs across sessions. Future Plans 02-07 should expect to set this env var when regenerating the lockfile or installing extras. Open Q4 (131-RESEARCH) handed forward.
+- Tier 3 _split_context module-level helper for testability without LightRAG init (Phase 131-02)
+- Tier 5 retrieved_contexts unconditionally [] honest empty (Pitfall 9); _strip_openrouter_prefix duplicated to respect frozen-module boundary (Phase 131-02)
+- All 4 in-sandbox adapters fail-soft on KeyError from tracker.record_llm — prevents unknown-model price miss from crashing harness mid-loop (Phase 131-02)
 
 ### Pending Todos
 
@@ -251,7 +255,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T11:23:31Z
-Stopped at: Plan 131-01 COMPLETE — Evaluation harness foundation shipped to origin/main of companion repo. Two atomic commits: feat b6210cf (pyproject.toml [evaluation] extra inheriting [shared] only per Pattern 10 — ragas>=0.4.3,<0.5 + langchain-openai>=0.2,<0.4 + langchain-community>=0.4,<0.5 + litellm>=1.0,<2 + datasets>=4.0; "evaluation" appended to [tool.setuptools].packages; uv.lock regenerated with 30+ new packages incl ragas==0.4.3 + langchain==1.2.15 + langchain-core==1.3.2 + litellm==1.83.0; lockfile guard re-run post-lock and PASSES — Pitfall 4 mitigated; .gitignore adds evaluation/results/queries+metrics/ while costs/+comparison.md remain tracked) + feat d839d81 (evaluation/harness/__init__.py 1 LOC empty marker + evaluation/harness/records.py 84 LOC implementing Pattern 1 schema verbatim — EvalRecord/QueryLog/ScoreRecord Pydantic v2 BaseModels + write_query_log/read_query_log helpers using model_dump_json/model_validate_json NOT deprecated parse_file + evaluation/harness/adapters/__init__.py 4 LOC + evaluation/tests/conftest.py 36 LOC with live_eval_keys_ok+tier1_index_present fixtures + repo-root sys.path bootstrap + load_dotenv mirroring tier-5-agentic verbatim + evaluation/tests/test_eval_records.py 94 LOC with 6 non-live tests covering EvalRecord defaults/full + QueryLog roundtrip via tmp_path + ScoreRecord nan_reason permutations empty_contexts/agent_truncated/full_pass; NO evaluation/tests/__init__.py per Phase 128 Plan 02 follow-on rule). Empirical findings recorded in 131-01-SUMMARY.md for Plans 02-07: RAGAS import surface verified (ragas.llms.llm_factory + ragas.embeddings.base.embedding_factory + ragas.cost.get_token_usage_for_openai all import — Open Q1 RESOLVED YES); ragas.metrics.* deprecation warning surfaced (Plan 05 should prefer ragas.metrics.collections.* for forward-compat with ragas 1.0); shared/pricing.py NEEDS NO EDITS (Pattern 7 — google/gemini-2.5-flash + openai/text-embedding-3-small already present from Phase 127/128); sandbox UV_CACHE_DIR=/tmp/claude/uv-cache workaround documented for future Plans 02-07. NO deviations — plan executed exactly as written. 6 new non-live tests pass; full suite now 97 passed / 4 skipped / 9 deselected (was 91/4/9 → +6 new tests).
+Last session: 2026-04-27T11:37:45.604Z
+Stopped at: Completed 131-02-PLAN.md
 Resume file: None
 Next: Plan 131-02 (Wave 2) — per-tier adapters for Tiers 1/2/3/5 implementing the uniform run_tierN(question) -> EvalRecord contract. Imports EvalRecord from evaluation.harness.records (this plan's output). Plan 131-03 (Wave 2 parallel) — Tier 4 dual-mode adapter (live + cached via read_query_log). Both unblocked.
