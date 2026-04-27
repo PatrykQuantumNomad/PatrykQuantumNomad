@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Plan 130-01 COMPLETE — [tier-4] + [tier-5] extras concretized (raganything==1.2.10, openai-agents[litellm]==0.14.6, lightrag-hku==1.4.15, chromadb>=1.5.8,<2, openai>=1.50,<3, Pillow>=10,<12). uv.lock regenerated cleanly (no google-generativeai regression). .gitignore + .env.example updated for Tier 4/Tier 5 runtime. Smoke imports all PASS (raganything 1.2.10, agents 0.14.6, LitellmModel OK, chromadb 1.5.8). Two commits pushed: deps 08a0917 + lockfile chore a081238.
-last_updated: "2026-04-26T23:53:27Z"
+stopped_at: Plan 130-02 COMPLETE — Tier 4 RAG-Anything init + ingest plumbing landed (4 modules + shim + 2 non-live test files; 597 LOC across 7 new files + 1 modified). build_rag + 5 locked constants + 3 OpenRouter-routed async closures (Pattern 1, _vision_func handles BOTH messages= and image_data= shapes per Pitfall 3). CostAdapter mirrors Phase 129 Plan 03 verbatim (completion_tokens key dispatch). ingest_pdfs.py uses stable doc_id; ingest_images.py guards Pitfall 4 via Path().resolve(). tier_4_multimodal shim mirrors tier_3_graph (sys.path + _load helper). 4/4 non-live tests PASS in 0.44s; module imports cleanly without OPENROUTER_API_KEY. Two commits pushed: feat 1d9946e + test c26258b. Plan 04 (Tier 5) ran concurrently in tier-5-agentic/ — clean fast-forward, no merge conflicts.
+last_updated: "2026-04-26T20:30:00Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 24
-  completed_plans: 19
-  percent: 79
+  completed_plans: 20
+  percent: 83
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 130 of 134 IN PROGRESS (Tiers 4-5 Multimodal + Agentic RAG)
-Plan: 1 of 6 complete. Plan 130-01 dependency contract locked: [tier-4] = raganything==1.2.10 + lightrag-hku==1.4.15 + openai>=1.50,<3 + Pillow>=10,<12; [tier-5] = openai-agents[litellm]==0.14.6 + chromadb>=1.5.8,<2 + openai>=1.50,<3. .gitignore covers rag_anything_storage/ + tier-4-multimodal/.cache/ + tier-4-multimodal/output/. .env.example documents OPENROUTER_API_KEY as required for Tier 1 + Tier 3 + Tier 4 + Tier 5.
-Status: Phase 130 Wave 1 foundation landed cleanly — uv pip install --dry-run resolves both extras (156 packages tier-4 / 108 packages tier-5); lockfile guard test 5/5 PASS (no google-generativeai regression via raganything or openai-agents transitives); smoke imports all green (raganything 1.2.10 / agents 0.14.6 / LitellmModel OK / chromadb 1.5.8). Two commits on origin/main: deps 08a0917 + lockfile chore a081238. Phase 129 fully verified previously (both Tier 2 + Tier 3 ROADMAP gates empirically passed). Next: Plan 130-02 Tier 4 RAG-Anything rag.py module.
+Plan: 2 of 6 complete. Plan 130-02 Tier 4 init + ingest plumbing landed: tier-4-multimodal/{rag,cost_adapter,ingest_pdfs,ingest_images}.py + tier_4_multimodal shim + 2 non-live test files. build_rag + 5 locked constants (WORKING_DIR=rag_anything_storage/tier-4-multimodal, EMBED_DIMS=1536, 3 OpenRouter slugs) + 3 async closures (Pattern 1; _vision_func handles BOTH messages= and image_data= per Pitfall 3). CostAdapter mirrors Phase 129 Plan 03 verbatim (completion_tokens key dispatch); ingest_images guards Pitfall 4 via Path().resolve(); ingest_pdfs uses stable doc_id=p["paper_id"]. Shim mirrors tier_3_graph (sys.path injection + _load helper + try/except per submodule). pyproject [tool.setuptools].packages now includes tier_4_multimodal (Plan 04 concurrently added tier_5_agentic — clean fast-forward, no conflict).
+Status: Phase 130 Wave 2 (Plan 02 + Plan 04 concurrent) Tier 4 half landed cleanly — 4/4 non-live tests PASS in 0.44s (test_tier4_rag.py constants + build_rag construct; test_ingest_images.py absolute-path invariant + empty-input edge); full non-live suite 85 passed / 2 skipped with all tier extras enabled; OPENROUTER_API_KEY="" import OK (lazy env reads in closures). Two commits on origin/main: feat 1d9946e + test c26258b (with 1 Rule 3 deviation — test_rag.py renamed to test_tier4_rag.py to dodge pytest rootdir collision with tier-3-graph/tests/test_rag.py; same convention as Phase 129 Plans 06/07).
 Last activity: 2026-04-26
 
-Progress: [████████░░] 79%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [████████░░] 79%
 | Phase 129 P06 | 7min | 2 tasks | 3 files (375 LOC: README 133 + conftest 55 + test_e2e_live 187) |
 | Phase 129 P07 | 6min | 3 tasks | 3 files (371 LOC touched: README 151 + conftest +16 + test_tier3_e2e_live 204) |
 | Phase 130 P01 | 7min | 2 tasks (+1 lockfile chore follow-on) | 4 files (pyproject.toml, .gitignore, .env.example, uv.lock) |
+| Phase 130 P02 | 14min | 2 tasks | 8 files (7 created + 1 modified, 597 LOC: rag.py 174 + cost_adapter.py 82 + ingest_pdfs.py 78 + ingest_images.py 77 + tier_4_multimodal/__init__.py 69 + 2 tests 117) |
 
 ## Accumulated Context
 
@@ -181,6 +182,13 @@ Plan 127-02 added:
 - Plan 130-01: tests/test_tier_requirements.py 5/5 PASS — T-127-08 lockfile guard intact (no google-generativeai regression). Verified neither raganything 1.2.10 nor openai-agents 0.14.6 pulls the deprecated SDK: raganything's transitive Google access flows through lightrag-hku 1.4.15 → google-genai (unified SDK from Phase 127's pin); openai-agents has no Google deps in its transitive graph at all (LiteLLM proxies all model calls)
 - Plan 130-01: Smoke imports all PASS — raganything 1.2.10 (exact pin holds), agents 0.14.6 (version IS exposed despite plan body's "may print n/a" caveat), `from agents.extensions.models.litellm_model import LitellmModel` succeeds, chromadb 1.5.8. LiteLLM emits a benign sandbox-only warning about httpx[socks]/socksio when fetching its remote model-cost-map JSON (Phase 128-06 / 129-07 precedent — fallback to local backup is documented LiteLLM behavior; not a deps issue)
 - Plan 130-01: shared/embeddings.py + shared/llm.py + shared/pricing.py NOT modified — Phase 127/128/129 contracts preserved; existing pricing slugs (openai/text-embedding-3-small, google/gemini-2.5-flash, anthropic/claude-{haiku,sonnet}-4.5, openai/gpt-4o-{mini}) cover all Phase 130 model usage; Tier 4 + Tier 5 will reuse the OpenRouter unified-gateway pattern from Phase 128-06
+- Plan 130-02: Tier 4 cost_adapter mirrors Phase 129 Plan 03 (tier-3-graph/cost_adapter.py) verbatim — same constructor (tracker, llm_model, embed_model), same key-presence dispatch on completion_tokens. RAG-Anything 1.2.10 composes a LightRAG instance internally so the LightRAG token_tracker protocol (probe-validated in Phase 129 Plan 03) transfers 1:1 to Tier 4. Single CostAdapter instance threaded through both LLM closure + embedding closure for unified cost capture.
+- Plan 130-02: tier_4_multimodal shim adopts the FULLER tier_3_graph pattern (sys.path injection + _load() helper + try/except per submodule) instead of the more compact loop in plan body — tier_3_graph is the more recent + battle-tested precedent (Phase 129 Plan 03 ran live with it). Functionally equivalent for success path; fuller pattern is the convention going forward for Tier shims.
+- Plan 130-02: Test filename test_tier4_rag.py (NOT test_rag.py per plan body) — Rule 3 fix for pytest rootdir collection collision with tier-3-graph/tests/test_rag.py (Phase 129 Plan 03's existing test). pytest's rootdir mode (no __init__.py per Phase 128 Plan 02 follow-on) raises ImportPathMismatchError when two test files share a basename across tier dirs. Establishes the tier-prefix convention extension to non-live tests (was already in use for live tests via Phase 129 Plans 06/07: test_e2e_live.py / test_tier3_e2e_live.py).
+- Plan 130-02: Plan 04 (parallel Tier 5) concurrently added tier_5_agentic to pyproject [tool.setuptools].packages while Plan 02 ran — final list: [shared, scripts, tier_1_naive, tier_2_managed, tier_3_graph, tier_4_multimodal, tier_5_agentic]. Each agent's diff stayed scoped to its own tier element; clean fast-forward push (a081238..1d9946e Task1 then 1d9946e..c26258b Task2). Mirrors Phase 129 Plans 02+03 / 04+05 / 06+07 wave-2 concurrent-execution pattern.
+- Plan 130-02: vision_func degrades to text-only LLM closure when neither messages= nor image_data= is provided (defensive — avoids crash if RAG-Anything 1.2.x ever calls vision_model_func for a text-only prompt during edge cases). The ingest_images module exposes BOTH async ingest_standalone_images (live path) AND pure build_image_content_list (test path) — same Pitfall 4 absolute-path logic factored once; non-live test runs in <1ms without touching the real rag.
+- Plan 130-02: uv venv re-syncs to default extras on each `uv run` invocation when --extra is not explicitly passed — caused mid-Task-2 raganything ModuleNotFoundError (Plan 04's parallel uv run dropped tier-4 from venv state). Fix: always invoke pytest with `uv run --extra tier-4 --extra tier-5 pytest ...`. Sandbox-only ergonomics; not a project-dep change. Documented in 130-02-SUMMARY.md verbatim-output block.
+- Plan 130-02: build_rag module-level constants WORKING_DIR=rag_anything_storage/tier-4-multimodal (NOT lightrag_storage/ — Tier 3's path; mixing storage roots cross-contaminates entity/embedding indices), EMBED_DIMS=1536 (Pitfall 4 — pinned at module level NOT a CLI flag; HKUDS issue #2119 inherited), DEFAULT_VISION_MODEL == DEFAULT_LLM_MODEL = google/gemini-2.5-flash (Gemini 2.5 Flash is itself multimodal), DEFAULT_EMBED_MODEL = openai/text-embedding-3-small. All env reads (os.environ["OPENROUTER_API_KEY"]) inside the async closures so module imports cleanly without the key set (lazy pattern from Phase 129 Plan 03).
 
 ### Pending Todos
 
@@ -203,7 +211,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-26T23:53:27Z
-Stopped at: Plan 130-01 COMPLETE — Phase 130 dependency contract locked. Two commits pushed to origin/main: deps 08a0917 (pyproject [tier-4] + [tier-5] concretized + .gitignore + .env.example) and chore a081238 (uv.lock regen, +2396 / -16 lines). All 5 must-haves passed: dry-run resolution clean for both extras, lockfile guard 5/5 PASS (no google-generativeai regression), smoke imports all green (raganything 1.2.10 / agents 0.14.6 / LitellmModel OK / chromadb 1.5.8). Phase 129 previously fully verified (~$0.26 total live-test cost). No deviations from plan; no auth gates; no live API calls in Plan 130-01.
+Last session: 2026-04-26T20:30:00Z
+Stopped at: Plan 130-02 COMPLETE — Tier 4 RAG-Anything init layer + ingest plumbing landed. Two commits pushed to origin/main: feat 1d9946e (rag.py 174 + cost_adapter.py 82 + ingest_pdfs.py 78 + ingest_images.py 77 + tier_4_multimodal/__init__.py 69 + pyproject.toml +1 line; 486 insertions) and test c26258b (test_tier4_rag.py 51 + test_ingest_images.py 66; 117 insertions). All 5 must-haves passed: 4/4 non-live tests PASS in 0.44s; full non-live suite 85 passed / 2 skipped (with all tier extras enabled); module imports cleanly without OPENROUTER_API_KEY; tier-4-multimodal/tests/__init__.py confirmed ABSENT (matches Tier 1/2/3 baseline); pyproject [tool.setuptools].packages includes tier_4_multimodal. One Rule 3 deviation: test_rag.py renamed to test_tier4_rag.py (pytest rootdir collision with tier-3-graph/tests/test_rag.py); same convention as Phase 129 Plans 06/07 for live tests now extends to non-live. No auth gates; no live API calls. Plan 04 (Tier 5) ran concurrently — clean fast-forward, no merge conflict.
 Resume file: None
-Next: Plan 130-02 (Wave 1 / autonomous) — Tier 4 RAG-Anything rag.py module: three OpenRouter wrappers (llm_model_func, vision_model_func, embedding_func), WORKING_DIR = "rag_anything_storage/tier-4-multimodal", EMBED_DIMS=1536 hardcoded (Pitfall 4), CostAdapter mirroring Tier 3's pattern. Plan 02 depends only on this plan's [tier-4] extras (already on origin/main).
+Next: Plan 130-03 (Wave 2 / autonomous) — Tier 4 query layer + main.py CLI + Dockerfile. Consumes build_rag + CostAdapter + ingest_pdfs + ingest_standalone_images from Plan 02. Lands tier-4-multimodal/query.py (chunk-shape adapter for RAG-Anything's aquery return per Pitfall 7) + tier-4-multimodal/main.py (CLI mirroring Tier 1/3 ergonomics) + Dockerfile (MineRU runtime). Plan 03 depends only on Plan 02's surface (already on origin/main).
