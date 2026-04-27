@@ -16,7 +16,8 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 - [x] **REPO-03**: Shared utilities (embeddings, output formatting, cost tracking) reused across tiers
 - [x] **REPO-04
 **: Per-tier requirements.txt files for isolated dependency installation
-- [ ] **REPO-05**: Docker support for Tiers 3-5 where dependency complexity requires it
+- [ ] **REPO-05
+**: Docker support for Tiers 3-5 where dependency complexity requires it
 - [x] **REPO-06
 **: .env.example documenting all required API keys per tier
 
@@ -30,7 +31,8 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 - [x] **TIER-03
 
 **: Tier 3 (Graph RAG) with LightRAG, knowledge graph extraction and entity-relationship retrieval
-- [ ] **TIER-04**: Tier 4 (Multimodal RAG) with RAG-Anything processing images, tables, and text as unified knowledge graph
+- [ ] **TIER-04
+**: Tier 4 (Multimodal RAG) with RAG-Anything processing images, tables, and text as unified knowledge graph
 - [ ] **TIER-05**: Tier 5 (Agentic RAG) with OpenAI Agents SDK, autonomous multi-tool retrieval with iteration limits
 
 ### Evaluation
@@ -103,12 +105,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-02 | Phase 127 | In progress (Plan 02 — test_dataset.py conditional trace; Plan 03 — curation scripts authored; full data lands in Plans 04/05) |
 | REPO-03 | Phase 127 | Complete (Plan 02 — 7 shared/ modules + smoke test) |
 | REPO-04 | Phase 127 | Complete (Plan 01 + Plan 02 — test_tier_requirements.py automated trace) |
-| REPO-05 | Phase 130 | Pending |
+| REPO-05 | Phase 130 | In progress (Plan 03 — Tier 4 multi-stage Dockerfile + .dockerignore shipped; documented as Tier-4-only in Plan 05 README) |
 | REPO-06 | Phase 127 | Complete (Plan 01 + Plan 02 — test_env_example.py automated trace) |
 | TIER-01 | Phase 128 | In progress (Plans 01-04 complete; Plan 05 = live end-to-end test + README) |
 | TIER-02 | Phase 129 | In progress (Plans 01-04 complete — store helpers + query.py + main.py CLI shipped; Plan 06 = README + live e2e test) |
 | TIER-03 | Phase 129 | In progress (Plan 01 — [tier-3] extras concretized w/ lightrag-hku==1.4.15; full impl in Plans 03/05/07) |
-| TIER-04 | Phase 130 | Pending |
+| TIER-04 | Phase 130 | In progress (Plans 01-03 complete — [tier-4] extras + RAGAnything builder + cost adapter + ingest plumbing + query.py + main.py CLI + Dockerfile shipped; Plans 05/06 = README + live e2e) |
 | TIER-05 | Phase 130 | Pending |
 | EVAL-01 | Phase 131 | Pending |
 | EVAL-02 | Phase 131 | Pending |
