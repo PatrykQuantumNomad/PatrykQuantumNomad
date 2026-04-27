@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.22
 milestone_name: RAG Architecture Patterns
 status: executing
-stopped_at: Completed 131-05-PLAN.md (Wave 4 done — Stage 2 RAGAS scoring shipped; live drive deferred to Plan 07)
-last_updated: "2026-04-27T11:59:58.393Z"
+stopped_at: Completed 131-06-PLAN.md (Wave 5 done — Stage 3 compare.py + comparison.md emitter shipped; live drive deferred to Plan 07)
+last_updated: "2026-04-27T12:10:59.644Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 31
-  completed_plans: 30
-  percent: 97
+  completed_plans: 31
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 131 of 134 IN PROGRESS (Evaluation Harness — RAGAS + tier comparison)
-Plan: 5 of 7 complete (Wave 4 done). Plan 05 ships Stage 2 of the harness: evaluation/harness/score.py (408 LOC) is the RAGAS scoring entry point — 8-flag argparse (`--queries-dir`, `--output-dir`, `--tiers`, `--judge-model`, `--judge-emb`, `--batch-size`, `--limit`, `--yes`); single asyncio.run boundary; lazy imports of ragas/litellm keep --help responsive (~ms instead of ~3s); _short_circuit_nan covers 4 branches (agent_truncated for Pitfall 8, empty_contexts for Pitfall 2, tier4_unavailable, cached_miss) — all skip the judge call entirely (zero cost paid for known-bad records); evaluate(metrics=[faithfulness, answer_relevancy, context_precision], llm=judge_llm, embeddings=judge_emb, token_usage_parser=get_token_usage_for_openai, batch_size=10, raise_exceptions=False); judge LLM via llm_factory(provider='litellm', client=litellm.completion) with OpenRouter slug 'openrouter/google/gemini-2.5-flash'; judge embedder via embedding_factory('litellm', model='openrouter/openai/text-embedding-3-small'); judge cost via CostTracker(f'ragas-judge-tier-{N}') (Pattern 2 — collision-free vs Plan 04's tier-{N}-eval); D-13 JSON written to evaluation/results/costs/ragas-judge-tier-{N}-{ts}.json; metrics persisted as evaluation/results/metrics/tier-{N}-{ts}.json (timestamp matches source query log so Plan 06's compare.py can join directly). Fast-fails (exit 2): missing OPENROUTER_API_KEY, missing queries_dir, missing golden_qa.json, unsupported tier; cost-surprise gate (~$0.003/q × n_records) bypassed by --yes. Non-live tests in evaluation/tests/test_eval_score.py (222 LOC): 11 cases covering all 4 short-circuit branches + passthrough + helpers (_to_float_or_none, _strip_openrouter_prefix) + persistence schema + full-short-circuit run (PROVES no judge call paid when n_scored=0) + CLI --help — all pass in 4.68s. Live drive deferred to Plan 07 (no tier-1 query log on disk + no OPENROUTER_API_KEY in this executor). Full non-live suite 125/4/9 (was 114/4/9 → +11 from this plan). ZERO deviations — verbatim plan source compiled and ran without modification. Empirical confirmation that ragas.embeddings.base.embedding_factory and ragas.cost.get_token_usage_for_openai both import cleanly in 0.4.3 (matches Plan 01 SUMMARY). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
+Plan: 6 of 7 complete (Wave 4 done). Plan 05 ships Stage 2 of the harness: evaluation/harness/score.py (408 LOC) is the RAGAS scoring entry point — 8-flag argparse (`--queries-dir`, `--output-dir`, `--tiers`, `--judge-model`, `--judge-emb`, `--batch-size`, `--limit`, `--yes`); single asyncio.run boundary; lazy imports of ragas/litellm keep --help responsive (~ms instead of ~3s); _short_circuit_nan covers 4 branches (agent_truncated for Pitfall 8, empty_contexts for Pitfall 2, tier4_unavailable, cached_miss) — all skip the judge call entirely (zero cost paid for known-bad records); evaluate(metrics=[faithfulness, answer_relevancy, context_precision], llm=judge_llm, embeddings=judge_emb, token_usage_parser=get_token_usage_for_openai, batch_size=10, raise_exceptions=False); judge LLM via llm_factory(provider='litellm', client=litellm.completion) with OpenRouter slug 'openrouter/google/gemini-2.5-flash'; judge embedder via embedding_factory('litellm', model='openrouter/openai/text-embedding-3-small'); judge cost via CostTracker(f'ragas-judge-tier-{N}') (Pattern 2 — collision-free vs Plan 04's tier-{N}-eval); D-13 JSON written to evaluation/results/costs/ragas-judge-tier-{N}-{ts}.json; metrics persisted as evaluation/results/metrics/tier-{N}-{ts}.json (timestamp matches source query log so Plan 06's compare.py can join directly). Fast-fails (exit 2): missing OPENROUTER_API_KEY, missing queries_dir, missing golden_qa.json, unsupported tier; cost-surprise gate (~$0.003/q × n_records) bypassed by --yes. Non-live tests in evaluation/tests/test_eval_score.py (222 LOC): 11 cases covering all 4 short-circuit branches + passthrough + helpers (_to_float_or_none, _strip_openrouter_prefix) + persistence schema + full-short-circuit run (PROVES no judge call paid when n_scored=0) + CLI --help — all pass in 4.68s. Live drive deferred to Plan 07 (no tier-1 query log on disk + no OPENROUTER_API_KEY in this executor). Full non-live suite 125/4/9 (was 114/4/9 → +11 from this plan). ZERO deviations — verbatim plan source compiled and ran without modification. Empirical confirmation that ragas.embeddings.base.embedding_factory and ragas.cost.get_token_usage_for_openai both import cleanly in 0.4.3 (matches Plan 01 SUMMARY). UV_CACHE_DIR=/tmp/claude/uv-cache workaround still required.
 Status: Ready to execute
 Last activity: 2026-04-27
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [██████████] 97%
 | Phase 131 P03 | 4min 14sec | 2 tasks | 4 files (4 created, 473 LOC: tier_4.py 149 + test_eval_tier4.py 156 + scripts/__init__.py 1 + scripts/eval_capture.py 167) |
 | Phase 131 P04 | 4min 22sec | 2 tasks | 2 files (2 created, 553 LOC: harness/run.py 351 + tests/test_eval_run.py 202) |
 | Phase 131-evaluation-harness P05 | 3min 3sec | 2 tasks | 2 files |
+| Phase 131 P06 | 4min 50sec | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,9 @@ Plan 127-02 added:
 - Plan 131-05: Lazy import of ragas/litellm inside score_query_log + _build_judge keeps --help responsive (~ms instead of ~3s)
 - Plan 131-05: _short_circuit_nan branch order (agent_truncated → empty_contexts → tier4_unavailable → cached_miss); empty contexts checked before tier4 error so empty-contexts-PLUS-tier4-error returns empty_contexts
 - Plan 131-05: Judge cost via CostTracker(f'ragas-judge-tier-{N}') — collision-free vs Plan 04's tier-{N}-eval; D-13 schema reused
+- Phase 131 Plan 06: Stage 3 (compare.py) is pure-sync — no asyncio. Pure file I/O + numpy.nanmean; main(argv) wraps sync _run(args).
+- Phase 131 Plan 06: comparison.md emits TWO Markdown tables (9-col tier rollup + 7-col per-question-class rollup) + footer (judge model/emb + capture provenance + NaN breakdown + Tier 4 deferral when missing + 4 honest disclaimers).
+- Phase 131 Plan 06: real comparison.md generation deferred to Plan 07 (Wave 6) — no real queries/metrics on this executor's disk; synthetic smoke + 10 non-live tests fully exercise the emit path.
 
 ### Pending Todos
 
@@ -275,7 +279,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T11:59:58.387Z
-Stopped at: Completed 131-05-PLAN.md (Wave 4 done — Stage 2 RAGAS scoring shipped; live drive deferred to Plan 07)
+Last session: 2026-04-27T12:10:59.639Z
+Stopped at: Completed 131-06-PLAN.md (Wave 5 done — Stage 3 compare.py + comparison.md emitter shipped; live drive deferred to Plan 07)
 Resume file: None
 Next: Plan 131-05 (Wave 4) — RAGAS scoring pipeline. Reads evaluation/results/queries/tier-{N}-{ts}.json (Plan 04 output shape verified empirically by the live smoke); produces evaluation/results/metrics/tier-{N}-{ts}.json ScoreRecord lists via OpenRouter LiteLLM judge. Open question handed forward: when multiple query log files exist for a tier, pick most-recent by mtime (recommended; mirrors Plan 06's compare.py glob-and-sort) OR add explicit `--query-log PATH` override (composite). Plan 04 unblocks Plan 05 fully; Tier 4's cached-mode contract (CachedTier4Miss subclass + question-id miss EvalRecord) is the same shape Plan 05 will consume.

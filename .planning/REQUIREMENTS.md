@@ -42,7 +42,8 @@ Requirements for the RAG Architecture Patterns milestone. Each maps to roadmap p
 **: RAGAS evaluation metrics (faithfulness, answer relevance, context precision) per tier
 - [x] **EVAL-03
 **: Cost and latency tracking per tier with comparison summary
-- [ ] **EVAL-04**: Comparison script generating tier-by-tier results table
+- [x] **EVAL-04
+**: Comparison script generating tier-by-tier results table
 
 ### Source Verification
 
